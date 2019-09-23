@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.contrib.postgres.fields import JSONField, ArrayField
 
 
 #############################################################
@@ -36,17 +37,18 @@ class Variant(models.Model):
 
 	# CHECK! one allele per one variant
 	allele_type = models.CharField(choices=ALLELE, max_length=200)
-	allele = models.TextField()
-	zygosity = models.TextField(blank=True)
+	allele = JSONField()
+	zygosity = JSONField(blank=True, null=True)
 
-	def __str__(self);
+	def __str__(self):
 		return self.id
 
 # CHECK !!!
 
-class HgcvAllele(models.Model):
+class HgvsAllele(models.Model):
 	""" Class to describe an allele according to the nomenclature of the HGVC """
 
+	hgvs_allele_id = models.CharField(max_length=200, blank=True)
 	hgvs = models.CharField(max_length=200)
 	variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
 
@@ -57,21 +59,23 @@ class HgcvAllele(models.Model):
 class VcfAllele(models.Model):
 	""" Class to describe variants using Varian Call Format """
 
+	vcf_allele_id = models.CharField(max_length=200, blank=True)
 	genome_assembly = models.CharField(max_length=200)
 	_chr = models.CharField(max_length=200)
 	pos = models.IntegerField()
 	re = models.CharField(max_length=200)
 	alt = models.CharField(max_length=200)
-	info = models.CharField(blank=True, max_length=200)
+	info = models.CharField(blank=True, max_length=500)
 	variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
 
-	def __str__(self);
-	return self.id
+	def __str__(self):
+		return self.id
 
 
 class SpdiAllele(models.Model):
 	""" Class to describe variants using SPDI notation """
 
+	spdi_allele_id = models.CharField(max_length=200, blank=True)
 	seq_id = models.CharField(max_length=200)
 	position = models.IntegerField()
 	deleted_sequence = models.CharField(max_length=200)
@@ -85,6 +89,7 @@ class SpdiAllele(models.Model):
 class IscnAllele(models.Model):
 	""" Class to describe cytogenetic anomalies according to the ISCN """
 
+	iscn_allele_id = models.CharField(max_length=200, blank=True)
 	iscn = models.CharField(max_length=200)
 	variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
 
@@ -100,12 +105,13 @@ class PhenotypicFeature(models.Model):
 
 	description = models.CharField(max_length=200, blank=True)
 	# JsonField
-	phenotype = models.TextField()
+	phenotype = JSONField()
 	negated = models.BooleanField(default=False)
-	severity = models.TextField(blank=True)
-	modifier = models.TextField(blank=True)
-	onset = models.TextField(blank=True)
-	evidence = models.TextField(blank=True)
+	# list of OntologyClass
+	severity = JSONField(blank=True, null=True)
+	modifier = JSONField(blank=True, null=True)
+	onset = JSONField(blank=True, null=True)
+	evidence = JSONField(blank=True, null=True)
 
 	def __str__(self):
 		return self.id
@@ -117,8 +123,8 @@ class Procedure(models.Model):
 	(subject) in oder to extract a biosample
 	"""
 
-	code = models.TextField()
-	body_site = models.TextField(blank=True)
+	code = JSONField()
+	body_site = JSONField(blank=True, null=True)
 
 	def __str__(self):
 		return self.id
@@ -144,7 +150,7 @@ class HtsFile(models.Model):
 	# "individualToSampleIdentifiers": {
 	#   "patient23456": "NA12345"
 	# }
-	individual_to_sample_identifiers = models.TextField(blank=True)
+	individual_to_sample_identifiers = JSONField(blank=True, null=True)
 
 	def __str__(self):
 		return self.id
@@ -152,8 +158,10 @@ class HtsFile(models.Model):
 
 class Gene(models.Model):
 	""" Class to represent an identifier for a gene """
-
-	alternate_ids = models.TextField(balnk=True)
+	# Official identifier of the gene is it unique? make PK ?
+	# ???
+	gene_id = models.CharField(max_length=200)
+	alternate_id = ArrayField(models.CharField(blank=True, max_length=200))
 	symbol = models.CharField(max_length=200)
 
 	def __str__(self):
@@ -166,9 +174,9 @@ class Disease(models.Model):
 	underlying the observed phenotypic abnoramalities
 	"""
 
-	term = models.TextField()
-	onset = models.TextField(blank=True)
-	tumor_stage = models.TextField(blank=True)
+	term = JSONField()
+	onset = JSONField(blank=True, null=True)
+	tumor_stage = JSONField(blank=True, null=True)
 
 	def __str__(self):
 		return self.id
@@ -187,6 +195,8 @@ class Resource(models.Model):
 	used for referencing an object
 	"""
 
+	# resource_id e.g. "id": "uniprot"
+	resource_id = models.CharField(max_length=200)
 	name = models.CharField(max_length=200)
 	namespace_prefix = models.CharField(max_length=200)
 	url = models.URLField(max_length=200)
@@ -208,10 +218,11 @@ class Update(models.Model):
 		return self.id
 
 
-class ExternalResource(models.Model):
-	""" Class to store information about an external resource """
+class ExternalReference(models.Model):
+	""" Class to store information about an external reference """
 
-	description = models.TextField(blank=True)
+	external_reference_id = models.CharField(max_length=200)
+	description = JSONField(blank=True, null=True)
 
 	def __str__(self):
 		return self.id
@@ -234,9 +245,9 @@ class MetaData(models.Model):
 	# MUST have one Resource element each for MONDO and HPO.
 	# see example: https://phenopackets-schema.readthedocs.io/en/latest/metadata.html#rstmetadata
 	resource = models.ManyToManyField(Resource)
-	update = models.ManyToManyField(Update, blank=True, null=True)
+	update = models.ManyToManyField(Update, blank=True)
 	phenopacket_schema_version = models.CharField(max_length=200, blank=True)
-	external_references = models.ManyToManyField(ExternalResource, blank=True, null=True)
+	external_reference = models.ManyToManyField(ExternalReference, blank=True)
 
 	def __str__(self):
 		return self.id
@@ -247,18 +258,14 @@ class MetaData(models.Model):
 
 class Individual(models.Model):
 	""" Class to store sensitive information about Patient"""
-	UNKNOWN_SEX = 0
-	FEMALE = 1
-	MALE = 2
-	OTHER_SEX = 3
+
 	SEX = (
-	(UNKNOWN_SEX, 'UNKNOWN_SEX'),
-	(FEMALE, 'FEMALE'),
-	(MALE, 'MALE'),
-	(OTHER_SEX, 'OTHER_SEX')
+	('UNKNOWN_SEX', 'UNKNOWN_SEX'),
+	('FEMALE', 'FEMALE'),
+	('MALE', 'MALE'),
+	('OTHER_SEX', 'OTHER_SEX')
 	)
 
-	# TODO
 	KARYOTYPIC_SEX = (
 	('UNKNOWN_KARYOTYPE', 'UNKNOWN_KARYOTYPE'),
 	('XX', 'XX'),
@@ -281,14 +288,16 @@ class Individual(models.Model):
 	# )
 
 	#id = models.AutoField(primary_key=True)
-	alternate_ids = models.TextField(blank=True)
+	# takes a list of CURIE
+	individual_id = models.CharField(max_length=200)
+	alternate_id = ArrayField(models.CharField(blank=True, max_length=200))
 	date_of_birth = models.DateField(null=True, blank=True)
 	# An ISO8601 string represent age
 	age = models.CharField(max_length=200, blank=True)
-	sex = models.IntegerField(choices=SEX, max_length=200,  blank=True, null=True)
+	sex = models.CharField(choices=SEX, max_length=200,  blank=True, null=True)
 	karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200, blank=True)
 	# for now
-	taxonomy = models.TextField(blank=True)
+	taxonomy = JSONField(blank=True, null=True)
 	# FHIR fields how useful hey are?
 	# active = models.BooleanField()
 	# gender = models.CharField(choices=GENDER, max_length=200)
@@ -301,42 +310,44 @@ class Individual(models.Model):
 class Biosample(models.Model):
 	""" Class to describe a unit of biological material """
 
+	biosample_id = models.CharField(max_length=200)
 	# if Invividual instance is deleted Biosample instance is deleted too
 	# CHECK if this rel must be a required
 	individual = models.ForeignKey(Individual, on_delete=models.CASCADE, blank=True, null=True)
 	description = models.CharField(max_length=200, blank=True)
-	sampled_tissue = models.TextField()
-	phenotypic_feature = models.ManyToManyField(PhenotypicFeature, blank=True, null=True)
-	taxonomy = models.TextField(blank=True)
+	sampled_tissue = JSONField()
+	phenotypic_feature = models.ManyToManyField(PhenotypicFeature, blank=True)
+	taxonomy = JSONField(blank=True, null=True)
 	# An ISO8601 string represent age
 	individual_age_at_collection = models.CharField(max_length=200, blank=True)
-	historical_diagnosis = models.TextField(blank=True)
-	tumor_progression = models.TextField(blank=True)
-	tumor_grade = models.TextField(blank=True)
-	diagnostic_marker = models.TextField(blank=True)
+	historical_diagnosis = JSONField(blank=True, null=True)
+	tumor_progression = JSONField(blank=True, null=True)
+	tumor_grade = JSONField(blank=True, null=True)
+	diagnostic_marker = JSONField(blank=True, null=True)
 	# CHECK! if Procedure instance is deleted Biosample instance is deleted too
 	procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE)
 	hts_file = models.ForeignKey(HtsFile, on_delete=models.CASCADE, blank=True, null=True)
-	variant = models.ManyToManyField(Variant, blank=True, null=True)
+	variant = models.ManyToManyField(Variant, blank=True)
 	is_control_sample = models.BooleanField(default=False)
 
-	def __str__(self);
+	def __str__(self):
 		return self.id
 
 
 class Phenopacket(models.Model):
 	""" Class to aggregate Patient's experiments data """
 
+	phenopacket_id = models.CharField(max_length=200)
 	# if Individual instance is deleted Phenopacket instance is deleted too
 	# CHECK !!! Force as required?
 	subject = models.ForeignKey(Individual, on_delete=models.CASCADE)
 	# PhenotypicFeatures are present in Biosample, so can be accessed via Biosample instance
-	phenotypic_feature = models.ManyToManyField(PhenotypicFeature, blank=True, null=True)
-	biosample = models.ManyToManyField(Biosample, blank=True, null=True)
+	phenotypic_feature = models.ManyToManyField(PhenotypicFeature, blank=True)
+	biosample = models.ManyToManyField(Biosample, blank=True)
 	gene = models.ForeignKey(Gene, on_delete=models.CASCADE, blank=True, null=True)
-	variant = models.ManyToManyField(Variant, blank=True, null=True)
-	disease = models.ManyToManyField(Disease, blank=True, null=True)
-	hts_file = models.ManyToManyField(HtsFile, blank=True, null=True)
+	variant = models.ManyToManyField(Variant, blank=True)
+	disease = models.ManyToManyField(Disease, blank=True)
+	hts_file = models.ManyToManyField(HtsFile, blank=True)
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE)
 	
 	def __str__(self):
