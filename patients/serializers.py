@@ -1,15 +1,34 @@
 from rest_framework import serializers
 from .models import *
-
-
-class VariantSerializer(serializers.ModelSerializer):
-
-	class Meta:
-		model = Variant
-		fields = '__all__'
+from jsonschema import validate, ValidationError, Draft7Validator
+from .allele import ALLELE_SCHEMA
 
 
 ##### Allele classes have to be serialized in VarianSerializer #####
+
+class VariantSerializer(serializers.ModelSerializer):
+	#allele_type = serializers.CharField()
+	allele = JSONField()
+	zygosity = JSONField()
+
+	class Meta:
+		model = Variant
+		fields = ['id', 'allele_type', 'allele', 'zygosity']
+
+	def validate_allele(self, value):
+		""" Check that allele json data is valid """
+
+		validation = Draft7Validator(ALLELE_SCHEMA).is_valid(value)
+		if not validation:
+			raise serializers.ValidationError("Allele is not valid")
+		return value
+
+	def to_representation(self, obj):
+		""" Change 'allele_type' field name to allele type value. """
+
+		output = super().to_representation(obj)
+		output[obj.allele_type] = output.pop('allele')
+		return output
 
 
 class PhenotypicFeatureSerializer(serializers.ModelSerializer):

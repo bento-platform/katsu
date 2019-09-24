@@ -15,10 +15,10 @@ class Variant(models.Model):
 	""" Class to describe candidate (individual ???) variants or diagnosed causative variants """
 	# TODO
 	ALLELE = (
-	('HgvsAllele', 'HgvsAllele'),
-	('VcfAllele', 'VcfAllele'),
-	('SpdiAllele', 'SpdiAllele'),
-	('IscnAllele', 'IscnAllele')
+	('hgvsAllele', 'hgvsAllele'),
+	('vcfAllele', 'vcfAllele'),
+	('spdiAllele', 'spdiAllele'),
+	('iscnAllele', 'iscnAllele')
 	)
 
 	# {
@@ -37,11 +37,12 @@ class Variant(models.Model):
 
 	# CHECK! one allele per one variant
 	allele_type = models.CharField(choices=ALLELE, max_length=200)
+	# !!!!!!!!! CHECK
 	allele = JSONField()
 	zygosity = JSONField(blank=True, null=True)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 # CHECK !!!
 
@@ -53,7 +54,7 @@ class HgvsAllele(models.Model):
 	variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class VcfAllele(models.Model):
@@ -69,7 +70,7 @@ class VcfAllele(models.Model):
 	variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class SpdiAllele(models.Model):
@@ -83,7 +84,7 @@ class SpdiAllele(models.Model):
 	variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class IscnAllele(models.Model):
@@ -94,7 +95,7 @@ class IscnAllele(models.Model):
 	variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 #############################################################
@@ -114,7 +115,7 @@ class PhenotypicFeature(models.Model):
 	evidence = JSONField(blank=True, null=True)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class Procedure(models.Model):
@@ -127,7 +128,7 @@ class Procedure(models.Model):
 	body_site = JSONField(blank=True, null=True)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class HtsFile(models.Model):
@@ -153,7 +154,7 @@ class HtsFile(models.Model):
 	individual_to_sample_identifiers = JSONField(blank=True, null=True)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class Gene(models.Model):
@@ -165,7 +166,7 @@ class Gene(models.Model):
 	symbol = models.CharField(max_length=200)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class Disease(models.Model):
@@ -179,7 +180,7 @@ class Disease(models.Model):
 	tumor_stage = JSONField(blank=True, null=True)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 #############################################################
@@ -204,7 +205,7 @@ class Resource(models.Model):
 	iri_prefix = models.URLField(max_length=200)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class Update(models.Model):
@@ -215,7 +216,7 @@ class Update(models.Model):
 	comment = models.TextField()
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class ExternalReference(models.Model):
@@ -225,7 +226,7 @@ class ExternalReference(models.Model):
 	description = JSONField(blank=True, null=True)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class MetaData(models.Model):
@@ -250,7 +251,7 @@ class MetaData(models.Model):
 	external_reference = models.ManyToManyField(ExternalReference, blank=True)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 #############################################################
@@ -304,7 +305,7 @@ class Individual(models.Model):
 	# deceased = models.BooleanField()
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class Biosample(models.Model):
@@ -331,7 +332,7 @@ class Biosample(models.Model):
 	is_control_sample = models.BooleanField(default=False)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 class Phenopacket(models.Model):
@@ -351,4 +352,4 @@ class Phenopacket(models.Model):
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE)
 	
 	def __str__(self):
-		return self.id
+		return str(self.id)
