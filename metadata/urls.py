@@ -21,6 +21,18 @@ from patients import api_views
 
 router = routers.DefaultRouter()
 router.register(r'variants', api_views.VariantViewSet)
+router.register(r'phenotypicfeatures', api_views.PhenotypicFeatureViewSet)
+router.register(r'procedures', api_views.ProcedureViewSet)
+router.register(r'htsfiles', api_views.HtsFileViewSet)
+router.register(r'genes', api_views.GeneViewSet)
+router.register(r'diseases', api_views.DiseaseViewSet)
+router.register(r'resources', api_views.ResourceViewSet)
+router.register(r'updates', api_views.UpdateViewSet)
+router.register(r'externalreferences', api_views.ExternalReferenceViewSet)
+router.register(r'metadata', api_views.MetaDataViewSet)
+router.register(r'individuals', api_views.IndividualViewSet)
+router.register(r'biosamples', api_views.BiosampleViewSet)
+router.register(r'phenopackets', api_views.PhenopacketViewSet)
 
 
 urlpatterns = [
