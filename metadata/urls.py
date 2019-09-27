@@ -41,4 +41,5 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('', get_schema_view(title="Metadata Service API"),
         name='openapi-schema'),
+    path('service-info/', api_views.service_info),
 ]

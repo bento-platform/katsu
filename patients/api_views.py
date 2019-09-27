@@ -1,6 +1,9 @@
 from rest_framework import viewsets, pagination
 from .serializers import *
 from .models import *
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from metadata.service_info import SERVICE_INFO
 
 
 class LargeResultsSetPagination(pagination.PageNumberPagination):
@@ -191,3 +194,13 @@ class PhenopacketViewSet(viewsets.ModelViewSet):
 	queryset = Phenopacket.objects.all()
 	serializer_class = PhenopacketSerializer
 	pagination_class = LargeResultsSetPagination
+
+
+@api_view()
+def service_info(request):
+	"""
+	get:
+	Return service info
+	"""
+
+	return Response(SERVICE_INFO)
