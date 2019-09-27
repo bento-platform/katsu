@@ -4,9 +4,9 @@
 
 The service uses PostgreSQL database for data storage.
 
-1. Create and activate virtual environment
-2. Run: `pip install -r requirements.txt`
-3. Configure database connection in settings.py
+* Create and activate virtual environment
+* Run: `pip install -r requirements.txt`
+* Configure database connection in settings.py
 
 e.g. settings if running database on localhost, default port for PostgreSQL is 5432:
 
@@ -23,7 +23,7 @@ DATABASES = {
 }
 ```
 
-4. Run:
+* Run:
 
 `python manage.py makemigrations`
 
@@ -31,4 +31,4 @@ DATABASES = {
 
 `python manage.py runserver`
 
-5. Development server runs at http://127.0.0.1:8000/
+* Development server runs at http://127.0.0.1:8000/
