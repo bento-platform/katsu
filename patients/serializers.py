@@ -5,6 +5,20 @@ from .allele import ALLELE_SCHEMA
 
 
 ##### Allele classes have to be serialized in VarianSerializer #####
+# TODO move
+ONTOLOGY_CLASS = {
+"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "todo",
+	"title": "Ontology class schema",
+	"description": "todo",
+	"type": "object",
+	"properties": {
+		"id": {"type": "string", "description": "CURIE style identifier"},
+		"label": {"type": "string", "description": "Human-readable class name"}
+	},
+	"required": ["id", "label"]
+	
+}
 
 class VariantSerializer(serializers.ModelSerializer):
 	#allele_type = serializers.CharField()
@@ -36,6 +50,13 @@ class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = PhenotypicFeature
 		fields = '__all__'
+
+
+	def validate_phenotype(self, value):
+		validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(value)
+		if not validation:
+			raise serializers.ValidationError("Phenotype must have id and label of an ontology class.")
+		return value
 
 
 class ProcedureSerializer(serializers.ModelSerializer):

@@ -105,11 +105,12 @@ class PhenotypicFeature(models.Model):
 	""" Class to describe a phenotype of an Individual """
 
 	description = models.CharField(max_length=200, blank=True)
-	# JsonField
+	# OntologyClass
 	phenotype = JSONField()
 	negated = models.BooleanField(default=False)
-	# list of OntologyClass
+	# OntologyClass
 	severity = JSONField(blank=True, null=True)
+	# must be an ArrayField to store list of OntologyClass
 	modifier = JSONField(blank=True, null=True)
 	onset = JSONField(blank=True, null=True)
 	evidence = JSONField(blank=True, null=True)
@@ -123,7 +124,7 @@ class Procedure(models.Model):
 	Class to represent a clinical procedure performed on an individual
 	(subject) in oder to extract a biosample
 	"""
-
+	# OntologyClass
 	code = JSONField()
 	body_site = JSONField(blank=True, null=True)
 
@@ -151,6 +152,7 @@ class HtsFile(models.Model):
 	# "individualToSampleIdentifiers": {
 	#   "patient23456": "NA12345"
 	# }
+	# the key is always unique ?
 	individual_to_sample_identifiers = JSONField(blank=True, null=True)
 
 	def __str__(self):
@@ -174,7 +176,7 @@ class Disease(models.Model):
 	Class to represent a diagnosis and inference or hypothesis about the cause
 	underlying the observed phenotypic abnoramalities
 	"""
-
+	# OntologyClass except onset it can also take Age or AgeRange
 	term = JSONField()
 	onset = JSONField(blank=True, null=True)
 	tumor_stage = JSONField(blank=True, null=True)
@@ -291,13 +293,13 @@ class Individual(models.Model):
 	#id = models.AutoField(primary_key=True)
 	# takes a list of CURIE
 	individual_id = models.CharField(max_length=200)
-	alternate_id = ArrayField(models.CharField(blank=True, max_length=200))
+	alternate_id = ArrayField(models.CharField(max_length=200), blank=True, null=True)
 	date_of_birth = models.DateField(null=True, blank=True)
 	# An ISO8601 string represent age
 	age = models.CharField(max_length=200, blank=True)
 	sex = models.CharField(choices=SEX, max_length=200,  blank=True, null=True)
 	karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200, blank=True)
-	# for now
+	# OntologyClass
 	taxonomy = JSONField(blank=True, null=True)
 	# FHIR fields how useful hey are?
 	# active = models.BooleanField()
@@ -316,11 +318,14 @@ class Biosample(models.Model):
 	# CHECK if this rel must be a required
 	individual = models.ForeignKey(Individual, on_delete=models.CASCADE, blank=True, null=True)
 	description = models.CharField(max_length=200, blank=True)
+	# OntologyClass
 	sampled_tissue = JSONField()
 	phenotypic_feature = models.ManyToManyField(PhenotypicFeature, blank=True)
+	# OntologyClass
 	taxonomy = JSONField(blank=True, null=True)
 	# An ISO8601 string represent age
 	individual_age_at_collection = models.CharField(max_length=200, blank=True)
+	# all OntologyClass
 	historical_diagnosis = JSONField(blank=True, null=True)
 	tumor_progression = JSONField(blank=True, null=True)
 	tumor_grade = JSONField(blank=True, null=True)
