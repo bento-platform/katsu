@@ -20,6 +20,7 @@ ONTOLOGY_CLASS = {
 	
 }
 
+
 class VariantSerializer(serializers.ModelSerializer):
 	#allele_type = serializers.CharField()
 	allele = JSONField()
@@ -46,12 +47,12 @@ class VariantSerializer(serializers.ModelSerializer):
 
 
 class PhenotypicFeatureSerializer(serializers.ModelSerializer):
+	#phenotype = JSONField(validators=[ontology_validator])
 
 	class Meta:
 		model = PhenotypicFeature
 		fields = '__all__'
-		extra_kwargs = {'phenotype': {'required': True}} 
-
+		extra_kwargs = {'phenotype': {'required': True}}
 
 	def validate(self, data):
 		""" Validate all OntologyClass JSONFields against OntologyClass schema """
