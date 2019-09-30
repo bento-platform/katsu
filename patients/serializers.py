@@ -50,13 +50,25 @@ class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = PhenotypicFeature
 		fields = '__all__'
+		extra_kwargs = {'phenotype': {'required': True}} 
 
 
-	def validate_phenotype(self, value):
-		validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(value)
-		if not validation:
-			raise serializers.ValidationError("Phenotype must have id and label of an ontology class.")
-		return value
+	def validate(self, data):
+		""" Validate all OntologyClass JSONFields against OntologyClass schema """
+
+		ontology_fields = ['phenotype', 'severity', 'onset', 'evidence']
+		errors = {}
+		for field in ontology_fields:
+			if data.get(field):
+				v = Draft7Validator(ONTOLOGY_CLASS)
+				validation = v.is_valid(data.get(field))
+				if not validation:
+					errors[field] = [str(error.message) for error in sorted(v.iter_errors(data.get(field)))]
+		if errors:
+			raise serializers.ValidationError(
+				errors)
+		else:
+			return data
 
 
 class ProcedureSerializer(serializers.ModelSerializer):
