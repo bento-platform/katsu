@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
 
 
@@ -161,9 +162,9 @@ class HtsFile(models.Model):
 
 class Gene(models.Model):
 	""" Class to represent an identifier for a gene """
-	# Official identifier of the gene is it unique? make PK ?
-	# ???
-	gene_id = models.CharField(max_length=200)
+
+	# Gene id is unique
+	gene_id = models.CharField(max_length=200, unique=True)
 	alternate_id = ArrayField(models.CharField(blank=True, max_length=200))
 	symbol = models.CharField(max_length=200)
 
@@ -356,5 +357,72 @@ class Phenopacket(models.Model):
 	hts_file = models.ManyToManyField(HtsFile, blank=True)
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE)
 	
+	def __str__(self):
+		return str(self.id)
+
+
+#############################################################
+#                                                           #
+#                    Interpretation                         #
+#                                                           #
+#############################################################
+
+
+class GenomicInterpretation(models.Model):
+	"""
+	Class to represent a statemenet about the contribution
+	of a genomic element towards the observed phenotype
+	"""
+
+	GENOMIC_INTERPRETATION_STATUS = (
+		('UNKNOWN', 'UNKNOWN'),
+		('REJECTED', 'REJECTED'),
+		('CANDIDATE', 'CANDIDATE'),
+		('CAUSATIVE', 'CAUSATIVE')
+		)
+	status = models.CharField(choices=GENOMIC_INTERPRETATION_STATUS, max_length=200, blank=True)
+	gene = models.ForeignKey(Gene, on_delete=models.CASCADE, to_field='gene_id',
+		blank=True, null=True)
+	variant = models.ForeignKey(Variant, on_delete=models.CASCADE,
+		blank=True, null=True)
+
+
+	def clean(self):
+		if not (self.gene or self.variant):
+			raise ValidationError('Either Gene or Variant must be specified')
+
+	def __str__(self):
+		return str(self.id)
+
+
+class Diagnosis(models.Model):
+	""" Class to refer to disease that is present in in the individual analyzed """
+
+	disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
+	# required?
+	genomic_interpretation = models.ManyToManyField(GenomicInterpretation, blank=True)
+
+	def __str__(self):
+		return str(self.id)
+
+
+class Interpretation(models.Model):
+	""" Class to represent the interpretation of a genomyc analysis """
+
+	RESOLUTION_STATUS = (
+		('UNKNOWN', 'UNKNOWN'),
+		('SOLVED', 'SOLVED'),
+		('UNSOLVED', 'UNSOLVED'),
+		('IN_PROGRESS', 'IN_PROGRESS')
+		)
+
+	interpretation_id = models.CharField(max_length=200)
+	resolution_status = models.CharField(choices=RESOLUTION_STATUS, max_length=200, blank=True)
+	phenopacket = models.ForeignKey(Phenopacket, on_delete=models.CASCADE)
+	# fetch disease via from phenopacket
+	# diagnosis on one disease ? there can be many disease assosiated with phenopacket
+	diagnosis = models.ManyToManyField(Diagnosis)
+	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE)
+
 	def __str__(self):
 		return str(self.id)
