@@ -20,12 +20,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '=p1@hhp5m4v0$c#eba3a+rx!$9-xk^q*7cb9(cd!wn1&_*osyc'
+SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk^q*7cb9(cd!wn1&_*osyc')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # TODO: Production mode
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [os.environ.get("SERVICE_HOST", "localhost")]
 
 
 # Application definition
@@ -86,11 +86,11 @@ WSGI_APPLICATION = 'metadata.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'metadata',
-        'USER': 'admin',
-        'PASSWORD': 'admin',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get("POSTGRES_DATABASE", 'metadata'),
+        'USER': os.environ.get("POSTGRES_USER", 'admin'),
+        'PASSWORD': 'admin',  # TODO: Production / CHORD mode
+        'HOST': 'localhost',  # TODO: Production / CHORD mode
+        'PORT': '5432',  # TODO: Production / CHORD mode
     }
 }
 

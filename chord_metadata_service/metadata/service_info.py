@@ -3,12 +3,12 @@
 SERVICE_INFO = {
 	"id": "ca.distributedgenomics.chord_metadata_service",
 	"name": "Metadata Service",
-	"type": "data service",
+	"type": "data service",  # TODO
 	"description": "Metadata service implementation based on Phenopackets schema",
 	"organization": {
 		"name": "C3G",
 		"url": "http://www.computationalgenomics.ca/"
 	},
 	"contactUrl": "mailto:ksenia.zaytseva@mcgill.ca",
-	"version": "TODO"
+	"version": "TODO"  # TODO
 }
