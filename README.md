@@ -1,4 +1,4 @@
-# Metadata service
+# CHORD Metadata Service
 
 ## Install
 
