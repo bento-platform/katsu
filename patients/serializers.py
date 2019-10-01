@@ -147,3 +147,24 @@ class PhenopacketSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Phenopacket
 		fields = '__all__'
+
+
+class GenomicInterpretationSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = GenomicInterpretation
+		fields = '__all__'
+
+
+class DiagnosisSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = Diagnosis
+		fields = '__all__'
+
+
+class InterpretationSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = Interpretation
+		fields = '__all__'

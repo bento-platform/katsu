@@ -34,6 +34,9 @@ router.register(r'metadata', api_views.MetaDataViewSet)
 router.register(r'individuals', api_views.IndividualViewSet)
 router.register(r'biosamples', api_views.BiosampleViewSet)
 router.register(r'phenopackets', api_views.PhenopacketViewSet)
+router.register(r'genomicinterpretations', api_views.GenomicInterpretationViewSet)
+router.register(r'diagnoses', api_views.DiagnosisViewSet)
+router.register(r'interpretations', api_views.InterpretationViewSet)
 
 
 urlpatterns = [

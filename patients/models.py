@@ -380,7 +380,7 @@ class GenomicInterpretation(models.Model):
 		('CANDIDATE', 'CANDIDATE'),
 		('CAUSATIVE', 'CAUSATIVE')
 		)
-	status = models.CharField(choices=GENOMIC_INTERPRETATION_STATUS, max_length=200, blank=True)
+	status = models.CharField(choices=GENOMIC_INTERPRETATION_STATUS, max_length=200)
 	gene = models.ForeignKey(Gene, on_delete=models.CASCADE, to_field='gene_id',
 		blank=True, null=True)
 	variant = models.ForeignKey(Variant, on_delete=models.CASCADE,

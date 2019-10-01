@@ -196,6 +196,48 @@ class PhenopacketViewSet(viewsets.ModelViewSet):
 	pagination_class = LargeResultsSetPagination
 
 
+class GenomicInterpretationViewSet(viewsets.ModelViewSet):
+	"""
+	get:
+	Return a list of all existing genomic interpretations
+
+	post:
+	Create a new genomic interpretation
+
+	"""
+	queryset = GenomicInterpretation.objects.all()
+	serializer_class = GenomicInterpretationSerializer
+	pagination_class = LargeResultsSetPagination
+
+
+class DiagnosisViewSet(viewsets.ModelViewSet):
+	"""
+	get:
+	Return a list of all existing diagnoses
+
+	post:
+	Create a new diagnosis
+
+	"""
+	queryset = Diagnosis.objects.all()
+	serializer_class = DiagnosisSerializer
+	pagination_class = LargeResultsSetPagination
+
+
+class InterpretationViewSet(viewsets.ModelViewSet):
+	"""
+	get:
+	Return a list of all existing interpretations
+
+	post:
+	Create a new interpretation
+
+	"""
+	queryset = Interpretation.objects.all()
+	serializer_class = InterpretationSerializer
+	pagination_class = LargeResultsSetPagination
+
+
 @api_view()
 def service_info(request):
 	"""
