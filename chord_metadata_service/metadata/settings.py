@@ -53,7 +53,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'metadata.urls'
+ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
 
 TEMPLATES = [
     {
@@ -71,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'metadata.wsgi.application'
+WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
 
 
 # Database
