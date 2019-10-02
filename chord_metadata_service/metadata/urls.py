@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from patients import api_views
+from chord_metadata_service.patients import api_views
 from rest_framework.schemas import get_schema_view
 
 
