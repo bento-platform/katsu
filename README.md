@@ -31,4 +31,4 @@ DATABASES = {
 
 `python manage.py runserver`
 
-* Development server runs at locahost:8000/
+* Development server runs at `localhost:8000`
