@@ -6,8 +6,8 @@ import re
 from pathlib import Path
 from pkg_resources import get_distribution, DistributionNotFound
 
-from . import metadata
-from . import patients
+from . import metadata  # TODO: Delete if not needed
+from . import patients  # TODO: Delete if not needed
 
 name = "chord_metadata_service"
 
@@ -18,4 +18,4 @@ except DistributionNotFound:
     __version__ = [re.search(r"(\d+\.\d+\.\d+)", l).group(1) for l in open(setup_path, "r").readlines()
                    if "    version" in l][0]
 
-__all__ = ["name", "__version__", "metadata", "patients"]
+__all__ = ["name", "__version__", "metadata", "patients"]  # TODO: Delete if not needed
