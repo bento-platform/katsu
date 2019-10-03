@@ -407,12 +407,12 @@ class Phenopacket(models.Model):
 	# CHECK !!! Force as required?
 	subject = models.ForeignKey(Individual, on_delete=models.CASCADE)
 	# PhenotypicFeatures are present in Biosample, so can be accessed via Biosample instance
-	phenotypic_feature = models.ManyToManyField(PhenotypicFeature, blank=True)
-	biosample = models.ManyToManyField(Biosample, blank=True)
-	gene = models.ForeignKey(Gene, on_delete=models.CASCADE, blank=True, null=True)
-	variant = models.ManyToManyField(Variant, blank=True)
-	disease = models.ManyToManyField(Disease, blank=True)
-	hts_file = models.ManyToManyField(HtsFile, blank=True)
+	phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True)
+	biosamples = models.ManyToManyField(Biosample, blank=True)
+	genes = models.ManyToManyField(Gene, blank=True)
+	variants = models.ManyToManyField(Variant, blank=True)
+	diseases = models.ManyToManyField(Disease, blank=True)
+	hts_files = models.ManyToManyField(HtsFile, blank=True)
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE)
 	
 	def __str__(self):
