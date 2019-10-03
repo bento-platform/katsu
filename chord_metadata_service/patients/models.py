@@ -367,7 +367,7 @@ class Biosample(models.Model):
 	biosample_id = models.CharField(max_length=200)
 	# if Invividual instance is deleted Biosample instance is deleted too
 	# CHECK if this rel must be a required
-	individual = models.ForeignKey(Individual, on_delete=models.CASCADE,
+	individual_id = models.ForeignKey(Individual, on_delete=models.CASCADE,
 		blank=True, null=True)
 	description = models.CharField(max_length=200, blank=True)
 	sampled_tissue = models.ForeignKey(Ontology, on_delete=models.PROTECT,
@@ -392,7 +392,7 @@ class Biosample(models.Model):
 	procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE)
 	hts_files = models.ManyToManyField(HtsFile, blank=True,
 		related_name='biosample_hts_files')
-	variant = models.ManyToManyField(Variant, blank=True)
+	variants = models.ManyToManyField(Variant, blank=True)
 	is_control_sample = models.BooleanField(default=False)
 
 	def __str__(self):
