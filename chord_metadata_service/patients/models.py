@@ -275,7 +275,7 @@ class ExternalReference(models.Model):
 	""" Class to store information about an external reference """
 
 	external_reference_id = models.CharField(max_length=200)
-	description = JSONField(blank=True, null=True)
+	description = models.TextField(blank=True)
 
 	def __str__(self):
 		return str(self.id)
