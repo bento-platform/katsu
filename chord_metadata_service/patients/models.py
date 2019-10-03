@@ -136,7 +136,7 @@ class PhenotypicFeature(models.Model):
 	description = models.CharField(max_length=200, blank=True)
 	# if Ontology deleted protect the PhenotypicFeature from deletion
 	# and raise IntegrityError
-	phenotype = models.ForeignKey(Ontology, on_delete=models.PROTECT,
+	_type = models.ForeignKey(Ontology, on_delete=models.PROTECT,
 		related_name='phenotypes')
 	negated = models.BooleanField(default=False)
 	# since severity is an optional, set value to null when Ontology deleted
@@ -297,10 +297,10 @@ class MetaData(models.Model):
 	# and HPO terms are used to specificy the phenotypes of a patient, then the MetaData element
 	# MUST have one Resource element each for MONDO and HPO.
 	# see example: https://phenopackets-schema.readthedocs.io/en/latest/metadata.html#rstmetadata
-	resource = models.ManyToManyField(Resource)
-	update = models.ManyToManyField(Update, blank=True)
+	resources = models.ManyToManyField(Resource)
+	updates = models.ManyToManyField(Update, blank=True)
 	phenopacket_schema_version = models.CharField(max_length=200, blank=True)
-	external_reference = models.ManyToManyField(ExternalReference, blank=True)
+	external_references = models.ManyToManyField(ExternalReference, blank=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -343,7 +343,7 @@ class Individual(models.Model):
 	#id = models.AutoField(primary_key=True)
 	individual_id = models.CharField(max_length=200)
 	# TODO check for CURIE
-	alternate_id = ArrayField(models.CharField(max_length=200), blank=True, null=True)
+	alternate_ids = ArrayField(models.CharField(max_length=200), blank=True, null=True)
 	date_of_birth = models.DateField(null=True, blank=True)
 	# An ISO8601 string represent age
 	age = models.CharField(max_length=200, blank=True)
