@@ -372,8 +372,7 @@ class Biosample(models.Model):
 	description = models.CharField(max_length=200, blank=True)
 	sampled_tissue = models.ForeignKey(Ontology, on_delete=models.PROTECT,
 		related_name='sampled_tissues')
-	phenotypic_feature = models.ManyToManyField(PhenotypicFeature, blank=True,
-		verbose_name='phenotypic_features')
+	phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True)
 	# OntologyClass
 	taxonomy = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
 		null=True, related_name='biosample_taxonomies')
