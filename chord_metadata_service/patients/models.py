@@ -458,7 +458,7 @@ class Diagnosis(models.Model):
 
 	disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
 	# required?
-	genomic_interpretation = models.ManyToManyField(GenomicInterpretation, blank=True)
+	genomic_interpretations = models.ManyToManyField(GenomicInterpretation, blank=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -476,6 +476,7 @@ class Interpretation(models.Model):
 
 	interpretation_id = models.CharField(max_length=200)
 	resolution_status = models.CharField(choices=RESOLUTION_STATUS, max_length=200, blank=True)
+	# In Phenopackets schema this field is 'phenopacket_or_family'
 	phenopacket = models.ForeignKey(Phenopacket, on_delete=models.CASCADE)
 	# fetch disease via from phenopacket
 	# diagnosis on one disease ? there can be many disease assosiated with phenopacket
