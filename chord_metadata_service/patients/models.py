@@ -68,7 +68,8 @@ class Variant(models.Model):
 	allele_type = models.CharField(choices=ALLELE, max_length=200)
 	# !!!!!!!!! CHECK
 	allele = JSONField()
-	zygosity = models.ForeignKey(Ontology, on_delete=models.SET_NULL, null=True)
+	zygosity = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+		related_name='zygosities', null=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -137,7 +138,7 @@ class PhenotypicFeature(models.Model):
 	# if Ontology deleted protect the PhenotypicFeature from deletion
 	# and raise IntegrityError
 	_type = models.ForeignKey(Ontology, on_delete=models.PROTECT,
-		related_name='phenotypes')
+		related_name='types')
 	negated = models.BooleanField(default=False)
 	# since severity is an optional, set value to null when Ontology deleted
 	severity = models.ForeignKey(Ontology, on_delete=models.SET_NULL,

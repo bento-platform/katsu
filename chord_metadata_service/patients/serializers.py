@@ -21,6 +21,13 @@ ONTOLOGY_CLASS = {
 }
 
 
+class OntologySerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = Ontology
+		fields = '__all__'
+
+
 class VariantSerializer(serializers.ModelSerializer):
 	#allele_type = serializers.CharField()
 	allele = JSONField()
@@ -48,28 +55,29 @@ class VariantSerializer(serializers.ModelSerializer):
 
 class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 	#phenotype = JSONField(validators=[ontology_validator])
+	type = OntologySerializer(source="_type")
 
 	class Meta:
 		model = PhenotypicFeature
-		fields = '__all__'
-		extra_kwargs = {'phenotype': {'required': True}}
+		exclude = ['_type']
+		#extra_kwargs = {'phenotype': {'required': True}}
 
-	def validate(self, data):
-		""" Validate all OntologyClass JSONFields against OntologyClass schema """
+	# def validate(self, data):
+	# 	""" Validate all OntologyClass JSONFields against OntologyClass schema """
 
-		ontology_fields = ['phenotype', 'severity', 'onset', 'evidence']
-		errors = {}
-		for field in ontology_fields:
-			if data.get(field):
-				v = Draft7Validator(ONTOLOGY_CLASS)
-				validation = v.is_valid(data.get(field))
-				if not validation:
-					errors[field] = [str(error.message) for error in sorted(v.iter_errors(data.get(field)))]
-		if errors:
-			raise serializers.ValidationError(
-				errors)
-		else:
-			return data
+	# 	ontology_fields = ['_type', 'severity', 'onset', 'evidence']
+	# 	errors = {}
+	# 	for field in ontology_fields:
+	# 		if data.get(field):
+	# 			v = Draft7Validator(ONTOLOGY_CLASS)
+	# 			validation = v.is_valid(data.get(field))
+	# 			if not validation:
+	# 				errors[field] = [str(error.message) for error in sorted(v.iter_errors(data.get(field)))]
+	# 	if errors:
+	# 		raise serializers.ValidationError(
+	# 			errors)
+	# 	else:
+	# 		return data
 
 
 class ProcedureSerializer(serializers.ModelSerializer):
