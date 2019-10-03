@@ -10,8 +10,8 @@ setuptools.setup(
     version="0.1.0",
 
     python_requires=">=3.6",
-    install_requires=["chord_lib @ git+https://bitbucket.org/genap/chord_lib", "Django==2.2.6", "django-filter",
-                      "djangorestframework", "psycopg2-binary", "requests"],
+    install_requires=["chord_lib @ git+https://github.com/c3g/chord_lib", "Django==2.2.6", "django-filter",
+                      "djangorestframework", "jsonschema", "psycopg2-binary", "PyYAML", "requests", "uritemplate"],
 
     author="Ksenia Zaytseva",
 
@@ -19,7 +19,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
 
-    packages=["chord_metadata_service"],
+    packages=setuptools.find_packages(),
     include_package_data=True,
 
     url="https://github.com/c3g/chord_metadata_service",

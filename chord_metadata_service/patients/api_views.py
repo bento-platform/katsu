@@ -3,7 +3,7 @@ from .serializers import *
 from .models import *
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from metadata.service_info import SERVICE_INFO
+from chord_metadata_service.metadata.service_info import SERVICE_INFO
 
 
 class LargeResultsSetPagination(pagination.PageNumberPagination):

@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk^q*7cb9(cd!wn1&_*osyc')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # TODO: Production mode
+DEBUG = bool(os.environ.get("CHORD_DEBUG", "True"))
 
-ALLOWED_HOSTS = [os.environ.get("SERVICE_HOST", "localhost")]
+ALLOWED_HOSTS = [os.environ.get("SERVICE_HOST", "localhost")] if not DEBUG else []
 
 
 # Application definition
@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'patients',
+
+    'chord_metadata_service.patients',
+
     'rest_framework',
 ]
 
@@ -51,7 +53,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'metadata.urls'
+ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
 
 TEMPLATES = [
     {
@@ -69,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'metadata.wsgi.application'
+WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
 
 
 # Database
@@ -85,12 +87,14 @@ WSGI_APPLICATION = 'metadata.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get("POSTGRES_DATABASE", 'metadata'),
         'USER': os.environ.get("POSTGRES_USER", 'admin'),
-        'PASSWORD': 'admin',  # TODO: Production / CHORD mode
-        'HOST': 'localhost',  # TODO: Production / CHORD mode
-        'PORT': '5432',  # TODO: Production / CHORD mode
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'admin'),
+
+        # Use sockets if we're inside a CHORD container
+        'HOST': "" if os.environ.get("CHORD_DEBUG", None) is not None else 'localhost',
+        'PORT': "" if os.environ.get("CHORD_DEBUG", None) is not None else '5432',
     }
 }
 
