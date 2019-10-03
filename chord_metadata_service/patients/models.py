@@ -7,6 +7,34 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 
 #############################################################
 #                                                           #
+#                        Ontology                           #
+#                                                           #
+#############################################################
+
+
+class Ontology(models.Model):
+	""" Class to reperesent terms from ontologies
+	e.g.
+	{
+	  "id": "HP:0001875",
+	  "label": "Neutropenia"
+	}
+	"""
+
+	ontology_id = models.CharField(max_length=200)
+	label = models.CharField(max_length=200)
+
+	class Meta:
+		unique_together = ['ontology_id', 'label']
+
+	def __str__(self):
+		return str(ontology_id)
+
+#############################################################
+
+
+#############################################################
+#                                                           #
 #                        Variants                           #
 #                                                           #
 #############################################################
@@ -40,7 +68,7 @@ class Variant(models.Model):
 	allele_type = models.CharField(choices=ALLELE, max_length=200)
 	# !!!!!!!!! CHECK
 	allele = JSONField()
-	zygosity = JSONField(blank=True, null=True)
+	zygosity = models.ForeignKey(Ontology, on_delete=models.SET_NULL, null=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -106,14 +134,18 @@ class PhenotypicFeature(models.Model):
 	""" Class to describe a phenotype of an Individual """
 
 	description = models.CharField(max_length=200, blank=True)
-	# OntologyClass
-	phenotype = JSONField()
+	# if Ontology deleted protect the PhenotypicFeature from deletion
+	# and raise IntegrityError
+	phenotype = models.ForeignKey(Ontology, on_delete=models.PROTECT,
+		related_name='phenotypes')
 	negated = models.BooleanField(default=False)
-	# OntologyClass
-	severity = JSONField(blank=True, null=True)
-	# must be an ArrayField to store list of OntologyClass
-	modifier = JSONField(blank=True, null=True)
-	onset = JSONField(blank=True, null=True)
+	# since severity is an optional, set value to null when Ontology deleted
+	severity = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+		null=True, related_name='severities')
+	modifier = models.ManyToManyField(Ontology, blank=True,
+		related_name='modifiers')
+	onset = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+		null=True, related_name='onsets')
 	evidence = JSONField(blank=True, null=True)
 
 	def __str__(self):
@@ -125,9 +157,11 @@ class Procedure(models.Model):
 	Class to represent a clinical procedure performed on an individual
 	(subject) in oder to extract a biosample
 	"""
-	# OntologyClass
-	code = JSONField()
-	body_site = JSONField(blank=True, null=True)
+
+	code = models.ForeignKey(Ontology, on_delete=models.PROTECT,
+		related_name='codes')
+	body_site = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+		null=True, related_name='body_sites')
 
 	def __str__(self):
 		return str(self.id)
@@ -165,6 +199,7 @@ class Gene(models.Model):
 
 	# Gene id is unique
 	gene_id = models.CharField(max_length=200, unique=True)
+	# CURIE style?
 	alternate_id = ArrayField(models.CharField(blank=True, max_length=200))
 	symbol = models.CharField(max_length=200)
 
@@ -177,13 +212,27 @@ class Disease(models.Model):
 	Class to represent a diagnosis and inference or hypothesis about the cause
 	underlying the observed phenotypic abnoramalities
 	"""
-	# OntologyClass except onset it can also take Age or AgeRange
-	term = JSONField()
-	onset = JSONField(blank=True, null=True)
-	tumor_stage = JSONField(blank=True, null=True)
+
+	term = models.ForeignKey(Ontology, on_delete=models.PROTECT,
+		related_name='terms')
+	# onset can be represented by Age or Ontology, recommended ontology is the HPO onset hierarchy
+	# TODO think how to serialize it
+
+	# "ageOfOnset": {
+  	# "age": "P38Y7M"
+  	# }
+	age_of_onset = JSONField(blank=True, null=True)
+	# "ageOfOnset": {
+  	# "id": "HP:0003581",
+  	# "label": "Adult onset"
+  	# }
+	age_of_onset_ontology = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+		null=True, related_name='age_of_onset_ontologies')
+	tumor_stage = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+		null=True, related_name='tumor_stages')
 
 	def __str__(self):
-		return str(self.id)
+		return self.id
 
 
 #############################################################
