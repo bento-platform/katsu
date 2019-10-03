@@ -341,8 +341,8 @@ class Individual(models.Model):
 	# )
 
 	#id = models.AutoField(primary_key=True)
-	# takes a list of CURIE
 	individual_id = models.CharField(max_length=200)
+	# TODO check for CURIE
 	alternate_id = ArrayField(models.CharField(max_length=200), blank=True, null=True)
 	date_of_birth = models.DateField(null=True, blank=True)
 	# An ISO8601 string represent age
@@ -350,7 +350,8 @@ class Individual(models.Model):
 	sex = models.CharField(choices=SEX, max_length=200,  blank=True, null=True)
 	karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200, blank=True)
 	# OntologyClass
-	taxonomy = JSONField(blank=True, null=True)
+	taxonomy = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+		null=True, related_name='taxonomies')
 	# FHIR fields how useful hey are?
 	# active = models.BooleanField()
 	# gender = models.CharField(choices=GENDER, max_length=200)
