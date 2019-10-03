@@ -22,16 +22,18 @@ ONTOLOGY_CLASS = {
 
 
 class OntologySerializer(serializers.ModelSerializer):
+	# this will create problems
+	id = serializers.CharField(source='ontology_id')
 
 	class Meta:
 		model = Ontology
-		fields = '__all__'
+		fields = ['id', 'label']
 
 
 class VariantSerializer(serializers.ModelSerializer):
 	#allele_type = serializers.CharField()
 	allele = JSONField()
-	zygosity = JSONField()
+	zygosity = OntologySerializer()
 
 	class Meta:
 		model = Variant
@@ -55,7 +57,10 @@ class VariantSerializer(serializers.ModelSerializer):
 
 class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 	#phenotype = JSONField(validators=[ontology_validator])
-	type = OntologySerializer(source="_type")
+	type = OntologySerializer(source='_type')
+	severity = OntologySerializer()
+	modifier = OntologySerializer()
+	onset = OntologySerializer()
 
 	class Meta:
 		model = PhenotypicFeature
@@ -81,6 +86,8 @@ class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 
 
 class ProcedureSerializer(serializers.ModelSerializer):
+	code = OntologySerializer()
+	body_site = OntologySerializer()
 
 	class Meta:
 		model = Procedure
@@ -102,6 +109,9 @@ class GeneSerializer(serializers.ModelSerializer):
 
 
 class DiseaseSerializer(serializers.ModelSerializer):
+	term = OntologySerializer()
+	age_of_onset_ontology = OntologySerializer()
+	tumor_stage = OntologySerializer()
 
 	class Meta:
 		model = Disease
@@ -137,6 +147,7 @@ class MetaDataSerializer(serializers.ModelSerializer):
 
 
 class IndividualSerializer(serializers.ModelSerializer):
+	taxonomy = OntologySerializer()
 
 	class Meta:
 		model = Individual
@@ -144,6 +155,12 @@ class IndividualSerializer(serializers.ModelSerializer):
 
 
 class BiosampleSerializer(serializers.ModelSerializer):
+	sampled_tissue = OntologySerializer()
+	taxonomy = OntologySerializer()
+	historical_diagnosis = OntologySerializer()
+	tumor_progression = OntologySerializer()
+	tumor_grade = OntologySerializer()
+	diagnostic_markers = OntologySerializer()
 
 	class Meta:
 		model = Biosample
