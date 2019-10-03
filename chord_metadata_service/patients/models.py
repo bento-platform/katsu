@@ -351,7 +351,7 @@ class Individual(models.Model):
 	karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200, blank=True)
 	# OntologyClass
 	taxonomy = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
-		null=True, related_name='taxonomies')
+		null=True, related_name='individual_taxonomies')
 	# FHIR fields how useful hey are?
 	# active = models.BooleanField()
 	# gender = models.CharField(choices=GENDER, max_length=200)
@@ -367,23 +367,32 @@ class Biosample(models.Model):
 	biosample_id = models.CharField(max_length=200)
 	# if Invividual instance is deleted Biosample instance is deleted too
 	# CHECK if this rel must be a required
-	individual = models.ForeignKey(Individual, on_delete=models.CASCADE, blank=True, null=True)
+	individual = models.ForeignKey(Individual, on_delete=models.CASCADE,
+		blank=True, null=True)
 	description = models.CharField(max_length=200, blank=True)
+	sampled_tissue = models.ForeignKey(Ontology, on_delete=models.PROTECT,
+		related_name='sampled_tissues')
+	phenotypic_feature = models.ManyToManyField(PhenotypicFeature, blank=True,
+		verbose_name='phenotypic_features')
 	# OntologyClass
-	sampled_tissue = JSONField()
-	phenotypic_feature = models.ManyToManyField(PhenotypicFeature, blank=True)
-	# OntologyClass
-	taxonomy = JSONField(blank=True, null=True)
+	taxonomy = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+		null=True, related_name='biosample_taxonomies')
 	# An ISO8601 string represent age
 	individual_age_at_collection = models.CharField(max_length=200, blank=True)
 	# all OntologyClass
-	historical_diagnosis = JSONField(blank=True, null=True)
-	tumor_progression = JSONField(blank=True, null=True)
-	tumor_grade = JSONField(blank=True, null=True)
-	diagnostic_marker = JSONField(blank=True, null=True)
+	historical_diagnosis = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+		null=True, related_name='histological_diagnoses')
+	tumor_progression = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+		null=True, related_name='tumor_progressions')
+	# TODO check if it takes a list
+	tumor_grade = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+		null=True, related_name='tumor_grades')
+	diagnostic_markers = models.ManyToManyField(Ontology, blank=True,
+		related_name='diagnostic_markers')
 	# CHECK! if Procedure instance is deleted Biosample instance is deleted too
 	procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE)
-	hts_file = models.ForeignKey(HtsFile, on_delete=models.CASCADE, blank=True, null=True)
+	hts_files = models.ManyToManyField(HtsFile, blank=True,
+		related_name='biosample_hts_files')
 	variant = models.ManyToManyField(Variant, blank=True)
 	is_control_sample = models.BooleanField(default=False)
 
