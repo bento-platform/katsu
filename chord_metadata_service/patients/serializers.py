@@ -23,12 +23,11 @@ ONTOLOGY_CLASS = {
 
 class OntologySerializer(serializers.ModelSerializer):
 	# this will create problems
-	id = serializers.CharField(source='ontology_id')
-	primary_key = serializers.CharField(source='id', read_only=True)
+	#id = serializers.CharField(source='ontology_id')
 
 	class Meta:
 		model = Ontology
-		fields = ['id', 'label', 'primary_key']
+		fields = ['ontology_id', 'label', 'id']
 
 	# def run_validators(self, value):
 	# 	for validator in self.validators:
@@ -44,7 +43,7 @@ class OntologySerializer(serializers.ModelSerializer):
 class VariantSerializer(serializers.ModelSerializer):
 	#allele_type = serializers.CharField()
 	allele = JSONField()
-	zygosity = OntologySerializer()
+	zygosity = OntologySerializer(required=False)
 
 	class Meta:
 		model = Variant
@@ -72,18 +71,52 @@ class VariantSerializer(serializers.ModelSerializer):
 		variant = Variant.objects.create(zygosity=ontology_model, **validated_data)
 		return variant
 
+	def update(self, instance, validated_data):
+		# TODO fix buf This field may not be blank on zygosity field
+		instance.allele = validated_data.get('allele', instance.allele)
+		instance.allele_type = validated_data.get('allele_type', instance.allele_type)
+		instance.save()
+		zygosity_data = validated_data.pop('zygosity', None)
+		if zygosity_data:
+			instance.zygosity, _ = Ontology.objects.get_or_create(**zygosity_data)
+
+		return instance
+
 
 class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 	#phenotype = JSONField(validators=[ontology_validator])
 	type = OntologySerializer(source='_type')
 	severity = OntologySerializer()
-	modifier = OntologySerializer()
+	modifier = OntologySerializer(required=False, many=True)
 	onset = OntologySerializer()
 
 	class Meta:
 		model = PhenotypicFeature
 		exclude = ['_type']
 		#extra_kwargs = {'phenotype': {'required': True}}
+
+	def create(self, validated_data):
+		type_data = validated_data.pop('_type')
+		severity = validated_data.pop('severity')
+		onset = validated_data.pop('onset')
+		# M2M field
+		modifier = validated_data.pop('modifier', [])
+		# TODO refactor
+		type_ontology, _ = Ontology.objects.get_or_create(**type_data)
+		severity_ontology, _ = Ontology.objects.get_or_create(**severity)
+		onset_ntology, _ = Ontology.objects.get_or_create(**onset)
+
+		phenotypic_feature = PhenotypicFeature.objects.create(
+			 _type=type_ontology,
+			severity=severity_ontology, onset=onset_ntology,
+			**validated_data
+			)
+		# for M2M
+		for mod in modifier:
+			modifier_ontology, _ = Ontology.objects.get_or_create(**mod)
+			phenotypic_feature.modifier.add(modifier_ontology)
+
+		return phenotypic_feature
 
 	# def validate(self, data):
 	# 	""" Validate all OntologyClass JSONFields against OntologyClass schema """

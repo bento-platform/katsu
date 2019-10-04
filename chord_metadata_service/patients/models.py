@@ -27,8 +27,8 @@ class Ontology(models.Model):
 	# class Meta:
 	# 	unique_together = ['ontology_id', 'label']
 
-	# def __str__(self):
-	# 	return str(ontology_id)
+	def __str__(self):
+		return str(self.id)
 
 #############################################################
 
