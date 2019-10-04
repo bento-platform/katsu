@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from chord_metadata_service.patients import api_views
+from chord_metadata_service.patients import api_views, chord_api_views
 from rest_framework.schemas import get_schema_view
 
 
@@ -44,5 +44,10 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('', get_schema_view(title="Metadata Service API"),
         name='openapi-schema'),
+
     path('service-info/', api_views.service_info),
+
+    path('workflows/', chord_api_views.workflow_list),
+    path('workflows/<slug:workflow_id>', chord_api_views.workflow_item),
+    path('workflows/<slug:workflow_id>.wdl', chord_api_views.workflow_file),
 ]
