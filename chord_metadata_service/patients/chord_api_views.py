@@ -1,4 +1,7 @@
+import chord_lib
 import os
+
+from jsonschema import validate, ValidationError
 
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import BaseRenderer
@@ -67,3 +70,14 @@ def workflow_file(_request, workflow_id):
 
     with open(wdl_path, "r") as wf:
         return Response(wf.read())
+
+
+@api_view(["POST"])
+def ingest(request):
+    try:
+        validate(request.data, chord_lib.schemas.chord.CHORD_INGEST_SCHEMA)
+    except ValidationError:
+        return Response(status=400)
+
+    # TODO: Schema for OpenAPI doc
+    # TODO

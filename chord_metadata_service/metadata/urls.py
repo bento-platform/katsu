@@ -50,4 +50,6 @@ urlpatterns = [
     path('workflows/', chord_api_views.workflow_list),
     path('workflows/<slug:workflow_id>', chord_api_views.workflow_item),
     path('workflows/<slug:workflow_id>.wdl', chord_api_views.workflow_file),
+
+    path('ingest/', chord_api_views.ingest),
 ]
