@@ -12,6 +12,20 @@ class LargeResultsSetPagination(pagination.PageNumberPagination):
 	max_page_size = 10000
 
 
+class OntologyViewSet(viewsets.ModelViewSet):
+	"""
+	get:
+	Return a list of all existing ontologies
+
+	post:
+	Create a new ontology
+
+	"""
+	queryset = Ontology.objects.all()
+	serializer_class = OntologySerializer
+	pagination_class = LargeResultsSetPagination
+
+
 class VariantViewSet(viewsets.ModelViewSet):
 	"""
 	get:

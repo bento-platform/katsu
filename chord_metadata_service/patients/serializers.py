@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, validators
 from .models import *
 from jsonschema import validate, ValidationError, Draft7Validator
 from .allele import ALLELE_SCHEMA
@@ -24,10 +24,21 @@ ONTOLOGY_CLASS = {
 class OntologySerializer(serializers.ModelSerializer):
 	# this will create problems
 	id = serializers.CharField(source='ontology_id')
+	primary_key = serializers.CharField(source='id', read_only=True)
 
 	class Meta:
 		model = Ontology
-		fields = ['id', 'label']
+		fields = ['id', 'label', 'primary_key']
+
+	# def run_validators(self, value):
+	# 	for validator in self.validators:
+	# 		if isinstance(validator, validators.UniqueTogetherValidator):
+	# 			self.validators.remove(validator)
+	# 	super(OntologySerializer, self).run_validators(value)
+
+	def create(self, validated_data):
+		instance, _ = Ontology.objects.get_or_create(**validated_data)
+		return instance
 
 
 class VariantSerializer(serializers.ModelSerializer):
@@ -47,12 +58,19 @@ class VariantSerializer(serializers.ModelSerializer):
 			raise serializers.ValidationError("Allele is not valid")
 		return value
 
-	def to_representation(self, obj):
-		""" Change 'allele_type' field name to allele type value. """
+	# TODO uncomment when update() added
+	# def to_representation(self, obj):
+	# 	""" Change 'allele_type' field name to allele type value. """
 
-		output = super().to_representation(obj)
-		output[obj.allele_type] = output.pop('allele')
-		return output
+	# 	output = super().to_representation(obj)
+	# 	output[obj.allele_type] = output.pop('allele')
+	# 	return output
+
+	def create(self, validated_data):
+		zygosity_data = validated_data.pop('zygosity')
+		ontology_model, _ = Ontology.objects.get_or_create(**zygosity_data)
+		variant = Variant.objects.create(zygosity=ontology_model, **validated_data)
+		return variant
 
 
 class PhenotypicFeatureSerializer(serializers.ModelSerializer):
