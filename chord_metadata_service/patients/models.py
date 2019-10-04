@@ -66,63 +66,10 @@ class Variant(models.Model):
 
 	# CHECK! one allele per one variant
 	allele_type = models.CharField(choices=ALLELE, max_length=200)
-	# !!!!!!!!! CHECK
+	# The field is validated against ALLELE_SCHEMA for four types of allele
 	allele = JSONField()
 	zygosity = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
 		related_name='zygosities', null=True)
-
-	def __str__(self):
-		return str(self.id)
-
-# CHECK !!!
-
-class HgvsAllele(models.Model):
-	""" Class to describe an allele according to the nomenclature of the HGVC """
-
-	hgvs_allele_id = models.CharField(max_length=200, blank=True)
-	hgvs = models.CharField(max_length=200)
-	variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
-
-	def __str__(self):
-		return str(self.id)
-
-
-class VcfAllele(models.Model):
-	""" Class to describe variants using Varian Call Format """
-
-	vcf_allele_id = models.CharField(max_length=200, blank=True)
-	genome_assembly = models.CharField(max_length=200)
-	_chr = models.CharField(max_length=200)
-	pos = models.IntegerField()
-	re = models.CharField(max_length=200)
-	alt = models.CharField(max_length=200)
-	info = models.CharField(blank=True, max_length=500)
-	variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
-
-	def __str__(self):
-		return str(self.id)
-
-
-class SpdiAllele(models.Model):
-	""" Class to describe variants using SPDI notation """
-
-	spdi_allele_id = models.CharField(max_length=200, blank=True)
-	seq_id = models.CharField(max_length=200)
-	position = models.IntegerField()
-	deleted_sequence = models.CharField(max_length=200)
-	inserted_sequence = models.CharField(max_length=200)
-	variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
-
-	def __str__(self):
-		return str(self.id)
-
-
-class IscnAllele(models.Model):
-	""" Class to describe cytogenetic anomalies according to the ISCN """
-
-	iscn_allele_id = models.CharField(max_length=200, blank=True)
-	iscn = models.CharField(max_length=200)
-	variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
 
 	def __str__(self):
 		return str(self.id)
