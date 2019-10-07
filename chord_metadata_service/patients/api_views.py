@@ -269,7 +269,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 	@action(detail=True, methods=["GET"])
 	def datasets(self, _request, pk):
 		project = self.get_object()
-		datasets = Dataset.objects.filter(project=project)
+		datasets = Dataset.objects.filter(project=project).order_by("dataset_id")
 
 		page = self.paginate_queryset(datasets)
 		if page is not None:
