@@ -38,6 +38,8 @@ router.register(r'phenopackets', api_views.PhenopacketViewSet)
 router.register(r'genomicinterpretations', api_views.GenomicInterpretationViewSet)
 router.register(r'diagnoses', api_views.DiagnosisViewSet)
 router.register(r'interpretations', api_views.InterpretationViewSet)
+router.register(r'projects', api_views.ProjectViewSet)
+router.register(r'datasets', api_views.DatasetViewSet)
 
 
 urlpatterns = [
