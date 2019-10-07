@@ -362,7 +362,9 @@ class Phenopacket(models.Model):
 	diseases = models.ManyToManyField(Disease, blank=True)
 	hts_files = models.ManyToManyField(HtsFile, blank=True)
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE)
-	
+
+	dataset = models.ForeignKey("Dataset", on_delete=models.CASCADE, blank=True, null=True)
+
 	def __str__(self):
 		return str(self.id)
 
@@ -413,7 +415,7 @@ class Diagnosis(models.Model):
 
 
 class Interpretation(models.Model):
-	""" Class to represent the interpretation of a genomyc analysis """
+	""" Class to represent the interpretation of a genomic analysis """
 
 	RESOLUTION_STATUS = (
 		('UNKNOWN', 'UNKNOWN'),
@@ -427,9 +429,51 @@ class Interpretation(models.Model):
 	# In Phenopackets schema this field is 'phenopacket_or_family'
 	phenopacket = models.ForeignKey(Phenopacket, on_delete=models.CASCADE)
 	# fetch disease via from phenopacket
-	# diagnosis on one disease ? there can be many disease assosiated with phenopacket
+	# diagnosis on one disease ? there can be many disease associated with phenopacket
 	diagnosis = models.ManyToManyField(Diagnosis)
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE)
 
 	def __str__(self):
 		return str(self.id)
+
+
+#############################################################
+#                                                           #
+#                   Project Management                      #
+#                                                           #
+#############################################################
+
+class Project(models.Model):
+	"""
+	Class to represent a Project, which contains multiple
+	Datasets which are each a group of Phenopackets.
+	"""
+
+	project_id = models.CharField(max_length=36, primary_key=True)
+	name = models.CharField(max_length=200, unique=True)
+	description = models.TextField(blank=True)
+	data_use = JSONField()
+
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return str(self.project_id)
+
+
+class Dataset(models.Model):
+	"""
+	Class to represent a Dataset, which contains multiple Phenopackets.
+	"""
+
+	dataset_id = models.CharField(max_length=36, primary_key=True)
+	name = models.CharField(max_length=200, unique=True)
+	description = models.TextField(blank=True)
+
+	project = models.ForeignKey(Project, on_delete=models.CASCADE)  # Delete dataset upon project deletion
+
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return str(self.project_id)

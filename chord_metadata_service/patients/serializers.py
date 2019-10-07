@@ -1,3 +1,4 @@
+from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
 from rest_framework import serializers, validators
 from .models import *
 from jsonschema import validate, ValidationError, Draft7Validator
@@ -17,7 +18,7 @@ ONTOLOGY_CLASS = {
 		"label": {"type": "string", "description": "Human-readable class name"}
 	},
 	"required": ["id", "label"]
-	
+
 }
 
 
@@ -243,4 +244,33 @@ class InterpretationSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Interpretation
+		fields = '__all__'
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+	# noinspection PyMethodMayBeStatic
+	def validate_data_use(self, value):
+		validation = Draft7Validator(CHORD_DATA_USE_SCHEMA).validate(value)
+		if not validation:
+			raise serializers.ValidationError("Data use is not valid")
+		return value
+
+	# noinspection PyMethodMayBeStatic
+	def validate_name(self, value):
+		if len(value.strip()) < 3:
+			raise serializers.ValidationError("Name must be at least 3 characters")
+
+	class Meta:
+		model = Project
+		fields = '__all__'
+
+
+class DatasetSerializer(serializers.ModelSerializer):
+	# noinspection PyMethodMayBeStatic
+	def validate_name(self, value):
+		if len(value.strip()) < 3:
+			raise serializers.ValidationError("Name must be at least 3 characters")
+
+	class Meta:
+		model = Dataset
 		fields = '__all__'

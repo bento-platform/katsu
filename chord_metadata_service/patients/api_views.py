@@ -1,7 +1,7 @@
 from rest_framework import viewsets, pagination
 from .serializers import *
 from .models import *
-from rest_framework.decorators import api_view
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
 
@@ -249,6 +249,47 @@ class InterpretationViewSet(viewsets.ModelViewSet):
 	"""
 	queryset = Interpretation.objects.all()
 	serializer_class = InterpretationSerializer
+	pagination_class = LargeResultsSetPagination
+
+
+class ProjectViewSet(viewsets.ModelViewSet):
+	"""
+	get:
+	Return a list of all existing projects
+
+	post:
+	Create a new project
+	"""
+
+	queryset = Project.objects.all()
+	serializer_class = ProjectSerializer
+	pagination_class = LargeResultsSetPagination
+
+	@action(detail=True, methods=["GET"])
+	def datasets(self, _request):
+		project = self.get_object()
+		datasets = Dataset.objects.filter(project=project)
+
+		page = self.paginate_queryset(datasets)
+		if page is not None:
+			serializer = self.get_serializer(page, many=True)
+			return self.get_paginated_response(serializer.data)
+
+		serializer = self.get_serializer(datasets, many=True)
+		return Response(serializer.data)
+
+
+class DatasetViewSet(viewsets.ModelViewSet):
+	"""
+	get:
+	Return a list of all existing datasets
+
+	post:
+	Create a new dataset
+	"""
+
+	queryset = Project.objects.all()
+	serializer_class = ProjectSerializer
 	pagination_class = LargeResultsSetPagination
 
 
