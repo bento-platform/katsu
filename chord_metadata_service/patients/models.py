@@ -478,4 +478,4 @@ class Dataset(models.Model):
 	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
-		return str(self.project_id)
+		return str(self.dataset_id)
