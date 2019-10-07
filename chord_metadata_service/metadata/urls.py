@@ -21,6 +21,7 @@ from rest_framework.schemas import get_schema_view
 
 
 router = routers.DefaultRouter()
+router.register(r'ontologies', api_views.OntologyViewSet)
 router.register(r'variants', api_views.VariantViewSet)
 router.register(r'phenotypicfeatures', api_views.PhenotypicFeatureViewSet)
 router.register(r'procedures', api_views.ProcedureViewSet)

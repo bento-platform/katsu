@@ -24,11 +24,11 @@ class Ontology(models.Model):
 	ontology_id = models.CharField(max_length=200)
 	label = models.CharField(max_length=200)
 
-	class Meta:
-		unique_together = ['ontology_id', 'label']
+	# class Meta:
+	# 	unique_together = ['ontology_id', 'label']
 
 	def __str__(self):
-		return str(ontology_id)
+		return str(self.id)
 
 #############################################################
 
