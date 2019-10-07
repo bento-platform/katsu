@@ -460,7 +460,7 @@ class Project(models.Model):
 	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
-		return str(self.project_id)
+		return f"{self.name} (ID: {self.project_id})"
 
 
 class Dataset(models.Model):
@@ -478,4 +478,4 @@ class Dataset(models.Model):
 	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
-		return str(self.dataset_id)
+		return f"{self.name} (ID: {self.dataset_id})"
