@@ -3,6 +3,7 @@
 import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
 import django.db.models.deletion
+import uuid
 
 
 class Migration(migrations.Migration):
@@ -15,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Project',
             fields=[
-                ('project_id', models.CharField(max_length=36, primary_key=True, serialize=False)),
+                ('project_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=200, unique=True)),
                 ('description', models.TextField(blank=True)),
                 ('data_use', django.contrib.postgres.fields.jsonb.JSONField()),
@@ -26,7 +27,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Dataset',
             fields=[
-                ('dataset_id', models.CharField(max_length=36, primary_key=True, serialize=False)),
+                ('dataset_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=200, unique=True)),
                 ('description', models.TextField(blank=True)),
                 ('created', models.DateTimeField(auto_now=True)),

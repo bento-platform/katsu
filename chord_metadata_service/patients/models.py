@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -449,7 +451,7 @@ class Project(models.Model):
 	Datasets which are each a group of Phenopackets.
 	"""
 
-	project_id = models.CharField(max_length=36, primary_key=True)
+	project_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=200, unique=True)
 	description = models.TextField(blank=True)
 	data_use = JSONField()
@@ -466,7 +468,7 @@ class Dataset(models.Model):
 	Class to represent a Dataset, which contains multiple Phenopackets.
 	"""
 
-	dataset_id = models.CharField(max_length=36, primary_key=True)
+	dataset_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=200, unique=True)
 	description = models.TextField(blank=True)
 
