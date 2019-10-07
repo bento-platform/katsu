@@ -1,3 +1,5 @@
+from .. import __version__
+
 # Service info according to spec https://github.com/ga4gh-discovery/ga4gh-service-info
 
 SERVICE_INFO = {
@@ -10,5 +12,5 @@ SERVICE_INFO = {
 		"url": "http://www.computationalgenomics.ca/"
 	},
 	"contactUrl": "mailto:ksenia.zaytseva@mcgill.ca",
-	"version": "TODO"  # TODO
+	"version": __version__  # TODO
 }
