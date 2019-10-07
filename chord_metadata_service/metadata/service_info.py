@@ -12,5 +12,5 @@ SERVICE_INFO = {
 		"url": "http://www.computationalgenomics.ca/"
 	},
 	"contactUrl": "mailto:ksenia.zaytseva@mcgill.ca",
-	"version": __version__  # TODO
+	"version": __version__
 }
