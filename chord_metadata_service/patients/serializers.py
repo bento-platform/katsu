@@ -250,7 +250,7 @@ class InterpretationSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
 	# noinspection PyMethodMayBeStatic
 	def validate_data_use(self, value):
-		validation = Draft7Validator(CHORD_DATA_USE_SCHEMA).validate(value)
+		validation = Draft7Validator(CHORD_DATA_USE_SCHEMA).is_valid(value)
 		if not validation:
 			raise serializers.ValidationError("Data use is not valid")
 		return value
@@ -259,6 +259,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 	def validate_name(self, value):
 		if len(value.strip()) < 3:
 			raise serializers.ValidationError("Name must be at least 3 characters")
+		return value.strip()
 
 	class Meta:
 		model = Project
@@ -270,6 +271,7 @@ class DatasetSerializer(serializers.ModelSerializer):
 	def validate_name(self, value):
 		if len(value.strip()) < 3:
 			raise serializers.ValidationError("Name must be at least 3 characters")
+		return value.strip()
 
 	class Meta:
 		model = Dataset
