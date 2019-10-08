@@ -91,11 +91,11 @@ class PhenotypicFeature(models.Model):
 	negated = models.BooleanField(default=False)
 	# since severity is an optional, set value to null when Ontology deleted
 	severity = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
-		null=True, related_name='severities')
+		null=True, blank=True, related_name='severities')
 	modifier = models.ManyToManyField(Ontology, blank=True,
 		related_name='modifiers')
 	onset = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
-		null=True, related_name='onsets')
+		null=True, blank=True, related_name='onsets')
 	evidence = JSONField(blank=True, null=True)
 
 	def __str__(self):
