@@ -2,7 +2,7 @@ from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
 from rest_framework import serializers, validators
 from .models import *
 from jsonschema import validate, ValidationError, Draft7Validator, FormatChecker
-from .allele import ALLELE_SCHEMA
+from .schemas import ALLELE_SCHEMA, UPDATE_SCHEMA
 
 
 ##### Allele classes have to be serialized in VarianSerializer #####
@@ -19,21 +19,6 @@ ONTOLOGY_CLASS = {
 	},
 	"required": ["id", "label"]
 
-}
-
-UPDATE_SCHEMA = {
-"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "todo",
-	"title": "Updates schema",
-	"description": "Schema to check incoming updates format",
-	"type": "object",
-	"properties": {
-		"timestamp": {"type": "string", "format": "date-time", "description": "ISO8601 UTC timestamp at which this record was updated"},
-		"updated_by": {"type": "string", "description": "Who updated the phenopacket"},
-		"comment": {"type": "string", "description": "Comment about updates or reasons for an update"}
-	},
-	"required": ["timestamp", "comment"]
-	
 }
 
 
