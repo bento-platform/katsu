@@ -39,6 +39,7 @@ router.register(r'diagnoses', api_views.DiagnosisViewSet)
 router.register(r'interpretations', api_views.InterpretationViewSet)
 router.register(r'projects', api_views.ProjectViewSet)
 router.register(r'datasets', api_views.DatasetViewSet)
+router.register(r'table_ownership', api_views.TableOwnershipViewSet)
 
 
 urlpatterns = [
