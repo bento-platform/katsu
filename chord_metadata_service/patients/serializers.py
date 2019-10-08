@@ -198,13 +198,13 @@ class MetaDataSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 	def validate_updates(self, value):
-		""" 
-		Check updates against schema. 
+		"""
+		Check updates against schema.
 		Timestamp must follow ISO8601 UTC standard
 		e.g. 2018-06-10T10:59:06Z
 
 		"""
-		
+
 		if isinstance(value, list):
 			for item in value:
 				validation = Draft7Validator(
@@ -292,4 +292,10 @@ class DatasetSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Dataset
+		fields = '__all__'
+
+
+class TableOwnershipSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = TableOwnership
 		fields = '__all__'

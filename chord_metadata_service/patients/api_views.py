@@ -280,6 +280,21 @@ class DatasetViewSet(viewsets.ModelViewSet):
 	pagination_class = LargeResultsSetPagination
 
 
+class TableOwnershipViewSet(viewsets.ModelViewSet):
+	"""
+	get:
+	Return a list of table-(dataset|dataset,biosample) relationships
+
+	post:
+	Create a new relationship between a dataset (and optionally a specific biosample) and a table
+	in another service
+	"""
+
+	queryset = TableOwnership.objects.all().order_by("table_id")
+	serializer_class = TableOwnershipSerializer
+	pagination_class = LargeResultsSetPagination
+
+
 @api_view()
 def service_info(request):
 	"""
