@@ -210,17 +210,6 @@ class Resource(models.Model):
 		return str(self.id)
 
 
-class Update(models.Model):
-	""" Class to store data about an update event to a metadata record """
-
-	timestamp = models.DateTimeField(default=timezone.now)
-	updated_by = models.CharField(max_length=200, blank=True)
-	comment = models.TextField()
-
-	def __str__(self):
-		return str(self.id)
-
-
 class ExternalReference(models.Model):
 	""" Class to store information about an external reference """
 
@@ -248,7 +237,8 @@ class MetaData(models.Model):
 	# MUST have one Resource element each for MONDO and HPO.
 	# see example: https://phenopackets-schema.readthedocs.io/en/latest/metadata.html#rstmetadata
 	resources = models.ManyToManyField(Resource)
-	updates = models.ManyToManyField(Update, blank=True)
+	#updates = models.ManyToManyField(Update, blank=True)
+	updates = ArrayField(JSONField(null=True, blank=True), blank=True, null=True)
 	phenopacket_schema_version = models.CharField(max_length=200, blank=True)
 	external_references = models.ManyToManyField(ExternalReference, blank=True)
 

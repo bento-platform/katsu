@@ -127,20 +127,6 @@ class ResourceViewSet(viewsets.ModelViewSet):
 	pagination_class = LargeResultsSetPagination
 
 
-class UpdateViewSet(viewsets.ModelViewSet):
-	"""
-	get:
-	Return a list of all existing updates
-
-	post:
-	Create a new update
-
-	"""
-	queryset = Update.objects.all()
-	serializer_class = UpdateSerializer
-	pagination_class = LargeResultsSetPagination
-
-
 class ExternalReferenceViewSet(viewsets.ModelViewSet):
 	"""
 	get:

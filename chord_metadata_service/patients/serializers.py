@@ -1,7 +1,7 @@
 from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
 from rest_framework import serializers, validators
 from .models import *
-from jsonschema import validate, ValidationError, Draft7Validator
+from jsonschema import validate, ValidationError, Draft7Validator, FormatChecker
 from .allele import ALLELE_SCHEMA
 
 
@@ -19,6 +19,21 @@ ONTOLOGY_CLASS = {
 	},
 	"required": ["id", "label"]
 
+}
+
+UPDATE_SCHEMA = {
+"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "todo",
+	"title": "Updates schema",
+	"description": "Schema to check incoming updates format",
+	"type": "object",
+	"properties": {
+		"timestamp": {"type": "string", "format": "date-time", "description": "ISO8601 UTC timestamp at which this record was updated"},
+		"updated_by": {"type": "string", "description": "Who updated the phenopacket"},
+		"comment": {"type": "string", "description": "Comment about updates or reasons for an update"}
+	},
+	"required": ["timestamp", "comment"]
+	
 }
 
 
@@ -184,13 +199,6 @@ class ResourceSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 
-class UpdateSerializer(serializers.ModelSerializer):
-
-	class Meta:
-		model = Update
-		fields = '__all__'
-
-
 class ExternalReferenceSerializer(serializers.ModelSerializer):
 
 	class Meta:
@@ -203,6 +211,23 @@ class MetaDataSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = MetaData
 		fields = '__all__'
+
+	def validate_updates(self, value):
+		""" 
+		Check updates against schema. 
+		Timestamp must follow ISO8601 UTC standard
+		e.g. 2018-06-10T10:59:06Z
+
+		"""
+		
+		if isinstance(value, list):
+			for item in value:
+				validation = Draft7Validator(
+					UPDATE_SCHEMA, format_checker=FormatChecker(formats=['date-time'])
+					).is_valid(item)
+				if not validation:
+					raise serializers.ValidationError("Update is not valid")
+		return value
 
 
 class IndividualSerializer(serializers.ModelSerializer):
