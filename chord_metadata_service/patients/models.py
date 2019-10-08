@@ -129,7 +129,7 @@ class HtsFile(models.Model):
 	('GVCF', 'GVCF')
 	)
 
-	uri = models.URLField(max_length=200)
+	uri = models.URLField(primary_key=True, max_length=200)
 	description = models.CharField(max_length=200, blank=True)
 	hts_format = models.CharField(choices=HTS_FORMAT, max_length=200)
 	genome_assembly = models.CharField(max_length=200)
@@ -291,7 +291,7 @@ class Individual(models.Model):
 	# )
 
 	#id = models.AutoField(primary_key=True)
-	individual_id = models.CharField(max_length=200)
+	individual_id = models.CharField(primary_key=True, max_length=200)
 	# TODO check for CURIE
 	alternate_ids = ArrayField(models.CharField(max_length=200), blank=True, null=True)
 	date_of_birth = models.DateField(null=True, blank=True)
@@ -314,7 +314,8 @@ class Individual(models.Model):
 class Biosample(models.Model):
 	""" Class to describe a unit of biological material """
 
-	biosample_id = models.CharField(max_length=200)
+	# always unique?
+	biosample_id = models.CharField(primary_key=True, max_length=200)
 	# if Invividual instance is deleted Biosample instance is deleted too
 	# CHECK if this rel must be a required
 	individual_id = models.ForeignKey(Individual, on_delete=models.CASCADE,
@@ -352,7 +353,7 @@ class Biosample(models.Model):
 class Phenopacket(models.Model):
 	""" Class to aggregate Patient's experiments data """
 
-	phenopacket_id = models.CharField(max_length=200)
+	phenopacket_id = models.CharField(primary_key=True, max_length=200)
 	# if Individual instance is deleted Phenopacket instance is deleted too
 	# CHECK !!! Force as required?
 	subject = models.ForeignKey(Individual, on_delete=models.CASCADE)

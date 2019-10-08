@@ -85,7 +85,7 @@ class VariantSerializer(serializers.ModelSerializer):
 		instance.allele = validated_data.get('allele', instance.allele)
 		instance.allele_type = validated_data.get('allele_type', instance.allele_type)
 		instance.save()
-		zygosity_data = validated_data.get('zygosity', None)
+		zygosity_data = validated_data.pop('zygosity', None)
 		if zygosity_data:
 			instance.zygosity, _ = Ontology.objects.get_or_create(**zygosity_data)
 		return instance
