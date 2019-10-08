@@ -58,29 +58,36 @@ class VariantSerializer(serializers.ModelSerializer):
 			raise serializers.ValidationError("Allele is not valid")
 		return value
 
-	# TODO uncomment when update() added
-	# def to_representation(self, obj):
-	# 	""" Change 'allele_type' field name to allele type value. """
+	def to_representation(self, obj):
+		""" Change 'allele_type' field name to allele type value. """
 
-	# 	output = super().to_representation(obj)
-	# 	output[obj.allele_type] = output.pop('allele')
-	# 	return output
+		output = super().to_representation(obj)
+		output[obj.allele_type] = output.pop('allele')
+		return output
+
+	def to_internal_value(self, data):
+		""" When writing back to db change field name back to 'allele'. """
+
+		if not 'allele' in data.keys():
+			allele_type = data.get('allele_type')
+			data['allele'] = data.pop(allele_type)
+		return data
 
 	def create(self, validated_data):
-		zygosity_data = validated_data.pop('zygosity')
-		ontology_model, _ = Ontology.objects.get_or_create(**zygosity_data)
-		variant = Variant.objects.create(zygosity=ontology_model, **validated_data)
+		if 'zygosity' in validated_data.keys():
+			zygosity_data = validated_data.pop('zygosity')
+			ontology_model, _ = Ontology.objects.get_or_create(**zygosity_data)
+			variant = Variant.objects.create(zygosity=ontology_model, **validated_data)
+		variant = Variant.objects.create(**validated_data)
 		return variant
 
 	def update(self, instance, validated_data):
-		# TODO fix buf This field may not be blank on zygosity field
 		instance.allele = validated_data.get('allele', instance.allele)
 		instance.allele_type = validated_data.get('allele_type', instance.allele_type)
 		instance.save()
-		zygosity_data = validated_data.pop('zygosity', None)
+		zygosity_data = validated_data.get('zygosity', None)
 		if zygosity_data:
 			instance.zygosity, _ = Ontology.objects.get_or_create(**zygosity_data)
-
 		return instance
 
 
