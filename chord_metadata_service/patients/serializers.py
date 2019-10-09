@@ -93,7 +93,7 @@ class VariantSerializer(serializers.ModelSerializer):
 
 
 class PhenotypicFeatureSerializer(serializers.ModelSerializer):
-	#phenotype = JSONField(validators=[ontology_validator])
+	# TODO _type to type
 	_type = OntologySerializer()
 	severity = OntologySerializer(required=False, allow_null=True)
 	modifier = OntologySerializer(required=False, allow_null=True, many=True)
@@ -102,8 +102,6 @@ class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = PhenotypicFeature
 		fields = '__all__'
-		# exclude = ['_type']
-		#extra_kwargs = {'phenotype': {'required': True}}
 
 	def create(self, validated_data):
 		modifiers = []
