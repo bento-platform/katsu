@@ -93,38 +93,41 @@ class VariantSerializer(serializers.ModelSerializer):
 
 class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 	#phenotype = JSONField(validators=[ontology_validator])
-	type = OntologySerializer(source='_type')
-	severity = OntologySerializer()
-	modifier = OntologySerializer(required=False, many=True)
-	onset = OntologySerializer()
+	_type = OntologySerializer()
+	severity = OntologySerializer(required=False, allow_null=True)
+	modifier = OntologySerializer(required=False, allow_null=True, many=True)
+	onset = OntologySerializer(required=False, allow_null=True)
 
 	class Meta:
 		model = PhenotypicFeature
-		exclude = ['_type']
+		fields = '__all__'
+		# exclude = ['_type']
 		#extra_kwargs = {'phenotype': {'required': True}}
 
 	def create(self, validated_data):
-		type_data = validated_data.pop('_type')
-		severity = validated_data.pop('severity')
-		onset = validated_data.pop('onset')
-		# M2M field
-		modifier = validated_data.pop('modifier', [])
-		# TODO refactor
-		type_ontology, _ = Ontology.objects.get_or_create(**type_data)
-		severity_ontology, _ = Ontology.objects.get_or_create(**severity)
-		onset_ntology, _ = Ontology.objects.get_or_create(**onset)
+		modifiers = []
+		if 'modifier' in validated_data.keys():
+			modifier = validated_data.pop('modifier', None)
+			if isinstance(modifier, list):
+				for mod in modifier:
+					modifier_ontology, _ = Ontology.objects.get_or_create(**mod)
+					modifiers.append(modifier_ontology)
+		all_ontologies = {}
+		ontology_fields = ['_type', 'severity', 'onset']
+		for field in ontology_fields:
+			field_data = validated_data.pop(field, None)
+			if field_data:
+				field_ontology, _ = Ontology.objects.get_or_create(**field_data)
+				all_ontologies[field] = field_ontology
 
-		phenotypic_feature = PhenotypicFeature.objects.create(
-			 _type=type_ontology,
-			severity=severity_ontology, onset=onset_ntology,
+		phenotypic_feature = PhenotypicFeature.objects.create(_type=all_ontologies.get('_type', None),
+			severity=all_ontologies.get('severity', None), onset=all_ontologies.get('onset', None),
 			**validated_data
 			)
-		# for M2M
-		for mod in modifier:
-			modifier_ontology, _ = Ontology.objects.get_or_create(**mod)
-			phenotypic_feature.modifier.add(modifier_ontology)
-
+		# add ManyToMany related objects
+		phenotypic_feature.modifier.add(*set(modifiers))
 		return phenotypic_feature
+		
 
 	# def validate(self, data):
 	# 	""" Validate all OntologyClass JSONFields against OntologyClass schema """
