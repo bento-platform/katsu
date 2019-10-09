@@ -130,7 +130,6 @@ class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 		return phenotypic_feature
 
 	def update(self, instance, validated_data):
-		print("VALIDATED DATA {}".format(validated_data))
 		instance.description = validated_data.get('description', instance.description)
 		instance.negated = validated_data.get('negated', instance.negated)
 		instance.evidence = validated_data.get('evidence', instance.evidence)
