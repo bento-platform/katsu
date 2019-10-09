@@ -88,6 +88,7 @@ class VariantSerializer(serializers.ModelSerializer):
 		zygosity_data = validated_data.pop('zygosity', None)
 		if zygosity_data:
 			instance.zygosity, _ = Ontology.objects.get_or_create(**zygosity_data)
+			# TODO Save instance?
 		return instance
 
 
@@ -127,7 +128,32 @@ class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 		# add ManyToMany related objects
 		phenotypic_feature.modifier.add(*set(modifiers))
 		return phenotypic_feature
-		
+
+	def update(self, instance, validated_data):
+		print("VALIDATED DATA {}".format(validated_data))
+		instance.description = validated_data.get('description', instance.description)
+		instance.negated = validated_data.get('negated', instance.negated)
+		instance.evidence = validated_data.get('evidence', instance.evidence)
+		instance.save()
+		ontology_fields = ['_type', 'severity', 'onset']
+		# TODO if field was removed entirely, clean this field in db too
+		for field in ontology_fields:
+			if field in validated_data.keys():
+				field_data = validated_data.pop(field, None)
+				# if field_data:
+				instance.field, _ = Ontology.objects.get_or_create(**field_data)
+				instance.save()
+		modifiers = []
+		if 'modifier' in validated_data.keys():
+			modifier = validated_data.pop('modifier', None)
+			for mod in modifier:
+				modifier_ontology, _ = Ontology.objects.get_or_create(**mod)
+				modifiers.append(modifier_ontology)
+		instance.modifier.clear()
+		instance.modifier.add(*set(modifiers))
+		instance.save()
+		return instance
+
 
 	# def validate(self, data):
 	# 	""" Validate all OntologyClass JSONFields against OntologyClass schema """
