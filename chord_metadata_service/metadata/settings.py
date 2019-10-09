@@ -92,9 +92,9 @@ DATABASES = {
         'USER': os.environ.get("POSTGRES_USER", 'admin'),
         'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'admin'),
 
-        # Use sockets if we're inside a CHORD container
-        'HOST': "" if os.environ.get("CHORD_DEBUG", None) is not None else 'localhost',
-        'PORT': "" if os.environ.get("CHORD_DEBUG", None) is not None else '5432',
+        # Use sockets if we're inside a CHORD container / as a priority
+        'HOST': os.environ.get("POSTGRES_SOCKET_DIR", os.environ.get("POSTGRES_HOST", "localhost")),
+        'PORT': os.environ.get("POSTGRES_PORT", "5432"),
     }
 }
 
