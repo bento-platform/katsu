@@ -96,6 +96,7 @@ class PhenotypicFeature(models.Model):
 		related_name='modifiers')
 	onset = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
 		null=True, blank=True, related_name='onsets')
+	# TODO Evidence as a separate class
 	evidence = JSONField(blank=True, null=True)
 
 	def __str__(self):
@@ -354,6 +355,7 @@ class Phenopacket(models.Model):
 	variants = models.ManyToManyField(Variant, blank=True)
 	diseases = models.ManyToManyField(Disease, blank=True)
 	hts_files = models.ManyToManyField(HtsFile, blank=True)
+	# TODO OneToOneField
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE)
 
 	dataset = models.ForeignKey("Dataset", on_delete=models.CASCADE, blank=True, null=True)
