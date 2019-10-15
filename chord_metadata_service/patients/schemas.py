@@ -1,3 +1,5 @@
+# Individual schemas for validation of JSONField values
+
 ALLELE_SCHEMA = {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"$id": "todo",
@@ -43,4 +45,20 @@ ALLELE_SCHEMA = {
 	"seq_id": ["position", "deleted_sequence", "inserted_sequence"]
 
 	}
+}
+
+
+UPDATE_SCHEMA = {
+"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "todo",
+	"title": "Updates schema",
+	"description": "Schema to check incoming updates format",
+	"type": "object",
+	"properties": {
+		"timestamp": {"type": "string", "format": "date-time", "description": "ISO8601 UTC timestamp at which this record was updated"},
+		"updated_by": {"type": "string", "description": "Who updated the phenopacket"},
+		"comment": {"type": "string", "description": "Comment about updates or reasons for an update"}
+	},
+	"required": ["timestamp", "comment"]
+	
 }

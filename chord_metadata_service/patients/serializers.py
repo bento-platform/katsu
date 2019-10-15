@@ -1,7 +1,8 @@
+from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
 from rest_framework import serializers, validators
 from .models import *
-from jsonschema import validate, ValidationError, Draft7Validator
-from .allele import ALLELE_SCHEMA
+from jsonschema import validate, ValidationError, Draft7Validator, FormatChecker
+from .schemas import ALLELE_SCHEMA, UPDATE_SCHEMA
 
 
 ##### Allele classes have to be serialized in VarianSerializer #####
@@ -17,7 +18,7 @@ ONTOLOGY_CLASS = {
 		"label": {"type": "string", "description": "Human-readable class name"}
 	},
 	"required": ["id", "label"]
-	
+
 }
 
 
@@ -57,66 +58,99 @@ class VariantSerializer(serializers.ModelSerializer):
 			raise serializers.ValidationError("Allele is not valid")
 		return value
 
-	# TODO uncomment when update() added
-	# def to_representation(self, obj):
-	# 	""" Change 'allele_type' field name to allele type value. """
+	def to_representation(self, obj):
+		""" Change 'allele_type' field name to allele type value. """
 
-	# 	output = super().to_representation(obj)
-	# 	output[obj.allele_type] = output.pop('allele')
-	# 	return output
+		output = super().to_representation(obj)
+		output[obj.allele_type] = output.pop('allele')
+		return output
+
+	def to_internal_value(self, data):
+		""" When writing back to db change field name back to 'allele'. """
+
+		if not 'allele' in data.keys():
+			allele_type = data.get('allele_type')
+			data['allele'] = data.pop(allele_type)
+		return data
 
 	def create(self, validated_data):
-		zygosity_data = validated_data.pop('zygosity')
-		ontology_model, _ = Ontology.objects.get_or_create(**zygosity_data)
-		variant = Variant.objects.create(zygosity=ontology_model, **validated_data)
+		if 'zygosity' in validated_data.keys():
+			zygosity_data = validated_data.pop('zygosity')
+			ontology_model, _ = Ontology.objects.get_or_create(**zygosity_data)
+			variant = Variant.objects.create(zygosity=ontology_model, **validated_data)
+		variant = Variant.objects.create(**validated_data)
 		return variant
 
 	def update(self, instance, validated_data):
-		# TODO fix buf This field may not be blank on zygosity field
 		instance.allele = validated_data.get('allele', instance.allele)
 		instance.allele_type = validated_data.get('allele_type', instance.allele_type)
 		instance.save()
 		zygosity_data = validated_data.pop('zygosity', None)
 		if zygosity_data:
 			instance.zygosity, _ = Ontology.objects.get_or_create(**zygosity_data)
-
+			# TODO Save instance?
 		return instance
 
 
 class PhenotypicFeatureSerializer(serializers.ModelSerializer):
-	#phenotype = JSONField(validators=[ontology_validator])
-	type = OntologySerializer(source='_type')
-	severity = OntologySerializer()
-	modifier = OntologySerializer(required=False, many=True)
-	onset = OntologySerializer()
+	# TODO _type to type
+	_type = OntologySerializer()
+	severity = OntologySerializer(required=False, allow_null=True)
+	modifier = OntologySerializer(required=False, allow_null=True, many=True)
+	onset = OntologySerializer(required=False, allow_null=True)
 
 	class Meta:
 		model = PhenotypicFeature
-		exclude = ['_type']
-		#extra_kwargs = {'phenotype': {'required': True}}
+		fields = '__all__'
 
 	def create(self, validated_data):
-		type_data = validated_data.pop('_type')
-		severity = validated_data.pop('severity')
-		onset = validated_data.pop('onset')
-		# M2M field
-		modifier = validated_data.pop('modifier', [])
-		# TODO refactor
-		type_ontology, _ = Ontology.objects.get_or_create(**type_data)
-		severity_ontology, _ = Ontology.objects.get_or_create(**severity)
-		onset_ntology, _ = Ontology.objects.get_or_create(**onset)
+		modifiers = []
+		if 'modifier' in validated_data.keys():
+			modifier = validated_data.pop('modifier', None)
+			if isinstance(modifier, list):
+				for mod in modifier:
+					modifier_ontology, _ = Ontology.objects.get_or_create(**mod)
+					modifiers.append(modifier_ontology)
+		all_ontologies = {}
+		ontology_fields = ['_type', 'severity', 'onset']
+		for field in ontology_fields:
+			field_data = validated_data.pop(field, None)
+			if field_data:
+				field_ontology, _ = Ontology.objects.get_or_create(**field_data)
+				all_ontologies[field] = field_ontology
 
-		phenotypic_feature = PhenotypicFeature.objects.create(
-			 _type=type_ontology,
-			severity=severity_ontology, onset=onset_ntology,
+		phenotypic_feature = PhenotypicFeature.objects.create(_type=all_ontologies.get('_type', None),
+			severity=all_ontologies.get('severity', None), onset=all_ontologies.get('onset', None),
 			**validated_data
 			)
-		# for M2M
-		for mod in modifier:
-			modifier_ontology, _ = Ontology.objects.get_or_create(**mod)
-			phenotypic_feature.modifier.add(modifier_ontology)
-
+		# add ManyToMany related objects
+		phenotypic_feature.modifier.add(*set(modifiers))
 		return phenotypic_feature
+
+	def update(self, instance, validated_data):
+		instance.description = validated_data.get('description', instance.description)
+		instance.negated = validated_data.get('negated', instance.negated)
+		instance.evidence = validated_data.get('evidence', instance.evidence)
+		instance.save()
+		ontology_fields = ['_type', 'severity', 'onset']
+		# TODO if field was removed entirely, clean this field in db too
+		for field in ontology_fields:
+			if field in validated_data.keys():
+				field_data = validated_data.pop(field, None)
+				# if field_data:
+				instance.field, _ = Ontology.objects.get_or_create(**field_data)
+				instance.save()
+		modifiers = []
+		if 'modifier' in validated_data.keys():
+			modifier = validated_data.pop('modifier', None)
+			for mod in modifier:
+				modifier_ontology, _ = Ontology.objects.get_or_create(**mod)
+				modifiers.append(modifier_ontology)
+		instance.modifier.clear()
+		instance.modifier.add(*set(modifiers))
+		instance.save()
+		return instance
+
 
 	# def validate(self, data):
 	# 	""" Validate all OntologyClass JSONFields against OntologyClass schema """
@@ -176,13 +210,6 @@ class ResourceSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 
-class UpdateSerializer(serializers.ModelSerializer):
-
-	class Meta:
-		model = Update
-		fields = '__all__'
-
-
 class ExternalReferenceSerializer(serializers.ModelSerializer):
 
 	class Meta:
@@ -195,6 +222,23 @@ class MetaDataSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = MetaData
 		fields = '__all__'
+
+	def validate_updates(self, value):
+		"""
+		Check updates against schema.
+		Timestamp must follow ISO8601 UTC standard
+		e.g. 2018-06-10T10:59:06Z
+
+		"""
+
+		if isinstance(value, list):
+			for item in value:
+				validation = Draft7Validator(
+					UPDATE_SCHEMA, format_checker=FormatChecker(formats=['date-time'])
+					).is_valid(item)
+				if not validation:
+					raise serializers.ValidationError("Update is not valid")
+		return value
 
 
 class IndividualSerializer(serializers.ModelSerializer):
@@ -243,4 +287,41 @@ class InterpretationSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Interpretation
+		fields = '__all__'
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+	# noinspection PyMethodMayBeStatic
+	def validate_data_use(self, value):
+		validation = Draft7Validator(CHORD_DATA_USE_SCHEMA).is_valid(value)
+		if not validation:
+			raise serializers.ValidationError("Data use is not valid")
+		return value
+
+	# noinspection PyMethodMayBeStatic
+	def validate_name(self, value):
+		if len(value.strip()) < 3:
+			raise serializers.ValidationError("Name must be at least 3 characters")
+		return value.strip()
+
+	class Meta:
+		model = Project
+		fields = '__all__'
+
+
+class DatasetSerializer(serializers.ModelSerializer):
+	# noinspection PyMethodMayBeStatic
+	def validate_name(self, value):
+		if len(value.strip()) < 3:
+			raise serializers.ValidationError("Name must be at least 3 characters")
+		return value.strip()
+
+	class Meta:
+		model = Dataset
+		fields = '__all__'
+
+
+class TableOwnershipSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = TableOwnership
 		fields = '__all__'

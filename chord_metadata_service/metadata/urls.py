@@ -29,7 +29,6 @@ router.register(r'htsfiles', api_views.HtsFileViewSet)
 router.register(r'genes', api_views.GeneViewSet)
 router.register(r'diseases', api_views.DiseaseViewSet)
 router.register(r'resources', api_views.ResourceViewSet)
-router.register(r'updates', api_views.UpdateViewSet)
 router.register(r'externalreferences', api_views.ExternalReferenceViewSet)
 router.register(r'metadata', api_views.MetaDataViewSet)
 router.register(r'individuals', api_views.IndividualViewSet)
@@ -38,6 +37,9 @@ router.register(r'phenopackets', api_views.PhenopacketViewSet)
 router.register(r'genomicinterpretations', api_views.GenomicInterpretationViewSet)
 router.register(r'diagnoses', api_views.DiagnosisViewSet)
 router.register(r'interpretations', api_views.InterpretationViewSet)
+router.register(r'projects', api_views.ProjectViewSet)
+router.register(r'datasets', api_views.DatasetViewSet)
+router.register(r'table_ownership', api_views.TableOwnershipViewSet)
 
 
 urlpatterns = [

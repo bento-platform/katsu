@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -89,11 +91,12 @@ class PhenotypicFeature(models.Model):
 	negated = models.BooleanField(default=False)
 	# since severity is an optional, set value to null when Ontology deleted
 	severity = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
-		null=True, related_name='severities')
+		null=True, blank=True, related_name='severities')
 	modifier = models.ManyToManyField(Ontology, blank=True,
 		related_name='modifiers')
 	onset = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
-		null=True, related_name='onsets')
+		null=True, blank=True, related_name='onsets')
+	# TODO Evidence as a separate class
 	evidence = JSONField(blank=True, null=True)
 
 	def __str__(self):
@@ -127,7 +130,7 @@ class HtsFile(models.Model):
 	('GVCF', 'GVCF')
 	)
 
-	uri = models.URLField(max_length=200)
+	uri = models.URLField(primary_key=True, max_length=200)
 	description = models.CharField(max_length=200, blank=True)
 	hts_format = models.CharField(choices=HTS_FORMAT, max_length=200)
 	genome_assembly = models.CharField(max_length=200)
@@ -208,17 +211,6 @@ class Resource(models.Model):
 		return str(self.id)
 
 
-class Update(models.Model):
-	""" Class to store data about an update event to a metadata record """
-
-	timestamp = models.DateTimeField(default=timezone.now)
-	updated_by = models.CharField(max_length=200, blank=True)
-	comment = models.TextField()
-
-	def __str__(self):
-		return str(self.id)
-
-
 class ExternalReference(models.Model):
 	""" Class to store information about an external reference """
 
@@ -246,7 +238,8 @@ class MetaData(models.Model):
 	# MUST have one Resource element each for MONDO and HPO.
 	# see example: https://phenopackets-schema.readthedocs.io/en/latest/metadata.html#rstmetadata
 	resources = models.ManyToManyField(Resource)
-	updates = models.ManyToManyField(Update, blank=True)
+	#updates = models.ManyToManyField(Update, blank=True)
+	updates = ArrayField(JSONField(null=True, blank=True), blank=True, null=True)
 	phenopacket_schema_version = models.CharField(max_length=200, blank=True)
 	external_references = models.ManyToManyField(ExternalReference, blank=True)
 
@@ -289,7 +282,7 @@ class Individual(models.Model):
 	# )
 
 	#id = models.AutoField(primary_key=True)
-	individual_id = models.CharField(max_length=200)
+	individual_id = models.CharField(primary_key=True, max_length=200)
 	# TODO check for CURIE
 	alternate_ids = ArrayField(models.CharField(max_length=200), blank=True, null=True)
 	date_of_birth = models.DateField(null=True, blank=True)
@@ -312,7 +305,8 @@ class Individual(models.Model):
 class Biosample(models.Model):
 	""" Class to describe a unit of biological material """
 
-	biosample_id = models.CharField(max_length=200)
+	# always unique?
+	biosample_id = models.CharField(primary_key=True, max_length=200)
 	# if Invividual instance is deleted Biosample instance is deleted too
 	# CHECK if this rel must be a required
 	individual_id = models.ForeignKey(Individual, on_delete=models.CASCADE,
@@ -350,7 +344,7 @@ class Biosample(models.Model):
 class Phenopacket(models.Model):
 	""" Class to aggregate Patient's experiments data """
 
-	phenopacket_id = models.CharField(max_length=200)
+	phenopacket_id = models.CharField(primary_key=True, max_length=200)
 	# if Individual instance is deleted Phenopacket instance is deleted too
 	# CHECK !!! Force as required?
 	subject = models.ForeignKey(Individual, on_delete=models.CASCADE)
@@ -361,8 +355,11 @@ class Phenopacket(models.Model):
 	variants = models.ManyToManyField(Variant, blank=True)
 	diseases = models.ManyToManyField(Disease, blank=True)
 	hts_files = models.ManyToManyField(HtsFile, blank=True)
+	# TODO OneToOneField
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE)
-	
+
+	dataset = models.ForeignKey("Dataset", on_delete=models.CASCADE, blank=True, null=True)
+
 	def __str__(self):
 		return str(self.id)
 
@@ -413,7 +410,7 @@ class Diagnosis(models.Model):
 
 
 class Interpretation(models.Model):
-	""" Class to represent the interpretation of a genomyc analysis """
+	""" Class to represent the interpretation of a genomic analysis """
 
 	RESOLUTION_STATUS = (
 		('UNKNOWN', 'UNKNOWN'),
@@ -427,9 +424,70 @@ class Interpretation(models.Model):
 	# In Phenopackets schema this field is 'phenopacket_or_family'
 	phenopacket = models.ForeignKey(Phenopacket, on_delete=models.CASCADE)
 	# fetch disease via from phenopacket
-	# diagnosis on one disease ? there can be many disease assosiated with phenopacket
+	# diagnosis on one disease ? there can be many disease associated with phenopacket
 	diagnosis = models.ManyToManyField(Diagnosis)
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE)
 
 	def __str__(self):
 		return str(self.id)
+
+
+#############################################################
+#                                                           #
+#                   Project Management                      #
+#                                                           #
+#############################################################
+
+class Project(models.Model):
+	"""
+	Class to represent a Project, which contains multiple
+	Datasets which are each a group of Phenopackets.
+	"""
+
+	project_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	name = models.CharField(max_length=200, unique=True)
+	description = models.TextField(blank=True)
+	data_use = JSONField()
+
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return f"{self.name} (ID: {self.project_id})"
+
+
+class Dataset(models.Model):
+	"""
+	Class to represent a Dataset, which contains multiple Phenopackets.
+	"""
+
+	dataset_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	name = models.CharField(max_length=200, unique=True)
+	description = models.TextField(blank=True)
+
+	project = models.ForeignKey(Project, on_delete=models.CASCADE)  # Delete dataset upon project deletion
+
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return f"{self.name} (ID: {self.dataset_id})"
+
+
+class TableOwnership(models.Model):
+	"""
+	Class to represent a Table, which are organizationally part of a Dataset and can optionally be
+	attached to a Phenopacket (and possibly a Biosample).
+	"""
+
+	table_id = models.UUIDField(primary_key=True)
+	service_id = models.UUIDField()
+	data_type = models.CharField(max_length=200)  # TODO: Is this needed?
+
+	# Delete table ownership upon project/dataset deletion
+	dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+	# If not specified, compound table which may link to many samples TODO: ???
+	sample = models.ForeignKey(Biosample, on_delete=models.CASCADE, blank=True, null=True)
+
+	def __str__(self):
+		return f"{self.dataset if not self.sample else self.sample} -> {self.table_id}"
