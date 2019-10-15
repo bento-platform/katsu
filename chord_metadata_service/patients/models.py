@@ -338,7 +338,7 @@ class Biosample(models.Model):
 	is_control_sample = models.BooleanField(default=False)
 
 	def __str__(self):
-		return str(self.id)
+		return str(self.biosample_id)
 
 
 class Phenopacket(models.Model):
@@ -361,7 +361,7 @@ class Phenopacket(models.Model):
 	dataset = models.ForeignKey("Dataset", on_delete=models.CASCADE, blank=True, null=True)
 
 	def __str__(self):
-		return str(self.id)
+		return str(self.phenopacket_id)
 
 
 #############################################################
