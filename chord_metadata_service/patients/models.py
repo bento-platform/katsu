@@ -179,8 +179,7 @@ class Disease(models.Model):
   	# }
 	age_of_onset_ontology = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
 		null=True, related_name='age_of_onset_ontologies')
-	tumor_stage = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
-		null=True, related_name='tumor_stages')
+	tumor_stage = models.ManyToManyField(Ontology, blank=True)
 
 	def __str__(self):
 		return self.id
@@ -309,7 +308,7 @@ class Biosample(models.Model):
 	biosample_id = models.CharField(primary_key=True, max_length=200)
 	# if Invividual instance is deleted Biosample instance is deleted too
 	# CHECK if this rel must be a required
-	individual_id = models.ForeignKey(Individual, on_delete=models.CASCADE,
+	individual = models.ForeignKey(Individual, on_delete=models.CASCADE,
 		blank=True, null=True)
 	description = models.CharField(max_length=200, blank=True)
 	sampled_tissue = models.ForeignKey(Ontology, on_delete=models.PROTECT,
