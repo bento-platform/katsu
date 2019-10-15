@@ -299,7 +299,7 @@ class Individual(models.Model):
 	# deceased = models.BooleanField()
 
 	def __str__(self):
-		return str(self.id)
+		return str(self.individual_id)
 
 
 class Biosample(models.Model):
