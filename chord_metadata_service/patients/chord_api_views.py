@@ -205,8 +205,7 @@ def ingest(request):
             subject, _ = Individual.objects.get_or_create(
                 individual_id=subject["id"],
                 alternate_ids=subject.get("alternate_ids", None),
-                date_of_birth=(isoparse(subject["date_of_birth"])
-                               if "date_of_birth" in subject else None),
+                date_of_birth=isoparse(subject["date_of_birth"]) if "date_of_birth" in subject else None,
                 age=subject.get("age", ""),  # TODO: Shouldn't this be nullable, since it's recommended in the spec?
                 sex=subject.get("sex", None),
                 karyotypic_sex=subject.get("karyotypic_sex", None),
@@ -218,11 +217,10 @@ def ingest(request):
         biosamples_db = []
         for bs in biosamples:
             # TODO: This should probably be a JSON field, or compound key with code/body_site
-            procedure = Procedure(
+            procedure, _ = Procedure.objects.get_or_create(
                 code=get_db_ontology(bs["procedure"]["code"]),
                 body_site=get_db_ontology_or_none(bs["procedure"].get("body_site", None))
             )
-            procedure.save()
 
             bs_pfs = [create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
 
