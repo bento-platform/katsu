@@ -100,8 +100,12 @@ def aggregate_phenotypic_feature_terms(s, pfs):
         add_ontology_tuple(s, pf.get("onset", None))
 
 
+def get_db_ontology(v):
+    return Ontology.objects.get(ontology_id=v["id"])
+
+
 def get_db_ontology_or_none(v):
-    return Ontology.objects.get(ontology_id=v["id"]) if v is not None else None
+    return get_db_ontology(v) if v is not None else None
 
 
 def create_phenotypic_feature(pf):
@@ -215,14 +219,14 @@ def ingest(request):
         for bs in biosamples:
             # TODO: This should probably be a JSON field, or compound key with code/body_site
             procedure = Procedure(
-                code=get_db_ontology_or_none(bs["procedure"]["code"]),
+                code=get_db_ontology(bs["procedure"]["code"]),
                 body_site=get_db_ontology_or_none(bs["procedure"].get("body_site", None))
             )
             procedure.save()
 
             bs_pfs = [create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
 
-            diagnostic_markers = [get_db_ontology_or_none(dm) for dm in bs.get("diagnostic_markers", [])]
+            diagnostic_markers = [get_db_ontology(dm) for dm in bs.get("diagnostic_markers", [])]
 
             bs_obj, _ = Biosample.objects.get_or_create(
                 biosample_id=bs["id"],
