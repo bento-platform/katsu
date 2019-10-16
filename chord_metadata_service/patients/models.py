@@ -371,7 +371,7 @@ class Phenopacket(models.Model):
 
 class GenomicInterpretation(models.Model):
 	"""
-	Class to represent a statemenet about the contribution
+	Class to represent a statement about the contribution
 	of a genomic element towards the observed phenotype
 	"""
 
