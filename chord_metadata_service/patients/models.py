@@ -1,7 +1,6 @@
 import uuid
 
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
@@ -15,11 +14,11 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 
 
 class Ontology(models.Model):
-	""" Class to reperesent terms from ontologies
+	""" Class to represent terms from ontologies
 	e.g.
 	{
-	  "id": "HP:0001875",
-	  "label": "Neutropenia"
+		"id": "HP:0001875",
+		"label": "Neutropenia"
 	}
 	"""
 
@@ -46,10 +45,10 @@ class Variant(models.Model):
 	""" Class to describe candidate (individual ???) variants or diagnosed causative variants """
 	# TODO
 	ALLELE = (
-	('hgvsAllele', 'hgvsAllele'),
-	('vcfAllele', 'vcfAllele'),
-	('spdiAllele', 'spdiAllele'),
-	('iscnAllele', 'iscnAllele')
+		('hgvsAllele', 'hgvsAllele'),
+		('vcfAllele', 'vcfAllele'),
+		('spdiAllele', 'spdiAllele'),
+		('iscnAllele', 'iscnAllele')
 	)
 
 	# {
@@ -121,13 +120,13 @@ class Procedure(models.Model):
 class HtsFile(models.Model):
 	""" Class to link HTC files with data """
 	HTS_FORMAT = (
-	('UNKNOWN', 'UNKNOWN'),
-	('SAM', 'SAM'),
-	('BAM', 'BAM'),
-	('CRAM', 'CRAM'),
-	('VCF', 'VCF'),
-	('BCF', 'BCF'),
-	('GVCF', 'GVCF')
+		('UNKNOWN', 'UNKNOWN'),
+		('SAM', 'SAM'),
+		('BAM', 'BAM'),
+		('CRAM', 'CRAM'),
+		('VCF', 'VCF'),
+		('BCF', 'BCF'),
+		('GVCF', 'GVCF')
 	)
 
 	uri = models.URLField(primary_key=True, max_length=200)
@@ -170,13 +169,13 @@ class Disease(models.Model):
 	# TODO think how to serialize it
 
 	# "ageOfOnset": {
-  	# "age": "P38Y7M"
-  	# }
+	# "age": "P38Y7M"
+	# }
 	age_of_onset = JSONField(blank=True, null=True)
 	# "ageOfOnset": {
-  	# "id": "HP:0003581",
-  	# "label": "Adult onset"
-  	# }
+	# "id": "HP:0003581",
+	# "label": "Adult onset"
+	# }
 	age_of_onset_ontology = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
 		null=True, related_name='age_of_onset_ontologies')
 	tumor_stage = models.ManyToManyField(Ontology, blank=True)
@@ -232,12 +231,12 @@ class MetaData(models.Model):
 	submitted_by = models.CharField(max_length=200, blank=True)
 	# From specs:
 	# The MetaData element MUST have one Resource element for each ontology or terminology whose
-	# terms are used in the Phenopacket. For instance, if a MONDO term is used to specificy the disease
-	# and HPO terms are used to specificy the phenotypes of a patient, then the MetaData element
+	# terms are used in the Phenopacket. For instance, if a MONDO term is used to specify the disease
+	# and HPO terms are used to specify the phenotypes of a patient, then the MetaData element
 	# MUST have one Resource element each for MONDO and HPO.
 	# see example: https://phenopackets-schema.readthedocs.io/en/latest/metadata.html#rstmetadata
 	resources = models.ManyToManyField(Resource)
-	#updates = models.ManyToManyField(Update, blank=True)
+	# updates = models.ManyToManyField(Update, blank=True)
 	updates = ArrayField(JSONField(null=True, blank=True), blank=True, null=True)
 	phenopacket_schema_version = models.CharField(max_length=200, blank=True)
 	external_references = models.ManyToManyField(ExternalReference, blank=True)
@@ -253,24 +252,24 @@ class Individual(models.Model):
 	""" Class to store sensitive information about Patient"""
 
 	SEX = (
-	('UNKNOWN_SEX', 'UNKNOWN_SEX'),
-	('FEMALE', 'FEMALE'),
-	('MALE', 'MALE'),
-	('OTHER_SEX', 'OTHER_SEX')
+		('UNKNOWN_SEX', 'UNKNOWN_SEX'),
+		('FEMALE', 'FEMALE'),
+		('MALE', 'MALE'),
+		('OTHER_SEX', 'OTHER_SEX')
 	)
 
 	KARYOTYPIC_SEX = (
-	('UNKNOWN_KARYOTYPE', 'UNKNOWN_KARYOTYPE'),
-	('XX', 'XX'),
-	('XY', 'XY'),
-	('XO', 'XO'),
-	('XXY', 'XXY'),
-	('XXX', 'XXX'),
-	('XXYY', 'XXYY'),
-	('XXXY', 'XXXY'),
-	('XXXX', 'XXXX'),
-	('XYY', 'XYY'),
-	('OTHER_KARYOTYPE', 'OTHER_KARYOTYPE'),
+		('UNKNOWN_KARYOTYPE', 'UNKNOWN_KARYOTYPE'),
+		('XX', 'XX'),
+		('XY', 'XY'),
+		('XO', 'XO'),
+		('XXY', 'XXY'),
+		('XXX', 'XXX'),
+		('XXYY', 'XXYY'),
+		('XXXY', 'XXXY'),
+		('XXXX', 'XXXX'),
+		('XYY', 'XYY'),
+		('OTHER_KARYOTYPE', 'OTHER_KARYOTYPE'),
 	)
 
 	# GENDER = (
@@ -280,7 +279,7 @@ class Individual(models.Model):
 	# ('UNKNOWN', 'UNKNOWN')
 	# )
 
-	#id = models.AutoField(primary_key=True)
+	# id = models.AutoField(primary_key=True)
 	individual_id = models.CharField(primary_key=True, max_length=200)
 	# TODO check for CURIE
 	alternate_ids = ArrayField(models.CharField(max_length=200), blank=True, null=True)
@@ -306,7 +305,7 @@ class Biosample(models.Model):
 
 	# always unique?
 	biosample_id = models.CharField(primary_key=True, max_length=200)
-	# if Invividual instance is deleted Biosample instance is deleted too
+	# if Individual instance is deleted Biosample instance is deleted too
 	# CHECK if this rel must be a required
 	individual = models.ForeignKey(Individual, on_delete=models.CASCADE,
 		blank=True, null=True)
@@ -388,7 +387,6 @@ class GenomicInterpretation(models.Model):
 	variant = models.ForeignKey(Variant, on_delete=models.CASCADE,
 		blank=True, null=True)
 
-
 	def clean(self):
 		if not (self.gene or self.variant):
 			raise ValidationError('Either Gene or Variant must be specified')
@@ -416,7 +414,7 @@ class Interpretation(models.Model):
 		('SOLVED', 'SOLVED'),
 		('UNSOLVED', 'UNSOLVED'),
 		('IN_PROGRESS', 'IN_PROGRESS')
-		)
+	)
 
 	interpretation_id = models.CharField(max_length=200)
 	resolution_status = models.CharField(choices=RESOLUTION_STATUS, max_length=200, blank=True)
