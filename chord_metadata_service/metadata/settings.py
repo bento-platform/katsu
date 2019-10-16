@@ -27,6 +27,8 @@ DEBUG = os.environ.get("CHORD_DEBUG", "true").lower() == "true"
 
 ALLOWED_HOSTS = [os.environ.get("SERVICE_HOST", "localhost")] if not DEBUG else []
 
+APPEND_SLASH = False
+
 
 # Application definition
 
@@ -103,6 +105,7 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 10,
     # 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+    'DEFAULT_AUTHENTICATION_CLASSES': []  # TODO
 }
 
 # Password validation

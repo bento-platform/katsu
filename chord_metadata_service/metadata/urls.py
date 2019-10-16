@@ -49,16 +49,16 @@ urlpatterns = [
     path('', get_schema_view(title="Metadata Service API"),
         name='openapi-schema'),
 
-    path('service-info/', api_views.service_info),
+    path('service-info', api_views.service_info),
 
-    path('workflows/', chord_ingest_views.workflow_list),
+    path('workflows', chord_ingest_views.workflow_list),
     path('workflows/<slug:workflow_id>', chord_ingest_views.workflow_item),
     path('workflows/<slug:workflow_id>.wdl', chord_ingest_views.workflow_file),
 
-    path('ingest/', chord_ingest_views.ingest),
+    path('ingest', chord_ingest_views.ingest),
 
-    path('data-types/', chord_search_views.data_type_list),
-    path('datasets/', chord_search_views.dataset_list),
+    path('data-types', chord_search_views.data_type_list),
+    path('datasets', chord_search_views.dataset_list),
     path('datasets/<str:dataset_id>', chord_search_views.dataset_detail),
-    path('search/', chord_search_views.chord_search),
+    path('search', chord_search_views.chord_search),
 ] + [path('admin/', admin.site.urls)] if DEBUG else []
