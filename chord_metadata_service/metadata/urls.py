@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from chord_metadata_service.patients import api_views, chord_api_views
+from chord_metadata_service.patients import api_views, chord_ingest_views
 from rest_framework.schemas import get_schema_view
 
 from .settings import DEBUG
@@ -51,9 +51,9 @@ urlpatterns = [
 
     path('service-info/', api_views.service_info),
 
-    path('workflows/', chord_api_views.workflow_list),
-    path('workflows/<slug:workflow_id>', chord_api_views.workflow_item),
-    path('workflows/<slug:workflow_id>.wdl', chord_api_views.workflow_file),
+    path('workflows/', chord_ingest_views.workflow_list),
+    path('workflows/<slug:workflow_id>', chord_ingest_views.workflow_item),
+    path('workflows/<slug:workflow_id>.wdl', chord_ingest_views.workflow_file),
 
-    path('ingest/', chord_api_views.ingest),
+    path('ingest/', chord_ingest_views.ingest),
 ] + [path('admin/', admin.site.urls)] if DEBUG else []
