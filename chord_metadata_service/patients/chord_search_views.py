@@ -1,3 +1,5 @@
+from chord_lib.search import build_search_response
+from datetime import datetime
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -48,4 +50,5 @@ def dataset_detail(request, dataset_id):
 @api_view(["POST"])
 def chord_search(_request):
     # TODO
-    return Response(status=500)
+    start = datetime.now()
+    return Response(build_search_response([], start))
