@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk^q*7cb9(cd!wn1&_*osyc')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get("CHORD_DEBUG", "True"))
+DEBUG = os.environ.get("CHORD_DEBUG", "true").lower() == "true"
 
 ALLOWED_HOSTS = [os.environ.get("SERVICE_HOST", "localhost")] if not DEBUG else []
 
