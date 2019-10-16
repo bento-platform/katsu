@@ -43,3 +43,9 @@ def dataset_detail(request, dataset_id):
     if request.method == "DELETE":
         dataset.delete()
         return Response(status=204)
+
+
+@api_view(["POST"])
+def chord_search(_request):
+    # TODO
+    return Response(status=500)
