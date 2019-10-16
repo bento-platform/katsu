@@ -161,7 +161,7 @@ class Gene(models.Model):
 class Disease(models.Model):
 	"""
 	Class to represent a diagnosis and inference or hypothesis about the cause
-	underlying the observed phenotypic abnoramalities
+	underlying the observed phenotypic abnormalities
 	"""
 
 	term = models.ForeignKey(Ontology, on_delete=models.PROTECT,
@@ -182,7 +182,7 @@ class Disease(models.Model):
 	tumor_stage = models.ManyToManyField(Ontology, blank=True)
 
 	def __str__(self):
-		return self.id
+		return str(self.id)
 
 
 #############################################################
