@@ -65,14 +65,36 @@ UPDATE_SCHEMA = {
 }
 
 
+def _single_optional_eq_search(order):
+    return {
+        "operations": ["eq"],
+        "canNegate": True,
+        "required": False,
+        "type": "single",
+        "order": order
+    }
+
+
+def _single_optional_str_search(order):
+    return {
+        "operations": ["eq", "co"],
+        "canNegate": True,
+        "required": False,
+        "type": "single",
+        "order": order
+    }
+
+
 PHENOPACKET_ONTOLOGY_SCHEMA = {
     "type": "object",
     "properties": {
         "id": {
-            "type": "string"
+            "type": "string",
+            "search": _single_optional_str_search(0)
         },
         "label": {
-            "type": "string"
+            "type": "string",
+            "search": _single_optional_str_search(1)
         },
     },
     "required": ["id", "label"]
@@ -82,14 +104,17 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = {
     "type": "object",
     "properties": {
         "id": {
-            "type": "string"
+            "type": "string",
+            "search": _single_optional_str_search(0)
         },
         "description": {
-            "type": "string"
+            "type": "string",
+            "search": _single_optional_str_search(1)
         }
     },
     "required": ["id"]
 }
+
 
 PHENOPACKET_INDIVIDUAL_SCHEMA = {
     "type": "object",
@@ -107,9 +132,10 @@ PHENOPACKET_INDIVIDUAL_SCHEMA = {
             "type": "string"
         },
         # TODO: Age
-        "sex": {
+        "sex": {  # TODO: Front end: enum dropdown
             "type": "string",
-            "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"]
+            "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
+            "search": _single_optional_eq_search(0)
         },
         "karyotypic_sex": {
             "type": "string",
@@ -125,7 +151,8 @@ PHENOPACKET_INDIVIDUAL_SCHEMA = {
                 "XXXX",
                 "XYY",
                 "OTHER_KARYOTYPE"
-            ]
+            ],
+            "search": _single_optional_eq_search(1)
         },
         "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA
     },
@@ -136,15 +163,24 @@ PHENOPACKET_META_DATA_SCHEMA = {
     "type": "object",
     "properties": {
         "created": {"type": "string"},
-        "created_by": {"type": "string"},
-        "submitted_by": {"type": "string"},
+        "created_by": {
+            "type": "string",
+            "search": _single_optional_str_search(0)
+        },
+        "submitted_by": {
+            "type": "string",
+            "search": _single_optional_str_search(1)
+        },
         "resources": {
             "type": "array",
             "items": {
                 "type": "object",  # TODO
                 "properties": {
                     "id": {"type": "string"},
-                    "name": {"type": "string"},
+                    "name": {
+                        "type": "string",
+                        "search": _single_optional_str_search(0)
+                    },
                     "namespace_prefix": {"type": "string"},
                     "url": {"type": "string"},
                     "version": {"type": "string"},
@@ -268,7 +304,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
             }
         },
         "is_control_sample": {
-            "type": "boolean"
+            "type": "boolean"  # TODO: Boolean search
         },
     },
     "required": ["id", "sampled_tissue", "procedure"]
@@ -299,12 +335,21 @@ PHENOPACKET_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "id": {"type": "string"},
+                    "id": {
+                        "type": "string",
+                        "search": _single_optional_str_search(0)
+                    },
                     "alternate_ids": {
                         "type": "array",
-                        "items": {"type": "string"}
+                        "items": {
+                            "type": "string",
+                            "search": _single_optional_str_search(1)
+                        }
                     },
-                    "symbol": {"type": "string"}
+                    "symbol": {
+                        "type": "string",
+                        "search": _single_optional_str_search(2)
+                    }
                 },
                 "required": ["id", "symbol"]
             }
@@ -315,7 +360,7 @@ PHENOPACKET_SCHEMA = {
                 "type": "object"  # TODO
             }
         },
-        "diseases": {
+        "diseases": {  # TODO: Too sensitive for search?
             "type": "array",
             "items": {
                 "type": "object",
