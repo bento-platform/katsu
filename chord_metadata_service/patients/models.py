@@ -319,7 +319,7 @@ class Biosample(models.Model):
 	# An ISO8601 string represent age
 	individual_age_at_collection = models.CharField(max_length=200, blank=True)
 	# all OntologyClass
-	historical_diagnosis = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
+	histological_diagnosis = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
 		null=True, related_name='histological_diagnoses')
 	tumor_progression = models.ForeignKey(Ontology, on_delete=models.SET_NULL,
 		null=True, related_name='tumor_progressions')
