@@ -62,3 +62,18 @@ UPDATE_SCHEMA = {
 	"required": ["timestamp", "comment"]
 	
 }
+
+
+ONTOLOGY_CLASS = {
+"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "todo",
+	"title": "Ontology class schema",
+	"description": "todo",
+	"type": "object",
+	"properties": {
+		"id": {"type": "string", "description": "CURIE style identifier"},
+		"label": {"type": "string", "description": "Human-readable class name"}
+	},
+	"required": ["id", "label"]
+
+}

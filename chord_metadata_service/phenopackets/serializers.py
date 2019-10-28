@@ -2,24 +2,7 @@ from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
 from rest_framework import serializers, validators
 from .models import *
 from jsonschema import validate, ValidationError, Draft7Validator, FormatChecker
-from chord_metadata_service.patients.schemas import ALLELE_SCHEMA, UPDATE_SCHEMA
-
-
-##### Allele classes have to be serialized in VarianSerializer #####
-# TODO move
-ONTOLOGY_CLASS = {
-"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id": "todo",
-	"title": "Ontology class schema",
-	"description": "todo",
-	"type": "object",
-	"properties": {
-		"id": {"type": "string", "description": "CURIE style identifier"},
-		"label": {"type": "string", "description": "Human-readable class name"}
-	},
-	"required": ["id", "label"]
-
-}
+from chord_metadata_service.restapi.schemas import ALLELE_SCHEMA, UPDATE_SCHEMA, ONTOLOGY_CLASS
 
 
 # class OntologySerializer(serializers.ModelSerializer):
