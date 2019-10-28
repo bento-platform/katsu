@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from restapi import urls as restapi_urls
+from chord_metadata_service.restapi import urls as restapi_urls
 from chord_metadata_service.patients import api_views, chord_api_views
 from rest_framework.schemas import get_schema_view
 from .settings import DEBUG

@@ -5,7 +5,7 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 
 
 class Individual(models.Model):
-	""" Class to store sensitive information about Patient"""
+	""" Class to store demographic information about an Individual (Patient) """
 
 	SEX = (
 		('UNKNOWN_SEX', 'UNKNOWN_SEX'),
@@ -28,14 +28,6 @@ class Individual(models.Model):
 		('OTHER_KARYOTYPE', 'OTHER_KARYOTYPE'),
 	)
 
-	# GENDER = (
-	# ('MALE', 'MALE'),
-	# ('FEMALE', 'FEMALE'),
-	# ('OTHER', 'OTHER'),
-	# ('UNKNOWN', 'UNKNOWN')
-	# )
-
-	# id = models.AutoField(primary_key=True)
 	individual_id = models.CharField(primary_key=True, max_length=200)
 	# TODO check for CURIE
 	alternate_ids = ArrayField(models.CharField(max_length=200), blank=True, null=True)
@@ -44,13 +36,14 @@ class Individual(models.Model):
 	age = models.CharField(max_length=200, blank=True)
 	sex = models.CharField(choices=SEX, max_length=200,  blank=True, null=True)
 	karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200, blank=True)
-	# OntologyClass
-	# taxonomy = JSONField(blank=True, null=True)
-	# FHIR fields how useful hey are?
-	# active = models.BooleanField()
-	# gender = models.CharField(choices=GENDER, max_length=200)
-	# deceased = models.BooleanField()
+	taxonomy = JSONField(blank=True, null=True)
+	# FHIR specific
+	active = models.BooleanField(default=False)
+	deceased = models.BooleanField(default=False)
+	address_postal_code = models.CharField(max_length=200, blank=True)
+	# mCode specific
+	race = models.CharField(max_length=200, blank=True)
+	ethnicity = models.CharField(max_length=200, blank=True)
 
 	def __str__(self):
 		return str(self.individual_id)
-
