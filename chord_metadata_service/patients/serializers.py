@@ -5,7 +5,10 @@ from chord_metadata_service.restapi.validators import JsonSchemaValidator
 
 
 class IndividualSerializer(serializers.ModelSerializer):
-	taxonomy = serializers.JSONField(validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
+	taxonomy = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+		allow_null=True
+		)
 
 	class Meta:
 		model = Individual

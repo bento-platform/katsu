@@ -2,6 +2,8 @@ from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
 from rest_framework import serializers, validators
 from .models import *
 from jsonschema import validate, ValidationError, Draft7Validator, FormatChecker
+from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ALLELE_SCHEMA
+from chord_metadata_service.restapi.validators import JsonSchemaValidator
 
 
 # class OntologySerializer(serializers.ModelSerializer):
@@ -22,13 +24,65 @@ from jsonschema import validate, ValidationError, Draft7Validator, FormatChecker
 # 		instance, _ = Ontology.objects.get_or_create(**validated_data)
 # 		return instance
 
+class ResourceSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = Resource
+		fields = '__all__'
+
+
+# class ExternalReferenceSerializer(serializers.ModelSerializer):
+
+# 	class Meta:
+# 		model = ExternalReference
+# 		fields = '__all__'
+
+
+class MetaDataSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = MetaData
+		fields = '__all__'
+
+	def validate_updates(self, value):
+		"""
+		Check updates against schema.
+		Timestamp must follow ISO8601 UTC standard
+		e.g. 2018-06-10T10:59:06Z
+
+		"""
+
+		if isinstance(value, list):
+			for item in value:
+				validation = Draft7Validator(
+					UPDATE_SCHEMA, format_checker=FormatChecker(formats=['date-time'])
+					).is_valid(item)
+				if not validation:
+					raise serializers.ValidationError("Update is not valid")
+		return value
 
 
 class PhenotypicFeatureSerializer(serializers.ModelSerializer):
+	_type = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
+	severity = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+		allow_null=True)
+	onset = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+		allow_null=True)
 	
 	class Meta:
 		model = PhenotypicFeature
 		fields = '__all__'
+
+	def validate_modifier(self, value):
+		if isinstance(value, list):
+			for item in value:
+				validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(item)
+				if not validation:
+					raise serializers.ValidationError("Not valid JSON schema for this field.")
+		return value
 
 	# def create(self, validated_data):
 	# 	modifiers = []
@@ -98,6 +152,11 @@ class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 
 
 class ProcedureSerializer(serializers.ModelSerializer):
+	code = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
+	body_site = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+		allow_null=True)
 
 	class Meta:
 		model = Procedure
@@ -119,21 +178,19 @@ class GeneSerializer(serializers.ModelSerializer):
 
 
 class VariantSerializer(serializers.ModelSerializer):
-	#allele_type = serializers.CharField()
-	# allele = JSONField()
-	# zygosity = JSONField(required=False)
+	# allele_type = serializers.CharField()
+	allele = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ALLELE_SCHEMA)])
+	# allele = serializers.JSONField()
+	zygosity = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+		allow_null=True)
+	# zygosity = serializers.JSONField(required=False, allow_null=True)
 
 	class Meta:
 		model = Variant
-		fields = ['id', 'allele_type', 'allele', 'zygosity']
+		fields = '__all__'
 
-	# def validate_allele(self, value):
-	# 	""" Check that allele json data is valid """
-
-	# 	validation = Draft7Validator(ALLELE_SCHEMA).is_valid(value)
-	# 	if not validation:
-	# 		raise serializers.ValidationError("Allele is not valid")
-	# 	return value
 
 	# def to_representation(self, obj):
 	# 	""" Change 'allele_type' field name to allele type value. """
@@ -149,6 +206,23 @@ class VariantSerializer(serializers.ModelSerializer):
 	# 		allele_type = data.get('allele_type')
 	# 		data['allele'] = data.pop(allele_type)
 	# 	return data
+
+	# def validate_allele(self, value):
+	# 	""" Check that allele json data is valid """
+
+	# 	validation = Draft7Validator(ALLELE_SCHEMA).is_valid(value)
+	# 	if not validation:
+	# 		raise serializers.ValidationError("Allele is not valid")
+	# 	return value
+
+	# def validate_zygosity(self, value):
+	# 	""" Check that zygosity json data is valid """
+
+	# 	validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(value)
+	# 	if not validation:
+	# 		raise serializers.ValidationError("Zygosity is not valid")
+	# 	return value
+
 
 	# def create(self, validated_data):
 	# 	if 'zygosity' in validated_data.keys():
@@ -170,55 +244,22 @@ class VariantSerializer(serializers.ModelSerializer):
 
 
 class DiseaseSerializer(serializers.ModelSerializer):
+	term = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
 
 	class Meta:
 		model = Disease
 		fields = '__all__'
 
-
-class ResourceSerializer(serializers.ModelSerializer):
-
-	class Meta:
-		model = Resource
-		fields = '__all__'
-
-
-# class ExternalReferenceSerializer(serializers.ModelSerializer):
-
-# 	class Meta:
-# 		model = ExternalReference
-# 		fields = '__all__'
-
-
-class MetaDataSerializer(serializers.ModelSerializer):
-
-	class Meta:
-		model = MetaData
-		fields = '__all__'
-
-	def validate_updates(self, value):
-		"""
-		Check updates against schema.
-		Timestamp must follow ISO8601 UTC standard
-		e.g. 2018-06-10T10:59:06Z
-
-		"""
-
+	def validate_tumor_stage(self, value):
 		if isinstance(value, list):
 			for item in value:
-				validation = Draft7Validator(
-					UPDATE_SCHEMA, format_checker=FormatChecker(formats=['date-time'])
-					).is_valid(item)
+				validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(item)
 				if not validation:
-					raise serializers.ValidationError("Update is not valid")
+					raise serializers.ValidationError(
+						"Not valid JSON schema for this field."
+						)
 		return value
-
-
-class IndividualSerializer(serializers.ModelSerializer):
-
-	class Meta:
-		model = Individual
-		fields = '__all__'
 
 
 class BiosampleSerializer(serializers.ModelSerializer):
