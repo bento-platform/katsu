@@ -2,7 +2,6 @@ from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
 from rest_framework import serializers, validators
 from .models import *
 from jsonschema import validate, ValidationError, Draft7Validator, FormatChecker
-from chord_metadata_service.restapi.schemas import ALLELE_SCHEMA, UPDATE_SCHEMA, ONTOLOGY_CLASS
 
 
 # class OntologySerializer(serializers.ModelSerializer):
@@ -24,8 +23,9 @@ from chord_metadata_service.restapi.schemas import ALLELE_SCHEMA, UPDATE_SCHEMA,
 # 		return instance
 
 
-class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 
+class PhenotypicFeatureSerializer(serializers.ModelSerializer):
+	
 	class Meta:
 		model = PhenotypicFeature
 		fields = '__all__'
