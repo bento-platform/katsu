@@ -319,7 +319,8 @@ PHENOPACKET_SCHEMA = {
     "type": "object",
     "properties": {
         "id": {
-            "type": "string"
+            "type": "string",
+            "search": {"database": {"field": "phenopacket_id"}}
         },
         "subject": PHENOPACKET_INDIVIDUAL_SCHEMA,
         "phenotypic_features": {
@@ -379,5 +380,11 @@ PHENOPACKET_SCHEMA = {
         },
         "meta_data": PHENOPACKET_META_DATA_SCHEMA
     },
-    "required": ["id", "meta_data"]
+    "required": ["id", "meta_data"],
+    "search": {
+        "database": {
+            "relation": "patients_phenopacket",
+            "primary_key": "phenopacket_id"
+        }
+    }
 }
