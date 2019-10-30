@@ -290,7 +290,7 @@ class Phenopacket(models.Model):
 	# if Individual instance is deleted Phenopacket instance is deleted too
 	# CHECK !!! Force as required?
 	subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
-		help_text='The proband.')
+		related_name='phenopackets', help_text='The proband.')
 	# PhenotypicFeatures are present in Biosample, so can be accessed via Biosample instance
 	phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
 		help_text='Phenotypic features observed in the proband.')
@@ -380,6 +380,7 @@ class Interpretation(models.Model):
 		blank=True, help_text='The current status of work on the case.')
 	# In Phenopackets schema this field is 'phenopacket_or_family'
 	phenopacket = models.ForeignKey(Phenopacket, on_delete=models.CASCADE,
+		related_name='interpretations',
 		help_text='The subject of this interpretation.')
 	# fetch disease via from phenopacket
 	# diagnosis on one disease ? there can be many disease associated with phenopacket
