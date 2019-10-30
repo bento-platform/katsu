@@ -241,7 +241,7 @@ class Biosample(models.Model):
 	# if Individual instance is deleted Biosample instance is deleted too
 	# CHECK if this rel must be a required
 	individual = models.ForeignKey(Individual, on_delete=models.CASCADE,
-		blank=True, null=True,
+		blank=True, null=True, related_name='biosamples',
 		help_text='The id of the Individual this biosample was derived from.')
 	description = models.CharField(max_length=200, blank=True,
 		help_text='The biosample’s description.')

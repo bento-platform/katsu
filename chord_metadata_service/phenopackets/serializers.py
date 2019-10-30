@@ -263,10 +263,34 @@ class DiseaseSerializer(serializers.ModelSerializer):
 
 
 class BiosampleSerializer(serializers.ModelSerializer):
+	sampled_tissue = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
+	taxonomy = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+		allow_null=True)
+	histological_diagnosis = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+		allow_null=True)
+	tumor_progression = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+		allow_null=True)
+	tumor_grade = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+		allow_null=True)
 
 	class Meta:
 		model = Biosample
 		fields = '__all__'
+
+	def validate_diagnostic_markers(self, value):
+		if isinstance(value, list):
+			for item in value:
+				validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(item)
+				if not validation:
+					raise serializers.ValidationError(
+						"Not valid JSON schema for this field."
+						)
+		return value
 
 
 class PhenopacketSerializer(serializers.ModelSerializer):
