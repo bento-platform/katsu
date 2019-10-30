@@ -4,7 +4,7 @@ from .models import *
 from jsonschema import validate, ValidationError, Draft7Validator, FormatChecker
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ALLELE_SCHEMA
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
-
+from chord_metadata_service.restapi.serializers import GenericSerializer
 
 # class OntologySerializer(serializers.ModelSerializer):
 # 	# this will create problems
@@ -24,7 +24,7 @@ from chord_metadata_service.restapi.validators import JsonSchemaValidator
 # 		instance, _ = Ontology.objects.get_or_create(**validated_data)
 # 		return instance
 
-class ResourceSerializer(serializers.ModelSerializer):
+class ResourceSerializer(GenericSerializer):
 
 	class Meta:
 		model = Resource
@@ -38,7 +38,7 @@ class ResourceSerializer(serializers.ModelSerializer):
 # 		fields = '__all__'
 
 
-class MetaDataSerializer(serializers.ModelSerializer):
+class MetaDataSerializer(GenericSerializer):
 
 	class Meta:
 		model = MetaData
@@ -62,7 +62,7 @@ class MetaDataSerializer(serializers.ModelSerializer):
 		return value
 
 
-class PhenotypicFeatureSerializer(serializers.ModelSerializer):
+class PhenotypicFeatureSerializer(GenericSerializer):
 	_type = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
 	severity = serializers.JSONField(
@@ -151,7 +151,7 @@ class PhenotypicFeatureSerializer(serializers.ModelSerializer):
 	# 		return data
 
 
-class ProcedureSerializer(serializers.ModelSerializer):
+class ProcedureSerializer(GenericSerializer):
 	code = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
 	body_site = serializers.JSONField(
@@ -163,21 +163,21 @@ class ProcedureSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 
-class HtsFileSerializer(serializers.ModelSerializer):
+class HtsFileSerializer(GenericSerializer):
 
 	class Meta:
 		model = HtsFile
 		fields = '__all__'
 
 
-class GeneSerializer(serializers.ModelSerializer):
+class GeneSerializer(GenericSerializer):
 
 	class Meta:
 		model = Gene
 		fields = '__all__'
 
 
-class VariantSerializer(serializers.ModelSerializer):
+class VariantSerializer(GenericSerializer):
 	# allele_type = serializers.CharField()
 	allele = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ALLELE_SCHEMA)])
@@ -243,7 +243,7 @@ class VariantSerializer(serializers.ModelSerializer):
 	# 	return instance
 
 
-class DiseaseSerializer(serializers.ModelSerializer):
+class DiseaseSerializer(GenericSerializer):
 	term = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
 
@@ -262,7 +262,7 @@ class DiseaseSerializer(serializers.ModelSerializer):
 		return value
 
 
-class BiosampleSerializer(serializers.ModelSerializer):
+class BiosampleSerializer(GenericSerializer):
 	sampled_tissue = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
 	taxonomy = serializers.JSONField(
@@ -293,35 +293,35 @@ class BiosampleSerializer(serializers.ModelSerializer):
 		return value
 
 
-class PhenopacketSerializer(serializers.ModelSerializer):
+class PhenopacketSerializer(GenericSerializer):
 
 	class Meta:
 		model = Phenopacket
 		fields = '__all__'
 
 
-class GenomicInterpretationSerializer(serializers.ModelSerializer):
+class GenomicInterpretationSerializer(GenericSerializer):
 
 	class Meta:
 		model = GenomicInterpretation
 		fields = '__all__'
 
 
-class DiagnosisSerializer(serializers.ModelSerializer):
+class DiagnosisSerializer(GenericSerializer):
 
 	class Meta:
 		model = Diagnosis
 		fields = '__all__'
 
 
-class InterpretationSerializer(serializers.ModelSerializer):
+class InterpretationSerializer(GenericSerializer):
 
 	class Meta:
 		model = Interpretation
 		fields = '__all__'
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class ProjectSerializer(GenericSerializer):
 	# noinspection PyMethodMayBeStatic
 	def validate_data_use(self, value):
 		validation = Draft7Validator(CHORD_DATA_USE_SCHEMA).is_valid(value)
@@ -340,7 +340,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 
-class DatasetSerializer(serializers.ModelSerializer):
+class DatasetSerializer(GenericSerializer):
 	# noinspection PyMethodMayBeStatic
 	def validate_name(self, value):
 		if len(value.strip()) < 3:
@@ -352,7 +352,7 @@ class DatasetSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 
-class TableOwnershipSerializer(serializers.ModelSerializer):
+class TableOwnershipSerializer(GenericSerializer):
 	class Meta:
 		model = TableOwnership
 		fields = '__all__'

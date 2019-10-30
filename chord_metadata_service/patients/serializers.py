@@ -4,9 +4,10 @@ from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.phenopackets.serializers import (
 	BiosampleSerializer, PhenopacketSerializer)
+from chord_metadata_service.restapi.serializers import GenericSerializer
 
 
-class IndividualSerializer(serializers.ModelSerializer):
+class IndividualSerializer(GenericSerializer):
 	taxonomy = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
 		allow_null=True
