@@ -22,7 +22,7 @@ from rest_framework.schemas import get_schema_view
 from .settings import DEBUG
 
 
-router = routers.DefaultRouter()
+router = routers.DefaultRouter(trailing_slash=False)
 router.register(r'ontologies', api_views.OntologyViewSet)
 router.register(r'variants', api_views.VariantViewSet)
 router.register(r'phenotypicfeatures', api_views.PhenotypicFeatureViewSet)
