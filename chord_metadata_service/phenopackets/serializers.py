@@ -2,7 +2,7 @@ from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
 from rest_framework import serializers, validators
 from .models import *
 from jsonschema import validate, ValidationError, Draft7Validator, FormatChecker
-from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ALLELE_SCHEMA
+from chord_metadata_service.restapi.schemas import *
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.serializers import GenericSerializer
 
@@ -59,6 +59,14 @@ class MetaDataSerializer(GenericSerializer):
 					).is_valid(item)
 				if not validation:
 					raise serializers.ValidationError("Update is not valid")
+		return value
+
+	def validate_external_references(self, value):
+		if isinstance(value, list):
+			for item in value:
+				validation = Draft7Validator(EXTERNAL_REFERENCE).is_valid(item)
+				if not validation:
+					raise serializers.ValidationError("Not valid JSON schema for this field.")
 		return value
 
 

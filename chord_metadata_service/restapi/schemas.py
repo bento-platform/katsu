@@ -55,9 +55,9 @@ UPDATE_SCHEMA = {
 	"description": "Schema to check incoming updates format",
 	"type": "object",
 	"properties": {
-		"timestamp": {"type": "string", "format": "date-time", "description": "ISO8601 UTC timestamp at which this record was updated"},
+		"timestamp": {"type": "string", "format": "date-time", "description": "ISO8601 UTC timestamp at which this record was updated."},
 		"updated_by": {"type": "string", "description": "Who updated the phenopacket"},
-		"comment": {"type": "string", "description": "Comment about updates or reasons for an update"}
+		"comment": {"type": "string", "description": "Comment about updates or reasons for an update."}
 	},
 	"required": ["timestamp", "comment"]
 	
@@ -71,9 +71,24 @@ ONTOLOGY_CLASS = {
 	"description": "todo",
 	"type": "object",
 	"properties": {
-		"id": {"type": "string", "description": "CURIE style identifier"},
-		"label": {"type": "string", "description": "Human-readable class name"}
+		"id": {"type": "string", "description": "CURIE style identifier."},
+		"label": {"type": "string", "description": "Human-readable class name."}
 	},
 	"required": ["id", "label"]
+
+}
+
+
+EXTERNAL_REFERENCE = {
+"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "todo",
+	"title": "External reference schema",
+	"description": "The schema encodes information about an external reference.",
+	"type": "object",
+	"properties": {
+		"id": {"type": "string", "description": "An application specific identifier."},
+		"description": {"type": "string", "description": "An application specific description."}
+	},
+	"required": ["id"]
 
 }
