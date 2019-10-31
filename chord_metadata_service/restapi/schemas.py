@@ -1,3 +1,6 @@
+import json
+
+
 # Individual schemas for validation of JSONField values
 
 ALLELE_SCHEMA = {
@@ -25,6 +28,7 @@ ALLELE_SCHEMA = {
 
 		"iscn": {"type": "string"}
 	},
+	"additionalProperties": False,
 	"oneOf": [
 		{
 		"required": ["hgvs"]
@@ -58,6 +62,7 @@ UPDATE_SCHEMA = {
 		"updated_by": {"type": "string", "description": "Who updated the phenopacket"},
 		"comment": {"type": "string", "description": "Comment about updates or reasons for an update."}
 	},
+	"additionalProperties": False,
 	"required": ["timestamp", "comment"]	
 }
 
@@ -72,6 +77,7 @@ ONTOLOGY_CLASS = {
 		"id": {"type": "string", "description": "CURIE style identifier."},
 		"label": {"type": "string", "description": "Human-readable class name."}
 	},
+	"additionalProperties": False,
 	"required": ["id", "label"]
 }
 
@@ -86,6 +92,7 @@ EXTERNAL_REFERENCE = {
 		"id": {"type": "string", "description": "An application specific identifier."},
 		"description": {"type": "string", "description": "An application specific description."}
 	},
+	"additionalProperties": False,
 	"required": ["id"]
 }
 
@@ -104,6 +111,7 @@ EVIDENCE = {
 				"id": {"type": "string", "description": "CURIE style identifier."},
 				"label": {"type": "string", "description": "Human-readable class name."}
 				},
+			"additionalProperties": False,
 			"required": ["id", "label"]
 			},
 		"reference": {
@@ -113,8 +121,10 @@ EVIDENCE = {
 				"id": {"type": "string", "description": "An application specific identifier."},
 				"description": {"type": "string", "description": "An application specific description."}
 				},
+			"additionalProperties": False,
 			"required": ["id"]
 			}
 	},
+	"additionalProperties": False,
 	"required": ["evidence_code"]
 }
