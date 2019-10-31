@@ -1,6 +1,3 @@
-import json
-
-
 # Individual schemas for validation of JSONField values
 
 ALLELE_SCHEMA = {

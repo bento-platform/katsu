@@ -21,7 +21,12 @@ from rest_framework.schemas import get_schema_view
 from .settings import DEBUG
 
 urlpatterns = [
-    path('', get_schema_view(title="Metadata Service API"),
+    path('', get_schema_view(
+        title="Metadata Service API",
+        description="Metadata Service provides a phenotypic description of an Individual "
+        "in the context of biomedical research.",
+        version="0.1"
+        ),
         name='openapi-schema'),
     path('api/', include(restapi_urls)),
     # path('service-info/', api_views.service_info),
