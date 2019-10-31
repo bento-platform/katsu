@@ -18,6 +18,8 @@ class Resource(models.Model):
 	"""
 	Class to represent a description of an external resource
 	used for referencing an object
+
+	FHIR: CodeSystem
 	"""
 
 	# resource_id e.g. "id": "uniprot"
@@ -43,20 +45,12 @@ class Resource(models.Model):
 		return str(self.id)
 
 
-# class ExternalReference(models.Model):
-# 	""" Class to store information about an external reference """
-
-# 	external_reference_id = models.CharField(max_length=200)
-# 	description = models.TextField(blank=True)
-
-# 	def __str__(self):
-# 		return str(self.id)
-
-
 class MetaData(models.Model):
 	"""
 	Class to store structured definitions of the resources
 	and ontologies used within the phenopacket
+
+	FHIR: Metadata
 	"""
 
 	# CHECK !!! created or submitted?
@@ -69,13 +63,12 @@ class MetaData(models.Model):
 	resources = models.ManyToManyField(Resource,
 		help_text='This element contains a listing of the ontologies/resources '
 		'referenced in the phenopacket.')
-	# UPDATE_SCHEMA
 	updates = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
 		help_text='List of updates to the phenopacket.')
 	phenopacket_schema_version = models.CharField(max_length=200, blank=True,
 		help_text='Schema version of the current phenopacket.')
-	# TODO add EXTERNAL_REFERENCE_SCHEMA
-	external_references = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
+	external_references = ArrayField(JSONField(null=True, blank=True),
+		blank=True, null=True,
 		help_text='List of external resources from the phenopacket was derived.')
 
 	def __str__(self):
@@ -93,17 +86,18 @@ class MetaData(models.Model):
 
 
 class PhenotypicFeature(models.Model):
-	""" Class to describe a phenotype of an Individual """
+	""" 
+	Class to describe a phenotype of an Individual
+
+	FHIR: Condition or Observation
+	"""
 
 	description = models.CharField(max_length=200, blank=True,
 		help_text='Human-readable verbiage NOT for structured text')
-	# if Ontology deleted protect the PhenotypicFeature from deletion
-	# and raise IntegrityError
 	_type = JSONField(verbose_name='type',
 		help_text='Ontology term that describes the phenotype.')
 	negated = models.BooleanField(default=False,
 		help_text='This element is a flag to indicate whether the phenotype was observed or not.')
-	# since severity is an optional, set value to null when Ontology deleted
 	severity = JSONField(blank=True, null=True,
 		help_text='Description of the severity of the feature'
 		'represented by a term from HP:0012824.')
@@ -114,9 +108,9 @@ class PhenotypicFeature(models.Model):
 	onset = JSONField(blank=True, null=True,
 		help_text='This element can be used to describe the age at '
 		'which a phenotypic feature was first noticed or diagnosed.')
-	# TODO Evidence as a separate class
 	# evidence can stay here because evidence is given for an observation of PF
 	# JSON schema to check evidence_code is present
+	# FHIR: Condition.evidence
 	evidence = JSONField(blank=True, null=True,
 		help_text='This element intends to represent the evidence for '
 		'an assertion such as an observation of a PhenotypicFeature.')
@@ -129,6 +123,8 @@ class Procedure(models.Model):
 	"""
 	Class to represent a clinical procedure performed on an individual
 	(subject) in oder to extract a biosample
+
+	FHIR: Procedure
 	"""
 
 	code = JSONField(help_text='Clinical procedure performed on a subject.')
@@ -140,7 +136,12 @@ class Procedure(models.Model):
 
 
 class HtsFile(models.Model):
-	""" Class to link HTC files with data """
+	"""
+	Class to link HTC files with data
+	
+	FHIR: DocumentReference
+	"""
+
 	HTS_FORMAT = (
 		('UNKNOWN', 'UNKNOWN'),
 		('SAM', 'SAM'),
@@ -150,7 +151,6 @@ class HtsFile(models.Model):
 		('BCF', 'BCF'),
 		('GVCF', 'GVCF')
 	)
-	#? TODO ????
 	uri = models.URLField(primary_key=True, max_length=200,
 		help_text='A valid URI for the file.')
 	description = models.CharField(max_length=200, blank=True,
@@ -172,12 +172,18 @@ class HtsFile(models.Model):
 
 
 class Gene(models.Model):
-	""" Class to represent an identifier for a gene """
+	"""
+	Class to represent an identifier for a gene
+	
+	FHIR: ?
+	Draft extention for Gene is in development
+	where Gene defined via class CodeableConcept
+	"""
 
 	# Gene id is unique
 	gene_id = models.CharField(primary_key=True, max_length=200,
 		help_text='Official identifier of the gene.')
-	# CURIE style?
+	# CURIE style? Yes!
 	alternate_id = ArrayField(models.CharField(max_length=200, blank=True),
 		help_text='Alternative identifier(s) of the gene.')
 	symbol = models.CharField(max_length=200,
@@ -188,8 +194,13 @@ class Gene(models.Model):
 
 
 class Variant(models.Model):
-	""" Class to describe Individual variants or diagnosed causative variants """
-	# TODO
+	"""
+	Class to describe Individual variants or diagnosed causative variants
+	
+	FHIR: Observation ?
+	Draft extention for Variant is in development
+	"""
+
 	ALLELE = (
 		('hgvsAllele', 'hgvsAllele'),
 		('vcfAllele', 'vcfAllele'),
@@ -198,7 +209,6 @@ class Variant(models.Model):
 	)
 	allele_type = models.CharField(max_length=200, choices=ALLELE,
 		help_text='One of four allele types.')
-	# The field is validated against ALLELE_SCHEMA for four types of allele
 	allele = JSONField()
 	zygosity = JSONField(blank=True, null=True,
 		help_text='Genotype Ontology (GENO) term representing the zygosity of the variant.')
@@ -211,6 +221,8 @@ class Disease(models.Model):
 	"""
 	Class to represent a diagnosis and inference or hypothesis about the cause
 	underlying the observed phenotypic abnormalities
+
+	FHIR: Condition
 	"""
 
 	term = JSONField(help_text='An ontology term that represents the disease.')
@@ -233,13 +245,15 @@ class Disease(models.Model):
 
 
 class Biosample(models.Model):
-	""" Class to describe a unit of biological material """
+	"""
+	Class to describe a unit of biological material
+	
+	FHIR: Specimen 
+	"""
 
-	# always unique?
 	biosample_id = models.CharField(primary_key=True, max_length=200,
 		help_text='An arbitrary identifier.')
 	# if Individual instance is deleted Biosample instance is deleted too
-	# CHECK if this rel must be a required
 	individual = models.ForeignKey(Individual, on_delete=models.CASCADE,
 		blank=True, null=True, related_name='biosamples',
 		help_text='The id of the Individual this biosample was derived from.')
@@ -254,13 +268,11 @@ class Biosample(models.Model):
 	# An ISO8601 string represent age
 	individual_age_at_collection = models.CharField(max_length=200, blank=True,
 		help_text='Age of the proband at the time the sample was taken.')
-	# all OntologyClass
 	histological_diagnosis = JSONField(blank=True, null=True,
 		help_text='An Ontology term describing the disease diagnosis '
 		'that was inferred from the histological examination.')
 	tumor_progression = JSONField(blank=True, null=True,
 		help_text='An Ontology term describing primary, metastatic, recurrent.')
-	# TODO check if it takes a list
 	tumor_grade = JSONField(blank=True, null=True,
 		help_text='An Ontology term describing the tumor grade. '
 		'Potentially a child term of NCIT:C28076 or equivalent.')
@@ -283,7 +295,9 @@ class Biosample(models.Model):
 
 
 class Phenopacket(models.Model):
-	""" Class to aggregate Individual's experiments data """
+	"""
+	Class to aggregate Individual's experiments data
+	"""
 
 	phenopacket_id = models.CharField(primary_key=True, max_length=200,
 		help_text='An arbitrary identifier for the phenopacket.')
@@ -326,6 +340,8 @@ class GenomicInterpretation(models.Model):
 	"""
 	Class to represent a statemenet about the contribution
 	of a genomic element towards the observed phenotype
+
+	FHIR: Observation
 	"""
 
 	GENOMIC_INTERPRETATION_STATUS = (
@@ -352,7 +368,11 @@ class GenomicInterpretation(models.Model):
 
 
 class Diagnosis(models.Model):
-	""" Class to refer to disease that is present in the individual analyzed """
+	"""
+	Class to refer to disease that is present in the individual analyzed
+	
+	FHIR: Condition
+	"""
 
 	disease = models.ForeignKey(Disease, on_delete=models.CASCADE,
 		help_text='The diagnosed condition.')
@@ -365,7 +385,11 @@ class Diagnosis(models.Model):
 
 
 class Interpretation(models.Model):
-	""" Class to represent the interpretation of a genomic analysis """
+	"""
+	Class to represent the interpretation of a genomic analysis
+	
+	FHIR: DiagnosticReport
+	"""
 
 	RESOLUTION_STATUS = (
 		('UNKNOWN', 'UNKNOWN'),
