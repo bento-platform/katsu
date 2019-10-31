@@ -75,10 +75,13 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
 	severity = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-		allow_null=True)
+		allow_null=True, required=False)
 	onset = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-		allow_null=True)
+		allow_null=True, required=False)
+	evidence = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=EVIDENCE)],
+		allow_null=True, required=False)
 	
 	class Meta:
 		model = PhenotypicFeature
@@ -164,7 +167,7 @@ class ProcedureSerializer(GenericSerializer):
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
 	body_site = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-		allow_null=True)
+		allow_null=True, required=False)
 
 	class Meta:
 		model = Procedure
@@ -192,7 +195,7 @@ class VariantSerializer(GenericSerializer):
 	# allele = serializers.JSONField()
 	zygosity = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-		allow_null=True)
+		allow_null=True, required=False)
 	# zygosity = serializers.JSONField(required=False, allow_null=True)
 
 	class Meta:
@@ -275,16 +278,16 @@ class BiosampleSerializer(GenericSerializer):
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
 	taxonomy = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-		allow_null=True)
+		allow_null=True, required=False)
 	histological_diagnosis = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-		allow_null=True)
+		allow_null=True, required=False)
 	tumor_progression = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-		allow_null=True)
+		allow_null=True, required=False)
 	tumor_grade = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-		allow_null=True)
+		allow_null=True, required=False)
 
 	class Meta:
 		model = Biosample

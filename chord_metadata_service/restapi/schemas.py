@@ -43,7 +43,6 @@ ALLELE_SCHEMA = {
 	"dependencies": {
 	"genome_assembly": ["chr", "pos", "re", "alt", "info"],
 	"seq_id": ["position", "deleted_sequence", "inserted_sequence"]
-
 	}
 }
 
@@ -59,8 +58,7 @@ UPDATE_SCHEMA = {
 		"updated_by": {"type": "string", "description": "Who updated the phenopacket"},
 		"comment": {"type": "string", "description": "Comment about updates or reasons for an update."}
 	},
-	"required": ["timestamp", "comment"]
-	
+	"required": ["timestamp", "comment"]	
 }
 
 
@@ -75,7 +73,6 @@ ONTOLOGY_CLASS = {
 		"label": {"type": "string", "description": "Human-readable class name."}
 	},
 	"required": ["id", "label"]
-
 }
 
 
@@ -90,5 +87,34 @@ EXTERNAL_REFERENCE = {
 		"description": {"type": "string", "description": "An application specific description."}
 	},
 	"required": ["id"]
+}
 
+
+EVIDENCE = {
+"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "todo",
+	"title": "Evidence schema",
+	"description": "The schema represents the evidence for an assertion such as an observation of a PhenotypicFeature.",
+	"type": "object",
+	"properties": {
+		"evidence_code": {
+			"type": "object",
+			"description": "An ontology class that represents the evidence type.",
+			"properties": {
+				"id": {"type": "string", "description": "CURIE style identifier."},
+				"label": {"type": "string", "description": "Human-readable class name."}
+				},
+			"required": ["id", "label"]
+			},
+		"reference": {
+			"type": "object",
+			"description": "Representation of the source of the evidence.",
+			"properties": {
+				"id": {"type": "string", "description": "An application specific identifier."},
+				"description": {"type": "string", "description": "An application specific description."}
+				},
+			"required": ["id"]
+			}
+	},
+	"required": ["evidence_code"]
 }
