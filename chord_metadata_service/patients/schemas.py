@@ -123,7 +123,8 @@ def phenopacket_individual_schema(database_attrs: dict):
         "type": "object",
         "properties": {
             "id": {
-                "type": "string"
+                "type": "string",
+                "search": {"database": {"field": Individual._meta.pk.column}}
             },
             "alternate_ids": {
                 "type": "array",
@@ -158,12 +159,12 @@ def phenopacket_individual_schema(database_attrs: dict):
                 "search": _single_optional_eq_search(1)
             },
             "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA,
-            "search": {
-                "database": {
-                    "relation": Individual._meta.db_table,
-                    "primary_key": Individual._meta.pk.column,
-                    **database_attrs
-                }
+        },
+        "search": {
+            "database": {
+                "relation": Individual._meta.db_table,
+                "primary_key": Individual._meta.pk.column,
+                **database_attrs
             }
         },
         "required": ["id"]
@@ -265,7 +266,10 @@ PHENOPACKET_AGE_SCHEMA = {
 PHENOPACKET_BIOSAMPLE_SCHEMA = {
     "type": "object",
     "properties": {
-        "id": {"type": "string"},
+        "id": {
+            "type": "string",
+            "search": {"database": {"field": Biosample._meta.pk.column}}
+        },
         "individual_id": {"type": "string"},
         "description": {"type": "string"},
         "sampled_tissue": PHENOPACKET_ONTOLOGY_SCHEMA,
@@ -322,6 +326,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
 }
 
 # Deduplicate with other phenopacket representations
+# noinspection PyProtectedMember
 PHENOPACKET_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "TODO",
@@ -345,7 +350,17 @@ PHENOPACKET_SCHEMA = {
         },
         "biosamples": {
             "type": "array",
-            "items": PHENOPACKET_BIOSAMPLE_SCHEMA
+            "items": PHENOPACKET_BIOSAMPLE_SCHEMA,
+            "search": {
+                "database": {
+                    "relation": Phenopacket._meta.get_field("biosamples").remote_field.through._meta.db_table,
+                    "relationship": {
+                        "type": "MANY_TO_MANY",
+                        "parent_foreign_key": "phenopacket_id",
+                        "parent_primary_key": "phenopacket_id"
+                    }
+                }
+            }
         },
         "genes": {
             "type": "array",
