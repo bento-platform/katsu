@@ -1,5 +1,7 @@
 # Individual schemas for validation of JSONField values
 
+from .models import *
+
 ALLELE_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "todo",
@@ -116,48 +118,57 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = {
 }
 
 
-PHENOPACKET_INDIVIDUAL_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": {
-            "type": "string"
-        },
-        "alternate_ids": {
-            "type": "array",
-            "items": {
+def phenopacket_individual_schema(database_attrs: dict):
+    return {
+        "type": "object",
+        "properties": {
+            "id": {
                 "type": "string"
+            },
+            "alternate_ids": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "date_of_birth": {
+                "type": "string"
+            },
+            # TODO: Age
+            "sex": {  # TODO: Front end: enum dropdown
+                "type": "string",
+                "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
+                "search": _single_optional_eq_search(0)
+            },
+            "karyotypic_sex": {
+                "type": "string",
+                "enum": [
+                    "UNKNOWN_KARYOTYPE",
+                    "XX",
+                    "XY",
+                    "XO",
+                    "XXY",
+                    "XXX",
+                    "XXYY",
+                    "XXXY",
+                    "XXXX",
+                    "XYY",
+                    "OTHER_KARYOTYPE"
+                ],
+                "search": _single_optional_eq_search(1)
+            },
+            "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA,
+            "search": {
+                "database": {
+                    "relation": Individual._meta.db_table,
+                    "primary_key": Individual._meta.pk.column,
+                    **database_attrs
+                }
             }
         },
-        "date_of_birth": {
-            "type": "string"
-        },
-        # TODO: Age
-        "sex": {  # TODO: Front end: enum dropdown
-            "type": "string",
-            "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
-            "search": _single_optional_eq_search(0)
-        },
-        "karyotypic_sex": {
-            "type": "string",
-            "enum": [
-                "UNKNOWN_KARYOTYPE",
-                "XX",
-                "XY",
-                "XO",
-                "XXY",
-                "XXX",
-                "XXYY",
-                "XXXY",
-                "XXXX",
-                "XYY",
-                "OTHER_KARYOTYPE"
-            ],
-            "search": _single_optional_eq_search(1)
-        },
-        "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA
-    },
-    "required": ["id"]
-}
+        "required": ["id"]
+    }
+
 
 PHENOPACKET_META_DATA_SCHEMA = {
     "type": "object",
@@ -320,9 +331,14 @@ PHENOPACKET_SCHEMA = {
     "properties": {
         "id": {
             "type": "string",
-            "search": {"database": {"field": "phenopacket_id"}}
+            "search": {"database": {"field": Phenopacket._meta.pk.column}}
         },
-        "subject": PHENOPACKET_INDIVIDUAL_SCHEMA,
+        "subject": phenopacket_individual_schema({
+            "relationship": {
+                "type": "MANY_TO_ONE",
+                "foreign_key": Phenopacket._meta.get_field("subject").column
+            }
+        }),
         "phenotypic_features": {
             "type": "array",
             "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA
@@ -383,8 +399,8 @@ PHENOPACKET_SCHEMA = {
     "required": ["id", "meta_data"],
     "search": {
         "database": {
-            "relation": "patients_phenopacket",
-            "primary_key": "phenopacket_id"
+            "relation": Phenopacket._meta.db_table,
+            "primary_key": Phenopacket._meta.pk.column
         }
     }
 }
