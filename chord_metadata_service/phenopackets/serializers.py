@@ -177,6 +177,7 @@ class BiosampleSerializer(GenericSerializer):
 		allow_null=True, required=False)
 	phenotypic_features = PhenotypicFeatureSerializer(read_only=True,
 		many=True, exclude_when_nested=['id', 'biosample'])
+	procedure = ProcedureSerializer(read_only=True, exclude_when_nested=['id'])
 
 	class Meta:
 		model = Biosample
