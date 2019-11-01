@@ -27,7 +27,7 @@ DEBUG = os.environ.get("CHORD_DEBUG", "true").lower() == "true"
 
 ALLOWED_HOSTS = [os.environ.get("CHORD_HOST", "localhost")]
 if DEBUG:
-    ALLOWED_HOSTS += ["127.0.0.1", "[::1]"]
+    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
 
 APPEND_SLASH = False
 
