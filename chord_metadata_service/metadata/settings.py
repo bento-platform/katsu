@@ -25,7 +25,9 @@ SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("CHORD_DEBUG", "true").lower() == "true"
 
-ALLOWED_HOSTS = [os.environ.get("CHORD_HOST", "localhost")] if not DEBUG else []
+ALLOWED_HOSTS = [os.environ.get("CHORD_HOST", "localhost")]
+if DEBUG:
+    ALLOWED_HOSTS += ["127.0.0.1", "[::1]"]
 
 APPEND_SLASH = False
 
