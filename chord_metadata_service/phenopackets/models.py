@@ -114,6 +114,10 @@ class PhenotypicFeature(models.Model):
 	evidence = JSONField(blank=True, null=True,
 		help_text='This element intends to represent the evidence for '
 		'an assertion such as an observation of a PhenotypicFeature.')
+	biosample = models.ForeignKey("Biosample", on_delete=models.SET_NULL,
+		blank=True, null=True, related_name='phenotypic_features')
+	phenopacket = models.ForeignKey("Phenopacket", on_delete=models.SET_NULL,
+		blank=True, null=True, related_name='phenotypic_features')
 
 	def __str__(self):
 		return str(self.id)
@@ -261,8 +265,8 @@ class Biosample(models.Model):
 		help_text='The biosample’s description.')
 	sampled_tissue = JSONField(help_text='An Ontology term describing '
 		'the tissue from which the sample was taken.')
-	phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
-		help_text='List of phenotypic abnormalities of the sample.')
+	# phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
+	# 	help_text='List of phenotypic abnormalities of the sample.')
 	taxonomy = JSONField(blank=True, null=True,
 		help_text='An Ontology term describing the species of the sampled individual.')
 	# An ISO8601 string represent age
@@ -306,8 +310,8 @@ class Phenopacket(models.Model):
 	subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
 		related_name='phenopackets', help_text='The proband.')
 	# PhenotypicFeatures are present in Biosample, so can be accessed via Biosample instance
-	phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
-		help_text='Phenotypic features observed in the proband.')
+	# phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
+	# 	help_text='Phenotypic features observed in the proband.')
 	biosamples = models.ManyToManyField(Biosample, blank=True,
 		help_text='The biosamples that have been derived from an individual who is '
 		'the subject of the Phenopacket. Rr a collection of biosamples in isolation.')
