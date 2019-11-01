@@ -70,14 +70,6 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 	evidence = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=EVIDENCE)],
 		allow_null=True, required=False)
-
-	def __init__(self, *args, **kwargs):
-		exclude_when_nested = kwargs.pop('exclude_when_nested', None)
-		super(PhenotypicFeatureSerializer, self).__init__(*args, **kwargs)
-
-		if exclude_when_nested:
-			for field_name in exclude_when_nested:
-				self.fields.pop(field_name)
 	
 	class Meta:
 		model = PhenotypicFeature

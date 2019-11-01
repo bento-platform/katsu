@@ -12,7 +12,8 @@ class IndividualSerializer(GenericSerializer):
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
 		allow_null=True
 		)
-	biosamples = BiosampleSerializer(read_only=True, many=True)
+	biosamples = BiosampleSerializer(read_only=True, many=True,
+		exclude_when_nested=['individual'])
 	phenopackets = PhenopacketSerializer(read_only=True, many=True)
 
 	class Meta:
