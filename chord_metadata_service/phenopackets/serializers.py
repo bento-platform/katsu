@@ -182,6 +182,21 @@ class ProcedureSerializer(GenericSerializer):
 		model = Procedure
 		fields = '__all__'
 
+	def validate(self, data):
+		"""
+		Check if body_site is not empty
+		if not bind 'code' and 'body_site' to be unique together
+		"""
+
+		if data.get('body_site'):
+			check = Procedure.objects.filter(
+				code=data.get('code'), body_site=data.get('body_site')).exists()
+			if check:
+				raise serializers.ValidationError(
+					"This procedure is already exists."
+					)
+		return data
+
 
 class HtsFileSerializer(GenericSerializer):
 
