@@ -59,7 +59,7 @@ class MetaDataSerializer(GenericSerializer):
 #############################################################
 
 class PhenotypicFeatureSerializer(GenericSerializer):
-	_type = serializers.JSONField(
+	pftype = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
 	severity = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
@@ -74,7 +74,18 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 	class Meta:
 		model = PhenotypicFeature
 		fields = '__all__'
-		# exclude = ['biosample']
+
+	# TODO removes validation why?
+	def to_representation(self, obj):
+		output = super().to_representation(obj)
+		output['type'] = output.pop('pftype')
+		return output
+
+	def to_internal_value(self, data):
+		if 'type' in data.keys():
+			data['pftype'] = data.pop('type')
+		return data
+
 
 	def validate_modifier(self, value):
 		if isinstance(value, list):

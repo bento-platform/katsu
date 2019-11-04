@@ -94,7 +94,7 @@ class PhenotypicFeature(models.Model):
 
 	description = models.CharField(max_length=200, blank=True,
 		help_text='Human-readable verbiage NOT for structured text')
-	_type = JSONField(verbose_name='type',
+	pftype = JSONField(verbose_name='type',
 		help_text='Ontology term that describes the phenotype.')
 	negated = models.BooleanField(default=False,
 		help_text='This element is a flag to indicate whether the phenotype was observed or not.')
