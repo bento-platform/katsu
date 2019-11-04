@@ -20,6 +20,7 @@ from chord_metadata_service.patients import api_views, chord_api_views
 from rest_framework.schemas import get_schema_view
 from .settings import DEBUG
 
+
 urlpatterns = [
     path('', get_schema_view(
         title="Metadata Service API",

@@ -10,7 +10,7 @@ from chord_metadata_service.restapi.serializers import GenericSerializer
 class IndividualSerializer(GenericSerializer):
 	taxonomy = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-		allow_null=True
+		allow_null=True, required=False
 		)
 	biosamples = BiosampleSerializer(read_only=True, many=True,
 		exclude_when_nested=['individual'])

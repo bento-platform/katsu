@@ -172,7 +172,7 @@ class HtsFile(models.Model):
 		'to the sample identifier in the HTS file')
 
 	def __str__(self):
-		return str(self.id)
+		return str(self.uri)
 
 
 class Gene(models.Model):
@@ -194,7 +194,7 @@ class Gene(models.Model):
 		help_text='Official gene symbol.')
 
 	def __str__(self):
-		return str(self.id)
+		return str(self.gene_id)
 
 
 class Variant(models.Model):
