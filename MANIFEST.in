@@ -1,1 +1,1 @@
-include chord_variant_service/patients/workflows/phenopackets_json.wdl
+include chord_metadata_service/patients/workflows/phenopackets_json.wdl
