@@ -162,5 +162,56 @@
       },
       "phenopackets.is_control_sample": "biosample.is_control_sample"
     }
+  ],
+  "procedures": [
+    {
+      "resourceType": "Procedure",
+      "identifier": "procedure.id",
+      "code": {
+      "coding": [
+        {
+          "system": "",
+          "code": "procedure.code.id",
+          "display": "procedure.code.label"
+        }
+      ],
+      "bodySite": [
+        {
+          "coding": [
+            {
+              "system": "",
+              "code": "procedure.body_site.id",
+              "display": "procedure.body_site.label"
+            }
+          ]
+        }
+      ]
+      }
+    }
+  ],
+  "htsfiles": [
+    {
+      "resourceType": "DocumentReference",
+      "content": [
+        {
+          "attachment": {
+            "url": "htsfile.uri",
+            "title": "htsfile.description"
+          }
+        }
+      ],
+      "type": {
+        "coding": [
+          {
+            "system": "http://ga4gh.org",
+            "code": "htsfile.hts_format",
+            "display": "htsfile.hts_format"
+          }
+        ]
+      },
+      "extension": {
+        "htsfile-genome-assembly": "htsfile.genome_assembly"
+      }
+    }
   ]
 }
