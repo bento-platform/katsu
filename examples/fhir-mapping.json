@@ -1,0 +1,166 @@
+{
+  "subject": {
+    "resourceType": "Patient",
+    "identifier": "individual.individual_id",
+    "birthDate": "individual.date_of_birth",
+    "gender": "individual.sex",
+    "active": "individual.active"
+  },
+  "phenotypic_features": [
+    {
+      "resourceType": "Condition",
+      "identifier": {
+        "value": "phenotypicfeature.id"
+      },
+      "text": "phenotypicfeature.description",
+      "code": {
+        "coding": [
+          {
+            "system": "",
+            "code": "phenotypicfeature._type.id",
+            "display": "phenotypicfeature._type.label"
+          }
+        ]
+      },
+      "severity": {
+        "coding": [
+          {
+            "system": "",
+            "code": "phenotypicfeature.severity.id",
+            "display": "phenotypicfeature.severity.label"
+          }
+        ]
+      },
+      "onsetAge": {
+        "value": "",
+        "units": "",
+        "system": "",
+        "code": "phenotypicfeature.onset.id"
+      },
+      "evidence": [
+        {
+          "code": [
+            {
+              "coding": [
+                {
+                  "system": "",
+                  "code": "phenotypicfeature.evidence.evidence_code.id",
+                  "display": "phenotypicfeature.evidence.evidence_code.label"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "detail": [
+            {
+              "reference": "phenotypicfeature.evidence.reference.id",
+              "display": "phenotypicfeature.evidence.reference.description"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "diseases": [
+    {
+      "resourceType": "Condition",
+      "code": [
+            {
+              "coding": [
+                {
+                  "system": "",
+                  "code": "disease.term.id",
+                  "display": "disease.term.label"
+                }
+              ]
+            }
+          ],
+      "onsetAge": {
+        "value": "",
+        "units": "",
+        "system": "",
+        "code": "disease.onset.age"
+      },
+      "stage": [
+        {
+          "summary": {
+            "coding": {
+              "system": "",
+              "code": "",
+              "display": ""
+            }
+          },
+          "type": {
+            "coding": {
+              "system": "",
+              "code": "disease.tumor_stage.id",
+              "display": "disease.tumor_stage.label"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "biosamples": [
+    {
+      "resourceType": "Specimen",
+      "identifier": "biosample.biosample_id",
+      "subject": "individual.individual_id",
+      "text": "biosample.description",
+      "parent": {
+        "reference": {
+          "reference": "biosample.sampled_tissue.id",
+          "type": "",
+          "identifier": "",
+          "display": "biosample.sampled_tissue.label"
+        }
+      },
+      "phenotypic_features": [
+        {
+          "reference": {
+             "identifier": "phenotypicfeature.id"
+          }
+        }
+      ],
+      "phenopackets.individual_age_at_collection": {
+        "age": "biosample.individual_age_at_collection"
+      },
+      "phenopackets.histological_diagnosis": {
+        "id": "biosample.histological_diagnosis.id",
+        "label": "biosample.histological_diagnosis.label"
+      },
+      "phenopackets.tumor_progression": {
+        "id": "biosample.tumor_progression.id",
+        "label": "biosample.tumor_progression.label"
+      },
+      "phenopackets.diagnostic_markers": [
+        {
+        "id": "phenopackets.diagnostic_markers.id",
+        "label": "biosample.diagnostic_markers.label"
+        }
+      ],
+      "collection": {
+        "method": {
+          "coding": [
+            {
+              "system": "",
+              "code": "procedure.code.id",
+              "display": "procedure.code.label"
+            }
+          ]
+        },
+        "bodySite": {
+          "coding": [
+            {
+              "system": "",
+              "code": "procedure.body_site.id",
+              "display": "procedure.body_site.label"
+            }
+          ]
+        }
+      },
+      "phenopackets.is_control_sample": "biosample.is_control_sample"
+    }
+  ]
+}
