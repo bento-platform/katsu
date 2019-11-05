@@ -1,7 +1,7 @@
 from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
-from rest_framework import serializers, validators
+from rest_framework import serializers
 from .models import *
-from jsonschema import validate, ValidationError, Draft7Validator, FormatChecker
+from jsonschema import Draft7Validator, FormatChecker
 from chord_metadata_service.restapi.schemas import *
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.serializers import GenericSerializer
@@ -70,7 +70,7 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 	evidence = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=EVIDENCE)],
 		allow_null=True, required=False)
-	
+
 	class Meta:
 		model = PhenotypicFeature
 		fields = '__all__'
