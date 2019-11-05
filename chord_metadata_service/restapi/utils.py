@@ -48,6 +48,23 @@ def convert_to_fhir(individual_data):
 						ftype['display'] = feature.get('type').get('label')
 						feature_record['code']['coding'].append(ftype)
 					biosample_record['phenotypic_features'].append(feature_record)
+			# mapping for procedure relared to each biosample
+			if 'procedure' in sample.keys():
+				procedure = sample.get('procedure')
+				biosample_record['procedure'] = {}
+				biosample_record['procedure']['resourceType'] = 'Procedure'
+				biosample_record['procedure']['code'] = {}
+				biosample_record['procedure']['code']['coding'] = []
+				code = {}
+				code['code'] = procedure.get('code').get('id')
+				code['display'] = procedure.get('code').get('label')
+				biosample_record['procedure']['code']['coding'].append(code)
+				biosample_record['procedure']['code']['bodySite'] = []
+				body_site = {}
+				body_site['code'] = procedure.get('body_site').get('id')
+				body_site['display'] = procedure.get('body_site').get('label')
+				biosample_record['procedure']['code']['bodySite'].append(body_site)
+
 			fhir_record['biosamples'].append(biosample_record)
 
 	return fhir_record
