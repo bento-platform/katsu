@@ -1,0 +1,303 @@
+{
+  "subject": {
+    "resourceType": "Patient",
+    "identifier": "individual.individual_id",
+    "birthDate": "individual.date_of_birth",
+    "gender": "individual.sex",
+    "active": "individual.active",
+    "deceased": "individual.deceased",
+    "address_postal_code": "individual.address_postal_code",
+    "race": "individual.race",
+    "ethnicity": "individual.ethnicity"
+  },
+  "phenotypic_features": [
+    {
+      "resourceType": "Condition",
+      "identifier": {
+        "value": "phenotypicfeature.id"
+      },
+      "text": "phenotypicfeature.description",
+      "code": {
+        "coding": [
+          {
+            "system": "",
+            "code": "phenotypicfeature._type.id",
+            "display": "phenotypicfeature._type.label"
+          }
+        ]
+      },
+      "severity": {
+        "coding": [
+          {
+            "system": "",
+            "code": "phenotypicfeature.severity.id",
+            "display": "phenotypicfeature.severity.label"
+          }
+        ]
+      },
+      "onsetAge": {
+        "value": "",
+        "units": "",
+        "system": "",
+        "code": "phenotypicfeature.onset.id"
+      },
+      "evidence": [
+        {
+          "code": [
+            {
+              "coding": [
+                {
+                  "system": "",
+                  "code": "phenotypicfeature.evidence.evidence_code.id",
+                  "display": "phenotypicfeature.evidence.evidence_code.label"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "detail": [
+            {
+              "reference": "phenotypicfeature.evidence.reference.id",
+              "display": "phenotypicfeature.evidence.reference.description"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "diseases": [
+    {
+      "resourceType": "Condition",
+      "code": [
+            {
+              "coding": [
+                {
+                  "system": "",
+                  "code": "disease.term.id",
+                  "display": "disease.term.label"
+                }
+              ]
+            }
+          ],
+      "onsetAge": {
+        "value": "",
+        "units": "",
+        "system": "",
+        "code": "disease.onset.age"
+      },
+      "stage": [
+        {
+          "summary": {
+            "coding": {
+              "system": "",
+              "code": "",
+              "display": ""
+            }
+          },
+          "type": {
+            "coding": {
+              "system": "",
+              "code": "disease.tumor_stage.id",
+              "display": "disease.tumor_stage.label"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "biosamples": [
+    {
+      "resourceType": "Specimen",
+      "identifier": "biosample.biosample_id",
+      "subject": "individual.individual_id",
+      "text": "biosample.description",
+      "parent": {
+        "reference": {
+          "reference": "biosample.sampled_tissue.id",
+          "type": "",
+          "identifier": "",
+          "display": "biosample.sampled_tissue.label"
+        }
+      },
+      "phenotypic_features": [
+        {
+          "reference": {
+             "identifier": "phenotypicfeature.id"
+          }
+        }
+      ],
+      "phenopackets.individual_age_at_collection": {
+        "age": "biosample.individual_age_at_collection"
+      },
+      "phenopackets.histological_diagnosis": {
+        "id": "biosample.histological_diagnosis.id",
+        "label": "biosample.histological_diagnosis.label"
+      },
+      "phenopackets.tumor_progression": {
+        "id": "biosample.tumor_progression.id",
+        "label": "biosample.tumor_progression.label"
+      },
+      "phenopackets.diagnostic_markers": [
+        {
+        "id": "phenopackets.diagnostic_markers.id",
+        "label": "biosample.diagnostic_markers.label"
+        }
+      ],
+      "collection": {
+        "method": {
+          "coding": [
+            {
+              "system": "",
+              "code": "procedure.code.id",
+              "display": "procedure.code.label"
+            }
+          ]
+        },
+        "bodySite": {
+          "coding": [
+            {
+              "system": "",
+              "code": "procedure.body_site.id",
+              "display": "procedure.body_site.label"
+            }
+          ]
+        }
+      },
+      "phenopackets.is_control_sample": "biosample.is_control_sample"
+    }
+  ],
+  "procedures": [
+    {
+      "resourceType": "Procedure",
+      "identifier": "procedure.id",
+      "code": {
+      "coding": [
+        {
+          "system": "",
+          "code": "procedure.code.id",
+          "display": "procedure.code.label"
+        }
+      ],
+      "bodySite": [
+        {
+          "coding": [
+            {
+              "system": "",
+              "code": "procedure.body_site.id",
+              "display": "procedure.body_site.label"
+            }
+          ]
+        }
+      ]
+      }
+    }
+  ],
+  "htsfiles": [
+    {
+      "resourceType": "DocumentReference",
+      "content": [
+        {
+          "attachment": {
+            "url": "htsfile.uri",
+            "title": "htsfile.description"
+          }
+        }
+      ],
+      "type": {
+        "coding": [
+          {
+            "system": "http://ga4gh.org",
+            "code": "htsfile.hts_format",
+            "display": "htsfile.hts_format"
+          }
+        ]
+      },
+      "extension": {
+        "htsfile-genome-assembly": "htsfile.genome_assembly"
+      }
+    }
+  ],
+  "genes": [
+    {
+      "resourceType": " CodeableConcept",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/region-studied"
+        ]
+      },
+      "coding": [
+        {
+          "code": "gene.gene_id",
+          "display": "gene.symbol"
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "resourceType": "Observation",
+      "identifier": "variant.id",
+      "meta" : {
+          "profile" : [
+            "http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/variant"
+          ]
+        }
+    }
+  ],
+  "phenopackets": [
+    {
+      "resourceType": "Composition",
+      "id": "phenopacket.phenopacket_id",
+      "meta": {
+          "profile" : [
+            "http://ga4gh.org/fhir/phenopackets/StructureDefinition/Phenopacket"
+          ],
+          "versionId": "metadata.id",
+          "lastUpdated": "metadata.created",
+          "source": "metadata.external_references",
+          "tag": "metadata.resources"
+        },
+      "subject": "individual.individual_id",
+      "section": [
+        {
+          "title": "biosamples",
+          "entry": [
+            "biosample.biosample_id"
+          ]
+        },
+        {
+          "title": "phenotypic_features",
+          "entry": [
+            "phenotypicfeature.id"
+          ]
+        },
+        {
+          "title": "genes",
+          "entry": [
+            "gene.gene_id"
+          ]
+        },
+        {
+          "title": "variants",
+          "entry": [
+            "variant.id"
+          ]
+        },
+        {
+          "title": "diseases",
+          "entry": [
+            "disease.id"
+          ]
+        },
+        {
+          "title": "htsfiles",
+          "entry": [
+            "htsfile.uri"
+          ]
+        }
+      ]
+
+    }
+  ]
+}

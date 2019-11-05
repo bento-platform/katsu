@@ -15,41 +15,24 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework import routers
-from chord_metadata_service.patients import api_views, chord_ingest_views, chord_search_views
+from chord_metadata_service.restapi import urls as restapi_urls
+from chord_metadata_service.patients import chord_ingest_views, chord_search_views
 from rest_framework.schemas import get_schema_view
 
 from .settings import DEBUG
 
 
-router = routers.DefaultRouter(trailing_slash=False)
-router.register(r'ontologies', api_views.OntologyViewSet)
-router.register(r'variants', api_views.VariantViewSet)
-router.register(r'phenotypicfeatures', api_views.PhenotypicFeatureViewSet)
-router.register(r'procedures', api_views.ProcedureViewSet)
-router.register(r'htsfiles', api_views.HtsFileViewSet)
-router.register(r'genes', api_views.GeneViewSet)
-router.register(r'diseases', api_views.DiseaseViewSet)
-router.register(r'resources', api_views.ResourceViewSet)
-router.register(r'externalreferences', api_views.ExternalReferenceViewSet)
-router.register(r'metadata', api_views.MetaDataViewSet)
-router.register(r'individuals', api_views.IndividualViewSet)
-router.register(r'biosamples', api_views.BiosampleViewSet)
-router.register(r'phenopackets', api_views.PhenopacketViewSet)
-router.register(r'genomicinterpretations', api_views.GenomicInterpretationViewSet)
-router.register(r'diagnoses', api_views.DiagnosisViewSet)
-router.register(r'interpretations', api_views.InterpretationViewSet)
-router.register(r'projects', api_views.ProjectViewSet)
-router.register(r'datasets', api_views.DatasetViewSet)
-router.register(r'table_ownership', api_views.TableOwnershipViewSet)
-
-
 urlpatterns = [
-    path('api/', include(router.urls)),
-    path('', get_schema_view(title="Metadata Service API"),
+    path('', get_schema_view(
+        title="Metadata Service API",
+        description="Metadata Service provides a phenotypic description of an Individual "
+        "in the context of biomedical research.",
+        version="0.1"
+        ),
         name='openapi-schema'),
 
-    path('service-info', api_views.service_info),
+    path('api/', include(restapi_urls)),
+    # path('service-info/', api_views.service_info),
 
     path('workflows', chord_ingest_views.workflow_list),
     path('workflows/<slug:workflow_id>', chord_ingest_views.workflow_item),
