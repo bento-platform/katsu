@@ -2,7 +2,8 @@ from rest_framework import viewsets, pagination
 from .serializers import *
 from .models import *
 from rest_framework.settings import api_settings
-from chord_metadata_service.restapi.api_renderers import FHIRRenderer
+from chord_metadata_service.restapi.api_renderers import (
+	FHIRRenderer, PhenopacketsRenderer)
 
 
 class LargeResultsSetPagination(pagination.PageNumberPagination):
@@ -23,4 +24,6 @@ class IndividualViewSet(viewsets.ModelViewSet):
 	queryset = Individual.objects.all()
 	serializer_class = IndividualSerializer
 	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES) + (FHIRRenderer, )
+	renderer_classes = tuple(
+		api_settings.DEFAULT_RENDERER_CLASSES
+		) + (FHIRRenderer, PhenopacketsRenderer)
