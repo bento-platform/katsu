@@ -32,7 +32,7 @@ urlpatterns = [
         name='openapi-schema'),
 
     path('api/', include(restapi_urls)),
-    path('service-info/', api_views.service_info),
+    path('service-info', api_views.service_info),
 
     path('workflows', views_ingest.workflow_list),
     path('workflows/<slug:workflow_id>', views_ingest.workflow_item),
