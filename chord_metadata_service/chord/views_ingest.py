@@ -168,7 +168,7 @@ def ingest(request):
                 sampled_tissue=bs.get("sampled_tissue", None),
                 taxonomy=bs.get("taxonomy", None),
                 individual_age_at_collection=bs.get("individual_age_at_collection", None),
-                historical_diagnosis=bs.get("historical_diagnosis", None),
+                histological_diagnosis=bs.get("histological_diagnosis", None),
                 tumor_progression=bs.get("tumor_progression", None),
                 tumor_grade=bs.get("tumor_grade", None),
                 procedure=procedure,
