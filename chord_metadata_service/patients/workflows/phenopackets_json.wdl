@@ -12,6 +12,6 @@ task identity_task {
         true
     }
     output {
-        File json_document = json_document_in
+        File json_document = "${json_document_in}"
     }
 }
