@@ -4,7 +4,11 @@
     "identifier": "individual.individual_id",
     "birthDate": "individual.date_of_birth",
     "gender": "individual.sex",
-    "active": "individual.active"
+    "active": "individual.active",
+    "deceased": "individual.deceased",
+    "address_postal_code": "individual.address_postal_code",
+    "race": "individual.race",
+    "ethnicity": "individual.ethnicity"
   },
   "phenotypic_features": [
     {
