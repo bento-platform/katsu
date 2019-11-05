@@ -10,7 +10,7 @@
     "race": "individual.race",
     "ethnicity": "individual.ethnicity"
   },
-  "phenotypic_features": [
+  "phenotypicFeatures": [
     {
       "resourceType": "Condition",
       "identifier": {
@@ -120,7 +120,7 @@
           "display": "biosample.sampled_tissue.label"
         }
       },
-      "phenotypic_features": [
+      "phenotypicFeatures": [
         {
           "reference": {
              "identifier": "phenotypicfeature.id"
@@ -130,20 +130,61 @@
       "phenopackets.individual_age_at_collection": {
         "age": "biosample.individual_age_at_collection"
       },
-      "phenopackets.histological_diagnosis": {
-        "id": "biosample.histological_diagnosis.id",
-        "label": "biosample.histological_diagnosis.label"
+      "taxonomy": {
+        "coding": [
+          {
+            "system": "",
+            "code": "biosample.taxonomy.id",
+            "display": "biosample.taxonomy.label"
+          }
+        ],
+        "text": ""
       },
-      "phenopackets.tumor_progression": {
-        "id": "biosample.tumor_progression.id",
-        "label": "biosample.tumor_progression.label"
+      "histologicalDiagnosis": {
+        "coding": [
+          {
+            "system": "",
+            "code": "biosample.histological_diagnosis.id",
+            "display": "biosample.histological_diagnosis.label"
+          }
+        ],
+        "text": ""
       },
-      "phenopackets.diagnostic_markers": [
-        {
-        "id": "phenopackets.diagnostic_markers.id",
-        "label": "biosample.diagnostic_markers.label"
-        }
-      ],
+      "tumorProgression": {
+        "coding": [
+          {
+            "system": "",
+            "code": "biosample.tumor_progression.id",
+            "display": "biosample.tumor_progression.label"
+          }
+        ],
+        "text": ""
+      },
+       "tumorGrade": {
+        "coding": [
+          {
+            "system": "",
+            "code": "biosample.tumor_grade.id",
+            "display": "biosample.tumor_grade.label"
+          }
+        ],
+        "text": ""
+      },
+      "diagnosticMarkers": {
+        "coding": [
+          {
+            "system": "",
+            "code": "biosample.diagnostic_markers.id",
+            "display": "biosample.diagnostic_markers.label"
+          },
+          {
+            "system": "",
+            "code": "biosample.diagnostic_markers.id",
+            "display": "biosample.diagnostic_markers.label"
+          }
+        ],
+        "text": ""
+      },
       "collection": {
         "method": {
           "coding": [

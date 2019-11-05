@@ -1,5 +1,5 @@
 from rest_framework.renderers import JSONRenderer
-from .utils import convert_to_fhir
+from .utils import convert_to_fhir, camel_case_field_names
 
 
 class FHIRRenderer(JSONRenderer):
@@ -17,3 +17,11 @@ class FHIRRenderer(JSONRenderer):
 			final_data = convert_to_fhir(data)
 
 		return super(FHIRRenderer, self).render(final_data, media_type, renderer_context)
+
+
+class PhenopacketsRenderer(JSONRenderer):
+	media_type = 'application/json'
+	format = 'phenopackets'
+
+	def render(self, data, media_type=None, renderer_context=None):
+		return super(PhenopacketsRenderer, self).render(data, media_type, renderer_context)
