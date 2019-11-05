@@ -213,5 +213,87 @@
         "htsfile-genome-assembly": "htsfile.genome_assembly"
       }
     }
+  ],
+  "genes": [
+    {
+      "resourceType": " CodeableConcept",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/region-studied"
+        ]
+      },
+      "coding": [
+        {
+          "code": "gene.gene_id",
+          "display": "gene.symbol"
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "resourceType": "Observation",
+      "identifier": "variant.id",
+      "meta" : {
+          "profile" : [
+            "http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/variant"
+          ]
+        }
+    }
+  ],
+  "phenopackets": [
+    {
+      "resourceType": "Composition",
+      "id": "phenopacket.phenopacket_id",
+      "meta": {
+          "profile" : [
+            "http://ga4gh.org/fhir/phenopackets/StructureDefinition/Phenopacket"
+          ],
+          "versionId": "metadata.id",
+          "lastUpdated": "metadata.created",
+          "source": "metadata.external_references",
+          "tag": "metadata.resources"
+        },
+      "subject": "individual.individual_id",
+      "section": [
+        {
+          "title": "biosamples",
+          "entry": [
+            "biosample.biosample_id"
+          ]
+        },
+        {
+          "title": "phenotypic_features",
+          "entry": [
+            "phenotypicfeature.id"
+          ]
+        },
+        {
+          "title": "genes",
+          "entry": [
+            "gene.gene_id"
+          ]
+        },
+        {
+          "title": "variants",
+          "entry": [
+            "variant.id"
+          ]
+        },
+        {
+          "title": "diseases",
+          "entry": [
+            "disease.id"
+          ]
+        },
+        {
+          "title": "htsfiles",
+          "entry": [
+            "htsfile.uri"
+          ]
+        }
+      ]
+
+    }
   ]
 }
