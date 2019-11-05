@@ -11,7 +11,7 @@ from chord_metadata_service.phenopackets import api_views as phenopacket_views
 # from .settings import DEBUG
 
 
-router = routers.DefaultRouter()
+router = routers.DefaultRouter(trailing_slash=False)
 
 # Patients app urls
 router.register(r'individuals', individual_views.IndividualViewSet)
