@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'chord_metadata_service.chord',
     'chord_metadata_service.patients',
     'chord_metadata_service.phenopackets',
     'chord_metadata_service.restapi',

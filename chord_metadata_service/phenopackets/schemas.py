@@ -1,6 +1,7 @@
 # Individual schemas for validation of JSONField values
 
 from chord_metadata_service.phenopackets.models import *
+from chord_metadata_service.patients.models import Individual
 
 ALLELE_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",

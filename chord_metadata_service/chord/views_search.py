@@ -4,8 +4,8 @@ from django.db import connection
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Dataset, Phenopacket
-from .schemas import PHENOPACKET_SCHEMA
+from .models import Dataset
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 
 PHENOPACKET_DATA_TYPE_ID = "phenopacket"
 
