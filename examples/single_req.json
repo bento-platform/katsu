@@ -1,0 +1,28 @@
+{
+  "dataset_id": "3df5e8b0-3949-4d3c-a37f-1c6a81940d50",
+  "workflow_id": "phenopackets_json",
+  "workflow_metadata": {
+    "inputs": [
+      {
+        "id": "json_document",
+        "type": "file",
+        "extensions": [
+          ".json"
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "id": "json_document",
+        "type": "file",
+        "value": "{json_document}"
+      }
+    ]
+  },
+  "workflow_params": {
+    "phenopackets_json.json_document": "/home/dlougheed/git/chord_metadata_service/examples/single.json"
+  },
+  "workflow_outputs": {
+    "json_document": "/home/dlougheed/git/chord_metadata_service/examples/single.json"
+  }
+}
