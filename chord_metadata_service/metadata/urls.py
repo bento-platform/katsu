@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from chord_metadata_service.restapi import urls as restapi_urls
+from chord_metadata_service.restapi import api_views, urls as restapi_urls
 from chord_metadata_service.patients import chord_ingest_views, chord_search_views
 from rest_framework.schemas import get_schema_view
 
@@ -32,7 +32,7 @@ urlpatterns = [
         name='openapi-schema'),
 
     path('api/', include(restapi_urls)),
-    # path('service-info/', api_views.service_info),
+    path('service-info/', api_views.service_info),
 
     path('workflows', chord_ingest_views.workflow_list),
     path('workflows/<slug:workflow_id>', chord_ingest_views.workflow_item),
