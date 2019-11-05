@@ -1,6 +1,7 @@
 import chord_lib
 import json
 import os
+import uuid
 
 from dateutil.parser import isoparse
 
@@ -12,7 +13,8 @@ from rest_framework.response import Response
 
 from chord_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
-from .models import *
+from chord_metadata_service.chord.models import *
+from chord_metadata_service.phenopackets.models import *
 
 
 METADATA_WORKFLOWS = {
@@ -77,45 +79,14 @@ def workflow_file(_request, workflow_id):
         return Response(wf.read())
 
 
-def add_ontology_tuple(s, v):
-    if v is None:
-        return
-
-    if "id" not in v or "label" not in v:
-        return
-
-    s.add((v["id"], v["label"]))
-
-
-def aggregate_phenotypic_feature_terms(s, pfs):
-    for pf in pfs:
-        add_ontology_tuple(s, pf["type"])
-
-        if "severity" in pf:
-            add_ontology_tuple(s, pf["severity"])
-
-        for m in pf.get("modifiers", []):
-            add_ontology_tuple(s, m)
-
-        add_ontology_tuple(s, pf.get("onset", None))
-
-
-def get_db_ontology(v):
-    return Ontology.objects.get(ontology_id=v["id"])
-
-
-def get_db_ontology_or_none(v):
-    return get_db_ontology(v) if v is not None else None
-
-
 def create_phenotypic_feature(pf):
     pf_obj = PhenotypicFeature(
         description=pf.get("description", ""),
-        _type=Ontology.objects.get(pf["type"]["id"]),
+        pftype=pf["type"]["id"],
         negated=pf.get("negated", False),
-        severity=get_db_ontology_or_none(pf.get("severity", None)),
+        severity=pf.get("severity", None),
         modifiers=[],  # TODO
-        onset=get_db_ontology_or_none(pf.get("onset", None)),
+        onset=pf.get("onset", None),
         evidence=pf.get("evidence", None)  # TODO: Separate class?
     )
 
@@ -166,41 +137,6 @@ def ingest(request):
         diseases = phenopacket_data.get("diseases", [])
         meta_data = phenopacket_data["meta_data"]
 
-        # Aggregate ontology terms across all possible locations
-
-        ontology_terms = set()
-
-        if subject:
-            add_ontology_tuple(ontology_terms, subject.get("taxonomy", None))
-
-        aggregate_phenotypic_feature_terms(ontology_terms, phenotypic_features)
-
-        for bs in biosamples:
-            add_ontology_tuple(ontology_terms, bs["sampled_tissue"])
-            aggregate_phenotypic_feature_terms(ontology_terms, bs.get("phenotypic_features", []))
-            add_ontology_tuple(ontology_terms, bs.get("taxonomy", None))
-            add_ontology_tuple(ontology_terms, bs.get("histological_diagnosis", None))
-            add_ontology_tuple(ontology_terms, bs.get("tumor_progression", None))
-            add_ontology_tuple(ontology_terms, bs.get("tumor_grade", None))
-            add_ontology_tuple(ontology_terms, bs.get("diagnostic_markers", None))
-            add_ontology_tuple(ontology_terms, bs["procedure"]["code"])
-            add_ontology_tuple(ontology_terms, bs["procedure"].get("body_site", None))
-
-        for d in diseases:
-            add_ontology_tuple(ontology_terms, d["term"])
-            add_ontology_tuple(ontology_terms, d.get("onset", None))  # Will not add anything if Age/AgeRange
-            for ts in d.get("tumor_stage", []):
-                add_ontology_tuple(ontology_terms, ts)
-
-        # TODO: Check ontologies with metadata resources
-
-        # Add ontology terms to database if needed
-        # TODO: Don't load all ontology IDs (wasteful)
-
-        existing_ontologies = set(o.ontology_id for o in Ontology.objects.all())
-        Ontology.objects.bulk_create(Ontology(ontology_id=oi, label=ol) for oi, ol in ontology_terms
-                                     if oi not in existing_ontologies)
-
         if subject:
             subject, _ = Individual.objects.get_or_create(
                 individual_id=subject["id"],
@@ -218,31 +154,30 @@ def ingest(request):
         for bs in biosamples:
             # TODO: This should probably be a JSON field, or compound key with code/body_site
             procedure, _ = Procedure.objects.get_or_create(
-                code=get_db_ontology(bs["procedure"]["code"]),
-                body_site=get_db_ontology_or_none(bs["procedure"].get("body_site", None))
+                code=bs["procedure"]["code"],
+                body_site=bs["procedure"].get("body_site", None)
             )
 
             bs_pfs = [create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
-
-            diagnostic_markers = [get_db_ontology(dm) for dm in bs.get("diagnostic_markers", [])]
 
             bs_obj, _ = Biosample.objects.get_or_create(
                 biosample_id=bs["id"],
                 individual=(Individual.objects.get(individual_id=bs["individual_id"])
                             if "individual_id" in bs else None),
                 description=bs.get("description", ""),
-                sampled_tissue=get_db_ontology_or_none(bs.get("sampled_tissue", None)),
-                taxonomy=get_db_ontology_or_none(bs.get("taxonomy", None)),
+                sampled_tissue=bs.get("sampled_tissue", None),
+                taxonomy=bs.get("taxonomy", None),
                 individual_age_at_collection=bs.get("individual_age_at_collection", None),
-                historical_diagnosis=get_db_ontology_or_none(bs.get("historical_diagnosis", None)),
-                tumor_progression=get_db_ontology_or_none(bs.get("tumor_progression", None)),
-                tumor_grade=get_db_ontology_or_none(bs.get("tumor_grade", None)),
+                histological_diagnosis=bs.get("histological_diagnosis", None),
+                tumor_progression=bs.get("tumor_progression", None),
+                tumor_grade=bs.get("tumor_grade", None),
                 procedure=procedure,
-                is_control_sample=bs.get("is_control_sample", False)
+                is_control_sample=bs.get("is_control_sample", False),
+
+                diagnostic_markers=bs.get("diagnostic_markers", [])
             )
 
             bs_obj.phenotypic_features.set(bs_pfs)
-            bs_obj.diagnostic_markers.set(diagnostic_markers)
 
             biosamples_db.append(bs_obj)
 
@@ -264,19 +199,8 @@ def ingest(request):
         for d in diseases:
             # TODO: Primary key, should this be a model?
 
-            onset = {}
-            age_of_onset_ontology = get_db_ontology_or_none(d.get("onset", None))
-            if age_of_onset_ontology is not None:
-                onset["age_of_onset_ontology"] = age_of_onset_ontology
-            elif d.get("onset", None) is not None:
-                onset["age_of_onset"] = d["onset"]
-
-            d_obj = Disease(term=get_db_ontology_or_none(d["term"]), **onset)
+            d_obj = Disease(term=d["term"], age_of_onset=d.get("onset", None), tumor_stage=d.get("tumor_stage", []))
             d_obj.save()
-
-            d_obj.tumor_stage.set([get_db_ontology_or_none(o) for o in d.get("tumor_stage", [])])
-
-            diseases_db.append(d_obj)
 
         resources_db = []
         for rs in meta_data.get("resources", []):
@@ -291,23 +215,15 @@ def ingest(request):
             rs_obj.save()
             resources_db.append(rs_obj)
 
-        er_db = []
-        for er in meta_data.get("external_references", []):
-            er_obj, _ = ExternalReference.objects.get_or_create(
-                external_reference_id=er["id"],
-                description=er.get("description", "")
-            )
-            er_db.append(er_obj)
-
         meta_data_obj = MetaData(
             created_by=meta_data["created_by"],
             submitted_by=meta_data.get("submitted_by", None),
-            phenopacket_schema_version="1.0.0-RC3"
+            phenopacket_schema_version="1.0.0-RC3",
+            external_references=meta_data.get("external_references", [])
         )
         meta_data_obj.save()
 
         meta_data_obj.resources.set(resources_db)  # TODO: primary key ???
-        meta_data_obj.external_references.set(er_db)
 
         new_phenopacket = Phenopacket(
             phenopacket_id=new_phenopacket_id,

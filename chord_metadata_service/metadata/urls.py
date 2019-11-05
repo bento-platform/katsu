@@ -15,9 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from chord_metadata_service.restapi import urls as restapi_urls
-from chord_metadata_service.patients import api_views, chord_api_views
+from chord_metadata_service.restapi import api_views, urls as restapi_urls
+from chord_metadata_service.chord import views_ingest, views_search
 from rest_framework.schemas import get_schema_view
+
 from .settings import DEBUG
 
 
@@ -29,12 +30,18 @@ urlpatterns = [
         version="0.1"
         ),
         name='openapi-schema'),
+
     path('api/', include(restapi_urls)),
-    # path('service-info/', api_views.service_info),
+    path('service-info', api_views.service_info),
 
-    path('workflows/', chord_api_views.workflow_list),
-    path('workflows/<slug:workflow_id>', chord_api_views.workflow_item),
-    path('workflows/<slug:workflow_id>.wdl', chord_api_views.workflow_file),
+    path('workflows', views_ingest.workflow_list),
+    path('workflows/<slug:workflow_id>', views_ingest.workflow_item),
+    path('workflows/<slug:workflow_id>.wdl', views_ingest.workflow_file),
 
-    path('ingest/', chord_api_views.ingest),
+    path('ingest', views_ingest.ingest),
+
+    path('data-types', views_search.data_type_list),
+    path('datasets', views_search.dataset_list),
+    path('datasets/<str:dataset_id>', views_search.dataset_detail),
+    path('search', views_search.chord_search),
 ] + [path('admin/', admin.site.urls)] if DEBUG else []

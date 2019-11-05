@@ -25,7 +25,11 @@ SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("CHORD_DEBUG", "true").lower() == "true"
 
-ALLOWED_HOSTS = [os.environ.get("SERVICE_HOST", "localhost")] if not DEBUG else []
+ALLOWED_HOSTS = [os.environ.get("CHORD_HOST", "localhost")]
+if DEBUG:
+    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
+
+APPEND_SLASH = False
 
 
 # Application definition
@@ -38,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'chord_metadata_service.chord',
     'chord_metadata_service.patients',
     'chord_metadata_service.phenopackets',
     'chord_metadata_service.restapi',
@@ -116,6 +121,7 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 10,
     # 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+    'DEFAULT_AUTHENTICATION_CLASSES': []  # TODO
 }
 
 # Password validation

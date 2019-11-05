@@ -69,18 +69,3 @@ class DiagnosisAdmin(admin.ModelAdmin):
 @admin.register(Interpretation)
 class InterpretationAdmin(admin.ModelAdmin):
     pass
-
-
-@admin.register(Project)
-class ProjectAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(Dataset)
-class DatasetAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(TableOwnership)
-class TableOwnershipAdmin(admin.ModelAdmin):
-    pass

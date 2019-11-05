@@ -1,9 +1,8 @@
-import uuid
-
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
+
 from chord_metadata_service.patients.models import Individual
 
 
@@ -86,7 +85,7 @@ class MetaData(models.Model):
 
 
 class PhenotypicFeature(models.Model):
-	""" 
+	"""
 	Class to describe a phenotype of an Individual
 
 	FHIR: Condition or Observation
@@ -142,7 +141,7 @@ class Procedure(models.Model):
 class HtsFile(models.Model):
 	"""
 	Class to link HTC files with data
-	
+
 	FHIR: DocumentReference
 	"""
 
@@ -178,7 +177,7 @@ class HtsFile(models.Model):
 class Gene(models.Model):
 	"""
 	Class to represent an identifier for a gene
-	
+
 	FHIR: ?
 	Draft extention for Gene is in development
 	where Gene defined via class CodeableConcept
@@ -200,7 +199,7 @@ class Gene(models.Model):
 class Variant(models.Model):
 	"""
 	Class to describe Individual variants or diagnosed causative variants
-	
+
 	FHIR: Observation ?
 	Draft extention for Variant is in development
 	"""
@@ -251,8 +250,8 @@ class Disease(models.Model):
 class Biosample(models.Model):
 	"""
 	Class to describe a unit of biological material
-	
-	FHIR: Specimen 
+
+	FHIR: Specimen
 	"""
 
 	biosample_id = models.CharField(primary_key=True, max_length=200,
@@ -327,7 +326,7 @@ class Phenopacket(models.Model):
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE,
 		help_text='Information about ontologies and references used in the phenopacket.')
 
-	dataset = models.ForeignKey("Dataset", on_delete=models.CASCADE, blank=True, null=True)
+	dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)
 
 	def __str__(self):
 		return str(self.phenopacket_id)
@@ -374,7 +373,7 @@ class GenomicInterpretation(models.Model):
 class Diagnosis(models.Model):
 	"""
 	Class to refer to disease that is present in the individual analyzed
-	
+
 	FHIR: Condition
 	"""
 
@@ -391,7 +390,7 @@ class Diagnosis(models.Model):
 class Interpretation(models.Model):
 	"""
 	Class to represent the interpretation of a genomic analysis
-	
+
 	FHIR: DiagnosticReport
 	"""
 
@@ -419,64 +418,3 @@ class Interpretation(models.Model):
 
 	def __str__(self):
 		return str(self.id)
-
-
-#############################################################
-#                                                           #
-#                   Project Management                      #
-#                                                           #
-#############################################################
-
-class Project(models.Model):
-	"""
-	Class to represent a Project, which contains multiple
-	Datasets which are each a group of Phenopackets.
-	"""
-
-	project_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	name = models.CharField(max_length=200, unique=True)
-	description = models.TextField(blank=True)
-	data_use = JSONField()
-
-	created = models.DateTimeField(auto_now=True)
-	updated = models.DateTimeField(auto_now_add=True)
-
-	def __str__(self):
-		return f"{self.name} (ID: {self.project_id})"
-
-
-class Dataset(models.Model):
-	"""
-	Class to represent a Dataset, which contains multiple Phenopackets.
-	"""
-
-	dataset_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	name = models.CharField(max_length=200, unique=True)
-	description = models.TextField(blank=True)
-
-	project = models.ForeignKey(Project, on_delete=models.CASCADE)  # Delete dataset upon project deletion
-
-	created = models.DateTimeField(auto_now=True)
-	updated = models.DateTimeField(auto_now_add=True)
-
-	def __str__(self):
-		return f"{self.name} (ID: {self.dataset_id})"
-
-
-class TableOwnership(models.Model):
-	"""
-	Class to represent a Table, which are organizationally part of a Dataset and can optionally be
-	attached to a Phenopacket (and possibly a Biosample).
-	"""
-
-	table_id = models.UUIDField(primary_key=True)
-	service_id = models.UUIDField()
-	data_type = models.CharField(max_length=200)  # TODO: Is this needed?
-
-	# Delete table ownership upon project/dataset deletion
-	dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
-	# If not specified, compound table which may link to many samples TODO: ???
-	sample = models.ForeignKey(Biosample, on_delete=models.CASCADE, blank=True, null=True)
-
-	def __str__(self):
-		return f"{self.dataset if not self.sample else self.sample} -> {self.table_id}"

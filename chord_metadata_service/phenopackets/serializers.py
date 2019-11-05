@@ -1,7 +1,7 @@
 from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
-from rest_framework import serializers, validators
+from rest_framework import serializers
 from .models import *
-from jsonschema import validate, ValidationError, Draft7Validator, FormatChecker
+from jsonschema import Draft7Validator, FormatChecker
 from chord_metadata_service.restapi.schemas import *
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.serializers import GenericSerializer
@@ -70,7 +70,7 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 	evidence = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=EVIDENCE)],
 		allow_null=True, required=False)
-	
+
 	class Meta:
 		model = PhenotypicFeature
 		fields = '__all__'
@@ -238,47 +238,4 @@ class InterpretationSerializer(GenericSerializer):
 
 	class Meta:
 		model = Interpretation
-		fields = '__all__'
-
-
-#############################################################
-#                                                           #
-#              Project Management  Serializers              #
-#                                                           #
-#############################################################
-
-class ProjectSerializer(GenericSerializer):
-	# noinspection PyMethodMayBeStatic
-	def validate_data_use(self, value):
-		validation = Draft7Validator(CHORD_DATA_USE_SCHEMA).is_valid(value)
-		if not validation:
-			raise serializers.ValidationError("Data use is not valid")
-		return value
-
-	# noinspection PyMethodMayBeStatic
-	def validate_name(self, value):
-		if len(value.strip()) < 3:
-			raise serializers.ValidationError("Name must be at least 3 characters")
-		return value.strip()
-
-	class Meta:
-		model = Project
-		fields = '__all__'
-
-
-class DatasetSerializer(GenericSerializer):
-	# noinspection PyMethodMayBeStatic
-	def validate_name(self, value):
-		if len(value.strip()) < 3:
-			raise serializers.ValidationError("Name must be at least 3 characters")
-		return value.strip()
-
-	class Meta:
-		model = Dataset
-		fields = '__all__'
-
-
-class TableOwnershipSerializer(GenericSerializer):
-	class Meta:
-		model = TableOwnership
 		fields = '__all__'
