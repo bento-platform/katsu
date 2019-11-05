@@ -1,6 +1,4 @@
 from django.db import models
-from django.utils import timezone
-from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
 
 
