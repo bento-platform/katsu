@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('phenopackets', '0006_auto_20191105_2106'),
+        ('phenopackets', '0005_auto_20191104_1729'),
     ]
 
     operations = [

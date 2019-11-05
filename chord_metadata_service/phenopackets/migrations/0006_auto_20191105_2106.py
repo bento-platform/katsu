@@ -7,6 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('chord', '__first__'),
         ('phenopackets', '0005_auto_20191104_1729'),
     ]
 
