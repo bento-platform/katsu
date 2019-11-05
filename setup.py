@@ -11,8 +11,8 @@ setuptools.setup(
 
     python_requires=">=3.6",
     install_requires=["chord_lib @ git+https://github.com/c3g/chord_lib", "Django==2.2.6", "django-filter",
-                      "djangorestframework", "jsonschema", "psycopg2-binary", "python-dateutil", "PyYAML", "requests",
-                      "uritemplate"],
+                      "djangorestframework", "djangorestframework-camel-case", "jsonschema", "psycopg2-binary",
+                      "python-dateutil", "PyYAML", "requests", "uritemplate"],
 
     author="Ksenia Zaytseva",
 
