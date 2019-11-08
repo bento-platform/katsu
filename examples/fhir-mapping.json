@@ -12,11 +12,9 @@
   },
   "phenotypicFeatures": [
     {
-      "resourceType": "Condition",
-      "identifier": {
-        "value": "phenotypicfeature.id"
-      },
-      "text": "phenotypicfeature.description",
+      "resourceType": "Observation",
+      "id": "phenotypicfeature.id",
+      "note": "phenotypicfeature.description",
       "code": {
         "coding": [
           {
@@ -27,6 +25,7 @@
         ]
       },
       "severity": {
+        "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-severity",
         "coding": [
           {
             "system": "",
@@ -34,6 +33,17 @@
             "display": "phenotypicfeature.severity.label"
           }
         ]
+      },
+      "modifier": {
+        "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-modifier",
+         "coding": [
+          {
+            "system": "",
+            "code": "phenotypicfeature.modifier.id",
+            "display": "phenotypicfeature.modifier.label"
+          }
+        ]
+
       },
       "onsetAge": {
         "value": "",
