@@ -1,5 +1,6 @@
 from rest_framework.renderers import JSONRenderer
 from .utils import convert_to_fhir, camel_case_field_names
+from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
 
 class FHIRRenderer(JSONRenderer):
@@ -19,7 +20,7 @@ class FHIRRenderer(JSONRenderer):
 		return super(FHIRRenderer, self).render(final_data, media_type, renderer_context)
 
 
-class PhenopacketsRenderer(JSONRenderer):
+class PhenopacketsRenderer(CamelCaseJSONRenderer):
 	media_type = 'application/json'
 	format = 'phenopackets'
 
