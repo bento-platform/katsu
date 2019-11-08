@@ -59,7 +59,7 @@ class MetaDataSerializer(GenericSerializer):
 #############################################################
 
 class PhenotypicFeatureSerializer(GenericSerializer):
-	pftype = serializers.JSONField(
+	type = serializers.JSONField(source='pftype',
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
 	severity = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
@@ -73,19 +73,18 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 
 	class Meta:
 		model = PhenotypicFeature
-		fields = '__all__'
+		# fields = '__all__'
+		exclude = ['pftype']
 
-	# TODO removes validation why?
-	def to_representation(self, obj):
-		output = super().to_representation(obj)
-		output['type'] = output.pop('pftype')
-		return output
+	# def to_representation(self, obj):
+	# 	output = super().to_representation(obj)
+	# 	output['type'] = output.pop('pftype')
+	# 	return output
 
-	def to_internal_value(self, data):
-		if 'type' in data.keys():
-			data['pftype'] = data.pop('type')
-		return data
-
+	# def to_internal_value(self, data):
+	# 	if 'type' in data.keys():
+	# 		data['pftype'] = data.pop('type')
+	# 	return super(PhenotypicFeatureSerializer, self).to_internal_value(data=data)
 
 	def validate_modifier(self, value):
 		if isinstance(value, list):
@@ -138,18 +137,30 @@ class GeneSerializer(GenericSerializer):
 
 
 class VariantSerializer(GenericSerializer):
-	# allele_type = serializers.CharField()
 	allele = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ALLELE_SCHEMA)])
-	# allele = serializers.JSONField()
 	zygosity = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
 		allow_null=True, required=False)
-	# zygosity = serializers.JSONField(required=False, allow_null=True)
 
 	class Meta:
 		model = Variant
 		fields = '__all__'
+
+	def to_representation(self, obj):
+		""" Change 'allele_type' field name to allele type value. """
+
+		output = super().to_representation(obj)
+		output[obj.allele_type] = output.pop('allele')
+		return output
+
+	def to_internal_value(self, data):
+		""" When writing back to db change field name back to 'allele'. """
+
+		if not 'allele' in data.keys():
+			allele_type = data.get('allele_type')
+			data['allele'] = data.pop(allele_type)
+		return super(VariantSerializer, self).to_internal_value(data=data)
 
 
 class DiseaseSerializer(GenericSerializer):
