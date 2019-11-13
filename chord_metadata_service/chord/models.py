@@ -55,8 +55,9 @@ class TableOwnership(models.Model):
     attached to a Phenopacket (and possibly a Biosample).
     """
 
-    table_id = models.UUIDField(primary_key=True)
-    service_id = models.UUIDField()
+    table_id = models.CharField(primary_key=True, max_length=200)
+    service_id = models.UUIDField(max_length=200)
+    service_artifact = models.CharField(max_length=200, default="")
     data_type = models.CharField(max_length=200)  # TODO: Is this needed?
 
     # Delete table ownership upon project/dataset deletion
