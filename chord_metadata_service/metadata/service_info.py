@@ -1,11 +1,12 @@
 from .. import __version__
+from .settings import CHORD_SERVICE_TYPE, CHORD_SERVICE_ID
 
 # Service info according to spec https://github.com/ga4gh-discovery/ga4gh-service-info
 
 SERVICE_INFO = {
-	"id": "ca.c3g.chord:metadata",  # TODO: Globally unique
+	"id": CHORD_SERVICE_ID,
 	"name": "Metadata Service",  # TODO: Globally unique?
-	"type": "ca.c3g.chord:metadata:{}".format(__version__),
+	"type": CHORD_SERVICE_TYPE,
 	"description": "Metadata service implementation based on Phenopackets schema",
 	"organization": {
 		"name": "C3G",
