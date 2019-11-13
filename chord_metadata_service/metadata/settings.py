@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'chord_metadata_service.restapi',
 
     'rest_framework',
+    'django_nose',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +62,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 TEMPLATES = [
     {
