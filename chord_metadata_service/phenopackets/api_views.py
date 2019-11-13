@@ -127,20 +127,6 @@ class ResourceViewSet(viewsets.ModelViewSet):
 		) + (PhenopacketsRenderer,)
 
 
-# class ExternalReferenceViewSet(viewsets.ModelViewSet):
-# 	"""
-# 	get:
-# 	Return a list of all existing external references
-
-# 	post:
-# 	Create a new external reference
-
-# 	"""
-# 	queryset = ExternalReference.objects.all()
-# 	serializer_class = ExternalReferenceSerializer
-# 	pagination_class = LargeResultsSetPagination
-
-
 class MetaDataViewSet(viewsets.ModelViewSet):
 	"""
 	get:
@@ -155,20 +141,6 @@ class MetaDataViewSet(viewsets.ModelViewSet):
 	pagination_class = LargeResultsSetPagination
 	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
 		) + (PhenopacketsRenderer,)
-
-
-# class IndividualViewSet(viewsets.ModelViewSet):
-# 	"""
-# 	get:
-# 	Return a list of all existing individuals
-
-# 	post:
-# 	Create a new individual
-
-# 	"""
-# 	queryset = Individual.objects.all()
-# 	serializer_class = IndividualSerializer
-# 	pagination_class = LargeResultsSetPagination
 
 
 class BiosampleViewSet(viewsets.ModelViewSet):
@@ -248,13 +220,3 @@ class InterpretationViewSet(viewsets.ModelViewSet):
 	pagination_class = LargeResultsSetPagination
 	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
 		) + (PhenopacketsRenderer,)
-
-
-# @api_view()
-# def service_info(request):
-# 	"""
-# 	get:
-# 	Return service info
-# 	"""
-
-# 	return Response(SERVICE_INFO)
