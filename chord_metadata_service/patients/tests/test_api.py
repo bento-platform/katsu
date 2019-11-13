@@ -57,4 +57,70 @@ class CreateIndividualTest(APITestCase):
 		self.assertEqual(Individual.objects.count(), 0)
 
 
+class UpdateIndividualTest(APITestCase):
+	""" Test module for updating an existing Individual record. """
+
+	def setUp(self):
+		self.individual_one = Individual.objects.create(
+			individual_id='patient:1',
+			taxonomy={
+				"id": "NCBITaxon:9606",
+				"label": "human"
+			},
+			date_of_birth='2001-01-01',
+			age='P25Y3M2D',
+			sex='FEMALE',
+			active=True
+			)
+
+		self.valid_payload = {
+			"individual_id": "patient:1",
+			"taxonomy": {
+				"id": "NCBITaxon:9606",
+				"label": "human"
+			},
+			"date_of_birth": "2001-01-01",
+			"age": "P26Y3M2D",
+			"sex": "FEMALE",
+			"active": False
+		}
+
+		self.invalid_payload = {
+			"individual_id": "patient:1",
+			"taxonomy": {
+				"id": "NCBITaxon:9606",
+				"label": "human"
+			},
+			"date_of_birth": "2001-01-01",
+			"age": "P26Y3M2D",
+			"sex": "WOMEN",
+			"active": False
+		}
+
+	def test_update_individual(self):
+		""" Try to PUT new data in an existing Individual record. """
+
+		response = self.client.put(
+			reverse(
+				'individual-detail',
+				kwargs={'pk': self.individual_one.individual_id}
+				),
+			data=json.dumps(self.valid_payload),
+			content_type='application/json'
+			)
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+	def test_update_invalid_individual(self):
+		""" Try to PUT new invalid data in an existing Individual record. """
+
+		response = self.client.put(
+			reverse(
+				'individual-detail',
+				kwargs={'pk': self.individual_one.individual_id}
+				),
+			data=json.dumps(self.invalid_payload),
+			content_type='application/json'
+			)
+		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
