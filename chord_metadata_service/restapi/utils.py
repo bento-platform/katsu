@@ -99,7 +99,7 @@ def convert_to_fhir(individual_data):
 							evidence_detail['detail'].append(detail)
 							feature_record['evidence'].append(evidence_detail)
 					biosample_record['phenotypicFeatures'].append(feature_record)
-			# mapping for procedure relared to each biosample
+			# mapping for procedure related to each biosample
 			if 'procedure' in sample.keys():
 				procedure = sample.get('procedure')
 				biosample_record['procedure'] = {}
