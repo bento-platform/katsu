@@ -3,6 +3,8 @@ from django.urls import include, path, reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, URLPatternsTestCase
 from ..models import Individual
+from .assertions import assert_valid_schema
+from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS
 
 
 class CreateIndividualTest(APITestCase):
@@ -48,6 +50,8 @@ class CreateIndividualTest(APITestCase):
 	def test_create_invalid_individual(self):
 		""" POST a new individual with invalid data. """
 
+		if 'taxonomy' in self.invalid_payload:
+			assert_valid_schema(self.invalid_payload.get('taxonomy'), ONTOLOGY_CLASS)
 		invalid_response = self.client.post(
 			reverse('individual-list'),
 			data=json.dumps(self.invalid_payload),
