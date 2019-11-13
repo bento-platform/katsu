@@ -88,6 +88,8 @@ class VariantViewSet(viewsets.ModelViewSet):
 	queryset = Variant.objects.all()
 	serializer_class = VariantSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 	# TODO filtering
 	# filter_backends = (DjangoFilterBackend,)
 	# filter_class = VariantFilter
@@ -105,6 +107,8 @@ class DiseaseViewSet(viewsets.ModelViewSet):
 	queryset = Disease.objects.all()
 	serializer_class = DiseaseSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 class ResourceViewSet(viewsets.ModelViewSet):
@@ -119,6 +123,8 @@ class ResourceViewSet(viewsets.ModelViewSet):
 	queryset = Resource.objects.all()
 	serializer_class = ResourceSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 # class ExternalReferenceViewSet(viewsets.ModelViewSet):
@@ -147,6 +153,8 @@ class MetaDataViewSet(viewsets.ModelViewSet):
 	queryset = MetaData.objects.all()
 	serializer_class = MetaDataSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 # class IndividualViewSet(viewsets.ModelViewSet):
@@ -174,6 +182,8 @@ class BiosampleViewSet(viewsets.ModelViewSet):
 	queryset = Biosample.objects.all()
 	serializer_class = BiosampleSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 class PhenopacketViewSet(viewsets.ModelViewSet):
@@ -188,6 +198,8 @@ class PhenopacketViewSet(viewsets.ModelViewSet):
 	queryset = Phenopacket.objects.all()
 	serializer_class = PhenopacketSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 class GenomicInterpretationViewSet(viewsets.ModelViewSet):
@@ -202,6 +214,8 @@ class GenomicInterpretationViewSet(viewsets.ModelViewSet):
 	queryset = GenomicInterpretation.objects.all()
 	serializer_class = GenomicInterpretationSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 class DiagnosisViewSet(viewsets.ModelViewSet):
@@ -216,6 +230,8 @@ class DiagnosisViewSet(viewsets.ModelViewSet):
 	queryset = Diagnosis.objects.all()
 	serializer_class = DiagnosisSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 class InterpretationViewSet(viewsets.ModelViewSet):
@@ -230,6 +246,8 @@ class InterpretationViewSet(viewsets.ModelViewSet):
 	queryset = Interpretation.objects.all()
 	serializer_class = InterpretationSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 # @api_view()
