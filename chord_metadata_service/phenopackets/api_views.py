@@ -1,6 +1,9 @@
 from rest_framework import viewsets, pagination
 from .serializers import *
 from .models import *
+from rest_framework.settings import api_settings
+from chord_metadata_service.restapi.api_renderers import (
+	PhenopacketsRenderer)
 
 
 class LargeResultsSetPagination(pagination.PageNumberPagination):
@@ -21,6 +24,8 @@ class PhenotypicFeatureViewSet(viewsets.ModelViewSet):
 	queryset = PhenotypicFeature.objects.all()
 	serializer_class = PhenotypicFeatureSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 class ProcedureViewSet(viewsets.ModelViewSet):
@@ -35,6 +40,8 @@ class ProcedureViewSet(viewsets.ModelViewSet):
 	queryset = Procedure.objects.all()
 	serializer_class = ProcedureSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 class HtsFileViewSet(viewsets.ModelViewSet):
@@ -49,6 +56,8 @@ class HtsFileViewSet(viewsets.ModelViewSet):
 	queryset = HtsFile.objects.all()
 	serializer_class = HtsFileSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 class GeneViewSet(viewsets.ModelViewSet):
@@ -63,6 +72,8 @@ class GeneViewSet(viewsets.ModelViewSet):
 	queryset = Gene.objects.all()
 	serializer_class = GeneSerializer
 	pagination_class = LargeResultsSetPagination
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
+		) + (PhenopacketsRenderer,)
 
 
 class VariantViewSet(viewsets.ModelViewSet):

@@ -130,6 +130,9 @@ class HtsFileSerializer(GenericSerializer):
 
 
 class GeneSerializer(GenericSerializer):
+	alternate_id = serializers.ListField(
+		child=serializers.CharField(allow_blank=True),
+		allow_empty=True, required=False)
 
 	class Meta:
 		model = Gene
