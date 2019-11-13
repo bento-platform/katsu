@@ -32,3 +32,18 @@ DATABASES = {
 `python manage.py runserver`
 
 * Development server runs at `localhost:8000`
+
+## Authentication
+
+The service doesn't set any authentication now.
+Default authentication can be set globally in `settings.py`
+
+```
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+    	'rest_framework.authentication.BasicAuthentication',
+    	'rest_framework.authentication.SessionAuthentication',
+    ]
+
+}
+```
