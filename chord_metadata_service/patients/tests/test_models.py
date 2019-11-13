@@ -11,7 +11,7 @@ class IndividualTest(TestCase):
 		Individual.objects.create(
 			individual_id='patient:2', sex='FEMALE', age='P45Y3M2D')
 
-	def test_Individual(self):
+	def test_individual(self):
 		individual_one = Individual.objects.get(individual_id='patient:1')
 		individual_two = Individual.objects.get(individual_id='patient:2')
 		self.assertEqual(

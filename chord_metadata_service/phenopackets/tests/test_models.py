@@ -90,7 +90,7 @@ class BiosampleTest(TestCase):
 			is_control_sample=True
 			)
 
-	def test_Individual(self):
+	def test_biosample(self):
 		biosample_one = Biosample.objects.get(
 			tumor_progression__label='Primary Malignant Neoplasm',
 			sampled_tissue__label__icontains='urinary bladder'
