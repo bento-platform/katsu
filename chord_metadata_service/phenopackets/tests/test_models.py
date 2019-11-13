@@ -1,11 +1,18 @@
 from django.test import TestCase
 from ..models import Biosample, Procedure
+from chord_metadata_service.patients.models import Individual
 
 
 class BiosampleTest(TestCase):
 	""" Test module for Biosample model """
 
 	def setUp(self):
+		try:
+			individual = Individual.objects.get(
+				individual_id='patient:1', sex='FEMALE', age='P25Y3M2D')
+		except Individual.DoesNotExist:
+			individual = Individual.objects.create(
+				individual_id='patient:1', sex='FEMALE', age='P25Y3M2D')
 		procedure = Procedure.objects.create(
 			code={
 				"id": "NCIT:C28743",
@@ -17,6 +24,7 @@ class BiosampleTest(TestCase):
 			})
 		Biosample.objects.create(
 			biosample_id='biosample_id:1',
+			individual=individual,
 			sampled_tissue={
 				"id": "UBERON_0001256",
 				"label": "wall of urinary bladder"
