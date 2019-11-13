@@ -46,7 +46,7 @@ class CreateIndividualTest(APITestCase):
 		self.assertEqual(Individual.objects.get().individual_id, 'patient:1')
 
 	def test_create_invalid_individual(self):
-		""" Try to POST a new individual with wrong params. """
+		""" POST a new individual with invalid data. """
 
 		invalid_response = self.client.post(
 			reverse('individual-list'),
@@ -98,7 +98,7 @@ class UpdateIndividualTest(APITestCase):
 		}
 
 	def test_update_individual(self):
-		""" Try to PUT new data in an existing Individual record. """
+		""" PUT new data in an existing Individual record. """
 
 		response = self.client.put(
 			reverse(
@@ -111,7 +111,7 @@ class UpdateIndividualTest(APITestCase):
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 	def test_update_invalid_individual(self):
-		""" Try to PUT new invalid data in an existing Individual record. """
+		""" PUT new invalid data in an existing Individual record. """
 
 		response = self.client.put(
 			reverse(
@@ -124,3 +124,40 @@ class UpdateIndividualTest(APITestCase):
 		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
+class DeleteIndividualTest(APITestCase):
+	""" Test module for deleting an existing Individual record. """
+
+	def setUp(self):
+		self.individual_one = Individual.objects.create(
+			individual_id='patient:1',
+			taxonomy={
+				"id": "NCBITaxon:9606",
+				"label": "human"
+			},
+			date_of_birth='2001-01-01',
+			age='P25Y3M2D',
+			sex='FEMALE',
+			active=True
+			)
+
+	def test_delete_individual(self):
+		""" DELETE an existing Individual record. """
+
+		response = self.client.delete(
+			reverse(
+				'individual-detail',
+				kwargs={'pk': self.individual_one.individual_id}
+				)
+			)
+		self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+	def test_delete_non_existing_individual(self):
+		""" DELETE a non-existing Individual record. """
+
+		response = self.client.delete(
+			reverse(
+				'individual-detail',
+				kwargs={'pk': 'patient:what'}
+				)
+			)
+		self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
