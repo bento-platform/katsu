@@ -106,6 +106,10 @@ class ProcedureSerializer(GenericSerializer):
 		model = Procedure
 		fields = '__all__'
 
+	def create(self, validated_data):
+		instance, _ = Procedure.objects.get_or_create(**validated_data)
+		return instance
+
 	def validate(self, data):
 		"""
 		Check if body_site is not empty
@@ -202,7 +206,7 @@ class BiosampleSerializer(GenericSerializer):
 		allow_null=True, required=False)
 	phenotypic_features = PhenotypicFeatureSerializer(read_only=True,
 		many=True, exclude_when_nested=['id', 'biosample'])
-	procedure = ProcedureSerializer(read_only=True, exclude_when_nested=['id'])
+	procedure = ProcedureSerializer(exclude_when_nested=['id'])
 
 	class Meta:
 		model = Biosample
@@ -217,6 +221,12 @@ class BiosampleSerializer(GenericSerializer):
 						"Not valid JSON schema for this field."
 						)
 		return value
+
+	def create(self, validated_data):
+		procedure_data = validated_data.pop('procedure')
+		procedure_model = Procedure.objects.create(**procedure_data)
+		biosample = Biosample.objects.create(procedure=procedure_model, **validated_data)
+		return biosample
 
 
 class PhenopacketSerializer(GenericSerializer):

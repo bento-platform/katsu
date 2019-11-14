@@ -1,7 +1,7 @@
 import json
 from django.urls import include, path, reverse
 from rest_framework import status
-from rest_framework.test import APITestCase, URLPatternsTestCase
+from rest_framework.test import APITestCase
 from ..models import Individual
 from .assertions import assert_valid_schema
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS
