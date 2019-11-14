@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
+from .index import IndividualIndex
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Individual(models.Model):
@@ -58,3 +61,25 @@ class Individual(models.Model):
 
 	def __str__(self):
 		return str(self.individual_id)
+
+	def indexing(self):
+		# mapping model fields to index fields
+		obj = IndividualIndex(
+			meta={'id': self.individual_id},
+			alternate_ids=self.alternate_ids,
+			date_of_birth=self.date_of_birth,
+			age=self.age,
+			sex=self.sex,
+			karyotypic_sex=self.karyotypic_sex,
+			taxonomy=self.taxonomy,
+			active=self.active,
+			deceased=self.deceased
+			)
+		obj.save(index='metadata')
+		return obj.to_dict(include_meta=True)
+
+
+# add to index on post_save signal
+@receiver(post_save, sender=Individual)
+def index_individual(sender, instance, **kwargs):
+    instance.indexing()
