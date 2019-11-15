@@ -2,8 +2,14 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
+from elasticsearch_dsl import (
+	Document, Text, Date, Search,
+	Object, Boolean, InnerDoc, Nested)
 
 from chord_metadata_service.patients.models import Individual
+from .index import *
+from django.db.models.signals import post_save, post_delete, pre_save
+from django.dispatch import receiver
 
 
 #############################################################
@@ -296,6 +302,60 @@ class Biosample(models.Model):
 
 	def __str__(self):
 		return str(self.biosample_id)
+
+	@property
+	def get_sample_tissue_data(self):
+		return {'reference': {
+			'reference': self.sampled_tissue.get('id'),
+			'display': self.sampled_tissue.get('label')
+			}
+		}
+
+	def indexing(self):
+		# mapping model fields to index fields
+		obj = BiosampleIndex(
+			meta={'id': self.biosample_id},
+			resourceType='Specimen',
+			identifier=self.biosample_id,
+			subject=self.individual.individual_id,
+			text=self.description,
+			parent=InnerDoc(
+				properties={
+				'reference': InnerDoc(
+					properties={
+					'reference': self.sampled_tissue.get('id'),
+					'display': self.sampled_tissue.get('label')
+					}
+					)
+				}
+				)
+			)
+		obj.save(index='metadata')
+		return obj.to_dict(include_meta=True)
+
+	def delete_from_index(self):
+		obj = BiosampleIndex.get(id=self.biosample_id, index='metadata')
+		obj.delete()
+		return
+
+	def update_index(self):
+		obj = self.indexing()
+		return obj
+
+# add to index on post_save signal
+@receiver(post_save, sender=Biosample)
+def index_biosample(sender, instance, **kwargs):
+    instance.indexing()
+
+# delete doc from index when instance is deleted in db
+@receiver(post_delete, sender=Biosample)
+def remove_biosample(sender, instance, **kwargs):
+	instance.delete_from_index()
+
+# update doc in index when instance is updated in db
+@receiver(pre_save, sender=Biosample)
+def update_biosample(sender, instance, *args, **kwargs):
+	instance.update_index()
 
 
 class Phenopacket(models.Model):

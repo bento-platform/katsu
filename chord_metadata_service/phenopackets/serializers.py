@@ -110,20 +110,20 @@ class ProcedureSerializer(GenericSerializer):
 		instance, _ = Procedure.objects.get_or_create(**validated_data)
 		return instance
 
-	def validate(self, data):
-		"""
-		Check if body_site is not empty
-		if not bind 'code' and 'body_site' to be unique together
-		"""
+	# def validate(self, data):
+	# 	"""
+	# 	Check if body_site is not empty
+	# 	if not bind 'code' and 'body_site' to be unique together
+	# 	"""
 
-		if data.get('body_site'):
-			check = Procedure.objects.filter(
-				code=data.get('code'), body_site=data.get('body_site')).exists()
-			if check:
-				raise serializers.ValidationError(
-					"This procedure is already exists."
-					)
-		return data
+	# 	if data.get('body_site'):
+	# 		check = Procedure.objects.filter(
+	# 			code=data.get('code'), body_site=data.get('body_site')).exists()
+	# 		if check:
+	# 			raise serializers.ValidationError(
+	# 				"This procedure is already exists."
+	# 				)
+	# 	return data
 
 
 class HtsFileSerializer(GenericSerializer):
@@ -224,9 +224,16 @@ class BiosampleSerializer(GenericSerializer):
 
 	def create(self, validated_data):
 		procedure_data = validated_data.pop('procedure')
-		procedure_model = Procedure.objects.create(**procedure_data)
+		procedure_model, _ = Procedure.objects.get_or_create(**procedure_data)
 		biosample = Biosample.objects.create(procedure=procedure_model, **validated_data)
 		return biosample
+
+	def update(self, instance, validated_data):
+		procedure_data = validated_data.pop('procedure', None)
+		if procedure_data:
+			instance.procedure, _ = Procedure.objects.get_or_create(**procedure_data)
+		instance.save()
+		return instance
 
 
 class PhenopacketSerializer(GenericSerializer):
