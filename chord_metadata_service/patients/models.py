@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
 from .index import IndividualIndex
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 
@@ -78,8 +78,18 @@ class Individual(models.Model):
 		obj.save(index='metadata')
 		return obj.to_dict(include_meta=True)
 
+	def delete_from_index(self):
+		obj = IndividualIndex.get(id=self.individual_id, index='metadata')
+		obj.delete()
+		return
+
 
 # add to index on post_save signal
 @receiver(post_save, sender=Individual)
 def index_individual(sender, instance, **kwargs):
     instance.indexing()
+
+# delete doc from index when instance is deleted in db
+@receiver(post_delete, sender=Individual)
+def remove_individual(sender, instance, **kwargs):
+	instance.delete_from_index()
