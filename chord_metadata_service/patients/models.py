@@ -66,12 +66,10 @@ class Individual(models.Model):
 		# mapping model fields to index fields
 		obj = IndividualIndex(
 			meta={'id': self.individual_id},
-			alternate_ids=self.alternate_ids,
-			date_of_birth=self.date_of_birth,
-			age=self.age,
-			sex=self.sex,
-			karyotypic_sex=self.karyotypic_sex,
-			taxonomy=self.taxonomy,
+			resourceType='Patient',
+			identifier=self.individual_id,
+			birthDate=self.date_of_birth,
+			gender=self.sex,
 			active=self.active,
 			deceased=self.deceased
 			)

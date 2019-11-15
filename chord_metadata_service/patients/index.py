@@ -8,13 +8,10 @@ from . import models
 connections.create_connection()
 
 class IndividualIndex(Document):
-	individual_id = Text()
-	alternate_ids = Object()
-	date_of_birth = Date()
-	age = Text()
-	sex = Text()
-	karyotypic_sex = Text()
-	taxonomy = Object()
+	resourceType = Text()
+	identifier = Text()
+	birthDate = Date()
+	gender = Text()
 	active = Boolean()
 	deceased = Boolean()
 
