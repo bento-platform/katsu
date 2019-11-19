@@ -6,6 +6,10 @@ services:
   - postgresql
 addons:
   postgresql: "11"
+  apt:
+    packages:
+      - postgresql-11
+      - postgresql-contrib-11
 install:
   - pip install -r requirements.txt
 script:
