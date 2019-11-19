@@ -11,4 +11,4 @@ addons:
 install:
   - pip install -r requirements.txt
 script:
-  POSTGRES_USER="postgres" POSTGRES_PASSWORD="" POSTGRES_PORT=5433 python3 ./manage.py test
+  POSTGRES_USER="postgres" POSTGRES_SOCKET_DIR="/var/run/postgresql/" POSTGRES_PORT=5433 python3 ./manage.py test
