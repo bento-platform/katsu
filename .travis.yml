@@ -10,10 +10,10 @@ addons:
       - postgresql-contrib-11
 before_install:
   - sudo sed -i 's/postgres                                peer/postgres trust/g' /etc/postgresql/11/main/pg_hba.conf
-  - sudo systemctl restart postgresql
+  - sudo service postgresql restart 11
   - psql -U postgres -p 5433 -d postgres -c "alter user postgres with password 'admin';"
   - sudo sed -i 's/postgres trust/postgres md5/g' /etc/postgresql/11/main/pg_hba.conf
-  - sudo systemctl restart postgresql
+  - sudo service postgresql restart 11
 install:
   - pip install -r requirements.txt
 script:
