@@ -50,8 +50,6 @@ class CreateIndividualTest(APITestCase):
 	def test_create_invalid_individual(self):
 		""" POST a new individual with invalid data. """
 
-		if 'taxonomy' in self.invalid_payload:
-			assert_valid_schema(self.invalid_payload.get('taxonomy'), ONTOLOGY_CLASS)
 		invalid_response = self.client.post(
 			reverse('individual-list'),
 			data=json.dumps(self.invalid_payload),
