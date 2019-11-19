@@ -9,7 +9,7 @@ addons:
       - postgresql-11
       - postgresql-contrib-11
 before_install:
-  - psql -U postgres -d postgres -c "alter user postgres with password 'admin';"
+  - psql -U postgres -p 5433 -d postgres -c "alter user postgres with password 'admin';"
 install:
   - pip install -r requirements.txt
 script:
