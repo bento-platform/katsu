@@ -8,8 +8,7 @@ from elasticsearch_dsl import (
 
 from chord_metadata_service.patients.models import Individual
 from .index import *
-from django.db.models.signals import post_save, post_delete, pre_save
-from django.dispatch import receiver
+from .signals import *
 
 
 #############################################################
@@ -183,21 +182,6 @@ class Procedure(models.Model):
 	def update_index(self):
 		obj = self.indexing()
 		return obj
-
-# add to index on post_save signal
-@receiver(post_save, sender=Procedure)
-def index_procedure(sender, instance, **kwargs):
-    instance.indexing()
-
-# delete doc from index when instance is deleted in db
-@receiver(post_delete, sender=Procedure)
-def remove_procedure(sender, instance, **kwargs):
-	instance.delete_from_index()
-
-# update doc in index when instance is updated in db
-@receiver(pre_save, sender=Procedure)
-def update_procedure(sender, instance, *args, **kwargs):
-	instance.update_index()
 
 
 class HtsFile(models.Model):
@@ -401,21 +385,6 @@ class Biosample(models.Model):
 	def update_index(self):
 		obj = self.indexing()
 		return obj
-
-# add to index on post_save signal
-@receiver(post_save, sender=Biosample)
-def index_biosample(sender, instance, **kwargs):
-    instance.indexing()
-
-# delete doc from index when instance is deleted in db
-@receiver(post_delete, sender=Biosample)
-def remove_biosample(sender, instance, **kwargs):
-	instance.delete_from_index()
-
-# update doc in index when instance is updated in db
-@receiver(pre_save, sender=Biosample)
-def update_biosample(sender, instance, *args, **kwargs):
-	instance.update_index()
 
 
 class Phenopacket(models.Model):
