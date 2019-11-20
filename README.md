@@ -1,5 +1,8 @@
 # CHORD Metadata Service
 
+![Build Status](https://api.travis-ci.org/c3g/chord_metadata_service.svg?branch=master)
+[![codecov](https://codecov.io/gh/c3g/chord_metadata_service/branch/master/graph/badge.svg)](https://codecov.io/gh/c3g/chord_metadata_service)
+
 ## Install
 
 The service uses PostgreSQL database for data storage.
