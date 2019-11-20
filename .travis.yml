@@ -9,12 +9,8 @@ addons:
       - postgresql-11
       - postgresql-contrib-11
 before_install:
-  - sudo sed -i 's/postgres                                peer/postgres trust/g' /etc/postgresql/11/main/pg_hba.conf
-  - sudo service postgresql restart 11
-  - psql -U postgres -p 5433 -d postgres -c "alter user postgres with password 'admin';"
-  - sudo sed -i 's/postgres trust/postgres md5/g' /etc/postgresql/11/main/pg_hba.conf
-  - sudo service postgresql restart 11
+  - sudo -H -u postgres -c psql -U postgres -p 5433 -d postgres -c "alter user postgres with password 'hj38f3Ntr';"
 install:
   - pip install -r requirements.txt
 script:
-  POSTGRES_USER="postgres" POSTGRES_PASSWORD="admin" POSTGRES_PORT=5433 python3 ./manage.py test
+  POSTGRES_USER="postgres" POSTGRES_PASSWORD="hj38f3Ntr" POSTGRES_PORT=5433 python3 ./manage.py test
