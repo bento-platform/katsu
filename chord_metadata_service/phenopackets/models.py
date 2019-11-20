@@ -143,6 +143,62 @@ class Procedure(models.Model):
 	def __str__(self):
 		return str(self.id)
 
+	def indexing(self):
+		# mapping model fields to index fields
+		obj = ProcedureIndex(
+			meta={'id': self.id},
+			resourceType='Procedure',
+			identifier=self.id,
+			code=InnerDoc(
+				properties={
+				'coding': InnerDoc(
+					properties={
+					'system': '',
+					'code': self.code.get('id', None),
+					'display':self.code.get('label', None)
+					}
+					)
+				}
+				),
+			bodySite=InnerDoc(
+				properties={
+				'coding': InnerDoc(
+					properties={
+					'system': '',
+					'code': [self.body_site.get('id', None) if self.body_site else ''][0],
+					'display': [self.body_site.get('label', None) if self.body_site else ''][0]
+					}
+					)
+				}
+				)
+			)
+		obj.save(index='metadata')
+		return obj.to_dict(include_meta=True)
+
+	def delete_from_index(self):
+		obj = ProcedureIndex.get(id=self.id, index='metadata')
+		obj.delete()
+		return
+
+	def update_index(self):
+		obj = self.indexing()
+		return obj
+
+# add to index on post_save signal
+@receiver(post_save, sender=Procedure)
+def index_procedure(sender, instance, **kwargs):
+    instance.indexing()
+
+# delete doc from index when instance is deleted in db
+@receiver(post_delete, sender=Procedure)
+def remove_procedure(sender, instance, **kwargs):
+	instance.delete_from_index()
+
+# update doc in index when instance is updated in db
+@receiver(pre_save, sender=Procedure)
+def update_procedure(sender, instance, *args, **kwargs):
+	instance.update_index()
+
 
 class HtsFile(models.Model):
 	"""
@@ -313,11 +369,15 @@ class Biosample(models.Model):
 
 	def indexing(self):
 		# mapping model fields to index fields
+		if self.individual:
+			subject = self.individual.individual_id
+		else:
+			subject = None
 		obj = BiosampleIndex(
 			meta={'id': self.biosample_id},
 			resourceType='Specimen',
 			identifier=self.biosample_id,
-			subject=self.individual.individual_id,
+			subject=subject,
 			text=self.description,
 			parent=InnerDoc(
 				properties={

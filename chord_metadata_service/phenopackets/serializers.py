@@ -106,9 +106,11 @@ class ProcedureSerializer(GenericSerializer):
 		model = Procedure
 		fields = '__all__'
 
-	def create(self, validated_data):
-		instance, _ = Procedure.objects.get_or_create(**validated_data)
-		return instance
+	# create method on serializer cause creation of replica objects in ES index
+	# TODO check why
+	# def create(self, validated_data):
+	# 	instance, _ = Procedure.objects.get_or_create(**validated_data)
+	# 	return instance
 
 	# def validate(self, data):
 	# 	"""
@@ -206,7 +208,8 @@ class BiosampleSerializer(GenericSerializer):
 		allow_null=True, required=False)
 	phenotypic_features = PhenotypicFeatureSerializer(read_only=True,
 		many=True, exclude_when_nested=['id', 'biosample'])
-	procedure = ProcedureSerializer(exclude_when_nested=['id'])
+	# procedure = ProcedureSerializer(exclude_when_nested=['id'])
+	procedure = ProcedureSerializer()
 
 	class Meta:
 		model = Biosample
