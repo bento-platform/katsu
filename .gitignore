@@ -10,3 +10,12 @@ patients/migrations/*
 
 # passwords
 passwords.txt
+
+# virtualenv
+env/
+
+# intelliJ files
+.idea/
+
+# coverage
+.coverage
