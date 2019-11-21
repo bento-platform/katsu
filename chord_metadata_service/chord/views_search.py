@@ -5,7 +5,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .models import Dataset
+from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
+from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
 PHENOPACKET_DATA_TYPE_ID = "phenopacket"
 
@@ -48,8 +50,7 @@ def dataset_detail(request, dataset_id):
         return Response(status=204)
 
 
-@api_view(["POST"])
-def chord_search(request):
+def search(request, internal_data=False):
     # TODO
     start = datetime.now()
 
@@ -66,11 +67,41 @@ def chord_search(request):
         # TODO: Better error
         return Response(status=400)
 
+    if not internal_data:
+        def phenopacket_results():
+            with connection.cursor() as cursor:
+                cursor.execute(compiled_query.as_string(cursor.connection), params)
+                return set(dict(zip([col[0] for col in cursor.description], row))["dataset_id"]
+                           for row in cursor.fetchall())
+
+        datasets = Dataset.objects.filter(dataset_id__in=phenopacket_results())  # TODO: Maybe can avoid hitting DB here
+        return Response(build_search_response([{"id": d.dataset_id, "data_type": PHENOPACKET_DATA_TYPE_ID}
+                                               for d in datasets], start))
+
     def phenopacket_results():
         with connection.cursor() as cursor:
             cursor.execute(compiled_query.as_string(cursor.connection), params)
-            return (dict(zip([col[0] for col in cursor.description], row))["dataset_id"] for row in cursor.fetchall())
+            return set(dict(zip([col[0] for col in cursor.description], row))["phenopacket_id"]
+                       for row in cursor.fetchall())
 
-    datasets = Dataset.objects.filter(dataset_id__in=phenopacket_results())  # TODO: Maybe can avoid hitting DB here
-    return Response(build_search_response([{"id": d.dataset_id, "data_type": PHENOPACKET_DATA_TYPE_ID}
-                                           for d in datasets], start))
+    phenopackets = Phenopacket.objects.filter(phenopacket_id__in=phenopacket_results())
+    phenopackets_by_dataset = {}
+    for p in phenopackets:
+        if p.dataset_id not in phenopackets_by_dataset:
+            phenopackets_by_dataset[p.dataset_id] = []
+
+        serializer = PhenopacketSerializer(p)
+        phenopackets_by_dataset[p.dataset_id].append(serializer.data)
+
+    return Response(build_search_response({k: {"data_type": PHENOPACKET_DATA_TYPE_ID, "matches": v}
+                                           for k, v in phenopackets_by_dataset.items()}, start))
+
+
+@api_view(["POST"])
+def chord_search(request):
+    return search(request, internal_data=False)
+
+
+@api_view(["POST"])
+def chord_private_search(request):
+    return search(request, internal_data=True)
