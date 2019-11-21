@@ -14,13 +14,14 @@ from chord_metadata_service.restapi.serializers import GenericSerializer
 #############################################################
 
 class ResourceSerializer(GenericSerializer):
-
 	class Meta:
 		model = Resource
 		fields = '__all__'
 
 
 class MetaDataSerializer(GenericSerializer):
+	resources = ResourceSerializer(
+		read_only=True, many=True, exclude_when_nested=["id"])
 
 	class Meta:
 		model = MetaData
@@ -229,13 +230,28 @@ class BiosampleSerializer(GenericSerializer):
 		return biosample
 
 
-class PhenopacketSerializer(GenericSerializer):
-	phenotypic_features = PhenotypicFeatureSerializer(read_only=True,
-		many=True, exclude_when_nested=['id', 'biosample'])
+class SimplePhenopacketSerializer(GenericSerializer):
+	biosamples = BiosampleSerializer(
+		read_only=True, many=True, exclude_when_nested=["individual"])
+	genes = GeneSerializer(read_only=True, many=True)
+	variants = VariantSerializer(read_only=True, many=True)
+	diseases = DiseaseSerializer(read_only=True, many=True)
+	hts_files = HtsFileSerializer(read_only=True, many=True)
+	meta_data = MetaDataSerializer(read_only=True, exclude_when_nested=["id"])
+	phenotypic_features = PhenotypicFeatureSerializer(
+		read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
 
 	class Meta:
 		model = Phenopacket
 		fields = '__all__'
+
+
+class PhenopacketSerializer(SimplePhenopacketSerializer):
+	# Phenopacket serializer for nested individuals - need to import here to
+	# prevent circular import issues.
+	from chord_metadata_service.patients.serializers import IndividualSerializer
+	subject = IndividualSerializer(
+		read_only=True, exclude_when_nested=["phenopackets", "biosamples"])
 
 
 #############################################################
