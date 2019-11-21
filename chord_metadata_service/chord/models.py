@@ -40,7 +40,11 @@ class Dataset(models.Model):
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)  # Delete dataset upon project deletion
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,  # Delete dataset upon project deletion
+        related_name="datasets"
+    )
 
     created = models.DateTimeField(auto_now=True)
     updated = models.DateTimeField(auto_now_add=True)
