@@ -45,4 +45,5 @@ urlpatterns = [
     path('datasets/<str:dataset_id>', views_search.dataset_detail),
     path('search', views_search.chord_search),
     path('private/search', views_search.chord_private_search),
+    path('private/tables/<str:table_id>/search', views_search.chord_private_table_search),
 ] + [path('admin/', admin.site.urls)] if DEBUG else []

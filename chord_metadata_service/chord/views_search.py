@@ -1,6 +1,7 @@
 from chord_lib.search import build_search_response, postgres
 from datetime import datetime
 from django.db import connection
+from psycopg2 import sql
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -50,6 +51,18 @@ def dataset_detail(request, dataset_id):
         return Response(status=204)
 
 
+def phenopacket_query_results(query, params):
+    def phenopacket_results():
+        with connection.cursor() as cursor:
+            cursor.execute(query.as_string(cursor.connection), params)
+            return set(dict(zip([col[0] for col in cursor.description], row))["phenopacket_id"]
+                       for row in cursor.fetchall())
+
+    phenopackets = Phenopacket.objects.filter(phenopacket_id__in=phenopacket_results())
+
+    return phenopackets
+
+
 def search(request, internal_data=False):
     # TODO
     start = datetime.now()
@@ -78,15 +91,8 @@ def search(request, internal_data=False):
         return Response(build_search_response([{"id": d.dataset_id, "data_type": PHENOPACKET_DATA_TYPE_ID}
                                                for d in datasets], start))
 
-    def phenopacket_results():
-        with connection.cursor() as cursor:
-            cursor.execute(compiled_query.as_string(cursor.connection), params)
-            return set(dict(zip([col[0] for col in cursor.description], row))["phenopacket_id"]
-                       for row in cursor.fetchall())
-
-    phenopackets = Phenopacket.objects.filter(phenopacket_id__in=phenopacket_results())
     phenopackets_by_dataset = {}
-    for p in phenopackets:
+    for p in phenopacket_query_results(compiled_query, params):
         if p.dataset_id not in phenopackets_by_dataset:
             phenopackets_by_dataset[p.dataset_id] = []
 
@@ -105,3 +111,28 @@ def chord_search(request):
 @api_view(["POST"])
 def chord_private_search(request):
     return search(request, internal_data=True)
+
+
+@api_view(["POST"])
+def chord_private_table_search(request, table_id):  # Search phenopacket data types in specific tables
+    start = datetime.now()
+
+    if request.data is None or "query" not in request.data:
+        # TODO: Better error
+        return Response(status=400)
+
+    dataset = Dataset.objects.get(dataset_id=table_id)
+    query = request.data["query"]
+
+    try:
+        compiled_query, params = postgres.search_query_to_psycopg2_sql(query, PHENOPACKET_SCHEMA)
+    except (SyntaxError, TypeError, ValueError):
+        # TODO: Better error
+        return Response(status=400)
+
+    modified_query = sql.SQL("{} AND dataset_id = {}").format(compiled_query, sql.Placeholder())
+    modified_params = params + (dataset.dataset_id,)
+
+    serializer = PhenopacketSerializer(phenopacket_query_results(modified_query, modified_params), many=True)
+
+    return Response(build_search_response(serializer.data, start))
