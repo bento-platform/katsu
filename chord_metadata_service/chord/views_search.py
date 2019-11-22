@@ -79,10 +79,9 @@ def phenopacket_query_results(query, params):
     def phenopacket_results():
         with connection.cursor() as cursor:
             cursor.execute(query.as_string(cursor.connection), params)
-            return set(dict(zip([col[0] for col in cursor.description], row))["phenopacket_id"]
-                       for row in cursor.fetchall())
+            return set(dict(zip([col[0] for col in cursor.description], row))["id"] for row in cursor.fetchall())
 
-    phenopackets = Phenopacket.objects.filter(phenopacket_id__in=phenopacket_results())
+    phenopackets = Phenopacket.objects.filter(id__in=phenopacket_results())
 
     return phenopackets
 

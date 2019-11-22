@@ -66,7 +66,7 @@ class GeneViewSet(PhenopacketsModelViewSet):
 	Create a new gene
 
 	"""
-	queryset = Gene.objects.all().order_by("gene_id")
+	queryset = Gene.objects.all().order_by("id")
 	serializer_class = GeneSerializer
 
 
@@ -133,7 +133,7 @@ class BiosampleViewSet(PhenopacketsModelViewSet):
 	post:
 	Create a new biosample
 	"""
-	queryset = Biosample.objects.all().order_by("biosample_id")
+	queryset = Biosample.objects.all().order_by("id")
 	serializer_class = BiosampleSerializer
 
 
@@ -146,7 +146,7 @@ class PhenopacketViewSet(PhenopacketsModelViewSet):
 	Create a new phenopacket
 
 	"""
-	queryset = Phenopacket.objects.all().order_by("phenopacket_id")
+	queryset = Phenopacket.objects.all().order_by("id")
 	serializer_class = PhenopacketSerializer
 
 
