@@ -164,7 +164,7 @@ class VariantSerializer(GenericSerializer):
 	def to_internal_value(self, data):
 		""" When writing back to db change field name back to 'allele'. """
 
-		if not 'allele' in data.keys():
+		if 'allele' not in data.keys():
 			allele_type = data.get('allele_type')
 			data['allele'] = data.pop(allele_type)
 		return super(VariantSerializer, self).to_internal_value(data=data)

@@ -9,10 +9,10 @@ class BiosampleTest(TestCase):
 	def setUp(self):
 		try:
 			individual = Individual.objects.get(
-				individual_id='patient:1', sex='FEMALE', age='P25Y3M2D')
+				id='patient:1', sex='FEMALE', age='P25Y3M2D')
 		except Individual.DoesNotExist:
 			individual = Individual.objects.create(
-				individual_id='patient:1', sex='FEMALE', age='P25Y3M2D')
+				id='patient:1', sex='FEMALE', age='P25Y3M2D')
 		procedure = Procedure.objects.create(
 			code={
 				"id": "NCIT:C28743",
@@ -23,7 +23,7 @@ class BiosampleTest(TestCase):
 				"label": "skin of forearm"
 			})
 		Biosample.objects.create(
-			biosample_id='biosample_id:1',
+			id='biosample_id:1',
 			individual=individual,
 			sampled_tissue={
 				"id": "UBERON_0001256",
@@ -49,19 +49,19 @@ class BiosampleTest(TestCase):
 			},
 			diagnostic_markers=[
 				{
-				"id": "NCIT:C49286",
-				"label": "Hematology Test"
+					"id": "NCIT:C49286",
+					"label": "Hematology Test"
 				},
 				{
-				"id": "NCIT:C15709",
-				"label": "Genetic Testing"
+					"id": "NCIT:C15709",
+					"label": "Genetic Testing"
 				}
 			],
 			procedure=procedure,
 			is_control_sample=True
 			)
 		Biosample.objects.create(
-			biosample_id='biosample_id:2',
+			id='biosample_id:2',
 			sampled_tissue={
 				"id": "UBERON_0001256",
 				"label": "urinary bladder"
@@ -86,12 +86,12 @@ class BiosampleTest(TestCase):
 			},
 			diagnostic_markers=[
 				{
-				"id": "NCIT:C49286",
-				"label": "Hematology Test"
+					"id": "NCIT:C49286",
+					"label": "Hematology Test"
 				},
 				{
-				"id": "NCIT:C15709",
-				"label": "Genetic Testing"
+					"id": "NCIT:C15709",
+					"label": "Genetic Testing"
 				}
 			],
 			procedure=procedure,
@@ -103,6 +103,4 @@ class BiosampleTest(TestCase):
 			tumor_progression__label='Primary Malignant Neoplasm',
 			sampled_tissue__label__icontains='urinary bladder'
 			)
-		print(biosample_one)
-		self.assertEqual(
-			biosample_one.biosample_id, 'biosample_id:1')
+		self.assertEqual(biosample_one.id, 'biosample_id:1')

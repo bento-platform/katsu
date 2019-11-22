@@ -139,7 +139,7 @@ def ingest(request):
 
         if subject:
             subject, _ = Individual.objects.get_or_create(
-                individual_id=subject["id"],
+                id=subject["id"],
                 alternate_ids=subject.get("alternate_ids", None),
                 date_of_birth=isoparse(subject["date_of_birth"]) if "date_of_birth" in subject else None,
                 age=subject.get("age", ""),  # TODO: Shouldn't this be nullable, since it's recommended in the spec?
@@ -161,8 +161,8 @@ def ingest(request):
             bs_pfs = [create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
 
             bs_obj, _ = Biosample.objects.get_or_create(
-                biosample_id=bs["id"],
-                individual=(Individual.objects.get(individual_id=bs["individual_id"])
+                id=bs["id"],
+                individual=(Individual.objects.get(id=bs["individual_id"])
                             if "individual_id" in bs else None),
                 description=bs.get("description", ""),
                 sampled_tissue=bs.get("sampled_tissue", None),
@@ -188,7 +188,7 @@ def ingest(request):
             # TODO: Rename alternate_id
 
             g_obj, _ = Gene.objects.get_or_create(
-                gene_id=g["id"],
+                id=g["id"],
                 alternate_id=g.get("alternate_ids", []),
                 symbol=g["symbol"]
             )

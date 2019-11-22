@@ -357,8 +357,8 @@ PHENOPACKET_SCHEMA = {
                     "relation": Phenopacket._meta.get_field("biosamples").remote_field.through._meta.db_table,
                     "relationship": {
                         "type": "MANY_TO_MANY",
-                        "parent_foreign_key": "phenopacket_id",
-                        "parent_primary_key": "phenopacket_id"
+                        "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
+                        "parent_primary_key": "id"  # TODO: No hard-code
                     }
                 }
             }
