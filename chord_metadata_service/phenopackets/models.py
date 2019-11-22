@@ -303,7 +303,7 @@ class Biosample(models.Model):
 	taxonomy = JSONField(blank=True, null=True,
 		help_text='An Ontology term describing the species of the sampled individual.')
 	# An ISO8601 string represent age
-	individual_age_at_collection = models.CharField(max_length=200, blank=True,
+	individual_age_at_collection = JSONField(blank=True, null=True,
 		help_text='Age of the proband at the time the sample was taken.')
 	histological_diagnosis = JSONField(blank=True, null=True,
 		help_text='An Ontology term describing the disease diagnosis '
@@ -313,7 +313,7 @@ class Biosample(models.Model):
 	tumor_grade = JSONField(blank=True, null=True,
 		help_text='An Ontology term describing the tumor grade. '
 		'Potentially a child term of NCIT:C28076 or equivalent.')
-	diagnostic_markers =  ArrayField(JSONField(null=True, blank=True),
+	diagnostic_markers = ArrayField(JSONField(null=True, blank=True),
 		blank=True, null=True,
 		help_text='List of Ontology terms describing clinically relevant biomarkers.')
 	# CHECK! if Procedure instance is deleted Biosample instance is deleted too
