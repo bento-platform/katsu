@@ -11,7 +11,7 @@ def get_models_names(app_name):
 	return [model.__name__ for model in app_models]
 
 # define what models should be indexed
-index_models = ['Biosample', 'Procedure']
+index_models = ['Biosample', 'Procedure', 'PhenotypicFeature']
 
 
 @receiver(post_save)

@@ -17,11 +17,13 @@ class Reference(InnerDoc):
 	reference = Object(Ontology)
 	comment = Text()
 
+class SubjectReference(InnerDoc):
+	reference = Text()
 
 class BiosampleIndex(Document):
 	resourceType = Text()
 	identifier = Text()
-	subject = Text()
+	subject = Object(SubjectReference)
 	sex = Text()
 	text = Text()
 	parent = Object(Reference)
@@ -34,7 +36,7 @@ class Coding(InnerDoc):
 	system = Text()
 	code = Text()
 	display = Text()
-	
+
 
 class Code(InnerDoc):
 	coding = Object(Coding)
@@ -48,3 +50,22 @@ class ProcedureIndex(Document):
 
 	class Meta:
 		index = 'metadata'
+
+class Extension(InnerDoc):
+	code = Object(Code)
+
+class PhenotypicFeatureDocument(Document):
+	resourceType = Text()
+	identifier = Text()
+	note = Text()
+	code = Object(Code)
+	specimen = Object(SubjectReference)
+	interpretation = Object(Code)
+	phenotypic_feature_severity = Object(Extension)
+	phenotypic_feature_modifier = Object(Extension)
+	phenotypic_feature_onset = Object(Extension)
+	evidence = Object(Extension)
+
+	class Meta:
+		index = 'metadata'
+		
