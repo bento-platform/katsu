@@ -226,7 +226,7 @@ def ingest(request):
         meta_data_obj.resources.set(resources_db)  # TODO: primary key ???
 
         new_phenopacket = Phenopacket(
-            phenopacket_id=new_phenopacket_id,
+            id=new_phenopacket_id,
             subject=subject,
             meta_data=meta_data_obj,
             dataset=Dataset.objects.get(dataset_id=dataset_id)
