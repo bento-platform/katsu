@@ -291,10 +291,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
         },
         "histological_diagnosis": PHENOPACKET_ONTOLOGY_SCHEMA,
         "tumor_progression": PHENOPACKET_ONTOLOGY_SCHEMA,
-        "tumor_grade": {
-            "type": "array",
-            "items": PHENOPACKET_ONTOLOGY_SCHEMA
-        },
+        "tumor_grade": PHENOPACKET_ONTOLOGY_SCHEMA,  # TODO: Is this a list?
         "diagnostic_markers": {
             "type": "array",
             "items": PHENOPACKET_ONTOLOGY_SCHEMA
