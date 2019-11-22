@@ -1,7 +1,7 @@
 {
   "subject": {
     "resourceType": "Patient",
-    "identifier": "individual.individual_id",
+    "identifier": "individual.id",
     "birthDate": "individual.date_of_birth",
     "gender": "individual.sex",
     "active": "individual.active",
@@ -119,8 +119,8 @@
   "biosamples": [
     {
       "resourceType": "Specimen",
-      "identifier": "biosample.biosample_id",
-      "subject": "individual.individual_id",
+      "identifier": "biosample.id",
+      "subject": "individual.id",
       "text": "biosample.description",
       "parent": {
         "reference": {
@@ -279,7 +279,7 @@
       },
       "coding": [
         {
-          "code": "gene.gene_id",
+          "code": "gene.id",
           "display": "gene.symbol"
         }
       ]
@@ -299,7 +299,7 @@
   "phenopackets": [
     {
       "resourceType": "Composition",
-      "id": "phenopacket.phenopacket_id",
+      "id": "phenopacket.id",
       "meta": {
           "profile" : [
             "http://ga4gh.org/fhir/phenopackets/StructureDefinition/Phenopacket"
@@ -309,12 +309,12 @@
           "source": "metadata.external_references",
           "tag": "metadata.resources"
         },
-      "subject": "individual.individual_id",
+      "subject": "individual.id",
       "section": [
         {
           "title": "biosamples",
           "entry": [
-            "biosample.biosample_id"
+            "biosample.id"
           ]
         },
         {
@@ -326,7 +326,7 @@
         {
           "title": "genes",
           "entry": [
-            "gene.gene_id"
+            "gene.id"
           ]
         },
         {

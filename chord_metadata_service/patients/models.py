@@ -29,7 +29,7 @@ class Individual(models.Model):
 		('OTHER_KARYOTYPE', 'OTHER_KARYOTYPE'),
 	)
 
-	individual_id = models.CharField(primary_key=True, max_length=200,
+	id = models.CharField(primary_key=True, max_length=200,
 		help_text='An arbitrary identifier for the individual.')
 	# TODO check for CURIE
 	alternate_ids = ArrayField(models.CharField(max_length=200),
@@ -60,14 +60,14 @@ class Individual(models.Model):
 		help_text='A code for the person\'s ethnicity.')
 
 	def __str__(self):
-		return str(self.individual_id)
+		return str(self.id)
 
 	def indexing(self):
 		# mapping model fields to index fields
 		obj = IndividualIndex(
-			meta={'id': self.individual_id},
+			meta={'id': self.id},
 			resourceType='Patient',
-			identifier=self.individual_id,
+			identifier=self.id,
 			birthDate=self.date_of_birth,
 			gender=self.sex,
 			active=self.active,
@@ -77,7 +77,7 @@ class Individual(models.Model):
 		return obj.to_dict(include_meta=True)
 
 	def delete_from_index(self):
-		obj = IndividualIndex.get(id=self.individual_id, index='metadata')
+		obj = IndividualIndex.get(id=self.id, index='metadata')
 		obj.delete()
 		return
 
