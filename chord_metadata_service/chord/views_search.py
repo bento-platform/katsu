@@ -12,10 +12,34 @@ from chord_metadata_service.phenopackets.serializers import PhenopacketSerialize
 
 PHENOPACKET_DATA_TYPE_ID = "phenopacket"
 
+PHENOPACKET_METADATA_SCHEMA = {
+    "type": "object"
+    # TODO
+}
+
 
 @api_view(["GET"])
 def data_type_list(_request):
     return Response([{"id": PHENOPACKET_DATA_TYPE_ID, "schema": PHENOPACKET_SCHEMA}])
+
+
+@api_view(["GET"])
+def data_type_phenopacket(_request):
+    return Response({
+        "id": PHENOPACKET_DATA_TYPE_ID,
+        "schema": PHENOPACKET_SCHEMA,
+        "metadata_schema": PHENOPACKET_METADATA_SCHEMA
+    })
+
+
+@api_view(["GET"])
+def data_type_phenopacket_schema(_request):
+    return Response(PHENOPACKET_SCHEMA)
+
+
+@api_view(["GET"])
+def data_type_phenopacket_metadata_schema(_request):
+    return Response(PHENOPACKET_METADATA_SCHEMA)
 
 
 @api_view(["GET"])

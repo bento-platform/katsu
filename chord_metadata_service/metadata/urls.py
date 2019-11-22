@@ -41,6 +41,10 @@ urlpatterns = [
     path('ingest', views_ingest.ingest),
 
     path('data-types', views_search.data_type_list),
+    path('data-types/phenopacket', views_search.data_type_phenopacket),
+    path('data-types/phenopacket/schema', views_search.data_type_phenopacket_schema),
+    # TODO: Consistent snake or kebab
+    path('data-types/phenopacket/metadata_schema', views_search.data_type_phenopacket_metadata_schema),
     path('datasets', views_search.dataset_list),
     path('datasets/<str:dataset_id>', views_search.dataset_detail),
     path('search', views_search.chord_search),
