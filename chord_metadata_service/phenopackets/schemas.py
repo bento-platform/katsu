@@ -358,7 +358,7 @@ PHENOPACKET_SCHEMA = {
                     "relationship": {
                         "type": "MANY_TO_MANY",
                         "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
-                        "parent_primary_key": "id"  # TODO: No hard-code
+                        "parent_primary_key": Phenopacket._meta.pk.column
                     }
                 }
             }
