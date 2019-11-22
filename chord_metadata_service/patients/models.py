@@ -26,7 +26,7 @@ class Individual(models.Model):
 		('OTHER_KARYOTYPE', 'OTHER_KARYOTYPE'),
 	)
 
-	individual_id = models.CharField(primary_key=True, max_length=200,
+	id = models.CharField(primary_key=True, max_length=200,
 		help_text='An arbitrary identifier for the individual.')
 	# TODO check for CURIE
 	alternate_ids = ArrayField(models.CharField(max_length=200),
@@ -57,4 +57,4 @@ class Individual(models.Model):
 		help_text='A code for the person\'s ethnicity.')
 
 	def __str__(self):
-		return str(self.individual_id)
+		return str(self.id)

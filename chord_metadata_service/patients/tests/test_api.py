@@ -13,7 +13,7 @@ class CreateIndividualTest(APITestCase):
 	def setUp(self):
 
 		self.valid_payload = {
-			"individual_id": "patient:1",
+			"id": "patient:1",
 			"taxonomy": {
 				"id": "NCBITaxon:9606",
 				"label": "human"
@@ -25,7 +25,7 @@ class CreateIndividualTest(APITestCase):
 		}
 
 		self.invalid_payload = {
-			"individual_id": "patient:1",
+			"id": "patient:1",
 			"taxonomy": {
 				"id": "NCBITaxon:9606"
 			},
@@ -45,7 +45,7 @@ class CreateIndividualTest(APITestCase):
 		)
 		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 		self.assertEqual(Individual.objects.count(), 1)
-		self.assertEqual(Individual.objects.get().individual_id, 'patient:1')
+		self.assertEqual(Individual.objects.get().id, 'patient:1')
 
 	def test_create_invalid_individual(self):
 		""" POST a new individual with invalid data. """
@@ -64,7 +64,7 @@ class UpdateIndividualTest(APITestCase):
 
 	def setUp(self):
 		self.individual_one = Individual.objects.create(
-			individual_id='patient:1',
+			id='patient:1',
 			taxonomy={
 				"id": "NCBITaxon:9606",
 				"label": "human"
@@ -76,7 +76,7 @@ class UpdateIndividualTest(APITestCase):
 			)
 
 		self.valid_payload = {
-			"individual_id": "patient:1",
+			"id": "patient:1",
 			"taxonomy": {
 				"id": "NCBITaxon:9606",
 				"label": "human"
@@ -88,7 +88,7 @@ class UpdateIndividualTest(APITestCase):
 		}
 
 		self.invalid_payload = {
-			"individual_id": "patient:1",
+			"id": "patient:1",
 			"taxonomy": {
 				"id": "NCBITaxon:9606",
 				"label": "human"
@@ -105,7 +105,7 @@ class UpdateIndividualTest(APITestCase):
 		response = self.client.put(
 			reverse(
 				'individual-detail',
-				kwargs={'pk': self.individual_one.individual_id}
+				kwargs={'pk': self.individual_one.id}
 				),
 			data=json.dumps(self.valid_payload),
 			content_type='application/json'
@@ -118,7 +118,7 @@ class UpdateIndividualTest(APITestCase):
 		response = self.client.put(
 			reverse(
 				'individual-detail',
-				kwargs={'pk': self.individual_one.individual_id}
+				kwargs={'pk': self.individual_one.id}
 				),
 			data=json.dumps(self.invalid_payload),
 			content_type='application/json'
@@ -131,7 +131,7 @@ class DeleteIndividualTest(APITestCase):
 
 	def setUp(self):
 		self.individual_one = Individual.objects.create(
-			individual_id='patient:1',
+			id='patient:1',
 			taxonomy={
 				"id": "NCBITaxon:9606",
 				"label": "human"
@@ -148,7 +148,7 @@ class DeleteIndividualTest(APITestCase):
 		response = self.client.delete(
 			reverse(
 				'individual-detail',
-				kwargs={'pk': self.individual_one.individual_id}
+				kwargs={'pk': self.individual_one.id}
 				)
 			)
 		self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)

@@ -11,7 +11,7 @@ class CreateBiosampleTest(APITestCase):
 
 	def setUp(self):
 		self.individual = Individual.objects.create(
-			individual_id='patient:1',
+			id='patient:1',
 			sex='FEMALE',
 			age='P67Y3M2D'
 			)
@@ -26,8 +26,8 @@ class CreateBiosampleTest(APITestCase):
 			}
 		}
 		self.valid_payload = {
-			"biosample_id": "biosample:1",
-			"individual": self.individual.individual_id,
+			"id": "biosample:1",
+			"individual": self.individual.id,
 			"procedure": self.procedure,
 			"description": "This is a test description.",
 			"sampled_tissue": {
@@ -49,18 +49,18 @@ class CreateBiosampleTest(APITestCase):
 			},
 			"diagnostic_markers": [
 				{
-				"id": "NCIT:C49286",
-				"label": "Hematology Test"
+					"id": "NCIT:C49286",
+					"label": "Hematology Test"
 				},
 				{
-				"id": "NCIT:C15709",
-				"label": "Genetic Testing"
+					"id": "NCIT:C15709",
+					"label": "Genetic Testing"
 				}
 			]
 		}
 		self.invalid_payload = {
-			"biosample_id": "biosample:1",
-			"individual": self.individual.individual_id,
+			"id": "biosample:1",
+			"individual": self.individual.id,
 			"description": "This is a test description.",
 			"sampled_tissue": {
 				"id": "UBERON_0001256",
@@ -81,12 +81,12 @@ class CreateBiosampleTest(APITestCase):
 			},
 			"diagnostic_markers": [
 				{
-				"id": "NCIT:C49286",
-				"label": "Hematology Test"
+					"id": "NCIT:C49286",
+					"label": "Hematology Test"
 				},
 				{
-				"id": "NCIT:C15709",
-				"label": "Genetic Testing"
+					"id": "NCIT:C15709",
+					"label": "Genetic Testing"
 				}
 			]
 		}
@@ -101,7 +101,7 @@ class CreateBiosampleTest(APITestCase):
 		)
 		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 		self.assertEqual(Biosample.objects.count(), 1)
-		self.assertEqual(Biosample.objects.get().biosample_id, 'biosample:1')
+		self.assertEqual(Biosample.objects.get().id, 'biosample:1')
 
 	def test_create_invalid_biosample(self):
 		""" POST a new biosample with invalid data. """
@@ -111,6 +111,6 @@ class CreateBiosampleTest(APITestCase):
 			data=json.dumps(self.invalid_payload),
 			content_type='application/json'
 		)
-		self.assertEqual(invalid_response.status_code, status.HTTP_400_BAD_REQUEST)
+		self.assertEqual(
+			invalid_response.status_code, status.HTTP_400_BAD_REQUEST)
 		self.assertEqual(Biosample.objects.count(), 0)
-		

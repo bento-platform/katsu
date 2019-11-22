@@ -22,7 +22,7 @@ class Resource(models.Model):
 	"""
 
 	# resource_id e.g. "id": "uniprot"
-	resource_id = models.CharField(max_length=200,
+	id = models.CharField(primary_key=True, max_length=200,
 		help_text='For OBO ontologies, the value of this string '
 		'MUST always be the official OBO ID, which is always '
 		'equivalent to the ID prefix in lower case. '
@@ -184,7 +184,7 @@ class Gene(models.Model):
 	"""
 
 	# Gene id is unique
-	gene_id = models.CharField(primary_key=True, max_length=200,
+	id = models.CharField(primary_key=True, max_length=200,
 		help_text='Official identifier of the gene.')
 	# CURIE style? Yes!
 	alternate_id = ArrayField(models.CharField(max_length=200, blank=True),
@@ -194,7 +194,7 @@ class Gene(models.Model):
 		help_text='Official gene symbol.')
 
 	def __str__(self):
-		return str(self.gene_id)
+		return str(self.id)
 
 
 class Variant(models.Model):
@@ -255,7 +255,7 @@ class Biosample(models.Model):
 	FHIR: Specimen
 	"""
 
-	biosample_id = models.CharField(primary_key=True, max_length=200,
+	id = models.CharField(primary_key=True, max_length=200,
 		help_text='An arbitrary identifier.')
 	# if Individual instance is deleted Biosample instance is deleted too
 	individual = models.ForeignKey(Individual, on_delete=models.CASCADE,
@@ -295,7 +295,7 @@ class Biosample(models.Model):
 		help_text='Whether the sample is being used as a normal control.')
 
 	def __str__(self):
-		return str(self.biosample_id)
+		return str(self.id)
 
 
 class Phenopacket(models.Model):
@@ -303,7 +303,7 @@ class Phenopacket(models.Model):
 	Class to aggregate Individual's experiments data
 	"""
 
-	phenopacket_id = models.CharField(primary_key=True, max_length=200,
+	id = models.CharField(primary_key=True, max_length=200,
 		help_text='An arbitrary identifier for the phenopacket.')
 	# if Individual instance is deleted Phenopacket instance is deleted too
 	# CHECK !!! Force as required?
@@ -330,7 +330,7 @@ class Phenopacket(models.Model):
 	dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)
 
 	def __str__(self):
-		return str(self.phenopacket_id)
+		return str(self.id)
 
 
 #############################################################
@@ -356,7 +356,7 @@ class GenomicInterpretation(models.Model):
 		)
 	status = models.CharField(max_length=200, choices=GENOMIC_INTERPRETATION_STATUS,
 		help_text='How the call of this GenomicInterpretation was interpreted.')
-	gene = models.ForeignKey(Gene, on_delete=models.CASCADE, to_field='gene_id',
+	gene = models.ForeignKey(Gene, on_delete=models.CASCADE,
 		blank=True, null=True,
 		help_text='The gene contributing to the diagnosis.')
 	variant = models.ForeignKey(Variant, on_delete=models.CASCADE,
@@ -402,7 +402,7 @@ class Interpretation(models.Model):
 		('IN_PROGRESS', 'IN_PROGRESS')
 	)
 
-	interpretation_id = models.CharField(max_length=200,
+	id = models.CharField(primary_key=True, max_length=200,
 		help_text='An arbitrary identifier for the interpretation.')
 	resolution_status = models.CharField(choices=RESOLUTION_STATUS, max_length=200,
 		blank=True, help_text='The current status of work on the case.')

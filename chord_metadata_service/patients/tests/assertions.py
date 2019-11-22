@@ -1,4 +1,4 @@
-from jsonschema import validate, ValidationError, Draft7Validator
+from jsonschema import ValidationError, Draft7Validator
 
 
 def assert_valid_schema(data, schema):

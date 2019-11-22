@@ -20,7 +20,7 @@ def convert_to_fhir(individual_data):
 	fhir_record['resourceType'] = 'Patient'
 	# mapping for basic Patient attributes
 	mapping = {
-	'individual_id': 'identifier',
+	'id': 'identifier',
 	'date_of_birth': 'birthDate',
 	'sex': 'gender',
 	'active': 'active',
@@ -38,7 +38,7 @@ def convert_to_fhir(individual_data):
 		for sample in individual_data.get('biosamples', None):
 			biosample_record = {}
 			biosample_record['resourceType'] = 'Specimen'
-			biosample_record['identifier'] = sample.get('biosample_id', None)
+			biosample_record['identifier'] = sample.get('id', None)
 			biosample_record['parent'] = {}
 			biosample_record['parent']['reference'] = {}
 			biosample_record['parent']['reference']['reference'] = sample.get('sampled_tissue').get('id', None)
