@@ -21,7 +21,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
 	Create a new individual
 
 	"""
-	queryset = Individual.objects.all().order_by("individual_id")
+	queryset = Individual.objects.all().order_by("id")
 	serializer_class = IndividualSerializer
 	pagination_class = LargeResultsSetPagination
 	renderer_classes = tuple(
