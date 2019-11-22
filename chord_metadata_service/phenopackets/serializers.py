@@ -106,11 +106,9 @@ class ProcedureSerializer(GenericSerializer):
 		model = Procedure
 		fields = '__all__'
 
-	# create method on serializer cause creation of replica objects in ES index
-	# TODO check why
-	# def create(self, validated_data):
-	# 	instance, _ = Procedure.objects.get_or_create(**validated_data)
-	# 	return instance
+	def create(self, validated_data):
+		instance, _ = Procedure.objects.get_or_create(**validated_data)
+		return instance
 
 	# def validate(self, data):
 	# 	"""
@@ -232,6 +230,19 @@ class BiosampleSerializer(GenericSerializer):
 		return biosample
 
 	def update(self, instance, validated_data):
+		instance.sampled_tissue = validated_data.get('sampled_tissue',
+			instance.sampled_tissue)
+		instance.taxonomy = validated_data.get('taxonomy',
+			instance.taxonomy)
+		instance.histological_diagnosis = validated_data.get('histological_diagnosis',
+			instance.histological_diagnosis)
+		instance.tumor_progression = validated_data.get('tumor_progression',
+			instance.tumor_progression)
+		instance.tumor_grade = validated_data.get('tumor_grade',
+			instance.tumor_grade)
+		instance.diagnostic_markers = validated_data.get('diagnostic_markers',
+			instance.diagnostic_markers)
+		instance.save()
 		procedure_data = validated_data.pop('procedure', None)
 		if procedure_data:
 			instance.procedure, _ = Procedure.objects.get_or_create(**procedure_data)
