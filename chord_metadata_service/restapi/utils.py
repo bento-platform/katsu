@@ -25,7 +25,6 @@ def convert_to_fhir(individual_data):
 	'sex': 'gender',
 	'active': 'active',
 	'deceased': 'deceased',
-	'address_postal_code': 'addresPostalCode',
 	'race': 'race',
 	'ethnicity': 'ethnicity'
 	}
