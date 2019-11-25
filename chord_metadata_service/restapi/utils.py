@@ -101,19 +101,9 @@ def convert_to_fhir(individual_data):
 			# mapping for procedure related to each biosample
 			if 'procedure' in sample.keys():
 				procedure = sample.get('procedure')
-				biosample_record['procedure'] = {}
-				biosample_record['procedure']['resourceType'] = 'Procedure'
-				biosample_record['procedure']['code'] = {}
-				biosample_record['procedure']['code']['coding'] = []
-				code = {}
-				code['code'] = procedure.get('code').get('id', None)
-				code['display'] = procedure.get('code').get('label', None)
-				biosample_record['procedure']['code']['coding'].append(code)
-				biosample_record['procedure']['code']['bodySite'] = []
-				body_site = {}
-				body_site['code'] = procedure.get('body_site').get('id', None)
-				body_site['display'] = procedure.get('body_site').get('label', None)
-				biosample_record['procedure']['code']['bodySite'].append(body_site)
+				biosample_record['collection'] = {}
+				biosample_record['collection']['method'] = procedure_to_fhir(procedure).get('code')
+				biosample_record['collection']['bodySite'] = procedure_to_fhir(procedure).get('bodySite')
 			# all these elements are represented by FHIR Class CodeableConcept
 			# and have the same schema
 			codeable_concepts = [
@@ -142,3 +132,25 @@ def convert_to_fhir(individual_data):
 			fhir_record['biosamples'].append(biosample_record)
 
 	return fhir_record
+
+
+def fhir_coding(obj, value):
+	coding = {}
+	coding['system'] = ''
+	coding['code'] = obj.get(value, None).get('id', None)
+	coding['display'] = obj.get(value, None).get('label', None)
+	return coding
+
+
+def procedure_to_fhir(obj):
+	procedure = {}
+	procedure['resourceType'] = 'Procedure'
+	procedure['code'] = {}
+	procedure['code']['coding'] = []
+	coding = fhir_coding(obj, 'code')
+	procedure['code']['coding'].append(coding)
+	procedure['bodySite'] = {}
+	procedure['bodySite']['coding'] = []
+	body_site_coding = fhir_coding(obj, 'body_site')
+	procedure['bodySite']['coding'].append(body_site_coding)
+	return procedure

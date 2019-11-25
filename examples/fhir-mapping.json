@@ -222,15 +222,15 @@
       "resourceType": "Procedure",
       "identifier": "procedure.id",
       "code": {
-      "coding": [
-        {
-          "system": "",
-          "code": "procedure.code.id",
-          "display": "procedure.code.label"
-        }
-      ],
-      "bodySite": [
-        {
+        "coding": [
+          {
+            "system": "",
+            "code": "procedure.code.id",
+            "display": "procedure.code.label"
+          }
+        ]
+      },
+      "bodySite": {
           "coding": [
             {
               "system": "",
@@ -239,9 +239,8 @@
             }
           ]
         }
-      ]
-      }
-    }
+      
+      } 
   ],
   "htsfiles": [
     {
