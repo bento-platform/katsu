@@ -34,11 +34,11 @@ urlpatterns = [
     path('api/', include(restapi_urls)),
     path('service-info', api_views.service_info),
 
-    path('workflows', views_ingest.workflow_list),
-    path('workflows/<slug:workflow_id>', views_ingest.workflow_item),
-    path('workflows/<slug:workflow_id>.wdl', views_ingest.workflow_file),
+    path('workflows', views_ingest.workflow_list, name="workflows"),
+    path('workflows/<slug:workflow_id>', views_ingest.workflow_item, name="workflow-detail"),
+    path('workflows/<slug:workflow_id>.wdl', views_ingest.workflow_file, name="workflow-file"),
 
-    path('ingest', views_ingest.ingest),
+    path('ingest', views_ingest.ingest, name="ingest"),
 
     path('data-types', views_search.data_type_list, name="data-type-list"),
     path('data-types/phenopacket', views_search.data_type_phenopacket, name="data-type-detail"),
