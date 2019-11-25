@@ -196,3 +196,16 @@ def hts_file_to_fhir(obj):
 	htsfile_record['extension']['url'] = 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly'
 	htsfile_record['extension']['valueCode'] = obj.get('genome_assembly', None)
 	return htsfile_record
+
+
+def gene_to_fhir(obj):
+	""" Gene to FHIR CodeableConcept. """
+
+	gene_record = {}
+	gene_record['resourceType'] = 'CodeableConcept'
+	gene_record['coding'] = []
+	coding = {}
+	coding['code'] = obj.get('id', None)
+	coding['display'] = obj.get('symbol', None)
+	gene_record['coding'].append(coding)
+	return gene_record
