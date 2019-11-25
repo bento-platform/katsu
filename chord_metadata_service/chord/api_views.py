@@ -23,20 +23,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     pagination_class = LargeResultsSetPagination
 
-    # noinspection PyUnusedLocal
-    @action(detail=True, methods=["GET"])
-    def datasets(self, _request, pk):
-        project = self.get_object()
-        datasets = Dataset.objects.filter(project=project).order_by("dataset_id")
-
-        page = self.paginate_queryset(datasets)
-        if page is not None:
-            serializer = DatasetSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = DatasetSerializer(datasets, many=True)
-        return Response(serializer.data)
-
 
 class DatasetViewSet(viewsets.ModelViewSet):
     """
