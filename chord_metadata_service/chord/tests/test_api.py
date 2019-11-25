@@ -7,14 +7,17 @@ from .constants import VALID_DATA_USE_1
 from ..models import *
 
 
+VALID_PROJECT_1 = {
+    "name": "Project 1",
+    "description": "Some description",
+    "data_use": VALID_DATA_USE_1
+}
+
+
 class CreateProjectTest(APITestCase):
     def setUp(self) -> None:
         self.valid_payloads = [
-            {
-                "name": "Project 1",
-                "description": "Some description",
-                "data_use": VALID_DATA_USE_1
-            },
+            VALID_PROJECT_1,
             {
                 "name": "Project 2",
                 "description": "",
@@ -27,6 +30,11 @@ class CreateProjectTest(APITestCase):
                 "name": "Project 1",
                 "description": "",
                 "data_use": {}
+            },
+            {
+                "name": "aa",
+                "description": "",
+                "data_use": VALID_DATA_USE_1
             }
         ]
 
@@ -46,7 +54,45 @@ class CreateProjectTest(APITestCase):
 
 # TODO: Update Project
 # TODO: Delete Project
-# TODO: Create Dataset
+
+class CreateDatasetTest(APITestCase):
+    def setUp(self) -> None:
+        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
+        self.project = r.json()
+
+        self.valid_payloads = [
+            {
+                "name": "Dataset 1",
+                "description": "Test Dataset",
+                "project": self.project["project_id"]
+            }
+        ]
+
+        self.invalid_payloads = [
+            {
+                "name": "aa",
+                "description": "Test Dataset",
+                "project": self.project["project_id"]
+            },
+            {
+                "name": "Dataset 1",
+                "description": "Test Dataset",
+                "project": None
+            }
+        ]
+
+    def test_create_dataset(self):
+        for i, d in enumerate(self.valid_payloads, 1):
+            r = self.client.post(reverse("dataset-list"), data=json.dumps(d), content_type="application/json")
+            self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(Dataset.objects.count(), i)
+            self.assertEqual(Dataset.objects.get(name=d["name"]).description, d["description"])
+
+        for d in self.invalid_payloads:
+            r = self.client.post(reverse("dataset-list"), data=json.dumps(d), content_type="application/json")
+            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
+
 # TODO: Update Dataset
 # TODO: Delete Dataset
 # TODO: Create TableOwnership
