@@ -3,15 +3,8 @@ import json
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from .constants import VALID_DATA_USE_1
+from .constants import *
 from ..models import *
-
-
-VALID_PROJECT_1 = {
-    "name": "Project 1",
-    "description": "Some description",
-    "data_use": VALID_DATA_USE_1
-}
 
 
 class CreateProjectTest(APITestCase):
@@ -61,11 +54,7 @@ class CreateDatasetTest(APITestCase):
         self.project = r.json()
 
         self.valid_payloads = [
-            {
-                "name": "Dataset 1",
-                "description": "Test Dataset",
-                "project": self.project["project_id"]
-            }
+            valid_dataset_1(self.project["project_id"])
         ]
 
         self.invalid_payloads = [

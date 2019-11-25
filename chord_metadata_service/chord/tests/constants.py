@@ -1,3 +1,13 @@
+from uuid import uuid4
+
+__all__ = [
+    "VALID_DATA_USE_1",
+    "VALID_PROJECT_1",
+    "valid_dataset_1",
+    "TEST_SEARCH_QUERY"
+]
+
+
 VALID_DATA_USE_1 = {
     "consent_code": {
         "primary_category": {"code": "GRU"},
@@ -12,3 +22,21 @@ VALID_DATA_USE_1 = {
         {"code": "US"}
     ]
 }
+
+
+VALID_PROJECT_1 = {
+    "name": "Project 1",
+    "description": "Some description",
+    "data_use": VALID_DATA_USE_1
+}
+
+
+def valid_dataset_1(project_id):
+    return {
+        "name": "Dataset 1",
+        "description": "Test Dataset",
+        "project": project_id
+    }
+
+
+TEST_SEARCH_QUERY = ["#eq", ["#resolve", "subject", "sex"], "MALE"]

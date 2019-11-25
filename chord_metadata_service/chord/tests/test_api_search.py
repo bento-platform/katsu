@@ -1,7 +1,10 @@
+import json
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from .constants import *
 from ..views_search import PHENOPACKET_DATA_TYPE_ID, PHENOPACKET_SCHEMA, PHENOPACKET_METADATA_SCHEMA
 
 
@@ -34,3 +37,24 @@ class DataTypeTest(APITestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
         self.assertDictEqual(c, PHENOPACKET_METADATA_SCHEMA)
+
+
+class TableTest(APITestCase):
+    def setUp(self) -> None:
+        # Add example data
+
+        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
+        self.project = r.json()
+
+        self.client.post(reverse("dataset-list"), data=json.dumps(valid_dataset_1(self.project["project_id"])),
+                         content_type="application/json")
+
+    def test_table_list(self):
+        # No data type specified
+        r = self.client.get(reverse("table-list"))
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+
+        r = self.client.get(reverse("table-list"), {"data-type": PHENOPACKET_DATA_TYPE_ID})
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertEqual(len(c), 1)
