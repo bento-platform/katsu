@@ -1,5 +1,6 @@
 from rest_framework.renderers import JSONRenderer
-from .utils import convert_to_fhir, camel_case_field_names
+from .utils import (convert_to_fhir, camel_case_field_names, biosample_to_fhir,
+	phenotypic_feature_to_fhir, procedure_to_fhir)
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
 
@@ -18,6 +19,57 @@ class FHIRRenderer(JSONRenderer):
 			final_data = convert_to_fhir(data)
 
 		return super(FHIRRenderer, self).render(final_data, media_type, renderer_context)
+
+
+class BiosampleFHIRRenderer(JSONRenderer):
+	media_type = 'application/json'
+	format = 'fhir'
+
+	def render(self, data, media_type=None, renderer_context=None):
+		if 'results' in data:
+			final_data = {}
+			final_data['specimens'] = []
+			for item in data.get('results'):
+				item_data = biosample_to_fhir(item)
+				final_data['specimens'].append(item_data)
+		else:
+			final_data = biosample_to_fhir(data)
+
+		return super(BiosampleFHIRRenderer, self).render(final_data, media_type, renderer_context)
+
+
+class PhenotypicFeatureFHIRRenderer(JSONRenderer):
+	media_type = 'application/json'
+	format = 'fhir'
+
+	def render(self, data, media_type=None, renderer_context=None):
+		if 'results' in data:
+			final_data = {}
+			final_data['observations'] = []
+			for item in data.get('results'):
+				item_data = phenotypic_feature_to_fhir(item)
+				final_data['observations'].append(item_data)
+		else:
+			final_data = phenotypic_feature_to_fhir(data)
+
+		return super(PhenotypicFeatureFHIRRenderer, self).render(final_data, media_type, renderer_context)
+
+
+class ProcedureFHIRRenderer(JSONRenderer):
+	media_type = 'application/json'
+	format = 'fhir'
+
+	def render(self, data, media_type=None, renderer_context=None):
+		if 'results' in data:
+			final_data = {}
+			final_data['procedures'] = []
+			for item in data.get('results'):
+				item_data = procedure_to_fhir(item)
+				final_data['procedures'].append(item_data)
+		else:
+			final_data = procedure_to_fhir(data)
+
+		return super(ProcedureFHIRRenderer, self).render(final_data, media_type, renderer_context)
 
 
 class PhenopacketsRenderer(CamelCaseJSONRenderer):
