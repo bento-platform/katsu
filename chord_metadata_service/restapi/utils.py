@@ -15,7 +15,8 @@ def camel_case_field_names(string):
 
 
 def convert_to_fhir(individual_data):
-	""" Transform individual data to Patient FHIR record """
+	""" Transform individual data to Patient FHIR record. """
+
 	fhir_record = {}
 	fhir_record['resourceType'] = 'Patient'
 	# mapping for basic Patient attributes
@@ -35,63 +36,43 @@ def convert_to_fhir(individual_data):
 	if 'biosamples' in individual_data.keys():
 		fhir_record['biosamples'] = []
 		for sample in individual_data.get('biosamples', None):
-			biosample_record = {}
-			biosample_record['resourceType'] = 'Specimen'
-			biosample_record['identifier'] = sample.get('id', None)
-			biosample_record['parent'] = {}
-			biosample_record['parent']['reference'] = {}
-			biosample_record['parent']['reference']['reference'] = sample.get('sampled_tissue').get('id', None)
-			biosample_record['parent']['reference']['display'] = sample.get('sampled_tissue').get('label', None)
-			# mapping for phenotypic_features related to each biosample
-			if 'phenotypic_features' in sample.keys():
-				biosample_record['phenotypicFeatures'] = []
-				for feature in sample.get('phenotypic_features'):
-					feature_record = phenotypic_feature_to_fhir(feature)
-					biosample_record['phenotypicFeatures'].append(feature_record)
-			# mapping for procedure related to each biosample
-			if 'procedure' in sample.keys():
-				procedure = sample.get('procedure')
-				biosample_record['collection'] = {}
-				biosample_record['collection']['method'] = procedure_to_fhir(procedure).get('code')
-				biosample_record['collection']['bodySite'] = procedure_to_fhir(procedure).get('bodySite')
-			# all these elements are represented by FHIR Class CodeableConcept
-			# and have the same schema
-			codeable_concepts = [
-				'taxonomy', 'histological_diagnosis',
-				'tumor_progression', 'tumor_grade',
-				'diagnostic_markers'
-				]
-			for concept in codeable_concepts:
-				if concept in sample.keys():
-					concept_data = sample.get(concept)
-					concept_field_name = camel_case_field_names(concept)
-					biosample_record[concept_field_name] = {}
-					biosample_record[concept_field_name]['resourceType'] = 'CodeableConcept'
-					biosample_record[concept_field_name]['coding'] = []
-					coding = {}
-					if isinstance(concept_data, list):
-						for item in concept_data:
-							coding['code'] = item.get('id', None)
-							coding['display'] = item.get('label', None)
-							biosample_record[concept_field_name]['coding'].append(coding)
-					else:
-						coding['code'] = concept_data.get('id', None)
-						coding['display'] = concept_data.get('label', None)
-						biosample_record[concept_field_name]['coding'].append(coding)
-
+			biosample_record = biosample_to_fhir(sample)
 			fhir_record['biosamples'].append(biosample_record)
-
 	return fhir_record
 
 
-def fhir_coding(obj, value):
+def fhir_coding(obj, value=None):
+	""" Generic function to convert to FHIR coding element. """
+
 	coding = {}
-	coding['code'] = obj.get(value, None).get('id', None)
-	coding['display'] = obj.get(value, None).get('label', None)
+	if value:
+		coding['code'] = obj.get(value, None).get('id', None)
+		coding['display'] = obj.get(value, None).get('label', None)
+	else:
+		coding['code'] = obj.get('id', None)
+		coding['display'] = obj.get('label', None)
 	return coding
 
 
+def fhir_codeable_concept(obj):
+	""" Convert  different data types to FHIR Codeable concept. """
+
+	codeable_concept = {}
+	codeable_concept['resourceType'] = 'CodeableConcept'
+	codeable_concept['coding'] = []
+	if isinstance(obj, list):
+		for item in obj:
+			coding = fhir_coding(item)
+			codeable_concept['coding'].append(coding)
+	else:
+		coding = fhir_coding(obj)
+		codeable_concept['coding'].append(coding)
+	return codeable_concept
+
+
 def procedure_to_fhir(obj):
+	""" Convert procedure to FHIR Procedure. """
+
 	procedure = {}
 	procedure['resourceType'] = 'Procedure'
 	if 'id' in obj.keys():
@@ -108,6 +89,7 @@ def procedure_to_fhir(obj):
 
 
 def phenotypic_feature_to_fhir(obj):
+	""" Convert phenotypic feature to FHIR Observation. """
 	feature_record = {}
 	feature_record['resourceType'] = 'Observation'
 	if 'id' in obj.keys():
@@ -154,3 +136,39 @@ def phenotypic_feature_to_fhir(obj):
 			feature_record['evidence'].append(evidence_detail)
 	return feature_record
 
+
+def biosample_to_fhir(obj):
+	""" Convert biosample to FHIR Specimen. """
+
+	biosample_record = {}
+	biosample_record['resourceType'] = 'Specimen'
+	biosample_record['identifier'] = obj.get('id', None)
+	biosample_record['parent'] = {}
+	biosample_record['parent']['reference'] = {}
+	biosample_record['parent']['reference']['reference'] = obj.get('sampled_tissue').get('id', None)
+	biosample_record['parent']['reference']['display'] = obj.get('sampled_tissue').get('label', None)
+	# mapping for phenotypic_features related to each biosample
+	if 'phenotypic_features' in obj.keys():
+		biosample_record['phenotypicFeatures'] = []
+		for feature in obj.get('phenotypic_features'):
+			feature_record = phenotypic_feature_to_fhir(feature)
+			biosample_record['phenotypicFeatures'].append(feature_record)
+	# mapping for procedure related to each biosample
+	if 'procedure' in obj.keys():
+		procedure = obj.get('procedure')
+		biosample_record['collection'] = {}
+		biosample_record['collection']['method'] = procedure_to_fhir(procedure).get('code')
+		biosample_record['collection']['bodySite'] = procedure_to_fhir(procedure).get('bodySite')
+	# all these elements are represented by FHIR Class CodeableConcept
+	# and have the same schema
+	codeable_concepts = [
+		'taxonomy', 'histological_diagnosis',
+		'tumor_progression', 'tumor_grade',
+		'diagnostic_markers'
+		]
+	for concept in codeable_concepts:
+		if concept in obj.keys():
+			concept_data = obj.get(concept)
+			concept_field_name = camel_case_field_names(concept)
+			biosample_record[concept_field_name] = fhir_codeable_concept(concept_data)
+	return biosample_record
