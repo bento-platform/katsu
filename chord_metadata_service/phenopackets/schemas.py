@@ -261,7 +261,8 @@ PHENOPACKET_AGE_SCHEMA = {
     "type": "object",
     "properties": {
         "age": {"type": "string"}
-    }
+    },
+    "required": ["age"]
 }
 
 PHENOPACKET_BIOSAMPLE_SCHEMA = {
@@ -282,11 +283,19 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
         "individual_age_at_collection": {
             "type": "object",
             "oneOf": [  # TODO: Front end will need to deal with this
-                {"properties": PHENOPACKET_AGE_SCHEMA["properties"]},
-                {"properties": {
-                    "start": PHENOPACKET_AGE_SCHEMA,
-                    "end": PHENOPACKET_AGE_SCHEMA
-                }}
+                {
+                    "properties": PHENOPACKET_AGE_SCHEMA["properties"],
+                    "required": ["age"],
+                    "additionalProperties": False
+                },
+                {
+                    "properties": {
+                        "start": PHENOPACKET_AGE_SCHEMA,
+                        "end": PHENOPACKET_AGE_SCHEMA,
+                    },
+                    "required": ["start", "end"],
+                    "additionalProperties": False
+                }
             ]
         },
         "histological_diagnosis": PHENOPACKET_ONTOLOGY_SCHEMA,
