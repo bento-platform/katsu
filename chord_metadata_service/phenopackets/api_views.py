@@ -5,7 +5,7 @@ from rest_framework.settings import api_settings
 from chord_metadata_service.restapi.api_renderers import (
 	PhenopacketsRenderer, BiosampleFHIRRenderer,
 	PhenotypicFeatureFHIRRenderer, ProcedureFHIRRenderer,
-	HstFileFHIRRenderer, GeneFHIRRenderer)
+	HstFileFHIRRenderer, GeneFHIRRenderer, VariantFHIRRenderer)
 
 
 class LargeResultsSetPagination(pagination.PageNumberPagination):
@@ -91,7 +91,7 @@ class VariantViewSet(viewsets.ModelViewSet):
 	serializer_class = VariantSerializer
 	pagination_class = LargeResultsSetPagination
 	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer,)
+		) + (PhenopacketsRenderer, VariantFHIRRenderer, )
 	# TODO filtering
 	# filter_backends = (DjangoFilterBackend,)
 	# filter_class = VariantFilter

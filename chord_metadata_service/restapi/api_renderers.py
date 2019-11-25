@@ -105,6 +105,23 @@ class GeneFHIRRenderer(JSONRenderer):
 		return super(GeneFHIRRenderer, self).render(final_data, media_type, renderer_context)
 
 
+class VariantFHIRRenderer(JSONRenderer):
+	media_type = 'application/json'
+	format = 'fhir'
+
+	def render(self, data, media_type=None, renderer_context=None):
+		if 'results' in data:
+			final_data = {}
+			final_data['observations'] = []
+			for item in data.get('results'):
+				item_data = variant_to_fhir(item)
+				final_data['observations'].append(item_data)
+		else:
+			final_data = variant_to_fhir(data)
+
+		return super(VariantFHIRRenderer, self).render(final_data, media_type, renderer_context)
+
+
 class PhenopacketsRenderer(CamelCaseJSONRenderer):
 	media_type = 'application/json'
 	format = 'phenopackets'

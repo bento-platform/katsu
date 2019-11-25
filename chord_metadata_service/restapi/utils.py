@@ -209,3 +209,19 @@ def gene_to_fhir(obj):
 	coding['display'] = obj.get('symbol', None)
 	gene_record['coding'].append(coding)
 	return gene_record
+
+
+def variant_to_fhir(obj):
+	""" Variant to FHIR """
+	# TODO chekc this example
+	# http://build.fhir.org/ig/HL7/genomics-reporting/SNVexample.json.html
+
+	variant_record = {}
+	variant_record['resourceType'] = 'Observation'
+	variant_record['identifier'] = obj.get('id', None)
+	variant_record['meta'] = {}
+	variant_record['meta']['profile'] = [
+		'http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/variant'
+		]
+
+	return variant_record
