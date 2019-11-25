@@ -75,15 +75,14 @@ def dataset_detail(request, dataset_id):
         return Response(status=204)
 
 
+def phenopacket_results(query, params, key="id"):
+    with connection.cursor() as cursor:
+        cursor.execute(query.as_string(cursor.connection), params)
+        return set(dict(zip([col[0] for col in cursor.description], row))[key] for row in cursor.fetchall())
+
+
 def phenopacket_query_results(query, params):
-    def phenopacket_results():
-        with connection.cursor() as cursor:
-            cursor.execute(query.as_string(cursor.connection), params)
-            return set(dict(zip([col[0] for col in cursor.description], row))["id"] for row in cursor.fetchall())
-
-    phenopackets = Phenopacket.objects.filter(id__in=phenopacket_results())
-
-    return phenopackets
+    return Phenopacket.objects.filter(id__in=phenopacket_results(query, params, "id"))
 
 
 def search(request, internal_data=False):
@@ -104,13 +103,11 @@ def search(request, internal_data=False):
         return Response(status=400)
 
     if not internal_data:
-        def phenopacket_results():
-            with connection.cursor() as cursor:
-                cursor.execute(compiled_query.as_string(cursor.connection), params)
-                return set(dict(zip([col[0] for col in cursor.description], row))["dataset_id"]
-                           for row in cursor.fetchall())
-
-        datasets = Dataset.objects.filter(dataset_id__in=phenopacket_results())  # TODO: Maybe can avoid hitting DB here
+        datasets = Dataset.objects.filter(dataset_id__in=phenopacket_results(
+            query=compiled_query,
+            params=params,
+            key="dataset_id"
+        ))  # TODO: Maybe can avoid hitting DB here
         return Response(build_search_response([{"id": d.dataset_id, "data_type": PHENOPACKET_DATA_TYPE_ID}
                                                for d in datasets], start))
 
