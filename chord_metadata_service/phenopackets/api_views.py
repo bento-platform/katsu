@@ -4,7 +4,8 @@ from .models import *
 from rest_framework.settings import api_settings
 from chord_metadata_service.restapi.api_renderers import (
 	PhenopacketsRenderer, BiosampleFHIRRenderer,
-	PhenotypicFeatureFHIRRenderer, ProcedureFHIRRenderer)
+	PhenotypicFeatureFHIRRenderer, ProcedureFHIRRenderer,
+	HstFileFHIRRenderer)
 
 
 class LargeResultsSetPagination(pagination.PageNumberPagination):
@@ -58,7 +59,7 @@ class HtsFileViewSet(viewsets.ModelViewSet):
 	serializer_class = HtsFileSerializer
 	pagination_class = LargeResultsSetPagination
 	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer,)
+		) + (PhenopacketsRenderer, HstFileFHIRRenderer, )
 
 
 class GeneViewSet(viewsets.ModelViewSet):

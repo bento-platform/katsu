@@ -172,3 +172,27 @@ def biosample_to_fhir(obj):
 			concept_field_name = camel_case_field_names(concept)
 			biosample_record[concept_field_name] = fhir_codeable_concept(concept_data)
 	return biosample_record
+
+
+def hts_file_to_fhir(obj):
+	""" Convert HTSFile record to FHIR Document Reference. """
+
+	htsfile_record = {}
+	htsfile_record['resourceType'] = 'DocumentReference'
+	htsfile_record['content'] = []
+	content_data = {}
+	content_data['attachment'] = {}
+	content_data['attachment']['url'] = obj.get('uri', None)
+	if 'description' in obj.keys():
+		content_data['attachment']['title'] = obj.get('description', None)
+	htsfile_record['content'].append(content_data)
+	htsfile_record['type'] = {}
+	htsfile_record['type']['coding'] = []
+	coding = {}
+	coding['code'] = obj.get('hts_format', None)
+	coding['display'] = obj.get('hts_format', None)
+	htsfile_record['type']['coding'].append(coding)
+	htsfile_record['extension'] = {}
+	htsfile_record['extension']['url'] = 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly'
+	htsfile_record['extension']['valueCode'] = obj.get('genome_assembly', None)
+	return htsfile_record

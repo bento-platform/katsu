@@ -1,6 +1,6 @@
 from rest_framework.renderers import JSONRenderer
 from .utils import (convert_to_fhir, camel_case_field_names, biosample_to_fhir,
-	phenotypic_feature_to_fhir, procedure_to_fhir)
+	phenotypic_feature_to_fhir, procedure_to_fhir, hts_file_to_fhir)
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
 
@@ -70,6 +70,23 @@ class ProcedureFHIRRenderer(JSONRenderer):
 			final_data = procedure_to_fhir(data)
 
 		return super(ProcedureFHIRRenderer, self).render(final_data, media_type, renderer_context)
+
+
+class HstFileFHIRRenderer(JSONRenderer):
+	media_type = 'application/json'
+	format = 'fhir'
+
+	def render(self, data, media_type=None, renderer_context=None):
+		if 'results' in data:
+			final_data = {}
+			final_data['document_references'] = []
+			for item in data.get('results'):
+				item_data = hts_file_to_fhir(item)
+				final_data['document_references'].append(item_data)
+		else:
+			final_data = hts_file_to_fhir(data)
+
+		return super(HstFileFHIRRenderer, self).render(final_data, media_type, renderer_context)
 
 
 class PhenopacketsRenderer(CamelCaseJSONRenderer):
