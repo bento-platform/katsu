@@ -1,6 +1,4 @@
 from rest_framework import viewsets
-from rest_framework.decorators import action
-from rest_framework.response import Response
 
 from chord_metadata_service.phenopackets.api_views import LargeResultsSetPagination
 from .models import *
