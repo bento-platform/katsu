@@ -1,3 +1,5 @@
+import itertools
+
 from chord_lib.search import build_search_response, postgres
 from datetime import datetime
 from django.db import connection
@@ -87,18 +89,18 @@ def phenopacket_query_results(query, params):
 
 
 def search(request, internal_data=False):
-    # TODO
+    if request.data is None or "data_type" not in request.data or "query" not in request.data:
+        # TODO: Better error
+        return Response(status=400)
+
     start = datetime.now()
 
-    data_type = request.data["data_type"]
-    query = request.data["query"]
-
-    if data_type != PHENOPACKET_DATA_TYPE_ID:
+    if request.data["data_type"] != PHENOPACKET_DATA_TYPE_ID:
         # TODO: Better error
         return Response(status=404)
 
     try:
-        compiled_query, params = postgres.search_query_to_psycopg2_sql(query, PHENOPACKET_SCHEMA)
+        compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
     except (SyntaxError, TypeError, ValueError):
         # TODO: Better error
         return Response(status=400)
@@ -112,16 +114,15 @@ def search(request, internal_data=False):
         return Response(build_search_response([{"id": d.dataset_id, "data_type": PHENOPACKET_DATA_TYPE_ID}
                                                for d in datasets], start))
 
-    phenopackets_by_dataset = {}
-    for p in phenopacket_query_results(compiled_query, params):
-        if p.dataset_id not in phenopackets_by_dataset:
-            phenopackets_by_dataset[p.dataset_id] = []
-
-        serializer = PhenopacketSerializer(p)
-        phenopackets_by_dataset[p.dataset_id].append(serializer.data)
-
-    return Response(build_search_response({k: {"data_type": PHENOPACKET_DATA_TYPE_ID, "matches": v}
-                                           for k, v in phenopackets_by_dataset.items()}, start))
+    return Response(build_search_response({
+        dataset_id: {
+            "data_type": PHENOPACKET_DATA_TYPE_ID,
+            "matches": list(PhenopacketSerializer(p).data for p in dataset_phenopackets)
+        } for dataset_id, dataset_phenopackets in itertools.groupby(
+            phenopacket_query_results(compiled_query, params),
+            key=lambda p: p.dataset_id
+        )
+    }, start))
 
 
 @api_view(["POST"])
@@ -142,18 +143,18 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
         # TODO: Better error
         return Response(status=400)
 
+    # Check that dataset exists
     dataset = Dataset.objects.get(dataset_id=table_id)
-    query = request.data["query"]
 
     try:
-        compiled_query, params = postgres.search_query_to_psycopg2_sql(query, PHENOPACKET_SCHEMA)
+        compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
     except (SyntaxError, TypeError, ValueError):
         # TODO: Better error
         return Response(status=400)
 
-    modified_query = sql.SQL("{} AND dataset_id = {}").format(compiled_query, sql.Placeholder())
-    modified_params = params + (dataset.dataset_id,)
-
-    serializer = PhenopacketSerializer(phenopacket_query_results(modified_query, modified_params), many=True)
+    serializer = PhenopacketSerializer(phenopacket_query_results(
+        query=sql.SQL("{} AND dataset_id = {}").format(compiled_query, sql.Placeholder()),
+        params=params + (dataset.dataset_id,)
+    ), many=True)
 
     return Response(build_search_response(serializer.data, start))
