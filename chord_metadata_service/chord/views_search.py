@@ -61,8 +61,9 @@ def dataset_list(request):
     } for d in Dataset.objects.all()])
 
 
+# TODO: Remove pragma: no cover when GET/POST implemented
 @api_view(["DELETE"])
-def dataset_detail(request, dataset_id):
+def dataset_detail(request, dataset_id):  # pragma: no cover
     # TODO: Implement GET, POST
     try:
         dataset = Dataset.objects.get(dataset_id=dataset_id)

@@ -40,14 +40,29 @@ class DataTypeTest(APITestCase):
 
 
 class TableTest(APITestCase):
+    @staticmethod
+    def dataset_rep(dataset, created, updated):
+        return {
+            "id": dataset["dataset_id"],
+            "name": dataset["name"],
+            "metadata": {
+                "description": dataset["description"],
+                "project_id": dataset["project"],
+                "created": created,
+                "updated": updated
+            },
+            "schema": PHENOPACKET_SCHEMA
+        }
+
     def setUp(self) -> None:
         # Add example data
 
         r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
 
-        self.client.post(reverse("dataset-list"), data=json.dumps(valid_dataset_1(self.project["project_id"])),
-                         content_type="application/json")
+        r = self.client.post(reverse("dataset-list"), data=json.dumps(valid_dataset_1(self.project["project_id"])),
+                             content_type="application/json")
+        self.dataset = r.json()
 
     def test_table_list(self):
         # No data type specified
@@ -58,3 +73,4 @@ class TableTest(APITestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
         self.assertEqual(len(c), 1)
+        self.assertEqual(c[0], self.dataset_rep(self.dataset, c[0]["metadata"]["created"], c[0]["metadata"]["updated"]))
