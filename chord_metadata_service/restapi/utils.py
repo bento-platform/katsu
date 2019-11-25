@@ -46,57 +46,7 @@ def convert_to_fhir(individual_data):
 			if 'phenotypic_features' in sample.keys():
 				biosample_record['phenotypicFeatures'] = []
 				for feature in sample.get('phenotypic_features'):
-					feature_record = {}
-					feature_record['resourceType'] = 'Observation'
-					if 'id' in feature.keys():
-						feature_record['identifier'] = feature.get('id', None)
-					if 'description' in feature.keys():
-						feature_record['note'] = feature.get('description', None)
-					if 'type' in feature.keys():
-						feature_record['code'] = {}
-						feature_record['code']['coding'] = []
-						ftype = {}
-						ftype['code'] = feature.get('type').get('id', None)
-						ftype['display'] = feature.get('type').get('label', None)
-						feature_record['code']['coding'].append(ftype)
-					if 'onset' in feature.keys():
-						feature_record['onsetAge'] = {}
-						feature_record['onsetAge']['value'] = feature.get('onset').get('label', None)
-						feature_record['onsetAge']['code'] = feature.get('onset').get('id', None)
-					if 'modifier' in feature.keys():
-						feature_record['modifier'] = {}
-						# TODO store all profile references in separate dict, should be treated as a context
-						feature_record['modifier']['url'] = "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-modifier"
-						feature_record['modifier']['coding'] = []
-						for item in feature.get('modifier'):
-							mod = {}
-							mod['system'] = ""
-							mod['code'] = item.get('id')
-							mod['display'] = item.get('label')
-							feature_record['modifier']['coding'].append(mod)
-					if 'evidence' in feature.keys():
-						evidence = feature.get('evidence')
-						feature_record['evidence'] = []
-						evidence_code = {}
-						evidence_code['code'] = []
-						code = {}
-						code['coding'] = []
-						coding = {}
-						coding['system'] = ""
-						coding['code'] = evidence.get('evidence_code').get('id')
-						coding['display'] = evidence.get('evidence_code').get('label')
-						code['coding'].append(coding)
-						evidence_code['code'].append(code)
-						feature_record['evidence'].append(evidence_code)
-						if 'reference' in evidence.keys():
-							# feature_record['evidence_detail'] = []
-							evidence_detail = {}
-							evidence_detail['detail'] = []
-							detail = {}
-							detail['reference'] = evidence.get('reference').get('id')
-							detail['display'] = evidence.get('reference').get('description', None)
-							evidence_detail['detail'].append(detail)
-							feature_record['evidence'].append(evidence_detail)
+					feature_record = phenotypic_feature_to_fhir(feature)
 					biosample_record['phenotypicFeatures'].append(feature_record)
 			# mapping for procedure related to each biosample
 			if 'procedure' in sample.keys():
@@ -136,7 +86,6 @@ def convert_to_fhir(individual_data):
 
 def fhir_coding(obj, value):
 	coding = {}
-	coding['system'] = ''
 	coding['code'] = obj.get(value, None).get('id', None)
 	coding['display'] = obj.get(value, None).get('label', None)
 	return coding
@@ -145,6 +94,8 @@ def fhir_coding(obj, value):
 def procedure_to_fhir(obj):
 	procedure = {}
 	procedure['resourceType'] = 'Procedure'
+	if 'id' in obj.keys():
+		procedure['identifier'] = obj.get('id', None)
 	procedure['code'] = {}
 	procedure['code']['coding'] = []
 	coding = fhir_coding(obj, 'code')
@@ -154,3 +105,52 @@ def procedure_to_fhir(obj):
 	body_site_coding = fhir_coding(obj, 'body_site')
 	procedure['bodySite']['coding'].append(body_site_coding)
 	return procedure
+
+
+def phenotypic_feature_to_fhir(obj):
+	feature_record = {}
+	feature_record['resourceType'] = 'Observation'
+	if 'id' in obj.keys():
+		feature_record['identifier'] = obj.get('id', None)
+	if 'description' in obj.keys():
+		feature_record['note'] = obj.get('description', None)
+	if 'type' in obj.keys():
+		feature_record['code'] = {}
+		feature_record['code']['coding'] = []
+		ftype = fhir_coding(obj, 'type')
+		feature_record['code']['coding'].append(ftype)
+	if 'onset' in obj.keys():
+		feature_record['onsetAge'] = {}
+		feature_record['onsetAge']['value'] = obj.get('onset').get('label', None)
+		feature_record['onsetAge']['code'] = obj.get('onset').get('id', None)
+	if 'modifier' in obj.keys():
+		feature_record['modifier'] = {}
+		# TODO store all profile references in separate dict, should be treated as a context
+		feature_record['modifier']['url'] = 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-modifier'
+		feature_record['modifier']['coding'] = []
+		for item in obj.get('modifier'):
+			mod = {}
+			mod['code'] = item.get('id')
+			mod['display'] = item.get('label')
+			feature_record['modifier']['coding'].append(mod)
+	if 'evidence' in obj.keys():
+		evidence = obj.get('evidence')
+		feature_record['evidence'] = []
+		evidence_code = {}
+		evidence_code['code'] = []
+		code = {}
+		code['coding'] = []
+		coding = fhir_coding(evidence, 'evidence_code')
+		code['coding'].append(coding)
+		evidence_code['code'].append(code)
+		feature_record['evidence'].append(evidence_code)
+		if 'reference' in evidence.keys():
+			evidence_detail = {}
+			evidence_detail['detail'] = []
+			detail = {}
+			detail['reference'] = evidence.get('reference').get('id')
+			detail['display'] = evidence.get('reference').get('description', None)
+			evidence_detail['detail'].append(detail)
+			feature_record['evidence'].append(evidence_detail)
+	return feature_record
+
