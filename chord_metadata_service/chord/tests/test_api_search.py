@@ -4,7 +4,11 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from chord_metadata_service.phenopackets.tests.constants import *
+from chord_metadata_service.phenopackets.models import *
+
 from .constants import *
+from ..models import *
 from ..views_search import PHENOPACKET_DATA_TYPE_ID, PHENOPACKET_SCHEMA, PHENOPACKET_METADATA_SCHEMA
 
 
@@ -74,3 +78,97 @@ class TableTest(APITestCase):
         c = r.json()
         self.assertEqual(len(c), 1)
         self.assertEqual(c[0], self.dataset_rep(self.dataset, c[0]["metadata"]["created"], c[0]["metadata"]["updated"]))
+
+
+class SearchTest(APITestCase):
+    def setUp(self) -> None:
+        self.project = Project.objects.create(**VALID_PROJECT_1)
+        self.dataset = Dataset.objects.create(**valid_dataset_1(self.project))
+
+        # Set up a dummy phenopacket
+
+        self.individual, _ = Individual.objects.get_or_create(
+            id='patient:1', sex='FEMALE', age='P25Y3M2D')
+
+        self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
+
+        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual, self.procedure))
+        self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, self.procedure))
+
+        self.meta_data = MetaData.objects.create(**VALID_META_DATA_1)
+
+        self.phenopacket = Phenopacket.objects.create(
+            id="phenopacket_id:1",
+            subject=self.individual,
+            meta_data=self.meta_data,
+            dataset=self.dataset
+        )
+
+        self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
+
+    def test_common_search(self):
+        # No body
+        r = self.client.post(reverse("search"))
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # No data type
+        r = self.client.post(reverse("search"), data=json.dumps({"query": TEST_SEARCH_QUERY_1}),
+                             content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # No query
+        r = self.client.post(reverse("search"), data=json.dumps({"data_type": PHENOPACKET_DATA_TYPE_ID}),
+                             content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Bad data type
+        r = self.client.post(reverse("search"), data=json.dumps({
+            "data_type": "bad_data_type",
+            "query": TEST_SEARCH_QUERY_1
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Bad syntax for query
+        r = self.client.post(reverse("search"), data=json.dumps({
+            "data_type": PHENOPACKET_DATA_TYPE_ID,
+            "query": ["hello", "world"]
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_search(self):
+        # Valid search with result
+        r = self.client.post(reverse("search"), data=json.dumps({
+            "data_type": PHENOPACKET_DATA_TYPE_ID,
+            "query": TEST_SEARCH_QUERY_1
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertEqual(len(c["results"]), 1)
+        self.assertDictEqual(c["results"][0], {
+            "id": str(self.dataset.dataset_id),
+            "data_type": PHENOPACKET_DATA_TYPE_ID
+        })
+
+        # Valid search without result
+        r = self.client.post(reverse("search"), data=json.dumps({
+            "data_type": PHENOPACKET_DATA_TYPE_ID,
+            "query": TEST_SEARCH_QUERY_2
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertEqual(len(c["results"]), 0)
+
+    def test_private_search(self):
+        # Valid search with result
+        r = self.client.post(reverse("private-search"), data=json.dumps({
+            "data_type": PHENOPACKET_DATA_TYPE_ID,
+            "query": TEST_SEARCH_QUERY_1
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertIn(str(self.dataset.dataset_id), c["results"])
+        self.assertEqual(c["results"][str(self.dataset.dataset_id)]["data_type"], PHENOPACKET_DATA_TYPE_ID)
+        self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.dataset_id)]["matches"][0]["id"])
+        # TODO: Check schema?
+
+    # TODO: Table search test

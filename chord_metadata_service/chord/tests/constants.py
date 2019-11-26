@@ -4,7 +4,8 @@ __all__ = [
     "VALID_DATA_USE_1",
     "VALID_PROJECT_1",
     "valid_dataset_1",
-    "TEST_SEARCH_QUERY"
+    "TEST_SEARCH_QUERY_1",
+    "TEST_SEARCH_QUERY_2",
 ]
 
 
@@ -39,4 +40,5 @@ def valid_dataset_1(project_id):
     }
 
 
-TEST_SEARCH_QUERY = ["#eq", ["#resolve", "subject", "sex"], "MALE"]
+TEST_SEARCH_QUERY_1 = ["#eq", ["#resolve", "subject", "sex"], "FEMALE"]
+TEST_SEARCH_QUERY_2 = ["#eq", ["#resolve", "subject", "sex"], "MALE"]

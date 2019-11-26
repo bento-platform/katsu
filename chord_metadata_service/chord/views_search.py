@@ -97,7 +97,7 @@ def search(request, internal_data=False):
 
     if request.data["data_type"] != PHENOPACKET_DATA_TYPE_ID:
         # TODO: Better error
-        return Response(status=404)
+        return Response(status=400)
 
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
@@ -120,7 +120,7 @@ def search(request, internal_data=False):
             "matches": list(PhenopacketSerializer(p).data for p in dataset_phenopackets)
         } for dataset_id, dataset_phenopackets in itertools.groupby(
             phenopacket_query_results(compiled_query, params),
-            key=lambda p: p.dataset_id
+            key=lambda p: str(p.dataset_id)
         )
     }, start))
 
