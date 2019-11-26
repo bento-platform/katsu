@@ -209,7 +209,7 @@ def ingest(request):
         resources_db = []
         for rs in meta_data.get("resources", []):
             rs_obj = Resource(
-                resource_id=rs["id"],  # TODO: This ID is a bit iffy, because they're researcher-provided
+                id=rs["id"],  # TODO: This ID is a bit iffy, because they're researcher-provided
                 name=rs["name"],
                 namespace_prefix=rs["namespace_prefix"],
                 url=rs["url"],
