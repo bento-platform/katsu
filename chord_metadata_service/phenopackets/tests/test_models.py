@@ -7,13 +7,10 @@ class BiosampleTest(TestCase):
 	""" Test module for Biosample model """
 
 	def setUp(self):
-		try:
-			individual = Individual.objects.get(
-				id='patient:1', sex='FEMALE', age='P25Y3M2D')
-		except Individual.DoesNotExist:
-			individual = Individual.objects.create(
-				id='patient:1', sex='FEMALE', age='P25Y3M2D')
-		procedure = Procedure.objects.create(
+		self.individual, _ = Individual.objects.get_or_create(
+			id='patient:1', sex='FEMALE', age='P25Y3M2D')
+
+		self.procedure = Procedure.objects.create(
 			code={
 				"id": "NCIT:C28743",
 				"label": "Punch Biopsy"
@@ -22,9 +19,10 @@ class BiosampleTest(TestCase):
 				"id": "UBERON:0003403",
 				"label": "skin of forearm"
 			})
-		Biosample.objects.create(
+
+		self.biosample_1 = Biosample.objects.create(
 			id='biosample_id:1',
-			individual=individual,
+			individual=self.individual,
 			sampled_tissue={
 				"id": "UBERON_0001256",
 				"label": "wall of urinary bladder"
@@ -57,10 +55,11 @@ class BiosampleTest(TestCase):
 					"label": "Genetic Testing"
 				}
 			],
-			procedure=procedure,
+			procedure=self.procedure,
 			is_control_sample=True
 			)
-		Biosample.objects.create(
+
+		self.biosample_2 = Biosample.objects.create(
 			id='biosample_id:2',
 			sampled_tissue={
 				"id": "UBERON_0001256",
@@ -94,7 +93,7 @@ class BiosampleTest(TestCase):
 					"label": "Genetic Testing"
 				}
 			],
-			procedure=procedure,
+			procedure=self.procedure,
 			is_control_sample=True
 			)
 
@@ -104,3 +103,9 @@ class BiosampleTest(TestCase):
 			sampled_tissue__label__icontains='urinary bladder'
 			)
 		self.assertEqual(biosample_one.id, 'biosample_id:1')
+
+	def test_string_representations(self):
+		# Test __str__
+		self.assertEqual(str(self.individual), str(self.individual.pk))
+		self.assertEqual(str(self.procedure), str(self.procedure.pk))
+		self.assertEqual(str(self.biosample_1), str(self.biosample_1.pk))
