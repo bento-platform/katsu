@@ -85,7 +85,7 @@ def create_phenotypic_feature(pf):
         pftype=pf["type"]["id"],
         negated=pf.get("negated", False),
         severity=pf.get("severity", None),
-        modifiers=[],  # TODO
+        modifier=pf.get("modifier", []),  # TODO: Validate ontology term in schema...
         onset=pf.get("onset", None),
         evidence=pf.get("evidence", None)  # TODO: Separate class?
     )
