@@ -77,4 +77,10 @@ class IngestTest(APITestCase):
         r = self.client.post(reverse("ingest"), data=json.dumps(bad_wf), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
+        # json_document not in output
+        bad_wf = generate_ingest(self.dataset["dataset_id"])
+        bad_wf["workflow_outputs"] = {}
+        r = self.client.post(reverse("ingest"), data=json.dumps(bad_wf), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
         # TODO: More
