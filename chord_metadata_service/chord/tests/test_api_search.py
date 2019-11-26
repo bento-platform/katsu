@@ -171,4 +171,27 @@ class SearchTest(APITestCase):
         self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.dataset_id)]["matches"][0]["id"])
         # TODO: Check schema?
 
-    # TODO: Table search test
+    def test_private_table_search(self):
+        # No body
+        r = self.client.post(reverse("table-search", args=[str(self.dataset.dataset_id)]))
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # No query
+        r = self.client.post(reverse("table-search", args=[str(self.dataset.dataset_id)]), data=json.dumps({}),
+                             content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Bad syntax for query
+        r = self.client.post(reverse("table-search", args=[str(self.dataset.dataset_id)]), data=json.dumps({
+            "query": ["hello", "world"]
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Valid query with one result
+        r = self.client.post(reverse("table-search", args=[str(self.dataset.dataset_id)]), data=json.dumps({
+            "query": TEST_SEARCH_QUERY_1
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertEqual(len(c["results"]), 1)
+        self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
