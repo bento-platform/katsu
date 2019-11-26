@@ -123,7 +123,11 @@ def ingest(request):
         return Response(status=400)
 
     with open(workflow_outputs["json_document"], "r") as jf:
-        phenopacket_data = json.load(jf)  # TODO: Catch JSON parse errors
+        try:
+            phenopacket_data = json.load(jf)
+        except json.decoder.JSONDecodeError:
+            # TODO: Nicer error message
+            return Response(status=400)
 
         # TODO: Schema validation
         # TODO: Rollback in case of failures
