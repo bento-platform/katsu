@@ -14,7 +14,7 @@ def camel_case_field_names(string):
 	return string
 
 
-def convert_to_fhir(individual_data):
+def individual_to_fhir(obj):
 	""" Transform individual data to Patient FHIR record. """
 
 	fhir_record = {}
@@ -30,12 +30,12 @@ def convert_to_fhir(individual_data):
 	'ethnicity': 'ethnicity'
 	}
 	for field in mapping.keys():
-		if field in individual_data.keys():
-			fhir_record[mapping.get(field)] = individual_data.get(field, None)
+		if field in obj.keys():
+			fhir_record[mapping.get(field)] = obj.get(field, None)
 	# mapping for biosamples assosiated with this patient
-	if 'biosamples' in individual_data.keys():
+	if 'biosamples' in obj.keys():
 		fhir_record['biosamples'] = []
-		for sample in individual_data.get('biosamples', None):
+		for sample in obj.get('biosamples', None):
 			biosample_record = biosample_to_fhir(sample)
 			fhir_record['biosamples'].append(biosample_record)
 	return fhir_record
@@ -213,7 +213,7 @@ def gene_to_fhir(obj):
 
 def variant_to_fhir(obj):
 	""" Variant to FHIR """
-	# TODO chekc this example
+	# TODO check this example
 	# http://build.fhir.org/ig/HL7/genomics-reporting/SNVexample.json.html
 
 	variant_record = {}
@@ -225,3 +225,29 @@ def variant_to_fhir(obj):
 		]
 
 	return variant_record
+
+
+def disease_to_fhir(obj):
+	""" Disease to FHIR Condition. """
+
+	disease_record = {}
+	disease_record['resourceType'] = 'Condition'
+	disease_record['code'] = []
+	coding = {}
+	coding['coding'] = []
+	coding['coding'].append(fhir_coding(obj, 'term'))
+	disease_record['code'].append(coding)
+	if obj.get('age_of_onset'):
+		disease_record['onsetAge'] = {}
+		disease_record['onsetAge']['code'] = obj.get('age_of_onset', None).get('age', None)
+	tumor_stage_list = obj.get('tumor_stage', None)
+	if tumor_stage_list:
+		disease_record['stage'] = []
+		stage_type = {}
+		stage_type['type'] = {}
+		stage_type['type']['coding'] = []
+		for coding in tumor_stage_list:
+			coding = fhir_coding(coding)
+			stage_type['type']['coding'].append(coding)
+		disease_record['stage'].append(stage_type)
+	return disease_record

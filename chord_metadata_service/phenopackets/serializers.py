@@ -5,6 +5,7 @@ from jsonschema import Draft7Validator, FormatChecker
 from chord_metadata_service.restapi.schemas import *
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.serializers import GenericSerializer
+from chord_metadata_service.restapi.utils import *
 
 
 #############################################################
@@ -73,8 +74,10 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 
 	class Meta:
 		model = PhenotypicFeature
-		# fields = '__all__'
 		exclude = ['pftype']
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'observations'
+		class_converter = phenotypic_feature_to_fhir
 
 	# def to_representation(self, obj):
 	# 	output = super().to_representation(obj)
@@ -105,6 +108,9 @@ class ProcedureSerializer(GenericSerializer):
 	class Meta:
 		model = Procedure
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'procedures'
+		class_converter = procedure_to_fhir
 
 	def create(self, validated_data):
 		instance, _ = Procedure.objects.get_or_create(**validated_data)
@@ -131,6 +137,9 @@ class HtsFileSerializer(GenericSerializer):
 	class Meta:
 		model = HtsFile
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'document_references'
+		class_converter = hts_file_to_fhir
 
 
 class GeneSerializer(GenericSerializer):
@@ -141,6 +150,9 @@ class GeneSerializer(GenericSerializer):
 	class Meta:
 		model = Gene
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'codeable_concepts'
+		class_converter = gene_to_fhir
 
 
 class VariantSerializer(GenericSerializer):
@@ -153,6 +165,9 @@ class VariantSerializer(GenericSerializer):
 	class Meta:
 		model = Variant
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'observations'
+		class_converter = variant_to_fhir
 
 	def to_representation(self, obj):
 		""" Change 'allele_type' field name to allele type value. """
@@ -177,6 +192,9 @@ class DiseaseSerializer(GenericSerializer):
 	class Meta:
 		model = Disease
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'conditions'
+		class_converter = disease_to_fhir
 
 	def validate_tumor_stage(self, value):
 		if isinstance(value, list):
@@ -211,6 +229,9 @@ class BiosampleSerializer(GenericSerializer):
 	class Meta:
 		model = Biosample
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'specimens'
+		class_converter = biosample_to_fhir
 
 	def validate_diagnostic_markers(self, value):
 		if isinstance(value, list):
