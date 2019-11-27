@@ -1,11 +1,11 @@
 import chord_lib
 import json
+import jsonschema
+import jsonschema.exceptions
 import os
 import uuid
 
 from dateutil.parser import isoparse
-
-from jsonschema import validate, ValidationError
 
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import BaseRenderer
@@ -70,7 +70,7 @@ def workflow_item(_request, workflow_id):
 @renderer_classes([WDLRenderer])
 def workflow_file(_request, workflow_id):
     if not workflow_exists(workflow_id, METADATA_WORKFLOWS):
-        return Response(status=404)
+        return Response(status=404, data="Not found")
 
     wdl_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "workflows",
                             get_workflow_resource(workflow_id, METADATA_WORKFLOWS))
@@ -85,7 +85,7 @@ def create_phenotypic_feature(pf):
         pftype=pf["type"]["id"],
         negated=pf.get("negated", False),
         severity=pf.get("severity", None),
-        modifiers=[],  # TODO
+        modifier=pf.get("modifier", []),  # TODO: Validate ontology term in schema...
         onset=pf.get("onset", None),
         evidence=pf.get("evidence", None)  # TODO: Separate class?
     )
@@ -102,8 +102,8 @@ def ingest(request):
     #  not be optimal...)
 
     try:
-        validate(request.data, chord_lib.schemas.chord.CHORD_INGEST_SCHEMA)
-    except ValidationError:
+        jsonschema.validate(request.data, chord_lib.schemas.chord.CHORD_INGEST_SCHEMA)
+    except jsonschema.exceptions.ValidationError:
         return Response(status=400)
 
     dataset_id = request.data["dataset_id"]
@@ -123,7 +123,11 @@ def ingest(request):
         return Response(status=400)
 
     with open(workflow_outputs["json_document"], "r") as jf:
-        phenopacket_data = json.load(jf)  # TODO: Catch JSON parse errors
+        try:
+            phenopacket_data = json.load(jf)
+        except json.decoder.JSONDecodeError:
+            # TODO: Nicer error message
+            return Response(status=400)
 
         # TODO: Schema validation
         # TODO: Rollback in case of failures
@@ -205,7 +209,7 @@ def ingest(request):
         resources_db = []
         for rs in meta_data.get("resources", []):
             rs_obj = Resource(
-                resource_id=rs["id"],  # TODO: This ID is a bit iffy, because they're researcher-provided
+                id=rs["id"],  # TODO: This ID is a bit iffy, because they're researcher-provided
                 name=rs["name"],
                 namespace_prefix=rs["namespace_prefix"],
                 url=rs["url"],

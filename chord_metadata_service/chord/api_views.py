@@ -1,6 +1,4 @@
-from rest_framework import viewsets, pagination
-from rest_framework.decorators import action
-from rest_framework.response import Response
+from rest_framework import viewsets
 
 from chord_metadata_service.phenopackets.api_views import LargeResultsSetPagination
 from .models import *
@@ -22,20 +20,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all().order_by("project_id")
     serializer_class = ProjectSerializer
     pagination_class = LargeResultsSetPagination
-
-    # noinspection PyUnusedLocal
-    @action(detail=True, methods=["GET"])
-    def datasets(self, _request, pk):
-        project = self.get_object()
-        datasets = Dataset.objects.filter(project=project).order_by("dataset_id")
-
-        page = self.paginate_queryset(datasets)
-        if page is not None:
-            serializer = DatasetSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = DatasetSerializer(datasets, many=True)
-        return Response(serializer.data)
 
 
 class DatasetViewSet(viewsets.ModelViewSet):
