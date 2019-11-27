@@ -76,7 +76,7 @@
         "namespace_prefix": "NCIT",
         "url": "http://purl.obolibrary.org/obo/ncit.owl",
         "version": "18.05d",
-        "iri_prefix": ""
+        "iri_prefix": "http://purl.obolibrary.org/obo/NCIT_"
       }
     ],
     "updated": [],
