@@ -14,7 +14,13 @@ class LargeResultsSetPagination(pagination.PageNumberPagination):
 	max_page_size = 10000
 
 
-class PhenotypicFeatureViewSet(viewsets.ModelViewSet):
+class PhenopacketsModelViewSet(viewsets.ModelViewSet):
+	renderer_classes = tuple(
+		api_settings.DEFAULT_RENDERER_CLASSES) + (PhenopacketsRenderer,)
+	pagination_class = LargeResultsSetPagination
+
+
+class PhenotypicFeatureViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing phenotypic features
@@ -23,14 +29,13 @@ class PhenotypicFeatureViewSet(viewsets.ModelViewSet):
 	Create a new phenotypic feature
 
 	"""
-	queryset = PhenotypicFeature.objects.all()
+	queryset = PhenotypicFeature.objects.all().order_by("id")
 	serializer_class = PhenotypicFeatureSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer, PhenotypicFeatureFHIRRenderer, )
+	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
+		PhenotypicFeatureFHIRRenderer,)
 
 
-class ProcedureViewSet(viewsets.ModelViewSet):
+class ProcedureViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing procedures
@@ -39,14 +44,13 @@ class ProcedureViewSet(viewsets.ModelViewSet):
 	Create a new procedure
 
 	"""
-	queryset = Procedure.objects.all()
+	queryset = Procedure.objects.all().order_by("id")
 	serializer_class = ProcedureSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer, ProcedureFHIRRenderer)
+	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
+		ProcedureFHIRRenderer,)
 
 
-class HtsFileViewSet(viewsets.ModelViewSet):
+class HtsFileViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing HTS files
@@ -55,14 +59,13 @@ class HtsFileViewSet(viewsets.ModelViewSet):
 	Create a new HTS file
 
 	"""
-	queryset = HtsFile.objects.all()
+	queryset = HtsFile.objects.all().order_by("uri")
 	serializer_class = HtsFileSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer, HstFileFHIRRenderer, )
+	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
+		HstFileFHIRRenderer,)
 
 
-class GeneViewSet(viewsets.ModelViewSet):
+class GeneViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing genes
@@ -71,14 +74,13 @@ class GeneViewSet(viewsets.ModelViewSet):
 	Create a new gene
 
 	"""
-	queryset = Gene.objects.all()
+	queryset = Gene.objects.all().order_by("id")
 	serializer_class = GeneSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer, GeneFHIRRenderer, )
+	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
+		GeneFHIRRenderer,)
 
 
-class VariantViewSet(viewsets.ModelViewSet):
+class VariantViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing variants
@@ -87,17 +89,13 @@ class VariantViewSet(viewsets.ModelViewSet):
 	Create a new variant
 
 	"""
-	queryset = Variant.objects.all()
+	queryset = Variant.objects.all().order_by("id")
 	serializer_class = VariantSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer, VariantFHIRRenderer, )
-	# TODO filtering
-	# filter_backends = (DjangoFilterBackend,)
-	# filter_class = VariantFilter
+	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
+		VariantFHIRRenderer,)
 
 
-class DiseaseViewSet(viewsets.ModelViewSet):
+class DiseaseViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing diseases
@@ -106,14 +104,11 @@ class DiseaseViewSet(viewsets.ModelViewSet):
 	Create a new disease
 
 	"""
-	queryset = Disease.objects.all()
+	queryset = Disease.objects.all().order_by("id")
 	serializer_class = DiseaseSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer,)
 
 
-class ResourceViewSet(viewsets.ModelViewSet):
+class ResourceViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing resources
@@ -122,14 +117,11 @@ class ResourceViewSet(viewsets.ModelViewSet):
 	Create a new resource
 
 	"""
-	queryset = Resource.objects.all()
+	queryset = Resource.objects.all().order_by("id")
 	serializer_class = ResourceSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer,)
 
 
-class MetaDataViewSet(viewsets.ModelViewSet):
+class MetaDataViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing metadata records
@@ -138,14 +130,11 @@ class MetaDataViewSet(viewsets.ModelViewSet):
 	Create a new metadata record
 
 	"""
-	queryset = MetaData.objects.all()
+	queryset = MetaData.objects.all().order_by("id")
 	serializer_class = MetaDataSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer,)
 
 
-class BiosampleViewSet(viewsets.ModelViewSet):
+class BiosampleViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing biosamples
@@ -153,14 +142,13 @@ class BiosampleViewSet(viewsets.ModelViewSet):
 	post:
 	Create a new biosample
 	"""
-	queryset = Biosample.objects.all()
+	queryset = Biosample.objects.all().order_by("id")
 	serializer_class = BiosampleSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer, BiosampleFHIRRenderer, )
+	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
+		BiosampleFHIRRenderer,)
 
 
-class PhenopacketViewSet(viewsets.ModelViewSet):
+class PhenopacketViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing phenopackets
@@ -169,14 +157,11 @@ class PhenopacketViewSet(viewsets.ModelViewSet):
 	Create a new phenopacket
 
 	"""
-	queryset = Phenopacket.objects.all()
+	queryset = Phenopacket.objects.all().order_by("id")
 	serializer_class = PhenopacketSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer,)
 
 
-class GenomicInterpretationViewSet(viewsets.ModelViewSet):
+class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing genomic interpretations
@@ -185,14 +170,11 @@ class GenomicInterpretationViewSet(viewsets.ModelViewSet):
 	Create a new genomic interpretation
 
 	"""
-	queryset = GenomicInterpretation.objects.all()
+	queryset = GenomicInterpretation.objects.all().order_by("id")
 	serializer_class = GenomicInterpretationSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer,)
 
 
-class DiagnosisViewSet(viewsets.ModelViewSet):
+class DiagnosisViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing diagnoses
@@ -201,14 +183,11 @@ class DiagnosisViewSet(viewsets.ModelViewSet):
 	Create a new diagnosis
 
 	"""
-	queryset = Diagnosis.objects.all()
+	queryset = Diagnosis.objects.all().order_by("id")
 	serializer_class = DiagnosisSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer,)
 
 
-class InterpretationViewSet(viewsets.ModelViewSet):
+class InterpretationViewSet(PhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing interpretations
@@ -217,8 +196,5 @@ class InterpretationViewSet(viewsets.ModelViewSet):
 	Create a new interpretation
 
 	"""
-	queryset = Interpretation.objects.all()
+	queryset = Interpretation.objects.all().order_by("id")
 	serializer_class = InterpretationSerializer
-	pagination_class = LargeResultsSetPagination
-	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES
-		) + (PhenopacketsRenderer,)

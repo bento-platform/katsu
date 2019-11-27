@@ -125,7 +125,13 @@ def phenopacket_individual_schema(database_attrs: dict):
         "properties": {
             "id": {
                 "type": "string",
-                "search": {"database": {"field": Individual._meta.pk.column}}
+                "search": {
+                    # TODO: Should IDs be publicly searchable?
+                    **_single_optional_eq_search(0),
+                    "database": {
+                        "field": Individual._meta.pk.column
+                    }
+                }
             },
             "alternate_ids": {
                 "type": "array",
@@ -134,13 +140,15 @@ def phenopacket_individual_schema(database_attrs: dict):
                 }
             },
             "date_of_birth": {
-                "type": "string"
+                # TODO: This is a special ISO format... need UI for this
+                "type": "string",
+                "search": _single_optional_eq_search(1)
             },
             # TODO: Age
             "sex": {  # TODO: Front end: enum dropdown
                 "type": "string",
                 "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
-                "search": _single_optional_eq_search(0)
+                "search": _single_optional_eq_search(2)
             },
             "karyotypic_sex": {
                 "type": "string",
@@ -157,7 +165,7 @@ def phenopacket_individual_schema(database_attrs: dict):
                     "XYY",
                     "OTHER_KARYOTYPE"
                 ],
-                "search": _single_optional_eq_search(1)
+                "search": _single_optional_eq_search(3)
             },
             "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA,
         },
@@ -261,7 +269,8 @@ PHENOPACKET_AGE_SCHEMA = {
     "type": "object",
     "properties": {
         "age": {"type": "string"}
-    }
+    },
+    "required": ["age"]
 }
 
 PHENOPACKET_BIOSAMPLE_SCHEMA = {
@@ -269,7 +278,10 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
     "properties": {
         "id": {
             "type": "string",
-            "search": {"database": {"field": Biosample._meta.pk.column}}
+            "search": {
+                **_single_optional_eq_search(0),
+                "database": {"field": Biosample._meta.pk.column}
+            }
         },
         "individual_id": {"type": "string"},
         "description": {"type": "string"},
@@ -282,19 +294,24 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
         "individual_age_at_collection": {
             "type": "object",
             "oneOf": [  # TODO: Front end will need to deal with this
-                {"properties": PHENOPACKET_AGE_SCHEMA["properties"]},
-                {"properties": {
-                    "start": PHENOPACKET_AGE_SCHEMA,
-                    "end": PHENOPACKET_AGE_SCHEMA
-                }}
+                {
+                    "properties": PHENOPACKET_AGE_SCHEMA["properties"],
+                    "required": ["age"],
+                    "additionalProperties": False
+                },
+                {
+                    "properties": {
+                        "start": PHENOPACKET_AGE_SCHEMA,
+                        "end": PHENOPACKET_AGE_SCHEMA,
+                    },
+                    "required": ["start", "end"],
+                    "additionalProperties": False
+                }
             ]
         },
         "histological_diagnosis": PHENOPACKET_ONTOLOGY_SCHEMA,
         "tumor_progression": PHENOPACKET_ONTOLOGY_SCHEMA,
-        "tumor_grade": {
-            "type": "array",
-            "items": PHENOPACKET_ONTOLOGY_SCHEMA
-        },
+        "tumor_grade": PHENOPACKET_ONTOLOGY_SCHEMA,  # TODO: Is this a list?
         "diagnostic_markers": {
             "type": "array",
             "items": PHENOPACKET_ONTOLOGY_SCHEMA
@@ -320,7 +337,8 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
             }
         },
         "is_control_sample": {
-            "type": "boolean"  # TODO: Boolean search
+            "type": "boolean",  # TODO: Boolean search
+            "search": _single_optional_eq_search(1),
         },
     },
     "required": ["id", "sampled_tissue", "procedure"]
@@ -358,7 +376,7 @@ PHENOPACKET_SCHEMA = {
                     "relationship": {
                         "type": "MANY_TO_MANY",
                         "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
-                        "parent_primary_key": "id"  # TODO: No hard-code
+                        "parent_primary_key": Phenopacket._meta.pk.column
                     }
                 }
             }
