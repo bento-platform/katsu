@@ -20,8 +20,7 @@ class ResourceSerializer(GenericSerializer):
 
 
 class MetaDataSerializer(GenericSerializer):
-	resources = ResourceSerializer(
-		read_only=True, many=True, exclude_when_nested=["id"])
+	resources = ResourceSerializer(read_only=True, many=True)
 
 	class Meta:
 		model = MetaData
