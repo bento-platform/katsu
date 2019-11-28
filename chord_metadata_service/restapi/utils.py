@@ -283,7 +283,11 @@ def phenopacket_to_fhir(obj):
 		section_object['entry'] =[]
 		if isinstance(inner_obj, list):
 			for each in inner_obj:
-				section_object['entry'].append(each.get('id', None))
+				if each.get('id'):
+					section_object['entry'].append(each.get('id', None))
+				else:
+					section_object['entry'].append(each.get('uri', None))
+
 		else:
 			section_object['entry'].append(inner_obj)
 		return section_object
@@ -291,6 +295,6 @@ def phenopacket_to_fhir(obj):
 	sections = ['biosamples', 'genes', 'variants', 'diseases', 'hts_files']
 	for section in sections:
 		if section in obj.keys():
-			x = _get_section_object(obj.get(section, None), section)
-			phenopacket_record['section'].append(x)
+			entry_value = _get_section_object(obj.get(section, None), section)
+			phenopacket_record['section'].append(entry_value)
 	return phenopacket_record
