@@ -285,6 +285,9 @@ class SimplePhenopacketSerializer(GenericSerializer):
 		response['hts_files'] = HtsFileSerializer(
 			instance.hts_files, many=True, required=False
 			).data
+		response['meta_data'] = MetaDataSerializer(
+			instance.meta_data, exclude_when_nested=['id']
+			).data
 		return response
 
 
