@@ -251,27 +251,28 @@ class BiosampleSerializer(GenericSerializer):
 
 
 class SimplePhenopacketSerializer(GenericSerializer):
-	biosamples = BiosampleSerializer(
-		read_only=True, many=True, exclude_when_nested=["individual"])
-	genes = GeneSerializer(read_only=True, many=True)
-	variants = VariantSerializer(read_only=True, many=True)
-	diseases = DiseaseSerializer(read_only=True, many=True)
-	hts_files = HtsFileSerializer(read_only=True, many=True)
-	meta_data = MetaDataSerializer(read_only=True, exclude_when_nested=["id"])
+	biosamples = BiosampleSerializer(many=True,
+		exclude_when_nested=["individual"])
+	genes = GeneSerializer(many=True)
+	variants = VariantSerializer(many=True)
+	diseases = DiseaseSerializer(many=True)
+	hts_files = HtsFileSerializer(many=True)
+	meta_data = MetaDataSerializer(exclude_when_nested=["id"])
 	phenotypic_features = PhenotypicFeatureSerializer(
 		read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
 
 	class Meta:
 		model = Phenopacket
 		fields = '__all__'
-
+		fhir_datatype_plural = 'compositions'
+		class_converter = phenopacket_to_fhir
 
 class PhenopacketSerializer(SimplePhenopacketSerializer):
 	# Phenopacket serializer for nested individuals - need to import here to
 	# prevent circular import issues.
 	from chord_metadata_service.patients.serializers import IndividualSerializer
 	subject = IndividualSerializer(
-		read_only=True, exclude_when_nested=["phenopackets", "biosamples"])
+		exclude_when_nested=["phenopackets", "biosamples"])
 
 
 #############################################################

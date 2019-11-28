@@ -158,6 +158,8 @@ class PhenopacketViewSet(PhenopacketsModelViewSet):
 	"""
 	queryset = Phenopacket.objects.all().order_by("id")
 	serializer_class = PhenopacketSerializer
+	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
+		FHIRRenderer,)
 
 
 class GenomicInterpretationViewSet(PhenopacketsModelViewSet):

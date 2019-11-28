@@ -251,3 +251,46 @@ def disease_to_fhir(obj):
 			stage_type['type']['coding'].append(coding)
 		disease_record['stage'].append(stage_type)
 	return disease_record
+
+
+def phenopacket_to_fhir(obj):
+	""" Phenopackets to FHIR Composition. """
+
+	phenopacket_record = {}
+	phenopacket_record['resourceType'] = "Composition"
+	phenopacket_record['id'] = obj.get('id', None)
+	phenopacket_record['meta'] = {}
+	metadata = obj.get('meta_data')
+	if metadata.get('phenopacket_schema_version'):
+		phenopacket_record['meta']['versionId'] = metadata.get(
+			'phenopacket_schema_version'
+			)
+		phenopacket_record['meta']['lastUpdated'] = metadata.get(
+			'created'
+			)
+	if metadata.get('external_references'):
+		phenopacket_record['meta']['source'] = metadata.get(
+			'external_references'
+			)
+	phenopacket_record['meta']['tag'] = metadata.get('resources')
+	phenopacket_record['subject'] = {}
+	phenopacket_record['subject']['reference'] = obj.get('subject')
+	phenopacket_record['section'] = []
+	def _get_section_object(inner_obj, title):
+		""" Internal function to parse m2m objects. """
+		section_object = {}
+		section_object['title'] = title
+		section_object['entry'] =[]
+		if isinstance(inner_obj, list):
+			for each in inner_obj:
+				section_object['entry'].append(each.get('id', None))
+		else:
+			section_object['entry'].append(inner_obj)
+		return section_object
+
+	sections = ['biosamples', 'genes', 'variants', 'diseases', 'hts_files']
+	for section in sections:
+		if section in obj.keys():
+			x = _get_section_object(obj.get(section, None), section)
+			phenopacket_record['section'].append(x)
+	return phenopacket_record
