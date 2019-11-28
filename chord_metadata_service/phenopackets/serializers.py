@@ -251,28 +251,55 @@ class BiosampleSerializer(GenericSerializer):
 
 
 class SimplePhenopacketSerializer(GenericSerializer):
-	biosamples = BiosampleSerializer(many=True,
-		exclude_when_nested=["individual"])
-	genes = GeneSerializer(many=True)
-	variants = VariantSerializer(many=True)
-	diseases = DiseaseSerializer(many=True)
-	hts_files = HtsFileSerializer(many=True)
-	meta_data = MetaDataSerializer(exclude_when_nested=["id"])
 	phenotypic_features = PhenotypicFeatureSerializer(
 		read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
 
 	class Meta:
 		model = Phenopacket
 		fields = '__all__'
+		# meta info for converting to FHIR
 		fhir_datatype_plural = 'compositions'
 		class_converter = phenopacket_to_fhir
 
+
+	def to_representation(self, instance):
+		""""
+		Overriding this method to allow post Primary Key for FK and M2M
+		objects and return their nested serialization.
+
+		"""
+		response = super().to_representation(instance)
+		response['biosamples'] = BiosampleSerializer(
+			instance.biosamples, many=True, required=False,
+			exclude_when_nested=["individual"]
+			).data
+		response['genes'] = GeneSerializer(
+			instance.genes, many=True, required=False
+			).data
+		response['variants'] = VariantSerializer(
+			instance.variants, many=True, required=False
+			).data
+		response['diseases'] = DiseaseSerializer(
+			instance.diseases, many=True, required=False
+			).data
+		response['hts_files'] = HtsFileSerializer(
+			instance.hts_files, many=True, required=False
+			).data
+		return response
+
+
 class PhenopacketSerializer(SimplePhenopacketSerializer):
-	# Phenopacket serializer for nested individuals - need to import here to
-	# prevent circular import issues.
-	from chord_metadata_service.patients.serializers import IndividualSerializer
-	subject = IndividualSerializer(
-		exclude_when_nested=["phenopackets", "biosamples"])
+
+	def to_representation(self, instance):
+		# Phenopacket serializer for nested individuals - need to import here to
+		# prevent circular import issues.
+		from chord_metadata_service.patients.serializers import IndividualSerializer
+		response = super().to_representation(instance)
+		response['subject'] = IndividualSerializer(
+			instance.subject,
+			exclude_when_nested=["phenopackets", "biosamples"]
+			).data
+		return response
 
 
 #############################################################
