@@ -7,7 +7,7 @@ from chord_metadata_service.phenopackets.serializers import (
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.serializers import GenericSerializer
-from chord_metadata_service.restapi.utils import individual_to_fhir
+from chord_metadata_service.restapi.fhir_utils import individual_to_fhir
 
 
 class IndividualSerializer(GenericSerializer):

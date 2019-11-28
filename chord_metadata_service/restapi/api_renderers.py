@@ -1,5 +1,4 @@
 from rest_framework.renderers import JSONRenderer
-from .utils import *
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
 

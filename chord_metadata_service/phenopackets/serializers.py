@@ -5,7 +5,7 @@ from jsonschema import Draft7Validator, FormatChecker
 from chord_metadata_service.restapi.schemas import *
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.serializers import GenericSerializer
-from chord_metadata_service.restapi.utils import *
+from chord_metadata_service.restapi.fhir_utils import *
 
 
 #############################################################
