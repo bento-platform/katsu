@@ -254,7 +254,7 @@ def disease_to_fhir(obj):
 
 
 def phenopacket_to_fhir(obj):
-	""" Phenopackets to FHIR Composition. """
+	""" Phenopacket to FHIR Composition. """
 
 	phenopacket_record = {}
 	phenopacket_record['resourceType'] = "Composition"
@@ -277,7 +277,7 @@ def phenopacket_to_fhir(obj):
 	phenopacket_record['subject']['reference'] = obj.get('subject')
 	phenopacket_record['section'] = []
 	def _get_section_object(inner_obj, title):
-		""" Internal function to parse m2m objects. """
+		""" Internal function to parse phenopacket m2m objects. """
 		section_object = {}
 		section_object['title'] = title
 		section_object['entry'] =[]
