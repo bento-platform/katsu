@@ -53,7 +53,7 @@ class IngestTest(APITestCase):
         r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
 
-        r = self.client.post(reverse("dataset-list"), data=json.dumps(valid_dataset_1(self.project["project_id"])),
+        r = self.client.post(reverse("dataset-list"), data=json.dumps(valid_dataset_1(self.project["identifier"])),
                              content_type="application/json")
         self.dataset = r.json()
 
@@ -72,13 +72,13 @@ class IngestTest(APITestCase):
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Non-existent workflow ID
-        bad_wf = generate_ingest(self.dataset["dataset_id"])
+        bad_wf = generate_ingest(self.dataset["identifier"])
         bad_wf["workflow_id"] += "_invalid"
         r = self.client.post(reverse("ingest"), data=json.dumps(bad_wf), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # json_document not in output
-        bad_wf = generate_ingest(self.dataset["dataset_id"])
+        bad_wf = generate_ingest(self.dataset["identifier"])
         bad_wf["workflow_outputs"] = {}
         r = self.client.post(reverse("ingest"), data=json.dumps(bad_wf), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)

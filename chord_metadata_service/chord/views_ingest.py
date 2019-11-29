@@ -108,7 +108,7 @@ def ingest(request):
 
     dataset_id = request.data["dataset_id"]
 
-    if not Dataset.objects.filter(dataset_id=dataset_id).exists():
+    if not Dataset.objects.filter(identifier=dataset_id).exists():
         return Response(status=400)
 
     dataset_id = str(uuid.UUID(dataset_id))  # Normalize dataset ID to UUID's str format.
@@ -233,7 +233,7 @@ def ingest(request):
             id=new_phenopacket_id,
             subject=subject,
             meta_data=meta_data_obj,
-            dataset=Dataset.objects.get(dataset_id=dataset_id)
+            dataset=Dataset.objects.get(identifier=dataset_id)
         )
         new_phenopacket.save()
 

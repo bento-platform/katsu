@@ -51,8 +51,8 @@ def dataset_list(request):
         return Response(status=404)
 
     return Response([{
-        "id": d.dataset_id,
-        "name": d.name,
+        "id": d.identifier,
+        "name": d.title,
         "metadata": {
             "description": d.description,
             "project_id": d.project_id,
@@ -68,7 +68,7 @@ def dataset_list(request):
 def dataset_detail(request, dataset_id):  # pragma: no cover
     # TODO: Implement GET, POST
     try:
-        dataset = Dataset.objects.get(dataset_id=dataset_id)
+        dataset = Dataset.objects.get(identifier=dataset_id)
     except Dataset.DoesNotExist:
         # TODO: Better error
         return Response(status=404)
@@ -106,12 +106,12 @@ def search(request, internal_data=False):
         return Response(status=400)
 
     if not internal_data:
-        datasets = Dataset.objects.filter(dataset_id__in=phenopacket_results(
+        datasets = Dataset.objects.filter(identifier__in=phenopacket_results(
             query=compiled_query,
             params=params,
             key="dataset_id"
         ))  # TODO: Maybe can avoid hitting DB here
-        return Response(build_search_response([{"id": d.dataset_id, "data_type": PHENOPACKET_DATA_TYPE_ID}
+        return Response(build_search_response([{"id": d.identifier, "data_type": PHENOPACKET_DATA_TYPE_ID}
                                                for d in datasets], start))
 
     return Response(build_search_response({
@@ -144,7 +144,7 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
         return Response(status=400)
 
     # Check that dataset exists
-    dataset = Dataset.objects.get(dataset_id=table_id)
+    dataset = Dataset.objects.get(identifier=table_id)
 
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
@@ -154,7 +154,7 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
 
     serializer = PhenopacketSerializer(phenopacket_query_results(
         query=sql.SQL("{} AND dataset_id = {}").format(compiled_query, sql.Placeholder()),
-        params=params + (dataset.dataset_id,)
+        params=params + (dataset.identifier,)
     ), many=True)
 
     return Response(build_search_response(serializer.data, start))
