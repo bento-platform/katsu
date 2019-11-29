@@ -17,7 +17,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     Create a new project
     """
 
-    queryset = Project.objects.all().order_by("project_id")
+    queryset = Project.objects.all().order_by("identifier")
     serializer_class = ProjectSerializer
     pagination_class = LargeResultsSetPagination
 
@@ -31,7 +31,7 @@ class DatasetViewSet(viewsets.ModelViewSet):
     Create a new dataset
     """
 
-    queryset = Dataset.objects.all().order_by("dataset_id")
+    queryset = Dataset.objects.all().order_by("identifier")
     serializer_class = DatasetSerializer
     pagination_class = LargeResultsSetPagination
 
