@@ -14,7 +14,7 @@ def camel_case_field_names(string):
 	return string
 
 
-def convert_to_fhir(individual_data):
+def individual_to_fhir(obj):
 	""" Transform individual data to Patient FHIR record. """
 
 	fhir_record = {}
@@ -30,12 +30,12 @@ def convert_to_fhir(individual_data):
 	'ethnicity': 'ethnicity'
 	}
 	for field in mapping.keys():
-		if field in individual_data.keys():
-			fhir_record[mapping.get(field)] = individual_data.get(field, None)
+		if field in obj.keys():
+			fhir_record[mapping.get(field)] = obj.get(field, None)
 	# mapping for biosamples assosiated with this patient
-	if 'biosamples' in individual_data.keys():
+	if 'biosamples' in obj.keys():
 		fhir_record['biosamples'] = []
-		for sample in individual_data.get('biosamples', None):
+		for sample in obj.get('biosamples', None):
 			biosample_record = biosample_to_fhir(sample)
 			fhir_record['biosamples'].append(biosample_record)
 	return fhir_record
@@ -46,8 +46,8 @@ def fhir_coding(obj, value=None):
 
 	coding = {}
 	if value:
-		coding['code'] = obj.get(value, None).get('id', None)
-		coding['display'] = obj.get(value, None).get('label', None)
+		coding['code'] = obj.get(value).get('id', None)
+		coding['display'] = obj.get(value).get('label', None)
 	else:
 		coding['code'] = obj.get('id', None)
 		coding['display'] = obj.get('label', None)
@@ -172,3 +172,129 @@ def biosample_to_fhir(obj):
 			concept_field_name = camel_case_field_names(concept)
 			biosample_record[concept_field_name] = fhir_codeable_concept(concept_data)
 	return biosample_record
+
+
+def hts_file_to_fhir(obj):
+	""" Convert HTSFile record to FHIR Document Reference. """
+
+	htsfile_record = {}
+	htsfile_record['resourceType'] = 'DocumentReference'
+	htsfile_record['content'] = []
+	content_data = {}
+	content_data['attachment'] = {}
+	content_data['attachment']['url'] = obj.get('uri', None)
+	if 'description' in obj.keys():
+		content_data['attachment']['title'] = obj.get('description', None)
+	htsfile_record['content'].append(content_data)
+	htsfile_record['type'] = {}
+	htsfile_record['type']['coding'] = []
+	coding = {}
+	coding['code'] = obj.get('hts_format', None)
+	coding['display'] = obj.get('hts_format', None)
+	htsfile_record['type']['coding'].append(coding)
+	htsfile_record['extension'] = {}
+	htsfile_record['extension']['url'] = 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly'
+	htsfile_record['extension']['valueCode'] = obj.get('genome_assembly', None)
+	return htsfile_record
+
+
+def gene_to_fhir(obj):
+	""" Gene to FHIR CodeableConcept. """
+
+	gene_record = {}
+	gene_record['resourceType'] = 'CodeableConcept'
+	gene_record['coding'] = []
+	coding = {}
+	coding['code'] = obj.get('id', None)
+	coding['display'] = obj.get('symbol', None)
+	gene_record['coding'].append(coding)
+	return gene_record
+
+
+def variant_to_fhir(obj):
+	""" Variant to FHIR """
+	# TODO check this example
+	# http://build.fhir.org/ig/HL7/genomics-reporting/SNVexample.json.html
+
+	variant_record = {}
+	variant_record['resourceType'] = 'Observation'
+	variant_record['identifier'] = obj.get('id', None)
+	variant_record['meta'] = {}
+	variant_record['meta']['profile'] = [
+		'http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/variant'
+		]
+
+	return variant_record
+
+
+def disease_to_fhir(obj):
+	""" Disease to FHIR Condition. """
+
+	disease_record = {}
+	disease_record['resourceType'] = 'Condition'
+	disease_record['code'] = []
+	coding = {}
+	coding['coding'] = []
+	coding['coding'].append(fhir_coding(obj, 'term'))
+	disease_record['code'].append(coding)
+	if obj.get('age_of_onset'):
+		disease_record['onsetAge'] = {}
+		disease_record['onsetAge']['code'] = obj.get('age_of_onset', {}).get('age', None)
+	tumor_stage_list = obj.get('tumor_stage', None)
+	if tumor_stage_list:
+		disease_record['stage'] = []
+		stage_type = {}
+		stage_type['type'] = {}
+		stage_type['type']['coding'] = []
+		for coding in tumor_stage_list:
+			coding = fhir_coding(coding)
+			stage_type['type']['coding'].append(coding)
+		disease_record['stage'].append(stage_type)
+	return disease_record
+
+
+def phenopacket_to_fhir(obj):
+	""" Phenopacket to FHIR Composition. """
+
+	phenopacket_record = {}
+	phenopacket_record['resourceType'] = "Composition"
+	phenopacket_record['id'] = obj.get('id', None)
+	phenopacket_record['meta'] = {}
+	metadata = obj.get('meta_data')
+	if metadata.get('phenopacket_schema_version'):
+		phenopacket_record['meta']['versionId'] = metadata.get(
+			'phenopacket_schema_version'
+			)
+		phenopacket_record['meta']['lastUpdated'] = metadata.get(
+			'created'
+			)
+	if metadata.get('external_references'):
+		phenopacket_record['meta']['source'] = metadata.get(
+			'external_references'
+			)
+	phenopacket_record['meta']['tag'] = metadata.get('resources')
+	phenopacket_record['subject'] = {}
+	phenopacket_record['subject']['reference'] = obj.get('subject')
+	phenopacket_record['section'] = []
+	def _get_section_object(inner_obj, title):
+		""" Internal function to parse phenopacket m2m objects. """
+		section_object = {}
+		section_object['title'] = title
+		section_object['entry'] =[]
+		if isinstance(inner_obj, list):
+			for each in inner_obj:
+				if each.get('id'):
+					section_object['entry'].append(each.get('id', None))
+				else:
+					section_object['entry'].append(each.get('uri', None))
+
+		else:
+			section_object['entry'].append(inner_obj)
+		return section_object
+
+	sections = ['biosamples', 'genes', 'variants', 'diseases', 'hts_files']
+	for section in sections:
+		if section in obj.keys():
+			entry_value = _get_section_object(obj.get(section, None), section)
+			phenopacket_record['section'].append(entry_value)
+	return phenopacket_record

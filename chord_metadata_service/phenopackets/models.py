@@ -75,7 +75,6 @@ class MetaData(models.Model):
 		help_text='List of external resources from the phenopacket was derived.')
 	extra_properties = JSONField(blank=True, null=True,
 		help_text='Extra properties that are not supported by current schema')
-	created = models.DateTimeField(auto_now=True)
 	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):

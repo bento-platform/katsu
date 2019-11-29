@@ -2,8 +2,7 @@ from rest_framework import viewsets, pagination
 from .serializers import *
 from .models import *
 from rest_framework.settings import api_settings
-from chord_metadata_service.restapi.api_renderers import (
-	PhenopacketsRenderer)
+from chord_metadata_service.restapi.api_renderers import *
 
 
 class LargeResultsSetPagination(pagination.PageNumberPagination):
@@ -18,7 +17,12 @@ class PhenopacketsModelViewSet(viewsets.ModelViewSet):
 	pagination_class = LargeResultsSetPagination
 
 
-class PhenotypicFeatureViewSet(PhenopacketsModelViewSet):
+class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):
+	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
+		FHIRRenderer,)
+
+
+class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing phenotypic features
@@ -31,7 +35,7 @@ class PhenotypicFeatureViewSet(PhenopacketsModelViewSet):
 	serializer_class = PhenotypicFeatureSerializer
 
 
-class ProcedureViewSet(PhenopacketsModelViewSet):
+class ProcedureViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing procedures
@@ -44,7 +48,7 @@ class ProcedureViewSet(PhenopacketsModelViewSet):
 	serializer_class = ProcedureSerializer
 
 
-class HtsFileViewSet(PhenopacketsModelViewSet):
+class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing HTS files
@@ -57,7 +61,7 @@ class HtsFileViewSet(PhenopacketsModelViewSet):
 	serializer_class = HtsFileSerializer
 
 
-class GeneViewSet(PhenopacketsModelViewSet):
+class GeneViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing genes
@@ -70,7 +74,7 @@ class GeneViewSet(PhenopacketsModelViewSet):
 	serializer_class = GeneSerializer
 
 
-class VariantViewSet(PhenopacketsModelViewSet):
+class VariantViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing variants
@@ -81,12 +85,9 @@ class VariantViewSet(PhenopacketsModelViewSet):
 	"""
 	queryset = Variant.objects.all().order_by("id")
 	serializer_class = VariantSerializer
-	# TODO filtering
-	# filter_backends = (DjangoFilterBackend,)
-	# filter_class = VariantFilter
 
 
-class DiseaseViewSet(PhenopacketsModelViewSet):
+class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing diseases
@@ -125,7 +126,7 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
 	serializer_class = MetaDataSerializer
 
 
-class BiosampleViewSet(PhenopacketsModelViewSet):
+class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing biosamples
@@ -137,7 +138,7 @@ class BiosampleViewSet(PhenopacketsModelViewSet):
 	serializer_class = BiosampleSerializer
 
 
-class PhenopacketViewSet(PhenopacketsModelViewSet):
+class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing phenopackets

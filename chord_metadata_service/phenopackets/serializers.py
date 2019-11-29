@@ -5,6 +5,7 @@ from jsonschema import Draft7Validator, FormatChecker
 from chord_metadata_service.restapi.schemas import *
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.serializers import GenericSerializer
+from chord_metadata_service.restapi.fhir_utils import *
 
 
 #############################################################
@@ -73,8 +74,10 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 
 	class Meta:
 		model = PhenotypicFeature
-		# fields = '__all__'
 		exclude = ['pftype']
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'observations'
+		class_converter = phenotypic_feature_to_fhir
 
 	# def to_representation(self, obj):
 	# 	output = super().to_representation(obj)
@@ -105,6 +108,9 @@ class ProcedureSerializer(GenericSerializer):
 	class Meta:
 		model = Procedure
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'procedures'
+		class_converter = procedure_to_fhir
 
 	def create(self, validated_data):
 		instance, _ = Procedure.objects.get_or_create(**validated_data)
@@ -131,6 +137,9 @@ class HtsFileSerializer(GenericSerializer):
 	class Meta:
 		model = HtsFile
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'document_references'
+		class_converter = hts_file_to_fhir
 
 
 class GeneSerializer(GenericSerializer):
@@ -141,6 +150,9 @@ class GeneSerializer(GenericSerializer):
 	class Meta:
 		model = Gene
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'codeable_concepts'
+		class_converter = gene_to_fhir
 
 
 class VariantSerializer(GenericSerializer):
@@ -153,6 +165,9 @@ class VariantSerializer(GenericSerializer):
 	class Meta:
 		model = Variant
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'observations'
+		class_converter = variant_to_fhir
 
 	def to_representation(self, obj):
 		""" Change 'allele_type' field name to allele type value. """
@@ -177,6 +192,9 @@ class DiseaseSerializer(GenericSerializer):
 	class Meta:
 		model = Disease
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'conditions'
+		class_converter = disease_to_fhir
 
 	def validate_tumor_stage(self, value):
 		if isinstance(value, list):
@@ -211,6 +229,9 @@ class BiosampleSerializer(GenericSerializer):
 	class Meta:
 		model = Biosample
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'specimens'
+		class_converter = biosample_to_fhir
 
 	def validate_diagnostic_markers(self, value):
 		if isinstance(value, list):
@@ -230,27 +251,58 @@ class BiosampleSerializer(GenericSerializer):
 
 
 class SimplePhenopacketSerializer(GenericSerializer):
-	biosamples = BiosampleSerializer(
-		read_only=True, many=True, exclude_when_nested=["individual"])
-	genes = GeneSerializer(read_only=True, many=True)
-	variants = VariantSerializer(read_only=True, many=True)
-	diseases = DiseaseSerializer(read_only=True, many=True)
-	hts_files = HtsFileSerializer(read_only=True, many=True)
-	meta_data = MetaDataSerializer(read_only=True, exclude_when_nested=["id"])
 	phenotypic_features = PhenotypicFeatureSerializer(
 		read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
 
 	class Meta:
 		model = Phenopacket
 		fields = '__all__'
+		# meta info for converting to FHIR
+		fhir_datatype_plural = 'compositions'
+		class_converter = phenopacket_to_fhir
+
+
+	def to_representation(self, instance):
+		""""
+		Overriding this method to allow post Primary Key for FK and M2M
+		objects and return their nested serialization.
+
+		"""
+		response = super().to_representation(instance)
+		response['biosamples'] = BiosampleSerializer(
+			instance.biosamples, many=True, required=False,
+			exclude_when_nested=["individual"]
+			).data
+		response['genes'] = GeneSerializer(
+			instance.genes, many=True, required=False
+			).data
+		response['variants'] = VariantSerializer(
+			instance.variants, many=True, required=False
+			).data
+		response['diseases'] = DiseaseSerializer(
+			instance.diseases, many=True, required=False
+			).data
+		response['hts_files'] = HtsFileSerializer(
+			instance.hts_files, many=True, required=False
+			).data
+		response['meta_data'] = MetaDataSerializer(
+			instance.meta_data, exclude_when_nested=['id']
+			).data
+		return response
 
 
 class PhenopacketSerializer(SimplePhenopacketSerializer):
-	# Phenopacket serializer for nested individuals - need to import here to
-	# prevent circular import issues.
-	from chord_metadata_service.patients.serializers import IndividualSerializer
-	subject = IndividualSerializer(
-		read_only=True, exclude_when_nested=["phenopackets", "biosamples"])
+
+	def to_representation(self, instance):
+		# Phenopacket serializer for nested individuals - need to import here to
+		# prevent circular import issues.
+		from chord_metadata_service.patients.serializers import IndividualSerializer
+		response = super().to_representation(instance)
+		response['subject'] = IndividualSerializer(
+			instance.subject,
+			exclude_when_nested=["phenopackets", "biosamples"]
+			).data
+		return response
 
 
 #############################################################

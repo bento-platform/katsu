@@ -263,7 +263,8 @@
         ]
       },
       "extension": {
-        "htsfile-genome-assembly": "htsfile.genome_assembly"
+        "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly",
+        "valueCode": "htsfile.genome_assembly"
       }
     }
   ],
