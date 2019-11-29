@@ -17,7 +17,7 @@ __all__ = ["ProjectSerializer", "DatasetSerializer", "TableOwnershipSerializer"]
 
 class DatasetSerializer(GenericSerializer):
     # noinspection PyMethodMayBeStatic
-    def validate_name(self, value):
+    def validate_title(self, value):
         if len(value.strip()) < 3:
             raise serializers.ValidationError("Name must be at least 3 characters")
         return value.strip()
@@ -41,7 +41,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         return value
 
     # noinspection PyMethodMayBeStatic
-    def validate_name(self, value):
+    def validate_title(self, value):
         if len(value.strip()) < 3:
             raise serializers.ValidationError("Name must be at least 3 characters")
         return value.strip()

@@ -47,8 +47,8 @@ class TableTest(APITestCase):
     @staticmethod
     def dataset_rep(dataset, created, updated):
         return {
-            "id": dataset["dataset_id"],
-            "name": dataset["name"],
+            "id": dataset["identifier"],
+            "name": dataset["title"],
             "metadata": {
                 "description": dataset["description"],
                 "project_id": dataset["project"],
@@ -64,7 +64,7 @@ class TableTest(APITestCase):
         r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
 
-        r = self.client.post(reverse("dataset-list"), data=json.dumps(valid_dataset_1(self.project["project_id"])),
+        r = self.client.post(reverse("dataset-list"), data=json.dumps(valid_dataset_1(self.project["identifier"])),
                              content_type="application/json")
         self.dataset = r.json()
 
@@ -145,7 +145,7 @@ class SearchTest(APITestCase):
         c = r.json()
         self.assertEqual(len(c["results"]), 1)
         self.assertDictEqual(c["results"][0], {
-            "id": str(self.dataset.dataset_id),
+            "id": str(self.dataset.identifier),
             "data_type": PHENOPACKET_DATA_TYPE_ID
         })
 
@@ -166,29 +166,29 @@ class SearchTest(APITestCase):
         }), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
-        self.assertIn(str(self.dataset.dataset_id), c["results"])
-        self.assertEqual(c["results"][str(self.dataset.dataset_id)]["data_type"], PHENOPACKET_DATA_TYPE_ID)
-        self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.dataset_id)]["matches"][0]["id"])
+        self.assertIn(str(self.dataset.identifier), c["results"])
+        self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], PHENOPACKET_DATA_TYPE_ID)
+        self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.identifier)]["matches"][0]["id"])
         # TODO: Check schema?
 
     def test_private_table_search(self):
         # No body
-        r = self.client.post(reverse("table-search", args=[str(self.dataset.dataset_id)]))
+        r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]))
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # No query
-        r = self.client.post(reverse("table-search", args=[str(self.dataset.dataset_id)]), data=json.dumps({}),
+        r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]), data=json.dumps({}),
                              content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Bad syntax for query
-        r = self.client.post(reverse("table-search", args=[str(self.dataset.dataset_id)]), data=json.dumps({
+        r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
             "query": ["hello", "world"]
         }), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Valid query with one result
-        r = self.client.post(reverse("table-search", args=[str(self.dataset.dataset_id)]), data=json.dumps({
+        r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
             "query": TEST_SEARCH_QUERY_1
         }), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_200_OK)

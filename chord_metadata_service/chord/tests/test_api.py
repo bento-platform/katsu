@@ -12,7 +12,7 @@ class CreateProjectTest(APITestCase):
         self.valid_payloads = [
             VALID_PROJECT_1,
             {
-                "name": "Project 2",
+                "title": "Project 2",
                 "description": "",
                 "data_use": VALID_DATA_USE_1
             }
@@ -20,12 +20,12 @@ class CreateProjectTest(APITestCase):
 
         self.invalid_payloads = [
             {
-                "name": "Project 1",
+                "title": "Project 1",
                 "description": "",
                 "data_use": {}
             },
             {
-                "name": "aa",
+                "title": "aa",
                 "description": "",
                 "data_use": VALID_DATA_USE_1
             }
@@ -36,8 +36,8 @@ class CreateProjectTest(APITestCase):
             r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Project.objects.count(), i)
-            self.assertEqual(Project.objects.get(name=p["name"]).description, p["description"])
-            self.assertDictEqual(Project.objects.get(name=p["name"]).data_use, p["data_use"])
+            self.assertEqual(Project.objects.get(title=p["title"]).description, p["description"])
+            self.assertDictEqual(Project.objects.get(title=p["title"]).data_use, p["data_use"])
 
         for p in self.invalid_payloads:
             r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
@@ -54,17 +54,17 @@ class CreateDatasetTest(APITestCase):
         self.project = r.json()
 
         self.valid_payloads = [
-            valid_dataset_1(self.project["project_id"])
+            valid_dataset_1(self.project["identifier"])
         ]
 
         self.invalid_payloads = [
             {
-                "name": "aa",
+                "title": "aa",
                 "description": "Test Dataset",
-                "project": self.project["project_id"]
+                "project": self.project["identifier"]
             },
             {
-                "name": "Dataset 1",
+                "title": "Dataset 1",
                 "description": "Test Dataset",
                 "project": None
             }
@@ -75,7 +75,7 @@ class CreateDatasetTest(APITestCase):
             r = self.client.post(reverse("dataset-list"), data=json.dumps(d), content_type="application/json")
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Dataset.objects.count(), i)
-            self.assertEqual(Dataset.objects.get(name=d["name"]).description, d["description"])
+            self.assertEqual(Dataset.objects.get(title=d["title"]).description, d["description"])
 
         for d in self.invalid_payloads:
             r = self.client.post(reverse("dataset-list"), data=json.dumps(d), content_type="application/json")
