@@ -17,7 +17,12 @@ class PhenopacketsModelViewSet(viewsets.ModelViewSet):
 	pagination_class = LargeResultsSetPagination
 
 
-class PhenotypicFeatureViewSet(PhenopacketsModelViewSet):
+class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):
+	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
+		FHIRRenderer,)
+
+
+class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing phenotypic features
@@ -28,11 +33,9 @@ class PhenotypicFeatureViewSet(PhenopacketsModelViewSet):
 	"""
 	queryset = PhenotypicFeature.objects.all().order_by("id")
 	serializer_class = PhenotypicFeatureSerializer
-	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
-		FHIRRenderer,)
 
 
-class ProcedureViewSet(PhenopacketsModelViewSet):
+class ProcedureViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing procedures
@@ -43,11 +46,9 @@ class ProcedureViewSet(PhenopacketsModelViewSet):
 	"""
 	queryset = Procedure.objects.all().order_by("id")
 	serializer_class = ProcedureSerializer
-	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
-		FHIRRenderer,)
 
 
-class HtsFileViewSet(PhenopacketsModelViewSet):
+class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing HTS files
@@ -58,11 +59,9 @@ class HtsFileViewSet(PhenopacketsModelViewSet):
 	"""
 	queryset = HtsFile.objects.all().order_by("uri")
 	serializer_class = HtsFileSerializer
-	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
-		FHIRRenderer,)
 
 
-class GeneViewSet(PhenopacketsModelViewSet):
+class GeneViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing genes
@@ -73,11 +72,9 @@ class GeneViewSet(PhenopacketsModelViewSet):
 	"""
 	queryset = Gene.objects.all().order_by("id")
 	serializer_class = GeneSerializer
-	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
-		FHIRRenderer,)
 
 
-class VariantViewSet(PhenopacketsModelViewSet):
+class VariantViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing variants
@@ -88,11 +85,9 @@ class VariantViewSet(PhenopacketsModelViewSet):
 	"""
 	queryset = Variant.objects.all().order_by("id")
 	serializer_class = VariantSerializer
-	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
-		FHIRRenderer,)
 
 
-class DiseaseViewSet(PhenopacketsModelViewSet):
+class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing diseases
@@ -103,8 +98,6 @@ class DiseaseViewSet(PhenopacketsModelViewSet):
 	"""
 	queryset = Disease.objects.all().order_by("id")
 	serializer_class = DiseaseSerializer
-	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
-		FHIRRenderer,)
 
 
 class ResourceViewSet(PhenopacketsModelViewSet):
@@ -133,7 +126,7 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
 	serializer_class = MetaDataSerializer
 
 
-class BiosampleViewSet(PhenopacketsModelViewSet):
+class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing biosamples
@@ -143,11 +136,9 @@ class BiosampleViewSet(PhenopacketsModelViewSet):
 	"""
 	queryset = Biosample.objects.all().order_by("id")
 	serializer_class = BiosampleSerializer
-	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
-		FHIRRenderer,)
 
 
-class PhenopacketViewSet(PhenopacketsModelViewSet):
+class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
 	"""
 	get:
 	Return a list of all existing phenopackets
@@ -158,8 +149,6 @@ class PhenopacketViewSet(PhenopacketsModelViewSet):
 	"""
 	queryset = Phenopacket.objects.all().order_by("id")
 	serializer_class = PhenopacketSerializer
-	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
-		FHIRRenderer,)
 
 
 class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
