@@ -27,6 +27,18 @@ class DatasetSerializer(GenericSerializer):
     def validate(self, data):
         """ Validate all fields against DATS schemas. """
 
+        # the validation against dataset_schema is not working
+        # because the subschemas URI are not resolvable
+        
+        # schema_file = get_dats_schema('dataset')
+        # v = Draft4Validator(schema_file)
+        # validation = v.validate(data)
+        # errors = [e for e in v.iter_errors(data)]
+        # if errors:
+        #     raise serializers.ValidationError(errors)
+        # return data
+
+
         dataset_dats_fields = ['alternate_identifiers', 'related_identifiers',
             'dates', 'stored_in', 'spatial_coverage', 'types', 'distributions',
             'dimensions', 'primary_publications', 'citations', 'produced_by',

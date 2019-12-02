@@ -11,6 +11,7 @@ def get_dats_schema(field):
 
 	# mapping dataset model fields to dats schemas
 	fields_mapping = {
+	# 'dataset': 'dataset_schema',
 	'alternate_identifiers': 'alternate_identifier_info_schema',
 	'related_identifiers': 'related_identifier_info_schema',
 	'dates': 'date_info_schema',
