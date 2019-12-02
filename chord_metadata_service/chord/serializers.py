@@ -24,14 +24,49 @@ class DatasetSerializer(GenericSerializer):
             raise serializers.ValidationError("Name must be at least 3 characters")
         return value.strip()
 
-    def validate_licenses(self, value):
-        if isinstance(value, list):
-            for item in value:
-                schema = get_dats_schema('licenses')
-                validation = Draft4Validator(schema).is_valid(item)
-                if not validation:
-                    raise serializers.ValidationError("Not valid JSON schema for this field.")
-        return value
+    def validate(self, data):
+        """ Validate all fields against DATS schemas. """
+
+        dataset_dats_fields = ['alternate_identifiers', 'related_identifiers',
+            'dates', 'stored_in', 'spatial_coverage', 'types', 'distributions',
+            'dimensions', 'primary_publications', 'citations', 'produced_by',
+            'creators', 'licenses', 'acknowledges', 'keywords']
+        errors = {}
+        for field in dataset_dats_fields:
+            if data.get(field):
+                if isinstance(data.get(field), list):
+                    for item in data.get(field):
+                        call_validation = self.validation(
+                            value=item, schema=get_dats_schema(field),
+                            field_name=field
+                            )
+                        if isinstance(call_validation, dict):
+                            errors.update(call_validation)
+                else:
+                    call_validation = self.validation(
+                        value=data.get(field), schema=get_dats_schema(field),
+                        field_name=field
+                        )
+                    if isinstance(call_validation, dict):
+                        errors.update(call_validation)
+        if errors:
+            raise serializers.ValidationError(errors)
+        else:
+            return data
+
+    @staticmethod
+    def validation(value, schema, field_name):
+        """ Generic validation. Returns errors dict if validation is False. """
+        
+        errors = {}
+        v = Draft4Validator(schema)
+        validation = v.is_valid(value)
+        if not validation:
+            errors[field_name] = [
+                str(error.message) for error in v.iter_errors(value)
+                ]
+            return errors
+        return validation
 
     class Meta:
         model = Dataset
