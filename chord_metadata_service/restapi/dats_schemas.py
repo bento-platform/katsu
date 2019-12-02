@@ -28,7 +28,7 @@ def get_dats_schema(field):
 	'keywords': 'annotation_schema'
 	}
 
-	for filename in glob(os.path.join('dats/', '*.json')):
+	for filename in glob(os.path.join('chord_metadata_service/dats/', '*.json')):
 		# parse e.g. dats\access_schema.json to get just name
 		schema_name = filename.split('\\')[1].split('.')[0]
 		field_schema_name = fields_mapping.get(field, None)
