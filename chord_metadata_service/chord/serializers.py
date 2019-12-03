@@ -2,7 +2,7 @@ from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from rest_framework import serializers
-from chord_metadata_service.restapi.dats_schemas import get_dats_schema
+from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
 
 from .models import *
 
@@ -24,38 +24,36 @@ class DatasetSerializer(GenericSerializer):
             raise serializers.ValidationError("Name must be at least 3 characters")
         return value.strip()
 
+    def validate_creators(self, value):
+        # not working the error message is
+        # e.g. [{'name': 'The Allen Institute for Brain Science'}] is not of type 'object'
+        # for now the validation for creators is disabled
+        validation = self.jsonschema_validation(value, CREATORS)
+        # if isinstance(validation, dict):
+        #     raise serializers.ValidationError(validation)
+        return value
+
+
     def validate(self, data):
         """ Validate all fields against DATS schemas. """
-
-        # the validation against dataset_schema is not working
-        # because the subschemas URI are not resolvable
-        
-        # schema_file = get_dats_schema('dataset')
-        # v = Draft4Validator(schema_file)
-        # validation = v.validate(data)
-        # errors = [e for e in v.iter_errors(data)]
-        # if errors:
-        #     raise serializers.ValidationError(errors)
-        # return data
-
 
         dataset_dats_fields = ['alternate_identifiers', 'related_identifiers',
             'dates', 'stored_in', 'spatial_coverage', 'types', 'distributions',
             'dimensions', 'primary_publications', 'citations', 'produced_by',
-            'creators', 'licenses', 'acknowledges', 'keywords']
+            'licenses', 'acknowledges', 'keywords']
         errors = {}
         for field in dataset_dats_fields:
             if data.get(field):
                 if isinstance(data.get(field), list):
                     for item in data.get(field):
-                        call_validation = self.validation(
+                        call_validation = self.jsonschema_validation(
                             value=item, schema=get_dats_schema(field),
                             field_name=field
                             )
                         if isinstance(call_validation, dict):
                             errors.update(call_validation)
                 else:
-                    call_validation = self.validation(
+                    call_validation = self.jsonschema_validation(
                         value=data.get(field), schema=get_dats_schema(field),
                         field_name=field
                         )
@@ -67,7 +65,7 @@ class DatasetSerializer(GenericSerializer):
             return data
 
     @staticmethod
-    def validation(value, schema, field_name):
+    def jsonschema_validation(value, schema, field_name=None):
         """ Generic validation. Returns errors dict if validation is False. """
         
         errors = {}

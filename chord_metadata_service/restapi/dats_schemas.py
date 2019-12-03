@@ -11,7 +11,6 @@ def get_dats_schema(field):
 
 	# mapping dataset model fields to dats schemas
 	fields_mapping = {
-	# 'dataset': 'dataset_schema',
 	'alternate_identifiers': 'alternate_identifier_info_schema',
 	'related_identifiers': 'related_identifier_info_schema',
 	'dates': 'date_info_schema',
@@ -23,7 +22,6 @@ def get_dats_schema(field):
 	'primary_publications': 'publication_schema',
 	'citations': 'publication_schema',
 	'produced_by': 'study_schema',
-	# 'creators': ['person_schema', 'organization_schema'],
 	'licenses': 'license_schema',
 	'acknowledges': 'grant_schema',
 	'keywords': 'annotation_schema'
@@ -37,3 +35,29 @@ def get_dats_schema(field):
 			schema_file = open(filename)
 			schema = json.loads(schema_file.read())
 			return schema
+
+
+def _get_creators_schema(creator_type):
+	""" Internal function to get creators schemas. """
+
+	dats_creators_schema = open('chord_metadata_service/dats/{}.json'.format(creator_type))
+	creator_schema = json.loads(dats_creators_schema.read())
+	return creator_schema
+
+
+CREATORS = { 
+   "$schema":"http://json-schema.org/draft-04/schema",
+   "title":"Creators schema",
+   "description":"Creators of the dataset.",
+   "type":"object",
+   "properties":{ 
+      "@context":{ 
+         "description":"The JSON-LD context",
+         "type":"array",
+         "anyOf":[ 
+            _get_creators_schema('person_schema'),
+            _get_creators_schema('organization_schema')
+         ]
+      }
+   }
+}
