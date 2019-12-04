@@ -1,5 +1,5 @@
 from django.test import TestCase
-from ..models import Biosample, MetaData, Procedure, Phenopacket, PhenotypicFeature
+from ..models import Biosample, MetaData, Procedure, Phenopacket, PhenotypicFeature, HtsFile
 from chord_metadata_service.patients.models import Individual
 
 from .constants import *
@@ -87,4 +87,15 @@ class ProcedureTest(TestCase):
 		procedure_query_2 = Procedure.objects.filter(code__id='NCIT:C28743')
 		self.assertEqual(procedure_query_1.count(), 2)
 		self.assertEqual(procedure_query_2.count(), 2)
+
+
+class HtsFileTest(TestCase):
+
+	def setUp(self):
+		self.hts_file = HtsFile.objects.create(**VALID_HTS_FILE)
+
+	def test_hts_file(self):
+		hts_file = HtsFile.objects.get(genome_assembly='GRCh38')
+		self.assertEqual(hts_file.uri, 'https://data.example/genomes/germline_wgs.vcf.gz')
+
 

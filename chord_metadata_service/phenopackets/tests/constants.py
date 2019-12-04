@@ -42,6 +42,20 @@ VALID_INDIVIDUAL_2 = {
 }
 
 
+VALID_HTS_FILE = {
+    "uri": "https://data.example/genomes/germline_wgs.vcf.gz",
+    "description": "Matched normal germline sample",
+    "hts_format": "VCF",
+    "genome_assembly": "GRCh38",
+    "individual_to_sample_identifiers": {
+      "patient:1": "NA12345"
+    },
+    "extra_properties": {
+        "comment": "test data"
+    }
+}
+
+
 def valid_biosample_1(individual, procedure):
     return dict(
         id='biosample_id:1',
