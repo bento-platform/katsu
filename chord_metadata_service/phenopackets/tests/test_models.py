@@ -70,6 +70,7 @@ class PhenotypicFeatureTest(TestCase):
 			severity__label='Mild',
 			pftype__label='Proptosis'
 			)
+		phenotypic_feature_2 = PhenotypicFeature.objects.get(id=2, phenopacket__id='phenopacket_id:1')
 		self.assertEqual(PhenotypicFeature.objects.count(), 2)
 		self.assertEqual(phenotypic_feature_query.count(), 2)
-
+		self.assertEqual(phenotypic_feature_2.biosample.id, 'biosample_id:2')
