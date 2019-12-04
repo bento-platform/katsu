@@ -10,6 +10,18 @@ VALID_PROCEDURE_1 = {
 }
 
 
+VALID_PROCEDURE_2 = {
+    "code": {
+        "id": "NCIT:C28743",
+        "label": "Punch Biopsy"
+    },
+    "body_site": {
+        "id": "UBERON:0004263",
+        "label": "upper arm skin"
+    }
+}
+
+
 VALID_META_DATA_1 = {
     "created_by": "David Lougheed",
     "submitted_by": "David Lougheed"

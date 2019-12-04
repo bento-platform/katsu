@@ -74,3 +74,17 @@ class PhenotypicFeatureTest(TestCase):
 		self.assertEqual(PhenotypicFeature.objects.count(), 2)
 		self.assertEqual(phenotypic_feature_query.count(), 2)
 		self.assertEqual(phenotypic_feature_2.biosample.id, 'biosample_id:2')
+
+
+class ProcedureTest(TestCase):
+
+	def setUp(self):
+		self.procedure_1 = Procedure.objects.create(**VALID_PROCEDURE_1)
+		self.procedure_1 = Procedure.objects.create(**VALID_PROCEDURE_2)
+
+	def test_procedure(self):
+		procedure_query_1 = Procedure.objects.filter(body_site__label__icontains='arm')
+		procedure_query_2 = Procedure.objects.filter(code__id='NCIT:C28743')
+		self.assertEqual(procedure_query_1.count(), 2)
+		self.assertEqual(procedure_query_2.count(), 2)
+
