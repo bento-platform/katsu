@@ -91,6 +91,26 @@ VALID_VARIANT_1 = {
 }
 
 
+VALID_DISEASE_1 = {
+    "term": {
+        "id": "OMIM:164400",
+        "label": "Spinocerebellar ataxia 1"
+    },
+    "onset": {
+        "age": "P25Y3M2D"
+    },
+    "disease_stage": [
+        {
+        "id": "NCIT:C28091",
+        "label": "Gleason Score 7"
+        }
+    ],
+    "extra_properties": {
+        "comment": "test data"
+    }
+}
+
+
 def valid_biosample_1(individual, procedure):
     return dict(
         id='biosample_id:1',
@@ -214,4 +234,15 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
         },
         biosample=biosample,
         phenopacket=phenopacket
+        )
+
+
+def valid_genomic_interpretation(gene=None, variant=None):
+    return dict(
+        status='CANDIDATE',
+        gene=gene,
+        variant=variant,
+        extra_properties={
+            "comment": "test data"
+        }
         )

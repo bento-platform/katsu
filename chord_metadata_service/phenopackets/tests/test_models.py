@@ -2,6 +2,7 @@ from django.test import TestCase
 from ..models import *
 from chord_metadata_service.patients.models import Individual
 from django.db.utils import IntegrityError
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from .constants import *
 
@@ -121,3 +122,37 @@ class VariantTest(TestCase):
 	def test_variant(self):
 		variant_query = Variant.objects.filter(zygosity__id='NCBITaxon:9606')
 		self.assertEqual(variant_query.count(), 1)
+
+
+class DiseaseTest(TestCase):
+
+	def setUp(self):
+		self.disease_1 = Disease.objects.create(**VALID_DISEASE_1)
+
+	def test_disease(self):
+		disease_query = Disease.objects.filter(term__id='OMIM:164400')
+		self.assertEqual(disease_query.count(), 1)
+
+
+class GenomicInterpretationTest(TestCase):
+
+	def setUp(self):
+		self.gene = Gene.objects.create(**VALID_GENE_1)
+		self.variant = Variant.objects.create(**VALID_VARIANT_1)
+		self.genomic_interpretation = GenomicInterpretation.objects.create(
+			**valid_genomic_interpretation(self.gene, self.variant)
+			)
+
+	def test_genomic_interpretation(self):
+		genomic_interpretation_query = GenomicInterpretation.objects.filter(
+			gene='HGNC:347')
+		self.assertEqual(genomic_interpretation_query.count(), 1)
+		self.assertEqual(GenomicInterpretation.objects.count(), 1)
+
+	def test_validation_gene_or_variant(self):
+		with self.assertRaises(ValidationError):
+			test = GenomicInterpretation.objects.create(
+			**valid_genomic_interpretation()
+			).clean()
+
+
