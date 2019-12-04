@@ -203,7 +203,7 @@ def ingest(request):
         for d in diseases:
             # TODO: Primary key, should this be a model?
 
-            d_obj = Disease(term=d["term"], age_of_onset=d.get("onset", None), tumor_stage=d.get("tumor_stage", []))
+            d_obj = Disease(term=d["term"], onset=d.get("onset", None), disease_stage=d.get("disease_stage", []))
             d_obj.save()
 
         resources_db = []

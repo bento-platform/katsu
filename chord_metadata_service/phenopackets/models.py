@@ -266,11 +266,14 @@ class Disease(models.Model):
 	# "id": "HP:0003581",
 	# "label": "Adult onset"
 	# }
-	age_of_onset = JSONField(blank=True, null=True,
+	onset = JSONField(blank=True, null=True,
 		help_text='An element representing the age of onset of the disease.')
-	tumor_stage = ArrayField(JSONField(null=True, blank=True),
+	disease_stage = ArrayField(JSONField(null=True, blank=True),
 		blank=True, null=True,
-		help_text='List of terms representing the tumor stage (TNM findings).')
+		help_text='List of terms representing the disease stage.')
+	tnm_finding = ArrayField(JSONField(null=True, blank=True),
+		blank=True, null=True,
+		help_text='List of terms representing the tumor TNM score.')
 	extra_properties = JSONField(blank=True, null=True,
 		help_text='Extra properties that are not supported by current schema')
 	created = models.DateTimeField(auto_now=True)
