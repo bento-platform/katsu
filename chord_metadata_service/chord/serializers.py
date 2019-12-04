@@ -25,12 +25,11 @@ class DatasetSerializer(GenericSerializer):
         return value.strip()
 
     def validate_creators(self, value):
-        # not working the error message is
-        # e.g. [{'name': 'The Allen Institute for Brain Science'}] is not of type 'object'
-        # for now the validation for creators is disabled
+        # validation against person_schema is not working
+        # error: additonal properties ar enot allowed
         validation = self.jsonschema_validation(value, CREATORS)
-        # if isinstance(validation, dict):
-        #     raise serializers.ValidationError(validation)
+        if isinstance(validation, dict):
+            raise serializers.ValidationError(validation)
         return value
 
 

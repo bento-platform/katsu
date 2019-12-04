@@ -49,15 +49,11 @@ CREATORS = {
    "$schema":"http://json-schema.org/draft-04/schema",
    "title":"Creators schema",
    "description":"Creators of the dataset.",
-   "type":"object",
-   "properties":{ 
-      "@context":{ 
-         "description":"The JSON-LD context",
-         "type":"array",
-         "anyOf":[ 
-            _get_creators_schema('person_schema'),
-            _get_creators_schema('organization_schema')
-         ]
-      }
-   }
+   "type":"array",
+   "items": {
+	    "oneOf": [
+	        _get_creators_schema('person_schema'),
+	        _get_creators_schema('organization_schema')
+	    ]
+	}
 }
