@@ -16,6 +16,20 @@ VALID_META_DATA_1 = {
 }
 
 
+VALID_INDIVIDUAL_1 = {
+    "id": "patient:1",
+    "date_of_birth": "1967-01-01",
+    "sex": "MALE"
+}
+
+
+VALID_INDIVIDUAL_2 = {
+    "id": "patient:2",
+    "date_of_birth": "1978-01-01",
+    "sex": "FEMALE"
+}
+
+
 def valid_biosample_1(individual, procedure):
     return dict(
         id='biosample_id:1',
@@ -96,3 +110,47 @@ def valid_biosample_2(individual, procedure):
         procedure=procedure,
         is_control_sample=True
     )
+
+
+def valid_phenotypic_feature(biosample=None, phenopacket=None):
+    return dict(
+        description='This is a test phenotypic feature',
+        pftype={
+            "id": "HP:0000520",
+            "label": "Proptosis" 
+        },
+        negated=True,
+        severity={
+            "id": "HP: 0012825",
+            "label": "Mild"
+        },
+        modifier=[
+            {
+            "id": "HP: 0012825 ",
+            "label": "Mild"
+            },
+            {
+            "id": "HP: 0012823 ",
+            "label": "Semi-mild"
+            }
+        ],
+        onset={
+            "id": "HP:0003577",
+            "label": "Congenital onset"
+        },
+        evidence={
+            "evidence_code": {
+                "id": "ECO:0006017",
+                "label": "Author statement from published clinical study used in manual assertion"
+            },
+            "reference": {
+                "id": "PMID:30962759",
+                "description": "Recurrent Erythema Nodosum in a Child with a SHOC2 Gene Mutation"
+            }
+        },
+        extra_properties={
+            "comment": "test data"
+        },
+        biosample=biosample,
+        phenopacket=phenopacket
+        )
