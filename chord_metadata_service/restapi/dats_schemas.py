@@ -1,6 +1,11 @@
 import json
 import os
+
 from glob import glob
+from pathlib import Path
+
+
+DATS_PATH = os.path.join(Path(os.path.dirname(os.path.realpath(__file__))).parent, "dats")
 
 
 def get_dats_schema(field):
@@ -14,7 +19,7 @@ def get_dats_schema(field):
 	'alternate_identifiers': 'alternate_identifier_info_schema',
 	'related_identifiers': 'related_identifier_info_schema',
 	'dates': 'date_info_schema',
-	'stored_in': 'data_repository_schema', 
+	'stored_in': 'data_repository_schema',
 	'spatial_coverage': 'place_schema',
 	'types': 'data_type_schema',
 	'distributions': 'dataset_distribution_schema',
@@ -27,7 +32,7 @@ def get_dats_schema(field):
 	'keywords': 'annotation_schema'
 	}
 
-	for filename in glob(os.path.join('chord_metadata_service/dats/', '*.json')):
+	for filename in glob(os.path.join(DATS_PATH, '*.json')):
 		# parse e.g. dats\access_schema.json to get just name
 		schema_name = filename.split('\\')[1].split('.')[0]
 		field_schema_name = fields_mapping.get(field, None)
@@ -45,7 +50,7 @@ def _get_creators_schema(creator_type):
 	return creator_schema
 
 
-CREATORS = { 
+CREATORS = {
    "$schema":"http://json-schema.org/draft-04/schema",
    "title":"Creators schema",
    "description":"Creators of the dataset.",
