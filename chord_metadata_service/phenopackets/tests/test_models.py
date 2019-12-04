@@ -1,7 +1,8 @@
 from django.test import TestCase
-from ..models import Biosample, MetaData, Procedure, Phenopacket, PhenotypicFeature, HtsFile
+from ..models import *
 from chord_metadata_service.patients.models import Individual
-
+from django.db.utils import IntegrityError
+from django.db import transaction
 from .constants import *
 
 
@@ -99,3 +100,24 @@ class HtsFileTest(TestCase):
 		self.assertEqual(hts_file.uri, 'https://data.example/genomes/germline_wgs.vcf.gz')
 
 
+class GeneTest(TestCase):
+
+	def setUp(self):
+		self.gene_1 = Gene.objects.create(**VALID_GENE_1)
+		
+
+	def test_gene(self):
+		gene_1 = Gene.objects.get(id='HGNC:347')
+		self.assertEqual(gene_1.symbol, 'ETF1')		
+		with self.assertRaises(IntegrityError):
+			Gene.objects.create(**DUPLICATE_GENE_2)
+
+
+class VariantTest(TestCase):
+
+	def setUp(self):
+		variant = Variant.objects.create(**VALID_VARIANT_1)
+
+	def test_variant(self):
+		variant_query = Variant.objects.filter(zygosity__id='NCBITaxon:9606')
+		self.assertEqual(variant_query.count(), 1)

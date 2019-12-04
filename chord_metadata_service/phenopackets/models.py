@@ -206,7 +206,7 @@ class Gene(models.Model):
 	id = models.CharField(primary_key=True, max_length=200,
 		help_text='Official identifier of the gene.')
 	# CURIE style? Yes!
-	alternate_id = ArrayField(models.CharField(max_length=200, blank=True),
+	alternate_ids = ArrayField(models.CharField(max_length=200, blank=True),
 		blank=True, null=True,
 		help_text='Alternative identifier(s) of the gene.')
 	symbol = models.CharField(max_length=200,

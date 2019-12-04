@@ -56,6 +56,41 @@ VALID_HTS_FILE = {
 }
 
 
+VALID_GENE_1 = {
+  "id": "HGNC:347",
+  "alternate_ids": ["ensembl:ENSRNOG00000019450", "ncbigene:307503"],
+  "symbol": "ETF1",
+  "extra_properties": {
+    "comment": "test data"
+  }
+}
+
+
+DUPLICATE_GENE_2 = {
+  "id": "HGNC:347",
+  "symbol": "DYI"
+}
+
+
+VALID_VARIANT_1 = {
+    "allele_type": "spdiAllele",
+    "allele": {
+      "id": "clinvar:13294",
+      "seq_id": "NC_000010.10",
+      "position": 123256214,
+      "deleted_sequence": "T",
+      "inserted_sequence": "G"
+    },
+    "zygosity": {
+      "id": "NCBITaxon:9606",
+      "label": "human"
+    },
+    "extra_properties": {
+        "comment": "test data"
+    }
+}
+
+
 def valid_biosample_1(individual, procedure):
     return dict(
         id='biosample_id:1',
