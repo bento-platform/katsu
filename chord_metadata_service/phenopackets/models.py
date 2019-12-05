@@ -206,7 +206,7 @@ class Gene(models.Model):
 	id = models.CharField(primary_key=True, max_length=200,
 		help_text='Official identifier of the gene.')
 	# CURIE style? Yes!
-	alternate_id = ArrayField(models.CharField(max_length=200, blank=True),
+	alternate_ids = ArrayField(models.CharField(max_length=200, blank=True),
 		blank=True, null=True,
 		help_text='Alternative identifier(s) of the gene.')
 	symbol = models.CharField(max_length=200,
@@ -266,11 +266,14 @@ class Disease(models.Model):
 	# "id": "HP:0003581",
 	# "label": "Adult onset"
 	# }
-	age_of_onset = JSONField(blank=True, null=True,
+	onset = JSONField(blank=True, null=True,
 		help_text='An element representing the age of onset of the disease.')
-	tumor_stage = ArrayField(JSONField(null=True, blank=True),
+	disease_stage = ArrayField(JSONField(null=True, blank=True),
 		blank=True, null=True,
-		help_text='List of terms representing the tumor stage (TNM findings).')
+		help_text='List of terms representing the disease stage.')
+	tnm_finding = ArrayField(JSONField(null=True, blank=True),
+		blank=True, null=True,
+		help_text='List of terms representing the tumor TNM score.')
 	extra_properties = JSONField(blank=True, null=True,
 		help_text='Extra properties that are not supported by current schema')
 	created = models.DateTimeField(auto_now=True)

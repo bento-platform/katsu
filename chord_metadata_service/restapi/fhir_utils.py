@@ -237,16 +237,16 @@ def disease_to_fhir(obj):
 	coding['coding'] = []
 	coding['coding'].append(fhir_coding(obj, 'term'))
 	disease_record['code'].append(coding)
-	if obj.get('age_of_onset'):
+	if obj.get('onset'):
 		disease_record['onsetAge'] = {}
-		disease_record['onsetAge']['code'] = obj.get('age_of_onset', {}).get('age', None)
-	tumor_stage_list = obj.get('tumor_stage', None)
-	if tumor_stage_list:
+		disease_record['onsetAge']['code'] = obj.get('onset', {}).get('age', None)
+	disease_stages = obj.get('disease_stage', None)
+	if disease_stages:
 		disease_record['stage'] = []
 		stage_type = {}
 		stage_type['type'] = {}
 		stage_type['type']['coding'] = []
-		for coding in tumor_stage_list:
+		for coding in disease_stages:
 			coding = fhir_coding(coding)
 			stage_type['type']['coding'].append(coding)
 		disease_record['stage'].append(stage_type)

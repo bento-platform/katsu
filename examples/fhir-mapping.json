@@ -107,8 +107,8 @@
           "type": {
             "coding": {
               "system": "",
-              "code": "disease.tumor_stage.id",
-              "display": "disease.tumor_stage.label"
+              "code": "disease.disease_stage.id",
+              "display": "disease.disease_stage.label"
             }
           }
         }

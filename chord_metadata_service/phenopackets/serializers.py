@@ -196,7 +196,7 @@ class DiseaseSerializer(GenericSerializer):
 		fhir_datatype_plural = 'conditions'
 		class_converter = disease_to_fhir
 
-	def validate_tumor_stage(self, value):
+	def validate_disease_stage(self, value):
 		if isinstance(value, list):
 			for item in value:
 				validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(item)
