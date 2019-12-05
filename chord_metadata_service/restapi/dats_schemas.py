@@ -45,7 +45,7 @@ def get_dats_schema(field):
 def _get_creators_schema(creator_type):
 	""" Internal function to get creators schemas. """
 
-	dats_creators_schema = open('chord_metadata_service/dats/{}.json'.format(creator_type))
+	dats_creators_schema = open(os.path.join(DATS_PATH, '{}.json'.format(creator_type)))
 	creator_schema = json.loads(dats_creators_schema.read())
 	return creator_schema
 
