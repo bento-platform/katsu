@@ -122,7 +122,7 @@ class GeneTest(TestCase):
 class VariantTest(TestCase):
 
 	def setUp(self):
-		variant = Variant.objects.create(**VALID_VARIANT_1)
+		self.variant = Variant.objects.create(**VALID_VARIANT_1)
 
 	def test_variant(self):
 		variant_query = Variant.objects.filter(zygosity__id='NCBITaxon:9606')
@@ -208,3 +208,29 @@ class InterpretationTest(TestCase):
 			resolution_status='IN_PROGRESS'
 			)
 		self.assertEqual(interpretation_query.count(), 1)
+
+
+class ResourceTest(TestCase):
+
+	def setUp(self):
+		self.resource_1 = Resource.objects.create(**VALID_RESOURCE_1)
+		self.resource_2 = Resource.objects.create(**VALID_RESOURCE_2)
+
+	def test_resource(self):
+		self.assertEqual(Resource.objects.count(), 2)
+		with self.assertRaises(IntegrityError):
+			Resource.objects.create(**DUPLICATE_RESOURCE_3)
+
+
+class MetaDataTest(TestCase):
+
+	def setUp(self):
+		self.resource_1 = Resource.objects.create(**VALID_RESOURCE_1)
+		self.resource_2 = Resource.objects.create(**VALID_RESOURCE_2)
+		self.metadata = MetaData.objects.create(**VALID_META_DATA_2)
+		self.metadata.resources.set([self.resource_1, self.resource_2])
+
+	def test_metadata(self):
+		metadata = MetaData.objects.get(created_by__icontains='ksenia')
+		self.assertEqual(metadata.submitted_by, 'Ksenia Zaytseva')
+		self.assertEqual(metadata.resources.count(), 2)
