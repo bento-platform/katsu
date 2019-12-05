@@ -14,16 +14,6 @@ class CreateBiosampleTest(APITestCase):
 	def setUp(self):
 		self.individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
 		self.procedure = VALID_PROCEDURE_1
-		# self.procedure = {
-		# 	"code": {
-		# 		"id": "NCIT:C28743",
-		# 		"label": "Punch Biopsy"
-		# 	},
-		# 	"body_site": {
-		# 		"id": "UBERON:0003403",
-		# 		"label": "skin of forearm"
-		# 	}
-		# }
 		self.valid_payload = {
 			"id": "biosample:1",
 			"individual": self.individual.id,
@@ -121,3 +111,39 @@ class CreateBiosampleTest(APITestCase):
 	def test_seriliazer_validate_valid(self):
 		serializer = BiosampleSerializer(data=self.valid_payload)
 		self.assertEqual(serializer.is_valid(), True)
+
+
+class CreatePhenotypicFeatureTest(APITestCase):
+
+	def setUp(self):
+		valid_payload = valid_phenotypic_feature()
+		removed_pftype = valid_payload.pop('pftype', None)
+		valid_payload['type'] = {
+					"id": "HP:0000520",
+					"label": "Proptosis"
+				}
+		self.valid_phenotypic_feature = valid_payload
+		invalid_payload = invalid_phenotypic_feature()
+		invalid_payload['type'] = {
+					"id": "HP:0000520",
+					"label": "Proptosis"
+				}
+		self.invalid_phenotypic_feature = invalid_payload
+		
+
+	def test_create_phenotypic_feature(self):
+		""" POST a new phenotypic feature. """
+
+		response = self.client.post(
+			reverse('phenotypicfeature-list'),
+			data=json.dumps(self.valid_phenotypic_feature),
+			content_type='application/json'
+		)
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+		self.assertEqual(PhenotypicFeature.objects.count(), 1)
+
+	def test_modifier(self):
+		serializer = PhenotypicFeatureSerializer(data=self.invalid_phenotypic_feature)
+		self.assertEqual(serializer.is_valid(), False)
+
+

@@ -271,6 +271,42 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
         )
 
 
+def invalid_phenotypic_feature():
+    return dict(
+        description='This is a test phenotypic feature',
+        negated=True,
+        severity={
+            "id": "HP: 0012825",
+            "label": "Mild"
+        },
+        modifier=[
+            {
+            "label": "Mild"
+            },
+            {
+            "id": "HP: 0012823 "
+            }
+        ],
+        onset={
+            "id": "HP:0003577",
+            "label": "Congenital onset"
+        },
+        evidence={
+            "evidence_code": {
+                "id": "ECO:0006017",
+                "label": "Author statement from published clinical study used in manual assertion"
+            },
+            "reference": {
+                "id": "PMID:30962759",
+                "description": "Recurrent Erythema Nodosum in a Child with a SHOC2 Gene Mutation"
+            }
+        },
+        extra_properties={
+            "comment": "test data"
+        }
+        )
+
+
 def valid_genomic_interpretation(gene=None, variant=None):
     return dict(
             status='CANDIDATE',
