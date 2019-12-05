@@ -3,7 +3,6 @@ from ..models import *
 from chord_metadata_service.patients.models import Individual
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
-from django.db import transaction
 from .constants import *
 
 
