@@ -239,9 +239,18 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
 
 def valid_genomic_interpretation(gene=None, variant=None):
     return dict(
-        status='CANDIDATE',
-        gene=gene,
-        variant=variant,
+            status='CANDIDATE',
+            gene=gene,
+            variant=variant,
+            extra_properties={
+                "comment": "test data"
+            }
+        )
+
+
+def valid_diagnosis(disease):
+    return dict(
+        disease=disease,
         extra_properties={
             "comment": "test data"
         }

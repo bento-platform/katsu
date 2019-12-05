@@ -156,3 +156,27 @@ class GenomicInterpretationTest(TestCase):
 			).clean()
 
 
+class DiagnosisTest(TestCase):
+
+	def setUp(self):
+		self.disease = Disease.objects.create(**VALID_DISEASE_1)
+
+		self.gene = Gene.objects.create(**VALID_GENE_1)
+		self.variant = Variant.objects.create(**VALID_VARIANT_1)
+		self.genomic_interpretation_1 = GenomicInterpretation.objects.create(
+			**valid_genomic_interpretation(self.gene, self.variant)
+			)
+		self.genomic_interpretation_2 = GenomicInterpretation.objects.create(
+			**valid_genomic_interpretation(self.gene)
+			)
+		self.diagnosis = Diagnosis.objects.create(**valid_diagnosis(
+			self.disease))
+		self.diagnosis.genomic_interpretations.set([
+			self.genomic_interpretation_1,
+			self.genomic_interpretation_2
+			])
+
+	def test_diagnosis(self):
+		diagnosis = Diagnosis.objects.filter(disease__term__id='OMIM:164400')
+		self.assertEqual(diagnosis.count(), 1)
+
