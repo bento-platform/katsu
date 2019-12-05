@@ -195,6 +195,7 @@ class CreateGeneTest(APITestCase):
 	def setUp(self):
 		self.gene = VALID_GENE_1
 		self.duplicate_gene = DUPLICATE_GENE_2
+		self.invalid_gene = INVALID_GENE_2
 
 	def test_gene(self):
 		response = self.client.post(
@@ -211,3 +212,6 @@ class CreateGeneTest(APITestCase):
 		self.assertEqual(response_duplicate.status_code, status.HTTP_400_BAD_REQUEST)
 		self.assertEqual(Gene.objects.count(), 1)
 
+	def test_alternate_ids(self):
+		serializer = GeneSerializer(data=self.invalid_gene)
+		self.assertEqual(serializer.is_valid(), False)
