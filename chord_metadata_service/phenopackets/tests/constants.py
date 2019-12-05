@@ -28,6 +28,12 @@ VALID_META_DATA_1 = {
 }
 
 
+VALID_META_DATA_2 = {
+    "created_by": "Ksenia Zaytseva",
+    "submitted_by": "Ksenia Zaytseva"
+}
+
+
 VALID_INDIVIDUAL_1 = {
     "id": "patient:1",
     "date_of_birth": "1967-01-01",
@@ -251,6 +257,18 @@ def valid_genomic_interpretation(gene=None, variant=None):
 def valid_diagnosis(disease):
     return dict(
         disease=disease,
+        extra_properties={
+            "comment": "test data"
+        }
+        )
+
+
+def valid_interpretation(phenopacket, meta_data):
+    return dict(
+        id='interpretation:1',
+        resolution_status='IN_PROGRESS',
+        phenopacket=phenopacket,
+        meta_data=meta_data,
         extra_properties={
             "comment": "test data"
         }

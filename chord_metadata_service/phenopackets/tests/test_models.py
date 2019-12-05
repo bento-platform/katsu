@@ -11,14 +11,10 @@ class BiosampleTest(TestCase):
 	""" Test module for Biosample model """
 
 	def setUp(self):
-		self.individual, _ = Individual.objects.get_or_create(
-			id='patient:1', sex='FEMALE', age='P25Y3M2D')
-
+		self.individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
 		self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
-
 		self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual, self.procedure))
 		self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, self.procedure))
-
 		self.meta_data = MetaData.objects.create(**VALID_META_DATA_1)
 
 		self.phenopacket = Phenopacket.objects.create(
@@ -26,7 +22,6 @@ class BiosampleTest(TestCase):
 			subject=self.individual,
 			meta_data=self.meta_data,
 		)
-
 		self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
 	def test_biosample(self):
@@ -52,8 +47,12 @@ class PhenotypicFeatureTest(TestCase):
 		self.individual_1 = Individual.objects.create(**VALID_INDIVIDUAL_1)
 		self.individual_2 = Individual.objects.create(**VALID_INDIVIDUAL_2)
 		self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
-		self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual_1, self.procedure))
-		self.biosample_2 = Biosample.objects.create(**valid_biosample_2(self.individual_2, self.procedure))
+		self.biosample_1 = Biosample.objects.create(**valid_biosample_1(
+			self.individual_1, self.procedure)
+		)
+		self.biosample_2 = Biosample.objects.create(**valid_biosample_2(
+			self.individual_2, self.procedure)
+		)
 		self.meta_data = MetaData.objects.create(**VALID_META_DATA_1)
 		self.phenopacket = Phenopacket.objects.create(
 			id="phenopacket_id:1",
@@ -64,15 +63,19 @@ class PhenotypicFeatureTest(TestCase):
 				**valid_phenotypic_feature(biosample=self.biosample_1)
 			)
 		self.phenotypic_feature_2 = PhenotypicFeature.objects.create(
-				**valid_phenotypic_feature(biosample=self.biosample_2, phenopacket=self.phenopacket)
-			)
+				**valid_phenotypic_feature(
+					biosample=self.biosample_2,
+					phenopacket=self.phenopacket)
+					)
 
 	def test_phenotypic_feature(self):
 		phenotypic_feature_query = PhenotypicFeature.objects.filter(
 			severity__label='Mild',
 			pftype__label='Proptosis'
 			)
-		phenotypic_feature_2 = PhenotypicFeature.objects.get(id=2, phenopacket__id='phenopacket_id:1')
+		phenotypic_feature_2 = PhenotypicFeature.objects.get(
+			id=2, phenopacket__id='phenopacket_id:1'
+			)
 		self.assertEqual(PhenotypicFeature.objects.count(), 2)
 		self.assertEqual(phenotypic_feature_query.count(), 2)
 		self.assertEqual(phenotypic_feature_2.biosample.id, 'biosample_id:2')
@@ -85,7 +88,9 @@ class ProcedureTest(TestCase):
 		self.procedure_1 = Procedure.objects.create(**VALID_PROCEDURE_2)
 
 	def test_procedure(self):
-		procedure_query_1 = Procedure.objects.filter(body_site__label__icontains='arm')
+		procedure_query_1 = Procedure.objects.filter(
+			body_site__label__icontains='arm'
+			)
 		procedure_query_2 = Procedure.objects.filter(code__id='NCIT:C28743')
 		self.assertEqual(procedure_query_1.count(), 2)
 		self.assertEqual(procedure_query_2.count(), 2)
@@ -180,3 +185,26 @@ class DiagnosisTest(TestCase):
 		diagnosis = Diagnosis.objects.filter(disease__term__id='OMIM:164400')
 		self.assertEqual(diagnosis.count(), 1)
 
+
+class InterpretationTest(TestCase):
+
+	def setUp(self):
+		self.meta_data_phenopacket = MetaData.objects.create(**VALID_META_DATA_1)
+		self.meta_data_interpretation = MetaData.objects.create(**VALID_META_DATA_2)
+
+		self.individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
+		self.phenopacket = Phenopacket.objects.create(
+			id="phenopacket_id:1",
+			subject=self.individual,
+			meta_data=self.meta_data_phenopacket,
+		)
+		self.interpretation = Interpretation.objects.create(**valid_interpretation(
+			phenopacket=self.phenopacket,
+			meta_data=self.meta_data_interpretation
+			))
+
+	def test_interpretation(self):
+		interpretation_query = Interpretation.objects.filter(
+			resolution_status='IN_PROGRESS'
+			)
+		self.assertEqual(interpretation_query.count(), 1)
