@@ -215,3 +215,20 @@ class CreateGeneTest(APITestCase):
 	def test_alternate_ids(self):
 		serializer = GeneSerializer(data=self.invalid_gene)
 		self.assertEqual(serializer.is_valid(), False)
+
+
+class CreateVariantTest(APITestCase):
+
+	def setUp(self):
+		self.variant = VALID_VARIANT_1
+
+	def test_variant(self):
+		response = self.client.post(
+			reverse('variant-list'),
+			data=json.dumps(self.variant),
+			content_type='application/json'
+		)
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+		self.assertEqual(Variant.objects.count(), 1)
+
+	# TODO test to_representation and to_internal_value
