@@ -4,27 +4,26 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from ..models import *
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS
+from .constants import *
+from ..serializers import *
 
 
 class CreateBiosampleTest(APITestCase):
 	""" Test module for creating an Biosample. """
 
 	def setUp(self):
-		self.individual = Individual.objects.create(
-			id='patient:1',
-			sex='FEMALE',
-			age='P67Y3M2D'
-			)
-		self.procedure = {
-			"code": {
-				"id": "NCIT:C28743",
-				"label": "Punch Biopsy"
-			},
-			"body_site": {
-				"id": "UBERON:0003403",
-				"label": "skin of forearm"
-			}
-		}
+		self.individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
+		self.procedure = VALID_PROCEDURE_1
+		# self.procedure = {
+		# 	"code": {
+		# 		"id": "NCIT:C28743",
+		# 		"label": "Punch Biopsy"
+		# 	},
+		# 	"body_site": {
+		# 		"id": "UBERON:0003403",
+		# 		"label": "skin of forearm"
+		# 	}
+		# }
 		self.valid_payload = {
 			"id": "biosample:1",
 			"individual": self.individual.id,
@@ -61,10 +60,10 @@ class CreateBiosampleTest(APITestCase):
 		self.invalid_payload = {
 			"id": "biosample:1",
 			"individual": self.individual.id,
+			"procedure": self.procedure,
 			"description": "This is a test description.",
 			"sampled_tissue": {
-				"id": "UBERON_0001256",
-				"label": "wall of urinary bladder"
+				"id": "UBERON_0001256"
 			},
 			"individual_age_at_collection": "P67Y3M2D",
 			"histological_diagnosis": {
@@ -114,3 +113,11 @@ class CreateBiosampleTest(APITestCase):
 		self.assertEqual(
 			invalid_response.status_code, status.HTTP_400_BAD_REQUEST)
 		self.assertEqual(Biosample.objects.count(), 0)
+
+	def test_seriliazer_validate_invalid(self):
+		serializer = BiosampleSerializer(data=self.invalid_payload)
+		self.assertEqual(serializer.is_valid(), False)
+
+	def test_seriliazer_validate_valid(self):
+		serializer = BiosampleSerializer(data=self.valid_payload)
+		self.assertEqual(serializer.is_valid(), True)
