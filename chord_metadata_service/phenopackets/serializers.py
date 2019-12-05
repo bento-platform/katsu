@@ -143,7 +143,7 @@ class HtsFileSerializer(GenericSerializer):
 
 
 class GeneSerializer(GenericSerializer):
-	alternate_id = serializers.ListField(
+	alternate_ids = serializers.ListField(
 		child=serializers.CharField(allow_blank=True),
 		allow_empty=True, required=False)
 

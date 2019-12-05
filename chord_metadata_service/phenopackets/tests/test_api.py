@@ -173,3 +173,41 @@ class CreateProcedureTest(APITestCase):
 		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 		self.assertEqual(response_duplicate.status_code, status.HTTP_400_BAD_REQUEST)
 		self.assertEqual(Procedure.objects.count(), 2)
+
+
+class CreateHtsFileTest(APITestCase):
+
+	def setUp(self):
+		self.hts_file = VALID_HTS_FILE
+
+	def test_hts_file(self):
+		response = self.client.post(
+			reverse('htsfile-list'),
+			data=json.dumps(self.hts_file),
+			content_type='application/json'
+		)
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+		self.assertEqual(HtsFile.objects.count(), 1)
+
+
+class CreateGeneTest(APITestCase):
+
+	def setUp(self):
+		self.gene = VALID_GENE_1
+		self.duplicate_gene = DUPLICATE_GENE_2
+
+	def test_gene(self):
+		response = self.client.post(
+			reverse('gene-list'),
+			data=json.dumps(self.gene),
+			content_type='application/json'
+		)
+		response_duplicate = self.client.post(
+			reverse('gene-list'),
+			data=json.dumps(self.duplicate_gene),
+			content_type='application/json'
+		)
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+		self.assertEqual(response_duplicate.status_code, status.HTTP_400_BAD_REQUEST)
+		self.assertEqual(Gene.objects.count(), 1)
+
