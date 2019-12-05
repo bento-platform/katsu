@@ -147,3 +147,29 @@ class CreatePhenotypicFeatureTest(APITestCase):
 		self.assertEqual(serializer.is_valid(), False)
 
 
+class CreateProcedureTest(APITestCase):
+
+	def setUp(self):
+		self.valid_procedure = VALID_PROCEDURE_1
+		self.duplicate_procedure = VALID_PROCEDURE_1
+		self.valid_procedure_duplicate_code = VALID_PROCEDURE_2
+
+	def test_procedure(self):
+		response = self.client.post(
+			reverse('procedure-list'),
+			data=json.dumps(self.valid_procedure),
+			content_type='application/json'
+		)
+		response_duplicate = self.client.post(
+			reverse('procedure-list'),
+			data=json.dumps(self.duplicate_procedure),
+			content_type='application/json'
+		)
+		response_duplicate_code = self.client.post(
+			reverse('procedure-list'),
+			data=json.dumps(self.valid_procedure_duplicate_code),
+			content_type='application/json'
+		)
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+		self.assertEqual(response_duplicate.status_code, status.HTTP_400_BAD_REQUEST)
+		self.assertEqual(Procedure.objects.count(), 2)
