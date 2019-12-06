@@ -221,6 +221,7 @@ class CreateVariantTest(APITestCase):
 
 	def setUp(self):
 		self.variant = VALID_VARIANT_1
+		self.variant_2 = VALID_VARIANT_2
 
 	def test_variant(self):
 		response = self.client.post(
@@ -228,7 +229,18 @@ class CreateVariantTest(APITestCase):
 			data=json.dumps(self.variant),
 			content_type='application/json'
 		)
+		serializer = VariantSerializer(data=self.variant)
+		self.assertEqual(serializer.is_valid(), True)
 		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 		self.assertEqual(Variant.objects.count(), 1)
 
-	# TODO test to_representation and to_internal_value
+	def test_to_represenation(self):
+		response = self.client.post(
+			reverse('variant-list'),
+			data=json.dumps(self.variant_2),
+			content_type='application/json'
+		)
+		serializer = VariantSerializer(data=self.variant)
+		self.assertEqual(serializer.is_valid(), True)
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+		self.assertEqual(Variant.objects.count(), 1)

@@ -107,6 +107,25 @@ VALID_VARIANT_1 = {
 }
 
 
+VALID_VARIANT_2 = {
+    "allele_type": "spdiAllele",
+    "spdiAllele": {
+      "id": "clinvar:13294",
+      "seq_id": "NC_000010.10",
+      "position": 123256214,
+      "deleted_sequence": "T",
+      "inserted_sequence": "G"
+    },
+    "zygosity": {
+      "id": "NCBITaxon:9606",
+      "label": "human"
+    },
+    "extra_properties": {
+        "comment": "test data"
+    }
+}
+
+
 VALID_DISEASE_1 = {
     "term": {
         "id": "OMIM:164400",

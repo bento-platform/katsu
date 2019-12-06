@@ -6,6 +6,7 @@ from chord_metadata_service.restapi.schemas import *
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.restapi.fhir_utils import *
+import re
 
 
 #############################################################
@@ -180,8 +181,11 @@ class VariantSerializer(GenericSerializer):
 		""" When writing back to db change field name back to 'allele'. """
 
 		if 'allele' not in data.keys():
-			allele_type = data.get('allele_type')
-			data['allele'] = data.pop(allele_type)
+			allele_type = data.get('allele_type') # e.g. spdiAllele
+			# split by uppercase
+			normilize = filter(None, re.split("([A-Z][^A-Z]*)", allele_type))
+			normilized_allele_type = '_'.join([i.lower() for i in normilize])
+			data['allele'] = data.pop(normilized_allele_type)
 		return super(VariantSerializer, self).to_internal_value(data=data)
 
 
