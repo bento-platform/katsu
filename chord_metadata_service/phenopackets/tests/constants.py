@@ -31,12 +31,20 @@ VALID_META_DATA_1 = {
 VALID_META_DATA_2 = {
     "created_by": "Ksenia Zaytseva",
     "submitted_by": "Ksenia Zaytseva",
-    "externalReferences": [
+    "external_references": [
         {
         "id": "PMID:30808312",
         "description": "Bao M, et al. COL6A1 mutation leading to Bethlem myopathy with recurrent hematuria: a case report. BMC Neurol. 2019;19(1):32."
         }
-  ]
+  ],
+    "updates": [
+        {
+          "timestamp": "2018-06-10T10:59:06Z",
+          "updated_by": "Julius J.",
+          "comment": "added phenotypic features to individual patient:1"
+        }
+    ],
+    "phenopacket_schema_version": "0.1"
 }
 
 
@@ -198,6 +206,15 @@ DUPLICATE_RESOURCE_3 = {
     "version": "2019-08-08",
     "namespace_prefix": "HGNC"
 }
+
+
+def valid_phenopacket(subject, meta_data):
+    return dict(
+        id='phenopacket:1',
+        subject=subject,
+        meta_data=meta_data
+        )
+
 
 def valid_biosample_1(individual, procedure):
     return dict(

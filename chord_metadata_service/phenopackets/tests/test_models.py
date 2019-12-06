@@ -54,7 +54,7 @@ class PhenotypicFeatureTest(TestCase):
 		)
 		self.meta_data = MetaData.objects.create(**VALID_META_DATA_1)
 		self.phenopacket = Phenopacket.objects.create(
-			id="phenopacket_id:1",
+			id='phenopacket_id:1',
 			subject=self.individual_2,
 			meta_data=self.meta_data,
 		)
@@ -72,12 +72,12 @@ class PhenotypicFeatureTest(TestCase):
 			severity__label='Mild',
 			pftype__label='Proptosis'
 			)
-		phenotypic_feature_2 = PhenotypicFeature.objects.get(
-			id=2, phenopacket__id='phenopacket_id:1'
+		phenotypic_feature_2 = PhenotypicFeature.objects.filter(
+			phenopacket__id='phenopacket_id:1'
 			)
 		self.assertEqual(PhenotypicFeature.objects.count(), 2)
 		self.assertEqual(phenotypic_feature_query.count(), 2)
-		self.assertEqual(phenotypic_feature_2.biosample.id, 'biosample_id:2')
+		self.assertEqual(phenotypic_feature_2.count(), 1)
 
 
 class ProcedureTest(TestCase):

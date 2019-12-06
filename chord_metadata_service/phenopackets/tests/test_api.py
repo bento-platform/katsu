@@ -255,14 +255,31 @@ class CreateResourceTest(APITestCase):
 class CreateMetaDataTest(APITestCase):
 
 	def setUp(self):
-		self.metadata = VALID_META_DATA_1
+		self.metadata = VALID_META_DATA_2
 
-	def test_resource(self):
+	def test_metadata(self):
 		response = get_response('metadata-list', self.metadata)
 		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 		self.assertEqual(MetaData.objects.count(), 1)
 
 	def test_serializer(self):
+		# is_valid() calls validation on serializer
 		serializer = MetaDataSerializer(data=self.metadata)
 		self.assertEqual(serializer.is_valid(), True)
 
+
+class CreatePhenopacketTest(APITestCase):
+
+	def setUp(self):
+		individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
+		self.subject = individual.id
+		meta = MetaData.objects.create(**VALID_META_DATA_2)
+		self.metadata = meta.id
+		self.phenopacket = valid_phenopacket(
+			subject=self.subject,
+			meta_data=self.metadata)
+
+	def test_phenopacket(self):
+		response = get_response('phenopacket-list', self.phenopacket)
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+		self.assertEqual(Phenopacket.objects.count(), 1)
