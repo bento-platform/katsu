@@ -283,3 +283,66 @@ class CreatePhenopacketTest(APITestCase):
 		response = get_response('phenopacket-list', self.phenopacket)
 		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 		self.assertEqual(Phenopacket.objects.count(), 1)
+
+	def test_serializer(self):
+		serializer = PhenopacketSerializer(data=self.phenopacket)
+		self.assertEqual(serializer.is_valid(), True)
+
+
+class CreateGenomicInterpretationTest(APITestCase):
+
+	def setUp(self):
+		self.gene = Gene.objects.create(**VALID_GENE_1).id
+		self.variant = Variant.objects.create(**VALID_VARIANT_1).id
+		self.genomic_interpretation = valid_genomic_interpretation(
+			gene=self.gene,
+			variant=self.variant
+			)
+
+	def test_genomic_interpretation(self):
+		response = get_response('genomicinterpretation-list',
+			self.genomic_interpretation)
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+		self.assertEqual(GenomicInterpretation.objects.count(), 1)
+
+	def test_serializer(self):
+		serializer = GenomicInterpretationSerializer(data=self.genomic_interpretation)
+		self.assertEqual(serializer.is_valid(), True)
+
+
+class CreateDiagnosisTest(APITestCase):
+
+	def setUp(self):
+		self.disease = Disease.objects.create(**VALID_DISEASE_1).id
+		self.diagnosis = valid_diagnosis(self.disease)
+
+	def test_diagnosis(self):
+		response = get_response('diagnosis-list',
+			self.diagnosis)
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+		serializer = DiagnosisSerializer(data=self.diagnosis)
+		self.assertEqual(serializer.is_valid(), True)
+
+
+class CreateInterpretationTest(APITestCase):
+
+	def setUp(self):
+		self.individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
+		self.metadata = MetaData.objects.create(**VALID_META_DATA_2)
+		self.phenopacket = Phenopacket.objects.create(**valid_phenopacket(
+			subject=self.individual,
+			meta_data=self.metadata)
+		).id
+		self.metadata_interpretation = MetaData.objects.create(**VALID_META_DATA_2).id
+		self.disease = Disease.objects.create(**VALID_DISEASE_1)
+		self.diagnosis = Diagnosis.objects.create(**valid_diagnosis(self.disease)).id
+		self.interpretation = valid_interpretation(
+			phenopacket=self.phenopacket,
+			meta_data=self.metadata_interpretation
+			)
+		self.interpretation['diagnosis'] = [self.diagnosis]
+
+	def test_interpretation(self):
+		response = get_response('interpretation-list',
+			self.interpretation)
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)

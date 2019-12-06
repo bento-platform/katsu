@@ -188,6 +188,9 @@ class DiagnosisTest(TestCase):
 class InterpretationTest(TestCase):
 
 	def setUp(self):
+		self.disease = Disease.objects.create(**VALID_DISEASE_1)
+		self.diagnosis = Diagnosis.objects.create(**valid_diagnosis(
+			self.disease))
 		self.meta_data_phenopacket = MetaData.objects.create(**VALID_META_DATA_1)
 		self.meta_data_interpretation = MetaData.objects.create(**VALID_META_DATA_2)
 
@@ -201,6 +204,7 @@ class InterpretationTest(TestCase):
 			phenopacket=self.phenopacket,
 			meta_data=self.meta_data_interpretation
 			))
+		self.interpretation.diagnosis.set([self.diagnosis])
 
 	def test_interpretation(self):
 		interpretation_query = Interpretation.objects.filter(
