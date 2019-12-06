@@ -146,6 +146,25 @@ VALID_DISEASE_1 = {
 }
 
 
+INVALID_DISEASE_2 = {
+    "term": {
+        "id": "OMIM:164400",
+        "label": "Spinocerebellar ataxia 1"
+    },
+    "onset": {
+        "age": "P55Y3M2D"
+    },
+    "disease_stage": [
+        {
+        "id": "NCIT:C28091"
+        }
+    ],
+    "extra_properties": {
+        "comment": "test data"
+    }
+}
+
+
 VALID_RESOURCE_1 = {
     "id": "so",
     "name": "Sequence types and features",

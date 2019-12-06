@@ -244,3 +244,33 @@ class CreateVariantTest(APITestCase):
 		self.assertEqual(serializer.is_valid(), True)
 		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 		self.assertEqual(Variant.objects.count(), 1)
+
+
+class CreateDiseaseTest(APITestCase):
+
+	def setUp(self):
+		self.disease = VALID_DISEASE_1
+		self.invalid_disease = INVALID_DISEASE_2
+
+	def test_disease(self):
+		response = self.client.post(
+			reverse('disease-list'),
+			data=json.dumps(self.disease),
+			content_type='application/json'
+		)
+		serializer = DiseaseSerializer(data=self.disease)
+		self.assertEqual(serializer.is_valid(), True)
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+		self.assertEqual(Disease.objects.count(), 1)
+
+	def test_invalid_disease(self):
+		response = self.client.post(
+			reverse('disease-list'),
+			data=json.dumps(self.invalid_disease),
+			content_type='application/json'
+		)
+		serializer = DiseaseSerializer(data=self.invalid_disease)
+		self.assertEqual(serializer.is_valid(), False)
+		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+		self.assertEqual(Disease.objects.count(), 0)
+
