@@ -40,7 +40,7 @@ class Individual(models.Model):
 	sex = models.CharField(choices=SEX, max_length=200,  blank=True, null=True,
 		help_text='Observed apparent sex of the individual.')
 	karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200,
-		blank=True, null=True,
+		default='UNKNOWN_KARYOTYPE',
 		help_text='The karyotypic sex of the individual.')
 	taxonomy = JSONField(blank=True, null=True, help_text='Ontology resource '
 		'representing the species (e.g., NCBITaxon:9615).')
