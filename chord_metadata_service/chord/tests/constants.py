@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 __all__ = [
     "VALID_DATA_USE_1",
     "VALID_PROJECT_1",

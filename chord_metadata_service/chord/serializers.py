@@ -26,7 +26,7 @@ class DatasetSerializer(GenericSerializer):
 
     def validate_creators(self, value):
         # validation against person_schema is not working
-        # error: additonal properties ar enot allowed
+        # error: additional properties are not allowed
         validation = self.jsonschema_validation(value, CREATORS)
         if isinstance(validation, dict):
             raise serializers.ValidationError(validation)
@@ -36,45 +36,65 @@ class DatasetSerializer(GenericSerializer):
     def validate(self, data):
         """ Validate all fields against DATS schemas. """
 
-        dataset_dats_fields = ['alternate_identifiers', 'related_identifiers',
-            'dates', 'stored_in', 'spatial_coverage', 'types', 'distributions',
-            'dimensions', 'primary_publications', 'citations', 'produced_by',
-            'licenses', 'acknowledges', 'keywords']
+        dataset_dats_fields = (
+            'alternate_identifiers',
+            'related_identifiers',
+            'dates',
+            'stored_in',
+            'spatial_coverage',
+            'types',
+            'distributions',
+            'dimensions',
+            'primary_publications',
+            'citations',
+            'produced_by',
+            'licenses',
+            'acknowledges',
+            'keywords',
+        )
+
         errors = {}
         for field in dataset_dats_fields:
-            if data.get(field):
-                if isinstance(data.get(field), list):
-                    for item in data.get(field):
-                        call_validation = self.jsonschema_validation(
-                            value=item, schema=get_dats_schema(field),
-                            field_name=field
-                            )
-                        if isinstance(call_validation, dict):
-                            errors.update(call_validation)
-                else:
+            if not data.get(field):
+                continue
+
+            if isinstance(data.get(field), list):
+                for item in data.get(field):
                     call_validation = self.jsonschema_validation(
-                        value=data.get(field), schema=get_dats_schema(field),
+                        value=item,
+                        schema=get_dats_schema(field),
                         field_name=field
-                        )
+                    )
+
                     if isinstance(call_validation, dict):
                         errors.update(call_validation)
+
+            else:
+                call_validation = self.jsonschema_validation(
+                    value=data.get(field),
+                    schema=get_dats_schema(field),
+                    field_name=field
+                )
+
+                if isinstance(call_validation, dict):
+                    errors.update(call_validation)
         if errors:
             raise serializers.ValidationError(errors)
-        else:
-            return data
+
+        return data
 
     @staticmethod
     def jsonschema_validation(value, schema, field_name=None):
         """ Generic validation. Returns errors dict if validation is False. """
-        
+
         errors = {}
+
         v = Draft4Validator(schema)
         validation = v.is_valid(value)
         if not validation:
-            errors[field_name] = [
-                str(error.message) for error in v.iter_errors(value)
-                ]
+            errors[field_name] = [str(error.message) for error in v.iter_errors(value)]
             return errors
+
         return validation
 
     class Meta:
