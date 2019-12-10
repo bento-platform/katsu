@@ -50,3 +50,21 @@ REST_FRAMEWORK = {
 
 }
 ```
+
+## Tests
+
+Tests are located in tests directory in an individual app folder.
+
+Run all tests for the whole project:
+
+`python manage.py test`
+
+Run tests for an individual app, e.g.:
+
+`python manage.py test chord_metadata_service.phenopackets.tests.test_api`
+
+Create coverage html report:
+
+`coverage run manage.py test`
+
+`coverage html`
