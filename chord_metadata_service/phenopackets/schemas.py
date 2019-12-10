@@ -68,9 +68,10 @@ UPDATE_SCHEMA = {
 }
 
 
-def _single_optional_eq_search(order):
+def _single_optional_eq_search(order, queryable: str = "all"):
     return {
         "operations": ["eq"],
+        "queryable": queryable,
         "canNegate": True,
         "required": False,
         "type": "single",
@@ -78,9 +79,10 @@ def _single_optional_eq_search(order):
     }
 
 
-def _single_optional_str_search(order):
+def _single_optional_str_search(order, queryable: str = "all"):
     return {
         "operations": ["eq", "co"],
+        "queryable": queryable,
         "canNegate": True,
         "required": False,
         "type": "single",
@@ -126,8 +128,7 @@ def phenopacket_individual_schema(database_attrs: dict):
             "id": {
                 "type": "string",
                 "search": {
-                    # TODO: Should IDs be publicly searchable?
-                    **_single_optional_eq_search(0),
+                    **_single_optional_eq_search(0, queryable="internal"),
                     "database": {
                         "field": Individual._meta.pk.column
                     }
@@ -141,6 +142,7 @@ def phenopacket_individual_schema(database_attrs: dict):
             },
             "date_of_birth": {
                 # TODO: This is a special ISO format... need UI for this
+                # TODO: Internal?
                 "type": "string",
                 "search": _single_optional_eq_search(1)
             },
@@ -279,7 +281,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
         "id": {
             "type": "string",
             "search": {
-                **_single_optional_eq_search(0),
+                **_single_optional_eq_search(0, queryable="internal"),
                 "database": {"field": Biosample._meta.pk.column}
             }
         },

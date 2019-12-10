@@ -37,7 +37,6 @@ class CreateProjectTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Project.objects.count(), i)
             self.assertEqual(Project.objects.get(title=p["title"]).description, p["description"])
-            self.assertDictEqual(Project.objects.get(title=p["title"]).data_use, p["data_use"])
 
         for p in self.invalid_payloads:
             r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
@@ -76,6 +75,7 @@ class CreateDatasetTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Dataset.objects.count(), i)
             self.assertEqual(Dataset.objects.get(title=d["title"]).description, d["description"])
+            self.assertDictEqual(Dataset.objects.get(title=d["title"]).data_use, d["data_use"])
 
         for d in self.invalid_payloads:
             r = self.client.post(reverse("dataset-list"), data=json.dumps(d), content_type="application/json")
