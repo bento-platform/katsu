@@ -26,7 +26,6 @@ VALID_DATA_USE_1 = {
 VALID_PROJECT_1 = {
     "title": "Project 1",
     "description": "Some description",
-    "data_use": VALID_DATA_USE_1
 }
 
 
@@ -34,6 +33,7 @@ def valid_dataset_1(project_id):
     return {
         "title": "Dataset 1",
         "description": "Test Dataset",
+        "data_use": VALID_DATA_USE_1,
         "project": project_id
     }
 

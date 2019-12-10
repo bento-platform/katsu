@@ -22,7 +22,6 @@ class Project(models.Model):
     identifier = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
-    data_use = JSONField()
 
     created = models.DateTimeField(auto_now=True)
     updated = models.DateTimeField(auto_now_add=True)
@@ -44,6 +43,8 @@ class Dataset(models.Model):
         on_delete=models.CASCADE,  # Delete dataset upon project deletion
         related_name="datasets"
     )
+
+    data_use = JSONField()
 
     # --------------------------- DATS model fields ---------------------------
 

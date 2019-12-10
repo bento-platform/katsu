@@ -9,8 +9,8 @@ P2_DESC = "This is a good project..."
 
 class ProjectTest(TestCase):
     def setUp(self) -> None:
-        Project.objects.create(title="Project 1", description="", data_use=VALID_DATA_USE_1)
-        Project.objects.create(title="Project 2", description=P2_DESC, data_use=VALID_DATA_USE_1)
+        Project.objects.create(title="Project 1", description="")
+        Project.objects.create(title="Project 2", description=P2_DESC)
 
     def test_project(self):
         p1 = Project.objects.get(title="Project 1")
@@ -21,20 +21,18 @@ class ProjectTest(TestCase):
 
         self.assertEqual(str(p1), f"Project 1 (ID: {str(p1.identifier)})")
 
-        self.assertDictEqual(p1.data_use, VALID_DATA_USE_1)
-        self.assertDictEqual(p2.data_use, VALID_DATA_USE_1)
-
 
 class DatasetTest(TestCase):
     def setUp(self) -> None:
-        p = Project.objects.create(title="Project 1", description="", data_use=VALID_DATA_USE_1)
-        Dataset.objects.create(title="Dataset 1", description="Some dataset", project=p)
+        p = Project.objects.create(title="Project 1", description="")
+        Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1, project=p)
 
     def test_dataset(self):
         p = Project.objects.get(title="Project 1")
         d = Dataset.objects.get(title="Dataset 1")
 
         self.assertEqual(d.description, "Some dataset")
+        self.assertDictEqual(d.data_use, VALID_DATA_USE_1)
         self.assertEqual(d.project, p)
 
         self.assertEqual(str(d), f"Dataset 1 (ID: {str(d.identifier)})")
@@ -48,8 +46,8 @@ SERVICE_ID = str(uuid4())
 
 class TableOwnershipTest(TestCase):
     def setUp(self) -> None:
-        p = Project.objects.create(title="Project 1", description="", data_use=VALID_DATA_USE_1)
-        d = Dataset.objects.create(title="Dataset 1", description="", project=p)
+        p = Project.objects.create(title="Project 1", description="")
+        d = Dataset.objects.create(title="Dataset 1", description="", data_use=VALID_DATA_USE_1, project=p)
         TableOwnership.objects.create(
             table_id=TABLE_ID,
             service_id=SERVICE_ID,

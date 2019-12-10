@@ -32,6 +32,12 @@ class DatasetSerializer(GenericSerializer):
             raise serializers.ValidationError(validation)
         return value
 
+    # noinspection PyMethodMayBeStatic
+    def validate_data_use(self, value):
+        validation = Draft7Validator(CHORD_DATA_USE_SCHEMA).is_valid(value)
+        if not validation:
+            raise serializers.ValidationError("Data use is not valid")
+        return value
 
     def validate(self, data):
         """ Validate all fields against DATS schemas. """
@@ -105,15 +111,7 @@ class DatasetSerializer(GenericSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     # Don't inherit GenericSerializer to not pop empty fields
 
-    datasets = DatasetSerializer(
-        read_only=True, many=True, exclude_when_nested=["project"])
-
-    # noinspection PyMethodMayBeStatic
-    def validate_data_use(self, value):
-        validation = Draft7Validator(CHORD_DATA_USE_SCHEMA).is_valid(value)
-        if not validation:
-            raise serializers.ValidationError("Data use is not valid")
-        return value
+    datasets = DatasetSerializer(read_only=True, many=True, exclude_when_nested=["project"])
 
     # noinspection PyMethodMayBeStatic
     def validate_title(self, value):
