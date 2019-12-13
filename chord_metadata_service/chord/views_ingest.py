@@ -243,3 +243,14 @@ def ingest(request):
         new_phenopacket.diseases.set(diseases_db)
 
         return Response(status=204)
+
+
+def ingest_data(request):
+    """ Checks if request obj is list. """
+
+    if isinstance(request, list):
+        for item in request:
+            ingest(item)
+    else:
+        ingest(request)
+    return Response(status=204)
