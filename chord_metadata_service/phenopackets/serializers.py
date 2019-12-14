@@ -128,8 +128,15 @@ class ProcedureSerializer(GenericSerializer):
 				code=data.get('code'), body_site=data.get('body_site')).exists()
 			if check:
 				raise serializers.ValidationError(
-					"This procedure is already exists."
+					"This procedure already exists."
 					)
+		else:
+			check = Procedure.objects.filter(code=data.get('code')).exists()
+			if check:
+				raise serializers.ValidationError(
+					"This procedure already exists."
+				)
+
 		return data
 
 
@@ -249,7 +256,7 @@ class BiosampleSerializer(GenericSerializer):
 
 	def create(self, validated_data):
 		procedure_data = validated_data.pop('procedure')
-		procedure_model = Procedure.objects.create(**procedure_data)
+		procedure_model, _ = Procedure.objects.get_or_create(**procedure_data)
 		biosample = Biosample.objects.create(procedure=procedure_model, **validated_data)
 		return biosample
 

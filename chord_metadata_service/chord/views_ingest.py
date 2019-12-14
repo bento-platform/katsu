@@ -125,132 +125,127 @@ def ingest(request):
     with open(workflow_outputs["json_document"], "r") as jf:
         try:
             phenopacket_data = json.load(jf)
+            if isinstance(phenopacket_data, list):
+                for item in phenopacket_data:
+                    ingest_phenopacket(item, dataset_id)
+            else:
+                ingest_phenopacket(phenopacket_data, dataset_id)
+
         except json.decoder.JSONDecodeError:
             # TODO: Nicer error message
             return Response(status=400)
 
         # TODO: Schema validation
         # TODO: Rollback in case of failures
-
-        new_phenopacket_id = str(uuid.uuid4())  # TODO: Is this provided?
-
-        subject = phenopacket_data.get("subject", None)
-        phenotypic_features = phenopacket_data.get("phenotypicFeatures", [])
-        biosamples = phenopacket_data.get("biosamples", [])
-        genes = phenopacket_data.get("genes", [])
-        diseases = phenopacket_data.get("diseases", [])
-        meta_data = phenopacket_data["meta_data"]
-
-        if subject:
-            subject, _ = Individual.objects.get_or_create(
-                id=subject["id"],
-                alternate_ids=subject.get("alternate_ids", None),
-                date_of_birth=isoparse(subject["date_of_birth"]) if "date_of_birth" in subject else None,
-                age=subject.get("age", ""),  # TODO: Shouldn't this be nullable, since it's recommended in the spec?
-                sex=subject.get("sex", None),
-                karyotypic_sex=subject.get("karyotypic_sex", None),
-                taxonomy=subject.get("taxonomy", None)
-            )
-
-        phenotypic_features_db = [create_phenotypic_feature(pf) for pf in phenotypic_features]
-
-        biosamples_db = []
-        for bs in biosamples:
-            # TODO: This should probably be a JSON field, or compound key with code/body_site
-            procedure, _ = Procedure.objects.get_or_create(
-                code=bs["procedure"]["code"],
-                body_site=bs["procedure"].get("body_site", None)
-            )
-
-            bs_pfs = [create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
-
-            bs_obj, _ = Biosample.objects.get_or_create(
-                id=bs["id"],
-                individual=(Individual.objects.get(id=bs["individual_id"])
-                            if "individual_id" in bs else None),
-                description=bs.get("description", ""),
-                sampled_tissue=bs.get("sampled_tissue", None),
-                taxonomy=bs.get("taxonomy", None),
-                individual_age_at_collection=bs.get("individual_age_at_collection", None),
-                histological_diagnosis=bs.get("histological_diagnosis", None),
-                tumor_progression=bs.get("tumor_progression", None),
-                tumor_grade=bs.get("tumor_grade", None),
-                procedure=procedure,
-                is_control_sample=bs.get("is_control_sample", False),
-
-                diagnostic_markers=bs.get("diagnostic_markers", [])
-            )
-
-            bs_obj.phenotypic_features.set(bs_pfs)
-
-            biosamples_db.append(bs_obj)
-
-        # TODO: May want to augment alternate_ids
-        genes_db = []
-        for g in genes:
-            # TODO: Validate CURIE
-            # TODO: Rename alternate_id
-
-            g_obj, _ = Gene.objects.get_or_create(
-                id=g["id"],
-                alternate_id=g.get("alternate_ids", []),
-                symbol=g["symbol"]
-            )
-
-            genes_db.append(g_obj)
-
-        diseases_db = []
-        for d in diseases:
-            # TODO: Primary key, should this be a model?
-
-            d_obj = Disease(term=d["term"], onset=d.get("onset", None), disease_stage=d.get("disease_stage", []))
-            d_obj.save()
-
-        resources_db = []
-        for rs in meta_data.get("resources", []):
-            rs_obj = Resource(
-                id=rs["id"],  # TODO: This ID is a bit iffy, because they're researcher-provided
-                name=rs["name"],
-                namespace_prefix=rs["namespace_prefix"],
-                url=rs["url"],
-                version=rs["version"],
-                iri_prefix=rs["iri_prefix"]
-            )
-            rs_obj.save()
-            resources_db.append(rs_obj)
-
-        meta_data_obj = MetaData(
-            created_by=meta_data["created_by"],
-            submitted_by=meta_data.get("submitted_by", None),
-            phenopacket_schema_version="1.0.0-RC3",
-            external_references=meta_data.get("external_references", [])
-        )
-        meta_data_obj.save()
-
-        meta_data_obj.resources.set(resources_db)  # TODO: primary key ???
-
-        new_phenopacket = Phenopacket(
-            id=new_phenopacket_id,
-            subject=subject,
-            meta_data=meta_data_obj,
-            dataset=Dataset.objects.get(identifier=dataset_id)
-        )
-        new_phenopacket.save()
-
-        new_phenopacket.phenotypic_features.set(phenotypic_features_db)
-        new_phenopacket.biosamples.set(biosamples_db)
-        new_phenopacket.genes.set(genes_db)
-        new_phenopacket.diseases.set(diseases_db)
-
         return Response(status=204)
 
 
-def ingest_data(request):
-    """ Checks if request obj is list. """
+def ingest_phenopacket(phenopacket_data, dataset_id):
+    """ Ingests one phenopacket. """
 
-    if isinstance(request, list):
-        for item in request:
-            ingest(item)
-    else:
-        ingest(request)
-    return Response(status=204)
+    new_phenopacket_id = str(uuid.uuid4())  # TODO: Is this provided?
+
+    subject = phenopacket_data.get("subject", None)
+    phenotypic_features = phenopacket_data.get("phenotypicFeatures", [])
+    biosamples = phenopacket_data.get("biosamples", [])
+    genes = phenopacket_data.get("genes", [])
+    diseases = phenopacket_data.get("diseases", [])
+    meta_data = phenopacket_data["meta_data"]
+
+    if subject:
+        subject, _ = Individual.objects.get_or_create(
+            id=subject["id"],
+            alternate_ids=subject.get("alternate_ids", None),
+            date_of_birth=isoparse(subject["date_of_birth"]) if "date_of_birth" in subject else None,
+            age=subject.get("age", ""),  # TODO: Shouldn't this be nullable, since it's recommended in the spec?
+            sex=subject.get("sex", None),
+            karyotypic_sex=subject.get("karyotypic_sex", None),
+            taxonomy=subject.get("taxonomy", None)
+        )
+
+    phenotypic_features_db = [create_phenotypic_feature(pf) for pf in phenotypic_features]
+
+    biosamples_db = []
+    for bs in biosamples:
+        # TODO: This should probably be a JSON field, or compound key with code/body_site
+        procedure, _ = Procedure.objects.get_or_create(**bs["procedure"])
+        bs_pfs = [create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
+
+        bs_obj, _ = Biosample.objects.get_or_create(
+            id=bs["id"],
+            individual=(Individual.objects.get(id=bs["individual_id"])
+                        if "individual_id" in bs else None),
+            description=bs.get("description", ""),
+            sampled_tissue=bs.get("sampled_tissue", None),
+            taxonomy=bs.get("taxonomy", None),
+            individual_age_at_collection=bs.get("individual_age_at_collection", None),
+            histological_diagnosis=bs.get("histological_diagnosis", None),
+            tumor_progression=bs.get("tumor_progression", None),
+            tumor_grade=bs.get("tumor_grade", None),
+            procedure=procedure,
+            is_control_sample=bs.get("is_control_sample", False),
+
+            diagnostic_markers=bs.get("diagnostic_markers", [])
+        )
+
+        bs_obj.phenotypic_features.set(bs_pfs)
+
+        biosamples_db.append(bs_obj)
+
+    # TODO: May want to augment alternate_ids
+    genes_db = []
+    for g in genes:
+        # TODO: Validate CURIE
+        # TODO: Rename alternate_id
+
+        g_obj, _ = Gene.objects.get_or_create(
+            id=g["id"],
+            alternate_id=g.get("alternate_ids", []),
+            symbol=g["symbol"]
+        )
+
+        genes_db.append(g_obj)
+
+    diseases_db = []
+    for d in diseases:
+        # TODO: Primary key, should this be a model?
+
+        d_obj = Disease(term=d["term"], onset=d.get("onset", None), disease_stage=d.get("disease_stage", []))
+        d_obj.save()
+
+    resources_db = []
+    for rs in meta_data.get("resources", []):
+        rs_obj, _ = Resource.objects.get_or_create(
+            id=rs["id"],  # TODO: This ID is a bit iffy, because they're researcher-provided
+            name=rs["name"],
+            namespace_prefix=rs["namespace_prefix"],
+            url=rs["url"],
+            version=rs["version"],
+            iri_prefix=rs["iri_prefix"]
+        )
+        # rs_obj.save()
+        resources_db.append(rs_obj)
+
+    meta_data_obj = MetaData(
+        created_by=meta_data["created_by"],
+        submitted_by=meta_data.get("submitted_by", None),
+        phenopacket_schema_version="1.0.0-RC3",
+        external_references=meta_data.get("external_references", [])
+    )
+    meta_data_obj.save()
+
+    meta_data_obj.resources.set(resources_db)  # TODO: primary key ???
+
+    new_phenopacket = Phenopacket(
+        id=new_phenopacket_id,
+        subject=subject,
+        meta_data=meta_data_obj,
+        dataset=Dataset.objects.get(identifier=dataset_id)
+    )
+    new_phenopacket.save()
+
+    new_phenopacket.phenotypic_features.set(phenotypic_features_db)
+    new_phenopacket.biosamples.set(biosamples_db)
+    new_phenopacket.genes.set(genes_db)
+    new_phenopacket.diseases.set(diseases_db)
+    return new_phenopacket

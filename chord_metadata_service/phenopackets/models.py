@@ -198,7 +198,7 @@ class Gene(models.Model):
 	Class to represent an identifier for a gene
 
 	FHIR: ?
-	Draft extention for Gene is in development
+	Draft extension for Gene is in development
 	where Gene defined via class CodeableConcept
 	"""
 
@@ -225,7 +225,7 @@ class Variant(models.Model):
 	Class to describe Individual variants or diagnosed causative variants
 
 	FHIR: Observation ?
-	Draft extention for Variant is in development
+	Draft extension for Variant is in development
 	"""
 
 	ALLELE = (
