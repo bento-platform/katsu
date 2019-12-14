@@ -23,7 +23,7 @@ METADATA_WORKFLOWS = {
             "name": "Phenopackets-Compatible JSON",
             "description": "This ingestion workflow will validate and import a Phenopackets schema-compatible "
                            "JSON document.",
-            "data_types": ["phenopacket"],
+            "data_type": "phenopacket",
             "file": "phenopackets_json.wdl",
             "inputs": [
                 {
