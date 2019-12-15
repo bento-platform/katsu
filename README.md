@@ -68,3 +68,19 @@ Create coverage html report:
 `coverage run manage.py test`
 
 `coverage html`
+
+## Accessing the Django Shell from inside a CHORD Container
+
+Assuming `chord_singularity` is being used, the following commands can be used
+to bootstrap your way to a `chord_metadata_service` environment within a CHORD
+container:
+
+```bash
+./dev_utils.py --node x shell
+source /chord/services/metadata/env/bin/activate
+source /chord/data/metadata/.environment
+export $(cut -d= -f1 /chord/data/metadata/.environment)
+DJANGO_SETTINGS_MODULE=chord_metadata_service.metadata.settings django-admin shell
+```
+
+From there, you can import models and query the database from the REPL.
