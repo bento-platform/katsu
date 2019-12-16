@@ -410,7 +410,11 @@ PHENOPACKET_SCHEMA = {
         "variants": {
             "type": "array",
             "items": {
-                "type": "object"  # TODO
+                "type": "object",  # TODO
+                "properties": {
+                    "allele": {"type": "object"},  # TODO
+                    "zygosity": PHENOPACKET_ONTOLOGY_SCHEMA
+                }
             }
         },
         "diseases": {  # TODO: Too sensitive for search?
@@ -418,10 +422,30 @@ PHENOPACKET_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "allele": {"type": "object"},  # TODO
-                    "zygosity": PHENOPACKET_ONTOLOGY_SCHEMA
+                    "term": PHENOPACKET_ONTOLOGY_SCHEMA,
+                    "onset": PHENOPACKET_AGE_SCHEMA,
+                    "disease_stage": {
+                        "type": "array",
+                        "items": PHENOPACKET_ONTOLOGY_SCHEMA
+                        # TODO: Database access
+                    },
+                    "tnm_finding": {
+                        "type": "array",
+                        "items": PHENOPACKET_ONTOLOGY_SCHEMA
+                        # TODO: Database access
+                    },
                 },
-                "required": ["allele"]
+                "required": ["term"],
+                "search": {
+                    "database": {
+                        "relation": Phenopacket._meta.get_field("diseases").remote_field.through._meta.db_table,
+                        "relationship": {
+                            "type": "MANY_TO_MANY",
+                            "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
+                            "parent_primary_key": Phenopacket._meta.pk.column
+                        }
+                    }
+                }
             }
         },  # TODO
         "hts_files": {
