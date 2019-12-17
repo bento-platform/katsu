@@ -84,7 +84,7 @@ class ProcedureTest(TestCase):
 
 	def setUp(self):
 		self.procedure_1 = Procedure.objects.create(**VALID_PROCEDURE_1)
-		self.procedure_1 = Procedure.objects.create(**VALID_PROCEDURE_2)
+		self.procedure_2 = Procedure.objects.create(**VALID_PROCEDURE_2)
 
 	def test_procedure(self):
 		procedure_query_1 = Procedure.objects.filter(

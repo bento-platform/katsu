@@ -114,30 +114,12 @@ class ProcedureSerializer(GenericSerializer):
 		class_converter = procedure_to_fhir
 
 	def create(self, validated_data):
-		instance, _ = Procedure.objects.get_or_create(**validated_data)
-		return instance
-
-	def validate(self, data):
-		"""
-		Check if body_site is not empty
-		if not bind 'code' and 'body_site' to be unique together
-		"""
-
-		if data.get('body_site'):
-			check = Procedure.objects.filter(
-				code=data.get('code'), body_site=data.get('body_site')).exists()
-			if check:
-				raise serializers.ValidationError(
-					"This procedure already exists."
-					)
+		if validated_data.get('body_site'):
+			instance, _ = Procedure.objects.get_or_create(**validated_data)
 		else:
-			check = Procedure.objects.filter(code=data.get('code')).exists()
-			if check:
-				raise serializers.ValidationError(
-					"This procedure already exists."
-				)
-
-		return data
+			instance, _ = Procedure.objects.get_or_create(
+				code=validated_data.get('code'), body_site__isnull=True)
+		return instance
 
 
 class HtsFileSerializer(GenericSerializer):
