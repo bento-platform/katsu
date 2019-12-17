@@ -226,6 +226,9 @@ class BiosampleSerializer(GenericSerializer):
 	taxonomy = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
 		allow_null=True, required=False)
+	individual_age_at_collection = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=AGE_OR_AGE_RANGE)],
+		allow_null=True, required=False)
 	histological_diagnosis = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
 		allow_null=True, required=False)
