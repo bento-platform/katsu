@@ -80,16 +80,6 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 		fhir_datatype_plural = 'observations'
 		class_converter = phenotypic_feature_to_fhir
 
-	# def to_representation(self, obj):
-	# 	output = super().to_representation(obj)
-	# 	output['type'] = output.pop('pftype')
-	# 	return output
-
-	# def to_internal_value(self, data):
-	# 	if 'type' in data.keys():
-	# 		data['pftype'] = data.pop('type')
-	# 	return super(PhenotypicFeatureSerializer, self).to_internal_value(data=data)
-
 	def validate_modifier(self, value):
 		if isinstance(value, list):
 			for item in value:
