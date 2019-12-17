@@ -26,48 +26,7 @@ class CreateBiosampleTest(APITestCase):
     def setUp(self):
         self.individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
         self.procedure = VALID_PROCEDURE_1
-        self.valid_payload = {
-            "id": "biosample:1",
-            "individual": self.individual.id,
-            "procedure": self.procedure,
-            "description": "This is a test description.",
-            "sampled_tissue": {
-                "id": "UBERON_0001256",
-                "label": "wall of urinary bladder"
-            },
-            "individual_age_at_collection": {
-                "age": {
-                    "start": {
-                        "age": "P45Y"
-                    },
-                    "end": {
-                        "age": "P49Y"
-                    }
-                }
-            },
-            "histological_diagnosis": {
-                "id": "NCIT:C39853",
-                "label": "Infiltrating Urothelial Carcinoma"
-            },
-            "tumor_progression": {
-                "id": "NCIT:C84509",
-                "label": "Primary Malignant Neoplasm"
-            },
-            "tumor_grade": {
-                "id": "NCIT:C48766",
-                "label": "pT2b Stage Finding"
-            },
-            "diagnostic_markers": [
-                {
-                    "id": "NCIT:C49286",
-                    "label": "Hematology Test"
-                },
-                {
-                    "id": "NCIT:C15709",
-                    "label": "Genetic Testing"
-                }
-            ]
-        }
+        self.valid_payload = valid_biosample_1(self.individual.id, self.procedure)
         self.invalid_payload = {
             "id": "biosample:1",
             "individual": self.individual.id,
@@ -107,7 +66,7 @@ class CreateBiosampleTest(APITestCase):
         response = get_response('biosample-list', self.valid_payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Biosample.objects.count(), 1)
-        self.assertEqual(Biosample.objects.get().id, 'biosample:1')
+        self.assertEqual(Biosample.objects.get().id, 'biosample_id:1')
 
     def test_create_invalid_biosample(self):
         """ POST a new biosample with invalid data. """
