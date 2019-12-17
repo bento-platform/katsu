@@ -233,7 +233,16 @@ def valid_biosample_1(individual, procedure):
             "id": "NCBITaxon:9606",
             "label": "Homo sapiens"
         },
-        individual_age_at_collection='P52Y2M',
+        individual_age_at_collection={
+                "age": {
+                    "start": {
+                        "age": "P45Y"
+                    },
+                    "end": {
+                        "age": "P49Y"
+                    }
+                }
+            },
         histological_diagnosis={
             "id": "NCIT:C39853",
             "label": "Infiltrating Urothelial Carcinoma"
@@ -274,7 +283,16 @@ def valid_biosample_2(individual, procedure):
             "id": "NCBITaxon:9606",
             "label": "Homo sapiens"
         },
-        individual_age_at_collection='P52Y2M',
+        individual_age_at_collection={
+                "age": {
+                    "start": {
+                        "age": "P45Y"
+                    },
+                    "end": {
+                        "age": "P49Y"
+                    }
+                }
+            },
         histological_diagnosis={
             "id": "NCIT:C39853",
             "label": "Infiltrating Urothelial Carcinoma"

@@ -3,7 +3,6 @@ from django.urls import include, path, reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from ..models import *
-from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS
 from .constants import *
 from ..serializers import *
 from rest_framework.test import APIClient
@@ -340,7 +339,7 @@ class CreateInterpretationTest(APITestCase):
         self.phenopacket = Phenopacket.objects.create(**valid_phenopacket(
             subject=self.individual,
             meta_data=self.metadata)
-                                                      ).id
+            ).id
         self.metadata_interpretation = MetaData.objects.create(**VALID_META_DATA_2).id
         self.disease = Disease.objects.create(**VALID_DISEASE_1)
         self.diagnosis = Diagnosis.objects.create(**valid_diagnosis(self.disease)).id
