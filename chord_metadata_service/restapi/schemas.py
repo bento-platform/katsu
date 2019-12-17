@@ -123,6 +123,30 @@ EVIDENCE = {
     "required": ["evidence_code"]
 }
 
+
+AGE = {"type": "string", "description": "An ISO8601 string represent age."}
+
+
+AGE_RANGE = {
+    "type": "object",
+     "properties": {
+         "start": {
+             "type": "object",
+             "properties": {
+                 "age": AGE
+             }
+         },
+         "end": {
+             "type": "object",
+             "properties": {
+                 "age": AGE
+             }
+         }
+    },
+     "additionalProperties": False,
+     "required": ["start", "end"]
+}
+
 AGE_OR_AGE_RANGE = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "todo",
@@ -133,25 +157,27 @@ AGE_OR_AGE_RANGE = {
     "properties": {
         "age": {
             "anyOf": [
-                {"type": "string", "description": "An ISO8601 string represent age."},
-                {"type": "object",
-                 "properties": {
-                     "start": {
-                         "type": "object",
-                         "properties": {
-                             "age": {"type": "string", "description": "An ISO8601 string represent age."}
-                         }
-                     },
-                     "end": {
-                         "type": "object",
-                         "properties": {
-                             "age": {"type": "string", "description": "An ISO8601 string represent age."}
-                         }
-                     }
-                 },
-                 "additionalProperties": False,
-                 "required": ["start", "end"]
-                 }
+                AGE,
+                AGE_RANGE
+            ]
+        }
+    },
+    "additionalProperties": False
+}
+
+
+DISEASE_ONSET = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "todo",
+    "title": "Onset age",
+    "description": "Schema for the age of the onset of the disease.",
+    "type": "object",
+    "properties": {
+        "age": {
+            "anyOf": [
+                AGE,
+                AGE_RANGE,
+                ONTOLOGY_CLASS
             ]
         }
     },

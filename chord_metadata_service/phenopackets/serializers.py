@@ -199,6 +199,8 @@ class VariantSerializer(GenericSerializer):
 class DiseaseSerializer(GenericSerializer):
 	term = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
+	onset = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=DISEASE_ONSET)])
 
 	class Meta:
 		model = Disease
