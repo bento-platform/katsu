@@ -102,7 +102,12 @@ PHENOPACKET_ONTOLOGY_SCHEMA = {
             "search": _single_optional_str_search(1)
         },
     },
-    "required": ["id", "label"]
+    "required": ["id", "label"],
+    "search": {
+        "database": {
+            "type": "jsonb"  # TODO: parameterize?
+        }
+    }
 }
 
 PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = {
@@ -117,7 +122,12 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = {
             "search": _single_optional_str_search(1)
         }
     },
-    "required": ["id"]
+    "required": ["id"],
+    "search": {
+        "database": {
+            "type": "jsonb"  # TODO: parameterize?
+        }
+    }
 }
 
 
@@ -211,6 +221,7 @@ PHENOPACKET_META_DATA_SCHEMA = {
                 },
                 "required": ["id", "name", "namespace_prefix", "url", "version", "iri_prefix"]
             }
+            # TODO: Search
         },
         "updates": {
             "type": "array",
@@ -228,6 +239,11 @@ PHENOPACKET_META_DATA_SCHEMA = {
                     }
                 },
                 "required": ["timestamp", "comment"]
+            },
+            "search": {
+                "database": {
+                    "type": "array"
+                }
             }
         },
         "phenopacket_schema_version": {
@@ -262,7 +278,12 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = {
                 "evidence_code": PHENOPACKET_ONTOLOGY_SCHEMA,
                 "reference": PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
             },
-            "required": ["evidence_code"]
+            "required": ["evidence_code"],
+            "search": {
+                "database": {
+                    "type": "jsonb"
+                }
+            }
         }
     }
 }
@@ -316,7 +337,8 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
         "tumor_grade": PHENOPACKET_ONTOLOGY_SCHEMA,  # TODO: Is this a list?
         "diagnostic_markers": {
             "type": "array",
-            "items": PHENOPACKET_ONTOLOGY_SCHEMA
+            "items": PHENOPACKET_ONTOLOGY_SCHEMA,
+            "search": {"database": {"type": "array"}}
         },
         "procedure": {
             "type": "object",
@@ -324,7 +346,8 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
                 "code": PHENOPACKET_ONTOLOGY_SCHEMA,
                 "body_site": PHENOPACKET_ONTOLOGY_SCHEMA
             },
-            "required": ["code"]
+            "required": ["code"],
+            # TODO: Search
         },
         "hts_files": {
             "type": "array",
@@ -426,24 +449,24 @@ PHENOPACKET_SCHEMA = {
                     "onset": PHENOPACKET_AGE_SCHEMA,
                     "disease_stage": {
                         "type": "array",
-                        "items": PHENOPACKET_ONTOLOGY_SCHEMA
-                        # TODO: Database access
+                        "items": PHENOPACKET_ONTOLOGY_SCHEMA,
+                        "search": {"database": {"type": "array"}}
                     },
                     "tnm_finding": {
                         "type": "array",
-                        "items": PHENOPACKET_ONTOLOGY_SCHEMA
-                        # TODO: Database access
+                        "items": PHENOPACKET_ONTOLOGY_SCHEMA,
+                        "search": {"database": {"type": "array"}}
                     },
                 },
-                "required": ["term"],
-                "search": {
-                    "database": {
-                        "relation": Phenopacket._meta.get_field("diseases").remote_field.through._meta.db_table,
-                        "relationship": {
-                            "type": "MANY_TO_MANY",
-                            "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
-                            "parent_primary_key": Phenopacket._meta.pk.column
-                        }
+                "required": ["term"]
+            },
+            "search": {
+                "database": {
+                    "relation": Phenopacket._meta.get_field("diseases").remote_field.through._meta.db_table,
+                    "relationship": {
+                        "type": "MANY_TO_MANY",
+                        "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
+                        "parent_primary_key": Phenopacket._meta.pk.column
                     }
                 }
             }
