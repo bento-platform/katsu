@@ -375,13 +375,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
             "search": _single_optional_eq_search(1),
         },
     },
-    "required": ["id", "sampled_tissue", "procedure"],
-    "search": {
-        "database": {
-            "primary_key": Biosample._meta.pk.column,
-            "relation": Biosample._meta.db_table
-        }
-    }
+    "required": ["id", "sampled_tissue", "procedure"]
 }
 
 # Deduplicate with other phenopacket representations
@@ -409,7 +403,19 @@ PHENOPACKET_SCHEMA = {
         },
         "biosamples": {
             "type": "array",
-            "items": PHENOPACKET_BIOSAMPLE_SCHEMA,
+            "items": {
+                **PHENOPACKET_BIOSAMPLE_SCHEMA,
+                "search": {
+                    "database": {
+                        "primary_key": Biosample._meta.pk.column,
+                        "relation": Biosample._meta.db_table,
+                        "relationship": {
+                            "type": "MANY_TO_ONE",
+                            "foreign_key": "biosample_id"  # TODO: No hard-code, from M2M
+                        }
+                    }
+                }
+            },
             "search": {
                 "database": {
                     "relation": Phenopacket._meta.get_field("biosamples").remote_field.through._meta.db_table,
