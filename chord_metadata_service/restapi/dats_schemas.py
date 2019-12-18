@@ -32,10 +32,7 @@ def get_dats_schema(field):
     }
 
     for filename in glob(os.path.join(DATS_PATH, '*.json')):
-        # print('filename {}'.format(filename))
-        # parse e.g. dats\access_schema.json to get just name
-        schema_name = filename.split('dats\\')[1].split('.')[0]
-        # print('schema name after split {}'.format(schema_name))
+        schema_name = Path(filename).stem
         field_schema_name = fields_mapping.get(field, None)
         if schema_name == field_schema_name:
             schema_file = open(filename)
