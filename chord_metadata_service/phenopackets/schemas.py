@@ -347,7 +347,16 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
                 "body_site": PHENOPACKET_ONTOLOGY_SCHEMA
             },
             "required": ["code"],
-            # TODO: Search
+            "search": {
+                "database": {
+                    "primary_key": Procedure._meta.pk.column,
+                    "relation": Procedure._meta.db_table,
+                    "relationship": {
+                        "type": "MANY_TO_ONE",
+                        "foreign_key": Biosample._meta.get_field("procedure").column
+                    }
+                }
+            }
         },
         "hts_files": {
             "type": "array",
@@ -366,7 +375,13 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
             "search": _single_optional_eq_search(1),
         },
     },
-    "required": ["id", "sampled_tissue", "procedure"]
+    "required": ["id", "sampled_tissue", "procedure"],
+    "search": {
+        "database": {
+            "primary_key": Biosample._meta.pk.column,
+            "relation": Biosample._meta.db_table
+        }
+    }
 }
 
 # Deduplicate with other phenopacket representations
