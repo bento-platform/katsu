@@ -148,9 +148,9 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
 
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
-    except (SyntaxError, TypeError, ValueError):
+    except (SyntaxError, TypeError, ValueError) as e:
         # TODO: Better error
-        return Response(status=400)
+        return Response({"error": str(e)}, status=400)
 
     serializer = PhenopacketSerializer(phenopacket_query_results(
         query=sql.SQL("{} AND dataset_id = {}").format(compiled_query, sql.Placeholder()),
