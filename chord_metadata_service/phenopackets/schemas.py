@@ -296,6 +296,7 @@ PHENOPACKET_AGE_SCHEMA = {
     "required": ["age"]
 }
 
+# noinspection PyProtectedMember
 PHENOPACKET_BIOSAMPLE_SCHEMA = {
     "type": "object",
     "properties": {
@@ -311,7 +312,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
         "sampled_tissue": PHENOPACKET_ONTOLOGY_SCHEMA,
         "phenotypic_features": {
             "type": "array",
-            "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA
+            "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA  # TODO: How to incorporate search here -- other direction!
         },
         "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA,
         "individual_age_at_collection": {
@@ -375,7 +376,13 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
             "search": _single_optional_eq_search(1),
         },
     },
-    "required": ["id", "sampled_tissue", "procedure"]
+    "required": ["id", "sampled_tissue", "procedure"],
+    "search": {
+        "database": {
+            "primary_key": Biosample._meta.pk.column,
+            "relation": Biosample._meta.db_table,
+        }
+    }
 }
 
 # Deduplicate with other phenopacket representations
@@ -407,8 +414,7 @@ PHENOPACKET_SCHEMA = {
                 **PHENOPACKET_BIOSAMPLE_SCHEMA,
                 "search": {
                     "database": {
-                        "primary_key": Biosample._meta.pk.column,
-                        "relation": Biosample._meta.db_table,
+                        **PHENOPACKET_BIOSAMPLE_SCHEMA["search"]["database"],
                         "relationship": {
                             "type": "MANY_TO_ONE",
                             "foreign_key": "biosample_id"  # TODO: No hard-code, from M2M
