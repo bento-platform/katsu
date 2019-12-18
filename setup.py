@@ -10,7 +10,7 @@ setuptools.setup(
     version="0.1.0",
 
     python_requires=">=3.6",
-    install_requires=["chord_lib @ git+https://github.com/c3g/chord_lib", "Django==2.2.6", "django-filter",
+    install_requires=["chord_lib @ git+https://github.com/c3g/chord_lib", "Django==2.2.8", "django-filter",
                       "django-nose", "djangorestframework", "djangorestframework-camel-case", "jsonschema",
                       "psycopg2-binary", "python-dateutil", "PyYAML", "requests", "uritemplate"],
 
