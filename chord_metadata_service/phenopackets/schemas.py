@@ -420,9 +420,9 @@ PHENOPACKET_SCHEMA = {
                 "database": {
                     "relation": Phenopacket._meta.get_field("biosamples").remote_field.through._meta.db_table,
                     "relationship": {
-                        "type": "MANY_TO_MANY",
+                        "type": "MANY_TO_MANY",  # TODO: Effectively ONE_TO_MANY
                         "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
-                        "parent_primary_key": Phenopacket._meta.pk.column
+                        "parent_primary_key": Phenopacket._meta.pk.column  # TODO: Redundant?
                     }
                 }
             }
@@ -456,7 +456,7 @@ PHENOPACKET_SCHEMA = {
             "items": {
                 "type": "object",  # TODO
                 "properties": {
-                    "allele": {"type": "object"},  # TODO
+                    "allele": ALLELE_SCHEMA,  # TODO
                     "zygosity": PHENOPACKET_ONTOLOGY_SCHEMA
                 }
             }
@@ -479,15 +479,25 @@ PHENOPACKET_SCHEMA = {
                         "search": {"database": {"type": "array"}}
                     },
                 },
-                "required": ["term"]
+                "required": ["term"],
+                "search": {
+                    "database": {
+                        "primary_key": Disease._meta.pk.column,
+                        "relation": Disease._meta.db_table,
+                        "relationship": {
+                            "type": "MANY_TO_ONE",
+                            "foreign_key": "disease_id"  # TODO: No hard-code, from M2M
+                        }
+                    }
+                }
             },
             "search": {
                 "database": {
                     "relation": Phenopacket._meta.get_field("diseases").remote_field.through._meta.db_table,
                     "relationship": {
-                        "type": "MANY_TO_MANY",
+                        "type": "MANY_TO_MANY",  # TODO: Effectively ONE_TO_MANY
                         "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
-                        "parent_primary_key": Phenopacket._meta.pk.column
+                        "parent_primary_key": Phenopacket._meta.pk.column  # TODO: Redundant?
                     }
                 }
             }
