@@ -3,6 +3,7 @@ from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
+from chord_metadata_service.restapi.fhir_utils import transform_keys
 
 from .models import *
 
@@ -66,8 +67,9 @@ class DatasetSerializer(GenericSerializer):
 
             if isinstance(data.get(field), list):
                 for item in data.get(field):
+                    camel_case_item = transform_keys(item)
                     call_validation = self.jsonschema_validation(
-                        value=item,
+                        value=camel_case_item,
                         schema=get_dats_schema(field),
                         field_name=field
                     )
