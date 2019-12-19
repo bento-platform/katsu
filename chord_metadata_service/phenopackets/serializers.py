@@ -80,16 +80,6 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 		fhir_datatype_plural = 'observations'
 		class_converter = phenotypic_feature_to_fhir
 
-	# def to_representation(self, obj):
-	# 	output = super().to_representation(obj)
-	# 	output['type'] = output.pop('pftype')
-	# 	return output
-
-	# def to_internal_value(self, data):
-	# 	if 'type' in data.keys():
-	# 		data['pftype'] = data.pop('type')
-	# 	return super(PhenotypicFeatureSerializer, self).to_internal_value(data=data)
-
 	def validate_modifier(self, value):
 		if isinstance(value, list):
 			for item in value:
@@ -114,30 +104,12 @@ class ProcedureSerializer(GenericSerializer):
 		class_converter = procedure_to_fhir
 
 	def create(self, validated_data):
-		instance, _ = Procedure.objects.get_or_create(**validated_data)
-		return instance
-
-	def validate(self, data):
-		"""
-		Check if body_site is not empty
-		if not bind 'code' and 'body_site' to be unique together
-		"""
-
-		if data.get('body_site'):
-			check = Procedure.objects.filter(
-				code=data.get('code'), body_site=data.get('body_site')).exists()
-			if check:
-				raise serializers.ValidationError(
-					"This procedure already exists."
-					)
+		if validated_data.get('body_site'):
+			instance, _ = Procedure.objects.get_or_create(**validated_data)
 		else:
-			check = Procedure.objects.filter(code=data.get('code')).exists()
-			if check:
-				raise serializers.ValidationError(
-					"This procedure already exists."
-				)
-
-		return data
+			instance, _ = Procedure.objects.get_or_create(
+				code=validated_data.get('code'), body_site__isnull=True)
+		return instance
 
 
 class HtsFileSerializer(GenericSerializer):
@@ -199,6 +171,8 @@ class VariantSerializer(GenericSerializer):
 class DiseaseSerializer(GenericSerializer):
 	term = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
+	onset = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=DISEASE_ONSET)])
 
 	class Meta:
 		model = Disease
@@ -223,6 +197,9 @@ class BiosampleSerializer(GenericSerializer):
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
 	taxonomy = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+		allow_null=True, required=False)
+	individual_age_at_collection = serializers.JSONField(
+		validators=[JsonSchemaValidator(schema=AGE_OR_AGE_RANGE)],
 		allow_null=True, required=False)
 	histological_diagnosis = serializers.JSONField(
 		validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],

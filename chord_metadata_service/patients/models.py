@@ -35,7 +35,7 @@ class Individual(models.Model):
 	date_of_birth = models.DateField(null=True, blank=True,
 		help_text='A timestamp either exact or imprecise.')
 	# An ISO8601 string represent age
-	age = models.CharField(max_length=200, blank=True,
+	age = JSONField(blank=True, null=True,
 		help_text='The age or age range of the individual.')
 	sex = models.CharField(choices=SEX, max_length=200,  blank=True, null=True,
 		help_text='Observed apparent sex of the individual.')

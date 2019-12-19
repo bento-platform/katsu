@@ -3,6 +3,7 @@ from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
+from chord_metadata_service.restapi.fhir_utils import transform_keys
 
 from .models import *
 
@@ -25,11 +26,11 @@ class DatasetSerializer(GenericSerializer):
         return value.strip()
 
     def validate_creators(self, value):
-        # validation against person_schema is not working
-        # error: additional properties are not allowed
-        validation = self.jsonschema_validation(value, CREATORS)
-        if isinstance(validation, dict):
-            raise serializers.ValidationError(validation)
+        if isinstance(value, list):
+            transformed_value = [transform_keys(item) for item in value]
+            validation = self.jsonschema_validation(transformed_value, CREATORS)
+            if isinstance(validation, dict):
+                raise serializers.ValidationError(validation)
         return value
 
     # noinspection PyMethodMayBeStatic
@@ -67,7 +68,7 @@ class DatasetSerializer(GenericSerializer):
             if isinstance(data.get(field), list):
                 for item in data.get(field):
                     call_validation = self.jsonschema_validation(
-                        value=item,
+                        value=transform_keys(item),
                         schema=get_dats_schema(field),
                         field_name=field
                     )

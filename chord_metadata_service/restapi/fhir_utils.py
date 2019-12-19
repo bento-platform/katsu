@@ -14,6 +14,20 @@ def camel_case_field_names(string):
 	return string
 
 
+def transform_keys(obj):
+	"""
+	This function is needed for validation against DATS schemas that use camelCase.
+	Iterates over a dict and  changes all keys in nested objects to cameCase.
+	"""
+	if isinstance(obj, dict):
+		transformed_obj = {}
+		for key, value in obj.items():
+			if isinstance(value, dict):
+				value = transform_keys(value)
+			transformed_obj[camel_case_field_names(key)] = value
+		return transformed_obj
+
+
 def individual_to_fhir(obj):
 	""" Transform individual data to Patient FHIR record. """
 
