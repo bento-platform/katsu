@@ -95,10 +95,11 @@ def procedure_to_fhir(obj):
 	procedure['code']['coding'] = []
 	coding = fhir_coding(obj, 'code')
 	procedure['code']['coding'].append(coding)
-	procedure['bodySite'] = {}
-	procedure['bodySite']['coding'] = []
-	body_site_coding = fhir_coding(obj, 'body_site')
-	procedure['bodySite']['coding'].append(body_site_coding)
+	if obj.get('body_site'):
+		procedure['bodySite'] = {}
+		procedure['bodySite']['coding'] = []
+		body_site_coding = fhir_coding(obj, 'body_site')
+		procedure['bodySite']['coding'].append(body_site_coding)
 	return procedure
 
 
