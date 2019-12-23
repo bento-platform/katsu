@@ -113,22 +113,6 @@ def fhir_coding(obj, value=None):
 	return coding
 
 
-def fhir_codeable_concept(obj):
-	""" Convert  different data types to FHIR Codeable concept. """
-
-	codeable_concept = {}
-	codeable_concept['resourceType'] = 'CodeableConcept'
-	codeable_concept['coding'] = []
-	if isinstance(obj, list):
-		for item in obj:
-			coding = fhir_coding(item)
-			codeable_concept['coding'].append(coding)
-	else:
-		coding = fhir_coding(obj)
-		codeable_concept['coding'].append(coding)
-	return codeable_concept
-
-
 def procedure_to_fhir(obj):
 	""" Convert procedure to FHIR Procedure. """
 
@@ -225,12 +209,14 @@ def fhir_specimen(obj):
 		annotation = a.Annotation()
 		annotation.text = obj.get('description', None)
 		specimen.note.append(annotation)
+	# Note on taxonomy from phenopackets specs:
+	# Individuals already contain a taxonomy attribute so this attribute is not needed.
 	# extensions
 	specimen.extension = []
 	# individual_age_at_collection
 	if 'individual_age_at_collection' in obj.keys():
 		ind_age_at_collection_extension = extension.Extension()
-		ind_age_at_collection_extension.url = GA4GH_FHIR_PROFILES['individual_age_at_collection']
+		ind_age_at_collection_extension.url = GA4GH_FHIR_PROFILES['biosample-individual-age-at-collection']
 		if isinstance(obj['individual_age_at_collection']['age'], dict):
 			ind_age_at_collection_extension.valueRange = range.Range()
 			ind_age_at_collection_extension.valueRange.low = quantity.Quantity()
@@ -244,10 +230,38 @@ def fhir_specimen(obj):
 			ind_age_at_collection_extension.valueAge = age.Age()
 			ind_age_at_collection_extension.valueAge.unit = obj['individual_age_at_collection']['age']
 			specimen.extension.append(ind_age_at_collection_extension)
+	codeable_concepts_fields = [
+		'histological_diagnosis', 'tumor_progression',
+		'tumor_grade', 'diagnostic_markers'
+	]
+	for field in codeable_concepts_fields:
+		if field in obj.keys():
+			codeable_concepts_extension = extension.Extension()
+			codeable_concepts_extension.url = GA4GH_FHIR_PROFILES[field]
+			codeable_concepts_extension.valueCodeableConcept = fhir_codeable_concept(obj[field])
+			specimen.extension.append(codeable_concepts_extension)
 
-	# Note on taxonomy from phenopackets specs:
-	# Individuals already contain a taxonomy attribute so this attribute is not needed.
 	return specimen.as_json()
+
+
+def fhir_coding_util(obj):
+	coding = c.Coding()
+	coding.display = obj['label']
+	coding.code = obj['id']
+	return  coding
+
+
+def fhir_codeable_concept(obj):
+	codeable_concept = codeableconcept.CodeableConcept()
+	codeable_concept.coding = []
+	if isinstance(obj, list):
+		for item in obj:
+			coding = fhir_coding_util(item)
+			codeable_concept.coding.append(coding)
+	else:
+		coding = fhir_coding_util(obj)
+		codeable_concept.coding.append(coding)
+	return codeable_concept
 
 
 def biosample_to_fhir(obj):

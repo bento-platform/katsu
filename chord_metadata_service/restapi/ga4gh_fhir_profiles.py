@@ -7,5 +7,10 @@ GA4GH_FHIR_PROFILES = {
 
         ,
     "individual-taxonomy": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-taxonomy",
-    "individual_age_at_collection": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-individual-age-at-collection"
+    "biosample-individual-age-at-collection": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-individual-age-at-collection",
+    "histological_diagnosis": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-histological-diagnosis",
+    "tumor_progression": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-tumor-progression",
+    "tumor_grade": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-tumor-grade",
+    "diagnostic_markers": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-diagnostic-markers"
+
 }
