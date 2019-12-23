@@ -183,7 +183,7 @@ def phenotypic_feature_to_fhir(obj):
 
 from fhirclient.models import (specimen as s, identifier as fhir_indentifier,
 							   fhirreference, annotation as a,
-							   range, quantity)
+							   range, quantity, fhirreference, )
 
 
 def fhir_specimen(obj):
@@ -209,6 +209,11 @@ def fhir_specimen(obj):
 		annotation = a.Annotation()
 		annotation.text = obj.get('description', None)
 		specimen.note.append(annotation)
+	# procedure
+	specimen.collection = s.SpecimenCollection()
+	specimen.collection.method = fhir_codeable_concept(obj['procedure']['code'])
+	if 'body_site' in obj['procedure'].keys():
+		specimen.collection.bodySite = fhir_codeable_concept(obj['procedure']['body_site'])
 	# Note on taxonomy from phenopackets specs:
 	# Individuals already contain a taxonomy attribute so this attribute is not needed.
 	# extensions
@@ -240,7 +245,7 @@ def fhir_specimen(obj):
 			codeable_concepts_extension.url = GA4GH_FHIR_PROFILES[field]
 			codeable_concepts_extension.valueCodeableConcept = fhir_codeable_concept(obj[field])
 			specimen.extension.append(codeable_concepts_extension)
-
+	# TODO 2m extensions - references
 	return specimen.as_json()
 
 
