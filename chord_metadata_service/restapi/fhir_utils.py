@@ -1,6 +1,6 @@
 # Utils for converting data between formats
 
-
+# TODO move to a separate file
 def camel_case_field_names(string):
 	""" Function to convert snake_case field names to camelCase """
 
@@ -26,6 +26,50 @@ def transform_keys(obj):
 				value = transform_keys(value)
 			transformed_obj[camel_case_field_names(key)] = value
 		return transformed_obj
+
+
+from fhirclient.models import patient as p
+from fhirclient.models import extension, age, coding as c, codeableconcept
+from fhirclient.models.fhirdate import FHIRDate
+
+def fhir_patient(obj):
+	patient = p.Patient()
+	patient.id = obj.get('id', None)
+	patient.birthDate = FHIRDate(obj.get('date_of_birth', None))
+	patient.gender = obj.get('sex', None)
+	patient.active = obj.get('active', None)
+	patient.deceasedBoolean = obj.get('deceased', None)
+	patient.extension = list()
+	# age
+	age_extension = extension.Extension()
+	# TODO move phenopackets-fhir mappings in a separate file
+	age_extension.url = 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-age'
+	age_extension.valueAge = age.Age()
+	age_extension.valueAge.unit = obj.get('age', None).get('age', None)
+	patient.extension.append(age_extension)
+	# karyotypic_sex
+	karyotypic_sex_extension = extension.Extension()
+	karyotypic_sex_extension.url = 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-karyotypic-sex'
+	karyotypic_sex_extension.valueCodeableConcept = codeableconcept.CodeableConcept()
+	karyotypic_sex_extension.valueCodeableConcept.coding = list()
+	coding = c.Coding()
+	coding.display = obj.get('karyotypic_sex', None)
+	coding.code = obj.get('karyotypic_sex', None)
+	coding.system = 'http://ga4gh.org/fhir/phenopackets/CodeSystem/karyotypic-sex'
+	karyotypic_sex_extension.valueCodeableConcept.coding.append(coding)
+	patient.extension.append(karyotypic_sex_extension)
+	# taxonomy
+	taxonomy_extension = extension.Extension()
+	taxonomy_extension.url = 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-taxonomy'
+	taxonomy_extension.valueCodeableConcept = codeableconcept.CodeableConcept()
+	taxonomy_extension.valueCodeableConcept.coding = list()
+	coding = c.Coding()
+	coding.display = obj.get('taxonomy', None).get('label', None)
+	coding.code = obj.get('taxonomy', None).get('id', None)
+	taxonomy_extension.valueCodeableConcept.coding.append(coding)
+	patient.extension.append(taxonomy_extension)
+
+	return patient.as_json()
 
 
 def individual_to_fhir(obj):
