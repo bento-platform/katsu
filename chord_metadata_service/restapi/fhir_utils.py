@@ -31,6 +31,7 @@ def transform_keys(obj):
 from fhirclient.models import patient as p
 from fhirclient.models import extension, age, coding as c, codeableconcept
 from fhirclient.models.fhirdate import FHIRDate
+from chord_metadata_service.restapi.ga4gh_fhir_profiles import GA4GH_FHIR_PROFILES
 
 def fhir_patient(obj):
 	patient = p.Patient()
@@ -43,24 +44,24 @@ def fhir_patient(obj):
 	# age
 	age_extension = extension.Extension()
 	# TODO move phenopackets-fhir mappings in a separate file
-	age_extension.url = 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-age'
+	age_extension.url = GA4GH_FHIR_PROFILES['individual-age']
 	age_extension.valueAge = age.Age()
 	age_extension.valueAge.unit = obj.get('age', None).get('age', None)
 	patient.extension.append(age_extension)
 	# karyotypic_sex
 	karyotypic_sex_extension = extension.Extension()
-	karyotypic_sex_extension.url = 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-karyotypic-sex'
+	karyotypic_sex_extension.url = GA4GH_FHIR_PROFILES['individual-karyotypic-sex']['url']
 	karyotypic_sex_extension.valueCodeableConcept = codeableconcept.CodeableConcept()
 	karyotypic_sex_extension.valueCodeableConcept.coding = list()
 	coding = c.Coding()
 	coding.display = obj.get('karyotypic_sex', None)
 	coding.code = obj.get('karyotypic_sex', None)
-	coding.system = 'http://ga4gh.org/fhir/phenopackets/CodeSystem/karyotypic-sex'
+	coding.system = GA4GH_FHIR_PROFILES['individual-karyotypic-sex']['coding_system']
 	karyotypic_sex_extension.valueCodeableConcept.coding.append(coding)
 	patient.extension.append(karyotypic_sex_extension)
 	# taxonomy
 	taxonomy_extension = extension.Extension()
-	taxonomy_extension.url = 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-taxonomy'
+	taxonomy_extension.url = GA4GH_FHIR_PROFILES['individual-taxonomy']
 	taxonomy_extension.valueCodeableConcept = codeableconcept.CodeableConcept()
 	taxonomy_extension.valueCodeableConcept.coding = list()
 	coding = c.Coding()
@@ -194,6 +195,59 @@ def phenotypic_feature_to_fhir(obj):
 			evidence_detail['detail'].append(detail)
 			feature_record['evidence'].append(evidence_detail)
 	return feature_record
+
+
+from fhirclient.models import (specimen as s, identifier as fhir_indentifier,
+							   fhirreference, annotation as a,
+							   range, quantity)
+
+
+def fhir_specimen(obj):
+	specimen = s.Specimen()
+	specimen.identifier = []
+	# id
+	identifier = fhir_indentifier.Identifier()
+	identifier.value = obj.get('id', None)
+	specimen.identifier.append(identifier)
+	# individual - subject property in FHIR is mandatory for a specimen
+	specimen.subject = fhirreference.FHIRReference()
+	specimen.subject.reference = obj.get('individual', 'unknown')
+	# sampled_tissue
+	specimen.type = codeableconcept.CodeableConcept()
+	specimen.type.coding = []
+	coding = c.Coding()
+	coding.code = obj.get('sampled_tissue', None).get('id', None)
+	coding.display = obj.get('sampled_tissue', None).get('label', None)
+	specimen.type.coding.append(coding)
+	# description
+	if 'description' in obj.keys():
+		specimen.note = []
+		annotation = a.Annotation()
+		annotation.text = obj.get('description', None)
+		specimen.note.append(annotation)
+	# extensions
+	specimen.extension = []
+	# individual_age_at_collection
+	if 'individual_age_at_collection' in obj.keys():
+		ind_age_at_collection_extension = extension.Extension()
+		ind_age_at_collection_extension.url = GA4GH_FHIR_PROFILES['individual_age_at_collection']
+		if isinstance(obj['individual_age_at_collection']['age'], dict):
+			ind_age_at_collection_extension.valueRange = range.Range()
+			ind_age_at_collection_extension.valueRange.low = quantity.Quantity()
+			ind_age_at_collection_extension.valueRange.low.unit = obj['individual_age_at_collection']['age']\
+				['start']['age']
+			ind_age_at_collection_extension.valueRange.high = quantity.Quantity()
+			ind_age_at_collection_extension.valueRange.high.unit = obj['individual_age_at_collection']['age']\
+				['end']['age']
+			specimen.extension.append(ind_age_at_collection_extension)
+		else:
+			ind_age_at_collection_extension.valueAge = age.Age()
+			ind_age_at_collection_extension.valueAge.unit = obj['individual_age_at_collection']['age']
+			specimen.extension.append(ind_age_at_collection_extension)
+
+	# Note on taxonomy from phenopackets specs:
+	# Individuals already contain a taxonomy attribute so this attribute is not needed.
+	return specimen.as_json()
 
 
 def biosample_to_fhir(obj):

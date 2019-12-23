@@ -219,7 +219,7 @@ class BiosampleSerializer(GenericSerializer):
 		fields = '__all__'
 		# meta info for converting to FHIR
 		fhir_datatype_plural = 'specimens'
-		class_converter = biosample_to_fhir
+		class_converter = fhir_specimen
 
 	def validate_diagnostic_markers(self, value):
 		if isinstance(value, list):
