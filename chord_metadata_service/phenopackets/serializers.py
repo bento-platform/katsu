@@ -78,7 +78,7 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 		exclude = ['pftype']
 		# meta info for converting to FHIR
 		fhir_datatype_plural = 'observations'
-		class_converter = phenotypic_feature_to_fhir
+		class_converter = fhir_observation
 
 	def validate_modifier(self, value):
 		if isinstance(value, list):

@@ -1,3 +1,11 @@
+from fhirclient.models.fhirdate import FHIRDate
+from chord_metadata_service.restapi.ga4gh_fhir_profiles import GA4GH_FHIR_PROFILES
+from fhirclient.models import (observation as obs, patient as p, extension, age, coding as c,
+							   codeableconcept, specimen as s, identifier as fhir_indentifier,
+							   annotation as a, range, quantity, fhirreference
+							   )
+
+
 # Utils for converting data between formats
 
 # TODO move to a separate file
@@ -27,11 +35,6 @@ def transform_keys(obj):
 			transformed_obj[camel_case_field_names(key)] = value
 		return transformed_obj
 
-
-from fhirclient.models import patient as p
-from fhirclient.models import extension, age, coding as c, codeableconcept
-from fhirclient.models.fhirdate import FHIRDate
-from chord_metadata_service.restapi.ga4gh_fhir_profiles import GA4GH_FHIR_PROFILES
 
 def fhir_patient(obj):
 	patient = p.Patient()
@@ -69,7 +72,6 @@ def fhir_patient(obj):
 	coding.code = obj.get('taxonomy', None).get('id', None)
 	taxonomy_extension.valueCodeableConcept.coding.append(coding)
 	patient.extension.append(taxonomy_extension)
-
 	return patient.as_json()
 
 
@@ -131,6 +133,42 @@ def procedure_to_fhir(obj):
 		procedure['bodySite']['coding'].append(body_site_coding)
 	return procedure
 
+def codeable_concepts_fields(field_list, obj):
+	concept_extensions = []
+	for field in field_list:
+		if field in obj.keys():
+			codeable_concepts_extension = extension.Extension()
+			codeable_concepts_extension.url = GA4GH_FHIR_PROFILES[field]
+			codeable_concepts_extension.valueCodeableConcept = fhir_codeable_concept(obj[field])
+			concept_extensions.append(codeable_concepts_extension)
+	return concept_extensions
+		
+
+def fhir_observation(obj):
+	observation = obs.Observation()
+	if 'description' in obj.keys():
+		observation.note = []
+		annotation = a.Annotation()
+		annotation.text = obj.get('description', None)
+		observation.note.append(annotation)
+	observation.code = fhir_codeable_concept(obj['type'])
+	# required by FHIR specs but omitted by phenopackets, for now set for unknown
+	observation.status = 'unknown'
+	if 'negated' in obj.keys():
+		observation.interpretation = fhir_codeable_concept(
+			{"label": "Positive", "id": "POS"}
+		)
+	else:
+		observation.interpretation = fhir_codeable_concept(
+			{"label": "Negative", "id": "NEG"}
+		)
+	observation.extension = []
+	concept_extensions = codeable_concepts_fields(['severity', 'modifier', 'onset'], obj)
+	for c in concept_extensions:
+		observation.extension.append(c)
+
+	return observation.as_json()
+
 
 def phenotypic_feature_to_fhir(obj):
 	""" Convert phenotypic feature to FHIR Observation. """
@@ -179,11 +217,6 @@ def phenotypic_feature_to_fhir(obj):
 			evidence_detail['detail'].append(detail)
 			feature_record['evidence'].append(evidence_detail)
 	return feature_record
-
-
-from fhirclient.models import (specimen as s, identifier as fhir_indentifier,
-							   fhirreference, annotation as a,
-							   range, quantity, fhirreference, )
 
 
 def fhir_specimen(obj):
