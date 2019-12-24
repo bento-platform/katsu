@@ -245,6 +245,11 @@ def fhir_specimen(obj):
 			codeable_concepts_extension.url = GA4GH_FHIR_PROFILES[field]
 			codeable_concepts_extension.valueCodeableConcept = fhir_codeable_concept(obj[field])
 			specimen.extension.append(codeable_concepts_extension)
+	if 'is_control_sample' in obj.keys():
+		control_extension = extension.Extension()
+		control_extension.url = GA4GH_FHIR_PROFILES['is_control_sample']
+		control_extension.valueBoolean = obj['is_control_sample']
+		specimen.extension.append(control_extension)
 	# TODO 2m extensions - references
 	return specimen.as_json()
 
