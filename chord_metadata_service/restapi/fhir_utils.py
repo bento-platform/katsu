@@ -1,9 +1,10 @@
 from datetime import datetime
-from chord_metadata_service.restapi.ga4gh_fhir_profiles import GA4GH_FHIR_PROFILES
+from chord_metadata_service.restapi.ga4gh_fhir_profiles import GA4GH_FHIR_PROFILES, HL7_GENOMICS_REPORTING
 from fhirclient.models import (observation as obs, patient as p, extension, age, coding as c,
 							codeableconcept, specimen as s, identifier as fhir_indentifier,
 							annotation as a, range, quantity, fhirreference,
-							documentreference, attachment, fhirdate
+							documentreference, attachment, fhirdate,
+							backboneelement
 							)
 
 
@@ -221,6 +222,8 @@ def fhir_coding_util(obj):
 	coding = c.Coding()
 	coding.display = obj['label']
 	coding.code = obj['id']
+	if 'system' in obj.keys():
+		coding.system = obj['system']
 	return  coding
 
 
@@ -273,6 +276,28 @@ def gene_to_fhir(obj):
 	coding['display'] = obj.get('symbol', None)
 	gene_record['coding'].append(coding)
 	return gene_record
+
+import json
+def fhir_obs_region_studied(obj):
+	""" Gene corresponds to Observation.component."""
+	# GA4GH to FHIR Mapping Guide provides link to
+	# Genomics Reporting Implementation Guide (STU1) mapping
+	# Genomics Reporting Implementation Guide (STU1)
+	# http://build.fhir.org/ig/HL7/genomics-reporting/region-studied.html
+	component = backboneelement.BackboneElement()
+	component.modifierExtension = []
+	comp_extention = extension.Extension()
+	comp_extention.valueCodeableConcept = fhir_codeable_concept({
+		"id": obj['id'],
+		"label": obj['symbol'],
+		"system": HL7_GENOMICS_REPORTING['HGNC']
+	})
+	# comp_extention.code = fhir_codeable_concept(
+	# 	HL7_GENOMICS_REPORTING['gene_studied']
+	# )
+	comp_extention.url = GA4GH_FHIR_PROFILES['region_studied']
+	component.modifierExtension.append(comp_extention)
+	return component.as_json()
 
 
 def variant_to_fhir(obj):

@@ -22,6 +22,18 @@ GA4GH_FHIR_PROFILES = {
     "extension_description_url": "description",
     "document_reference_status": "current",
     "hts_file": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/HtsFile",
-    "genome_assembly": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly"
+    "genome_assembly": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly",
+    # FHIR
+    "region_studied": "http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/region-studied"
 
+}
+
+
+HL7_GENOMICS_REPORTING = {
+    "gene_studied": {
+        "system": "https://loinc.org",
+        "id": "48018-6",
+        "label": "Gene studied [ID]"
+    },
+    "HGNC": "https://www.genenames.org/"
 }
