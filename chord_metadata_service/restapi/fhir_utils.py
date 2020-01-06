@@ -1,9 +1,10 @@
-from fhirclient.models.fhirdate import FHIRDate
+from datetime import datetime
 from chord_metadata_service.restapi.ga4gh_fhir_profiles import GA4GH_FHIR_PROFILES
 from fhirclient.models import (observation as obs, patient as p, extension, age, coding as c,
-							   codeableconcept, specimen as s, identifier as fhir_indentifier,
-							   annotation as a, range, quantity, fhirreference
-							   )
+							codeableconcept, specimen as s, identifier as fhir_indentifier,
+							annotation as a, range, quantity, fhirreference,
+							documentreference, attachment, fhirdate
+							)
 
 
 # Utils for converting data between formats
@@ -14,7 +15,7 @@ def fhir_patient(obj):
 
 	patient = p.Patient()
 	patient.id = obj.get('id', None)
-	patient.birthDate = FHIRDate(obj.get('date_of_birth', None))
+	patient.birthDate = fhirdate.FHIRDate(obj.get('date_of_birth', None))
 	patient.gender = obj.get('sex', None)
 	patient.active = obj.get('active', None)
 	patient.deceasedBoolean = obj.get('deceased', None)
@@ -89,7 +90,7 @@ def codeable_concepts_fields(field_list, obj):
 			codeable_concepts_extension.valueCodeableConcept = fhir_codeable_concept(obj[field])
 			concept_extensions.append(codeable_concepts_extension)
 	return concept_extensions
-		
+
 
 def fhir_observation(obj):
 	""" Converts phenotypic feature to FHIR Observation. """
@@ -236,28 +237,29 @@ def fhir_codeable_concept(obj):
 	return codeable_concept
 
 
-def hts_file_to_fhir(obj):
-	""" Convert HTSFile record to FHIR Document Reference. """
+def fhir_document_reference(obj):
+	""" Converts HTS file to FHIR DocumentReference. """
 
-	htsfile_record = {}
-	htsfile_record['resourceType'] = 'DocumentReference'
-	htsfile_record['content'] = []
-	content_data = {}
-	content_data['attachment'] = {}
-	content_data['attachment']['url'] = obj.get('uri', None)
+	doc_ref = documentreference.DocumentReference()
+	doc_ref.type = fhir_codeable_concept({"label": obj['hts_format'], "id": obj['hts_format']})
+	# GA4GH requires status with the fixed value
+	doc_ref.status = GA4GH_FHIR_PROFILES['document_reference_status']
+	doc_ref.content = []
+	doc_content = documentreference.DocumentReferenceContent()
+	doc_content.attachment = attachment.Attachment()
+	doc_content.attachment.url = obj['uri']
 	if 'description' in obj.keys():
-		content_data['attachment']['title'] = obj.get('description', None)
-	htsfile_record['content'].append(content_data)
-	htsfile_record['type'] = {}
-	htsfile_record['type']['coding'] = []
-	coding = {}
-	coding['code'] = obj.get('hts_format', None)
-	coding['display'] = obj.get('hts_format', None)
-	htsfile_record['type']['coding'].append(coding)
-	htsfile_record['extension'] = {}
-	htsfile_record['extension']['url'] = 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly'
-	htsfile_record['extension']['valueCode'] = obj.get('genome_assembly', None)
-	return htsfile_record
+		doc_content.attachment.title = obj.get('description', None)
+	doc_ref.content.append(doc_content)
+	doc_ref.indexed = fhirdate.FHIRDate()
+	# check what date it should be  - when it's retrieved or created
+	doc_ref.indexed.date = datetime.now()
+	doc_ref.extension = []
+	genome_assembly = extension.Extension()
+	genome_assembly.url = GA4GH_FHIR_PROFILES['genome_assembly']
+	genome_assembly.valueString = obj['genome_assembly']
+	doc_ref.extension.append(genome_assembly)
+	return doc_ref.as_json()
 
 
 def gene_to_fhir(obj):

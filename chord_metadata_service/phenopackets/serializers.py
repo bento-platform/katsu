@@ -119,7 +119,7 @@ class HtsFileSerializer(GenericSerializer):
 		fields = '__all__'
 		# meta info for converting to FHIR
 		fhir_datatype_plural = 'document_references'
-		class_converter = hts_file_to_fhir
+		class_converter = fhir_document_reference
 
 
 class GeneSerializer(GenericSerializer):

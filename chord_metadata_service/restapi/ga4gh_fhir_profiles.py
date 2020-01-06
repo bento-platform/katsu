@@ -19,5 +19,9 @@ GA4GH_FHIR_PROFILES = {
     # GA4GH guide provides hardcoded values
     "evidence_code": "evidenceCode",
     "extension_id_url": "id",
-    "extension_description_url": "description"
+    "extension_description_url": "description",
+    "document_reference_status": "current",
+    "hts_file": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/HtsFile",
+    "genome_assembly": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly"
+
 }
