@@ -8,33 +8,6 @@ from fhirclient.models import (observation as obs, patient as p, extension, age,
 
 # Utils for converting data between formats
 
-# TODO move to a separate file
-def camel_case_field_names(string):
-	""" Function to convert snake_case field names to camelCase """
-
-	if '_' in string:
-		splitted = string.split('_')
-		capitilized = []
-		capitilized.append(splitted[0])
-		for each in splitted[1:]:
-			capitilized.append(each.title())
-		return ''.join(capitilized)
-	return string
-
-
-def transform_keys(obj):
-	"""
-	This function is needed for validation against DATS schemas that use camelCase.
-	Iterates over a dict and  changes all keys in nested objects to cameCase.
-	"""
-	if isinstance(obj, dict):
-		transformed_obj = {}
-		for key, value in obj.items():
-			if isinstance(value, dict):
-				value = transform_keys(value)
-			transformed_obj[camel_case_field_names(key)] = value
-		return transformed_obj
-
 
 def fhir_patient(obj):
 	""" Converts Individual to FHIR Patient. """
@@ -48,7 +21,6 @@ def fhir_patient(obj):
 	patient.extension = list()
 	# age
 	age_extension = extension.Extension()
-	# TODO move phenopackets-fhir mappings in a separate file
 	age_extension.url = GA4GH_FHIR_PROFILES['individual-age']
 	age_extension.valueAge = age.Age()
 	age_extension.valueAge.unit = obj.get('age', None).get('age', None)

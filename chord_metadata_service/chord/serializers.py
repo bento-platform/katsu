@@ -3,7 +3,7 @@ from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
-from chord_metadata_service.restapi.fhir_utils import transform_keys
+from chord_metadata_service.restapi.utils import transform_keys
 
 from .models import *
 
