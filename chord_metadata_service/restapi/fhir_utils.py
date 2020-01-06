@@ -190,6 +190,10 @@ def fhir_observation(obj):
 				evidence_reference.extension.append(evidence_reference_desc)
 			evidence.extension.append(evidence_reference)
 		observation.extension.append(evidence)
+
+	if 'biosample' in obj.keys():
+		observation.specimen = fhirreference.FHIRReference()
+		observation.specimen.reference = obj.get('biosample', None)
 	return observation.as_json()
 
 
