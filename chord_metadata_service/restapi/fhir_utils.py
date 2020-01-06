@@ -166,7 +166,30 @@ def fhir_observation(obj):
 	concept_extensions = codeable_concepts_fields(['severity', 'modifier', 'onset'], obj)
 	for c in concept_extensions:
 		observation.extension.append(c)
-
+	if 'evidence' in obj.keys():
+		evidence = extension.Extension()
+		evidence.url = GA4GH_FHIR_PROFILES['evidence']
+		evidence.extension = []
+		evidence_code = extension.Extension()
+		evidence_code.url = GA4GH_FHIR_PROFILES['evidence_code']
+		evidence_code.valueCodeableConcept = fhir_codeable_concept(obj['evidence']['evidence_code'])
+		evidence.extension.append(evidence_code)
+		if 'reference' in obj['evidence'].keys():
+			evidence_reference = extension.Extension()
+			evidence_reference.url = GA4GH_FHIR_PROFILES['reference']
+			evidence_reference.extension = []
+			evidence_reference_id = extension.Extension()
+			evidence_reference_id.url = GA4GH_FHIR_PROFILES['extension_id_url']
+			# GA$GH guide requires valueURL but there is no such property
+			evidence_reference_id.valueUri = obj['evidence']['reference']['id']
+			evidence_reference.extension.append(evidence_reference_id)
+			if 'description' in obj['evidence']['reference'].keys():
+				evidence_reference_desc = extension.Extension()
+				evidence_reference_desc.url = GA4GH_FHIR_PROFILES['extension_description_url']
+				evidence_reference_desc.valueString = obj['evidence']['reference'].get('description', None)
+				evidence_reference.extension.append(evidence_reference_desc)
+			evidence.extension.append(evidence_reference)
+		observation.extension.append(evidence)
 	return observation.as_json()
 
 

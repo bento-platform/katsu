@@ -13,5 +13,11 @@ GA4GH_FHIR_PROFILES = {
     "is_control_sample": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-control",
     "severity": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-severity",
     "modifier": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-modifier",
-    "onset": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-onset"
+    "onset": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-onset",
+    "evidence": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/evidence",
+    "reference": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/external-reference",
+    # GA4GH guide provides hardcoded values
+    "evidence_code": "evidenceCode",
+    "extension_id_url": "id",
+    "extension_description_url": "description"
 }
