@@ -247,7 +247,7 @@ class SimplePhenopacketSerializer(GenericSerializer):
 		fields = '__all__'
 		# meta info for converting to FHIR
 		fhir_datatype_plural = 'compositions'
-		class_converter = phenopacket_to_fhir
+		class_converter = fhir_composition
 
 
 	def to_representation(self, instance):

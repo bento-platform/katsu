@@ -3,7 +3,8 @@ from chord_metadata_service.restapi.ga4gh_fhir_profiles import GA4GH_FHIR_PROFIL
 from fhirclient.models import (observation as obs, patient as p, extension, age, coding as c,
 							codeableconcept, specimen as s, identifier as fhir_indentifier,
 							annotation as a, range, quantity, fhirreference,
-							documentreference, attachment, fhirdate, condition as cond
+							documentreference, attachment, fhirdate, condition as cond,
+							composition as comp
 							)
 
 
@@ -289,7 +290,7 @@ def check_disease_onset(disease):
 	"""
 	Phenopackets schema allows age to be represented by ISO8601 string,
 	whereis Pheno-FHIR guide requires it to be represented by CodeableConcept.
-	This function checks how age represented in data.
+	This function checks how age is represented in data.
 	"""
 	if disease.get('onset'):
 		if isinstance(disease.get('onset').get('age'), dict):
@@ -326,48 +327,58 @@ def fhir_condition(obj):
 	return condition.as_json()
 
 
-def phenopacket_to_fhir(obj):
-	""" Phenopacket to FHIR Composition. """
+def _get_section_object(nested_obj, title):
+	""" Internal function to convert phenopacket m2m objects to Composition section. """
 
-	phenopacket_record = {}
-	phenopacket_record['resourceType'] = "Composition"
-	phenopacket_record['id'] = obj.get('id', None)
-	phenopacket_record['meta'] = {}
-	metadata = obj.get('meta_data')
-	if metadata.get('phenopacket_schema_version'):
-		phenopacket_record['meta']['versionId'] = metadata.get(
-			'phenopacket_schema_version'
-			)
-		phenopacket_record['meta']['lastUpdated'] = metadata.get(
-			'created'
-			)
-	if metadata.get('external_references'):
-		phenopacket_record['meta']['source'] = metadata.get(
-			'external_references'
-			)
-	phenopacket_record['meta']['tag'] = metadata.get('resources')
-	phenopacket_record['subject'] = {}
-	phenopacket_record['subject']['reference'] = obj.get('subject')
-	phenopacket_record['section'] = []
-	def _get_section_object(inner_obj, title):
-		""" Internal function to parse phenopacket m2m objects. """
-		section_object = {}
-		section_object['title'] = title
-		section_object['entry'] =[]
-		if isinstance(inner_obj, list):
-			for each in inner_obj:
-				if each.get('id'):
-					section_object['entry'].append(each.get('id', None))
-				else:
-					section_object['entry'].append(each.get('uri', None))
+	section_content = comp.CompositionSection()
+	section_values = GA4GH_FHIR_PROFILES[title]
+	section_content.title = section_values['title']
+	section_content.code = codeableconcept.CodeableConcept()
+	section_content.code.coding = []
+	coding = c.Coding()
+	coding.system = section_values['code']['system']
+	coding.version = section_values['code']['version']
+	coding.code = section_values['code']['code']
+	coding.display = section_values['code']['display']
+	section_content.code.coding.append(coding)
 
+	section_content.entry = []
+	for item in nested_obj:
+		entry = fhirreference.FHIRReference()
+		if item.get('id'):
+			entry.reference = item['id']
 		else:
-			section_object['entry'].append(inner_obj)
-		return section_object
+			entry.reference = item['uri']
+		section_content.entry.append(entry)
+	return section_content
 
-	sections = ['biosamples', 'genes', 'variants', 'diseases', 'hts_files']
+
+def fhir_composition(obj):
+	""" Converts Phenopacket to FHIR Composition. """
+
+	composition = comp.Composition()
+	composition.id = obj['id']
+	composition.subject = fhirreference.FHIRReference()
+	composition.subject.reference = str(obj['subject']['id'])
+	composition.title = GA4GH_FHIR_PROFILES['phenopacket']['title']
+	# elements in Composition required by FHIR spec
+	composition.status = 'preliminary'
+	composition.author = []
+	author = fhirreference.FHIRReference()
+	author.reference = obj['meta_data']['created_by']
+	composition.author.append(author)
+	composition.date = fhirdate.FHIRDate(obj['meta_data']['created'])
+	composition.type = fhir_codeable_concept({
+		"id": GA4GH_FHIR_PROFILES['phenopacket']['code']['code'],
+		"label": GA4GH_FHIR_PROFILES['phenopacket']['title'],
+		"system": GA4GH_FHIR_PROFILES['phenopacket']['code']['system']
+	})
+
+	composition.section = []
+	sections = ['biosamples', 'variants', 'diseases', 'hts_files']
 	for section in sections:
-		if section in obj.keys():
-			entry_value = _get_section_object(obj.get(section, None), section)
-			phenopacket_record['section'].append(entry_value)
-	return phenopacket_record
+		if obj[section]:
+			section_content = _get_section_object(obj.get(section, None), section)
+			composition.section.append(section_content)
+
+	return composition.as_json()

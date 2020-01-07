@@ -1,3 +1,5 @@
+# Allf fixed values provided by Pheno_FHIR Mapping guide
+# TODO split by some logic
 GA4GH_FHIR_PROFILES = {
     "individual-age": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-age",
     "individual-karyotypic-sex": {
@@ -26,7 +28,62 @@ GA4GH_FHIR_PROFILES = {
     # FHIR
     "region_studied": "http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/region-studied",
     "disease-onset": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-onset",
-    "disease-tumor-stage": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-tumor-stage"
+    "disease-tumor-stage": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-tumor-stage",
+    # fixed values for sections in phenopacket-composition
+    # TODO split
+    "phenopacket": {
+        "title": "Phenopacket",
+        "code": {
+            "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/document-type",
+            "code": "phenopacket"
+        }
+    },
+
+    "phenotypic_features": {
+        "title": "Phenotypic Features",
+        "code": {
+            "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
+            "version": "0.1.0",
+            "code": "phenotypic-features",
+            "display": "Phenotypic Features"
+        }
+    },
+    "biosamples": {
+        "title": "Biosamples",
+        "code": {
+            "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
+            "version": "0.1.0",
+            "code": "biosamples",
+            "display": "Biosamples"
+        }
+    },
+    "variants": {
+        "title": "Variants",
+        "code": {
+            "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
+            "version": "0.1.0",
+            "code": "variants",
+            "display": "Variants"
+        }
+    },
+    "diseases": {
+        "title": "Diseases",
+        "code": {
+            "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
+            "version": "0.1.0",
+            "code": "diseases",
+            "display": "Diseases"
+        }
+    },
+    "hts_files": {
+        "title": "HTS Files",
+        "code": {
+            "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
+            "version": "0.1.0",
+            "code": "hts-files",
+            "display": "HTS Files"
+        }
+    }
 }
 
 
