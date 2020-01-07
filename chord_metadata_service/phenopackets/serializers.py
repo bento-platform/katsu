@@ -179,7 +179,7 @@ class DiseaseSerializer(GenericSerializer):
 		fields = '__all__'
 		# meta info for converting to FHIR
 		fhir_datatype_plural = 'conditions'
-		class_converter = disease_to_fhir
+		class_converter = fhir_condition
 
 	def validate_disease_stage(self, value):
 		if isinstance(value, list):

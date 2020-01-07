@@ -3,8 +3,7 @@ from chord_metadata_service.restapi.ga4gh_fhir_profiles import GA4GH_FHIR_PROFIL
 from fhirclient.models import (observation as obs, patient as p, extension, age, coding as c,
 							codeableconcept, specimen as s, identifier as fhir_indentifier,
 							annotation as a, range, quantity, fhirreference,
-							documentreference, attachment, fhirdate,
-							backboneelement
+							documentreference, attachment, fhirdate, condition as cond
 							)
 
 
@@ -317,6 +316,47 @@ def disease_to_fhir(obj):
 			stage_type['type']['coding'].append(coding)
 		disease_record['stage'].append(stage_type)
 	return disease_record
+
+
+def check_disease_onset(disease):
+	"""
+	Phenopackets schema allows age to be represented by ISO8601 string,
+	whereis Pheno-FHIR guide requires it to be represented by CodeableConcept.
+	This function checks how age represented in data.
+	"""
+	if disease.get('onset'):
+		if isinstance(disease.get('onset').get('age'), dict):
+			if disease.get('onset').get('age').get('label') is not None:
+				return True
+	return False
+
+
+def fhir_condition(obj):
+	""" Converts Disease to FHIR Condition. """
+
+	condition = cond.Condition()
+	condition.id = str(obj['id'])
+	condition.code = fhir_codeable_concept(obj['term'])
+	# subject is required by Pheno-FHIR mapping Guide and by FHIR, set to 'unknown'
+	condition.subject = fhirreference.FHIRReference()
+	condition.subject.reference = 'unknown'
+	condition.extension = []
+	onset_extension = extension.Extension()
+	onset_extension.url = GA4GH_FHIR_PROFILES['disease-onset']
+	# only adds disease-onset if it's ontology term
+	# NOTE it is required element by Pheno-FHIR mapping guide but not Phenopackets
+	if check_disease_onset(obj):
+		onset_extension.valueCodeableConcept = fhir_codeable_concept(obj['onset']['age'])
+	condition.extension.append(onset_extension)
+
+	if 'disease_stage' in obj.keys():
+		for item in obj['disease_stage']:
+			disease_stage_extension = extension.Extension()
+			disease_stage_extension.url = GA4GH_FHIR_PROFILES['disease-tumor-stage']
+			disease_stage_extension.valueCodeableConcept = fhir_codeable_concept(item)
+			condition.extension.append(disease_stage_extension)
+
+	return condition.as_json()
 
 
 def phenopacket_to_fhir(obj):

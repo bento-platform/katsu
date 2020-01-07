@@ -24,8 +24,9 @@ GA4GH_FHIR_PROFILES = {
     "hts_file": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/HtsFile",
     "genome_assembly": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly",
     # FHIR
-    "region_studied": "http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/region-studied"
-
+    "region_studied": "http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/region-studied",
+    "disease-onset": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-onset",
+    "disease-tumor-stage": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-tumor-stage"
 }
 
 
