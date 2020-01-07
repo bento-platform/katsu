@@ -292,32 +292,6 @@ def fhir_obs_component_variant(obj):
 	return component.as_json()
 
 
-def disease_to_fhir(obj):
-	""" Disease to FHIR Condition. """
-
-	disease_record = {}
-	disease_record['resourceType'] = 'Condition'
-	disease_record['code'] = []
-	coding = {}
-	coding['coding'] = []
-	coding['coding'].append(fhir_coding(obj, 'term'))
-	disease_record['code'].append(coding)
-	if obj.get('onset'):
-		disease_record['onsetAge'] = {}
-		disease_record['onsetAge']['code'] = obj.get('onset', {}).get('age', None)
-	disease_stages = obj.get('disease_stage', None)
-	if disease_stages:
-		disease_record['stage'] = []
-		stage_type = {}
-		stage_type['type'] = {}
-		stage_type['type']['coding'] = []
-		for coding in disease_stages:
-			coding = fhir_coding(coding)
-			stage_type['type']['coding'].append(coding)
-		disease_record['stage'].append(stage_type)
-	return disease_record
-
-
 def check_disease_onset(disease):
 	"""
 	Phenopackets schema allows age to be represented by ISO8601 string,
