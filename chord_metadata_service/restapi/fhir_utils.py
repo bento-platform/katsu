@@ -278,25 +278,20 @@ def gene_to_fhir(obj):
 	return gene_record
 
 
-def fhir_obs_region_studied(obj):
+def fhir_obs_component_region_studied(obj):
 	""" Gene corresponds to Observation.component."""
-	# GA4GH to FHIR Mapping Guide provides link to
+
+	# GA4GH to FHIR Mapping Guide provides a link to
 	# Genomics Reporting Implementation Guide (STU1) mapping
-	# Genomics Reporting Implementation Guide (STU1)
-	# http://build.fhir.org/ig/HL7/genomics-reporting/region-studied.html
-	component = backboneelement.BackboneElement()
-	component.modifierExtension = []
-	comp_extention = extension.Extension()
-	comp_extention.valueCodeableConcept = fhir_codeable_concept({
-		"id": obj['id'],
-		"label": obj['symbol'],
-		"system": HL7_GENOMICS_REPORTING['HGNC']
-	})
-	# comp_extention.code = fhir_codeable_concept(
-	# 	HL7_GENOMICS_REPORTING['gene_studied']
-	# )
-	comp_extention.url = GA4GH_FHIR_PROFILES['region_studied']
-	component.modifierExtension.append(comp_extention)
+	# http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/region-studied
+
+	component = obs.ObservationComponent()
+	component.code = fhir_codeable_concept(HL7_GENOMICS_REPORTING['observation_component_gene_studied'])
+	component.valueCodeableConcept = fhir_codeable_concept({
+			"id": obj['id'],
+			"label": obj['symbol'],
+			"system": HL7_GENOMICS_REPORTING['HGNC']
+		})
 	return component.as_json()
 
 

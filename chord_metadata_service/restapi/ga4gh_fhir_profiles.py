@@ -30,7 +30,7 @@ GA4GH_FHIR_PROFILES = {
 
 
 HL7_GENOMICS_REPORTING = {
-    "gene_studied": {
+    "observation_component_gene_studied": {
         "system": "https://loinc.org",
         "id": "48018-6",
         "label": "Gene studied [ID]"

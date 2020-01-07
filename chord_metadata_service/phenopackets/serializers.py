@@ -131,8 +131,8 @@ class GeneSerializer(GenericSerializer):
 		model = Gene
 		fields = '__all__'
 		# meta info for converting to FHIR
-		fhir_datatype_plural = 'genes_studied'
-		class_converter = fhir_obs_region_studied
+		fhir_datatype_plural = 'observations'
+		class_converter = fhir_obs_component_region_studied
 
 
 class VariantSerializer(GenericSerializer):
