@@ -35,5 +35,11 @@ HL7_GENOMICS_REPORTING = {
         "id": "48018-6",
         "label": "Gene studied [ID]"
     },
-    "HGNC": "https://www.genenames.org/"
+    "HGNC": "https://www.genenames.org/",
+    "variant": "http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/variant",
+    "observation_component_variant": {
+        "system": "https://loinc.org",
+        "id": "81300-6",
+        "label": "Structural variant [Length]"
+    }
 }

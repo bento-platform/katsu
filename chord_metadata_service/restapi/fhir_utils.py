@@ -277,7 +277,7 @@ def gene_to_fhir(obj):
 	gene_record['coding'].append(coding)
 	return gene_record
 
-import json
+
 def fhir_obs_region_studied(obj):
 	""" Gene corresponds to Observation.component."""
 	# GA4GH to FHIR Mapping Guide provides link to
@@ -300,20 +300,15 @@ def fhir_obs_region_studied(obj):
 	return component.as_json()
 
 
-def variant_to_fhir(obj):
-	""" Variant to FHIR """
-	# TODO check this example
-	# http://build.fhir.org/ig/HL7/genomics-reporting/SNVexample.json.html
+def fhir_obs_component_variant(obj):
+	""" Variant corresponds to Observation.component:variant """
 
-	variant_record = {}
-	variant_record['resourceType'] = 'Observation'
-	variant_record['identifier'] = obj.get('id', None)
-	variant_record['meta'] = {}
-	variant_record['meta']['profile'] = [
-		'http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/variant'
-		]
-
-	return variant_record
+	component = obs.ObservationComponent()
+	component.code = fhir_codeable_concept(HL7_GENOMICS_REPORTING['observation_component_variant'])
+	component.valueCodeableConcept = fhir_codeable_concept(
+		{"id": obj.get('allele_type'), "label": obj.get('allele_type')}
+	)
+	return component.as_json()
 
 
 def disease_to_fhir(obj):

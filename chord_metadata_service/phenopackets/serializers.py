@@ -147,7 +147,7 @@ class VariantSerializer(GenericSerializer):
 		fields = '__all__'
 		# meta info for converting to FHIR
 		fhir_datatype_plural = 'observations'
-		class_converter = variant_to_fhir
+		class_converter = fhir_obs_component_variant
 
 	def to_representation(self, obj):
 		""" Change 'allele_type' field name to allele type value. """
