@@ -265,19 +265,6 @@ def fhir_document_reference(obj):
 	return doc_ref.as_json()
 
 
-def gene_to_fhir(obj):
-	""" Gene to FHIR CodeableConcept. """
-
-	gene_record = {}
-	gene_record['resourceType'] = 'CodeableConcept'
-	gene_record['coding'] = []
-	coding = {}
-	coding['code'] = obj.get('id', None)
-	coding['display'] = obj.get('symbol', None)
-	gene_record['coding'].append(coding)
-	return gene_record
-
-
 def fhir_obs_component_region_studied(obj):
 	""" Gene corresponds to Observation.component."""
 
