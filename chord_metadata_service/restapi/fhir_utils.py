@@ -63,23 +63,16 @@ def fhir_coding(obj, value=None):
 	return coding
 
 
-def procedure_to_fhir(obj):
-	""" Convert procedure to FHIR Procedure. """
+def fhir_specimen_collection(obj):
+	""" Converts Procedure to FHIR Specimen collection. """
 
-	procedure = {}
-	procedure['resourceType'] = 'Procedure'
-	if 'id' in obj.keys():
-		procedure['identifier'] = obj.get('id', None)
-	procedure['code'] = {}
-	procedure['code']['coding'] = []
-	coding = fhir_coding(obj, 'code')
-	procedure['code']['coding'].append(coding)
-	if obj.get('body_site'):
-		procedure['bodySite'] = {}
-		procedure['bodySite']['coding'] = []
-		body_site_coding = fhir_coding(obj, 'body_site')
-		procedure['bodySite']['coding'].append(body_site_coding)
-	return procedure
+	collection = s.SpecimenCollection()
+	collection.id = str(obj['id'])
+	collection.method = fhir_codeable_concept(obj['code'])
+	if 'body_site' in obj.keys():
+		collection.bodySite = fhir_codeable_concept(obj['body_site'])
+	return collection.as_json()
+
 
 def codeable_concepts_fields(field_list, obj):
 	concept_extensions = []

@@ -100,8 +100,8 @@ class ProcedureSerializer(GenericSerializer):
 		model = Procedure
 		fields = '__all__'
 		# meta info for converting to FHIR
-		fhir_datatype_plural = 'procedures'
-		class_converter = procedure_to_fhir
+		fhir_datatype_plural = 'specimen.collections'
+		class_converter = fhir_specimen_collection
 
 	def create(self, validated_data):
 		if validated_data.get('body_site'):
