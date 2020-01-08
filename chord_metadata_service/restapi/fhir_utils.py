@@ -12,6 +12,24 @@ from fhirclient.models import (observation as obs, patient as p, extension, age,
 # Utils for converting data between formats
 
 
+def fhir_age(obj, mapping, field):
+	""" Generic function to convert Age or AgeRange to FHIR Age. """
+
+	age_extension = extension.Extension()
+	age_extension.url = mapping
+	if isinstance(obj[field]['age'], dict):
+		age_extension.valueRange = range.Range()
+		age_extension.valueRange.low = quantity.Quantity()
+		# TODO check this nesting
+		age_extension.valueRange.low.unit = obj[field]['age']['start']['age']
+		age_extension.valueRange.high = quantity.Quantity()
+		age_extension.valueRange.high.unit = obj[field]['age']['end']['age']
+	else:
+		age_extension.valueAge = age.Age()
+		age_extension.valueAge.unit = obj[field]['age']
+	return age_extension
+
+
 def fhir_patient(obj):
 	""" Converts Individual to FHIR Patient. """
 
@@ -23,22 +41,9 @@ def fhir_patient(obj):
 	patient.deceasedBoolean = obj.get('deceased', None)
 	patient.extension = list()
 	# age
-	# TODO add separate func for age
 	if 'age' in obj.keys():
-		age_extension = extension.Extension()
-		age_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['age']
-		if isinstance(obj['age']['age'], dict):
-			age_extension.valueRange = range.Range()
-			age_extension.valueRange.low = quantity.Quantity()
-			# TOD check this nesting
-			age_extension.valueRange.low.unit = obj['age']['age']['start']['age']
-			age_extension.valueRange.high = quantity.Quantity()
-			age_extension.valueRange.high.unit = obj['age']['age']['end']['age']
-			patient.extension.append(age_extension)
-		else:
-			age_extension.valueAge = age.Age()
-			age_extension.valueAge.unit = obj['age']['age']
-			patient.extension.append(age_extension)
+		age_extension = fhir_age(obj, PHENOPACKETS_ON_FHIR_MAPPING['individual']['age'], 'age')
+		patient.extension.append(age_extension)
 	# karyotypic_sex
 	karyotypic_sex_extension = extension.Extension()
 	karyotypic_sex_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['karyotypic_sex']['url']
@@ -190,24 +195,12 @@ def fhir_specimen(obj):
 	# extensions
 	specimen.extension = []
 	# individual_age_at_collection
-	# TODO add separate func for age
 	if 'individual_age_at_collection' in obj.keys():
-		ind_age_at_collection_extension = extension.Extension()
-		ind_age_at_collection_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['biosample']\
-			['individual_age_at_collection']
-		if isinstance(obj['individual_age_at_collection']['age'], dict):
-			ind_age_at_collection_extension.valueRange = range.Range()
-			ind_age_at_collection_extension.valueRange.low = quantity.Quantity()
-			ind_age_at_collection_extension.valueRange.low.unit = obj['individual_age_at_collection']['age']\
-				['start']['age']
-			ind_age_at_collection_extension.valueRange.high = quantity.Quantity()
-			ind_age_at_collection_extension.valueRange.high.unit = obj['individual_age_at_collection']['age']\
-				['end']['age']
-			specimen.extension.append(ind_age_at_collection_extension)
-		else:
-			ind_age_at_collection_extension.valueAge = age.Age()
-			ind_age_at_collection_extension.valueAge.unit = obj['individual_age_at_collection']['age']
-			specimen.extension.append(ind_age_at_collection_extension)
+		ind_age_at_collection_extension = fhir_age(
+			obj, PHENOPACKETS_ON_FHIR_MAPPING['biosample']['individual_age_at_collection'],
+			'individual_age_at_collection'
+		)
+		specimen.extension.append(ind_age_at_collection_extension)
 	concept_extensions = codeable_concepts_fields(
 		['histological_diagnosis', 'tumor_progression', 'tumor_grade', 'diagnostic_markers'],
 		'biosample', obj
