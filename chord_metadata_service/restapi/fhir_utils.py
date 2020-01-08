@@ -1,5 +1,5 @@
 from datetime import datetime
-from chord_metadata_service.restapi.ga4gh_fhir_profiles import GA4GH_FHIR_PROFILES, HL7_GENOMICS_REPORTING
+from chord_metadata_service.restapi.ga4gh_fhir_profiles import HL7_GENOMICS_REPORTING, PHENOPACKETS_ON_FHIR_MAPPING
 from fhirclient.models import (observation as obs, patient as p, extension, age, coding as c,
 							codeableconcept, specimen as s, identifier as fhir_indentifier,
 							annotation as a, range, quantity, fhirreference,
@@ -23,24 +23,24 @@ def fhir_patient(obj):
 	patient.extension = list()
 	# age
 	age_extension = extension.Extension()
-	age_extension.url = GA4GH_FHIR_PROFILES['individual-age']
+	age_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['age']
 	age_extension.valueAge = age.Age()
 	age_extension.valueAge.unit = obj.get('age', None).get('age', None)
 	patient.extension.append(age_extension)
 	# karyotypic_sex
 	karyotypic_sex_extension = extension.Extension()
-	karyotypic_sex_extension.url = GA4GH_FHIR_PROFILES['individual-karyotypic-sex']['url']
+	karyotypic_sex_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['karyotypic_sex']['url']
 	karyotypic_sex_extension.valueCodeableConcept = codeableconcept.CodeableConcept()
 	karyotypic_sex_extension.valueCodeableConcept.coding = list()
 	coding = c.Coding()
 	coding.display = obj.get('karyotypic_sex', None)
 	coding.code = obj.get('karyotypic_sex', None)
-	coding.system = GA4GH_FHIR_PROFILES['individual-karyotypic-sex']['coding_system']
+	coding.system = PHENOPACKETS_ON_FHIR_MAPPING['individual']['karyotypic_sex']['system']
 	karyotypic_sex_extension.valueCodeableConcept.coding.append(coding)
 	patient.extension.append(karyotypic_sex_extension)
 	# taxonomy
 	taxonomy_extension = extension.Extension()
-	taxonomy_extension.url = GA4GH_FHIR_PROFILES['individual-taxonomy']
+	taxonomy_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['taxonomy']
 	taxonomy_extension.valueCodeableConcept = codeableconcept.CodeableConcept()
 	taxonomy_extension.valueCodeableConcept.coding = list()
 	coding = c.Coding()
@@ -75,12 +75,12 @@ def fhir_specimen_collection(obj):
 	return collection.as_json()
 
 
-def codeable_concepts_fields(field_list, obj):
+def codeable_concepts_fields(field_list, profile, obj):
 	concept_extensions = []
 	for field in field_list:
 		if field in obj.keys():
 			codeable_concepts_extension = extension.Extension()
-			codeable_concepts_extension.url = GA4GH_FHIR_PROFILES[field]
+			codeable_concepts_extension.url = PHENOPACKETS_ON_FHIR_MAPPING[profile][field]
 			codeable_concepts_extension.valueCodeableConcept = fhir_codeable_concept(obj[field])
 			concept_extensions.append(codeable_concepts_extension)
 	return concept_extensions
@@ -107,29 +107,31 @@ def fhir_observation(obj):
 			{"label": "Negative", "id": "NEG"}
 		)
 	observation.extension = []
-	concept_extensions = codeable_concepts_fields(['severity', 'modifier', 'onset'], obj)
+	concept_extensions = codeable_concepts_fields(
+		['severity', 'modifier', 'onset'], 'phenotypic_feature', obj
+	)
 	for c in concept_extensions:
 		observation.extension.append(c)
 	if 'evidence' in obj.keys():
 		evidence = extension.Extension()
-		evidence.url = GA4GH_FHIR_PROFILES['evidence']
+		evidence.url = PHENOPACKETS_ON_FHIR_MAPPING['phenotypic_feature']['evidence']['url']
 		evidence.extension = []
 		evidence_code = extension.Extension()
-		evidence_code.url = GA4GH_FHIR_PROFILES['evidence_code']
+		evidence_code.url = PHENOPACKETS_ON_FHIR_MAPPING['phenotypic_feature']['evidence']['evidence_code']
 		evidence_code.valueCodeableConcept = fhir_codeable_concept(obj['evidence']['evidence_code'])
 		evidence.extension.append(evidence_code)
 		if 'reference' in obj['evidence'].keys():
 			evidence_reference = extension.Extension()
-			evidence_reference.url = GA4GH_FHIR_PROFILES['reference']
+			evidence_reference.url = PHENOPACKETS_ON_FHIR_MAPPING['external_reference']['url']
 			evidence_reference.extension = []
 			evidence_reference_id = extension.Extension()
-			evidence_reference_id.url = GA4GH_FHIR_PROFILES['extension_id_url']
+			evidence_reference_id.url = PHENOPACKETS_ON_FHIR_MAPPING['external_reference']['id_url']
 			# GA$GH guide requires valueURL but there is no such property
 			evidence_reference_id.valueUri = obj['evidence']['reference']['id']
 			evidence_reference.extension.append(evidence_reference_id)
 			if 'description' in obj['evidence']['reference'].keys():
 				evidence_reference_desc = extension.Extension()
-				evidence_reference_desc.url = GA4GH_FHIR_PROFILES['extension_description_url']
+				evidence_reference_desc.url = PHENOPACKETS_ON_FHIR_MAPPING['external_reference']['description_url']
 				evidence_reference_desc.valueString = obj['evidence']['reference'].get('description', None)
 				evidence_reference.extension.append(evidence_reference_desc)
 			evidence.extension.append(evidence_reference)
@@ -178,7 +180,7 @@ def fhir_specimen(obj):
 	# individual_age_at_collection
 	if 'individual_age_at_collection' in obj.keys():
 		ind_age_at_collection_extension = extension.Extension()
-		ind_age_at_collection_extension.url = GA4GH_FHIR_PROFILES['biosample-individual-age-at-collection']
+		ind_age_at_collection_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['biosample']['individual_age_at_collection']
 		if isinstance(obj['individual_age_at_collection']['age'], dict):
 			ind_age_at_collection_extension.valueRange = range.Range()
 			ind_age_at_collection_extension.valueRange.low = quantity.Quantity()
@@ -192,19 +194,16 @@ def fhir_specimen(obj):
 			ind_age_at_collection_extension.valueAge = age.Age()
 			ind_age_at_collection_extension.valueAge.unit = obj['individual_age_at_collection']['age']
 			specimen.extension.append(ind_age_at_collection_extension)
-	codeable_concepts_fields = [
-		'histological_diagnosis', 'tumor_progression',
-		'tumor_grade', 'diagnostic_markers'
-	]
-	for field in codeable_concepts_fields:
-		if field in obj.keys():
-			codeable_concepts_extension = extension.Extension()
-			codeable_concepts_extension.url = GA4GH_FHIR_PROFILES[field]
-			codeable_concepts_extension.valueCodeableConcept = fhir_codeable_concept(obj[field])
-			specimen.extension.append(codeable_concepts_extension)
+	concept_extensions = codeable_concepts_fields(
+		['histological_diagnosis', 'tumor_progression', 'tumor_grade', 'diagnostic_markers'],
+		'biosample', obj
+	)
+	for concept in concept_extensions:
+		specimen.extension.append(concept)
+
 	if 'is_control_sample' in obj.keys():
 		control_extension = extension.Extension()
-		control_extension.url = GA4GH_FHIR_PROFILES['is_control_sample']
+		control_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['biosample']['is_control_sample']
 		control_extension.valueBoolean = obj['is_control_sample']
 		specimen.extension.append(control_extension)
 	# TODO 2m extensions - references
@@ -239,7 +238,7 @@ def fhir_document_reference(obj):
 	doc_ref = documentreference.DocumentReference()
 	doc_ref.type = fhir_codeable_concept({"label": obj['hts_format'], "id": obj['hts_format']})
 	# GA4GH requires status with the fixed value
-	doc_ref.status = GA4GH_FHIR_PROFILES['document_reference_status']
+	doc_ref.status = PHENOPACKETS_ON_FHIR_MAPPING['hts_file']['status']
 	doc_ref.content = []
 	doc_content = documentreference.DocumentReferenceContent()
 	doc_content.attachment = attachment.Attachment()
@@ -252,7 +251,7 @@ def fhir_document_reference(obj):
 	doc_ref.indexed.date = datetime.now()
 	doc_ref.extension = []
 	genome_assembly = extension.Extension()
-	genome_assembly.url = GA4GH_FHIR_PROFILES['genome_assembly']
+	genome_assembly.url = PHENOPACKETS_ON_FHIR_MAPPING['hts_file']['genome_assembly']
 	genome_assembly.valueString = obj['genome_assembly']
 	doc_ref.extension.append(genome_assembly)
 	return doc_ref.as_json()
@@ -310,7 +309,7 @@ def fhir_condition(obj):
 	condition.subject.reference = 'unknown'
 	condition.extension = []
 	onset_extension = extension.Extension()
-	onset_extension.url = GA4GH_FHIR_PROFILES['disease-onset']
+	onset_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['disease']['onset']
 	# only adds disease-onset if it's ontology term
 	# NOTE it is required element by Pheno-FHIR mapping guide but not Phenopackets
 	if check_disease_onset(obj):
@@ -320,7 +319,7 @@ def fhir_condition(obj):
 	if 'disease_stage' in obj.keys():
 		for item in obj['disease_stage']:
 			disease_stage_extension = extension.Extension()
-			disease_stage_extension.url = GA4GH_FHIR_PROFILES['disease-tumor-stage']
+			disease_stage_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['disease']['disease_stage']
 			disease_stage_extension.valueCodeableConcept = fhir_codeable_concept(item)
 			condition.extension.append(disease_stage_extension)
 
@@ -331,7 +330,7 @@ def _get_section_object(nested_obj, title):
 	""" Internal function to convert phenopacket m2m objects to Composition section. """
 
 	section_content = comp.CompositionSection()
-	section_values = GA4GH_FHIR_PROFILES[title]
+	section_values = PHENOPACKETS_ON_FHIR_MAPPING['phenopacket'][title]
 	section_content.title = section_values['title']
 	section_content.code = codeableconcept.CodeableConcept()
 	section_content.code.coding = []
@@ -346,7 +345,7 @@ def _get_section_object(nested_obj, title):
 	for item in nested_obj:
 		entry = fhirreference.FHIRReference()
 		if item.get('id'):
-			entry.reference = item['id']
+			entry.reference = str(item['id'])
 		else:
 			entry.reference = item['uri']
 		section_content.entry.append(entry)
@@ -360,7 +359,7 @@ def fhir_composition(obj):
 	composition.id = obj['id']
 	composition.subject = fhirreference.FHIRReference()
 	composition.subject.reference = str(obj['subject']['id'])
-	composition.title = GA4GH_FHIR_PROFILES['phenopacket']['title']
+	composition.title = PHENOPACKETS_ON_FHIR_MAPPING['phenopacket']['title']
 	# elements in Composition required by FHIR spec
 	composition.status = 'preliminary'
 	composition.author = []
@@ -369,9 +368,9 @@ def fhir_composition(obj):
 	composition.author.append(author)
 	composition.date = fhirdate.FHIRDate(obj['meta_data']['created'])
 	composition.type = fhir_codeable_concept({
-		"id": GA4GH_FHIR_PROFILES['phenopacket']['code']['code'],
-		"label": GA4GH_FHIR_PROFILES['phenopacket']['title'],
-		"system": GA4GH_FHIR_PROFILES['phenopacket']['code']['system']
+		"id": PHENOPACKETS_ON_FHIR_MAPPING['phenopacket']['code']['code'],
+		"label": PHENOPACKETS_ON_FHIR_MAPPING['phenopacket']['title'],
+		"system": PHENOPACKETS_ON_FHIR_MAPPING['phenopacket']['code']['system']
 	})
 
 	composition.section = []

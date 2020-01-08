@@ -17,7 +17,52 @@ PHENOPACKETS_ON_FHIR_MAPPING = {
             "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/document-type",
             "code": "phenopacket"
         },
-        "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/Phenopacket"
+        "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/Phenopacket",
+        "phenotypic_features": {
+            "title": "Phenotypic Features",
+            "code": {
+                "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
+                "version": "0.1.0",
+                "code": "phenotypic-features",
+                "display": "Phenotypic Features"
+            }
+        },
+        "biosamples": {
+                "title": "Biosamples",
+                "code": {
+                    "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
+                    "version": "0.1.0",
+                    "code": "biosamples",
+                    "display": "Biosamples"
+                }
+            },
+        "variants": {
+            "title": "Variants",
+            "code": {
+                "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
+                "version": "0.1.0",
+                "code": "variants",
+                "display": "Variants"
+            }
+        },
+        "diseases": {
+            "title": "Diseases",
+            "code": {
+                "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
+                "version": "0.1.0",
+                "code": "diseases",
+                "display": "Diseases"
+            }
+        },
+        "hts_files": {
+            "title": "HTS Files",
+            "code": {
+                "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
+                "version": "0.1.0",
+                "code": "hts-files",
+                "display": "HTS Files"
+            }
+        }
     },
     "biosample": {
         "title": "Biosample",
@@ -39,14 +84,26 @@ PHENOPACKETS_ON_FHIR_MAPPING = {
             "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/evidence",
             # fixed value
             "evidence_code": "evidenceCode"
-
         }
-
-
+    },
+    "external_reference": {
+        "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/external-reference",
+        # fixed values
+        "id_url": "id",
+        "description_url": "description"
+    },
+    "hts_file": {
+        "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/HtsFile",
+        "genome_assembly": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly",
+        # fixed value
+        "status": "current",
+        "hts_format": "http://ga4gh.org/fhir/phenopackets/CodeSystem/hts-format"
+    },
+    "disease": {
+        "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/Disease",
+        "onset": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-onset",
+        "disease_stage": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-tumor-stage",
     }
-    
-
-
 }
 
 
