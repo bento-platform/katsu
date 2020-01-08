@@ -23,11 +23,22 @@ def fhir_patient(obj):
 	patient.deceasedBoolean = obj.get('deceased', None)
 	patient.extension = list()
 	# age
-	age_extension = extension.Extension()
-	age_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['age']
-	age_extension.valueAge = age.Age()
-	age_extension.valueAge.unit = obj.get('age', None).get('age', None)
-	patient.extension.append(age_extension)
+	# TODO add separate func for age
+	if 'age' in obj.keys():
+		age_extension = extension.Extension()
+		age_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['age']
+		if isinstance(obj['age']['age'], dict):
+			age_extension.valueRange = range.Range()
+			age_extension.valueRange.low = quantity.Quantity()
+			# TOD check this nesting
+			age_extension.valueRange.low.unit = obj['age']['age']['start']['age']
+			age_extension.valueRange.high = quantity.Quantity()
+			age_extension.valueRange.high.unit = obj['age']['age']['end']['age']
+			patient.extension.append(age_extension)
+		else:
+			age_extension.valueAge = age.Age()
+			age_extension.valueAge.unit = obj['age']['age']
+			patient.extension.append(age_extension)
 	# karyotypic_sex
 	karyotypic_sex_extension = extension.Extension()
 	karyotypic_sex_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['karyotypic_sex']['url']
@@ -179,6 +190,7 @@ def fhir_specimen(obj):
 	# extensions
 	specimen.extension = []
 	# individual_age_at_collection
+	# TODO add separate func for age
 	if 'individual_age_at_collection' in obj.keys():
 		ind_age_at_collection_extension = extension.Extension()
 		ind_age_at_collection_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['biosample']\
