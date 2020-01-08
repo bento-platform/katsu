@@ -1,5 +1,6 @@
 from datetime import datetime
-from chord_metadata_service.restapi.ga4gh_fhir_profiles import HL7_GENOMICS_REPORTING, PHENOPACKETS_ON_FHIR_MAPPING
+from chord_metadata_service.restapi.phenopackets_on_fhir_mapping import PHENOPACKETS_ON_FHIR_MAPPING
+from chord_metadata_service.restapi.hl7_genomics_mapping import HL7_GENOMICS_MAPPING
 from fhirclient.models import (observation as obs, patient as p, extension, age, coding as c,
 							codeableconcept, specimen as s, identifier as fhir_indentifier,
 							annotation as a, range, quantity, fhirreference,
@@ -265,11 +266,11 @@ def fhir_obs_component_region_studied(obj):
 	# http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/region-studied
 
 	component = obs.ObservationComponent()
-	component.code = fhir_codeable_concept(HL7_GENOMICS_REPORTING['observation_component_gene_studied'])
+	component.code = fhir_codeable_concept(HL7_GENOMICS_MAPPING['gene']['gene_studied_code'])
 	component.valueCodeableConcept = fhir_codeable_concept({
 			"id": obj['id'],
 			"label": obj['symbol'],
-			"system": HL7_GENOMICS_REPORTING['HGNC']
+			"system": HL7_GENOMICS_MAPPING['gene']['gene_studied_value']['system']
 		})
 	return component.as_json()
 
@@ -278,7 +279,7 @@ def fhir_obs_component_variant(obj):
 	""" Variant corresponds to Observation.component:variant """
 
 	component = obs.ObservationComponent()
-	component.code = fhir_codeable_concept(HL7_GENOMICS_REPORTING['observation_component_variant'])
+	component.code = fhir_codeable_concept(HL7_GENOMICS_MAPPING['variant']['variant_length_code'])
 	component.valueCodeableConcept = fhir_codeable_concept(
 		{"id": obj.get('allele_type'), "label": obj.get('allele_type')}
 	)
