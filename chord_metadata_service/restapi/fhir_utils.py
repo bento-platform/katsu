@@ -181,7 +181,8 @@ def fhir_specimen(obj):
 	# individual_age_at_collection
 	if 'individual_age_at_collection' in obj.keys():
 		ind_age_at_collection_extension = extension.Extension()
-		ind_age_at_collection_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['biosample']['individual_age_at_collection']
+		ind_age_at_collection_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['biosample']\
+			['individual_age_at_collection']
 		if isinstance(obj['individual_age_at_collection']['age'], dict):
 			ind_age_at_collection_extension.valueRange = range.Range()
 			ind_age_at_collection_extension.valueRange.low = quantity.Quantity()
