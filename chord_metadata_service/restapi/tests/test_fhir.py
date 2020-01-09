@@ -92,6 +92,22 @@ class FHIRPhenotypicFeatureTest(APITestCase):
                          'description')
 
 
+class FHIRProcedureTest(APITestCase):
+
+    def setUp(self):
+        self.valid_procedure = VALID_PROCEDURE_1
+
+    def test_get_fhir(self):
+        response = get_response('procedure-list', self.valid_procedure)
+        get_resp = self.client.get('/api/procedures?format=fhir')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        get_resp_obj = get_resp.json()
+        print(get_resp_obj)
+        self.assertIsNotNone(get_resp_obj['specimen.collections'][0]['method'])
+        self.assertIsInstance(get_resp_obj['specimen.collections'][0]['bodySite'], dict)
+        self.assertIsNot(get_resp_obj['specimen.collections'][0]['method']['coding'], [])
+
+
 class FHIRBiosampleTest(APITestCase):
     """ Test module for creating an Biosample. """
 
@@ -100,7 +116,7 @@ class FHIRBiosampleTest(APITestCase):
         self.procedure = VALID_PROCEDURE_1
         self.valid_payload = valid_biosample_1(self.individual.id, self.procedure)
 
-    def test_create_biosample(self):
+    def test_get_fhir(self):
         """ POST a new biosample. """
 
         response = get_response('biosample-list', self.valid_payload)
@@ -123,7 +139,7 @@ class FHIRHtsFileTest(APITestCase):
     def setUp(self):
         self.hts_file = VALID_HTS_FILE
 
-    def test_hts_file(self):
+    def test_get_fhir(self):
         response = get_response('htsfile-list', self.hts_file)
         get_resp = self.client.get('/api/htsfiles?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
@@ -143,7 +159,7 @@ class FHIRGeneTest(APITestCase):
     def setUp(self):
         self.gene = VALID_GENE_1
 
-    def test_gene(self):
+    def test_get_fhir(self):
         response = get_response('gene-list', self.gene)
         get_resp = self.client.get('/api/genes?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
@@ -163,7 +179,7 @@ class FHIRVariantTest(APITestCase):
     def setUp(self):
         self.variant = VALID_VARIANT_1
 
-    def test_variant(self):
+    def test_get_fhir(self):
         response = get_response('variant-list', self.variant)
         get_resp = self.client.get('/api/variants?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
@@ -182,7 +198,7 @@ class FHIRDiseaseTest(APITestCase):
     def setUp(self):
         self.disease = VALID_DISEASE_1
 
-    def test_disease(self):
+    def test_get_fhir(self):
         response = get_response('disease-list', self.disease)
         get_resp = self.client.get('/api/diseases?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
