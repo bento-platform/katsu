@@ -83,3 +83,5 @@ class FHIRPhenotypicFeatureTest(APITestCase):
         self.assertEqual(get_resp_obj['observations'][0]['interpretation']['coding'][0]['code'], 'POS')
         self.assertEqual(get_resp_obj['observations'][0]['extension'][3]['url'],
                               'http://ga4gh.org/fhir/phenopackets/StructureDefinition/evidence')
+        self.assertEqual(get_resp_obj['observations'][0]['extension'][3]['extension'][1]['extension'][1]['url'],
+                         'description')
