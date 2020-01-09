@@ -151,3 +151,24 @@ class FHIRGeneTest(APITestCase):
         self.assertIsInstance(get_resp_obj['observations'][0]['valueCodeableConcept']['coding'], list)
         self.assertEqual(get_resp_obj['observations'][0]['valueCodeableConcept']['coding'][0]['system'],
                          'https://www.genenames.org/')
+
+
+class FHIRVariantTest(APITestCase):
+
+    def setUp(self):
+        self.variant = VALID_VARIANT_1
+        self.variant_2 = VALID_VARIANT_2
+
+    def test_variant(self):
+        response = get_response('variant-list', self.variant)
+        get_resp = self.client.get('/api/variants?format=fhir')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        get_resp_obj = get_resp.json()
+        print(get_resp_obj)
+        self.assertIsInstance(get_resp_obj['observations'], list)
+        self.assertIsInstance(get_resp_obj['observations'][0]['code']['coding'], list)
+        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['code'], '81300-6')
+        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['display'], 'Structural variant [Length]')
+        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['system'], 'https://loinc.org')
+        self.assertEqual(get_resp_obj['observations'][0]['valueCodeableConcept']['coding'][0]['code'],
+                         get_resp_obj['observations'][0]['valueCodeableConcept']['coding'][0]['display'])
