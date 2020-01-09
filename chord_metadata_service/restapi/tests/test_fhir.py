@@ -123,7 +123,6 @@ class FHIRHtsFileTest(APITestCase):
         get_resp = self.client.get('/api/htsfiles?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
-        print(get_resp_obj)
         self.assertEqual(get_resp_obj['document_references'][0]['resourceType'], 'DocumentReference')
         self.assertIsInstance(get_resp_obj['document_references'][0]['content'], list)
         self.assertIsNotNone(get_resp_obj['document_references'][0]['content'][0]['attachment']['url'])
@@ -132,3 +131,23 @@ class FHIRHtsFileTest(APITestCase):
                          get_resp_obj['document_references'][0]['type']['coding'][0]['display'])
         self.assertEqual(get_resp_obj['document_references'][0]['extension'][0]['url'],
                          'http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly')
+
+
+class FHIRGeneTest(APITestCase):
+
+    def setUp(self):
+        self.gene = VALID_GENE_1
+
+    def test_gene(self):
+        response = get_response('gene-list', self.gene)
+        get_resp = self.client.get('/api/genes?format=fhir')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        get_resp_obj = get_resp.json()
+        self.assertIsInstance(get_resp_obj['observations'], list)
+        self.assertIsInstance(get_resp_obj['observations'][0]['code']['coding'], list)
+        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['code'], '48018-6')
+        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['display'], 'Gene studied [ID]')
+        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['system'], 'https://loinc.org')
+        self.assertIsInstance(get_resp_obj['observations'][0]['valueCodeableConcept']['coding'], list)
+        self.assertEqual(get_resp_obj['observations'][0]['valueCodeableConcept']['coding'][0]['system'],
+                         'https://www.genenames.org/')
