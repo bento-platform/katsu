@@ -1,5 +1,6 @@
 import json
 
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -49,6 +50,7 @@ class WorkflowTest(APITestCase):
 
 
 class IngestTest(APITestCase):
+    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def setUp(self) -> None:
         r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
@@ -57,6 +59,7 @@ class IngestTest(APITestCase):
                              content_type="application/json")
         self.dataset = r.json()
 
+    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_ingest(self):
         # No ingestion body
         r = self.client.post(reverse("ingest"), content_type="application/json")

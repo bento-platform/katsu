@@ -7,7 +7,8 @@ import uuid
 
 from dateutil.parser import isoparse
 
-from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.decorators import api_view, permission_classes, renderer_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 
@@ -54,11 +55,13 @@ class WDLRenderer(BaseRenderer):
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def workflow_list(_request):
     return Response(METADATA_WORKFLOWS)
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def workflow_item(_request, workflow_id):
     if not workflow_exists(workflow_id, METADATA_WORKFLOWS):
         return Response(status=404)
@@ -67,6 +70,7 @@ def workflow_item(_request, workflow_id):
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 @renderer_classes([WDLRenderer])
 def workflow_file(_request, workflow_id):
     if not workflow_exists(workflow_id, METADATA_WORKFLOWS):
@@ -96,6 +100,8 @@ def create_phenotypic_feature(pf):
 
 @api_view(["POST"])
 def ingest(request):
+    # Private ingest endpoints are protected by URL namespace, not by Django permissions.
+
     # TODO: Better errors
     # TODO: Schema for OpenAPI doc
     # TODO: Use serializers with basic objects and maybe some more complex ones too (but for performance, this might

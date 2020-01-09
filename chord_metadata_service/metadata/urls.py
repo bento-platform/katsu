@@ -19,6 +19,7 @@ from chord_metadata_service.restapi import api_views, urls as restapi_urls
 from chord_metadata_service.chord import views_ingest, views_search
 from rest_framework.schemas import get_schema_view
 
+# TODO: django.conf.settings breaks reverse(), how to import properly?
 from .settings import DEBUG
 
 

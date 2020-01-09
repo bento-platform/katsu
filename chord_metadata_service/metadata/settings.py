@@ -27,6 +27,9 @@ SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("CHORD_DEBUG", "true").lower() == "true"
 
+# SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
+AUTH_OVERRIDE = DEBUG  # TODO: Separate environment variable?
+
 ALLOWED_HOSTS = [os.environ.get("CHORD_HOST", "localhost")]
 if DEBUG:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
@@ -124,7 +127,8 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
-    )
+    ),
+    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly']
 }
 
 # Password validation

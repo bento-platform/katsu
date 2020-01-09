@@ -2,6 +2,7 @@ from rest_framework import viewsets
 
 from chord_metadata_service.phenopackets.api_views import LargeResultsSetPagination
 from .models import *
+from .permissions import OverrideOrSuperUserOnly
 from .serializers import *
 
 
@@ -20,6 +21,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all().order_by("identifier")
     serializer_class = ProjectSerializer
     pagination_class = LargeResultsSetPagination
+    permission_classes = [OverrideOrSuperUserOnly]  # Explicit
 
 
 class DatasetViewSet(viewsets.ModelViewSet):
@@ -34,6 +36,7 @@ class DatasetViewSet(viewsets.ModelViewSet):
     queryset = Dataset.objects.all().order_by("identifier")
     serializer_class = DatasetSerializer
     pagination_class = LargeResultsSetPagination
+    permission_classes = [OverrideOrSuperUserOnly]  # Explicit
 
 
 class TableOwnershipViewSet(viewsets.ModelViewSet):
@@ -49,3 +52,4 @@ class TableOwnershipViewSet(viewsets.ModelViewSet):
     queryset = TableOwnership.objects.all().order_by("table_id")
     serializer_class = TableOwnershipSerializer
     pagination_class = LargeResultsSetPagination
+    permission_classes = [OverrideOrSuperUserOnly]  # Explicit
