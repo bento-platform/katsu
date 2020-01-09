@@ -168,7 +168,7 @@ def fhir_specimen(obj):
 	specimen.identifier = []
 	# id
 	identifier = fhir_indentifier.Identifier()
-	identifier.value = obj.get('id', None)
+	identifier.value = obj['id']
 	specimen.identifier.append(identifier)
 	# individual - subject property in FHIR is mandatory for a specimen
 	specimen.subject = fhirreference.FHIRReference()
@@ -177,8 +177,8 @@ def fhir_specimen(obj):
 	specimen.type = codeableconcept.CodeableConcept()
 	specimen.type.coding = []
 	coding = c.Coding()
-	coding.code = obj.get('sampled_tissue', None).get('id', None)
-	coding.display = obj.get('sampled_tissue', None).get('label', None)
+	coding.code = obj['sampled_tissue']['id']
+	coding.display = obj['sampled_tissue']['label']
 	specimen.type.coding.append(coding)
 	# description
 	if 'description' in obj.keys():

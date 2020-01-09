@@ -85,3 +85,30 @@ class FHIRPhenotypicFeatureTest(APITestCase):
                               'http://ga4gh.org/fhir/phenopackets/StructureDefinition/evidence')
         self.assertEqual(get_resp_obj['observations'][0]['extension'][3]['extension'][1]['extension'][1]['url'],
                          'description')
+
+
+class CreateBiosampleTest(APITestCase):
+    """ Test module for creating an Biosample. """
+
+    def setUp(self):
+        self.individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
+        self.procedure = VALID_PROCEDURE_1
+        self.valid_payload = valid_biosample_1(self.individual.id, self.procedure)
+
+    def test_create_biosample(self):
+        """ POST a new biosample. """
+
+        response = get_response('biosample-list', self.valid_payload)
+        get_resp = self.client.get('/api/biosamples?format=fhir')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        get_resp_obj = get_resp.json()
+        self.assertEqual(get_resp_obj['specimens'][0]['resourceType'], 'Specimen')
+        self.assertIsNotNone(get_resp_obj['specimens'][0]['type']['coding'][0])
+        self.assertIsNotNone(get_resp_obj['specimens'][0]['collection'])
+        self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][0]['valueRange'], dict)
+        self.assertEqual(get_resp_obj['specimens'][0]['extension'][4]['url'],
+                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-diagnostic-markers')
+        self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][4]['valueCodeableConcept']['coding'],
+                         list)
+        self.assertTrue(get_resp_obj['specimens'][0]['extension'][5]['valueBoolean'])
+        
