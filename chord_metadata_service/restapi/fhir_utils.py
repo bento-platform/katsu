@@ -34,7 +34,7 @@ def fhir_patient(obj):
 	""" Converts Individual to FHIR Patient. """
 
 	patient = p.Patient()
-	patient.id = obj.get('id', None)
+	patient.id = obj['id']
 	patient.birthDate = fhirdate.FHIRDate(obj.get('date_of_birth', None))
 	patient.gender = obj.get('sex', None)
 	patient.active = obj.get('active', None)
@@ -56,15 +56,16 @@ def fhir_patient(obj):
 	karyotypic_sex_extension.valueCodeableConcept.coding.append(coding)
 	patient.extension.append(karyotypic_sex_extension)
 	# taxonomy
-	taxonomy_extension = extension.Extension()
-	taxonomy_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['taxonomy']
-	taxonomy_extension.valueCodeableConcept = codeableconcept.CodeableConcept()
-	taxonomy_extension.valueCodeableConcept.coding = list()
-	coding = c.Coding()
-	coding.display = obj.get('taxonomy', None).get('label', None)
-	coding.code = obj.get('taxonomy', None).get('id', None)
-	taxonomy_extension.valueCodeableConcept.coding.append(coding)
-	patient.extension.append(taxonomy_extension)
+	if 'taxonomy' in obj.keys():
+		taxonomy_extension = extension.Extension()
+		taxonomy_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['taxonomy']
+		taxonomy_extension.valueCodeableConcept = codeableconcept.CodeableConcept()
+		taxonomy_extension.valueCodeableConcept.coding = list()
+		coding = c.Coding()
+		coding.display = obj.get('taxonomy', None).get('label', None)
+		coding.code = obj.get('taxonomy', None).get('id', None)
+		taxonomy_extension.valueCodeableConcept.coding.append(coding)
+		patient.extension.append(taxonomy_extension)
 	return patient.as_json()
 
 

@@ -37,7 +37,7 @@ class FHIRIndividualTest(APITestCase):
     def setUp(self):
         self.individual = VALID_INDIVIDUAL
 
-    def test_create_individual(self):
+    def test_get_fhir(self):
         response = get_response('individual-list', self.individual)
         get_resp = self.client.get('/api/individuals?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
