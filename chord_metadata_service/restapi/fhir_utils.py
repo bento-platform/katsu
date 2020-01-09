@@ -9,7 +9,45 @@ from fhirclient.models import (observation as obs, patient as p, extension, age,
 							)
 
 
-# Utils for converting data between formats
+##################### Generic FHIR conversion functions #####################
+
+
+def fhir_coding_util(obj):
+	""" Genenric function to convert object to FHIR Coding. """
+
+	coding = c.Coding()
+	coding.display = obj['label']
+	coding.code = obj['id']
+	if 'system' in obj.keys():
+		coding.system = obj['system']
+	return  coding
+
+
+def fhir_codeable_concept(obj):
+	""" Generic function to convert object to FHIR CodeableConcept. """
+
+	codeable_concept = codeableconcept.CodeableConcept()
+	codeable_concept.coding = []
+	if isinstance(obj, list):
+		for item in obj:
+			coding = fhir_coding_util(item)
+			codeable_concept.coding.append(coding)
+	else:
+		coding = fhir_coding_util(obj)
+		codeable_concept.coding.append(coding)
+	return codeable_concept
+
+
+def codeable_concepts_fields(field_list, profile, obj):
+	""" Converts a list of fields to FHIR CodeableConcepts and returns a list of extensions. """
+	concept_extensions = []
+	for field in field_list:
+		if field in obj.keys():
+			codeable_concepts_extension = extension.Extension()
+			codeable_concepts_extension.url = PHENOPACKETS_ON_FHIR_MAPPING[profile][field]
+			codeable_concepts_extension.valueCodeableConcept = fhir_codeable_concept(obj[field])
+			concept_extensions.append(codeable_concepts_extension)
+	return concept_extensions
 
 
 def fhir_age(obj, mapping, field):
@@ -28,6 +66,22 @@ def fhir_age(obj, mapping, field):
 		age_extension.valueAge = age.Age()
 		age_extension.valueAge.unit = obj[field]['age']
 	return age_extension
+
+
+def check_disease_onset(disease):
+	"""
+	Phenopackets schema allows age to be represented by ISO8601 string,
+	whereis Pheno-FHIR guide requires it to be represented by CodeableConcept.
+	This function checks how age is represented in data.
+	"""
+	if disease.get('onset'):
+		if isinstance(disease.get('onset').get('age'), dict):
+			if disease.get('onset').get('age').get('label') is not None:
+				return True
+	return False
+
+
+##################### Class-based FHIR conversion functions #####################
 
 
 def fhir_patient(obj):
@@ -78,17 +132,6 @@ def fhir_specimen_collection(obj):
 	if 'body_site' in obj.keys():
 		collection.bodySite = fhir_codeable_concept(obj['body_site'])
 	return collection.as_json()
-
-
-def codeable_concepts_fields(field_list, profile, obj):
-	concept_extensions = []
-	for field in field_list:
-		if field in obj.keys():
-			codeable_concepts_extension = extension.Extension()
-			codeable_concepts_extension.url = PHENOPACKETS_ON_FHIR_MAPPING[profile][field]
-			codeable_concepts_extension.valueCodeableConcept = fhir_codeable_concept(obj[field])
-			concept_extensions.append(codeable_concepts_extension)
-	return concept_extensions
 
 
 def fhir_observation(obj):
@@ -205,28 +248,6 @@ def fhir_specimen(obj):
 	return specimen.as_json()
 
 
-def fhir_coding_util(obj):
-	coding = c.Coding()
-	coding.display = obj['label']
-	coding.code = obj['id']
-	if 'system' in obj.keys():
-		coding.system = obj['system']
-	return  coding
-
-
-def fhir_codeable_concept(obj):
-	codeable_concept = codeableconcept.CodeableConcept()
-	codeable_concept.coding = []
-	if isinstance(obj, list):
-		for item in obj:
-			coding = fhir_coding_util(item)
-			codeable_concept.coding.append(coding)
-	else:
-		coding = fhir_coding_util(obj)
-		codeable_concept.coding.append(coding)
-	return codeable_concept
-
-
 def fhir_document_reference(obj):
 	""" Converts HTS file to FHIR DocumentReference. """
 
@@ -270,7 +291,7 @@ def fhir_obs_component_region_studied(obj):
 
 
 def fhir_obs_component_variant(obj):
-	""" Variant corresponds to Observation.component:variant """
+	""" Variant corresponds to Observation.component:variant. """
 
 	component = obs.ObservationComponent()
 	component.code = fhir_codeable_concept(HL7_GENOMICS_MAPPING['variant']['variant_length_code'])
@@ -278,19 +299,6 @@ def fhir_obs_component_variant(obj):
 		{"id": obj.get('allele_type'), "label": obj.get('allele_type')}
 	)
 	return component.as_json()
-
-
-def check_disease_onset(disease):
-	"""
-	Phenopackets schema allows age to be represented by ISO8601 string,
-	whereis Pheno-FHIR guide requires it to be represented by CodeableConcept.
-	This function checks how age is represented in data.
-	"""
-	if disease.get('onset'):
-		if isinstance(disease.get('onset').get('age'), dict):
-			if disease.get('onset').get('age').get('label') is not None:
-				return True
-	return False
 
 
 def fhir_condition(obj):
