@@ -69,17 +69,19 @@ class FHIRIndividualTest(APITestCase):
 class FHIRPhenotypicFeatureTest(APITestCase):
 
     def setUp(self):
-        valid_payload = valid_phenotypic_feature()
-        removed_pftype = valid_payload.pop('pftype', None)
-        valid_payload['type'] = {
-            "id": "HP:0000520",
-            "label": "Proptosis"
-        }
-        self.valid_phenotypic_feature = valid_payload
+        self.individual_1 = Individual.objects.create(**VALID_INDIVIDUAL_1)
+        self.individual_2 = Individual.objects.create(**VALID_INDIVIDUAL_2)
+        self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
+        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual_1, self.procedure))
+        self.biosample_2 = Biosample.objects.create(**valid_biosample_2(
+            self.individual_2, self.procedure))
+        self.phenotypic_feature_1 = PhenotypicFeature.objects.create(
+            **valid_phenotypic_feature(biosample=self.biosample_1))
+        self.phenotypic_feature_2 = PhenotypicFeature.objects.create(
+            **valid_phenotypic_feature(biosample=self.biosample_2))
 
 
     def test_get_fhir(self):
-        response = get_response('phenotypicfeature-list', self.valid_phenotypic_feature)
         get_resp = self.client.get('/api/phenotypicfeatures?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -104,6 +106,9 @@ class FHIRPhenotypicFeatureTest(APITestCase):
                               'http://ga4gh.org/fhir/phenopackets/StructureDefinition/evidence')
         self.assertEqual(get_resp_obj['observations'][0]['extension'][3]['extension'][1]['extension'][1]['url'],
                          'description')
+        self.assertIsNotNone(get_resp_obj['observations'][0]['specimen'])
+        self.assertIsInstance(get_resp_obj['observations'][0]['specimen'], dict)
+        self.assertEqual(get_resp_obj['observations'][0]['specimen']['reference'], 'biosample_id:1')
 
 
 class FHIRProcedureTest(APITestCase):
