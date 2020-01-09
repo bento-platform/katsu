@@ -10,17 +10,19 @@ from rest_framework import status
 class FHIRPhenopacketTest(APITestCase):
 
     def setUp(self):
-        individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
-        self.subject = individual.id
-        meta = MetaData.objects.create(**VALID_META_DATA_2)
-        self.metadata = meta.id
-        self.phenopacket = valid_phenopacket(
+        self.subject = Individual.objects.create(**VALID_INDIVIDUAL_1)
+        self.metadata = MetaData.objects.create(**VALID_META_DATA_2)
+        self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
+        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.subject, self.procedure))
+        self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, self.procedure))
+        self.phenopacket = Phenopacket.objects.create(
+            id="phenopacket_id:1",
             subject=self.subject,
-            meta_data=self.metadata)
-
+            meta_data=self.metadata,
+        )
+        self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
     def test_get_fhir(self):
-        response = get_response('phenopacket-list', self.phenopacket)
         get_resp = self.client.get('/api/phenopackets?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -30,6 +32,18 @@ class FHIRPhenopacketTest(APITestCase):
                          'http://ga4gh.org/fhir/phenopackets/CodeSystem/document-type')
         self.assertEqual(get_resp_obj['compositions'][0]['status'], 'preliminary')
         self.assertIsInstance(get_resp_obj['compositions'][0]['subject']['reference'], str)
+        self.assertIsInstance(get_resp_obj['compositions'][0]['section'], list)
+        self.assertIsInstance(get_resp_obj['compositions'][0]['section'][0]['code']['coding'], list)
+        self.assertEqual(get_resp_obj['compositions'][0]['section'][0]['code']['coding'][0]['code'],
+                         'biosamples')
+        self.assertEqual(get_resp_obj['compositions'][0]['section'][0]['code']['coding'][0]['display'],
+                         'Biosamples')
+        self.assertEqual(get_resp_obj['compositions'][0]['section'][0]['code']['coding'][0]['system'],
+                         'http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type')
+        self.assertEqual(get_resp_obj['compositions'][0]['section'][0]['code']['coding'][0]['version'],
+                         '0.1.0')
+        self.assertIsInstance(get_resp_obj['compositions'][0]['section'][0]['entry'], list)
+        self.assertEqual(len(get_resp_obj['compositions'][0]['section'][0]['entry']), 2)
 
 
 class FHIRIndividualTest(APITestCase):
@@ -102,7 +116,6 @@ class FHIRProcedureTest(APITestCase):
         get_resp = self.client.get('/api/procedures?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
-        print(get_resp_obj)
         self.assertIsNotNone(get_resp_obj['specimen.collections'][0]['method'])
         self.assertIsInstance(get_resp_obj['specimen.collections'][0]['bodySite'], dict)
         self.assertIsNot(get_resp_obj['specimen.collections'][0]['method']['coding'], [])
