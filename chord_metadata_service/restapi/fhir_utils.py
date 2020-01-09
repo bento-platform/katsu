@@ -69,19 +69,6 @@ def fhir_patient(obj):
 	return patient.as_json()
 
 
-def fhir_coding(obj, value=None):
-	""" Generic function to convert to FHIR coding element. """
-
-	coding = {}
-	if value:
-		coding['code'] = obj.get(value).get('id', None)
-		coding['display'] = obj.get(value).get('label', None)
-	else:
-		coding['code'] = obj.get('id', None)
-		coding['display'] = obj.get('label', None)
-	return coding
-
-
 def fhir_specimen_collection(obj):
 	""" Converts Procedure to FHIR Specimen collection. """
 
