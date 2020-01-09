@@ -87,7 +87,7 @@ class FHIRPhenotypicFeatureTest(APITestCase):
                          'description')
 
 
-class CreateBiosampleTest(APITestCase):
+class FHIRBiosampleTest(APITestCase):
     """ Test module for creating an Biosample. """
 
     def setUp(self):
@@ -111,4 +111,24 @@ class CreateBiosampleTest(APITestCase):
         self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][4]['valueCodeableConcept']['coding'],
                          list)
         self.assertTrue(get_resp_obj['specimens'][0]['extension'][5]['valueBoolean'])
-        
+
+
+class FHIRHtsFileTest(APITestCase):
+
+    def setUp(self):
+        self.hts_file = VALID_HTS_FILE
+
+    def test_hts_file(self):
+        response = get_response('htsfile-list', self.hts_file)
+        get_resp = self.client.get('/api/htsfiles?format=fhir')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        get_resp_obj = get_resp.json()
+        print(get_resp_obj)
+        self.assertEqual(get_resp_obj['document_references'][0]['resourceType'], 'DocumentReference')
+        self.assertIsInstance(get_resp_obj['document_references'][0]['content'], list)
+        self.assertIsNotNone(get_resp_obj['document_references'][0]['content'][0]['attachment']['url'])
+        self.assertEqual(get_resp_obj['document_references'][0]['status'], 'current')
+        self.assertEqual(get_resp_obj['document_references'][0]['type']['coding'][0]['code'],
+                         get_resp_obj['document_references'][0]['type']['coding'][0]['display'])
+        self.assertEqual(get_resp_obj['document_references'][0]['extension'][0]['url'],
+                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly')
