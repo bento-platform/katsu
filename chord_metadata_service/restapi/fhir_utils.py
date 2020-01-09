@@ -316,13 +316,13 @@ def fhir_condition(obj):
 	condition.subject = fhirreference.FHIRReference()
 	condition.subject.reference = 'unknown'
 	condition.extension = []
-	onset_extension = extension.Extension()
-	onset_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['disease']['onset']
 	# only adds disease-onset if it's ontology term
 	# NOTE it is required element by Pheno-FHIR mapping guide but not Phenopackets
 	if check_disease_onset(obj):
+		onset_extension = extension.Extension()
+		onset_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['disease']['onset']
 		onset_extension.valueCodeableConcept = fhir_codeable_concept(obj['onset']['age'])
-	condition.extension.append(onset_extension)
+		condition.extension.append(onset_extension)
 
 	if 'disease_stage' in obj.keys():
 		for item in obj['disease_stage']:
