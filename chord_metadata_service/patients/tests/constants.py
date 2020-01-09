@@ -38,3 +38,17 @@ INVALID_INDIVIDUAL = {
     "sex": "FEM",
     "active": True
 }
+
+VALID_INDIVIDUAL_2 = {
+    "id": "patient:2",
+    "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "human"
+    },
+    "date_of_birth": "1967-01-01",
+    "age": {
+        "age": "P55Y"
+    },
+    "sex": "MALE",
+    "active": True
+}

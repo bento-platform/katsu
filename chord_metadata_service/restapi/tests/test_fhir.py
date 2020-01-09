@@ -37,14 +37,19 @@ class FHIRIndividualTest(APITestCase):
 
     def setUp(self):
         self.individual = VALID_INDIVIDUAL
+        self.individual_second = VALID_INDIVIDUAL_2
 
     def test_get_fhir(self):
-        response = get_response('individual-list', self.individual)
+        response_1 = get_response('individual-list', self.individual)
+        response_2 = get_response('individual-list', self.individual_second)
         get_resp = self.client.get('/api/individuals?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
         self.assertEqual(get_resp_obj['patients'][0]['resourceType'], 'Patient')
         self.assertIsInstance(get_resp_obj['patients'][0]['extension'], list)
+        self.assertEqual(get_resp_obj['patients'][1]['extension'][0]['url'],
+                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-age')
+        self.assertIsInstance(get_resp_obj['patients'][1]['extension'][0]['valueAge'], dict)
 
 
 class FHIRPhenotypicFeatureTest(APITestCase):
