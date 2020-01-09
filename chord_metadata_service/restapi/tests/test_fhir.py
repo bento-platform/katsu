@@ -5,6 +5,7 @@ from chord_metadata_service.phenopackets.tests.test_api import get_response
 from chord_metadata_service.phenopackets.serializers import *
 from rest_framework import status
 
+# Tests for FHIR conversion functions
 
 class FHIRPhenopacketTest(APITestCase):
 
@@ -44,3 +45,41 @@ class FHIRIndividualTest(APITestCase):
         get_resp_obj = get_resp.json()
         self.assertEqual(get_resp_obj['patients'][0]['resourceType'], 'Patient')
         self.assertIsInstance(get_resp_obj['patients'][0]['extension'], list)
+
+
+class FHIRPhenotypicFeatureTest(APITestCase):
+
+    def setUp(self):
+        valid_payload = valid_phenotypic_feature()
+        removed_pftype = valid_payload.pop('pftype', None)
+        valid_payload['type'] = {
+            "id": "HP:0000520",
+            "label": "Proptosis"
+        }
+        self.valid_phenotypic_feature = valid_payload
+
+
+    def test_get_fhir(self):
+        response = get_response('phenotypicfeature-list', self.valid_phenotypic_feature)
+        get_resp = self.client.get('/api/phenotypicfeatures?format=fhir')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        get_resp_obj = get_resp.json()
+        severity = {
+            'url':'http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-severity',
+            'valueCodeableConcept':{
+                'coding':[
+                    {
+                    'code':'HP: 0012825',
+                    'display':'Mild'
+                    }
+                ]
+            }
+        }
+        self.assertEqual(get_resp_obj['observations'][0]['resourceType'], 'Observation')
+        self.assertIsInstance(get_resp_obj['observations'][0]['extension'], list)
+        self.assertIn(severity, get_resp_obj['observations'][0]['extension'])
+        self.assertEqual(get_resp_obj['observations'][0]['status'], 'unknown')
+        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['display'], 'Proptosis')
+        self.assertEqual(get_resp_obj['observations'][0]['interpretation']['coding'][0]['code'], 'POS')
+        self.assertEqual(get_resp_obj['observations'][0]['extension'][3]['url'],
+                              'http://ga4gh.org/fhir/phenopackets/StructureDefinition/evidence')
