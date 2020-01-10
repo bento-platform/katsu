@@ -121,7 +121,9 @@ DATABASES = {
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [],  # TODO,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.RemoteUserAuthentication'
+    ],
     'DEFAULT_PARSER_CLASSES': (
         # allows serializers to use snake_case field names, but parse incoming data as camelCase
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
