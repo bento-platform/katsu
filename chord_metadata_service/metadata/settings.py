@@ -68,6 +68,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'chord_lib.auth.django_remote_user.CHORDRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -152,7 +153,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTHENTICATION_BACKENDS = ["chord_lib.auth.django_backend.CHORDRemoteUserBackend"] + (
+AUTHENTICATION_BACKENDS = ["chord_lib.auth.django_remote_user.CHORDRemoteUserBackend"] + (
     ["django.contrib.auth.backends.ModelBackend"] if DEBUG else [])
 
 
