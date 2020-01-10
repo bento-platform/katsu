@@ -52,4 +52,4 @@ urlpatterns = [
     path('search', views_search.chord_search, name="search"),
     path('private/search', views_search.chord_private_search, name="private-search"),
     path('private/tables/<str:table_id>/search', views_search.chord_private_table_search, name="table-search"),
-] + [path('admin/', admin.site.urls)] if DEBUG else []
+] + ([path('admin/', admin.site.urls)] if DEBUG else [])
