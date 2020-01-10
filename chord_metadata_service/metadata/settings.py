@@ -150,6 +150,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+AUTHENTICATION_BACKENDS = ["chord_lib.auth.django_backend.CHORDRemoteUserBackend"] + (
+    ["django.contrib.auth.backends.ModelBackend"] if DEBUG else [])
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
