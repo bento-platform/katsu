@@ -123,7 +123,7 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.RemoteUserAuthentication'
+        'chord_lib.auth.django_remote_user.CHORDRemoteUserAuthentication'
     ],
     'DEFAULT_PARSER_CLASSES': (
         # allows serializers to use snake_case field names, but parse incoming data as camelCase
