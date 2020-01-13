@@ -18,8 +18,7 @@ class PhenopacketsModelViewSet(viewsets.ModelViewSet):
 
 
 class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):
-	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (
-		FHIRRenderer,)
+	renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (FHIRRenderer,)
 
 
 class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
