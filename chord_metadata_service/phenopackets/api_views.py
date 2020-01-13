@@ -12,8 +12,7 @@ class LargeResultsSetPagination(pagination.PageNumberPagination):
 
 
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
-	renderer_classes = tuple(
-		api_settings.DEFAULT_RENDERER_CLASSES) + (PhenopacketsRenderer,)
+	renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES) + (PhenopacketsRenderer,)
 	pagination_class = LargeResultsSetPagination
 
 
