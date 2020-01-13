@@ -27,9 +27,6 @@ SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("CHORD_DEBUG", "true").lower() == "true"
 
-# SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
-AUTH_OVERRIDE = DEBUG  # TODO: Separate environment variable?
-
 ALLOWED_HOSTS = [os.environ.get("CHORD_HOST", "localhost")]
 if DEBUG:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
@@ -39,8 +36,15 @@ APPEND_SLASH = False
 
 # CHORD-specific settings
 
+# SECURITY WARNING: Don't run with CHORD_PERMISSIONS turned off in production,
+# unless an alternative permissions system is in place.
+CHORD_PERMISSIONS = os.environ.get("CHORD_PERMISSIONS", str(not DEBUG)).lower() == "true"
+
 CHORD_SERVICE_TYPE = "ca.c3g.chord:metadata:{}".format(__version__)
 CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE)
+
+# SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
+AUTH_OVERRIDE = not CHORD_PERMISSIONS
 
 
 # Application definition
