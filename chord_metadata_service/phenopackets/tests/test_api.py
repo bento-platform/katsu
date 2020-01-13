@@ -2,7 +2,6 @@ import json
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from ..models import *
 from .constants import *
 from ..serializers import *
 from rest_framework.test import APIClient

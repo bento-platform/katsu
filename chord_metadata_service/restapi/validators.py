@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from jsonschema import validate, ValidationError, Draft7Validator
+from jsonschema import Draft7Validator
 
 
 class JsonSchemaValidator(object):
