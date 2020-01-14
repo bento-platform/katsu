@@ -1,5 +1,6 @@
 import json
 
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -58,6 +59,7 @@ class TableTest(APITestCase):
             "schema": PHENOPACKET_SCHEMA
         }
 
+    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def setUp(self) -> None:
         # Add example data
 
