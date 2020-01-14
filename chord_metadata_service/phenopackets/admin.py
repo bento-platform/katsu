@@ -7,11 +7,6 @@ class ResourceAdmin(admin.ModelAdmin):
     pass
 
 
-# @admin.register(ExternalReference)
-# class ExternalReferenceAdmin(admin.ModelAdmin):
-#     pass
-
-
 @admin.register(MetaData)
 class MetaDataAdmin(admin.ModelAdmin):
     pass

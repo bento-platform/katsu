@@ -2,7 +2,6 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
-
 from chord_metadata_service.patients.models import Individual
 
 
@@ -56,7 +55,6 @@ class MetaData(models.Model):
 	FHIR: Metadata
 	"""
 
-	# CHECK !!! created or submitted?
 	created = models.DateTimeField(default=timezone.now,
 		help_text='Time when this object was created.')
 	created_by = models.CharField(max_length=200,
@@ -340,6 +338,8 @@ class Biosample(models.Model):
 class Phenopacket(models.Model):
 	"""
 	Class to aggregate Individual's experiments data
+
+	FHIR: Composition
 	"""
 
 	id = models.CharField(primary_key=True, max_length=200,

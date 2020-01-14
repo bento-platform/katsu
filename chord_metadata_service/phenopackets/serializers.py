@@ -1,4 +1,3 @@
-from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
 from rest_framework import serializers
 from .models import *
 from jsonschema import Draft7Validator, FormatChecker
