@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from chord_metadata_service.phenopackets.api_views import LargeResultsSetPagination
 from .models import *
+from .permissions import OverrideOrSuperUserOnly
 from .serializers import *
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
 from rest_framework.settings import api_settings
@@ -9,12 +10,13 @@ from rest_framework.settings import api_settings
 __all__ = ["ProjectViewSet", "DatasetViewSet", "TableOwnershipViewSet"]
 
 
-class PhenopacketsModelViewSet(viewsets.ModelViewSet):
+class CHORDModelViewSet(viewsets.ModelViewSet):
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES) + (PhenopacketsRenderer,)
     pagination_class = LargeResultsSetPagination
+    permission_classes = [OverrideOrSuperUserOnly]  # Explicit
 
 
-class ProjectViewSet(PhenopacketsModelViewSet):
+class ProjectViewSet(CHORDModelViewSet):
     """
     get:
     Return a list of all existing projects
@@ -27,7 +29,7 @@ class ProjectViewSet(PhenopacketsModelViewSet):
     serializer_class = ProjectSerializer
 
 
-class DatasetViewSet(PhenopacketsModelViewSet):
+class DatasetViewSet(CHORDModelViewSet):
     """
     get:
     Return a list of all existing datasets
@@ -40,7 +42,7 @@ class DatasetViewSet(PhenopacketsModelViewSet):
     serializer_class = DatasetSerializer
 
 
-class TableOwnershipViewSet(PhenopacketsModelViewSet):
+class TableOwnershipViewSet(CHORDModelViewSet):
     """
     get:
     Return a list of table-(dataset|dataset,biosample) relationships

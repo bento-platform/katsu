@@ -4,10 +4,12 @@ from chord_lib.search import build_search_response, postgres
 from datetime import datetime
 from django.db import connection
 from psycopg2 import sql
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .models import Dataset
+from .permissions import OverrideOrSuperUserOnly
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
@@ -21,11 +23,13 @@ PHENOPACKET_METADATA_SCHEMA = {
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def data_type_list(_request):
     return Response([{"id": PHENOPACKET_DATA_TYPE_ID, "schema": PHENOPACKET_SCHEMA}])
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def data_type_phenopacket(_request):
     return Response({
         "id": PHENOPACKET_DATA_TYPE_ID,
@@ -35,16 +39,19 @@ def data_type_phenopacket(_request):
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def data_type_phenopacket_schema(_request):
     return Response(PHENOPACKET_SCHEMA)
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def data_type_phenopacket_metadata_schema(_request):
     return Response(PHENOPACKET_METADATA_SCHEMA)
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def dataset_list(request):
     if PHENOPACKET_DATA_TYPE_ID not in request.query_params.getlist("data-type"):
         # TODO: Better error
@@ -65,8 +72,10 @@ def dataset_list(request):
 
 # TODO: Remove pragma: no cover when GET/POST implemented
 @api_view(["DELETE"])
+@permission_classes([OverrideOrSuperUserOnly])
 def dataset_detail(request, dataset_id):  # pragma: no cover
     # TODO: Implement GET, POST
+    # TODO: Permissions: Check if user has control / more direct access over this dataset? Or just always use owner...
     try:
         dataset = Dataset.objects.get(identifier=dataset_id)
     except Dataset.DoesNotExist:
@@ -126,17 +135,21 @@ def search(request, internal_data=False):
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def chord_search(request):
     return search(request, internal_data=False)
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def chord_private_search(request):
+    # Private search endpoints are protected by URL namespace, not by Django permissions.
     return search(request, internal_data=True)
 
 
 @api_view(["POST"])
 def chord_private_table_search(request, table_id):  # Search phenopacket data types in specific tables
+    # Private search endpoints are protected by URL namespace, not by Django permissions.
     start = datetime.now()
 
     if request.data is None or "query" not in request.data:

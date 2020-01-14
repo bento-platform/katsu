@@ -19,6 +19,7 @@ from chord_metadata_service.restapi import api_views, urls as restapi_urls
 from chord_metadata_service.chord import views_ingest, views_search
 from rest_framework.schemas import get_schema_view
 
+# TODO: django.conf.settings breaks reverse(), how to import properly?
 from .settings import DEBUG
 
 
@@ -38,7 +39,7 @@ urlpatterns = [
     path('workflows/<slug:workflow_id>', views_ingest.workflow_item, name="workflow-detail"),
     path('workflows/<slug:workflow_id>.wdl', views_ingest.workflow_file, name="workflow-file"),
 
-    path('ingest', views_ingest.ingest, name="ingest"),
+    path('private/ingest', views_ingest.ingest, name="ingest"),
 
     path('data-types', views_search.data_type_list, name="data-type-list"),
     path('data-types/phenopacket', views_search.data_type_phenopacket, name="data-type-detail"),
@@ -51,4 +52,4 @@ urlpatterns = [
     path('search', views_search.chord_search, name="search"),
     path('private/search', views_search.chord_private_search, name="private-search"),
     path('private/tables/<str:table_id>/search', views_search.chord_private_table_search, name="table-search"),
-] + [path('admin/', admin.site.urls)] if DEBUG else []
+] + ([path('admin/', admin.site.urls)] if DEBUG else [])
