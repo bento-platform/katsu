@@ -41,7 +41,7 @@ class DatasetViewSet(CHORDModelViewSet):
 
     queryset = Dataset.objects.all().order_by("identifier")
     serializer_class = DatasetSerializer
-    renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (JSONLDDatasetRenderer,)
+    renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer,)
 
 
 class TableOwnershipViewSet(CHORDModelViewSet):

@@ -61,7 +61,7 @@ def dataset_to_jsonld(dataset):
             t['@type'] = 'DataType'
             if 'information' in t.keys():
                 annotation_to_jsonld(t['information'])
-    if dataset['primary_publications']:
+    if 'primary_publications' in dataset.keys():
         for pp in dataset['primary_publications']:
             pp['$schema'] = 'https://w3id.org/dats/schema/publication_schema.json'
             pp['@type'] = 'Publication'
@@ -71,11 +71,11 @@ def dataset_to_jsonld(dataset):
                 creators_to_jsonld(pp['authors'])
             if 'dates' in pp.keys():
                 dates_to_jsonld(pp['dates'])
-    if dataset['licenses']:
+    if 'licenses' in dataset.keys():
         for license in dataset['licenses']:
             license['$schema'] = 'https://w3id.org/dats/schema/license_schema.json'
             license['@type'] = 'License'
-    if dataset['extra_properties']:
+    if 'extra_properties' in dataset.keys():
         extra_properties_to_jsonld(dataset['extra_properties'])
 
     return dataset
