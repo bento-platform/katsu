@@ -154,7 +154,13 @@ def phenopacket_individual_schema(database_attrs: dict):
             "alternate_ids": {
                 "type": "array",
                 "items": {
-                    "type": "string"
+                    "type": "string",
+                    "search": _multiple_optional_str_search(0, queryable="internal")
+                },
+                "search": {
+                    "database": {
+                        "type": "array"
+                    }
                 }
             },
             "date_of_birth": {
@@ -164,7 +170,7 @@ def phenopacket_individual_schema(database_attrs: dict):
                 "search": _single_optional_eq_search(1, queryable="internal")
             },
             # TODO: Age
-            "sex": {  # TODO: Front end: enum dropdown
+            "sex": {
                 "type": "string",
                 "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
                 "search": _single_optional_eq_search(2)
