@@ -1,5 +1,6 @@
 from rest_framework.renderers import JSONRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
+from chord_metadata_service.restapi.jsonld_utils import dataset_to_jsonld
 
 
 class FHIRRenderer(JSONRenderer):
@@ -32,3 +33,20 @@ class PhenopacketsRenderer(CamelCaseJSONRenderer):
 
 	def render(self, data, media_type=None, renderer_context=None):
 		return super(PhenopacketsRenderer, self).render(data, media_type, renderer_context)
+
+
+class JSONLDDatasetRenderer(PhenopacketsRenderer):
+	media_type = 'application/ld+json'
+	format = 'dats-jsonld'
+
+	def render(self, data, media_type=None, renderer_context=None):
+		if 'results' in data:
+			jsonld_obj = {}
+			jsonld_obj['results'] = []
+			for item in data['results']:
+				dataset_jsonld = dataset_to_jsonld(item)
+				jsonld_obj['results'].append(dataset_jsonld)
+		else:
+			jsonld_obj = dataset_to_jsonld(data)
+
+		return super(JSONLDDatasetRenderer, self).render(jsonld_obj, media_type, renderer_context)

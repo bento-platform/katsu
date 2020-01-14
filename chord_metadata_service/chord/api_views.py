@@ -3,6 +3,7 @@ from chord_metadata_service.phenopackets.api_views import LargeResultsSetPaginat
 from .models import *
 from .serializers import *
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
+from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer
 from rest_framework.settings import api_settings
 
 
@@ -38,6 +39,7 @@ class DatasetViewSet(PhenopacketsModelViewSet):
 
     queryset = Dataset.objects.all().order_by("identifier")
     serializer_class = DatasetSerializer
+    renderer_classes = tuple(PhenopacketsModelViewSet.renderer_classes) + (JSONLDDatasetRenderer,)
 
 
 class TableOwnershipViewSet(PhenopacketsModelViewSet):
