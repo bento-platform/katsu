@@ -126,7 +126,7 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = {
         },
         "description": {
             "type": "string",
-            "search": _multiple_optional_str_search(1)
+            "search": _multiple_optional_str_search(1)  # TODO: Searchable? may leak
         }
     },
     "required": ["id"],
@@ -319,12 +319,13 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = {
     "type": "object",
     "properties": {
         "description": {
-            "type": "string"
+            "type": "string",
+            "search": _multiple_optional_str_search(0),  # TODO: Searchable? may leak
         },
         "type": PHENOPACKET_ONTOLOGY_SCHEMA,
         "negated": {
             "type": "boolean",
-            "search": _single_optional_eq_search(0)
+            "search": _single_optional_eq_search(1)
         },
         "severity": PHENOPACKET_ONTOLOGY_SCHEMA,
         "modifiers": {  # TODO: Plural?
@@ -374,7 +375,10 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
             }
         },
         "individual_id": {"type": "string"},
-        "description": {"type": "string"},
+        "description": {
+            "type": "string",
+            "search": _multiple_optional_str_search(1),  # TODO: Searchable? may leak
+        },
         "sampled_tissue": PHENOPACKET_ONTOLOGY_SCHEMA,
         "phenotypic_features": {
             "type": "array",
