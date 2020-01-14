@@ -36,8 +36,15 @@ APPEND_SLASH = False
 
 # CHORD-specific settings
 
+# SECURITY WARNING: Don't run with CHORD_PERMISSIONS turned off in production,
+# unless an alternative permissions system is in place.
+CHORD_PERMISSIONS = os.environ.get("CHORD_PERMISSIONS", str(not DEBUG)).lower() == "true"
+
 CHORD_SERVICE_TYPE = "ca.c3g.chord:metadata:{}".format(__version__)
 CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE)
+
+# SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
+AUTH_OVERRIDE = not CHORD_PERMISSIONS
 
 
 # Application definition
@@ -65,6 +72,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'chord_lib.auth.django_remote_user.CHORDRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -118,13 +126,16 @@ DATABASES = {
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [],  # TODO,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'chord_lib.auth.django_remote_user.CHORDRemoteUserAuthentication'
+    ],
     'DEFAULT_PARSER_CLASSES': (
         # allows serializers to use snake_case field names, but parse incoming data as camelCase
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
-    )
+    ),
+    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly']
 }
 
 # Password validation
@@ -144,6 +155,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+AUTHENTICATION_BACKENDS = ["chord_lib.auth.django_remote_user.CHORDRemoteUserBackend"] + (
+    ["django.contrib.auth.backends.ModelBackend"] if DEBUG else [])
 
 
 # Internationalization
