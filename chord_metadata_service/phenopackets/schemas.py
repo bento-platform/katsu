@@ -385,6 +385,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
             "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA,
             "search": {
                 "database": {
+                    **PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA["search"]["database"],
                     "relationship": {
                         "type": "ONE_TO_MANY",
                         "parent_foreign_key": PhenotypicFeature._meta.get_field("biosample").column,
@@ -485,7 +486,17 @@ PHENOPACKET_SCHEMA = {
         }),
         "phenotypic_features": {
             "type": "array",
-            "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA
+            "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA,
+            "search": {
+                "database": {
+                    **PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA["search"]["database"],
+                    "relationship": {
+                        "type": "ONE_TO_MANY",
+                        "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
+                        "parent_primary_key": Phenopacket._meta.pk.column  # TODO: Redundant?
+                    }
+                }
+            }
         },
         "biosamples": {
             "type": "array",
