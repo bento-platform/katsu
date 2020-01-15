@@ -1,7 +1,7 @@
 attrs==19.3.0
 certifi==2019.11.28
 chardet==3.0.4
-git+https://github.com/c3g/chord_lib#egg=chord_lib[django]
+chord-lib==0.1.0
 codecov==2.0.15
 coreapi==2.3.3
 coreschema==0.0.4
@@ -31,11 +31,11 @@ PyYAML==5.3
 redis==3.3.11
 requests==2.22.0
 simplejson==3.17.0
-six==1.13.0
+six==1.14.0
 sqlparse==0.3.0
 strict-rfc3339==0.7
 uritemplate==3.0.1
 urllib3==1.25.7
 Werkzeug==0.16.0
 wincertstore==0.2
-zipp==0.6.0
+zipp==1.0.0
