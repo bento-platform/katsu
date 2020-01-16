@@ -22,17 +22,17 @@ CHORD Metadata Service is a service to store epigenomic metadata.
 
 ## REST API highlights
 
-* Standard api delivers data in snake_case
-To retrieved data in json compliant with phenopackets that uses camelCase append `?format=phenopackets`
+* Standard api delivers data in snake_case.
+To retrieved data in json compliant with phenopackets that uses camelCase append `?format=phenopackets` .
 
-* Data can be ingested and retrieved in snake_case or camelCase
+* Data can be ingested and retrieved in snake_case or camelCase.
 
 * Other available renderers:
-phenopackets model is mapped to [FHIR](https://www.hl7.org/fhir/) using [Phenopackets on FHIR](https://aehrc.github.io/fhir-phenopackets-ig/) implementation guide.
-To retrieve data in fhir append `?format=fhir`
+Phenopackets model is mapped to [FHIR](https://www.hl7.org/fhir/) using [Phenopackets on FHIR](https://aehrc.github.io/fhir-phenopackets-ig/) implementation guide.
+To retrieve data in fhir append `?format=fhir` .
 
-* Ingest endpoint: `/ingest`
-Example of POST body is in chord/views_ingest.py (METADATA_WORKFLOWS)
+* Ingest endpoint: `/ingest` .
+Example of POST body is in chord/views_ingest.py (METADATA_WORKFLOWS).
 
 
 ## Install
