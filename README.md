@@ -82,7 +82,31 @@ REST_FRAMEWORK = {
 }
 ```
 
-## Tests
+### Note On Permissions
+
+By default, `chord_metadata_service` uses the CHORD permission system, which
+functions as follows:
+
+  * URLs under the `/private` namespace are assumed to be protected by an
+    **out-of-band** mechanism such as a properly-configured reverse proxy.
+  * Requests with the headers `X-User` and `X-User-Role` can be authenticated
+    via a Django Remote User-type system, with `X-User-Role: owner` giving
+    access to restricted endpoints and `X-User-Role: user` giving less trusted,
+    but authenticated, access.
+
+This can be turned off with the `CHORD_PERMISSIONS` environment variable and/or
+Django setting, or with the `AUTH_OVERRIDE` Django setting.
+
+## Developing
+
+### Branching
+
+All new feature requests and non-critical bug fixes should be merged into the
+`develop` branch. `develop` is treated as a "nightly" version. Releases are
+created from `develop`-to-`master` merges; patch-release work can be branched
+out and tagged from the tagged major/minor release in `master`.
+
+### Tests
 
 Tests are located in tests directory in an individual app folder.
 
@@ -100,22 +124,7 @@ Create coverage html report:
 
 `coverage html`
 
-## Note On Permissions
-
-By default, `chord_metadata_service` uses the CHORD permission system, which
-functions as follows:
-
-  * URLs under the `/private` namespace are assumed to be protected by an
-    **out-of-band** mechanism such as a properly-configured reverse proxy.
-  * Requests with the headers `X-User` and `X-User-Role` can be authenticated
-    via a Django Remote User-type system, with `X-User-Role: owner` giving
-    access to restricted endpoints and `X-User-Role: user` giving less trusted,
-    but authenticated, access.
-
-This can be turned off with the `CHORD_PERMISSIONS` environment variable and/or
-Django setting, or with the `AUTH_OVERRIDE` Django setting.
-
-## Accessing the Django Shell from inside a CHORD Container
+### Accessing the Django Shell from inside a CHORD Container
 
 Assuming `chord_singularity` is being used, the following commands can be used
 to bootstrap your way to a `chord_metadata_service` environment within a CHORD
