@@ -3,6 +3,38 @@
 ![Build Status](https://api.travis-ci.com/c3g/chord_metadata_service.svg?branch=master)
 [![codecov](https://codecov.io/gh/c3g/chord_metadata_service/branch/master/graph/badge.svg)](https://codecov.io/gh/c3g/chord_metadata_service)
 
+
+## Architecture
+
+CHORD Metadata Service is a service to store epigenomic metadata.
+
+1. Patients service handles anonymized individual’s data (individual id, sex, age or date of birth)
+* Data model: aggregated profile from GA4GH Phenopackets Individual and FHIR Patient
+
+2. Phenopackets service handles phenotypic and clinical data
+* Data model: [GA4GH Phenopackets schema](https://github.com/phenopackets/phenopacket-schema)
+
+3. CHORD service  handles metadata about dataset, has relation to phenopackets (one dataset can have many phenopackets)
+* Data model: [DATS](https://github.com/datatagsuite)  + [GA4GH DUO](https://github.com/EBISPOT/DUO)
+
+4. Rest api service handles all generic functionality shared among other services
+
+
+## REST API highlights
+
+* Standard api delivers data in snake_case.
+To retrieved data in json compliant with phenopackets that uses camelCase append `?format=phenopackets` .
+
+* Data can be ingested and retrieved in snake_case or camelCase.
+
+* Other available renderers:
+Phenopackets model is mapped to [FHIR](https://www.hl7.org/fhir/) using [Phenopackets on FHIR](https://aehrc.github.io/fhir-phenopackets-ig/) implementation guide.
+To retrieve data in fhir append `?format=fhir` .
+
+* Ingest endpoint: `/ingest` .
+Example of POST body is in chord/views_ingest.py (METADATA_WORKFLOWS).
+
+
 ## Install
 
 The service uses PostgreSQL database for data storage.
