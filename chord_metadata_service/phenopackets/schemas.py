@@ -102,10 +102,12 @@ PHENOPACKET_ONTOLOGY_SCHEMA = {
     "properties": {
         "id": {
             "type": "string",
+            "description": "A CURIE-formatted ontology term, e.g. NCIT:C15189.",
             "search": _multiple_optional_str_search(0)
         },
         "label": {
             "type": "string",
+            "description": "A human-readable label for the ontology term, e.g. Biopsy.",
             "search": _multiple_optional_str_search(1)
         },
     },
@@ -144,6 +146,7 @@ def phenopacket_individual_schema(database_attrs: dict):
         "properties": {
             "id": {
                 "type": "string",
+                "description": "Unique researcher-specified identifier for the individual.",
                 "search": {
                     **_single_optional_eq_search(0, queryable="internal"),
                     "database": {
@@ -157,6 +160,7 @@ def phenopacket_individual_schema(database_attrs: dict):
                     "type": "string",
                     "search": _multiple_optional_str_search(0, queryable="internal")
                 },
+                "description": "A list of alternative identifiers for the individual.",  # TODO: More specific
                 "search": {
                     "database": {
                         "type": "array"
@@ -173,6 +177,7 @@ def phenopacket_individual_schema(database_attrs: dict):
             "sex": {
                 "type": "string",
                 "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
+                "description": "An individual's phenotypic sex.",
                 "search": _single_optional_eq_search(2)
             },
             "karyotypic_sex": {
@@ -190,6 +195,7 @@ def phenopacket_individual_schema(database_attrs: dict):
                     "XYY",
                     "OTHER_KARYOTYPE"
                 ],
+                "description": "An individual's karyotypic sex.",
                 "search": _single_optional_eq_search(3)
             },
             "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA,
@@ -369,20 +375,26 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
     "properties": {
         "id": {
             "type": "string",
+            "description": "Unique researcher-specified identifier for the biosample.",
             "search": {
                 **_single_optional_eq_search(0, queryable="internal"),
                 "database": {"field": Biosample._meta.pk.column}
             }
         },
-        "individual_id": {"type": "string"},
+        "individual_id": {
+            "type": "string",
+            "description": "Identifier for the individual this biosample was sampled from."
+        },
         "description": {
             "type": "string",
+            "description": "Researcher-specified free text field to describe the biosample.",
             "search": _multiple_optional_str_search(1),  # TODO: Searchable? may leak
         },
         "sampled_tissue": PHENOPACKET_ONTOLOGY_SCHEMA,
         "phenotypic_features": {
             "type": "array",
             "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA,
+            "description": "A list of phenotypic features associated with the biosample.",  # TODO: More specific
             "search": {
                 "database": {
                     **PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA["search"]["database"],
