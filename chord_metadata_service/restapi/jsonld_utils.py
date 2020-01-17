@@ -5,6 +5,10 @@ CONTEXT_SCHEMAS = {
         'schema': 'https://w3id.org/dats/schema/license_schema.json',
         'type': 'License'
     },
+    'distributions': {
+        'schema': 'https://w3id.org/dats/schema/dataset_distribution_schema.json',
+        'type': 'DatasetDistribution'
+    },
     'stored_in': {
         'schema': 'https://w3id.org/dats/schema/data_repository_schema.json',
         'type': 'DataRepository'
@@ -84,8 +88,7 @@ def spatial_coverage_to_jsonld(spatial_coverage) -> list:
 
 def distributions_to_jsonld(distributions) -> list:
     for distribution in distributions:
-        distribution['$schema'] = 'https://w3id.org/dats/schema/dataset_distribution_schema.json'
-        distribution['@type'] = 'DatasetDistribution'
+        obj_to_jsonld(distribution, 'distributions')
         if 'identifier' in distribution.keys():
             obj_to_jsonld(distribution['identifier'], 'identifier')
         if 'alternate_identifiers' in distribution.keys():
@@ -128,12 +131,14 @@ def dataset_to_jsonld(dataset):
         obj_to_jsonld(dataset['stored_in'], 'stored_in')
     if 'types' in dataset.keys():
         for t in dataset['types']:
+            # TODO move to context dict
             t['$schema'] = 'https://w3id.org/dats/schema/data_type_schema.json'
             t['@type'] = 'DataType'
             if 'information' in t.keys():
                 obj_to_jsonld(t['information'], 'annotation')
     if 'primary_publications' in dataset.keys():
         for pp in dataset['primary_publications']:
+            # TODO move to context dict
             pp['$schema'] = 'https://w3id.org/dats/schema/publication_schema.json'
             pp['@type'] = 'Publication'
             if 'identifier' in pp.keys():
