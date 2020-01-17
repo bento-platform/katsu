@@ -11,7 +11,7 @@ setuptools.setup(
 
     python_requires=">=3.6",
     install_requires=[
-        "chord_lib @ git+https://github.com/c3g/chord_lib#egg=chord_lib[django]",
+        "chord_lib[django]==0.1.0",
         "Django>=2.2,<3.0",
         "django-filter>=2.2,<3.0",
         "django-nose>=1.4,<2.0",

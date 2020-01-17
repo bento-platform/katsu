@@ -163,6 +163,7 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
     except (SyntaxError, TypeError, ValueError) as e:
         # TODO: Better error
+        print("[CHORD Metadata] Error encountered compiling query {}:\n    {}".format(request.data["query"], str(e)))
         return Response({"error": str(e)}, status=400)
 
     serializer = PhenopacketSerializer(phenopacket_query_results(
