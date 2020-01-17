@@ -25,6 +25,22 @@ CONTEXT_SCHEMAS = {
         'schema': 'https://w3id.org/dats/schema/identifier_info_schema.json',
         'type': 'Identifier'
     },
+    'dates': {
+        'schema': 'https://w3id.org/dats/schema/date_info_schema.json',
+        'type': 'Date'
+    },
+    'spatial_coverage': {
+        'schema': 'https://w3id.org/dats/schema/place_schema.json',
+        'type': 'Place'
+    },
+    'person': {
+        'schema': 'https://w3id.org/dats/schema/person_schema.json',
+        'type': 'Person'
+    },
+    'organization': {
+        'schema': 'https://w3id.org/dats/schema/organization_schema.json',
+        'type': 'Organization'
+    },
     'primary_publications': {
         'schema': 'https://w3id.org/dats/schema/publication_schema.json',
         'type': 'Publication'
@@ -56,8 +72,7 @@ def obj_to_jsonld(obj, mapping) -> dict:
 
 def dates_to_jsonld(dates) -> list:
     for date in dates:
-        date['$schema'] = 'https://w3id.org/dats/schema/date_info_schema.json'
-        date['@type'] = 'Date'
+        obj_to_jsonld(date, 'dates')
         # the date always will be only object in our mapping
         obj_to_jsonld(date['type'], 'annotation')
     return dates
@@ -66,11 +81,9 @@ def dates_to_jsonld(dates) -> list:
 def creators_to_jsonld(creators) -> list:
     for creator in creators:
         if 'name' in creator.keys():
-            creator['$schema'] = 'https://w3id.org/dats/schema/organization_schema.json'
-            creator['@type'] = 'Organization'
+            obj_to_jsonld(creator, 'organization')
         else:
-            creator['$schema'] = 'https://w3id.org/dats/schema/person_schema.json'
-            creator['@type'] = 'Person'
+            obj_to_jsonld(creator, 'person')
     return creators
 
 
@@ -85,8 +98,7 @@ def extra_properties_to_jsonld(extra_properties) -> list:
 
 def spatial_coverage_to_jsonld(spatial_coverage) -> list:
     for sc in spatial_coverage:
-        sc['$schema'] = 'https://w3id.org/dats/schema/place_schema.json'
-        sc['@type'] = 'Place'
+        obj_to_jsonld(sc, 'spatial_coverage')
         if 'identifier' in sc.keys():
             obj_to_jsonld(sc['identifier'], 'identifier')
         if 'alternate_identifiers' in sc.keys():
