@@ -1,6 +1,10 @@
 # utils to convert dataset json to json-ld
 
 CONTEXT_SCHEMAS = {
+    'dataset': {
+        'schema': 'https://w3id.org/dats/schema/dataset_schema.json',
+        'type': 'Dataset'
+    },
     'licenses': {
         'schema': 'https://w3id.org/dats/schema/license_schema.json',
         'type': 'License'
@@ -9,6 +13,10 @@ CONTEXT_SCHEMAS = {
         'schema': 'https://w3id.org/dats/schema/dataset_distribution_schema.json',
         'type': 'DatasetDistribution'
     },
+    'types': {
+        'schema': 'https://w3id.org/dats/schema/data_type_schema.json',
+        'type': 'DataType'
+    },
     'stored_in': {
         'schema': 'https://w3id.org/dats/schema/data_repository_schema.json',
         'type': 'DataRepository'
@@ -16,6 +24,10 @@ CONTEXT_SCHEMAS = {
     'identifier': {
         'schema': 'https://w3id.org/dats/schema/identifier_info_schema.json',
         'type': 'Identifier'
+    },
+    'primary_publications': {
+        'schema': 'https://w3id.org/dats/schema/publication_schema.json',
+        'type': 'Publication'
     },
     'alternate_identifiers': {
         'schema': 'https://w3id.org/dats/schema/alternate_identifier_info_schema.json',
@@ -115,8 +127,8 @@ def dataset_to_jsonld(dataset):
     :return: enriched json with linked data context
     """
     dataset['@context'] = {}
-    dataset['@context']['$schema'] = 'https://w3id.org/dats/schema/dataset_schema.json'
-    dataset['@context']['@type'] = 'Dataset'
+    dataset['@context']['$schema'] = CONTEXT_SCHEMAS['dataset']['schema']
+    dataset['@context']['@type'] = CONTEXT_SCHEMAS['dataset']['type']
     # dates
     identifier_str = dataset['identifier']
     dataset['identifier'] = {}
@@ -131,16 +143,12 @@ def dataset_to_jsonld(dataset):
         obj_to_jsonld(dataset['stored_in'], 'stored_in')
     if 'types' in dataset.keys():
         for t in dataset['types']:
-            # TODO move to context dict
-            t['$schema'] = 'https://w3id.org/dats/schema/data_type_schema.json'
-            t['@type'] = 'DataType'
+            obj_to_jsonld(t, 'types')
             if 'information' in t.keys():
                 obj_to_jsonld(t['information'], 'annotation')
     if 'primary_publications' in dataset.keys():
         for pp in dataset['primary_publications']:
-            # TODO move to context dict
-            pp['$schema'] = 'https://w3id.org/dats/schema/publication_schema.json'
-            pp['@type'] = 'Publication'
+            obj_to_jsonld(pp, 'primary_publications')
             if 'identifier' in pp.keys():
                 obj_to_jsonld(pp['identifier'], 'identifier')
             if 'authors' in pp.keys():
