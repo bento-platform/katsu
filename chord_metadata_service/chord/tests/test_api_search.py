@@ -108,21 +108,24 @@ class SearchTest(APITestCase):
 
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
-    def test_common_search(self):
+    def test_common_search_1(self):
         # No body
         r = self.client.post(reverse("search"))
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_common_search_2(self):
         # No data type
         r = self.client.post(reverse("search"), data=json.dumps({"query": TEST_SEARCH_QUERY_1}),
                              content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_common_search_3(self):
         # No query
         r = self.client.post(reverse("search"), data=json.dumps({"data_type": PHENOPACKET_DATA_TYPE_ID}),
                              content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_common_search_4(self):
         # Bad data type
         r = self.client.post(reverse("search"), data=json.dumps({
             "data_type": "bad_data_type",
@@ -130,6 +133,7 @@ class SearchTest(APITestCase):
         }), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_common_search_5(self):
         # Bad syntax for query
         r = self.client.post(reverse("search"), data=json.dumps({
             "data_type": PHENOPACKET_DATA_TYPE_ID,
@@ -137,7 +141,7 @@ class SearchTest(APITestCase):
         }), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_search(self):
+    def test_search_with_result(self):
         # Valid search with result
         r = self.client.post(reverse("search"), data=json.dumps({
             "data_type": PHENOPACKET_DATA_TYPE_ID,
@@ -151,6 +155,7 @@ class SearchTest(APITestCase):
             "data_type": PHENOPACKET_DATA_TYPE_ID
         })
 
+    def test_search_without_result(self):
         # Valid search without result
         r = self.client.post(reverse("search"), data=json.dumps({
             "data_type": PHENOPACKET_DATA_TYPE_ID,
@@ -173,22 +178,25 @@ class SearchTest(APITestCase):
         self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.identifier)]["matches"][0]["id"])
         # TODO: Check schema?
 
-    def test_private_table_search(self):
+    def test_private_table_search_1(self):
         # No body
         r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]))
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_private_table_search_2(self):
         # No query
         r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]), data=json.dumps({}),
                              content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_private_table_search_3(self):
         # Bad syntax for query
         r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
             "query": ["hello", "world"]
         }), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_private_table_search_4(self):
         # Valid query with one result
         r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
             "query": TEST_SEARCH_QUERY_1
