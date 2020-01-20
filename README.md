@@ -4,6 +4,15 @@
 [![codecov](https://codecov.io/gh/c3g/chord_metadata_service/branch/master/graph/badge.svg)](https://codecov.io/gh/c3g/chord_metadata_service)
 
 
+## License
+
+The majority of the CHORD Metadata Service is licensed under the LGPLv3 license; copyright (c) 2019-2020 the Canadian
+Centre for Computational Genomics.
+
+Portions are copyright (c) 2019 Julius OB Jacobsen, Peter N Robinson, Christopher J Mungall (Phenopackets); licensed
+under the BSD 3-clause license.
+
+
 ## Architecture
 
 CHORD Metadata Service is a service to store epigenomic metadata.
