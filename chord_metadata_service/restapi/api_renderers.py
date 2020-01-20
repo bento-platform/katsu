@@ -4,6 +4,7 @@ from chord_metadata_service.restapi.jsonld_utils import dataset_to_jsonld, CONTE
 from rdflib import Graph, plugin
 import json, rdflib_jsonld
 from rdflib.plugin import register, Serializer
+
 register('json-ld', Serializer, 'rdflib_jsonld.serializer', 'JsonLDSerializer')
 from uuid import UUID
 from rest_framework.response import Response
@@ -23,13 +24,13 @@ class FHIRRenderer(JSONRenderer):
 
     def render(self, data, media_type=None, renderer_context=None):
         fhir_datatype_plural = getattr(
-                renderer_context.get('view').get_serializer().Meta,
-                'fhir_datatype_plural', 'objects'
-                )
+            renderer_context.get('view').get_serializer().Meta,
+            'fhir_datatype_plural', 'objects'
+        )
         class_converter = getattr(
-                renderer_context.get('view').get_serializer().Meta,
-                'class_converter', 'objects'
-                )
+            renderer_context.get('view').get_serializer().Meta,
+            'class_converter', 'objects'
+        )
         if 'results' in data:
             final_data = {}
             final_data[fhir_datatype_plural] = []
@@ -73,12 +74,16 @@ class RDFDatasetRenderer(PhenopacketsRenderer):
 
     def render(self, data, media_type=None, renderer_context=None):
         if 'results' in data:
-            # we need to construct large graph here because we have several results
-            rdf_data = {}
+            g = Graph()
+            for item in data['results']:
+                context = CONTEXT
+                small_g = Graph().parse(data=json.dumps(item, cls=UUIDEncoder), context=context, format='json-ld')
+                # join graphs
+                g = g + small_g
         else:
             context = CONTEXT
             g = Graph().parse(data=json.dumps(data, cls=UUIDEncoder), context=context, format='json-ld')
             # If destination is None serialize method returns the serialization as a string.
-            rdf_data = g.serialize(format='pretty-xml').decode('utf-8')
+        rdf_data = g.serialize(format='pretty-xml').decode('utf-8')
 
         return super(RDFDatasetRenderer, self).render(rdf_data, media_type, renderer_context)
