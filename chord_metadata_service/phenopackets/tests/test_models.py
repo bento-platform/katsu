@@ -109,11 +109,11 @@ class GeneTest(TestCase):
 
 	def setUp(self):
 		self.gene_1 = Gene.objects.create(**VALID_GENE_1)
-		
+
 
 	def test_gene(self):
 		gene_1 = Gene.objects.get(id='HGNC:347')
-		self.assertEqual(gene_1.symbol, 'ETF1')		
+		self.assertEqual(gene_1.symbol, 'ETF1')
 		with self.assertRaises(IntegrityError):
 			Gene.objects.create(**DUPLICATE_GENE_2)
 
