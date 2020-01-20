@@ -4,7 +4,7 @@ from .models import *
 from .permissions import OverrideOrSuperUserOnly
 from .serializers import *
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
-from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer
+from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from rest_framework.settings import api_settings
 
 
@@ -41,7 +41,7 @@ class DatasetViewSet(CHORDModelViewSet):
 
     queryset = Dataset.objects.all().order_by("identifier")
     serializer_class = DatasetSerializer
-    renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer,)
+    renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
 
 
 class TableOwnershipViewSet(CHORDModelViewSet):

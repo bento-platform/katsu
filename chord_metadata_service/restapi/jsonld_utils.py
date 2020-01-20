@@ -1,60 +1,46 @@
 # utils to convert dataset json to json-ld
 # context to schema.org provided here https://github.com/datatagsuite/context
-CONTEXT_SDO = {
-    "sdo": "https://schema.org/",
-    "Dataset": "sdo:Dataset",
-    "identifier": {
-      "@id": "sdo:identifier",
-      "@type": "sdo:Text"
-    },
-    "alternateIdentifier": "sdo:alternateName",
-    "relatedIdentifier": "sdo:mentions",
-    "title": {
-      "@id": "sdo:name",
-      "@type": "sdo:Text"
-    },
-    "description": {
-      "@id": "sdo:description",
-      "@type": "sdo:Text"
-    },
-    "dates": "sdo:temporalCoverage",
-    "spatialCoverage": "sdo:spatialCoverage",
-    "storedIn": {
-        "@id": "sdo:includedInDataCatalog",
-        "@type": "sdo:DataCatalog"
-    },
-    "distributions": {
-      "@id": "sdo:distribution",
-      "@type": "sdo:DataDownload"
-    },
-    "primaryPublications": "sdo:citation",
-    "citations": "sdo:citation",
-    "producedBy": "sdo:producer",
-    "creators": {
-        "@id": "sdo:creator",
-        "@type": "sdo:Thing"
-    },
-    "licenses": "sdo:license",
-    "isAbout": "sdo:about",
-    "hasPart": {
-        "@id": "sdo:hasPart",
-        "@type": "sdo:Dataset"
-    },
-    "acknowledges": "sdo:funder",
-    "dimensions": "sdo:variableMeasured",
-    "dates": "sdo:DateTime",
-        "date": {
-            "@id": "sdo:Property"
+
+# example of context is taken from here conp dataset
+CONTEXT = [
+        {
+            "dats": "https://w3id.org/dats/schema/",
+            "dimensions": "dats:dimensions",
+            "extraProperties": "dats:extraProperties"
         },
-        "type":{
-            "@id": "sdo:Property"
+        {
+            "sdo": "https://schema.org/",
+            "Dataset": "sdo:Dataset",
+            "title": {
+                "@id": "sdo:name",
+                "@type": "sdo:Text"
+            },
+            "description": {
+                "@id": "sdo:description",
+                "@type": "sdo:Text"
+            },
+            "distributions": {
+                "@id": "sdo:distribution",
+                "@type": "sdo:DataDownload"
+            },
+            "primaryPublications": "sdo:citation",
+            "citations": "sdo:citation",
+            "producedBy": "sdo:producer",
+            "creators": "sdo:creator",
+            "licenses": "sdo:license",
+            "isAbout": "sdo:about",
+            "hasPart": "sdo:hasPart",
+            "acknowledges": "sdo:funder",
+            "keywords": "sdo:keywords",
+            "dates": "sdo:date",
+            "storedIn": "sdo:url"
         }
-  }
+    ]
 
 
 def obj_to_jsonld(obj, mapping) -> dict:
-    obj['@id'] = CONTEXT_SCHEMAS[mapping]['id']
-    obj['@type'] = CONTEXT_SCHEMAS[mapping]['type']
+    # obj['@id'] = CONTEXT_SCHEMAS[mapping]['id']
+    # obj['@type'] = CONTEXT_SCHEMAS[mapping]['type']
     return obj
 
 
@@ -126,5 +112,5 @@ def dataset_to_jsonld(dataset):
     :param dataset: json serialization of dataset
     :return: enriched json with linked data context
     """
-    dataset['@context'] = CONTEXT_SDO
+    dataset['@context'] = CONTEXT
     return dataset
