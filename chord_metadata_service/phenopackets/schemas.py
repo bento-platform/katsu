@@ -231,26 +231,33 @@ PHENOPACKET_META_DATA_SCHEMA = {
                 "properties": {
                     "id": {
                         "type": "string",
+                        "description": "Unique researcher-specified identifier for the resource",  # TODO: specified?
                         "search": _single_optional_str_search(0)
                     },
                     "name": {
                         "type": "string",
+                        "description": "Human-readable name for the resource",
                         "search": _multiple_optional_str_search(1)
                     },
                     "namespace_prefix": {
                         "type": "string",
+                        "description": "Prefix for objects from this resource",
                         "search": _multiple_optional_str_search(2)
                     },
                     "url": {
                         "type": "string",
+                        "description": "Resource URL (In the case of ontologies, should be an OBO or OWL file)",
                         "search": _multiple_optional_str_search(3)
                     },
                     "version": {
                         "type": "string",
+                        "description": "Arbitrary resource version",
                         "search": _multiple_optional_str_search(4)
                     },
                     "iri_prefix": {
                         "type": "string",
+                        "description": ("The IRI prefix, when used with the namespace prefix and an object ID, should "
+                                        "resolve the term or object from the resource in question."),
                         "search": _multiple_optional_str_search(5)
                     }
                 },
@@ -281,14 +288,17 @@ PHENOPACKET_META_DATA_SCHEMA = {
                 "type": "object",  # TODO
                 "properties": {
                     "timestamp": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "ISO8601 timestamp containing the time the update was made"
                     },
                     "updated_by": {
                         "type": "string",
-                        "search": _multiple_optional_str_search(0)
+                        "description": "Who performed the update",
+                        "search": _multiple_optional_str_search(0),
                     },
                     "comment": {
                         "type": "string",
+                        "description": "Human-readable text describing the content or reason for the update",
                         "search": _multiple_optional_str_search(1)
                     }
                 },
@@ -326,24 +336,39 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = {
     "properties": {
         "description": {
             "type": "string",
+            "description": "Human-readable text describing the phenotypic feature",
             "search": _multiple_optional_str_search(0),  # TODO: Searchable? may leak
         },
         "type": PHENOPACKET_ONTOLOGY_SCHEMA,
         "negated": {
             "type": "boolean",
+            "description": "Whether the feature is present (false) or absent (true, feature is negated)",
             "search": _single_optional_eq_search(1)
         },
-        "severity": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "severity": {
+            **PHENOPACKET_ONTOLOGY_SCHEMA,
+            "description": "Ontology term describing the severity of the phenotype"
+        },
         "modifiers": {  # TODO: Plural?
-            "type": "array",
+            "type": "array",  # TODO: Description
             "items": PHENOPACKET_ONTOLOGY_SCHEMA
         },
-        "onset": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "onset": {
+            **PHENOPACKET_ONTOLOGY_SCHEMA,
+            "description": "Ontology term describing the onset of the phenotype"
+        },
         "evidence": {
             "type": "object",
+            "description": "Evidence for the assertion of the observation of the phenotypic feature type",
             "properties": {
-                "evidence_code": PHENOPACKET_ONTOLOGY_SCHEMA,
-                "reference": PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
+                "evidence_code": {
+                    **PHENOPACKET_ONTOLOGY_SCHEMA,
+                    "description": "Ontology term representing the evidence type"
+                },
+                "reference": {
+                    **PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA,
+                    "description": "Source of the evidence"
+                }
             },
             "required": ["evidence_code"],
             "search": {
@@ -364,7 +389,11 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = {
 PHENOPACKET_AGE_SCHEMA = {
     "type": "object",
     "properties": {
-        "age": {"type": "string"}
+        "age": {
+            "type": "string",
+            "description": ("An ISO8601 duration string (e.g. P40Y10M05D for 40 years, 10 months, 5 days) representing "
+                            "an age of a subject")
+        }
     },
     "required": ["age"]
 }
@@ -412,6 +441,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
             "oneOf": [  # TODO: Front end will need to deal with this
                 {
                     "properties": PHENOPACKET_AGE_SCHEMA["properties"],
+                    "description": PHENOPACKET_AGE_SCHEMA["description"],
                     "required": ["age"],
                     "additionalProperties": False
                 },
@@ -420,6 +450,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
                         "start": PHENOPACKET_AGE_SCHEMA,
                         "end": PHENOPACKET_AGE_SCHEMA,
                     },
+                    "description": "Age range (e.g. when a subject's age falls into a bin)",
                     "required": ["start", "end"],
                     "additionalProperties": False
                 }
