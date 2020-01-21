@@ -96,9 +96,9 @@ EXTRA_PROPERTIES = {"extra_properties": {
 def ontology_class(purpose=""):
     padded_purpose = f" {purpose}" if purpose.strip() != "" else ""
     return {
-        "description": f"An ontology term{padded_purpose}",
+        "description": f"An ontology term{padded_purpose}.",
         "properties": {
-            "id": f"A CURIE-style identifier (e.g. HP:0001875) for an ontology term{padded_purpose}.",
+            "id": f"A CURIE-style identifier (e.g. HP:0000000) for an ontology term{padded_purpose}.",
             "label": f"A human readable class name for an ontology term{padded_purpose}."
         }
     }
@@ -182,7 +182,7 @@ META_DATA = {
 }
 
 EVIDENCE = {
-    "description": "A representation for the evidence for an assertion such as an observation of a phenotypic feature.",
+    "description": "A representation of the evidence for an assertion, such as an observation of a phenotypic feature.",
     "properties": {
         "evidence_code": ontology_class("that represents the evidence type"),
         "reference": EXTERNAL_REFERENCE,
