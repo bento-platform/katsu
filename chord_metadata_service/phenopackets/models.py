@@ -247,8 +247,9 @@ class Biosample(models.Model):
 
 	id = models.CharField(primary_key=True, max_length=200, help_text=d.rec_help(d.BIOSAMPLE, "id"))
 	# if Individual instance is deleted Biosample instance is deleted too
-	individual = models.ForeignKey(Individual, on_delete=models.CASCADE,
-		blank=True, null=True, related_name='biosamples', help_text=d.rec_help(d.BIOSAMPLE, "individual_id"))
+	individual = models.ForeignKey(
+		Individual, on_delete=models.CASCADE, blank=True, null=True, related_name="biosamples",
+		help_text=d.rec_help(d.BIOSAMPLE, "individual_id"))
 	description = models.CharField(max_length=200, blank=True, help_text=d.rec_help(d.BIOSAMPLE, "description"))
 	sampled_tissue = JSONField(help_text=d.rec_help(d.BIOSAMPLE, "sampled_tissue"))
 	# phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
