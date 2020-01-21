@@ -98,7 +98,7 @@ def ontology_class(purpose=""):
     return {
         "description": f"An ontology term{padded_purpose}.",
         "properties": {
-            "id": f"A CURIE-style identifier (e.g. HP:0000000) for an ontology term{padded_purpose}.",
+            "id": f"A CURIE-style identifier for an ontology term{padded_purpose}.",
             "label": f"A human readable class name for an ontology term{padded_purpose}."
         }
     }
