@@ -29,7 +29,7 @@ class IndividualSerializer(GenericSerializer):
 
 	class Meta:
 		model = Individual
-		fields = '__all__'
+		fields = "__all__"
 		# meta info for converting to FHIR
 		fhir_datatype_plural = 'patients'
 		class_converter = fhir_patient

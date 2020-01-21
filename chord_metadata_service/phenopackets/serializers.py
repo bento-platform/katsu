@@ -248,7 +248,6 @@ class SimplePhenopacketSerializer(GenericSerializer):
 		fhir_datatype_plural = 'compositions'
 		class_converter = fhir_composition
 
-
 	def to_representation(self, instance):
 		""""
 		Overriding this method to allow post Primary Key for FK and M2M
