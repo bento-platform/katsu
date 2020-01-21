@@ -120,7 +120,7 @@ PHENOPACKET_ONTOLOGY_SCHEMA = descriptions.describe_schema({
             "type": "jsonb"  # TODO: parameterize?
         }
     }
-}, descriptions.ontology_class())
+}, descriptions.ONTOLOGY_CLASS)
 
 PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = descriptions.describe_schema({
     "type": "object",

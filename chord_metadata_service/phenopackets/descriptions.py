@@ -104,6 +104,9 @@ def ontology_class(purpose=""):
     }
 
 
+ONTOLOGY_CLASS = ontology_class()
+
+
 # If description and help are specified separately, the Django help text differs from the schema description. Otherwise,
 # the data type is a string which fills both roles.
 
@@ -190,27 +193,33 @@ EVIDENCE = {
     }
 }
 
-PHENOTYPIC_FEATURE = {
-    "description": "A description of a phenotype that characterizes a subject or biosample of a Phenopacket.",
-    "properties": {
-        "description": "Human-readable text describing the phenotypic feature; NOT for structured text.",
-        "type": ontology_class("which describes the phenotype"),
-        "negated": "Whether the feature is present (false) or absent (true, feature is negated); default is false.",
-        "severity": ontology_class("that describes the severity of the condition"),
-        "modifier": {  # TODO: Plural?
-            "description": "A list of ontology terms that provide more expressive / precise descriptions of a "
-                           "phenotypic feature, including e.g. positionality or external factors.",
-            "items": ontology_class("that expounds on the phenotypic feature")
-        },
-        "onset": ontology_class("that describes the age at which the phenotypic feature was first noticed or "
-                                "diagnosed, e.g. HP:0003674"),
-        "evidence": {
-            "description": "One or more pieces of evidence that specify how the phenotype was determined.",
-            "items": EVIDENCE,
-        },
-        **EXTRA_PROPERTIES
+
+def phenotypic_feature(subject="a subject or biosample"):
+    return {
+        "description": f"A description of a phenotype that characterizes {subject} of a Phenopacket.",
+        "properties": {
+            "description": "Human-readable text describing the phenotypic feature; NOT for structured text.",
+            "type": ontology_class("which describes the phenotype"),
+            "negated": "Whether the feature is present (false) or absent (true, feature is negated); default is false.",
+            "severity": ontology_class("that describes the severity of the condition"),
+            "modifier": {  # TODO: Plural?
+                "description": "A list of ontology terms that provide more expressive / precise descriptions of a "
+                               "phenotypic feature, including e.g. positionality or external factors.",
+                "items": ontology_class("that expounds on the phenotypic feature")
+            },
+            "onset": ontology_class("that describes the age at which the phenotypic feature was first noticed or "
+                                    "diagnosed, e.g. HP:0003674"),
+            "evidence": {
+                "description": "One or more pieces of evidence that specify how the phenotype was determined.",
+                "items": EVIDENCE,
+            },
+            **EXTRA_PROPERTIES
+        }
     }
-}
+
+
+PHENOTYPIC_FEATURE = phenotypic_feature()
+
 
 PROCEDURE = {
     "description": "A description of a clinical procedure performed on a subject in order to extract a biosample.",
@@ -312,7 +321,7 @@ BIOSAMPLE = {
                                          "UBERON is recommended"),
         "phenotypic_features": {
             "description": "A list of phenotypic features / abnormalities of the sample.",
-            "items": PHENOTYPIC_FEATURE
+            "items": phenotypic_feature("a biosample")
         },
         "taxonomy": ontology_class("specified when more than one organism may be studied. It is advised that codes"
                                    "from the NCBI Taxonomy resource are used, e.g. NCBITaxon:9606 for humans"),
@@ -383,7 +392,7 @@ PHENOPACKET = {
         "subject": INDIVIDUAL,  # TODO: Just phenopackets-specific components of individual?
         "phenotypic_features": {
             "description": "A list of phenotypic features observed in the proband.",
-            "items": PHENOTYPIC_FEATURE
+            "items": phenotypic_feature("the proband")
         },  # TODO: Not present in model?
         "biosamples": {
             "description": "Samples (e.g. biopsies) taken from the individual, if any.",
