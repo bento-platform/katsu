@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.restapi.description_utils import rec_help
 
 
 #############################################################
@@ -23,13 +24,13 @@ class Resource(models.Model):
 	"""
 
 	# resource_id e.g. "id": "uniprot"
-	id = models.CharField(primary_key=True, max_length=200, help_text=d.rec_help(d.RESOURCE, "id"))
-	name = models.CharField(max_length=200, help_text=d.rec_help(d.RESOURCE, "name"))
-	namespace_prefix = models.CharField(max_length=200, help_text=d.rec_help(d.RESOURCE, "namespace_prefix"))
-	url = models.URLField(max_length=200, help_text=d.rec_help(d.RESOURCE, "url"))
-	version = models.CharField(max_length=200, help_text=d.rec_help(d.RESOURCE, "version"))
-	iri_prefix = models.URLField(max_length=200, help_text=d.rec_help(d.RESOURCE, "iri_prefix"))
-	extra_properties = JSONField(blank=True, null=True, help_text=d.rec_help(d.RESOURCE, "extra_properties"))
+	id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.RESOURCE, "id"))
+	name = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "name"))
+	namespace_prefix = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "namespace_prefix"))
+	url = models.URLField(max_length=200, help_text=rec_help(d.RESOURCE, "url"))
+	version = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "version"))
+	iri_prefix = models.URLField(max_length=200, help_text=rec_help(d.RESOURCE, "iri_prefix"))
+	extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.RESOURCE, "extra_properties"))
 	created = models.DateTimeField(auto_now=True)
 	updated = models.DateTimeField(auto_now_add=True)
 
@@ -45,20 +46,20 @@ class MetaData(models.Model):
 	FHIR: Metadata
 	"""
 
-	created = models.DateTimeField(default=timezone.now, help_text=d.rec_help(d.META_DATA, "created"))
-	created_by = models.CharField(max_length=200, help_text=d.rec_help(d.META_DATA, "created_by"))
-	submitted_by = models.CharField(max_length=200, blank=True, help_text=d.rec_help(d.META_DATA, "submitted_by"))
-	resources = models.ManyToManyField(Resource, help_text=d.rec_help(d.META_DATA, "resources"))
+	created = models.DateTimeField(default=timezone.now, help_text=rec_help(d.META_DATA, "created"))
+	created_by = models.CharField(max_length=200, help_text=rec_help(d.META_DATA, "created_by"))
+	submitted_by = models.CharField(max_length=200, blank=True, help_text=rec_help(d.META_DATA, "submitted_by"))
+	resources = models.ManyToManyField(Resource, help_text=rec_help(d.META_DATA, "resources"))
 	updates = ArrayField(
 		JSONField(null=True, blank=True), blank=True, null=True,
-		help_text=d.rec_help(d.META_DATA, "updates"))
+		help_text=rec_help(d.META_DATA, "updates"))
 	phenopacket_schema_version = models.CharField(max_length=200, blank=True,
 		help_text='Schema version of the current phenopacket.')
 	external_references = ArrayField(
 		JSONField(null=True, blank=True), blank=True, null=True,
-		help_text=d.rec_help(d.META_DATA, "external_references"))
+		help_text=rec_help(d.META_DATA, "external_references"))
 	extra_properties = JSONField(
-		blank=True, null=True, help_text=d.rec_help(d.META_DATA, "extra_properties"))
+		blank=True, null=True, help_text=rec_help(d.META_DATA, "extra_properties"))
 	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
@@ -83,23 +84,23 @@ class PhenotypicFeature(models.Model):
 	"""
 
 	description = models.CharField(
-		max_length=200, blank=True, help_text=d.rec_help(d.PHENOTYPIC_FEATURE, "description"))
-	pftype = JSONField(verbose_name='type', help_text=d.rec_help(d.PHENOTYPIC_FEATURE, "type"))
-	negated = models.BooleanField(default=False, help_text=d.rec_help(d.PHENOTYPIC_FEATURE, "negated"))
-	severity = JSONField(blank=True, null=True, help_text=d.rec_help(d.PHENOTYPIC_FEATURE, "severity"))
+		max_length=200, blank=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "description"))
+	pftype = JSONField(verbose_name='type', help_text=rec_help(d.PHENOTYPIC_FEATURE, "type"))
+	negated = models.BooleanField(default=False, help_text=rec_help(d.PHENOTYPIC_FEATURE, "negated"))
+	severity = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "severity"))
 	modifier = ArrayField(
 		JSONField(null=True, blank=True), blank=True, null=True,
-		help_text=d.rec_help(d.PHENOTYPIC_FEATURE, "modifier"))
-	onset = JSONField(blank=True, null=True, help_text=d.rec_help(d.PHENOTYPIC_FEATURE, "onset"))
+		help_text=rec_help(d.PHENOTYPIC_FEATURE, "modifier"))
+	onset = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "onset"))
 	# evidence can stay here because evidence is given for an observation of PF
 	# JSON schema to check evidence_code is present
 	# FHIR: Condition.evidence
-	evidence = JSONField(blank=True, null=True, help_text=d.rec_help(d.PHENOTYPIC_FEATURE, "evidence"))
+	evidence = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "evidence"))
 	biosample = models.ForeignKey(
 		"Biosample", on_delete=models.SET_NULL, blank=True, null=True, related_name='phenotypic_features')
 	phenopacket = models.ForeignKey(
 		"Phenopacket", on_delete=models.SET_NULL, blank=True, null=True, related_name='phenotypic_features')
-	extra_properties = JSONField(blank=True, null=True, help_text=d.rec_help(d.PHENOTYPIC_FEATURE, "extra_properties"))
+	extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "extra_properties"))
 	created = models.DateTimeField(auto_now=True)
 	updated = models.DateTimeField(auto_now_add=True)
 
@@ -115,9 +116,9 @@ class Procedure(models.Model):
 	FHIR: Procedure
 	"""
 
-	code = JSONField(help_text=d.rec_help(d.PROCEDURE, "code"))
-	body_site = JSONField(blank=True, null=True, help_text=d.rec_help(d.PROCEDURE, "body_site"))
-	extra_properties = JSONField(blank=True, null=True, help_text=d.rec_help(d.PROCEDURE, "extra_properties"))
+	code = JSONField(help_text=rec_help(d.PROCEDURE, "code"))
+	body_site = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "body_site"))
+	extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "extra_properties"))
 	created = models.DateTimeField(auto_now=True)
 	updated = models.DateTimeField(auto_now_add=True)
 
@@ -141,17 +142,17 @@ class HtsFile(models.Model):
 		('BCF', 'BCF'),
 		('GVCF', 'GVCF')
 	)
-	uri = models.URLField(primary_key=True, max_length=200, help_text=d.rec_help(d.HTS_FILE, "uri"))
-	description = models.CharField(max_length=200, blank=True, help_text=d.rec_help(d.HTS_FILE, "description"))
-	hts_format = models.CharField(max_length=200, choices=HTS_FORMAT, help_text=d.rec_help(d.HTS_FILE, "hts_format"))
-	genome_assembly = models.CharField(max_length=200, help_text=d.rec_help(d.HTS_FILE, "genome_assembly"))
+	uri = models.URLField(primary_key=True, max_length=200, help_text=rec_help(d.HTS_FILE, "uri"))
+	description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.HTS_FILE, "description"))
+	hts_format = models.CharField(max_length=200, choices=HTS_FORMAT, help_text=rec_help(d.HTS_FILE, "hts_format"))
+	genome_assembly = models.CharField(max_length=200, help_text=rec_help(d.HTS_FILE, "genome_assembly"))
 	# e.g.
 	# "individualToSampleIdentifiers": {
 	#   "patient23456": "NA12345"
 	# TODO how to perform this validation, ensure the patient id is the correct one?
 	individual_to_sample_identifiers = JSONField(
-		blank=True, null=True, help_text=d.rec_help(d.HTS_FILE, "individual_to_sample_identifiers"))
-	extra_properties = JSONField(blank=True, null=True, help_text=d.rec_help(d.HTS_FILE, "extra_properties"))
+		blank=True, null=True, help_text=rec_help(d.HTS_FILE, "individual_to_sample_identifiers"))
+	extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.HTS_FILE, "extra_properties"))
 	created = models.DateTimeField(auto_now=True)
 	updated = models.DateTimeField(auto_now_add=True)
 
@@ -169,13 +170,13 @@ class Gene(models.Model):
 	"""
 
 	# Gene id is unique
-	id = models.CharField(primary_key=True, max_length=200, help_text=d.rec_help(d.GENE, "id"))
+	id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENE, "id"))
 	# CURIE style? Yes!
 	alternate_ids = ArrayField(
 		models.CharField(max_length=200, blank=True), blank=True, null=True,
-		help_text=d.rec_help(d.GENE, "alternate_ids"))
-	symbol = models.CharField(max_length=200, help_text=d.rec_help(d.GENE, "symbol"))
-	extra_properties = JSONField(blank=True, null=True, help_text=d.rec_help(d.GENE, "extra_properties"))
+		help_text=rec_help(d.GENE, "alternate_ids"))
+	symbol = models.CharField(max_length=200, help_text=rec_help(d.GENE, "symbol"))
+	extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.GENE, "extra_properties"))
 	created = models.DateTimeField(auto_now=True)
 	updated = models.DateTimeField(auto_now_add=True)
 
@@ -198,9 +199,9 @@ class Variant(models.Model):
 		('iscnAllele', 'iscnAllele')
 	)
 	allele_type = models.CharField(max_length=200, choices=ALLELE, help_text="One of four allele types.")
-	allele = JSONField(help_text=d.rec_help(d.VARIANT, "allele"))
-	zygosity = JSONField(blank=True, null=True, help_text=d.rec_help(d.VARIANT, "zygosity"))
-	extra_properties = JSONField(blank=True, null=True, help_text=d.rec_help(d.VARIANT, "extra_properties"))
+	allele = JSONField(help_text=rec_help(d.VARIANT, "allele"))
+	zygosity = JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT, "zygosity"))
+	extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT, "extra_properties"))
 	created = models.DateTimeField(auto_now=True)
 	updated = models.DateTimeField(auto_now_add=True)
 
@@ -216,7 +217,7 @@ class Disease(models.Model):
 	FHIR: Condition
 	"""
 
-	term = JSONField(help_text=d.rec_help(d.DISEASE, "term"))
+	term = JSONField(help_text=rec_help(d.DISEASE, "term"))
 	# "ageOfOnset": {
 	# "age": "P38Y7M"
 	# }
@@ -225,12 +226,12 @@ class Disease(models.Model):
 	# "id": "HP:0003581",
 	# "label": "Adult onset"
 	# }
-	onset = JSONField(blank=True, null=True, help_text=d.rec_help(d.DISEASE, "onset"))
+	onset = JSONField(blank=True, null=True, help_text=rec_help(d.DISEASE, "onset"))
 	disease_stage = ArrayField(
-		JSONField(null=True, blank=True), blank=True, null=True, help_text=d.rec_help(d.DISEASE, "disease_stage"))
+		JSONField(null=True, blank=True), blank=True, null=True, help_text=rec_help(d.DISEASE, "disease_stage"))
 	tnm_finding = ArrayField(
-		JSONField(null=True, blank=True), blank=True, null=True, help_text=d.rec_help(d.DISEASE, "tnm_finding"))
-	extra_properties = JSONField(blank=True, null=True, help_text=d.rec_help(d.DISEASE, "extra_properties"))
+		JSONField(null=True, blank=True), blank=True, null=True, help_text=rec_help(d.DISEASE, "tnm_finding"))
+	extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.DISEASE, "extra_properties"))
 	created = models.DateTimeField(auto_now=True)
 	updated = models.DateTimeField(auto_now_add=True)
 
@@ -245,34 +246,34 @@ class Biosample(models.Model):
 	FHIR: Specimen
 	"""
 
-	id = models.CharField(primary_key=True, max_length=200, help_text=d.rec_help(d.BIOSAMPLE, "id"))
+	id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.BIOSAMPLE, "id"))
 	# if Individual instance is deleted Biosample instance is deleted too
 	individual = models.ForeignKey(
 		Individual, on_delete=models.CASCADE, blank=True, null=True, related_name="biosamples",
-		help_text=d.rec_help(d.BIOSAMPLE, "individual_id"))
-	description = models.CharField(max_length=200, blank=True, help_text=d.rec_help(d.BIOSAMPLE, "description"))
-	sampled_tissue = JSONField(help_text=d.rec_help(d.BIOSAMPLE, "sampled_tissue"))
+		help_text=rec_help(d.BIOSAMPLE, "individual_id"))
+	description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.BIOSAMPLE, "description"))
+	sampled_tissue = JSONField(help_text=rec_help(d.BIOSAMPLE, "sampled_tissue"))
 	# phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
 	# 	help_text='List of phenotypic abnormalities of the sample.')
-	taxonomy = JSONField(blank=True, null=True, help_text=d.rec_help(d.BIOSAMPLE, "taxonomy"))
+	taxonomy = JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "taxonomy"))
 	# An ISO8601 string represent age
 	individual_age_at_collection = JSONField(
-		blank=True, null=True, help_text=d.rec_help("individual_age_at_collection"))
+		blank=True, null=True, help_text=rec_help("individual_age_at_collection"))
 	histological_diagnosis = JSONField(
-		blank=True, null=True, help_text=d.rec_help(d.BIOSAMPLE, "histological_diagnosis"))
+		blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "histological_diagnosis"))
 	# TODO: Lists?
-	tumor_progression = JSONField(blank=True, null=True, help_text=d.rec_help(d.BIOSAMPLE, "tumor_progression"))
-	tumor_grade = JSONField(blank=True, null=True, help_text=d.rec_help(d.BIOSAMPLE, "tumor_grade"))
+	tumor_progression = JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "tumor_progression"))
+	tumor_grade = JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "tumor_grade"))
 	diagnostic_markers = ArrayField(
 		JSONField(null=True, blank=True), blank=True, null=True,
-		help_text=d.rec_help(d.BIOSAMPLE, "diagnostic_markers"))
+		help_text=rec_help(d.BIOSAMPLE, "diagnostic_markers"))
 	# CHECK! if Procedure instance is deleted Biosample instance is deleted too
-	procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE, help_text=d.rec_help(d.BIOSAMPLE, "procedure"))
+	procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE, help_text=rec_help(d.BIOSAMPLE, "procedure"))
 	hts_files = models.ManyToManyField(
-		HtsFile, blank=True, related_name='biosample_hts_files', help_text=d.rec_help(d.BIOSAMPLE, "hts_files"))
-	variants = models.ManyToManyField(Variant, blank=True, help_text=d.rec_help(d.BIOSAMPLE, "variants"))
-	is_control_sample = models.BooleanField(default=False, help_text=d.rec_help(d.BIOSAMPLE, "is_control_sample"))
-	extra_properties = JSONField(blank=True, null=True, help_text=d.rec_help(d.BIOSAMPLE, "extra_properties"))
+		HtsFile, blank=True, related_name='biosample_hts_files', help_text=rec_help(d.BIOSAMPLE, "hts_files"))
+	variants = models.ManyToManyField(Variant, blank=True, help_text=rec_help(d.BIOSAMPLE, "variants"))
+	is_control_sample = models.BooleanField(default=False, help_text=rec_help(d.BIOSAMPLE, "is_control_sample"))
+	extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "extra_properties"))
 	created = models.DateTimeField(auto_now=True)
 	updated = models.DateTimeField(auto_now_add=True)
 
@@ -287,24 +288,24 @@ class Phenopacket(models.Model):
 	FHIR: Composition
 	"""
 
-	id = models.CharField(primary_key=True, max_length=200, help_text=d.rec_help(d.PHENOPACKET, "id"))
+	id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.PHENOPACKET, "id"))
 	# if Individual instance is deleted Phenopacket instance is deleted too
 	# CHECK !!! Force as required?
 	subject = models.ForeignKey(
 		Individual, on_delete=models.CASCADE, related_name="phenopackets",
-		help_text=d.rec_help(d.PHENOPACKET, "subject"))
+		help_text=rec_help(d.PHENOPACKET, "subject"))
 	# PhenotypicFeatures are present in Biosample, so can be accessed via Biosample instance
 	# phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
 	# 	help_text='Phenotypic features observed in the proband.')
-	biosamples = models.ManyToManyField(Biosample, blank=True, help_text=d.rec_help(d.PHENOPACKET, "biosamples"))
-	genes = models.ManyToManyField(Gene, blank=True, help_text=d.rec_help(d.PHENOPACKET, "genes"))
-	variants = models.ManyToManyField(Variant, blank=True, help_text=d.rec_help(d.PHENOPACKET, "variants"))
-	diseases = models.ManyToManyField(Disease, blank=True, help_text=d.rec_help(d.PHENOPACKET, "diseases"))
-	hts_files = models.ManyToManyField(HtsFile, blank=True, help_text=d.rec_help(d.PHENOPACKET, "hts_files"))
+	biosamples = models.ManyToManyField(Biosample, blank=True, help_text=rec_help(d.PHENOPACKET, "biosamples"))
+	genes = models.ManyToManyField(Gene, blank=True, help_text=rec_help(d.PHENOPACKET, "genes"))
+	variants = models.ManyToManyField(Variant, blank=True, help_text=rec_help(d.PHENOPACKET, "variants"))
+	diseases = models.ManyToManyField(Disease, blank=True, help_text=rec_help(d.PHENOPACKET, "diseases"))
+	hts_files = models.ManyToManyField(HtsFile, blank=True, help_text=rec_help(d.PHENOPACKET, "hts_files"))
 	# TODO OneToOneField
-	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=d.rec_help(d.PHENOPACKET, "meta_data"))
+	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
 	dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)
-	extra_properties = JSONField(blank=True, null=True, help_text=d.rec_help(d.PHENOPACKET, "extra_properties"))
+	extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOPACKET, "extra_properties"))
 	created = models.DateTimeField(auto_now=True)
 	updated = models.DateTimeField(auto_now_add=True)
 

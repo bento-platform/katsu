@@ -2,7 +2,9 @@
 
 import chord_metadata_service.phenopackets.descriptions as descriptions
 from chord_metadata_service.phenopackets.models import *
+from chord_metadata_service.patients.descriptions import INDIVIDUAL
 from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.restapi.description_utils import describe_schema, ONTOLOGY_CLASS
 
 ALLELE_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -42,7 +44,7 @@ ALLELE_SCHEMA = {
 }
 
 
-UPDATE_SCHEMA = descriptions.describe_schema({
+UPDATE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "todo",
     "title": "Updates schema",
@@ -102,7 +104,7 @@ def _tag_with_database_attrs(schema: dict, db_attrs: dict):
     }
 
 
-PHENOPACKET_ONTOLOGY_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_ONTOLOGY_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": {
@@ -120,9 +122,9 @@ PHENOPACKET_ONTOLOGY_SCHEMA = descriptions.describe_schema({
             "type": "jsonb"  # TODO: parameterize?
         }
     }
-}, descriptions.ONTOLOGY_CLASS)
+}, ONTOLOGY_CLASS)
 
-PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": {
@@ -143,7 +145,7 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = descriptions.describe_schema({
 }, descriptions.EXTERNAL_REFERENCE)
 
 
-PHENOPACKET_INDIVIDUAL_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_INDIVIDUAL_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": {
@@ -209,9 +211,9 @@ PHENOPACKET_INDIVIDUAL_SCHEMA = descriptions.describe_schema({
         }
     },
     "required": ["id"]
-}, descriptions.INDIVIDUAL)
+}, INDIVIDUAL)
 
-PHENOPACKET_RESOURCE_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_RESOURCE_SCHEMA = describe_schema({
     "type": "object",  # TODO
     "properties": {
         "id": {
@@ -251,7 +253,7 @@ PHENOPACKET_RESOURCE_SCHEMA = descriptions.describe_schema({
 }, descriptions.RESOURCE)
 
 
-PHENOPACKET_UPDATE_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_UPDATE_SCHEMA = describe_schema({
     "type": "object",  # TODO
     "properties": {
         "timestamp": {
@@ -276,7 +278,7 @@ PHENOPACKET_UPDATE_SCHEMA = descriptions.describe_schema({
 
 
 # noinspection PyProtectedMember
-PHENOPACKET_META_DATA_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_META_DATA_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "created": {"type": "string"},
@@ -327,7 +329,7 @@ PHENOPACKET_META_DATA_SCHEMA = descriptions.describe_schema({
     }
 }, descriptions.META_DATA)
 
-PHENOPACKET_EVIDENCE_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_EVIDENCE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "evidence_code": PHENOPACKET_ONTOLOGY_SCHEMA,
@@ -341,7 +343,7 @@ PHENOPACKET_EVIDENCE_SCHEMA = descriptions.describe_schema({
     }
 }, descriptions.EVIDENCE)
 
-PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "description": {
@@ -369,7 +371,7 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = descriptions.describe_schema({
     }
 }, descriptions.PHENOTYPIC_FEATURE)
 
-PHENOPACKET_AGE_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_AGE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "age": {
@@ -381,7 +383,7 @@ PHENOPACKET_AGE_SCHEMA = descriptions.describe_schema({
 
 
 # TODO: search
-PHENOPACKET_GENE_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_GENE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": {
@@ -404,7 +406,7 @@ PHENOPACKET_GENE_SCHEMA = descriptions.describe_schema({
 }, descriptions.GENE)
 
 
-PHENOPACKET_HTS_FILE_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_HTS_FILE_SCHEMA = describe_schema({
     # TODO: Search? Probably not
     "type": "object",
     "properties": {
@@ -429,7 +431,7 @@ PHENOPACKET_HTS_FILE_SCHEMA = descriptions.describe_schema({
 
 
 # TODO: search??
-PHENOPACKET_VARIANT_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_VARIANT_SCHEMA = describe_schema({
     "type": "object",  # TODO
     "properties": {
         "allele": ALLELE_SCHEMA,  # TODO
@@ -438,7 +440,7 @@ PHENOPACKET_VARIANT_SCHEMA = descriptions.describe_schema({
 }, descriptions.VARIANT)
 
 # noinspection PyProtectedMember
-PHENOPACKET_BIOSAMPLE_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": {
@@ -539,7 +541,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = descriptions.describe_schema({
     }
 }, descriptions.BIOSAMPLE)
 
-PHENOPACKET_DISEASE_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_DISEASE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "term": PHENOPACKET_ONTOLOGY_SCHEMA,
@@ -566,7 +568,7 @@ PHENOPACKET_DISEASE_SCHEMA = descriptions.describe_schema({
 
 # Deduplicate with other phenopacket representations
 # noinspection PyProtectedMember
-PHENOPACKET_SCHEMA = descriptions.describe_schema({
+PHENOPACKET_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "TODO",
     "title": "Dataset Table Schema",

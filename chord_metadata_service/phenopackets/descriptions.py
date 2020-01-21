@@ -35,76 +35,8 @@
 #   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-def describe_schema(schema, descriptions):
-    if schema is None:
-        return {}  # TODO: If none is specified, should we still annotate it?
-
-    if descriptions is None:
-        return schema
-
-    schema_description = (descriptions.get("description", None)
-                          if isinstance(descriptions, dict) else descriptions)
-    schema_help = (descriptions.get("help", descriptions.get("description", None))
-                   if isinstance(descriptions, dict) else descriptions)
-
-    new_schema = schema.copy()
-
-    if schema_description is not None:
-        new_schema["description"] = schema_description
-
-    if schema_help is not None:
-        new_schema["help"] = schema_help
-
-    if all((schema["type"] == "object", "properties" in schema, isinstance(descriptions, dict),
-            "properties" in descriptions)):
-        new_schema["properties"] = {p: describe_schema(schema["properties"].get(p, None),
-                                                       descriptions["properties"].get(p, None))
-                                    for p in schema["properties"]}
-
-    elif all((schema["type"] == "array", "items" in schema, isinstance(descriptions, dict), "items" in descriptions)):
-        new_schema["items"] = describe_schema(schema["items"], descriptions["items"])
-
-    return new_schema
-
-
-def get_help(description):
-    if isinstance(description, str):
-        return description
-
-    elif "help" in description:
-        return description["help"]
-
-    return description["description"]
-
-
-def rec_help(description, *args):
-    if len(args) == 0:
-        return get_help(description)
-
-    elif args[0] == "[item]":
-        return rec_help(description["items"], *args[1:])
-
-    return rec_help(description["properties"][args[0]], *args[1:])
-
-
-EXTRA_PROPERTIES = {"extra_properties": {
-    # This isn't in the JSON schema, so no description needed
-    "help": "Extra properties that are not supported by current schema."
-}}
-
-
-def ontology_class(purpose=""):
-    padded_purpose = f" {purpose}" if purpose.strip() != "" else ""
-    return {
-        "description": f"An ontology term{padded_purpose}.",
-        "properties": {
-            "id": f"A CURIE-style identifier for an ontology term{padded_purpose}.",
-            "label": f"A human readable class name for an ontology term{padded_purpose}."
-        }
-    }
-
-
-ONTOLOGY_CLASS = ontology_class()
+from chord_metadata_service.patients.descriptions import INDIVIDUAL
+from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES, ontology_class
 
 
 # If description and help are specified separately, the Django help text differs from the schema description. Otherwise,
@@ -355,34 +287,6 @@ BIOSAMPLE = {
     }
 }
 
-# TODO: This is part of another app
-INDIVIDUAL = {
-    "description": "A subject of a phenopacket, representing either a human (typically) or another organism.",
-    "properties": {
-        # Phenopackets / shared
-        "id": "A unique researcher-specified identifier for an individual.",
-        "alternate_ids": {
-            "description": "A list of alternative identifiers for an individual.",
-            "items": "One of possibly many alternative identifiers for an individual."
-        },
-        "date_of_birth": "A timestamp representing an individual's date of birth; either exactly or imprecisely.",
-        "age": None,  # TODO: Age or AgeRange
-        "sex": "The phenotypic sex of an individual, as would be determined by a midwife or physician at birth.",
-        "karyotypic_sex": "The karyotypic sex of an individual.",
-        "taxonomy": ontology_class("specified when more than one organism may be studied. It is advised that codes"
-                                   "from the NCBI Taxonomy resource are used, e.g. NCBITaxon:9606 for humans"),
-
-        # FHIR-specific
-        "active": "Whether a patient's record is in active use.",
-        "deceased": "Whether a patient is deceased.",
-
-        # mCode-specific
-        "race": "A code for a person's race (mCode).",
-        "ethnicity": "A code for a person's ethnicity (mCode).",
-
-        **EXTRA_PROPERTIES
-    }
-}
 
 PHENOPACKET = {
     "description": "An anonymous phenotypic description of an individual or biosample with potential genes of interest "
@@ -393,7 +297,7 @@ PHENOPACKET = {
         "phenotypic_features": {
             "description": "A list of phenotypic features observed in the proband.",
             "items": phenotypic_feature("the proband")
-        },  # TODO: Not present in model?
+        },
         "biosamples": {
             "description": "Samples (e.g. biopsies) taken from the individual, if any.",
             "items": BIOSAMPLE
