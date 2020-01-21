@@ -290,6 +290,8 @@ AGE = {
     "help": "Age of a subject."
 }
 
+AGE_RANGE = "Age range (e.g. when a subject's age falls into a bin)"  # TODO
+
 AGE_NESTED = {
     "description": AGE["description"],
     "properties": {

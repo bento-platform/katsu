@@ -327,6 +327,20 @@ PHENOPACKET_META_DATA_SCHEMA = descriptions.describe_schema({
     }
 }, descriptions.META_DATA)
 
+PHENOPACKET_EVIDENCE_SCHEMA = descriptions.describe_schema({
+    "type": "object",
+    "properties": {
+        "evidence_code": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "reference": PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
+    },
+    "required": ["evidence_code"],
+    "search": {
+        "database": {
+            "type": "jsonb"
+        }
+    }
+}, descriptions.EVIDENCE)
+
 PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = descriptions.describe_schema({
     "type": "object",
     "properties": {
@@ -345,19 +359,7 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = descriptions.describe_schema({
             "items": PHENOPACKET_ONTOLOGY_SCHEMA
         },
         "onset": PHENOPACKET_ONTOLOGY_SCHEMA,
-        "evidence": {
-            "type": "object",
-            "properties": {
-                "evidence_code": PHENOPACKET_ONTOLOGY_SCHEMA,
-                "reference": PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
-            },
-            "required": ["evidence_code"],
-            "search": {
-                "database": {
-                    "type": "jsonb"
-                }
-            }
-        }
+        "evidence": PHENOPACKET_EVIDENCE_SCHEMA,
     },
     "search": {
         "database": {
@@ -400,6 +402,30 @@ PHENOPACKET_GENE_SCHEMA = descriptions.describe_schema({
     },
     "required": ["id", "symbol"]
 }, descriptions.GENE)
+
+
+PHENOPACKET_HTS_FILE_SCHEMA = descriptions.describe_schema({
+    # TODO: Search? Probably not
+    "type": "object",
+    "properties": {
+        "uri": {
+            "type": "string"  # TODO: URI pattern
+        },
+        "description": {
+            "type": "string"
+        },
+        "hts_format": {
+            "type": "string",
+            "enum": ["SAM", "BAM", "CRAM", "VCF", "BCF", "GVCF", "FASTQ", "UNKNOWN"]
+        },
+        "genome_assembly": {
+            "type": "string"
+        },
+        "individual_to_sample_identifiers": {
+            "type": "object"  # TODO
+        }
+    }
+}, descriptions.HTS_FILE)
 
 
 # TODO: search??
@@ -459,7 +485,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = descriptions.describe_schema({
                         "start": PHENOPACKET_AGE_SCHEMA,
                         "end": PHENOPACKET_AGE_SCHEMA,
                     },
-                    "description": "Age range (e.g. when a subject's age falls into a bin)",
+                    "description": d.AGE_RANGE,  # TODO: annotated
                     "required": ["start", "end"],
                     "additionalProperties": False
                 }
@@ -493,9 +519,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = descriptions.describe_schema({
         },
         "hts_files": {
             "type": "array",
-            "items": {
-                "type": "object"  # TODO
-            }
+            "items": PHENOPACKET_HTS_FILE_SCHEMA  # TODO
         },
         "variants": {
             "type": "array",
@@ -634,9 +658,7 @@ PHENOPACKET_SCHEMA = descriptions.describe_schema({
         },  # TODO
         "hts_files": {
             "type": "array",
-            "items": {
-                "type": "object"  # TODO
-            }
+            "items": PHENOPACKET_HTS_FILE_SCHEMA  # TODO
         },
         "meta_data": PHENOPACKET_META_DATA_SCHEMA
     },
