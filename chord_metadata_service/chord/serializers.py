@@ -104,6 +104,8 @@ class DatasetSerializer(GenericSerializer):
 
         return validation
 
+    n_of_tables = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Dataset
         fields = '__all__'
