@@ -156,7 +156,7 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
 
     if request.data is None or "query" not in request.data:
         # TODO: Better error
-        return Response(status=400)
+        return Response(bad_request_error("Missing query in request body"), status=400)
 
     # Check that dataset exists
     dataset = Dataset.objects.get(identifier=table_id)
@@ -164,9 +164,8 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
     except (SyntaxError, TypeError, ValueError) as e:
-        # TODO: Better error
         print("[CHORD Metadata] Error encountered compiling query {}:\n    {}".format(request.data["query"], str(e)))
-        return Response({"error": str(e)}, status=400)
+        return Response(bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
     serializer = PhenopacketSerializer(phenopacket_query_results(
         query=sql.SQL("{} AND dataset_id = {}").format(compiled_query, sql.Placeholder()),
