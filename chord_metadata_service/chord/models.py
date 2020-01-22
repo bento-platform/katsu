@@ -46,6 +46,9 @@ class Dataset(models.Model):
 
     data_use = JSONField()
 
+    field_links = ArrayField(JSONField(), blank=True, default=list,
+                             help_text="Data type fields which are linked together.")
+
     @property
     def n_of_tables(self):
         # TODO: No hard-code: +1 for phenopackets table
