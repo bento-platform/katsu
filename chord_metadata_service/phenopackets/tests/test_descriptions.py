@@ -1,4 +1,4 @@
-from chord_metadata_service.phenopackets.descriptions import *
+from chord_metadata_service.restapi.description_utils import *
 from django.test import TestCase
 
 

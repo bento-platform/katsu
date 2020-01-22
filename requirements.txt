@@ -1,7 +1,7 @@
 attrs==19.3.0
 certifi==2019.11.28
 chardet==3.0.4
-chord-lib==0.1.0
+chord-lib==0.2.0
 codecov==2.0.15
 coreapi==2.3.3
 coreschema==0.0.4
@@ -35,7 +35,7 @@ six==1.14.0
 sqlparse==0.3.0
 strict-rfc3339==0.7
 uritemplate==3.0.1
-urllib3==1.25.7
+urllib3==1.25.8
 Werkzeug==0.16.0
 wincertstore==0.2
-zipp==1.0.0
+zipp==2.0.0

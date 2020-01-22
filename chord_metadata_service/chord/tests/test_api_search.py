@@ -73,7 +73,7 @@ class TableTest(APITestCase):
     def test_table_list(self):
         # No data type specified
         r = self.client.get(reverse("table-list"))
-        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         r = self.client.get(reverse("table-list"), {"data-type": PHENOPACKET_DATA_TYPE_ID})
         self.assertEqual(r.status_code, status.HTTP_200_OK)

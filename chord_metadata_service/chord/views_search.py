@@ -1,5 +1,6 @@
 import itertools
 
+from chord_lib.responses.errors import *
 from chord_lib.search import build_search_response, postgres
 from datetime import datetime
 from django.db import connection
@@ -52,10 +53,10 @@ def data_type_phenopacket_metadata_schema(_request):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def dataset_list(request):
-    if PHENOPACKET_DATA_TYPE_ID not in request.query_params.getlist("data-type"):
-        # TODO: Better error
-        return Response(status=404)
+def table_list(request):
+    data_types = request.query_params.getlist("data-type")
+    if PHENOPACKET_DATA_TYPE_ID not in data_types:
+        return Response(bad_request_error(f"Missing or invalid data type (Specified: {data_types})"), status=400)
 
     return Response([{
         "id": d.identifier,
@@ -71,19 +72,19 @@ def dataset_list(request):
 
 
 # TODO: Remove pragma: no cover when GET/POST implemented
+# TODO: Should this exist? managed
 @api_view(["DELETE"])
 @permission_classes([OverrideOrSuperUserOnly])
-def dataset_detail(request, dataset_id):  # pragma: no cover
+def table_detail(request, table_id):  # pragma: no cover
     # TODO: Implement GET, POST
     # TODO: Permissions: Check if user has control / more direct access over this dataset? Or just always use owner...
     try:
-        dataset = Dataset.objects.get(identifier=dataset_id)
+        table = Dataset.objects.get(identifier=table_id)
     except Dataset.DoesNotExist:
-        # TODO: Better error
-        return Response(status=404)
+        return Response(not_found_error(f"Table with ID {table_id} not found"), status=404)
 
     if request.method == "DELETE":
-        dataset.delete()
+        table.delete()
         return Response(status=204)
 
 
@@ -98,21 +99,22 @@ def phenopacket_query_results(query, params):
 
 
 def search(request, internal_data=False):
-    if request.data is None or "data_type" not in request.data or "query" not in request.data:
-        # TODO: Better error
-        return Response(status=400)
+    if "data_type" not in request.data:
+        return Response(bad_request_error("Missing data_type in request body"), status=400)
+
+    if "query" not in request.data:
+        return Response(bad_request_error("Missing query in request body"), status=400)
 
     start = datetime.now()
 
     if request.data["data_type"] != PHENOPACKET_DATA_TYPE_ID:
-        # TODO: Better error
-        return Response(status=400)
+        return Response(bad_request_error(f"Missing or invalid data type (Specified: {request.data['data_type']})"),
+                        status=400)
 
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
-    except (SyntaxError, TypeError, ValueError):
-        # TODO: Better error
-        return Response(status=400)
+    except (SyntaxError, TypeError, ValueError) as e:
+        return Response(bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
     if not internal_data:
         datasets = Dataset.objects.filter(identifier__in=phenopacket_results(
