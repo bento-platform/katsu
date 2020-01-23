@@ -14,7 +14,7 @@ FIELD_LINKS_SCHEMA = {
     "items": {
         "type": "object",
         "properties": {
-            "name": {"type": "string"},
+            "name": {"type": "string", "minLength": 3},
             "links": {
                 "type": "object",
                 "propertyNames": {
@@ -23,7 +23,7 @@ FIELD_LINKS_SCHEMA = {
                 "minProperties": 2,
                 "additionalProperties": {  # Field specification, array format; e.g. ["biosamples", "[item]", "id"]
                     "type": "array",
-                    "items": {"type": "string"}
+                    "items": {"type": "string", "minLength": 1}
                 }
             }
         },
