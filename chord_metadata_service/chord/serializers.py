@@ -6,7 +6,7 @@ from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATOR
 from chord_metadata_service.restapi.utils import transform_keys
 
 from .models import *
-from .schemas import FIELD_LINK_SETS_SCHEMA
+from .schemas import LINKED_FIELD_SETS_SCHEMA
 
 
 __all__ = ["ProjectSerializer", "DatasetSerializer", "TableOwnershipSerializer"]
@@ -42,8 +42,8 @@ class DatasetSerializer(GenericSerializer):
         return value
 
     # noinspection PyMethodMayBeStatic
-    def validate_field_link_sets(self, value):
-        v = Draft7Validator(FIELD_LINK_SETS_SCHEMA)
+    def validate_linked_field_sets(self, value):
+        v = Draft7Validator(LINKED_FIELD_SETS_SCHEMA)
         validation = v.is_valid(value)
         if not validation:
             raise serializers.ValidationError([str(error.message) for error in v.iter_errors(value)])

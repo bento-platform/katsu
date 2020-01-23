@@ -1,6 +1,6 @@
 # e.g. PATCH
 # {
-#   "field_link_sets": [
+#   "linked_field_sets": [
 #     {
 #       "name": "subject IDs",
 #       "links": {"phenopacket": ["subject", "id"], "variant": ["sample_id"]}
@@ -9,13 +9,13 @@
 # }
 
 
-FIELD_LINK_SETS_SCHEMA = {
+LINKED_FIELD_SETS_SCHEMA = {
     "type": "array",
     "items": {
         "type": "object",
         "properties": {
             "name": {"type": "string", "minLength": 3},
-            "links": {
+            "fields": {
                 "type": "object",
                 "propertyNames": {
                     "pattern": r"^\S+$"  # TODO: synchronize pattern
