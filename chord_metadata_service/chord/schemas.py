@@ -1,6 +1,6 @@
 # e.g. PATCH
 # {
-#   "field_links": [
+#   "field_link_sets": [
 #     {
 #       "name": "subject IDs",
 #       "links": {"phenopacket": ["subject", "id"], "variant": ["sample_id"]}
@@ -9,7 +9,7 @@
 # }
 
 
-FIELD_LINKS_SCHEMA = {
+FIELD_LINK_SETS_SCHEMA = {
     "type": "array",
     "items": {
         "type": "object",
