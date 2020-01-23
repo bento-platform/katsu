@@ -27,7 +27,7 @@ LINKED_FIELD_SETS_SCHEMA = {
                 }
             }
         },
-        "required": ["name", "links"],
+        "required": ["name", "fields"],
         "additionalProperties": False
     }
 }
