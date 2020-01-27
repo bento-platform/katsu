@@ -7,9 +7,9 @@ from chord_metadata_service.metadata.service_info import SERVICE_INFO
 @api_view()
 @permission_classes([AllowAny])
 def service_info(_request):
-	"""
-	get:
-	Return service info
-	"""
+    """
+    get:
+    Return service info
+    """
 
-	return Response(SERVICE_INFO)
+    return Response(SERVICE_INFO)
