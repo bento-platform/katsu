@@ -13,7 +13,7 @@
         "label": "Hematuria"
       },
       "negated": false,
-      "modifiers": [],
+      "modifier": [],
       "evidence": []
     },
     {
@@ -27,7 +27,7 @@
         "id": "HP:0012828",
         "label": "Severe"
       },
-      "modifiers": [],
+      "modifier": [],
       "evidence": []
     }
   ],
@@ -37,7 +37,7 @@
         "id": "NCIT:C39853",
         "label": "Infiltrating Urothelial Carcinoma"
       },
-      "tumor_stage": [
+      "disease_stage": [
         {
           "id": "NCIT:C48766",
           "label": "pT2b Stage Finding"
@@ -76,7 +76,7 @@
         "namespace_prefix": "NCIT",
         "url": "http://purl.obolibrary.org/obo/ncit.owl",
         "version": "18.05d",
-        "iri_prefix": ""
+        "iri_prefix": "http://purl.obolibrary.org/obo/NCIT_"
       }
     ],
     "updated": [],
@@ -141,7 +141,7 @@
         "id": "NCIT:C28091",
         "label": "Gleason Score 7"
       },
-      "tumor_stage": [],
+      "disease_stage": [],
       "diagnostic_markers": [],
       "procedure": {
         "code": {
@@ -167,7 +167,7 @@
         "id": "NCIT:C38757",
         "label": "Negative Finding"
       },
-      "tumor_stage": [],
+      "disease_stage": [],
       "diagnostic_markers": [],
       "procedure": {
         "code": {
@@ -193,7 +193,7 @@
         "id": "NCIT:C38757",
         "label": "Negative Finding"
       },
-      "tumor_stage": [],
+      "disease_stage": [],
       "diagnostic_markers": [],
       "procedure": {
         "code": {
@@ -219,7 +219,7 @@
         "id": "NCIT:C3261",
         "label": "Metastatic Neoplasm"
       },
-      "tumor_stage": [],
+      "disease_stage": [],
       "diagnostic_markers": [],
       "procedure": {
         "code": {

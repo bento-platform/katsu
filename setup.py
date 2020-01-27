@@ -10,9 +10,21 @@ setuptools.setup(
     version="0.1.0",
 
     python_requires=">=3.6",
-    install_requires=["chord_lib @ git+https://github.com/c3g/chord_lib", "Django==2.2.6", "django-filter",
-                      "djangorestframework", "djangorestframework-camel-case", "jsonschema", "psycopg2-binary",
-                      "python-dateutil", "PyYAML", "requests", "uritemplate"],
+    install_requires=[
+        "chord_lib[django]==0.1.0",
+        "Django>=2.2,<3.0",
+        "django-filter>=2.2,<3.0",
+        "django-nose>=1.4,<2.0",
+        "djangorestframework>=3.10,<3.11",
+        "djangorestframework-camel-case",
+        "fhirclient>=3.2,<4.0",
+        "jsonschema>=3.2,<4.0",
+        "psycopg2-binary>=2.8,<3.0",
+        "python-dateutil>=2.8,<3.0",
+        "PyYAML>=5.3,<6.0",
+        "requests>=2.22,<3.0",
+        "uritemplate>=3.0,<4.0",
+    ],
 
     author="Ksenia Zaytseva",
 
@@ -27,7 +39,7 @@ setuptools.setup(
     license="LGPLv3",
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Operating System :: OS Independent"
     ]
 )

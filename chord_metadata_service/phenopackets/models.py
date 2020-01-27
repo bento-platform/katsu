@@ -5,7 +5,6 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 from elasticsearch_dsl import (
 	Document, Text, Date, Search,
 	Object, Boolean, InnerDoc, Nested)
-
 from chord_metadata_service.patients.models import Individual
 from .index import *
 from .signals import *
@@ -46,6 +45,10 @@ class Resource(models.Model):
 	iri_prefix = models.URLField(max_length=200,
 		help_text='The full IRI prefix which can be used with the namespace_prefix '
 		'and the Ontology::id to resolve to an IRI for a term.')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -59,7 +62,6 @@ class MetaData(models.Model):
 	FHIR: Metadata
 	"""
 
-	# CHECK !!! created or submitted?
 	created = models.DateTimeField(default=timezone.now,
 		help_text='Time when this object was created.')
 	created_by = models.CharField(max_length=200,
@@ -76,6 +78,9 @@ class MetaData(models.Model):
 	external_references = ArrayField(JSONField(null=True, blank=True),
 		blank=True, null=True,
 		help_text='List of external resources from the phenopacket was derived.')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -124,6 +129,10 @@ class PhenotypicFeature(models.Model):
 		blank=True, null=True, related_name='phenotypic_features')
 	phenopacket = models.ForeignKey("Phenopacket", on_delete=models.SET_NULL,
 		blank=True, null=True, related_name='phenotypic_features')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -226,6 +235,10 @@ class Procedure(models.Model):
 	code = JSONField(help_text='Clinical procedure performed on a subject.')
 	body_site = JSONField(blank=True, null=True,
 		help_text='Specific body site if unable to represent this is the code.')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -303,6 +316,10 @@ class HtsFile(models.Model):
 	individual_to_sample_identifiers = JSONField(blank=True, null=True,
 		help_text='The mapping between the Individual.id or Biosample.id '
 		'to the sample identifier in the HTS file')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.uri)
@@ -313,7 +330,7 @@ class Gene(models.Model):
 	Class to represent an identifier for a gene
 
 	FHIR: ?
-	Draft extention for Gene is in development
+	Draft extension for Gene is in development
 	where Gene defined via class CodeableConcept
 	"""
 
@@ -321,11 +338,15 @@ class Gene(models.Model):
 	id = models.CharField(primary_key=True, max_length=200,
 		help_text='Official identifier of the gene.')
 	# CURIE style? Yes!
-	alternate_id = ArrayField(models.CharField(max_length=200, blank=True),
+	alternate_ids = ArrayField(models.CharField(max_length=200, blank=True),
 		blank=True, null=True,
 		help_text='Alternative identifier(s) of the gene.')
 	symbol = models.CharField(max_length=200,
 		help_text='Official gene symbol.')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -336,7 +357,7 @@ class Variant(models.Model):
 	Class to describe Individual variants or diagnosed causative variants
 
 	FHIR: Observation ?
-	Draft extention for Variant is in development
+	Draft extension for Variant is in development
 	"""
 
 	ALLELE = (
@@ -349,7 +370,12 @@ class Variant(models.Model):
 		help_text='One of four allele types.')
 	allele = JSONField()
 	zygosity = JSONField(blank=True, null=True,
-		help_text='Genotype Ontology (GENO) term representing the zygosity of the variant.')
+		help_text='Genotype Ontology (GENO) term representing '
+		' the zygosity of the variant.')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -372,11 +398,18 @@ class Disease(models.Model):
 	# "id": "HP:0003581",
 	# "label": "Adult onset"
 	# }
-	age_of_onset = JSONField(blank=True, null=True,
+	onset = JSONField(blank=True, null=True,
 		help_text='An element representing the age of onset of the disease.')
-	tumor_stage = ArrayField(JSONField(null=True, blank=True),
+	disease_stage = ArrayField(JSONField(null=True, blank=True),
 		blank=True, null=True,
-		help_text='List of terms representing the tumor stage (TNM findings).')
+		help_text='List of terms representing the disease stage.')
+	tnm_finding = ArrayField(JSONField(null=True, blank=True),
+		blank=True, null=True,
+		help_text='List of terms representing the tumor TNM score.')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -404,7 +437,7 @@ class Biosample(models.Model):
 	taxonomy = JSONField(blank=True, null=True,
 		help_text='An Ontology term describing the species of the sampled individual.')
 	# An ISO8601 string represent age
-	individual_age_at_collection = models.CharField(max_length=200, blank=True,
+	individual_age_at_collection = JSONField(blank=True, null=True,
 		help_text='Age of the proband at the time the sample was taken.')
 	histological_diagnosis = JSONField(blank=True, null=True,
 		help_text='An Ontology term describing the disease diagnosis '
@@ -414,7 +447,7 @@ class Biosample(models.Model):
 	tumor_grade = JSONField(blank=True, null=True,
 		help_text='An Ontology term describing the tumor grade. '
 		'Potentially a child term of NCIT:C28076 or equivalent.')
-	diagnostic_markers =  ArrayField(JSONField(null=True, blank=True),
+	diagnostic_markers = ArrayField(JSONField(null=True, blank=True),
 		blank=True, null=True,
 		help_text='List of Ontology terms describing clinically relevant biomarkers.')
 	# CHECK! if Procedure instance is deleted Biosample instance is deleted too
@@ -427,6 +460,10 @@ class Biosample(models.Model):
 		help_text='List of variants determined to be present in the biosample.')
 	is_control_sample = models.BooleanField(default=False,
 		help_text='Whether the sample is being used as a normal control.')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -480,6 +517,8 @@ class Biosample(models.Model):
 class Phenopacket(models.Model):
 	"""
 	Class to aggregate Individual's experiments data
+
+	FHIR: Composition
 	"""
 
 	id = models.CharField(primary_key=True, max_length=200,
@@ -504,9 +543,14 @@ class Phenopacket(models.Model):
 		help_text='VCF or other high-throughput sequencing files.')
 	# TODO OneToOneField
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE,
-		help_text='Information about ontologies and references used in the phenopacket.')
-
-	dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)
+		help_text='Information about ontologies and references '
+		'used in the phenopacket.')
+	dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE,
+		blank=True, null=True)
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -541,6 +585,10 @@ class GenomicInterpretation(models.Model):
 	variant = models.ForeignKey(Variant, on_delete=models.CASCADE,
 		blank=True, null=True,
 		help_text='The variant contributing to the diagnosis.')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def clean(self):
 		if not (self.gene or self.variant):
@@ -560,8 +608,14 @@ class Diagnosis(models.Model):
 	disease = models.ForeignKey(Disease, on_delete=models.CASCADE,
 		help_text='The diagnosed condition.')
 	# required?
-	genomic_interpretations = models.ManyToManyField(GenomicInterpretation, blank=True,
-		help_text='The genomic elements assessed as being responsible for the disease.')
+	genomic_interpretations = models.ManyToManyField(
+		GenomicInterpretation, blank=True,
+		help_text='The genomic elements assessed as being '
+		'responsible for the disease.')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.id)
@@ -595,6 +649,10 @@ class Interpretation(models.Model):
 		help_text='One or more diagnoses, if made.')
 	meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE,
 		help_text='Metadata about this interpretation.')
+	extra_properties = JSONField(blank=True, null=True,
+		help_text='Extra properties that are not supported by current schema')
+	created = models.DateTimeField(auto_now=True)
+	updated = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return str(self.id)

@@ -1,10 +1,9 @@
 import json
-from django.urls import include, path, reverse
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from ..models import Individual
-from .assertions import assert_valid_schema
-from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS
+from .constants import *
 
 
 class CreateIndividualTest(APITestCase):
@@ -12,28 +11,8 @@ class CreateIndividualTest(APITestCase):
 
 	def setUp(self):
 
-		self.valid_payload = {
-			"id": "patient:1",
-			"taxonomy": {
-				"id": "NCBITaxon:9606",
-				"label": "human"
-			},
-			"date_of_birth": "2001-01-01",
-			"age": "P25Y3M2D",
-			"sex": "FEMALE",
-			"active": True
-		}
-
-		self.invalid_payload = {
-			"id": "patient:1",
-			"taxonomy": {
-				"id": "NCBITaxon:9606"
-			},
-			"date_of_birth": "2001-01-01",
-			"age": "P25Y3M2D",
-			"sex": "FEM",
-			"active": True
-		}
+		self.valid_payload = VALID_INDIVIDUAL
+		self.invalid_payload = INVALID_INDIVIDUAL
 
 	def test_create_individual(self):
 		""" POST a new individual. """
@@ -63,41 +42,29 @@ class UpdateIndividualTest(APITestCase):
 	""" Test module for updating an existing Individual record. """
 
 	def setUp(self):
-		self.individual_one = Individual.objects.create(
-			id='patient:1',
-			taxonomy={
-				"id": "NCBITaxon:9606",
-				"label": "human"
-			},
-			date_of_birth='2001-01-01',
-			age='P25Y3M2D',
-			sex='FEMALE',
-			active=True
-			)
+		self.individual_one = Individual.objects.create(**VALID_INDIVIDUAL)
 
-		self.valid_payload = {
+		self.put_valid_payload = {
 			"id": "patient:1",
 			"taxonomy": {
 				"id": "NCBITaxon:9606",
 				"label": "human"
 			},
 			"date_of_birth": "2001-01-01",
-			"age": "P26Y3M2D",
+			"age": {"age": {
+				  "start": {
+					  "age": "P45Y"
+				  },
+				  "end": {
+					  "age": "P49Y"
+				  }
+				}
+			},
 			"sex": "FEMALE",
 			"active": False
 		}
 
-		self.invalid_payload = {
-			"id": "patient:1",
-			"taxonomy": {
-				"id": "NCBITaxon:9606",
-				"label": "human"
-			},
-			"date_of_birth": "2001-01-01",
-			"age": "P26Y3M2D",
-			"sex": "WOMEN",
-			"active": False
-		}
+		self.invalid_payload = INVALID_INDIVIDUAL
 
 	def test_update_individual(self):
 		""" PUT new data in an existing Individual record. """
@@ -107,7 +74,7 @@ class UpdateIndividualTest(APITestCase):
 				'individual-detail',
 				kwargs={'pk': self.individual_one.id}
 				),
-			data=json.dumps(self.valid_payload),
+			data=json.dumps(self.put_valid_payload),
 			content_type='application/json'
 			)
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -130,17 +97,7 @@ class DeleteIndividualTest(APITestCase):
 	""" Test module for deleting an existing Individual record. """
 
 	def setUp(self):
-		self.individual_one = Individual.objects.create(
-			id='patient:1',
-			taxonomy={
-				"id": "NCBITaxon:9606",
-				"label": "human"
-			},
-			date_of_birth='2001-01-01',
-			age='P25Y3M2D',
-			sex='FEMALE',
-			active=True
-			)
+		self.individual_one = Individual.objects.create(**VALID_INDIVIDUAL)
 
 	def test_delete_individual(self):
 		""" DELETE an existing Individual record. """

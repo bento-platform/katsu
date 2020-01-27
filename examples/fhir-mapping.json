@@ -6,7 +6,6 @@
     "gender": "individual.sex",
     "active": "individual.active",
     "deceased": "individual.deceased",
-    "address_postal_code": "individual.address_postal_code",
     "race": "individual.race",
     "ethnicity": "individual.ethnicity"
   },
@@ -108,8 +107,8 @@
           "type": {
             "coding": {
               "system": "",
-              "code": "disease.tumor_stage.id",
-              "display": "disease.tumor_stage.label"
+              "code": "disease.disease_stage.id",
+              "display": "disease.disease_stage.label"
             }
           }
         }
@@ -223,15 +222,15 @@
       "resourceType": "Procedure",
       "identifier": "procedure.id",
       "code": {
-      "coding": [
-        {
-          "system": "",
-          "code": "procedure.code.id",
-          "display": "procedure.code.label"
-        }
-      ],
-      "bodySite": [
-        {
+        "coding": [
+          {
+            "system": "",
+            "code": "procedure.code.id",
+            "display": "procedure.code.label"
+          }
+        ]
+      },
+      "bodySite": {
           "coding": [
             {
               "system": "",
@@ -240,9 +239,8 @@
             }
           ]
         }
-      ]
-      }
-    }
+      
+      } 
   ],
   "htsfiles": [
     {
@@ -265,7 +263,8 @@
         ]
       },
       "extension": {
-        "htsfile-genome-assembly": "htsfile.genome_assembly"
+        "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly",
+        "valueCode": "htsfile.genome_assembly"
       }
     }
   ],
