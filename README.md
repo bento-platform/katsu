@@ -46,6 +46,10 @@ Example of POST body is in chord/views_ingest.py (METADATA_WORKFLOWS).
 
 ## Install
 
+Install the git submodule for DATS JSON schemas (if you did not clone recursively):
+
+`git submodule update --init`
+
 The service uses PostgreSQL database for data storage.
 
 * Create and activate virtual environment
