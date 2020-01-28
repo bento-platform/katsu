@@ -46,6 +46,14 @@ class Dataset(models.Model):
 
     data_use = JSONField()
 
+    linked_field_sets = ArrayField(JSONField(), blank=True, default=list,
+                                   help_text="Data type fields which are linked together.")
+
+    @property
+    def n_of_tables(self):
+        # TODO: No hard-code: +1 for phenopackets table
+        return TableOwnership.objects.filter(dataset=self).count() + 1
+
     # --------------------------- DATS model fields ---------------------------
 
     alternate_identifiers = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,

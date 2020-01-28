@@ -10,9 +10,9 @@ from .constants import *
 from ..views_ingest import METADATA_WORKFLOWS
 
 
-def generate_ingest(dataset_id):
+def generate_ingest(table_id):
     return {
-        "dataset_id": dataset_id,
+        "table_id": table_id,
         "workflow_id": "phenopackets_json",
         "workflow_metadata": METADATA_WORKFLOWS["ingestion"]["phenopackets_json"],
         "workflow_outputs": {

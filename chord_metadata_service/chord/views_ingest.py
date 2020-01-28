@@ -12,6 +12,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 
+from chord_lib.responses.errors import *
 from chord_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
 from chord_metadata_service.chord.models import *
@@ -64,7 +65,7 @@ def workflow_list(_request):
 @permission_classes([AllowAny])
 def workflow_item(_request, workflow_id):
     if not workflow_exists(workflow_id, METADATA_WORKFLOWS):
-        return Response(status=404)
+        return Response(not_found_error(f"No workflow with ID {workflow_id}"), status=404)
 
     return Response(get_workflow(workflow_id, METADATA_WORKFLOWS))
 
@@ -102,7 +103,6 @@ def create_phenotypic_feature(pf):
 def ingest(request):
     # Private ingest endpoints are protected by URL namespace, not by Django permissions.
 
-    # TODO: Better errors
     # TODO: Schema for OpenAPI doc
     # TODO: Use serializers with basic objects and maybe some more complex ones too (but for performance, this might
     #  not be optimal...)
@@ -110,43 +110,43 @@ def ingest(request):
     try:
         jsonschema.validate(request.data, chord_lib.schemas.chord.CHORD_INGEST_SCHEMA)
     except jsonschema.exceptions.ValidationError:
-        return Response(status=400)
+        return Response(bad_request_error("Invalid ingest request body"), status=400)  # TODO: Validation errors
 
-    dataset_id = request.data["dataset_id"]
+    table_id = request.data["table_id"]
 
-    if not Dataset.objects.filter(identifier=dataset_id).exists():
-        return Response(status=400)
+    if not Dataset.objects.filter(identifier=table_id).exists():
+        return Response(bad_request_error(f"Table with ID {table_id} does not exist"), status=400)
 
-    dataset_id = str(uuid.UUID(dataset_id))  # Normalize dataset ID to UUID's str format.
+    table_id = str(uuid.UUID(table_id))  # Normalize dataset ID to UUID's str format.
 
     workflow_id = request.data["workflow_id"].strip()
     workflow_outputs = request.data["workflow_outputs"]
 
     if not chord_lib.workflows.workflow_exists(workflow_id, METADATA_WORKFLOWS):  # Check that the workflow exists
-        return Response(status=400)
+        return Response(bad_request_error(f"Workflow with ID {workflow_id} does not exist"), status=400)
 
     if "json_document" not in workflow_outputs:
-        return Response(status=400)
+        return Response(bad_request_error("Missing workflow output 'json_document'"), status=400)
 
     with open(workflow_outputs["json_document"], "r") as jf:
         try:
             phenopacket_data = json.load(jf)
             if isinstance(phenopacket_data, list):
                 for item in phenopacket_data:
-                    ingest_phenopacket(item, dataset_id)
+                    ingest_phenopacket(item, table_id)
             else:
-                ingest_phenopacket(phenopacket_data, dataset_id)
+                ingest_phenopacket(phenopacket_data, table_id)
 
-        except json.decoder.JSONDecodeError:
-            # TODO: Nicer error message
-            return Response(status=400)
+        except json.decoder.JSONDecodeError as e:
+            return Response(bad_request_error(f"Invalid JSON provided for phenopacket document (message: {e})"),
+                            status=400)
 
         # TODO: Schema validation
         # TODO: Rollback in case of failures
         return Response(status=204)
 
 
-def ingest_phenopacket(phenopacket_data, dataset_id):
+def ingest_phenopacket(phenopacket_data, table_id):
     """ Ingests one phenopacket. """
 
     new_phenopacket_id = str(uuid.uuid4())  # TODO: Is this provided?
@@ -246,7 +246,7 @@ def ingest_phenopacket(phenopacket_data, dataset_id):
         id=new_phenopacket_id,
         subject=subject,
         meta_data=meta_data_obj,
-        dataset=Dataset.objects.get(identifier=dataset_id)
+        dataset=Dataset.objects.get(identifier=table_id)
     )
     new_phenopacket.save()
 

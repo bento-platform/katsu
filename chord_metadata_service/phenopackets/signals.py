@@ -5,10 +5,10 @@ from django.apps import apps
 
 # TODO move to separate utils
 def get_models_names(app_name):
-	""" Return a list of all models names in the app """
+    """ Return a list of all models names in the app """
 
-	app_models = apps.get_app_config(app_name).get_models()
-	return [model.__name__ for model in app_models]
+    app_models = apps.get_app_config(app_name).get_models()
+    return [model.__name__ for model in app_models]
 
 # define what models should be indexed
 index_models = ['Biosample', 'Procedure', 'PhenotypicFeature']
@@ -16,17 +16,17 @@ index_models = ['Biosample', 'Procedure', 'PhenotypicFeature']
 
 @receiver(post_save)
 def add_to_index(sender, instance, **kwargs):
-	if sender.__name__ in index_models:
-		instance.indexing()
+    if sender.__name__ in index_models:
+        instance.indexing()
 
 
 @receiver(post_delete)
 def remove_instance(sender, instance, **kwargs):
-	if sender.__name__ in index_models:
-		instance.delete_from_index()
+    if sender.__name__ in index_models:
+        instance.delete_from_index()
 
 
 @receiver(pre_save)
 def update_instance(sender, instance, *args, **kwargs):
-	if sender.__name__ in index_models:
-		instance.update_index()
+    if sender.__name__ in index_models:
+        instance.update_index()

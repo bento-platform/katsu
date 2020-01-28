@@ -8,12 +8,12 @@ from . import models
 connections.create_connection()
 
 class IndividualIndex(Document):
-	resourceType = Text()
-	identifier = Text()
-	birthDate = Date()
-	gender = Text()
-	active = Boolean()
-	deceased = Boolean()
+    resourceType = Text()
+    identifier = Text()
+    birthDate = Date()
+    gender = Text()
+    active = Boolean()
+    deceased = Boolean()
 
-	class Meta:
-		index = 'metadata'
+    class Meta:
+        index = 'metadata'
