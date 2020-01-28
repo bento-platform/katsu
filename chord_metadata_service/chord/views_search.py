@@ -99,7 +99,12 @@ def phenopacket_results(query, params, key="id"):
 
 
 def phenopacket_query_results(query, params):
-    return Phenopacket.objects.filter(id__in=phenopacket_results(query, params, "id"))
+    # TODO: possibly a quite inefficient way of doing things...
+    return Phenopacket.objects.filter(id__in=phenopacket_results(query, params, "id")).prefetch_related(
+        "subject",
+        "biosamples",
+        "meta_data",
+    )
 
 
 def search(request, internal_data=False):
