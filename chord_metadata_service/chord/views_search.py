@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from .models import Dataset
 from .permissions import OverrideOrSuperUserOnly
+from chord_metadata_service.metadata.settings import DEBUG
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
@@ -90,6 +91,9 @@ def table_detail(request, table_id):  # pragma: no cover
 
 def phenopacket_results(query, params, key="id"):
     with connection.cursor() as cursor:
+        if DEBUG:
+            print(f"[CHORD Metadata {datetime.now()}] [DEBUG] Executing SQL:\n    {query.as_string(cursor.connection)}",
+                  flush=True)
         cursor.execute(query.as_string(cursor.connection), params)
         return set(dict(zip([col[0] for col in cursor.description], row))[key] for row in cursor.fetchall())
 
@@ -154,6 +158,9 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
     # Private search endpoints are protected by URL namespace, not by Django permissions.
     start = datetime.now()
 
+    if DEBUG:
+        print(f"[CHORD Metadata {datetime.now()}] [DEBUG] Started private table search", flush=True)
+
     if request.data is None or "query" not in request.data:
         # TODO: Better error
         return Response(bad_request_error("Missing query in request body"), status=400)
@@ -167,9 +174,17 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
         print("[CHORD Metadata] Error encountered compiling query {}:\n    {}".format(request.data["query"], str(e)))
         return Response(bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
+    if DEBUG:
+        print(f"[CHORD Metadata {datetime.now()}] [DEBUG] Finished compiling query in {datetime.now() - start}",
+              flush=True)
+
     serializer = PhenopacketSerializer(phenopacket_query_results(
         query=sql.SQL("{} AND dataset_id = {}").format(compiled_query, sql.Placeholder()),
         params=params + (dataset.identifier,)
     ), many=True)
+
+    if DEBUG:
+        print(f"[CHORD Metadata {datetime.now()}] [DEBUG] Finished running query in {datetime.now() - start}",
+              flush=True)
 
     return Response(build_search_response(serializer.data, start))
