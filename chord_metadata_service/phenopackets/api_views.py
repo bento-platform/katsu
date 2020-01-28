@@ -111,6 +111,11 @@ class ResourceViewSet(PhenopacketsModelViewSet):
     serializer_class = ResourceSerializer
 
 
+META_DATA_PREFETCH = (
+    "resources",
+)
+
+
 class MetaDataViewSet(PhenopacketsModelViewSet):
     """
     get:
@@ -120,7 +125,7 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
     Create a new metadata record
 
     """
-    queryset = MetaData.objects.all().prefetch_related("resources").order_by("id")
+    queryset = MetaData.objects.all().prefetch_related(*META_DATA_PREFETCH).order_by("id")
     serializer_class = MetaDataSerializer
 
 
@@ -149,7 +154,7 @@ PHENOPACKET_PREFETCH = (
     "diseases",
     "genes",
     "hts_files",
-    "meta_data__resources",
+    *(f"metadata__{p}" for p in META_DATA_PREFETCH),
     "phenotypic_features",
     "subject",
     "variants",
