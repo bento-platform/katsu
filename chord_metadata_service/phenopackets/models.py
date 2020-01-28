@@ -335,15 +335,13 @@ class GenomicInterpretation(models.Model):
         ('CAUSATIVE', 'CAUSATIVE')
         )
     status = models.CharField(max_length=200, choices=GENOMIC_INTERPRETATION_STATUS,
-        help_text='How the call of this GenomicInterpretation was interpreted.')
+                              help_text='How the call of this GenomicInterpretation was interpreted.')
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE,
-        blank=True, null=True,
-        help_text='The gene contributing to the diagnosis.')
+                             blank=True, null=True, help_text='The gene contributing to the diagnosis.')
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE,
-        blank=True, null=True,
-        help_text='The variant contributing to the diagnosis.')
+                                blank=True, null=True, help_text='The variant contributing to the diagnosis.')
     extra_properties = JSONField(blank=True, null=True,
-        help_text='Extra properties that are not supported by current schema')
+                                 help_text='Extra properties that are not supported by current schema')
     created = models.DateTimeField(auto_now=True)
     updated = models.DateTimeField(auto_now_add=True)
 
@@ -362,15 +360,13 @@ class Diagnosis(models.Model):
     FHIR: Condition
     """
 
-    disease = models.ForeignKey(Disease, on_delete=models.CASCADE,
-        help_text='The diagnosed condition.')
+    disease = models.ForeignKey(Disease, on_delete=models.CASCADE, help_text='The diagnosed condition.')
     # required?
     genomic_interpretations = models.ManyToManyField(
         GenomicInterpretation, blank=True,
-        help_text='The genomic elements assessed as being '
-        'responsible for the disease.')
+        help_text='The genomic elements assessed as being responsible for the disease.')
     extra_properties = JSONField(blank=True, null=True,
-        help_text='Extra properties that are not supported by current schema')
+                                 help_text='Extra properties that are not supported by current schema')
     created = models.DateTimeField(auto_now=True)
     updated = models.DateTimeField(auto_now_add=True)
 
@@ -392,22 +388,18 @@ class Interpretation(models.Model):
         ('IN_PROGRESS', 'IN_PROGRESS')
     )
 
-    id = models.CharField(primary_key=True, max_length=200,
-        help_text='An arbitrary identifier for the interpretation.')
-    resolution_status = models.CharField(choices=RESOLUTION_STATUS, max_length=200,
-        blank=True, help_text='The current status of work on the case.')
+    id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for the interpretation.')
+    resolution_status = models.CharField(choices=RESOLUTION_STATUS, max_length=200, blank=True,
+                                         help_text='The current status of work on the case.')
     # In Phenopackets schema this field is 'phenopacket_or_family'
-    phenopacket = models.ForeignKey(Phenopacket, on_delete=models.CASCADE,
-        related_name='interpretations',
-        help_text='The subject of this interpretation.')
+    phenopacket = models.ForeignKey(Phenopacket, on_delete=models.CASCADE, related_name='interpretations',
+                                    help_text='The subject of this interpretation.')
     # fetch disease via from phenopacket
     # diagnosis on one disease ? there can be many disease associated with phenopacket
-    diagnosis = models.ManyToManyField(Diagnosis,
-        help_text='One or more diagnoses, if made.')
-    meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE,
-        help_text='Metadata about this interpretation.')
+    diagnosis = models.ManyToManyField(Diagnosis, help_text='One or more diagnoses, if made.')
+    meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text='Metadata about this interpretation.')
     extra_properties = JSONField(blank=True, null=True,
-        help_text='Extra properties that are not supported by current schema')
+                                 help_text='Extra properties that are not supported by current schema')
     created = models.DateTimeField(auto_now=True)
     updated = models.DateTimeField(auto_now_add=True)
 
