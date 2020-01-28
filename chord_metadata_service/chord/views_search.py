@@ -11,6 +11,8 @@ from rest_framework.response import Response
 
 from .models import Dataset
 from .permissions import OverrideOrSuperUserOnly
+from chord_metadata_service.metadata.settings import DEBUG
+from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
@@ -88,14 +90,23 @@ def table_detail(request, table_id):  # pragma: no cover
         return Response(status=204)
 
 
+# TODO: CHORD-standardized logging
+def debug_log(message):  # pragma: no cover
+    if DEBUG:
+        print(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}", flush=True)
+
+
 def phenopacket_results(query, params, key="id"):
     with connection.cursor() as cursor:
+        debug_log(f"Executing SQL:\n    {query.as_string(cursor.connection)}")
         cursor.execute(query.as_string(cursor.connection), params)
         return set(dict(zip([col[0] for col in cursor.description], row))[key] for row in cursor.fetchall())
 
 
 def phenopacket_query_results(query, params):
-    return Phenopacket.objects.filter(id__in=phenopacket_results(query, params, "id"))
+    # TODO: possibly a quite inefficient way of doing things...
+    return Phenopacket.objects.filter(id__in=phenopacket_results(query, params, "id")).prefetch_related(
+        *PHENOPACKET_PREFETCH)
 
 
 def search(request, internal_data=False):
@@ -150,9 +161,12 @@ def chord_private_search(request):
 
 
 @api_view(["POST"])
-def chord_private_table_search(request, table_id):  # Search phenopacket data types in specific tables
+def chord_private_table_search(request, table_id):
+    # Search phenopacket data types in specific tables
     # Private search endpoints are protected by URL namespace, not by Django permissions.
+
     start = datetime.now()
+    debug_log("Started private table search")
 
     if request.data is None or "query" not in request.data:
         # TODO: Better error
@@ -167,9 +181,16 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
         print("[CHORD Metadata] Error encountered compiling query {}:\n    {}".format(request.data["query"], str(e)))
         return Response(bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
-    serializer = PhenopacketSerializer(phenopacket_query_results(
+    debug_log(f"Finished compiling query in {datetime.now() - start}")
+
+    query_results = phenopacket_query_results(
         query=sql.SQL("{} AND dataset_id = {}").format(compiled_query, sql.Placeholder()),
         params=params + (dataset.identifier,)
-    ), many=True)
+    )
 
-    return Response(build_search_response(serializer.data, start))
+    debug_log(f"Finished running query in {datetime.now() - start}")
+
+    serialized_data = PhenopacketSerializer(query_results, many=True).data
+    debug_log(f"Finished running query and serializing in {datetime.now() - start}")
+
+    return Response(build_search_response(serialized_data, start))
