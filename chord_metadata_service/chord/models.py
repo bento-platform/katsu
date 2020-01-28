@@ -38,6 +38,7 @@ class Dataset(models.Model):
     identifier = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
+    contact_info = models.TextField(blank=True)
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,  # Delete dataset upon project deletion
