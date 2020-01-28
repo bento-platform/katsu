@@ -2,6 +2,7 @@ from rest_framework import viewsets, pagination
 from .serializers import *
 from .models import *
 from rest_framework.settings import api_settings
+from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
 from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer, PhenopacketsRenderer)
 
@@ -21,9 +22,10 @@ class IndividualViewSet(viewsets.ModelViewSet):
     Create a new individual
 
     """
-    queryset = Individual.objects.all().order_by("id")
+    queryset = Individual.objects.all().prefetch_related(
+        *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+        *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
+    ).order_by("id")
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
-    renderer_classes = tuple(
-        api_settings.DEFAULT_RENDERER_CLASSES
-        ) + (FHIRRenderer, PhenopacketsRenderer)
+    renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES) + (FHIRRenderer, PhenopacketsRenderer)
