@@ -6,4 +6,4 @@ from .models import *
 
 @admin.register(Individual)
 class IndividualAdmin(admin.ModelAdmin):
-	pass
+    pass

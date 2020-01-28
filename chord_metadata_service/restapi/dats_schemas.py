@@ -9,9 +9,9 @@ DATS_PATH = os.path.join(Path(os.path.dirname(os.path.realpath(__file__))).paren
 
 def get_dats_schema(field):
     """
-	Call this function when validating a field.
-	Returns json schema for the specified field.
-	"""
+    Call this function when validating a field.
+    Returns json schema for the specified field.
+    """
 
     # mapping dataset model fields to dats schemas
     fields_mapping = {

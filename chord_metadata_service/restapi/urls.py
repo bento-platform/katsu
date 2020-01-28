@@ -32,5 +32,5 @@ router.register(r'datasets', chord_views.DatasetViewSet)
 router.register(r'table_ownership', chord_views.TableOwnershipViewSet)
 
 urlpatterns = [
-	path('', include(router.urls)),
+    path('', include(router.urls)),
 ]
