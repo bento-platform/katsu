@@ -25,7 +25,7 @@ CONTEXT = [
         "@id": "sdo:accessMode",
         "@type": "sdo:EntryPoint"
       },
-      "landingPage": {
+      "landing_page": {
         "@id": "sdo:url",
         "@type": "sdo:URL"
       },
@@ -33,23 +33,23 @@ CONTEXT = [
         "@id": "sdo:contentSize",
         "@type": "sdo:Text"
       },
-      "primaryPublications": "sdo:citation",
+      "primary_publications": "sdo:citation",
       "citations": "sdo:citation",
-      "producedBy": "sdo:producer",
+      "produced_by": "sdo:producer",
       "creators": {
         "@id": "sdo:creator",
         "@type": "sdo:Thing"
       },
       "licenses": "sdo:license",
-      "isAbout": "sdo:about",
-      "hasPart": {
+      "is_about": "sdo:about",
+      "has_part": {
         "@id": "sdo:hasPart",
         "@type": "sdo:Dataset"
       },
       "acknowledges": "sdo:funder",
       "keywords": "sdo:keywords",
       "dates": "sdo:temporalCoverage",
-      "storedIn": {
+      "stored_in": {
         "@id": "sdo:includedInDataCatalog",
         "@type": "sdo:DataCatalog"
       },
@@ -65,7 +65,7 @@ CONTEXT = [
       "Annotation": "sdo:Thing",
       "TaxonomicInformation": "sdo:Thing",
       "Identifier": "sdo:Thing",
-      "identifierSource": {
+      "identifier_source": {
         "@id": "sdo:Property",
         "@type": "sdo:Text"
       },
@@ -76,17 +76,22 @@ CONTEXT = [
         "@id": "sdo:value",
         "@type": "sdo:Text"
       },
-      "categoryIRI": {
+      "category_iri": {
         "@id": "sdo:url",
         "@type": "sdo:URL"
       },
       "Organization": "sdo:Organization",
       "Person": "sdo:Person",
+      "full_name": "sdo:name",
+      "first_name": "sdo:givenName",
+      "last_name": "sdo:familyName",
+      "affiliation": "sdo:affiliation",
       "value": {
         "@id": "sdo:value",
         "@type": "sdo:DataType"
       },
-      "valueIRI": {
+      "types": "sdo:contentType",
+      "value_iri": {
         "@id": "sdo:url",
         "@type": "sdo:URL"
       },
@@ -107,17 +112,19 @@ CONTEXT = [
         "@id": "sdo:additionalProperty",
         "@type": "sdo:Thing"
       },
-      "diseaseStatus": "sdo:status",
+      "disease_status": "sdo:status",
       "Material": "sdo:Thing",
-      "derivesFrom": "sdo:relatedTo",
+      "derives_from": "sdo:relatedTo",
       "License": "sdo:CreativeWork",
       "DataRepository": "sdo:DataCatalog",
       "DataAcquisition": "sdo:CreateAction",
       "uses": "sdo:relatedTo",
       "Software": "sdo:SoftwareApplication",
       "values": "sdo:value",
-      "extraProperties": "sdo:additionalProperty",
-      "Place": "sdo:Place"
+      "extra_properties": "sdo:additionalProperty",
+      "Place": "sdo:Place",
+      "Dimension": "sdo:Thing",
+      "dimensions": "sdo:additionalProperty"
     }
   ]
 
@@ -139,6 +146,10 @@ CONTEXT_TYPES = {
     'distributions': {
         'schema': 'https://w3id.org/dats/schema/dataset_distribution_schema.json',
         'type': 'DatasetDistribution'
+    },
+    'dimensions': {
+        'schema': 'https://w3id.org/dats/schema/dimension_schema.json',
+        'type': 'Dimension'
     },
     'types': {
         'schema': 'https://w3id.org/dats/schema/data_type_schema.json',

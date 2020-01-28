@@ -105,6 +105,9 @@ def dataset_to_jsonld(dataset):
         spatial_coverage_to_jsonld(dataset['spatial_coverage'])
     if 'distributions' in dataset.keys():
         distributions_to_jsonld(dataset['distributions'])
+    if 'dimensions' in dataset.keys():
+        for dimension in dataset['dimensions']:
+            obj_to_jsonld(dimension, 'dimensions')
     if 'primary_publications' in dataset.keys():
         for pp in dataset['primary_publications']:
             obj_to_jsonld(pp, 'primary_publications')
