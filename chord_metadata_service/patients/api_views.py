@@ -23,7 +23,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
     """
     queryset = Individual.objects.all().prefetch_related(
         "biosamples",
-        "phenopackets__metadata",
+        "phenopackets__meta_data",
         "phenopackets__biosamples",
         "phenopackets__genes",
         "phenopackets__variants",

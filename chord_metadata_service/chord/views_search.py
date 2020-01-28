@@ -103,6 +103,9 @@ def phenopacket_query_results(query, params):
     return Phenopacket.objects.filter(id__in=phenopacket_results(query, params, "id")).prefetch_related(
         "subject",
         "biosamples__phenotypic_features",
+        "biosamples__procedure",
+        "biosamples__hts_files",
+        "biosamples__variants",
         "genes",
         "variants",
         "diseases",
