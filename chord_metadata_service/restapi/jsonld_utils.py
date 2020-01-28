@@ -1,41 +1,120 @@
 # utils to convert dataset json to json-ld
 # context to schema.org provided here https://github.com/datatagsuite/context
 
-# example of context is taken from here conp dataset
+
 CONTEXT = [
-        {
-            "dats": "https://w3id.org/dats/schema/",
-            "dimensions": "dats:dimensions",
-            "extraProperties": "dats:extraProperties"
-        },
-        {
-            "sdo": "https://schema.org/",
-            "Dataset": "sdo:Dataset",
-            "title": {
-                "@id": "sdo:name",
-                "@type": "sdo:Text"
-            },
-            "description": {
-                "@id": "sdo:description",
-                "@type": "sdo:Text"
-            },
-            "distributions": {
-                "@id": "sdo:distribution",
-                "@type": "sdo:DataDownload"
-            },
-            "primaryPublications": "sdo:citation",
-            "citations": "sdo:citation",
-            "producedBy": "sdo:producer",
-            "creators": "sdo:creator",
-            "licenses": "sdo:license",
-            "isAbout": "sdo:about",
-            "hasPart": "sdo:hasPart",
-            "acknowledges": "sdo:funder",
-            "keywords": "sdo:keywords",
-            "dates": "sdo:date",
-            "storedIn": "sdo:url"
-        }
-    ]
+    {
+      "sdo": "https://schema.org/",
+      "Dataset": "sdo:Dataset",
+      "title": {
+        "@id": "sdo:name",
+        "@type": "sdo:Text"
+      },
+      "description": {
+        "@id": "sdo:description",
+        "@type": "sdo:Text"
+      },
+      "distributions": {
+        "@id": "sdo:distribution",
+        "@type": "sdo:DataDownload"
+      },
+      "formats": "sdo:fileFormat",
+      "unit": "sdo:unitCode",
+      "access": {
+        "@id": "sdo:accessMode",
+        "@type": "sdo:EntryPoint"
+      },
+      "landingPage": {
+        "@id": "sdo:url",
+        "@type": "sdo:URL"
+      },
+      "size": {
+        "@id": "sdo:contentSize",
+        "@type": "sdo:Text"
+      },
+      "primaryPublications": "sdo:citation",
+      "citations": "sdo:citation",
+      "producedBy": "sdo:producer",
+      "creators": {
+        "@id": "sdo:creator",
+        "@type": "sdo:Thing"
+      },
+      "licenses": "sdo:license",
+      "isAbout": "sdo:about",
+      "hasPart": {
+        "@id": "sdo:hasPart",
+        "@type": "sdo:Dataset"
+      },
+      "acknowledges": "sdo:funder",
+      "keywords": "sdo:keywords",
+      "dates": "sdo:temporalCoverage",
+      "storedIn": {
+        "@id": "sdo:includedInDataCatalog",
+        "@type": "sdo:DataCatalog"
+      },
+      "version": "sdo:version",
+      "identifier": {
+        "@id": "sdo:identifier",
+        "@type": "sdo:Text"
+      },
+      "DataType": "sdo:Thing",
+      "information": {
+        "@id": "sdo:Property"
+      },
+      "Annotation": "sdo:Thing",
+      "TaxonomicInformation": "sdo:Thing",
+      "Identifier": "sdo:Thing",
+      "identifierSource": {
+        "@id": "sdo:Property",
+        "@type": "sdo:Text"
+      },
+      "CategoryValuesPair": "sdo:PropertyValue",
+      "category": {
+        "@id": "sdo:value",
+        "@type": "sdo:Text"
+      },
+      "categoryIRI": {
+        "@id": "sdo:url",
+        "@type": "sdo:URL"
+      },
+      "Organization": "sdo:Organization",
+      "value": {
+        "@id": "sdo:value",
+        "@type": "sdo:DataType"
+      },
+      "valueIRI": {
+        "@id": "sdo:url",
+        "@type": "sdo:URL"
+      },
+      "name": {
+        "@id": "sdo:name",
+        "@type": "sdo:Text"
+      },
+      "Date": "sdo:DateTime",
+      "date": {
+        "@id": "sdo:Property"
+      },
+      "type": {
+        "@id": "sdo:Property"
+      },
+      "Disease": "sdo:MedicalCondition",
+      "MolecularEntity": "sdo:Thing",
+      "characteristics": {
+        "@id": "sdo:additionalProperty",
+        "@type": "sdo:Thing"
+      },
+      "diseaseStatus": "sdo:status",
+      "Material": "sdo:Thing",
+      "derivesFrom": "sdo:relatedTo",
+      "License": "sdo:CreativeWork",
+      "DataRepository": "sdo:DataCatalog",
+      "DataAcquisition": "sdo:CreateAction",
+      "uses": "sdo:relatedTo",
+      "Software": "sdo:SoftwareApplication",
+      "values": "sdo:value",
+      "extraProperties": "sdo:additionalProperty"
+    }
+  ]
 
 
 def obj_to_jsonld(obj, mapping) -> dict:
