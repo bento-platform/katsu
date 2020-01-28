@@ -1,8 +1,8 @@
 from rest_framework.renderers import JSONRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 from chord_metadata_service.restapi.jsonld_utils import dataset_to_jsonld, CONTEXT
-from rdflib import Graph, plugin
-import json, rdflib_jsonld
+from rdflib import Graph
+import json
 from rdflib.plugin import register, Serializer
 
 register('json-ld', Serializer, 'rdflib_jsonld.serializer', 'JsonLDSerializer')
