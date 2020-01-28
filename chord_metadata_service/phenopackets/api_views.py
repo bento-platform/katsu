@@ -154,7 +154,7 @@ PHENOPACKET_PREFETCH = (
     "diseases",
     "genes",
     "hts_files",
-    *(f"metadata__{p}" for p in META_DATA_PREFETCH),
+    *(f"meta_data__{p}" for p in META_DATA_PREFETCH),
     "phenotypic_features",
     "subject",
     "variants",
