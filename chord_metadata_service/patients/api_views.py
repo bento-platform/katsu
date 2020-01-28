@@ -21,7 +21,15 @@ class IndividualViewSet(viewsets.ModelViewSet):
     Create a new individual
 
     """
-    queryset = Individual.objects.all().order_by("id")
+    queryset = Individual.objects.all().prefetch_related(
+        "biosamples",
+        "phenopackets__metadata",
+        "phenopackets__biosamples",
+        "phenopackets__genes",
+        "phenopackets__variants",
+        "phenopackets__diseases",
+        "phenopackets__hts_files",
+    ).order_by("id")
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(

@@ -132,7 +132,7 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     post:
     Create a new biosample
     """
-    queryset = Biosample.objects.all().order_by("id")
+    queryset = Biosample.objects.all().prefetch_related("procedure").order_by("id")
     serializer_class = BiosampleSerializer
 
 
@@ -145,7 +145,15 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     Create a new phenopacket
 
     """
-    queryset = Phenopacket.objects.all().order_by("id")
+    queryset = Phenopacket.objects.all().prefetch_related(
+        "subject",
+        "metadata__resources",
+        "biosamples__procedure",
+        "genes",
+        "variants",
+        "diseases",
+        "hts_files",
+    ).order_by("id")
     serializer_class = PhenopacketSerializer
 
 

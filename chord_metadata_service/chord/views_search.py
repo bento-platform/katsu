@@ -102,8 +102,13 @@ def phenopacket_query_results(query, params):
     # TODO: possibly a quite inefficient way of doing things...
     return Phenopacket.objects.filter(id__in=phenopacket_results(query, params, "id")).prefetch_related(
         "subject",
-        "biosamples",
-        "meta_data",
+        "biosamples__phenotypic_features",
+        "genes",
+        "variants",
+        "diseases",
+        "hts_files",
+        "meta_data__resources",
+        "phenotypic_features",
     )
 
 
