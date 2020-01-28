@@ -132,7 +132,12 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     post:
     Create a new biosample
     """
-    queryset = Biosample.objects.all().prefetch_related("procedure", "hts_files", "variants").order_by("id")
+    queryset = Biosample.objects.all().prefetch_related(
+        "procedure",
+        "hts_files",
+        "variants",
+        "phenotypic_features",
+    ).order_by("id")
     serializer_class = BiosampleSerializer
 
 

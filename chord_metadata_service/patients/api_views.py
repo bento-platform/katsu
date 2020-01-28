@@ -24,11 +24,12 @@ class IndividualViewSet(viewsets.ModelViewSet):
     queryset = Individual.objects.all().prefetch_related(
         "biosamples",
         "phenopackets__meta_data",
-        "phenopackets__biosamples",
+        "phenopackets__biosamples__phenotypic_features",
         "phenopackets__genes",
         "phenopackets__variants",
         "phenopackets__diseases",
         "phenopackets__hts_files",
+        "phenopackets__phenotypic_features",
     ).order_by("id")
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
