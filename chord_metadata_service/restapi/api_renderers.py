@@ -1,6 +1,7 @@
 from rest_framework.renderers import JSONRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
-from chord_metadata_service.restapi.jsonld_utils import dataset_to_jsonld, CONTEXT
+from .jsonld_utils import dataset_to_jsonld
+from .semantic_mappings.context import *
 from rdflib import Graph
 import json
 from rdflib.plugin import register, Serializer
@@ -69,21 +70,19 @@ class JSONLDDatasetRenderer(PhenopacketsRenderer):
 
 class RDFDatasetRenderer(PhenopacketsRenderer):
     # change for 'application/rdf+xml'
-    media_type = 'text/html'
+    media_type = 'application/rdf+xml'
+    render_style = 'binary'
+    charset = 'utf-8'
     format = 'rdf'
 
     def render(self, data, media_type=None, renderer_context=None):
         if 'results' in data:
             g = Graph()
             for item in data['results']:
-                context = CONTEXT
-                small_g = Graph().parse(data=json.dumps(item, cls=UUIDEncoder), context=context, format='json-ld')
+                small_g = Graph().parse(data=json.dumps(item, cls=UUIDEncoder), context=CONTEXT, format='json-ld')
                 # join graphs
                 g = g + small_g
         else:
-            context = CONTEXT
-            g = Graph().parse(data=json.dumps(data, cls=UUIDEncoder), context=context, format='json-ld')
-            # If destination is None serialize method returns the serialization as a string.
-        rdf_data = g.serialize(format='pretty-xml').decode('utf-8')
-
-        return super(RDFDatasetRenderer, self).render(rdf_data, media_type, renderer_context)
+            g = Graph().parse(data=json.dumps(data, cls=UUIDEncoder), context=CONTEXT, format='json-ld')
+        rdf_data = g.serialize(format='pretty-xml')
+        return rdf_data
