@@ -1,7 +1,8 @@
 # utils to convert dataset json to json-ld
-# context to schema.org provided here https://github.com/datatagsuite/context
+# schema.org jsonld context https://schema.org/docs/jsonldcontext.json
+# schema.org context to dats provided here https://github.com/datatagsuite/context
 
-
+# context from dataset to schema.org
 CONTEXT = [
     {
       "sdo": "https://schema.org/",
@@ -14,6 +15,7 @@ CONTEXT = [
         "@id": "sdo:description",
         "@type": "sdo:Text"
       },
+      "DatasetDistribution": "sdo:DataDownload",
       "distributions": {
         "@id": "sdo:distribution",
         "@type": "sdo:DataDownload"
@@ -112,14 +114,79 @@ CONTEXT = [
       "uses": "sdo:relatedTo",
       "Software": "sdo:SoftwareApplication",
       "values": "sdo:value",
-      "extraProperties": "sdo:additionalProperty"
+      "extraProperties": "sdo:additionalProperty",
+      "Place": "sdo:Place"
     }
   ]
 
 
+# context types according to dats schema
+CONTEXT_TYPES = {
+    'dataset': {
+        'schema': 'https://w3id.org/dats/schema/dataset_schema.json',
+        'type': 'Dataset'
+    },
+    'dates': {
+        'schema': 'https://w3id.org/dats/schema/date_info_schema.json',
+        'type': 'Date'
+    },
+    'licenses': {
+        'schema': 'https://w3id.org/dats/schema/license_schema.json',
+        'type': 'License'
+    },
+    'distributions': {
+        'schema': 'https://w3id.org/dats/schema/dataset_distribution_schema.json',
+        'type': 'DatasetDistribution'
+    },
+    'types': {
+        'schema': 'https://w3id.org/dats/schema/data_type_schema.json',
+        'type': 'DataType'
+    },
+    'stored_in': {
+        'schema': 'https://w3id.org/dats/schema/data_repository_schema.json',
+        'type': 'DataRepository'
+    },
+    'spatial_coverage': {
+        'schema': 'https://w3id.org/dats/schema/place_schema.json',
+        'type': 'Place'
+    },
+    'organization': {
+        'schema': 'https://w3id.org/dats/schema/organization_schema.json',
+        'type': 'Organization'
+    },
+    'person': {
+        'schema': 'https://w3id.org/dats/schema/person_schema.json',
+        'type': 'Person'
+    },
+    'identifier': {
+        'schema': 'https://w3id.org/dats/schema/identifier_info_schema.json',
+        'type': 'Identifier'
+    },
+    'primary_publications': {
+        'schema': 'https://w3id.org/dats/schema/publication_schema.json',
+        'type': 'Publication'
+    },
+    'alternate_identifiers': {
+        'schema': 'https://w3id.org/dats/schema/alternate_identifier_info_schema.json',
+        'type': 'AlternateIdentifier'
+    },
+    'related_identifiers': {
+        'schema': 'https://w3id.org/dats/schema/related_identifier_info_schema.json',
+        'type': 'RelatedIdentifier'
+    },
+    'annotation': {
+        'schema': 'https://w3id.org/dats/schema/annotation_schema.json',
+        'type': 'Annotation'
+    },
+    'extra_properties': {
+        'schema': 'https://w3id.org/dats/schema/category_values_pair_schema.json',
+        'type': 'CategoryValuesPair'
+    }
+}
+
+
 def obj_to_jsonld(obj, mapping) -> dict:
-    # obj['@id'] = CONTEXT_SCHEMAS[mapping]['id']
-    # obj['@type'] = CONTEXT_SCHEMAS[mapping]['type']
+    obj['@type'] = CONTEXT_TYPES[mapping]['type']
     return obj
 
 
@@ -192,4 +259,42 @@ def dataset_to_jsonld(dataset):
     :return: enriched json with linked data context
     """
     dataset['@context'] = CONTEXT
+    dataset['@type'] = CONTEXT_TYPES['dataset']['type']
+
+    if 'dates' in dataset.keys():
+        dates_to_jsonld(dataset['dates'])
+    if 'stored_in' in dataset.keys():
+        obj_to_jsonld(dataset['stored_in'], 'stored_in')
+    if 'creators' in dataset.keys():
+        creators_to_jsonld(dataset['creators'])
+    if 'types' in dataset.keys():
+        for t in dataset['types']:
+            obj_to_jsonld(t, 'types')
+            if 'information' in t.keys():
+                obj_to_jsonld(t['information'], 'annotation')
+    if 'licenses' in dataset.keys():
+        for license in dataset['licenses']:
+            obj_to_jsonld(license, 'licenses')
+    if 'extra_properties' in dataset.keys():
+        extra_properties_to_jsonld(dataset['extra_properties'])
+    if 'alternate_identifiers' in dataset.keys():
+        for identifier in dataset['alternate_identifiers']:
+            obj_to_jsonld(identifier, 'alternate_identifiers')
+    if 'related_identifiers' in dataset.keys():
+        for rel_id in dataset['related_identifiers']:
+            obj_to_jsonld(rel_id, 'related_identifiers')
+    if 'spatial_coverage' in dataset.keys():
+        spatial_coverage_to_jsonld(dataset['spatial_coverage'])
+    if 'distributions' in dataset.keys():
+        distributions_to_jsonld(dataset['distributions'])
+    if 'primary_publications' in dataset.keys():
+        for pp in dataset['primary_publications']:
+            obj_to_jsonld(pp, 'primary_publications')
+            if 'identifier' in pp.keys():
+                obj_to_jsonld(pp['identifier'], 'identifier')
+            if 'authors' in pp.keys():
+                creators_to_jsonld(pp['authors'])
+            if 'dates' in pp.keys():
+                dates_to_jsonld(pp['dates'])
+
     return dataset
