@@ -178,13 +178,19 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
         print(f"[CHORD Metadata {datetime.now()}] [DEBUG] Finished compiling query in {datetime.now() - start}",
               flush=True)
 
-    serializer = PhenopacketSerializer(phenopacket_query_results(
+    query_results = phenopacket_query_results(
         query=sql.SQL("{} AND dataset_id = {}").format(compiled_query, sql.Placeholder()),
         params=params + (dataset.identifier,)
-    ), many=True)
+    )
 
     if DEBUG:
         print(f"[CHORD Metadata {datetime.now()}] [DEBUG] Finished running query in {datetime.now() - start}",
               flush=True)
 
-    return Response(build_search_response(serializer.data, start))
+    serialized_data = PhenopacketSerializer(query_results, many=True).data
+
+    if DEBUG:
+        print(f"[CHORD Metadata {datetime.now()}] [DEBUG] Finished running query and serializing in "
+              f"{datetime.now() - start}", flush=True)
+
+    return Response(build_search_response(serialized_data, start))
