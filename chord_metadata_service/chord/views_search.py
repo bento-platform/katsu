@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from .models import Dataset
 from .permissions import OverrideOrSuperUserOnly
 from chord_metadata_service.metadata.settings import DEBUG
+from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
@@ -101,18 +102,7 @@ def phenopacket_results(query, params, key="id"):
 def phenopacket_query_results(query, params):
     # TODO: possibly a quite inefficient way of doing things...
     return Phenopacket.objects.filter(id__in=phenopacket_results(query, params, "id")).prefetch_related(
-        "subject",
-        "biosamples__phenotypic_features",
-        "biosamples__procedure",
-        "biosamples__hts_files",
-        "biosamples__variants",
-        "genes",
-        "variants",
-        "diseases",
-        "hts_files",
-        "meta_data__resources",
-        "phenotypic_features",
-    )
+        *PHENOPACKET_PREFETCH)
 
 
 def search(request, internal_data=False):

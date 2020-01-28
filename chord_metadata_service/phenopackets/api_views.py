@@ -124,6 +124,14 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
     serializer_class = MetaDataSerializer
 
 
+BIOSAMPLE_PREFETCH = (
+    "hts_files",
+    "phenotypic_features",
+    "procedure",
+    "variants",
+)
+
+
 class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     """
     get:
@@ -132,13 +140,20 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     post:
     Create a new biosample
     """
-    queryset = Biosample.objects.all().prefetch_related(
-        "procedure",
-        "hts_files",
-        "variants",
-        "phenotypic_features",
-    ).order_by("id")
+    queryset = Biosample.objects.all().prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
     serializer_class = BiosampleSerializer
+
+
+PHENOPACKET_PREFETCH = (
+    *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+    "diseases",
+    "genes",
+    "hts_files",
+    "meta_data__resources",
+    "phenotypic_features",
+    "subject",
+    "variants",
+)
 
 
 class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
@@ -150,15 +165,7 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     Create a new phenopacket
 
     """
-    queryset = Phenopacket.objects.all().prefetch_related(
-        "subject",
-        "meta_data__resources",
-        "biosamples__procedure",
-        "genes",
-        "variants",
-        "diseases",
-        "hts_files",
-    ).order_by("id")
+    queryset = Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")
     serializer_class = PhenopacketSerializer
 
 
