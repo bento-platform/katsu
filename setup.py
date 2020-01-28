@@ -7,11 +7,11 @@ with open("README.md", "r") as rf:
 
 setuptools.setup(
     name="chord_metadata_service",
-    version="0.1.0",
+    version="0.2.0",
 
     python_requires=">=3.6",
     install_requires=[
-        "chord_lib[django]==0.1.0",
+        "chord_lib[django]==0.2.0",
         "Django>=2.2,<3.0",
         "django-filter>=2.2,<3.0",
         "django-nose>=1.4,<2.0",

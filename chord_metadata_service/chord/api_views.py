@@ -1,5 +1,12 @@
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.response import Response
+from rest_framework.settings import api_settings
+
 from chord_metadata_service.phenopackets.api_views import LargeResultsSetPagination
+from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
+
 from .models import *
 from .permissions import OverrideOrSuperUserOnly
 from .serializers import *
@@ -11,13 +18,22 @@ from rest_framework.settings import api_settings
 __all__ = ["ProjectViewSet", "DatasetViewSet", "TableOwnershipViewSet"]
 
 
+class ReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        return request.method in SAFE_METHODS
+
+
 class CHORDModelViewSet(viewsets.ModelViewSet):
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES) + (PhenopacketsRenderer,)
     pagination_class = LargeResultsSetPagination
     permission_classes = [OverrideOrSuperUserOnly]  # Explicit
 
 
-class ProjectViewSet(CHORDModelViewSet):
+class CHORDPublicModelViewSet(CHORDModelViewSet):
+    permission_classes = [OverrideOrSuperUserOnly | ReadOnly]
+
+
+class ProjectViewSet(CHORDPublicModelViewSet):
     """
     get:
     Return a list of all existing projects
@@ -30,7 +46,7 @@ class ProjectViewSet(CHORDModelViewSet):
     serializer_class = ProjectSerializer
 
 
-class DatasetViewSet(CHORDModelViewSet):
+class DatasetViewSet(CHORDPublicModelViewSet):
     """
     get:
     Return a list of all existing datasets
@@ -44,7 +60,7 @@ class DatasetViewSet(CHORDModelViewSet):
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
 
 
-class TableOwnershipViewSet(CHORDModelViewSet):
+class TableOwnershipViewSet(CHORDModelViewSet):  # TODO: Public?
     """
     get:
     Return a list of table-(dataset|dataset,biosample) relationships
