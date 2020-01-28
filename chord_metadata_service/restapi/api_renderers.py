@@ -79,10 +79,12 @@ class RDFDatasetRenderer(PhenopacketsRenderer):
         if 'results' in data:
             g = Graph()
             for item in data['results']:
-                small_g = Graph().parse(data=json.dumps(item, cls=UUIDEncoder), context=CONTEXT, format='json-ld')
+                ld_context_item = dataset_to_jsonld(item)
+                small_g = Graph().parse(data=json.dumps(ld_context_item, cls=UUIDEncoder), format='json-ld')
                 # join graphs
                 g = g + small_g
         else:
-            g = Graph().parse(data=json.dumps(data, cls=UUIDEncoder), context=CONTEXT, format='json-ld')
+            ld_context_data = dataset_to_jsonld(data)
+            g = Graph().parse(data=json.dumps(ld_context_data, cls=UUIDEncoder), format='json-ld')
         rdf_data = g.serialize(format='pretty-xml')
         return rdf_data

@@ -69,6 +69,8 @@ CONTEXT = [
         "@id": "sdo:Property",
         "@type": "sdo:Text"
       },
+      "AlternateIdentifier": "sdo:Thing",
+      "RelatedIdentifier": "sdo:Thing",
       "CategoryValuesPair": "sdo:PropertyValue",
       "category": {
         "@id": "sdo:value",
@@ -79,6 +81,7 @@ CONTEXT = [
         "@type": "sdo:URL"
       },
       "Organization": "sdo:Organization",
+      "Person": "sdo:Person",
       "value": {
         "@id": "sdo:value",
         "@type": "sdo:DataType"
