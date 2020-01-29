@@ -61,7 +61,7 @@ The service uses PostgreSQL database for data storage.
 
 e.g. settings if running database on localhost, default port for PostgreSQL is 5432:
 
-```
+```python
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -88,7 +88,7 @@ python manage.py runserver
 
 Default authentication can be set globally in `settings.py`
 
-```
+```python
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
     	'rest_framework.authentication.BasicAuthentication',
