@@ -18,13 +18,13 @@ under the BSD 3-clause license.
 CHORD Metadata Service is a service to store epigenomic metadata.
 
 1. Patients service handles anonymized individual’s data (individual id, sex, age or date of birth)
-* Data model: aggregated profile from GA4GH Phenopackets Individual and FHIR Patient
+    * Data model: aggregated profile from GA4GH Phenopackets Individual and FHIR Patient
 
 2. Phenopackets service handles phenotypic and clinical data
-* Data model: [GA4GH Phenopackets schema](https://github.com/phenopackets/phenopacket-schema)
+    * Data model: [GA4GH Phenopackets schema](https://github.com/phenopackets/phenopacket-schema)
 
 3. CHORD service  handles metadata about dataset, has relation to phenopackets (one dataset can have many phenopackets)
-* Data model: [DATS](https://github.com/datatagsuite)  + [GA4GH DUO](https://github.com/EBISPOT/DUO)
+    * Data model: [DATS](https://github.com/datatagsuite)  + [GA4GH DUO](https://github.com/EBISPOT/DUO)
 
 4. Rest api service handles all generic functionality shared among other services
 
@@ -37,18 +37,21 @@ To retrieved data in json compliant with phenopackets that uses camelCase append
 * Data can be ingested and retrieved in snake_case or camelCase.
 
 * Other available renderers:
-Phenopackets model is mapped to [FHIR](https://www.hl7.org/fhir/) using [Phenopackets on FHIR](https://aehrc.github.io/fhir-phenopackets-ig/) implementation guide.
+Phenopackets model is mapped to [FHIR](https://www.hl7.org/fhir/) using
+[Phenopackets on FHIR](https://aehrc.github.io/fhir-phenopackets-ig/) implementation guide.
 To retrieve data in fhir append `?format=fhir` .
 
-* Ingest endpoint: `/ingest` .
-Example of POST body is in chord/views_ingest.py (METADATA_WORKFLOWS).
+* Ingest endpoint: `/private/ingest`.
+Example of POST body is in `chord/views_ingest.py` (`METADATA_WORKFLOWS`).
 
 
 ## Install
 
 Install the git submodule for DATS JSON schemas (if you did not clone recursively):
 
-`git submodule update --init`
+```
+git submodule update --init
+```
 
 The service uses PostgreSQL database for data storage.
 
@@ -73,11 +76,11 @@ DATABASES = {
 
 * Run:
 
-`python manage.py makemigrations`
-
-`python manage.py migrate`
-
-`python manage.py runserver`
+```
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver
+```
 
 * Development server runs at `localhost:8000`
 
@@ -91,9 +94,14 @@ REST_FRAMEWORK = {
     	'rest_framework.authentication.BasicAuthentication',
     	'rest_framework.authentication.SessionAuthentication',
     ]
-
 }
+# ...
+AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 ```
+
+By default, the service ships with a custom remote user middleware and backend
+compatible with the CHORD project. This middleware isn't particularly useful
+for a standalone instance of this server, so it can be swapped out.
 
 ### Note On Permissions
 
@@ -125,17 +133,22 @@ Tests are located in tests directory in an individual app folder.
 
 Run all tests for the whole project:
 
-`python manage.py test`
+```
+python manage.py test
+```
 
 Run tests for an individual app, e.g.:
 
-`python manage.py test chord_metadata_service.phenopackets.tests.test_api`
+```
+python manage.py test chord_metadata_service.phenopackets.tests.test_api
+```
 
 Create coverage html report:
 
-`coverage run manage.py test`
-
-`coverage html`
+```
+coverage run manage.py test
+coverage html
+```
 
 ### Accessing the Django Shell from inside a CHORD Container
 
