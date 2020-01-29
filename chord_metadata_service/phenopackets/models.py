@@ -202,8 +202,8 @@ class Variant(models.Model):
     allele = JSONField(help_text=rec_help(d.VARIANT, "allele"))
     zygosity = JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT, "zygosity"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT, "extra_properties"))
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
@@ -232,8 +232,8 @@ class Disease(models.Model):
     tnm_finding = ArrayField(
         JSONField(null=True, blank=True), blank=True, null=True, help_text=rec_help(d.DISEASE, "tnm_finding"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.DISEASE, "extra_properties"))
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
@@ -274,8 +274,8 @@ class Biosample(models.Model):
     variants = models.ManyToManyField(Variant, blank=True, help_text=rec_help(d.BIOSAMPLE, "variants"))
     is_control_sample = models.BooleanField(default=False, help_text=rec_help(d.BIOSAMPLE, "is_control_sample"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "extra_properties"))
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
@@ -306,8 +306,8 @@ class Phenopacket(models.Model):
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
     dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOPACKET, "extra_properties"))
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
@@ -342,8 +342,8 @@ class GenomicInterpretation(models.Model):
                                 blank=True, null=True, help_text='The variant contributing to the diagnosis.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def clean(self):
         if not (self.gene or self.variant):
@@ -367,8 +367,8 @@ class Diagnosis(models.Model):
         help_text='The genomic elements assessed as being responsible for the disease.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
@@ -400,8 +400,8 @@ class Interpretation(models.Model):
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text='Metadata about this interpretation.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)

@@ -56,8 +56,8 @@ class Individual(models.Model):
         help_text='A code for the person\'s ethnicity.')
     extra_properties = JSONField(blank=True, null=True,
         help_text='Extra properties that are not supported by current schema')
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
