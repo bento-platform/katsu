@@ -1,6 +1,6 @@
 from datetime import datetime
-from chord_metadata_service.restapi.phenopackets_on_fhir_mapping import PHENOPACKETS_ON_FHIR_MAPPING
-from chord_metadata_service.restapi.hl7_genomics_mapping import HL7_GENOMICS_MAPPING
+from chord_metadata_service.restapi.semantic_mappings.phenopackets_on_fhir_mapping import PHENOPACKETS_ON_FHIR_MAPPING
+from chord_metadata_service.restapi.semantic_mappings.hl7_genomics_mapping import HL7_GENOMICS_MAPPING
 from fhirclient.models import (observation as obs, patient as p, extension, age, coding as c,
                             codeableconcept, specimen as s, identifier as fhir_indentifier,
                             annotation as a, range, quantity, fhirreference,
