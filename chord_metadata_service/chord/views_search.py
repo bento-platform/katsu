@@ -1,5 +1,6 @@
 import itertools
 
+from chord_lib.responses.errors import *
 from chord_lib.search import build_search_response, postgres
 from datetime import datetime
 from django.db import connection
@@ -10,6 +11,8 @@ from rest_framework.response import Response
 
 from .models import Dataset
 from .permissions import OverrideOrSuperUserOnly
+from chord_metadata_service.metadata.settings import DEBUG
+from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
@@ -52,10 +55,10 @@ def data_type_phenopacket_metadata_schema(_request):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def dataset_list(request):
-    if PHENOPACKET_DATA_TYPE_ID not in request.query_params.getlist("data-type"):
-        # TODO: Better error
-        return Response(status=404)
+def table_list(request):
+    data_types = request.query_params.getlist("data-type")
+    if PHENOPACKET_DATA_TYPE_ID not in data_types:
+        return Response(bad_request_error(f"Missing or invalid data type (Specified: {data_types})"), status=400)
 
     return Response([{
         "id": d.identifier,
@@ -71,48 +74,58 @@ def dataset_list(request):
 
 
 # TODO: Remove pragma: no cover when GET/POST implemented
+# TODO: Should this exist? managed
 @api_view(["DELETE"])
 @permission_classes([OverrideOrSuperUserOnly])
-def dataset_detail(request, dataset_id):  # pragma: no cover
+def table_detail(request, table_id):  # pragma: no cover
     # TODO: Implement GET, POST
     # TODO: Permissions: Check if user has control / more direct access over this dataset? Or just always use owner...
     try:
-        dataset = Dataset.objects.get(identifier=dataset_id)
+        table = Dataset.objects.get(identifier=table_id)
     except Dataset.DoesNotExist:
-        # TODO: Better error
-        return Response(status=404)
+        return Response(not_found_error(f"Table with ID {table_id} not found"), status=404)
 
     if request.method == "DELETE":
-        dataset.delete()
+        table.delete()
         return Response(status=204)
+
+
+# TODO: CHORD-standardized logging
+def debug_log(message):  # pragma: no cover
+    if DEBUG:
+        print(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}", flush=True)
 
 
 def phenopacket_results(query, params, key="id"):
     with connection.cursor() as cursor:
+        debug_log(f"Executing SQL:\n    {query.as_string(cursor.connection)}")
         cursor.execute(query.as_string(cursor.connection), params)
         return set(dict(zip([col[0] for col in cursor.description], row))[key] for row in cursor.fetchall())
 
 
 def phenopacket_query_results(query, params):
-    return Phenopacket.objects.filter(id__in=phenopacket_results(query, params, "id"))
+    # TODO: possibly a quite inefficient way of doing things...
+    return Phenopacket.objects.filter(id__in=phenopacket_results(query, params, "id")).prefetch_related(
+        *PHENOPACKET_PREFETCH)
 
 
 def search(request, internal_data=False):
-    if request.data is None or "data_type" not in request.data or "query" not in request.data:
-        # TODO: Better error
-        return Response(status=400)
+    if "data_type" not in request.data:
+        return Response(bad_request_error("Missing data_type in request body"), status=400)
+
+    if "query" not in request.data:
+        return Response(bad_request_error("Missing query in request body"), status=400)
 
     start = datetime.now()
 
     if request.data["data_type"] != PHENOPACKET_DATA_TYPE_ID:
-        # TODO: Better error
-        return Response(status=400)
+        return Response(bad_request_error(f"Missing or invalid data type (Specified: {request.data['data_type']})"),
+                        status=400)
 
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
-    except (SyntaxError, TypeError, ValueError):
-        # TODO: Better error
-        return Response(status=400)
+    except (SyntaxError, TypeError, ValueError) as e:
+        return Response(bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
     if not internal_data:
         datasets = Dataset.objects.filter(identifier__in=phenopacket_results(
@@ -148,13 +161,16 @@ def chord_private_search(request):
 
 
 @api_view(["POST"])
-def chord_private_table_search(request, table_id):  # Search phenopacket data types in specific tables
+def chord_private_table_search(request, table_id):
+    # Search phenopacket data types in specific tables
     # Private search endpoints are protected by URL namespace, not by Django permissions.
+
     start = datetime.now()
+    debug_log("Started private table search")
 
     if request.data is None or "query" not in request.data:
         # TODO: Better error
-        return Response(status=400)
+        return Response(bad_request_error("Missing query in request body"), status=400)
 
     # Check that dataset exists
     dataset = Dataset.objects.get(identifier=table_id)
@@ -162,13 +178,19 @@ def chord_private_table_search(request, table_id):  # Search phenopacket data ty
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
     except (SyntaxError, TypeError, ValueError) as e:
-        # TODO: Better error
         print("[CHORD Metadata] Error encountered compiling query {}:\n    {}".format(request.data["query"], str(e)))
-        return Response({"error": str(e)}, status=400)
+        return Response(bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
-    serializer = PhenopacketSerializer(phenopacket_query_results(
+    debug_log(f"Finished compiling query in {datetime.now() - start}")
+
+    query_results = phenopacket_query_results(
         query=sql.SQL("{} AND dataset_id = {}").format(compiled_query, sql.Placeholder()),
         params=params + (dataset.identifier,)
-    ), many=True)
+    )
 
-    return Response(build_search_response(serializer.data, start))
+    debug_log(f"Finished running query in {datetime.now() - start}")
+
+    serialized_data = PhenopacketSerializer(query_results, many=True).data
+    debug_log(f"Finished running query and serializing in {datetime.now() - start}")
+
+    return Response(build_search_response(serialized_data, start))

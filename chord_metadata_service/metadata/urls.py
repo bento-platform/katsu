@@ -47,8 +47,8 @@ urlpatterns = [
     # TODO: Consistent snake or kebab
     path('data-types/phenopacket/metadata_schema', views_search.data_type_phenopacket_metadata_schema,
          name="data-type-metadata-schema"),
-    path('datasets', views_search.dataset_list, name="table-list"),
-    path('datasets/<str:dataset_id>', views_search.dataset_detail, name="table-detail"),
+    path('tables', views_search.table_list, name="table-list"),
+    path('tables/<str:dataset_id>', views_search.table_detail, name="table-detail"),
     path('search', views_search.chord_search, name="search"),
     path('private/search', views_search.chord_private_search, name="private-search"),
     path('private/tables/<str:table_id>/search', views_search.chord_private_table_search, name="table-search"),

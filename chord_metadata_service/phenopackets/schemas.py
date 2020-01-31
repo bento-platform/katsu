@@ -1,7 +1,10 @@
 # Individual schemas for validation of JSONField values
 
+import chord_metadata_service.phenopackets.descriptions as descriptions
 from chord_metadata_service.phenopackets.models import *
+from chord_metadata_service.patients.descriptions import INDIVIDUAL
 from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.restapi.description_utils import describe_schema, ONTOLOGY_CLASS
 
 ALLELE_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -29,18 +32,10 @@ ALLELE_SCHEMA = {
         "iscn": {"type": "string"}
     },
     "oneOf": [
-        {
-            "required": ["hgvs"]
-        },
-        {
-            "required": ["genome_assembly"]
-        },
-        {
-            "required": ["seq_id"]
-        },
-        {
-            "required": ["iscn"]
-        }
+        {"required": ["hgvs"]},
+        {"required": ["genome_assembly"]},
+        {"required": ["seq_id"]},
+        {"required": ["iscn"]}
     ],
     "dependencies": {
         "genome_assembly": ["chr", "pos", "re", "alt", "info"],
@@ -49,7 +44,7 @@ ALLELE_SCHEMA = {
 }
 
 
-UPDATE_SCHEMA = {
+UPDATE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "todo",
     "title": "Updates schema",
@@ -59,13 +54,12 @@ UPDATE_SCHEMA = {
         "timestamp": {
             "type": "string",
             "format": "date-time",
-            "description": "ISO8601 UTC timestamp at which this record was updated"
         },
-        "updated_by": {"type": "string", "description": "Who updated the phenopacket"},
-        "comment": {"type": "string", "description": "Comment about updates or reasons for an update"}
+        "updated_by": {"type": "string"},
+        "comment": {"type": "string"}
     },
     "required": ["timestamp", "comment"]
-}
+}, descriptions.UPDATE)
 
 
 def _single_optional_eq_search(order, queryable: str = "all"):
@@ -97,7 +91,20 @@ def _multiple_optional_str_search(order, queryable: str = "all"):
     return {**_optional_str_search(order, queryable), "type": "multiple"}
 
 
-PHENOPACKET_ONTOLOGY_SCHEMA = {
+def _tag_with_database_attrs(schema: dict, db_attrs: dict):
+    return {
+        **schema,
+        "search": {
+            **schema.get("search", {}),
+            "database": {
+                **schema.get("search", {}).get("database", {}),
+                **db_attrs
+            }
+        }
+    }
+
+
+PHENOPACKET_ONTOLOGY_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": {
@@ -115,9 +122,9 @@ PHENOPACKET_ONTOLOGY_SCHEMA = {
             "type": "jsonb"  # TODO: parameterize?
         }
     }
-}
+}, ONTOLOGY_CLASS)
 
-PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = {
+PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": {
@@ -135,78 +142,143 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = {
             "type": "jsonb"  # TODO: parameterize?
         }
     }
-}
+}, descriptions.EXTERNAL_REFERENCE)
 
 
-def phenopacket_individual_schema(database_attrs: dict):
-    return {
-        "type": "object",
-        "properties": {
-            "id": {
-                "type": "string",
-                "search": {
-                    **_single_optional_eq_search(0, queryable="internal"),
-                    "database": {
-                        "field": Individual._meta.pk.column
-                    }
+PHENOPACKET_INDIVIDUAL_SCHEMA = describe_schema({
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "Unique researcher-specified identifier for the individual.",
+            "search": {
+                **_single_optional_eq_search(0, queryable="internal"),
+                "database": {
+                    "field": Individual._meta.pk.column
                 }
-            },
-            "alternate_ids": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "search": _multiple_optional_str_search(0, queryable="internal")
-                },
-                "search": {
-                    "database": {
-                        "type": "array"
-                    }
-                }
-            },
-            "date_of_birth": {
-                # TODO: This is a special ISO format... need UI for this
-                # TODO: Internal?
-                "type": "string",
-                "search": _single_optional_eq_search(1, queryable="internal")
-            },
-            # TODO: Age
-            "sex": {
-                "type": "string",
-                "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
-                "search": _single_optional_eq_search(2)
-            },
-            "karyotypic_sex": {
-                "type": "string",
-                "enum": [
-                    "UNKNOWN_KARYOTYPE",
-                    "XX",
-                    "XY",
-                    "XO",
-                    "XXY",
-                    "XXX",
-                    "XXYY",
-                    "XXXY",
-                    "XXXX",
-                    "XYY",
-                    "OTHER_KARYOTYPE"
-                ],
-                "search": _single_optional_eq_search(3)
-            },
-            "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA,
-        },
-        "search": {
-            "database": {
-                "relation": Individual._meta.db_table,
-                "primary_key": Individual._meta.pk.column,
-                **database_attrs
             }
         },
-        "required": ["id"]
+        "alternate_ids": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "search": _multiple_optional_str_search(0, queryable="internal")
+            },
+            "description": "A list of alternative identifiers for the individual.",  # TODO: More specific
+            "search": {
+                "database": {
+                    "type": "array"
+                }
+            }
+        },
+        "date_of_birth": {
+            # TODO: This is a special ISO format... need UI for this
+            # TODO: Internal?
+            "type": "string",
+            "search": _single_optional_eq_search(1, queryable="internal")
+        },
+        # TODO: Age
+        "sex": {
+            "type": "string",
+            "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
+            "description": "An individual's phenotypic sex.",
+            "search": _single_optional_eq_search(2)
+        },
+        "karyotypic_sex": {
+            "type": "string",
+            "enum": [
+                "UNKNOWN_KARYOTYPE",
+                "XX",
+                "XY",
+                "XO",
+                "XXY",
+                "XXX",
+                "XXYY",
+                "XXXY",
+                "XXXX",
+                "XYY",
+                "OTHER_KARYOTYPE"
+            ],
+            "description": "An individual's karyotypic sex.",
+            "search": _single_optional_eq_search(3)
+        },
+        "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA,
+    },
+    "search": {
+        "database": {
+            "relation": Individual._meta.db_table,
+            "primary_key": Individual._meta.pk.column,
+        }
+    },
+    "required": ["id"]
+}, INDIVIDUAL)
+
+PHENOPACKET_RESOURCE_SCHEMA = describe_schema({
+    "type": "object",  # TODO
+    "properties": {
+        "id": {
+            "type": "string",
+            "search": _single_optional_str_search(0)
+        },
+        "name": {
+            "type": "string",
+            "search": _multiple_optional_str_search(1)
+        },
+        "namespace_prefix": {
+            "type": "string",
+            "search": _multiple_optional_str_search(2)
+        },
+        "url": {
+            "type": "string",
+            "search": _multiple_optional_str_search(3)
+        },
+        "version": {
+            "type": "string",
+            "search": _multiple_optional_str_search(4)
+        },
+        "iri_prefix": {
+            "type": "string",
+            "search": _multiple_optional_str_search(5)
+        }
+    },
+    "required": ["id", "name", "namespace_prefix", "url", "version", "iri_prefix"],
+    "search": {
+        "database": {
+            "relationship": {
+                "type": "MANY_TO_ONE",
+                "foreign_key": "resource_id"  # TODO: No hard-code, from M2M
+            }
+        }
     }
+}, descriptions.RESOURCE)
+
+
+PHENOPACKET_UPDATE_SCHEMA = describe_schema({
+    "type": "object",  # TODO
+    "properties": {
+        "timestamp": {
+            "type": "string",
+        },
+        "updated_by": {
+            "type": "string",
+            "search": _multiple_optional_str_search(0),
+        },
+        "comment": {
+            "type": "string",
+            "search": _multiple_optional_str_search(1)
+        }
+    },
+    "required": ["timestamp", "comment"],
+    "search": {
+        "database": {
+            "type": "jsonb"
+        }
+    }
+}, descriptions.UPDATE)
 
 
 # noinspection PyProtectedMember
-PHENOPACKET_META_DATA_SCHEMA = {
+PHENOPACKET_META_DATA_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "created": {"type": "string"},
@@ -220,44 +292,7 @@ PHENOPACKET_META_DATA_SCHEMA = {
         },
         "resources": {
             "type": "array",
-            "items": {
-                "type": "object",  # TODO
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "search": _single_optional_str_search(0)
-                    },
-                    "name": {
-                        "type": "string",
-                        "search": _multiple_optional_str_search(1)
-                    },
-                    "namespace_prefix": {
-                        "type": "string",
-                        "search": _multiple_optional_str_search(2)
-                    },
-                    "url": {
-                        "type": "string",
-                        "search": _multiple_optional_str_search(3)
-                    },
-                    "version": {
-                        "type": "string",
-                        "search": _multiple_optional_str_search(4)
-                    },
-                    "iri_prefix": {
-                        "type": "string",
-                        "search": _multiple_optional_str_search(5)
-                    }
-                },
-                "required": ["id", "name", "namespace_prefix", "url", "version", "iri_prefix"],
-                "search": {
-                    "database": {
-                        "relationship": {
-                            "type": "MANY_TO_ONE",
-                            "foreign_key": "resource_id"  # TODO: No hard-code, from M2M
-                        }
-                    }
-                }
-            },
+            "items": PHENOPACKET_RESOURCE_SCHEMA,
             "search": {
                 "database": {
                     "relation": MetaData._meta.get_field("resources").remote_field.through._meta.db_table,
@@ -271,28 +306,7 @@ PHENOPACKET_META_DATA_SCHEMA = {
         },
         "updates": {
             "type": "array",
-            "items": {
-                "type": "object",  # TODO
-                "properties": {
-                    "timestamp": {
-                        "type": "string"
-                    },
-                    "updated_by": {
-                        "type": "string",
-                        "search": _multiple_optional_str_search(0)
-                    },
-                    "comment": {
-                        "type": "string",
-                        "search": _multiple_optional_str_search(1)
-                    }
-                },
-                "required": ["timestamp", "comment"],
-                "search": {
-                    "database": {
-                        "type": "jsonb"
-                    }
-                }
-            },
+            "items": PHENOPACKET_UPDATE_SCHEMA,
             "search": {
                 "database": {
                     "type": "array"
@@ -300,7 +314,7 @@ PHENOPACKET_META_DATA_SCHEMA = {
             }
         },
         "phenopacket_schema_version": {
-            "type": "string"
+            "type": "string",
         },
         "external_references": {
             "type": "array",
@@ -313,9 +327,23 @@ PHENOPACKET_META_DATA_SCHEMA = {
             "primary_key": MetaData._meta.pk.column
         }
     }
-}
+}, descriptions.META_DATA)
 
-PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = {
+PHENOPACKET_EVIDENCE_SCHEMA = describe_schema({
+    "type": "object",
+    "properties": {
+        "evidence_code": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "reference": PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
+    },
+    "required": ["evidence_code"],
+    "search": {
+        "database": {
+            "type": "jsonb"
+        }
+    }
+}, descriptions.EVIDENCE)
+
+PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "description": {
@@ -328,24 +356,12 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = {
             "search": _single_optional_eq_search(1)
         },
         "severity": PHENOPACKET_ONTOLOGY_SCHEMA,
-        "modifiers": {  # TODO: Plural?
+        "modifier": {  # TODO: Plural?
             "type": "array",
             "items": PHENOPACKET_ONTOLOGY_SCHEMA
         },
         "onset": PHENOPACKET_ONTOLOGY_SCHEMA,
-        "evidence": {
-            "type": "object",
-            "properties": {
-                "evidence_code": PHENOPACKET_ONTOLOGY_SCHEMA,
-                "reference": PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
-            },
-            "required": ["evidence_code"],
-            "search": {
-                "database": {
-                    "type": "jsonb"
-                }
-            }
-        }
+        "evidence": PHENOPACKET_EVIDENCE_SCHEMA,
     },
     "search": {
         "database": {
@@ -353,18 +369,78 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = {
             "primary_key": PhenotypicFeature._meta.pk.column
         }
     }
-}
+}, descriptions.PHENOTYPIC_FEATURE)
 
-PHENOPACKET_AGE_SCHEMA = {
+PHENOPACKET_AGE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
-        "age": {"type": "string"}
+        "age": {
+            "type": "string",
+        }
     },
     "required": ["age"]
-}
+}, descriptions.AGE_NESTED)
+
+
+# TODO: search
+PHENOPACKET_GENE_SCHEMA = describe_schema({
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "search": _single_optional_str_search(0)
+        },
+        "alternate_ids": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "search": _single_optional_str_search(1)
+            }
+        },
+        "symbol": {
+            "type": "string",
+            "search": _single_optional_str_search(2)
+        }
+    },
+    "required": ["id", "symbol"]
+}, descriptions.GENE)
+
+
+PHENOPACKET_HTS_FILE_SCHEMA = describe_schema({
+    # TODO: Search? Probably not
+    "type": "object",
+    "properties": {
+        "uri": {
+            "type": "string"  # TODO: URI pattern
+        },
+        "description": {
+            "type": "string"
+        },
+        "hts_format": {
+            "type": "string",
+            "enum": ["SAM", "BAM", "CRAM", "VCF", "BCF", "GVCF", "FASTQ", "UNKNOWN"]
+        },
+        "genome_assembly": {
+            "type": "string"
+        },
+        "individual_to_sample_identifiers": {
+            "type": "object"  # TODO
+        }
+    }
+}, descriptions.HTS_FILE)
+
+
+# TODO: search??
+PHENOPACKET_VARIANT_SCHEMA = describe_schema({
+    "type": "object",  # TODO
+    "properties": {
+        "allele": ALLELE_SCHEMA,  # TODO
+        "zygosity": PHENOPACKET_ONTOLOGY_SCHEMA
+    }
+}, descriptions.VARIANT)
 
 # noinspection PyProtectedMember
-PHENOPACKET_BIOSAMPLE_SCHEMA = {
+PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": {
@@ -374,7 +450,9 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
                 "database": {"field": Biosample._meta.pk.column}
             }
         },
-        "individual_id": {"type": "string"},
+        "individual_id": {
+            "type": "string",
+        },
         "description": {
             "type": "string",
             "search": _multiple_optional_str_search(1),  # TODO: Searchable? may leak
@@ -400,6 +478,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
             "oneOf": [  # TODO: Front end will need to deal with this
                 {
                     "properties": PHENOPACKET_AGE_SCHEMA["properties"],
+                    "description": PHENOPACKET_AGE_SCHEMA["description"],
                     "required": ["age"],
                     "additionalProperties": False
                 },
@@ -408,6 +487,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
                         "start": PHENOPACKET_AGE_SCHEMA,
                         "end": PHENOPACKET_AGE_SCHEMA,
                     },
+                    "description": d.AGE_RANGE,  # TODO: annotated
                     "required": ["start", "end"],
                     "additionalProperties": False
                 }
@@ -441,15 +521,11 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
         },
         "hts_files": {
             "type": "array",
-            "items": {
-                "type": "object"  # TODO
-            }
+            "items": PHENOPACKET_HTS_FILE_SCHEMA  # TODO
         },
         "variants": {
             "type": "array",
-            "items": {
-                "type": "object"  # TODO
-            }
+            "items": PHENOPACKET_VARIANT_SCHEMA,  # TODO: search?
         },
         "is_control_sample": {
             "type": "boolean",  # TODO: Boolean search
@@ -463,11 +539,36 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = {
             "relation": Biosample._meta.db_table,
         }
     }
-}
+}, descriptions.BIOSAMPLE)
+
+PHENOPACKET_DISEASE_SCHEMA = describe_schema({
+    "type": "object",
+    "properties": {
+        "term": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "onset": PHENOPACKET_AGE_SCHEMA,
+        "disease_stage": {
+            "type": "array",
+            "items": PHENOPACKET_ONTOLOGY_SCHEMA,
+            "search": {"database": {"type": "array"}}
+        },
+        "tnm_finding": {
+            "type": "array",
+            "items": PHENOPACKET_ONTOLOGY_SCHEMA,
+            "search": {"database": {"type": "array"}}
+        },
+    },
+    "required": ["term"],
+    "search": {
+        "database": {
+            "primary_key": Disease._meta.pk.column,
+            "relation": Disease._meta.db_table,
+        }
+    }
+}, descriptions.DISEASE)
 
 # Deduplicate with other phenopacket representations
 # noinspection PyProtectedMember
-PHENOPACKET_SCHEMA = {
+PHENOPACKET_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "TODO",
     "title": "Dataset Table Schema",
@@ -478,7 +579,7 @@ PHENOPACKET_SCHEMA = {
             "type": "string",
             "search": {"database": {"field": Phenopacket._meta.pk.column}}
         },
-        "subject": phenopacket_individual_schema({
+        "subject": _tag_with_database_attrs(PHENOPACKET_INDIVIDUAL_SCHEMA, {
             "relationship": {
                 "type": "MANY_TO_ONE",
                 "foreign_key": Phenopacket._meta.get_field("subject").column
@@ -525,61 +626,20 @@ PHENOPACKET_SCHEMA = {
         },
         "genes": {
             "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "search": _single_optional_str_search(0)
-                    },
-                    "alternate_ids": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "search": _single_optional_str_search(1)
-                        }
-                    },
-                    "symbol": {
-                        "type": "string",
-                        "search": _single_optional_str_search(2)
-                    }
-                },
-                "required": ["id", "symbol"]
-            }
+            "items": PHENOPACKET_GENE_SCHEMA
         },
         "variants": {
             "type": "array",
-            "items": {
-                "type": "object",  # TODO
-                "properties": {
-                    "allele": ALLELE_SCHEMA,  # TODO
-                    "zygosity": PHENOPACKET_ONTOLOGY_SCHEMA
-                }
-            }
+            "items": PHENOPACKET_VARIANT_SCHEMA
         },
         "diseases": {  # TODO: Too sensitive for search?
             "type": "array",
             "items": {
-                "type": "object",
-                "properties": {
-                    "term": PHENOPACKET_ONTOLOGY_SCHEMA,
-                    "onset": PHENOPACKET_AGE_SCHEMA,
-                    "disease_stage": {
-                        "type": "array",
-                        "items": PHENOPACKET_ONTOLOGY_SCHEMA,
-                        "search": {"database": {"type": "array"}}
-                    },
-                    "tnm_finding": {
-                        "type": "array",
-                        "items": PHENOPACKET_ONTOLOGY_SCHEMA,
-                        "search": {"database": {"type": "array"}}
-                    },
-                },
-                "required": ["term"],
+                **PHENOPACKET_DISEASE_SCHEMA,
                 "search": {
+                    **PHENOPACKET_DISEASE_SCHEMA.get("search", {}),
                     "database": {
-                        "primary_key": Disease._meta.pk.column,
-                        "relation": Disease._meta.db_table,
+                        **PHENOPACKET_DISEASE_SCHEMA.get("database", {}),
                         "relationship": {
                             "type": "MANY_TO_ONE",
                             "foreign_key": "disease_id"  # TODO: No hard-code, from M2M
@@ -600,9 +660,7 @@ PHENOPACKET_SCHEMA = {
         },  # TODO
         "hts_files": {
             "type": "array",
-            "items": {
-                "type": "object"  # TODO
-            }
+            "items": PHENOPACKET_HTS_FILE_SCHEMA  # TODO
         },
         "meta_data": PHENOPACKET_META_DATA_SCHEMA
     },
@@ -613,4 +671,4 @@ PHENOPACKET_SCHEMA = {
             "primary_key": Phenopacket._meta.pk.column
         }
     }
-}
+}, descriptions.PHENOPACKET)

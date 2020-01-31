@@ -14,8 +14,10 @@ passwords.txt
 # virtualenv
 env/
 
-# intelliJ files
+# IDE related (intelliJ, vim files)
 .idea/
+*.swp
+*.swo
 
 # coverage
 .coverage

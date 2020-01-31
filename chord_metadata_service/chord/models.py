@@ -23,8 +23,8 @@ class Project(models.Model):
     title = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
 
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.title} (ID: {self.identifier})"
@@ -38,6 +38,7 @@ class Dataset(models.Model):
     identifier = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
+    contact_info = models.TextField(blank=True)
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,  # Delete dataset upon project deletion
@@ -45,6 +46,14 @@ class Dataset(models.Model):
     )
 
     data_use = JSONField()
+
+    linked_field_sets = ArrayField(JSONField(), blank=True, default=list,
+                                   help_text="Data type fields which are linked together.")
+
+    @property
+    def n_of_tables(self):
+        # TODO: No hard-code: +1 for phenopackets table
+        return TableOwnership.objects.filter(dataset=self).count() + 1
 
     # --------------------------- DATS model fields ---------------------------
 
@@ -112,8 +121,8 @@ class Dataset(models.Model):
 
     # -------------------------------------------------------------------------
 
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.title} (ID: {self.identifier})"
