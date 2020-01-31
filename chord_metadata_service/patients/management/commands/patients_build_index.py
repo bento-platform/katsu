@@ -1,3 +1,4 @@
+import logging
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from chord_metadata_service.patients.models import Individual
@@ -5,6 +6,10 @@ from chord_metadata_service.patients.serializers import IndividualSerializer
 from chord_metadata_service.patients.indices import build_individual_index
 from chord_metadata_service.restapi.fhir_utils import fhir_patient
 from chord_metadata_service.metadata.elastic import es
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class Command(BaseCommand):
@@ -20,4 +25,4 @@ class Command(BaseCommand):
 
         for ind in individuals:
             created_or_updated = build_individual_index(ind)
-            print(f"{created_or_updated} index for {ind.id}")
+            logger.info(f"{created_or_updated} index for {ind.id}")
