@@ -23,3 +23,9 @@ class JSONLDDatasetTest(APITestCase):
         self.assertIsInstance(get_resp_obj['results'][0]['@context'], list)
         self.assertIsNotNone(get_resp_obj['results'][0]['@context'], True)
         self.assertEqual(get_resp_obj['results'][0]['@type'], 'Dataset')
+
+    def test_rdf(self):
+        get_resp = self.client.get('/api/datasets?format=rdf')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(get_resp.accepted_media_type, 'application/rdf+xml')
+        self.assertIsInstance(get_resp.content, bytes)
