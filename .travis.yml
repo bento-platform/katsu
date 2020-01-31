@@ -14,6 +14,8 @@ install:
   - pip install -r requirements.txt
   - pip install .
 script:
-  POSTGRES_USER="postgres" POSTGRES_PASSWORD="hj38f3Ntr" POSTGRES_PORT=5433 python3 -m coverage run ./manage.py test
+  - POSTGRES_USER="postgres" POSTGRES_PASSWORD="hj38f3Ntr" POSTGRES_PORT=5433 python3 -m coverage run ./manage.py test
+  - rm -rf chord_metadata_service
+  - POSTGRES_USER="postgres" POSTGRES_PASSWORD="hj38f3Ntr" POSTGRES_PORT=5433 python3 -m coverage run ./manage.py test
 after_success:
   - codecov
