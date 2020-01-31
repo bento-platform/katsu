@@ -1,7 +1,7 @@
 from rest_framework.test import APITestCase
 from chord_metadata_service.phenopackets.tests.constants import *
 from chord_metadata_service.patients.tests.constants import *
-from chord_metadata_service.phenopackets.tests.test_api import get_response
+from chord_metadata_service.restapi.tests.utils import get_response
 from chord_metadata_service.phenopackets.serializers import *
 from rest_framework import status
 
