@@ -14,19 +14,19 @@ def get_models_names(app_name):
 index_models = ['Biosample', 'Procedure', 'PhenotypicFeature']
 
 
-@receiver(post_save)
-def add_to_index(sender, instance, **kwargs):
-    if sender.__name__ in index_models:
-        instance.indexing()
-
-
-@receiver(post_delete)
-def remove_instance(sender, instance, **kwargs):
-    if sender.__name__ in index_models:
-        instance.delete_from_index()
-
-
-@receiver(pre_save)
-def update_instance(sender, instance, *args, **kwargs):
-    if sender.__name__ in index_models:
-        instance.update_index()
+#@receiver(post_save)
+#def add_to_index(sender, instance, **kwargs):
+#    if sender.__name__ in index_models:
+#        instance.indexing()
+#
+#
+#@receiver(post_delete)
+#def remove_instance(sender, instance, **kwargs):
+#    if sender.__name__ in index_models:
+#        instance.delete_from_index()
+#
+#
+#@receiver(pre_save)
+#def update_instance(sender, instance, *args, **kwargs):
+#    if sender.__name__ in index_models:
+#        instance.update_index()

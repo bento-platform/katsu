@@ -131,7 +131,7 @@ class PhenotypicFeature(models.Model):
                     )
                 }
                 ),
-            specimen=InnerDoc(properties={'reference': self.biosample.biosample_id}),
+            specimen=InnerDoc(properties={'reference': self.biosample.id}),
             interpretation=InnerDoc(
                 properties={
                 'coding': InnerDoc(

@@ -1,0 +1,23 @@
+from django.core.management.base import BaseCommand
+from django.conf import settings
+from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.patients.serializers import IndividualSerializer
+from chord_metadata_service.patients.indices import build_individual_index
+from chord_metadata_service.restapi.fhir_utils import fhir_patient
+from chord_metadata_service.metadata.elastic import es
+
+
+class Command(BaseCommand):
+    help = """
+        Takes every individual in the DB, port them over to FHIR-compliant
+        JSON and upload them into elasticsearch
+    """
+    def handle(self, *args, **options):
+        # TODO: currently only place we create the index, will have to review
+        es.indices.create(index=settings.FHIR_INDEX_NAME, ignore=400)
+
+        individuals = Individual.objects.all()
+
+        for ind in individuals:
+            created_or_updated = build_individual_index(ind)
+            print(f"{created_or_updated} index for {ind.id}")

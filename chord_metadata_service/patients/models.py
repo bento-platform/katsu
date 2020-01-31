@@ -1,8 +1,5 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
-from .index import IndividualIndex
-from django.db.models.signals import post_save, post_delete, pre_save
-from django.dispatch import receiver
 
 
 class Individual(models.Model):
@@ -59,50 +56,8 @@ class Individual(models.Model):
         help_text='A code for the person\'s ethnicity.')
     extra_properties = JSONField(blank=True, null=True,
         help_text='Extra properties that are not supported by current schema')
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True, blank=True, editable=False)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
-
-    def indexing(self):
-        # mapping model fields to index fields
-        obj = IndividualIndex(
-            meta={'id': self.id},
-            resourceType='Patient',
-            identifier=self.id,
-            birthDate=self.date_of_birth,
-            gender=self.sex,
-            active=self.active,
-            deceased=self.deceased
-            )
-        obj.save(index='metadata')
-        return obj.to_dict(include_meta=True)
-
-    def delete_from_index(self):
-        obj = IndividualIndex.get(id=self.id, index='metadata')
-        obj.delete()
-        return
-
-    def update_index(self):
-        obj = self.indexing()
-        return obj
-
-    def __str__(self):
-        return str(self.id)
-
-
-# add to index on post_save signal
-@receiver(post_save, sender=Individual)
-def index_individual(sender, instance, **kwargs):
-    instance.indexing()
-
-# delete doc from index when instance is deleted in db
-@receiver(post_delete, sender=Individual)
-def remove_individual(sender, instance, **kwargs):
-    instance.delete_from_index()
-
-# update doc in index when instance is updated in db
-@receiver(pre_save, sender=Individual)
-def update_individual(sender, instance, *args, **kwargs):
-    instance.update_index()

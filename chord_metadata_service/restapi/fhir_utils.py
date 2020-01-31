@@ -55,10 +55,10 @@ def fhir_age(obj, mapping, field):
 
     age_extension = extension.Extension()
     age_extension.url = mapping
+
     if isinstance(obj[field]['age'], dict):
         age_extension.valueRange = range.Range()
         age_extension.valueRange.low = quantity.Quantity()
-        # TODO check this nesting
         age_extension.valueRange.low.unit = obj[field]['age']['start']['age']
         age_extension.valueRange.high = quantity.Quantity()
         age_extension.valueRange.high.unit = obj[field]['age']['end']['age']

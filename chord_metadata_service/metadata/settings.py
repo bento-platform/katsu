@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'chord_metadata_service.chord',
-    'chord_metadata_service.patients',
+    'chord_metadata_service.patients.apps.PatientsConfig',
     'chord_metadata_service.phenopackets',
     'chord_metadata_service.restapi',
 
@@ -126,9 +126,11 @@ DATABASES = {
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': 'elasticsearch:9200'
+        'hosts': 'localhost:9200'
     },
 }
+
+FHIR_INDEX_NAME = 'fhir_metadata'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
