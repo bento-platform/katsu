@@ -22,11 +22,13 @@ setuptools.setup(
         "psycopg2-binary>=2.8,<3.0",
         "python-dateutil>=2.8,<3.0",
         "PyYAML>=5.3,<6.0",
+        "rdflib==4.2.2",
+        "rdflib-jsonld==0.4.0",
         "requests>=2.22,<3.0",
         "uritemplate>=3.0,<4.0",
     ],
 
-    author="Ksenia Zaytseva",
+    author="Ksenia Zaytseva, David Lougheed",
 
     description="An implementation of a variant store for the CHORD project.",
     long_description=long_description,

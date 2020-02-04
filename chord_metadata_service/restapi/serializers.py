@@ -1,9 +1,11 @@
 from rest_framework import serializers
 from collections import OrderedDict
+from typing import Tuple
 
 
 class GenericSerializer(serializers.ModelSerializer):
     """ Subclass of ModelSerializer """
+    always_include: Tuple[str, ...] = ()
 
     def __init__(self, *args, **kwargs):
         exclude_when_nested = kwargs.pop('exclude_when_nested', None)
@@ -17,5 +19,5 @@ class GenericSerializer(serializers.ModelSerializer):
         """ Return only not empty fields """
         final_object = super().to_representation(instance)
         # filter null values and create new dict
-        final_object = OrderedDict(list(filter(lambda x: x[1], final_object.items())))
+        final_object = OrderedDict(list(filter(lambda x: x[1] or x[0] in self.always_include, final_object.items())))
         return final_object

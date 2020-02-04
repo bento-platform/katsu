@@ -20,6 +20,12 @@ __all__ = ["ProjectSerializer", "DatasetSerializer", "TableOwnershipSerializer"]
 
 
 class DatasetSerializer(GenericSerializer):
+    always_include = (
+        "description",
+        "contact_info",
+        "linked_field_sets",
+    )
+
     # noinspection PyMethodMayBeStatic
     def validate_title(self, value):
         if len(value.strip()) < 3:
