@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sys
+import logging
 
 from .. import __version__
 
@@ -120,6 +122,10 @@ LOGGING = {
         },
     },
 }
+
+# if we are running the test suite, only log CRITICAL messages
+if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    logging.disable(logging.CRITICAL)
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

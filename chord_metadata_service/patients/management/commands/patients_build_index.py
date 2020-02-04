@@ -19,10 +19,13 @@ class Command(BaseCommand):
     """
     def handle(self, *args, **options):
         # TODO: currently only place we create the index, will have to review
-        es.indices.create(index=settings.FHIR_INDEX_NAME, ignore=400)
+        if es:
+            es.indices.create(index=settings.FHIR_INDEX_NAME, ignore=400)
 
-        individuals = Individual.objects.all()
+            individuals = Individual.objects.all()
 
-        for ind in individuals:
-            created_or_updated = build_individual_index(ind)
-            logger.info(f"{created_or_updated} index for {ind.id}")
+            for ind in individuals:
+                created_or_updated = build_individual_index(ind)
+                logger.info(f"{created_or_updated} index for {ind.id}")
+        else:
+            logger.error("No connection to elasticsearch")
