@@ -19,7 +19,7 @@ DELETE_DOC_SUCCESS = {
     '_id': 'ind:HG00315',
     '_version': 3,
     'result': 'deleted',
-    '_shards': {'total': 2, 'successful': 1, 'failed': 0}, 
+    '_shards': {'total': 2, 'successful': 1, 'failed': 0},
     '_seq_no': 1769,
     '_primary_term': 1
 }

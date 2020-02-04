@@ -1,6 +1,6 @@
 from django.test import TestCase
+from chord_metadata_service.patients.tests.es_mocks import es  # noqa: F401
 from ..models import Individual
-from chord_metadata_service.patients.tests.es_mocks import es
 
 
 class IndividualTest(TestCase):

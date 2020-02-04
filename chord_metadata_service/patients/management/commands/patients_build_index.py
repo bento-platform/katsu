@@ -2,9 +2,7 @@ import logging
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.patients.serializers import IndividualSerializer
 from chord_metadata_service.patients.indices import build_individual_index
-from chord_metadata_service.restapi.fhir_utils import fhir_patient
 from chord_metadata_service.metadata.elastic import es
 
 

@@ -1,9 +1,11 @@
 from rest_framework import viewsets, pagination
-from .serializers import *
-from .models import *
 from rest_framework.settings import api_settings
+from .serializers import IndividualSerializer
+from .models import Individual
 from chord_metadata_service.restapi.api_renderers import (
-    FHIRRenderer, PhenopacketsRenderer)
+    FHIRRenderer,
+    PhenopacketsRenderer
+)
 
 
 class LargeResultsSetPagination(pagination.PageNumberPagination):
