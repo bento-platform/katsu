@@ -34,6 +34,7 @@ CONTEXT = [
         "@type": "sdo:Text"
       },
       "primary_publications": "sdo:citation",
+      "Publication": "sdo:ScholarlyArticle",
       "citations": "sdo:citation",
       "produced_by": "sdo:producer",
       "creators": {
