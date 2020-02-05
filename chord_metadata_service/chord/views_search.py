@@ -1,21 +1,24 @@
 import itertools
-
-from chord_lib.responses.errors import *
-from chord_lib.search import build_search_response, postgres
 from datetime import datetime
+import json
+
 from django.db import connection
+from django.conf import settings
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .models import Dataset
-from .permissions import OverrideOrSuperUserOnly
+from chord_lib.responses.errors import *
+from chord_lib.search import build_search_response, postgres
 from chord_metadata_service.metadata.settings import DEBUG
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
+from chord_metadata_service.metadata.elastic import es
+from .models import Dataset
+from .permissions import OverrideOrSuperUserOnly
 
 PHENOPACKET_DATA_TYPE_ID = "phenopacket"
 
@@ -109,6 +112,10 @@ def phenopacket_query_results(query, params):
         *PHENOPACKET_PREFETCH)
 
 
+def phenopacket_query_by_subject(subject_ids):
+    return Phenopacket.objects.filter(subject__id__in=subject_ids).prefetch_related(*PHENOPACKET_PREFETCH)
+
+
 def search(request, internal_data=False):
     if "data_type" not in request.data:
         return Response(bad_request_error("Missing data_type in request body"), status=400)
@@ -158,6 +165,50 @@ def chord_search(request):
 def chord_private_search(request):
     # Private search endpoints are protected by URL namespace, not by Django permissions.
     return search(request, internal_data=True)
+
+
+# TODO: unsure why we chose POST for this endpoint? Should be GET me thinks
+def fhir_search(request, internal_data=False):
+    # TODO: not all that sure about the query format we'll want
+    # keep it simple for now
+    if "query" not in request.data:
+        return Response(bad_request_error("Missing query in request body"), status=400)
+
+    query = request.data["query"]
+    start = datetime.now()
+
+    res = es.search(index=settings.FHIR_INDEX_NAME, body=query)
+    subject_ids = [hit['_id'] for hit in res['hits']['hits']]
+
+    if not internal_data:
+        datasets = Dataset.objects.filter(
+            identifier__in = [
+                p.dataset_id for p in phenopacket_query_by_subject(subject_ids)
+            ]
+        )  # TODO: Maybe can avoid hitting DB here
+        return Response(build_search_response([{"id": d.identifier, "data_type": PHENOPACKET_DATA_TYPE_ID}
+                                               for d in datasets], start))
+    return Response(build_search_response({
+        dataset_id: {
+            "data_type": PHENOPACKET_DATA_TYPE_ID,
+            "matches": list(PhenopacketSerializer(p).data for p in dataset_phenopackets)
+        } for dataset_id, dataset_phenopackets in itertools.groupby(
+            phenopacket_query_by_subject(subject_ids),
+            key=lambda p: str(p.dataset_id)
+        )
+    }, start))
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def fhir_public_search(request):
+    return fhir_search(request)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def fhir_private_search(request):
+    return fhir_search(request, internal_data=True)
 
 
 @api_view(["POST"])
