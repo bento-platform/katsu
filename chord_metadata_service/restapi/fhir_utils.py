@@ -13,7 +13,7 @@ from fhirclient.models import (observation as obs, patient as p, extension, age,
 
 
 def fhir_coding_util(obj):
-    """ Genenric function to convert object to FHIR Coding. """
+    """ Generic function to convert object to FHIR Coding. """
 
     coding = c.Coding()
     coding.display = obj['label']

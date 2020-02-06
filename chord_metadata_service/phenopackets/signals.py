@@ -1,32 +1,56 @@
-from django.db.models.signals import post_save, post_delete, pre_save
+import logging
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.apps import apps
+from chord_metadata_service.phenopackets.models import (
+    Procedure,
+    Biosample,
+    PhenotypicFeature
+)
+from chord_metadata_service.phenopackets.indices import (
+    build_procedure_index,
+    remove_procedure_index,
+    build_biosample_index,
+    remove_biosample_index,
+    build_phenotypicfeature_index,
+    remove_phenotypicfeature_index
+)
 
 
-# TODO move to separate utils
-def get_models_names(app_name):
-    """ Return a list of all models names in the app """
-
-    app_models = apps.get_app_config(app_name).get_models()
-    return [model.__name__ for model in app_models]
-
-# define what models should be indexed
-index_models = ['Biosample', 'Procedure', 'PhenotypicFeature']
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
-#@receiver(post_save)
-#def add_to_index(sender, instance, **kwargs):
-#    if sender.__name__ in index_models:
-#        instance.indexing()
-#
-#
-#@receiver(post_delete)
-#def remove_instance(sender, instance, **kwargs):
-#    if sender.__name__ in index_models:
-#        instance.delete_from_index()
-#
-#
-#@receiver(pre_save)
-#def update_instance(sender, instance, *args, **kwargs):
-#    if sender.__name__ in index_models:
-#        instance.update_index()
+@receiver(post_save, sender=Procedure)
+def index_procedure(sender, instance, **kwargs):
+    build_procedure_index(instance)
+    logging.info(f'index_procedure_signal {instance.id}')
+
+
+@receiver(post_delete, sender=Procedure)
+def remove_procedure(sender, instance, **kwargs):
+    remove_procedure_index(instance)
+    logging.info(f'remove_procedure_signal {instance.id}')
+
+
+@receiver(post_save, sender=Biosample)
+def index_biosample(sender, instance, **kwargs):
+    build_biosample_index(instance)
+    logging.info(f'index_biosample_signal {instance.id}')
+
+
+@receiver(post_delete, sender=Biosample)
+def remove_biosample(sender, instance, **kwargs):
+    remove_biosample_index(instance)
+    logging.info(f'remove_biosample_signal {instance.id}')
+
+
+@receiver(post_save, sender=PhenotypicFeature)
+def index_phenotypicfeature(sender, instance, **kwargs):
+    build_phenotypicfeature_index(instance)
+    logging.info(f'index_phenotypicfeature_signal {instance.id}')
+
+
+@receiver(post_delete, sender=PhenotypicFeature)
+def remove_phenotypicfeature(sender, instance, **kwargs):
+    remove_phenotypicfeature_index(instance)
+    logging.info(f'remove_phenotypicfeature_signal {instance.id}')

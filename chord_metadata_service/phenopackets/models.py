@@ -1,5 +1,3 @@
-import chord_metadata_service.phenopackets.descriptions as d
-
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
@@ -10,9 +8,8 @@ from elasticsearch_dsl import (
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 from chord_metadata_service.patients.models import Individual
-from .index import *
-from .signals import *
 from chord_metadata_service.restapi.description_utils import rec_help
+import chord_metadata_service.phenopackets.descriptions as d
 
 
 #############################################################
@@ -114,92 +111,6 @@ class PhenotypicFeature(models.Model):
     def __str__(self):
         return str(self.id)
 
-    def indexing(self):
-        obj = PhenotypicFeatureDocument(
-            meta={'id': self.id},
-            resourceType='Observation',
-            identifier=self.id,
-            note="",
-            code=InnerDoc(
-                properties={
-                'coding': InnerDoc(
-                    properties={
-                    'system': '',
-                    'code': self.pftype.get('id'),
-                    'display': self.pftype.get('label')
-                    }
-                    )
-                }
-                ),
-            specimen=InnerDoc(properties={'reference': self.biosample.id}),
-            interpretation=InnerDoc(
-                properties={
-                'coding': InnerDoc(
-                    properties={
-                    'system': '',
-                    'code': '',
-                    'display': self.negated
-                    }
-                    )
-                }
-                ),
-            phenotypic_feature_severity=InnerDoc(
-                properties={
-                'code': InnerDoc(
-                    properties={'coding': InnerDoc(
-                        properties={
-                        'system': '',
-                        'code': self.severity.get('id'),
-                        'display': self.severity.get('label')
-                        }
-                    )})
-                }),
-            phenotypic_feature_modifier=InnerDoc(
-                properties={
-                'code': InnerDoc(
-                    properties={'coding': InnerDoc(
-                        properties={
-                        'system': '',
-                        'code': 'modifier',
-                        'display': 'modifier'
-                        }
-                    )})
-                }),
-            phenotypic_feature_onset=InnerDoc(
-                properties={
-                'code': InnerDoc(
-                    properties={'coding': InnerDoc(
-                        properties={
-                        'system': '',
-                        'code': self.onset.get('id'),
-                        'display': self.onset.get('label')
-                        }
-                    )})
-                }),
-            evidence=InnerDoc(
-                properties={
-                'code': InnerDoc(
-                    properties={'coding': InnerDoc(
-                        properties={
-                        'system': '',
-                        'code': self.evidence.get('evidence_code').get('id'),
-                        'display': self.evidence.get('evidence_code').get('label')
-                        }
-                    )})
-                })
-            )
-        obj.save(index='metadata')
-        return obj.to_dict(include_meta=True)
-
-    def delete_from_index(self):
-        obj = PhenotypicFeatureDocument.get(id=self.id, index='metadata')
-        obj.delete()
-        return
-
-    def update_index(self):
-        obj = self.indexing()
-        return obj
-
 
 class Procedure(models.Model):
     """
@@ -217,47 +128,6 @@ class Procedure(models.Model):
 
     def __str__(self):
         return str(self.id)
-
-    def indexing(self):
-        # mapping model fields to index fields
-        obj = ProcedureIndex(
-            meta={'id': self.id},
-            resourceType='Procedure',
-            identifier=self.id,
-            code=InnerDoc(
-                properties={
-                'coding': InnerDoc(
-                    properties={
-                    'system': '',
-                    'code': self.code.get('id', None),
-                    'display':self.code.get('label', None)
-                    }
-                    )
-                }
-                ),
-            bodySite=InnerDoc(
-                properties={
-                'coding': InnerDoc(
-                    properties={
-                    'system': '',
-                    'code': [self.body_site.get('id', None) if self.body_site else ''][0],
-                    'display': [self.body_site.get('label', None) if self.body_site else ''][0]
-                    }
-                    )
-                }
-                )
-            )
-        obj.save(index='metadata')
-        return obj.to_dict(include_meta=True)
-
-    def delete_from_index(self):
-        obj = ProcedureIndex.get(id=self.id, index='metadata')
-        obj.delete()
-        return
-
-    def update_index(self):
-        obj = self.indexing()
-        return obj
 
 
 class HtsFile(models.Model):
@@ -421,43 +291,6 @@ class Biosample(models.Model):
             'display': self.sampled_tissue.get('label')
             }
         }
-
-    def indexing(self):
-        # mapping model fields to index fields
-        if self.individual:
-            subject = self.individual.id
-        else:
-            subject = None
-        obj = BiosampleIndex(
-            meta={'id': self.id},
-            resourceType='Specimen',
-            identifier=self.id,
-            subject=InnerDoc(
-                properties={'reference': subject}
-                ),
-            text=self.description,
-            parent=InnerDoc(
-                properties={
-                'reference': InnerDoc(
-                    properties={
-                    'reference': self.sampled_tissue.get('id'),
-                    'display': self.sampled_tissue.get('label')
-                    }
-                    )
-                }
-                )
-            )
-        obj.save(index='metadata')
-        return obj.to_dict(include_meta=True)
-
-    def delete_from_index(self):
-        obj = BiosampleIndex.get(id=self.id, index='metadata')
-        obj.delete()
-        return
-
-    def update_index(self):
-        obj = self.indexing()
-        return obj
 
 
 class Phenopacket(models.Model):
