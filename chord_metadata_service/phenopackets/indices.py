@@ -1,34 +1,55 @@
 from django.conf import settings
 from chord_metadata_service.metadata.elastic import es
 from chord_metadata_service.phenopackets.serializers import (
-    ProcedureSerializer,
+    HtsFileSerializer,
+    DiseaseSerializer,
     BiosampleSerializer,
-    PhenotypicFeatureSerializer
+    PhenotypicFeatureSerializer,
+    PhenopacketSerializer
 )
 from chord_metadata_service.phenopackets.models import (
-    Procedure,
+    HtsFile,
+    Disease,
     Biosample,
-    PhenotypicFeature
+    PhenotypicFeature,
+    Phenopacket
 )
 from chord_metadata_service.restapi.fhir_utils import (
-    fhir_specimen_collection,
+    fhir_document_reference,
+    fhir_condition,
     fhir_specimen,
-    fhir_observation
+    fhir_observation,
+    fhir_composition
 )
 
 
-def build_procedure_index(procedure: Procedure) -> str:
+def build_htsfile_index(htsfile: HtsFile) -> str:
     if es:
-        procedure_json = ProcedureSerializer(procedure)
-        fhir_procedure_json = fhir_specimen_collection(procedure_json.data)
+        htsfile_json = HtsFileSerializer(htsfile)
+        fhir_htsfile_json = fhir_document_reference(htsfile_json.data)
 
-        res = es.index(index=settings.FHIR_INDEX_NAME, id=procedure.id, body=fhir_procedure_json)
+        res = es.index(index=settings.FHIR_INDEX_NAME, id=htsfile.uri, body=fhir_htsfile_json)
         return res['result']
 
 
-def remove_procedure_index(procedure: Procedure) -> str:
+def remove_htsfile_index(htsfile: HtsFile) -> str:
     if es:
-        res = es.delete(index=settings.FHIR_INDEX_NAME, id=procedure.id)
+        res = es.delete(index=settings.FHIR_INDEX_NAME, id=htsfile.uri)
+        return res['result']
+
+
+def build_disease_index(disease: Disease) -> str:
+    if es:
+        disease_json = DiseaseSerializer(disease)
+        fhir_disease_json = fhir_condition(disease_json.data)
+
+        res = es.index(index=settings.FHIR_INDEX_NAME, id=disease.id, body=fhir_disease_json)
+        return res['result']
+
+
+def remove_disease_index(disease: Disease) -> str:
+    if es:
+        res = es.delete(index=settings.FHIR_INDEX_NAME, id=disease.id)
         return res['result']
 
 
@@ -59,4 +80,19 @@ def build_phenotypicfeature_index(feature: PhenotypicFeature) -> str:
 def remove_phenotypicfeature_index(feature: PhenotypicFeature) -> str:
     if es:
         res = es.delete(index=settings.FHIR_INDEX_NAME, id=feature.id)
+        return res['result']
+
+
+def build_phenopacket_index(phenopacket: Phenopacket) -> str:
+    if es:
+        phenopacket_json = PhenopacketSerializer(phenopacket)
+        fhir_phenopacket_json = fhir_composition(phenopacket_json.data)
+
+        res = es.index(index=settings.FHIR_INDEX_NAME, id=phenopacket.id, body=fhir_phenopacket_json)
+        return res['result']
+
+
+def remove_phenopacket_index(phenopacket: Phenopacket) -> str:
+    if es:
+        res = es.delete(index=settings.FHIR_INDEX_NAME, id=phenopacket.id)
         return res['result']

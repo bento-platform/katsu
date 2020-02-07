@@ -2,14 +2,18 @@ import logging
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from chord_metadata_service.phenopackets.models import (
-    Procedure,
+    HtsFile,
+    Disease,
     Biosample,
-    PhenotypicFeature
+    PhenotypicFeature,
+    Phenopacket
 )
 from chord_metadata_service.phenopackets.indices import (
-    build_procedure_index,
+    build_htsfile_index,
+    build_disease_index,
     build_biosample_index,
-    build_phenotypicfeature_index
+    build_phenotypicfeature_index,
+    build_phenopacket_index
 )
 from chord_metadata_service.metadata.elastic import es
 
@@ -28,11 +32,17 @@ class Command(BaseCommand):
         if es:
             es.indices.create(index=settings.FHIR_INDEX_NAME, ignore=400)
 
-            procedures = Procedure.objects.all()
+            htsfiles = HtsFile.objects.all()
 
-            for procedure in procedures:
-                created_or_updated = build_procedure_index(procedure)
-                logger.info(f"{created_or_updated} index for procedure ID {procedure.id}")
+            for htsfile in htsfiles:
+                created_or_updated = build_htsfile_index(htsfile)
+                logger.info(f"{created_or_updated} index for htsfile ID {htsfile.uri}")
+
+            diseases = Disease.objects.all()
+
+            for disease in diseases:
+                created_or_updated = build_disease_index(disease)
+                logger.info(f"{created_or_updated} index for disease ID {disease.id}")
 
             biosamples = Biosample.objects.all()
 
@@ -45,5 +55,11 @@ class Command(BaseCommand):
             for feature in features:
                 created_or_updated = build_phenotypicfeature_index(feature)
                 logger.info(f"{created_or_updated} index for phenotypic feature ID {feature.id}")
+
+            phenopackets = Phenopacket.objects.all()
+
+            for phenopacket in phenopackets:
+                created_or_updated = build_phenopacket_index(phenopacket)
+                logger.info(f"{created_or_updated} index for phenopacket ID {phenopacket.id}")
         else:
             logger.error("No connection to elasticsearch")
