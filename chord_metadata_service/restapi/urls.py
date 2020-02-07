@@ -33,4 +33,5 @@ router.register(r'table_ownership', chord_views.TableOwnershipViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('phenopackets-schema', phenopacket_views.phenopackets_schema_view, name="phenopackets-schema"),
 ]
