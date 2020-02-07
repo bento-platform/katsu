@@ -1,22 +1,8 @@
-import json
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from .constants import *
 from ..serializers import *
-from rest_framework.test import APIClient
-
-
-def get_response(viewname, obj):
-    """ Generic POST function. """
-
-    client = APIClient()
-    response = client.post(
-        reverse(viewname),
-        data=json.dumps(obj),
-        content_type='application/json'
-    )
-    return response
+from chord_metadata_service.restapi.tests.utils import get_response
 
 
 class CreateBiosampleTest(APITestCase):
