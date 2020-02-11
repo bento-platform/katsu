@@ -36,30 +36,30 @@ class Command(BaseCommand):
 
             for htsfile in htsfiles:
                 created_or_updated = build_htsfile_index(htsfile)
-                logger.info(f"{created_or_updated} index for htsfile ID {htsfile.uri}")
+                logger.info(f"{created_or_updated} index for htsfile ID {htsfile.uri} indexed id {htsfile.index_id}")
 
             diseases = Disease.objects.all()
 
             for disease in diseases:
                 created_or_updated = build_disease_index(disease)
-                logger.info(f"{created_or_updated} index for disease ID {disease.id}")
+                logger.info(f"{created_or_updated} index for disease ID {disease.id} indexed id {disease.index_id}")
 
             biosamples = Biosample.objects.all()
 
             for biosample in biosamples:
                 created_or_updated = build_biosample_index(biosample)
-                logger.info(f"{created_or_updated} index for biosample ID {biosample.id}")
+                logger.info(f"{created_or_updated} index for biosample ID {biosample.id} indexed id {biosample.index_id}")
 
             features = PhenotypicFeature.objects.all()
 
             for feature in features:
                 created_or_updated = build_phenotypicfeature_index(feature)
-                logger.info(f"{created_or_updated} index for phenotypic feature ID {feature.id}")
+                logger.info(f"{created_or_updated} index for phenotypic feature ID {feature.index_id} indexed ID {feature.index_id}")
 
             phenopackets = Phenopacket.objects.all()
 
             for phenopacket in phenopackets:
                 created_or_updated = build_phenopacket_index(phenopacket)
-                logger.info(f"{created_or_updated} index for phenopacket ID {phenopacket.id}")
+                logger.info(f"{created_or_updated} index for phenopacket ID {phenopacket.id} indexed ID {phenopacket.index_id}")
         else:
             logger.error("No connection to elasticsearch")

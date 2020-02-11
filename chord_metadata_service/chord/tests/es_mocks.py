@@ -12,7 +12,7 @@ SEARCH_SUCCESS = {
     "hits": {
         "hits": [
             {
-                "_id": "patient:1",
+                "_id": "Individual|patient:1",
                 "_index": "fhir_metadata",
                 "_score": 6.334576,
                 "_source": {

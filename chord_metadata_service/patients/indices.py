@@ -10,11 +10,11 @@ def build_individual_index(individual: Individual) -> str:
         ind_json = IndividualSerializer(individual)
         fhir_ind_json = fhir_patient(ind_json.data)
 
-        res = es.index(index=settings.FHIR_INDEX_NAME, id=individual.id, body=fhir_ind_json)
+        res = es.index(index=settings.FHIR_INDEX_NAME, id=individual.index_id, body=fhir_ind_json)
         return res['result']
 
 
 def remove_individual_index(individual: Individual) -> str:
     if es:
-        res = es.delete(index=settings.FHIR_INDEX_NAME, id=individual.id)
+        res = es.delete(index=settings.FHIR_INDEX_NAME, id=individual.index_id)
         return res['result']

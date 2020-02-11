@@ -24,6 +24,6 @@ class Command(BaseCommand):
 
             for ind in individuals:
                 created_or_updated = build_individual_index(ind)
-                logger.info(f"{created_or_updated} index for patient ID {ind.id}")
+                logger.info(f"{created_or_updated} index for patient ID {ind.id} indexed ID {ind.index_id}")
         else:
             logger.error("No connection to elasticsearch")
