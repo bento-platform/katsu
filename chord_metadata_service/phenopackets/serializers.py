@@ -171,7 +171,8 @@ class DiseaseSerializer(GenericSerializer):
     term = serializers.JSONField(
         validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
     onset = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=DISEASE_ONSET)])
+        validators=[JsonSchemaValidator(schema=DISEASE_ONSET)],
+        allow_null=True, required=False)
 
     class Meta:
         model = Disease
