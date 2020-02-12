@@ -2,11 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
-from elasticsearch_dsl import (
-    Document, Text, Date, Search,
-    Object, Boolean, InnerDoc, Nested)
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search, Q
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.models import IndexableMixin

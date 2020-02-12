@@ -151,12 +151,6 @@ DATABASES = {
     }
 }
 
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'localhost:9200'
-    },
-}
-
 FHIR_INDEX_NAME = 'fhir_metadata'
 
 REST_FRAMEWORK = {
