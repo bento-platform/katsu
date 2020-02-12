@@ -27,5 +27,7 @@ DELETE_DOC_SUCCESS = {
 
 # TODO: as it stands we can merely import this to mock any calls
 # when testing, maybe a bit sketchy for a setup, could be error-prone
+es = Mock()
+
 es.index = Mock(return_value=INDEXING_SUCCESS)
 es.delete = Mock(return_value=DELETE_DOC_SUCCESS)

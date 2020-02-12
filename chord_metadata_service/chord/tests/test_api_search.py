@@ -1,4 +1,5 @@
 import json
+from unittest.mock import Mock, patch
 
 from django.test import override_settings
 from django.urls import reverse
@@ -8,7 +9,7 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.phenopackets.tests.constants import *
 from chord_metadata_service.phenopackets.models import *
 
-import chord_metadata_service.chord.tests.es_mocks
+from chord_metadata_service.chord.tests.es_mocks import SEARCH_SUCCESS
 from .constants import *
 from ..models import *
 from ..views_search import PHENOPACKET_DATA_TYPE_ID, PHENOPACKET_SCHEMA, PHENOPACKET_METADATA_SCHEMA
@@ -207,7 +208,9 @@ class SearchTest(APITestCase):
         self.assertEqual(len(c["results"]), 1)
         self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
 
-    def test_fhir_search(self):
+    @patch('chord_metadata_service.chord.views_search.es')
+    def test_fhir_search(self, mocked_es):
+        mocked_es.search.return_value = SEARCH_SUCCESS
         # Valid search with result
         r = self.client.post(reverse("fhir-search"), data=json.dumps({
             "data_type": PHENOPACKET_DATA_TYPE_ID,
@@ -223,7 +226,9 @@ class SearchTest(APITestCase):
             "data_type": PHENOPACKET_DATA_TYPE_ID
         })
 
-    def test_private_fhir_search(self):
+    @patch('chord_metadata_service.chord.views_search.es')
+    def test_private_fhir_search(self, mocked_es):
+        mocked_es.search.return_value = SEARCH_SUCCESS
         # Valid search with result
         r = self.client.post(reverse("fhir-private-search"), data=json.dumps({
             "data_type": PHENOPACKET_DATA_TYPE_ID,

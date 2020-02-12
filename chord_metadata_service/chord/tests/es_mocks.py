@@ -1,7 +1,3 @@
-from unittest.mock import Mock
-from chord_metadata_service.metadata.elastic import es
-
-
 SEARCH_SUCCESS = {
     "_shards": {
         "failed": 0,
@@ -58,6 +54,3 @@ SEARCH_SUCCESS = {
     "timed_out": False,
     "took": 5
 }
-
-
-es.search = Mock(return_value=SEARCH_SUCCESS)
