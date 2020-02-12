@@ -206,7 +206,7 @@ def ingest_phenopacket(phenopacket_data, table_id):
 
         g_obj, _ = Gene.objects.get_or_create(
             id=g["id"],
-            alternate_id=g.get("alternate_ids", []),
+            alternate_ids=g.get("alternate_ids", []),
             symbol=g["symbol"]
         )
 
