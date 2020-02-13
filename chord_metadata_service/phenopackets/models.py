@@ -1,11 +1,12 @@
-import chord_metadata_service.phenopackets.descriptions as d
-
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
+from elasticsearch import Elasticsearch
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.restapi.description_utils import rec_help
+from chord_metadata_service.restapi.models import IndexableMixin
+import chord_metadata_service.phenopackets.descriptions as d
 
 
 #############################################################
@@ -76,7 +77,7 @@ class MetaData(models.Model):
 #############################################################
 
 
-class PhenotypicFeature(models.Model):
+class PhenotypicFeature(models.Model, IndexableMixin):
     """
     Class to describe a phenotype of an Individual
 
@@ -126,7 +127,7 @@ class Procedure(models.Model):
         return str(self.id)
 
 
-class HtsFile(models.Model):
+class HtsFile(models.Model, IndexableMixin):
     """
     Class to link HTC files with data
 
@@ -209,7 +210,7 @@ class Variant(models.Model):
         return str(self.id)
 
 
-class Disease(models.Model):
+class Disease(models.Model, IndexableMixin):
     """
     Class to represent a diagnosis and inference or hypothesis about the cause
     underlying the observed phenotypic abnormalities
@@ -239,7 +240,7 @@ class Disease(models.Model):
         return str(self.id)
 
 
-class Biosample(models.Model):
+class Biosample(models.Model, IndexableMixin):
     """
     Class to describe a unit of biological material
 
@@ -280,8 +281,16 @@ class Biosample(models.Model):
     def __str__(self):
         return str(self.id)
 
+    @property
+    def get_sample_tissue_data(self):
+        return {'reference': {
+            'reference': self.sampled_tissue.get('id'),
+            'display': self.sampled_tissue.get('label')
+            }
+        }
 
-class Phenopacket(models.Model):
+
+class Phenopacket(models.Model, IndexableMixin):
     """
     Class to aggregate Individual's experiments data
 

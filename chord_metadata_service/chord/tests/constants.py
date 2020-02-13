@@ -7,6 +7,7 @@ __all__ = [
     "dats_dataset",
     "TEST_SEARCH_QUERY_1",
     "TEST_SEARCH_QUERY_2",
+    "TEST_FHIR_SEARCH_QUERY",
 ]
 
 
@@ -150,3 +151,4 @@ def dats_dataset(project_id, creators):
 
 TEST_SEARCH_QUERY_1 = ["#eq", ["#resolve", "subject", "sex"], "FEMALE"]
 TEST_SEARCH_QUERY_2 = ["#eq", ["#resolve", "subject", "sex"], "MALE"]
+TEST_FHIR_SEARCH_QUERY = {"query": {"match": {"gender": "FEMALE"}}}

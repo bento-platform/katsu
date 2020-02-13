@@ -1,4 +1,5 @@
 import json
+from unittest.mock import Mock, patch
 
 from django.test import override_settings
 from django.urls import reverse
@@ -8,6 +9,7 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.phenopackets.tests.constants import *
 from chord_metadata_service.phenopackets.models import *
 
+from chord_metadata_service.chord.tests.es_mocks import SEARCH_SUCCESS
 from .constants import *
 from ..models import *
 from ..views_search import PHENOPACKET_DATA_TYPE_ID, PHENOPACKET_SCHEMA, PHENOPACKET_METADATA_SCHEMA
@@ -90,7 +92,7 @@ class SearchTest(APITestCase):
         # Set up a dummy phenopacket
 
         self.individual, _ = Individual.objects.get_or_create(
-            id='patient:1', sex='FEMALE', age='P25Y3M2D')
+            id='patient:1', sex='FEMALE', age={"age": "P25Y3M2D"})
 
         self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
 
@@ -205,3 +207,37 @@ class SearchTest(APITestCase):
         c = r.json()
         self.assertEqual(len(c["results"]), 1)
         self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
+
+    @patch('chord_metadata_service.chord.views_search.es')
+    def test_fhir_search(self, mocked_es):
+        mocked_es.search.return_value = SEARCH_SUCCESS
+        # Valid search with result
+        r = self.client.post(reverse("fhir-search"), data=json.dumps({
+            "data_type": PHENOPACKET_DATA_TYPE_ID,
+            "query": TEST_FHIR_SEARCH_QUERY
+        }), content_type="application/json")
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+
+        self.assertEqual(len(c["results"]), 1)
+        self.assertDictEqual(c["results"][0], {
+            "id": str(self.dataset.identifier),
+            "data_type": PHENOPACKET_DATA_TYPE_ID
+        })
+
+    @patch('chord_metadata_service.chord.views_search.es')
+    def test_private_fhir_search(self, mocked_es):
+        mocked_es.search.return_value = SEARCH_SUCCESS
+        # Valid search with result
+        r = self.client.post(reverse("fhir-private-search"), data=json.dumps({
+            "data_type": PHENOPACKET_DATA_TYPE_ID,
+            "query": TEST_FHIR_SEARCH_QUERY
+        }), content_type="application/json")
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+
+        self.assertIn(str(self.dataset.identifier), c["results"])
+        self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], PHENOPACKET_DATA_TYPE_ID)
+        self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.identifier)]["matches"][0]["id"])

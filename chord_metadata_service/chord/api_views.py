@@ -53,7 +53,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
 
 
-class TableOwnershipViewSet(CHORDModelViewSet):  # TODO: Public?
+class TableOwnershipViewSet(CHORDPublicModelViewSet):
     """
     get:
     Return a list of table-(dataset|dataset,biosample) relationships

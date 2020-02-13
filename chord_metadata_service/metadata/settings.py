@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sys
+import logging
 
 from .. import __version__
 
@@ -58,8 +60,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'chord_metadata_service.chord',
-    'chord_metadata_service.patients',
-    'chord_metadata_service.phenopackets',
+    'chord_metadata_service.patients.apps.PatientsConfig',
+    'chord_metadata_service.phenopackets.apps.PhenopacketsConfig',
     'chord_metadata_service.restapi',
 
     'rest_framework',
@@ -99,6 +101,31 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'console',
+        },
+    },
+    'loggers': {
+        '': {
+            'level': 'INFO',
+            'handlers': ['console'],
+        },
+    },
+}
+
+# if we are running the test suite, only log CRITICAL messages
+if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    logging.disable(logging.CRITICAL)
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -124,6 +151,7 @@ DATABASES = {
     }
 }
 
+FHIR_INDEX_NAME = 'fhir_metadata'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -131,9 +159,9 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PARSER_CLASSES': (
         # allows serializers to use snake_case field names, but parse incoming data as camelCase
+        'djangorestframework_camel_case.parser.CamelCaseJSONParser',
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
-        'djangorestframework_camel_case.parser.CamelCaseJSONParser',
     ),
     'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly']
 }
