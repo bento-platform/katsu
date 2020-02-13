@@ -87,7 +87,7 @@ def workflow_file(_request, workflow_id):
 def create_phenotypic_feature(pf):
     pf_obj = PhenotypicFeature(
         description=pf.get("description", ""),
-        pftype=pf["type"]["id"],
+        pftype=pf["type"],
         negated=pf.get("negated", False),
         severity=pf.get("severity", None),
         modifier=pf.get("modifier", []),  # TODO: Validate ontology term in schema...
@@ -216,8 +216,13 @@ def ingest_phenopacket(phenopacket_data, table_id):
     for d in diseases:
         # TODO: Primary key, should this be a model?
 
-        d_obj = Disease(term=d["term"], onset=d.get("onset", None), disease_stage=d.get("disease_stage", []))
-        d_obj.save()
+        d_obj, _ = Disease.objects.get_or_create(
+            term=d["term"],
+            onset=d.get("onset", None),
+            disease_stage=d.get("disease_stage", []),
+            tnm_finding=d.get("tnm_finding", [])
+        )
+        diseases_db.append(d_obj.id)
 
     resources_db = []
     for rs in meta_data.get("resources", []):
