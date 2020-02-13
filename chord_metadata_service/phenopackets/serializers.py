@@ -1,11 +1,11 @@
+import re
 from rest_framework import serializers
-from .models import *
 from jsonschema import Draft7Validator, FormatChecker
+from .models import *
 from chord_metadata_service.restapi.schemas import *
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.restapi.fhir_utils import *
-import re
 
 
 #############################################################
@@ -235,6 +235,26 @@ class BiosampleSerializer(GenericSerializer):
         procedure_model, _ = Procedure.objects.get_or_create(**procedure_data)
         biosample = Biosample.objects.create(procedure=procedure_model, **validated_data)
         return biosample
+
+    def update(self, instance, validated_data):
+        instance.sampled_tissue = validated_data.get('sampled_tissue',
+            instance.sampled_tissue)
+        instance.taxonomy = validated_data.get('taxonomy',
+            instance.taxonomy)
+        instance.histological_diagnosis = validated_data.get('histological_diagnosis',
+            instance.histological_diagnosis)
+        instance.tumor_progression = validated_data.get('tumor_progression',
+            instance.tumor_progression)
+        instance.tumor_grade = validated_data.get('tumor_grade',
+            instance.tumor_grade)
+        instance.diagnostic_markers = validated_data.get('diagnostic_markers',
+            instance.diagnostic_markers)
+        instance.save()
+        procedure_data = validated_data.pop('procedure', None)
+        if procedure_data:
+            instance.procedure, _ = Procedure.objects.get_or_create(**procedure_data)
+        instance.save()
+        return instance
 
 
 class SimplePhenopacketSerializer(GenericSerializer):

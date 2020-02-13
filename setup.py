@@ -17,6 +17,7 @@ setuptools.setup(
         "django-nose>=1.4,<2.0",
         "djangorestframework>=3.10,<3.11",
         "djangorestframework-camel-case",
+        "elasticsearch==7.1.0",
         "fhirclient>=3.2,<4.0",
         "jsonschema>=3.2,<4.0",
         "psycopg2-binary>=2.8,<3.0",

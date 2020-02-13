@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
+from chord_metadata_service.restapi.models import IndexableMixin
 
 
-class Individual(models.Model):
+class Individual(models.Model, IndexableMixin):
     """ Class to store demographic information about an Individual (Patient) """
 
     SEX = (

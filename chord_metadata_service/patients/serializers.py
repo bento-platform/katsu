@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from .models import *
 from chord_metadata_service.phenopackets.serializers import (
     BiosampleSerializer,
     SimplePhenopacketSerializer
@@ -8,6 +7,7 @@ from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, AGE_OR_AGE_RA
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.restapi.fhir_utils import fhir_patient
+from .models import Individual
 
 
 class IndividualSerializer(GenericSerializer):
