@@ -3,10 +3,6 @@ from .serializers import *
 from .models import *
 from rest_framework.settings import api_settings
 from chord_metadata_service.restapi.api_renderers import *
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 
 
 class LargeResultsSetPagination(pagination.PageNumberPagination):
@@ -215,14 +211,3 @@ class InterpretationViewSet(PhenopacketsModelViewSet):
     """
     queryset = Interpretation.objects.all().order_by("id")
     serializer_class = InterpretationSerializer
-
-
-@api_view()
-@permission_classes([AllowAny])
-def phenopackets_schema_view(_request):
-    """
-    get:
-    Return metadata service custom phenopackets schema
-    """
-
-    return Response(PHENOPACKET_SCHEMA)
