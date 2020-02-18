@@ -2,11 +2,14 @@ import uuid
 
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.db import models
-import datetime
+from django.utils import timezone
 
 
 __all__ = ["Project", "Dataset", "TableOwnership"]
 
+
+def version_default():
+    return f"version_{timezone.now()}"
 
 #############################################################
 #                                                           #
@@ -117,7 +120,7 @@ class Dataset(models.Model):
                               help_text="The grant(s) which funded and supported the work reported by the dataset.")
     keywords = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
                           help_text="Tags associated with the dataset, which will help in its discovery.")
-    version = models.CharField(max_length=200, blank=True, default=f"version_{datetime.datetime.now()}",
+    version = models.CharField(max_length=200, blank=True, default=version_default,
                                   help_text="A release point for the dataset when applicable.")
     extra_properties = JSONField(blank=True, null=True,
                                  help_text="Extra properties that do not fit in the previous specified attributes.")
