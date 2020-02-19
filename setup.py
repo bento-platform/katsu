@@ -11,7 +11,7 @@ setuptools.setup(
 
     python_requires=">=3.6",
     install_requires=[
-        "chord_lib[django]==0.2.0",
+        "chord_lib[django]==0.3.0",
         "Django>=2.2,<3.0",
         "django-filter>=2.2,<3.0",
         "django-nose>=1.4,<2.0",
@@ -25,7 +25,7 @@ setuptools.setup(
         "PyYAML>=5.3,<6.0",
         "rdflib==4.2.2",
         "rdflib-jsonld==0.4.0",
-        "requests>=2.22,<3.0",
+        "requests>=2.23,<3.0",
         "uritemplate>=3.0,<4.0",
     ],
 
