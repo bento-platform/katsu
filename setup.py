@@ -7,16 +7,17 @@ with open("README.md", "r") as rf:
 
 setuptools.setup(
     name="chord_metadata_service",
-    version="0.2.0",
+    version="0.3.0",
 
     python_requires=">=3.6",
     install_requires=[
-        "chord_lib[django]==0.2.0",
+        "chord_lib[django]==0.3.0",
         "Django>=2.2,<3.0",
         "django-filter>=2.2,<3.0",
         "django-nose>=1.4,<2.0",
         "djangorestframework>=3.10,<3.11",
-        "djangorestframework-camel-case",
+        "djangorestframework-camel-case>=1.1,<2.0",
+        "elasticsearch==7.1.0",
         "fhirclient>=3.2,<4.0",
         "jsonschema>=3.2,<4.0",
         "psycopg2-binary>=2.8,<3.0",
@@ -24,11 +25,11 @@ setuptools.setup(
         "PyYAML>=5.3,<6.0",
         "rdflib==4.2.2",
         "rdflib-jsonld==0.4.0",
-        "requests>=2.22,<3.0",
+        "requests>=2.23,<3.0",
         "uritemplate>=3.0,<4.0",
     ],
 
-    author="Ksenia Zaytseva, David Lougheed",
+    author="Ksenia Zaytseva, David Lougheed, Simon Chénard",
 
     description="An implementation of a variant store for the CHORD project.",
     long_description=long_description,

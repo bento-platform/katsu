@@ -1,14 +1,12 @@
 from rest_framework.renderers import JSONRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 from .jsonld_utils import dataset_to_jsonld
-from .semantic_mappings.context import *
 from rdflib import Graph
 import json
 from rdflib.plugin import register, Serializer
 
 register('json-ld', Serializer, 'rdflib_jsonld.serializer', 'JsonLDSerializer')
 from uuid import UUID
-from rest_framework.response import Response
 
 
 class UUIDEncoder(json.JSONEncoder):
