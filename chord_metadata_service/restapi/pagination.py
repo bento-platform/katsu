@@ -1,6 +1,5 @@
 from django.conf import settings
 from rest_framework import pagination
-from rest_framework.utils.urls import remove_query_param, replace_query_param
 from urllib.parse import urljoin
 
 
