@@ -1,4 +1,4 @@
-from rest_framework import viewsets, pagination
+from rest_framework import viewsets
 from rest_framework.settings import api_settings
 from .serializers import IndividualSerializer
 from .models import Individual
@@ -7,12 +7,7 @@ from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer,
     PhenopacketsRenderer
 )
-
-
-class LargeResultsSetPagination(pagination.PageNumberPagination):
-    page_size = 25
-    page_size_query_param = 'page_size'
-    max_page_size = 10000
+from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 
 class IndividualViewSet(viewsets.ModelViewSet):

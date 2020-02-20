@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from chord_metadata_service.phenopackets.api_views import LargeResultsSetPagination
+from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from .models import *
 from .permissions import OverrideOrSuperUserOnly
 from .serializers import *
