@@ -1,6 +1,5 @@
 import itertools
 from datetime import datetime
-import json
 
 from django.db import connection
 from django.conf import settings
