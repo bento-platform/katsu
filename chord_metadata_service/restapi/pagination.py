@@ -17,7 +17,11 @@ class LargeResultsSetPagination(pagination.PageNumberPagination):
     # Fix next/previous links inside sub-path-mounted reverse proxies in the CHORD context
 
     def _get_chord_absolute_uri(self):
-        return urljoin(settings.CHORD_URL, self.request.get_full_path())
+        full_path = self.request.get_full_path()
+        # Strip first slash if necessary, to avoid urljoin removing reverse proxy sub-paths
+        if len(full_path) > 0 and full_path[0] == "/":
+            full_path = full_path[1:]
+        return urljoin(settings.CHORD_URL, full_path)
 
     def get_next_link(self):
         if not self.page.has_next():
