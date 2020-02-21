@@ -35,6 +35,7 @@ authorization policy, terms of use).
 The dataset in the current implementation is one or more phenopackets related to each other through their provenance.
 
 - Data model:
+
     - DATS model used for dataset description;
     - GA4GH DUO is used to capture the terms of use applied to a dataset.
 
