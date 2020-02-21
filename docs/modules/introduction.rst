@@ -36,8 +36,8 @@ The dataset in the current implementation is one or more phenopackets related to
 
 - Data model:
 
-    - DATS model used for dataset description;
-    - GA4GH DUO is used to capture the terms of use applied to a dataset.
+  - DATS model used for dataset description;
+  - GA4GH DUO is used to capture the terms of use applied to a dataset.
 
 
 **4. Restapi service** handles all generic functionality shared among other services (e.g. renderers, common serializers, schemas, validators)
@@ -68,11 +68,11 @@ REST API highlights
 
 - Other available renderers:
 
-    - Currently the following classes can be retirved in FHIR format by appending :code:`?format=fhir`: Phenopackets, Individual, Biosample, PhenotypicFeature, HtsFile, Gene, Variants, Disease, Procedure.
+  - Currently the following classes can be retirved in FHIR format by appending :code:`?format=fhir`: Phenopackets, Individual, Biosample, PhenotypicFeature, HtsFile, Gene, Variants, Disease, Procedure.
 
-    - JSON-LD context to schema.org provided for Dataset class in order to allow for a Google dataset search for Open Access Data: append :code:`?format=json-ld` when querying dataset endpoint.
+  - JSON-LD context to schema.org provided for Dataset class in order to allow for a Google dataset search for Open Access Data: append :code:`?format=json-ld` when querying dataset endpoint.
 
-    - Dataset description can also be retrived in RDF format: append :code:`?format=rdf` when querying dataset endpoint.
+  - Dataset description can also be retrived in RDF format: append :code:`?format=rdf` when querying dataset endpoint.
 
 **Data ingest**
 
