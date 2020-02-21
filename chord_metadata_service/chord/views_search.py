@@ -1,6 +1,5 @@
 import itertools
 from datetime import datetime
-import json
 
 from django.db import connection
 from django.conf import settings
@@ -167,6 +166,8 @@ def chord_search(request):
     return search(request, internal_data=False)
 
 
+# Mounted on /private/, so will get protected anyway; this allows for access from federation service
+# TODO: Ugly and misleading permissions
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def chord_private_search(request):
@@ -262,13 +263,18 @@ def fhir_public_search(request):
     return fhir_search(request)
 
 
+# Mounted on /private/, so will get protected anyway
+# TODO: Ugly and misleading permissions
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def fhir_private_search(request):
     return fhir_search(request, internal_data=True)
 
 
+# Mounted on /private/, so will get protected anyway; this allows for access from federation service
+# TODO: Ugly and misleading permissions
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def chord_private_table_search(request, table_id):
     # Search phenopacket data types in specific tables
     # Private search endpoints are protected by URL namespace, not by Django permissions.

@@ -99,7 +99,10 @@ def create_phenotypic_feature(pf):
     return pf_obj
 
 
+# Mounted on /private/, so will get protected anyway; this allows for access from WES
+# TODO: Ugly and misleading permissions
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def ingest(request):
     # Private ingest endpoints are protected by URL namespace, not by Django permissions.
 

@@ -22,3 +22,7 @@ env/
 # coverage
 .coverage
 htmlcov/
+
+# docs build
+
+docs/_build
