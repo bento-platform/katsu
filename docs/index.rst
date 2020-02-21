@@ -13,6 +13,7 @@ Welcome to metadata service's documentation!
    modules/introduction
    modules/installation
    modules/models
+   modules/views
 
 
 
