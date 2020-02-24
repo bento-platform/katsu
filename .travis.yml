@@ -16,7 +16,6 @@ install:
 script:
   - export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="hj38f3Ntr" && export POSTGRES_PORT=5433
   - python3 -m coverage run ./manage.py test
+  - codecov
   - rm -rf chord_metadata_service
   - python3 -m coverage run ./manage.py test chord_metadata_service
-after_success:
-  - codecov
