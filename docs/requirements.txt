@@ -1,3 +1,2 @@
 Sphinx==2.4.2
 sphinx_rtd_theme
-Django==2.2.10
