@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to metadata service's documentation!
+Welcome to Metadata service's documentation!
 ============================================
 
 .. toctree::

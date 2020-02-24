@@ -13,7 +13,7 @@ Technical implementation
 ------------------------
 
 The service is implemented in Python and Django and uses PostgreSQL database to store the data.
-Besides PostgreSQL the data can be indexed queried in Elasticsearch.
+Besides PostgreSQL the data can be indexed and queried in Elasticsearch.
 
 
 Architecture
