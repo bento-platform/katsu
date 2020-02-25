@@ -162,7 +162,7 @@ def ingest_phenopacket(phenopacket_data, table_id):
     new_phenopacket_id = str(uuid.uuid4())  # TODO: Is this provided?
 
     subject = phenopacket_data.get("subject", None)
-    phenotypic_features = phenopacket_data.get("phenotypicFeatures", [])
+    phenotypic_features = phenopacket_data.get("phenotypic_features", [])
     biosamples = phenopacket_data.get("biosamples", [])
     genes = phenopacket_data.get("genes", [])
     diseases = phenopacket_data.get("diseases", [])
@@ -254,10 +254,12 @@ def ingest_phenopacket(phenopacket_data, table_id):
         meta_data=meta_data_obj,
         dataset=Dataset.objects.get(identifier=table_id)
     )
-    new_phenopacket.save()
 
     new_phenopacket.phenotypic_features.set(phenotypic_features_db)
     new_phenopacket.biosamples.set(biosamples_db)
     new_phenopacket.genes.set(genes_db)
     new_phenopacket.diseases.set(diseases_db)
+
+    new_phenopacket.save()
+
     return new_phenopacket
