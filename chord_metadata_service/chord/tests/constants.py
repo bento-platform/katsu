@@ -92,7 +92,11 @@ def dats_dataset(project_id, creators):
           }
        ],
        "title": "1000 Genomes Project",
-       "description": "The 1000 Genomes Project provides a comprehensive description of common human variation by applying a combination of whole-genome sequencing, deep exome sequencing and dense microarray genotyping to a diverse set of 2504 individuals from 26 populations.  Over 88 million variants are characterised, including >99% of SNP variants with a frequency of >1% for a variety of ancestries.",
+       "description": "The 1000 Genomes Project provides a comprehensive description of common human variation by "
+                      "applying a combination of whole-genome sequencing, deep exome sequencing and dense microarray "
+                      "genotyping to a diverse set of 2504 individuals from 26 populations.  Over 88 million variants "
+                      "are characterised, including >99% of SNP variants with a frequency of >1% for a variety of "
+                      "ancestries.",
        "storedIn": {
           "name": "European Bioinformatics Institute"
        },
@@ -140,13 +144,14 @@ def dats_dataset(project_id, creators):
              "category": "contact",
              "values": [
                 {
-                   "value": "Jennifer Tremblay-Mercier, Research Co-ordinator, jennifer.tremblay-mercier@douglas.mcgill.ca, 514-761-6131 #3329"
+                   "value": "Jennifer Tremblay-Mercier, Research Co-ordinator, "
+                            "jennifer.tremblay-mercier@douglas.mcgill.ca, 514-761-6131 #3329"
                 }
              ]
           }
        ],
        "data_use": VALID_DATA_USE_1
-}
+    }
 
 
 TEST_SEARCH_QUERY_1 = ["#eq", ["#resolve", "subject", "sex"], "FEMALE"]
