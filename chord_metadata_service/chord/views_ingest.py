@@ -255,11 +255,11 @@ def ingest_phenopacket(phenopacket_data, table_id):
         dataset=Dataset.objects.get(identifier=table_id)
     )
 
+    new_phenopacket.save()
+
     new_phenopacket.phenotypic_features.set(phenotypic_features_db)
     new_phenopacket.biosamples.set(biosamples_db)
     new_phenopacket.genes.set(genes_db)
     new_phenopacket.diseases.set(diseases_db)
-
-    new_phenopacket.save()
 
     return new_phenopacket
