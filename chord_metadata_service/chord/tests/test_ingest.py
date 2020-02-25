@@ -58,3 +58,8 @@ class IngestTest(TestCase):
         biosamples = list(p.biosamples.all().order_by("id"))
         self.assertEqual(len(biosamples), 5)
         # TODO: More
+
+        # Test ingesting again
+        p2 = ingest_phenopacket(EXAMPLE_INGEST, self.d.identifier)
+        self.assertNotEqual(p.id, p2.id)
+        # TODO: More
