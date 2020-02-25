@@ -1,5 +1,5 @@
 {
-  "dataset_id": "3df5e8b0-3949-4d3c-a37f-1c6a81940d50",
+  "table_id": "3df5e8b0-3949-4d3c-a37f-1c6a81940d50",
   "workflow_id": "phenopackets_json",
   "workflow_metadata": {
     "inputs": [
