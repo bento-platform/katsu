@@ -70,9 +70,9 @@ REST API highlights
 
   - Currently the following classes can be retrieved in FHIR format by appending :code:`?format=fhir`: Phenopacket, Individual, Biosample, PhenotypicFeature, HtsFile, Gene, Variant, Disease, Procedure.
 
-  - JSON-LD context to schema.org provided for dataset class in order to allow for a Google dataset search for Open Access Data: append :code:`?format=json-ld` when querying dataset endpoint.
+  - JSON-LD context to schema.org provided for the Dataset class in order to allow for a Google dataset search for Open Access Data: append :code:`?format=json-ld` when querying dataset endpoint.
 
-  - Dataset description can also be retrieved in RDF format: append :code:`?format=rdf` when querying dataset endpoint.
+  - Dataset description can also be retrieved in RDF format: append :code:`?format=rdf` when querying the dataset endpoint.
 
 **Data ingest**
 
@@ -126,7 +126,7 @@ There are also two scripts provided to update these indexes all at once:
     python manage.py patients_build_index
     python manage.py phenopackets_build_index
 
-To query this information, here is an example request:
+Here is an example request for querying this information:
 
 .. code-block::
 
