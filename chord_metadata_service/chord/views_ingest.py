@@ -182,7 +182,7 @@ def ingest_phenopacket(phenopacket_data, table_id):
         procedure, _ = Procedure.objects.get_or_create(**bs["procedure"])
 
         bs_query = _query_and_check_nulls(bs, "individual_id", lambda i: Individual.objects.get(id=i))
-        for k in ("sampled_issue", "taxonomy", "individual_age_at_collection", "histological_diagnosis",
+        for k in ("sampled_tissue", "taxonomy", "individual_age_at_collection", "histological_diagnosis",
                   "tumor_progression", "tumor_grade"):
             bs_query.update(_query_and_check_nulls(bs, k))
 
