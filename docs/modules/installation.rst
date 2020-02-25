@@ -14,9 +14,9 @@ Installation
 
     git submodule update --init
 
-3. Create and activate virtual environment
+3. Create and activate a virtual environment
 
-4. Cd to the main directory and install required packages:
+4. Move to the main directory and install required packages:
 
 .. code-block::
 

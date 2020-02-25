@@ -21,8 +21,8 @@ django.setup()
 # -- Project information -----------------------------------------------------
 
 project = 'Metadata service'
-copyright = '2020, Ksenia Zaytseva, David Lougheed, Simon Chenard'
-author = 'Ksenia Zaytseva, David Lougheed, Simon Chenard'
+copyright = '2020, Ksenia Zaytseva, David Lougheed, Simon Chénard'
+author = 'Ksenia Zaytseva, David Lougheed, Simon Chénard'
 
 # The full version, including alpha/beta/rc tags
 release = '0.5.0'
