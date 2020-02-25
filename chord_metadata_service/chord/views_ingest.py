@@ -15,6 +15,8 @@ from rest_framework.response import Response
 from chord_lib.responses.errors import *
 from chord_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
+from typing import Callable
+
 from chord_metadata_service.chord.models import *
 from chord_metadata_service.phenopackets.models import *
 
@@ -149,6 +151,11 @@ def ingest(request):
         return Response(status=204)
 
 
+def _query_and_check_nulls(obj: dict, key: str, transform: Callable = lambda x: x):
+    value = obj.get(key, None)
+    return {f"{key}__isnull": True} if value is None else {key: transform(value)}
+
+
 def ingest_phenopacket(phenopacket_data, table_id):
     """ Ingests one phenopacket. """
 
@@ -162,15 +169,10 @@ def ingest_phenopacket(phenopacket_data, table_id):
     meta_data = phenopacket_data["meta_data"]
 
     if subject:
-        subject, _ = Individual.objects.get_or_create(
-            id=subject["id"],
-            alternate_ids=subject.get("alternate_ids", None),
-            date_of_birth=isoparse(subject["date_of_birth"]) if "date_of_birth" in subject else None,
-            age=subject.get("age", ""),  # TODO: Shouldn't this be nullable, since it's recommended in the spec?
-            sex=subject.get("sex", None),
-            karyotypic_sex=subject.get("karyotypic_sex", None),
-            taxonomy=subject.get("taxonomy", None)
-        )
+        subject_query = _query_and_check_nulls(subject, "date_of_birth", transform=isoparse)
+        for k in ("alternate_ids", "age", "sex", "karyotypic_sex", "taxonomy"):
+            subject_query.update(_query_and_check_nulls(subject, k))
+        subject, _ = Individual.objects.get_or_create(id=subject["id"], **subject_query)
 
     phenotypic_features_db = [create_phenotypic_feature(pf) for pf in phenotypic_features]
 
@@ -178,26 +180,26 @@ def ingest_phenopacket(phenopacket_data, table_id):
     for bs in biosamples:
         # TODO: This should probably be a JSON field, or compound key with code/body_site
         procedure, _ = Procedure.objects.get_or_create(**bs["procedure"])
-        bs_pfs = [create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
 
-        bs_obj, _ = Biosample.objects.get_or_create(
+        bs_query = _query_and_check_nulls(bs, "individual_id", lambda i: Individual.objects.get(id=i))
+        for k in ("sampled_issue", "taxonomy", "individual_age_at_collection", "histological_diagnosis",
+                  "tumor_progression", "tumor_grade"):
+            bs_query.update(_query_and_check_nulls(bs, k))
+
+        bs_obj, bs_created = Biosample.objects.get_or_create(
             id=bs["id"],
-            individual=(Individual.objects.get(id=bs["individual_id"])
-                        if "individual_id" in bs else None),
             description=bs.get("description", ""),
-            sampled_tissue=bs.get("sampled_tissue", None),
-            taxonomy=bs.get("taxonomy", None),
-            individual_age_at_collection=bs.get("individual_age_at_collection", None),
-            histological_diagnosis=bs.get("histological_diagnosis", None),
-            tumor_progression=bs.get("tumor_progression", None),
-            tumor_grade=bs.get("tumor_grade", None),
             procedure=procedure,
             is_control_sample=bs.get("is_control_sample", False),
-
-            diagnostic_markers=bs.get("diagnostic_markers", [])
+            diagnostic_markers=bs.get("diagnostic_markers", []),
+            **bs_query
         )
 
-        bs_obj.phenotypic_features.set(bs_pfs)
+        if bs_created:
+            bs_pfs = [create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
+            bs_obj.phenotypic_features.set(bs_pfs)
+
+        # TODO: Update phenotypic features otherwise?
 
         biosamples_db.append(bs_obj)
 
@@ -206,24 +208,21 @@ def ingest_phenopacket(phenopacket_data, table_id):
     for g in genes:
         # TODO: Validate CURIE
         # TODO: Rename alternate_id
-
         g_obj, _ = Gene.objects.get_or_create(
             id=g["id"],
             alternate_ids=g.get("alternate_ids", []),
             symbol=g["symbol"]
         )
-
         genes_db.append(g_obj)
 
     diseases_db = []
-    for d in diseases:
+    for disease in diseases:
         # TODO: Primary key, should this be a model?
-
         d_obj, _ = Disease.objects.get_or_create(
-            term=d["term"],
-            onset=d.get("onset", None),
-            disease_stage=d.get("disease_stage", []),
-            tnm_finding=d.get("tnm_finding", [])
+            term=disease["term"],
+            disease_stage=disease.get("disease_stage", []),
+            tnm_finding=disease.get("tnm_finding", []),
+            **_query_and_check_nulls(disease, "onset")
         )
         diseases_db.append(d_obj.id)
 
@@ -237,7 +236,6 @@ def ingest_phenopacket(phenopacket_data, table_id):
             version=rs["version"],
             iri_prefix=rs["iri_prefix"]
         )
-        # rs_obj.save()
         resources_db.append(rs_obj)
 
     meta_data_obj = MetaData(
