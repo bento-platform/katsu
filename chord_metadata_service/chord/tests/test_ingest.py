@@ -1,89 +1,65 @@
-import json
+from django.test import TestCase
+from dateutil.parser import isoparse
 
-from django.test import override_settings
-from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
-from uuid import uuid4
+from chord_metadata_service.chord.models import Project, Dataset
+from chord_metadata_service.chord.views_ingest import create_phenotypic_feature, ingest_phenopacket
+from chord_metadata_service.phenopackets.models import PhenotypicFeature, Phenopacket
 
-from .constants import *
-from ..views_ingest import METADATA_WORKFLOWS
-
-
-def generate_ingest(table_id):
-    return {
-        "table_id": table_id,
-        "workflow_id": "phenopackets_json",
-        "workflow_metadata": METADATA_WORKFLOWS["ingestion"]["phenopackets_json"],
-        "workflow_outputs": {
-            "json_document": ""  # TODO
-        },
-        "workflow_params": {
-            "json_document": ""  # TODO
-        }
-    }
+from .constants import VALID_DATA_USE_1
+from .example_ingest import EXAMPLE_INGEST
 
 
-class WorkflowTest(APITestCase):
-    def test_workflows(self):
-        r = self.client.get(reverse("workflows"), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(r.json(), METADATA_WORKFLOWS)
-
-        # Non-existent workflow
-        r = self.client.get(reverse("workflow-detail", args=("invalid_workflow",)), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
-
-        # Valid workflow
-        r = self.client.get(reverse("workflow-detail", args=("phenopackets_json",)), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(r.json(), METADATA_WORKFLOWS["ingestion"]["phenopackets_json"])
-
-        # Non-existent workflow file
-        r = self.client.get(reverse("workflow-file", args=("invalid_workflow",)), content_type="text/plain")
-        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
-
-        # Valid workflow file
-        r = self.client.get(reverse("workflow-file", args=("phenopackets_json",)), content_type="text/plain")
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        # TODO: Check file contents
-
-
-class IngestTest(APITestCase):
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
+class IngestTest(TestCase):
     def setUp(self) -> None:
-        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
-        self.project = r.json()
+        p = Project.objects.create(title="Project 1", description="")
+        self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
+                                        project=p)
 
-        r = self.client.post(reverse("dataset-list"), data=json.dumps(valid_dataset_1(self.project["identifier"])),
-                             content_type="application/json")
-        self.dataset = r.json()
+    def test_create_pf(self):
+        p1 = create_phenotypic_feature({
+            "description": "test",
+            "type": {
+                "id": "HP:0000790",
+                "label": "Hematuria"
+            },
+            "negated": False,
+            "modifier": [],
+            "evidence": []
+        })
 
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
-    def test_ingest(self):
-        # No ingestion body
-        r = self.client.post(reverse("ingest"), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        p2 = PhenotypicFeature.objects.get(description="test")
 
-        # Invalid ingestion request
-        r = self.client.post(reverse("ingest"), data=json.dumps({}), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(p1.pk, p2.pk)
 
-        # Non-existent dataset ID
-        r = self.client.post(reverse("ingest"), data=json.dumps(generate_ingest(str(uuid4()))),
-                             content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+    def test_ingesting_json(self):
+        p = ingest_phenopacket(EXAMPLE_INGEST, self.d.identifier)
+        self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
 
-        # Non-existent workflow ID
-        bad_wf = generate_ingest(self.dataset["identifier"])
-        bad_wf["workflow_id"] += "_invalid"
-        r = self.client.post(reverse("ingest"), data=json.dumps(bad_wf), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(p.subject.id, EXAMPLE_INGEST["subject"]["id"])
+        self.assertEqual(p.subject.date_of_birth, isoparse(EXAMPLE_INGEST["subject"]["date_of_birth"]))
+        self.assertEqual(p.subject.sex, EXAMPLE_INGEST["subject"]["sex"])
+        self.assertEqual(p.subject.karyotypic_sex, EXAMPLE_INGEST["subject"]["karyotypic_sex"])
 
-        # json_document not in output
-        bad_wf = generate_ingest(self.dataset["identifier"])
-        bad_wf["workflow_outputs"] = {}
-        r = self.client.post(reverse("ingest"), data=json.dumps(bad_wf), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        pfs = list(p.phenotypic_features.all().order_by("pftype__id"))
 
+        self.assertEqual(len(pfs), 2)
+        self.assertEqual(pfs[0].description, EXAMPLE_INGEST["phenotypic_features"][0]["description"])
+        self.assertEqual(pfs[0].pftype["id"], EXAMPLE_INGEST["phenotypic_features"][0]["type"]["id"])
+        self.assertEqual(pfs[0].pftype["label"], EXAMPLE_INGEST["phenotypic_features"][0]["type"]["label"])
+        self.assertEqual(pfs[0].negated, EXAMPLE_INGEST["phenotypic_features"][0]["negated"])
+        # TODO: Test more properties
+
+        diseases = list(p.diseases.all().order_by("term__id"))
+        self.assertEqual(len(diseases), 1)
+        # TODO: More
+
+        # TODO: Test Metadata
+
+        biosamples = list(p.biosamples.all().order_by("id"))
+        self.assertEqual(len(biosamples), 5)
+        # TODO: More
+
+        # Test ingesting again
+        p2 = ingest_phenopacket(EXAMPLE_INGEST, self.d.identifier)
+        self.assertNotEqual(p.id, p2.id)
         # TODO: More

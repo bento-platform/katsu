@@ -19,8 +19,8 @@ Besides PostgreSQL the data can be indexed and queried in Elasticsearch.
 Architecture
 ------------
 
-Metadata Service contains several services that share one API.
-Services depend on each other and separated based on their scope.
+The Metadata Service contains several services that share one API.
+Services depend on each other and are separated based on their scope.
 
 **1. Patients service** handles anonymized individual’s data (e.g. individual id, sex, age or date of birth)
 
@@ -68,16 +68,16 @@ REST API highlights
 
 - Other available renderers:
 
-  - Currently the following classes can be retirved in FHIR format by appending :code:`?format=fhir`: Phenopackets, Individual, Biosample, PhenotypicFeature, HtsFile, Gene, Variants, Disease, Procedure.
+  - Currently the following classes can be retrieved in FHIR format by appending :code:`?format=fhir`: Phenopacket, Individual, Biosample, PhenotypicFeature, HtsFile, Gene, Variant, Disease, Procedure.
 
-  - JSON-LD context to schema.org provided for Dataset class in order to allow for a Google dataset search for Open Access Data: append :code:`?format=json-ld` when querying dataset endpoint.
+  - JSON-LD context to schema.org provided for the Dataset class in order to allow for a Google dataset search for Open Access Data: append :code:`?format=json-ld` when querying dataset endpoint.
 
-  - Dataset description can also be retrived in RDF format: append :code:`?format=rdf` when querying dataset endpoint.
+  - Dataset description can also be retrieved in RDF format: append :code:`?format=rdf` when querying the dataset endpoint.
 
 **Data ingest**
 
 Currently only the data that follow Phenopackets schema can be ingested.
-Ingest endpoint is :code:`/private/ingest` .
+Ingest endpoint is :code:`/private/ingest`.
 Example of POST request body:
 
 .. code-block::
@@ -118,7 +118,7 @@ Elasticsearch index (optional)
 ------------------------------
 
 Data in FHIR format can be indexed in Elasticsearch - this is optional.
-If an Elasticsearch instance is running on the server (so on :code:`localhost:9000`) these models will automatically be indexed on creation/update.
+If an Elasticsearch instance is running on the server (so on :code:`localhost:9000`) these models will be automatically indexed on creation/update.
 There are also two scripts provided to update these indexes all at once:
 
 .. code-block::
@@ -126,7 +126,7 @@ There are also two scripts provided to update these indexes all at once:
     python manage.py patients_build_index
     python manage.py phenopackets_build_index
 
-To query this information, here is an example request :
+Here is an example request for querying this information:
 
 .. code-block::
 
