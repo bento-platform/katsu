@@ -112,7 +112,7 @@ class PhenotypicFeature(models.Model, IndexableMixin):
 class Procedure(models.Model):
     """
     Class to represent a clinical procedure performed on an individual
-    (subject) in oder to extract a biosample
+    (subject) in order to extract a biosample
 
     FHIR: Procedure
     """
