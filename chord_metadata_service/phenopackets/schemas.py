@@ -637,9 +637,9 @@ PHENOPACKET_SCHEMA = describe_schema({
             "items": {
                 **PHENOPACKET_DISEASE_SCHEMA,
                 "search": {
-                    **PHENOPACKET_DISEASE_SCHEMA.get("search", {}),
+                    **PHENOPACKET_DISEASE_SCHEMA["search"],
                     "database": {
-                        **PHENOPACKET_DISEASE_SCHEMA.get("database", {}),
+                        **PHENOPACKET_DISEASE_SCHEMA["search"]["database"],
                         "relationship": {
                             "type": "MANY_TO_ONE",
                             "foreign_key": "disease_id"  # TODO: No hard-code, from M2M
