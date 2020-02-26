@@ -25,7 +25,7 @@ copyright = '2020, Ksenia Zaytseva, David Lougheed, Simon Chénard'
 author = 'Ksenia Zaytseva, David Lougheed, Simon Chénard'
 
 # The full version, including alpha/beta/rc tags
-release = '0.5.0'
+release = '0.5.1'
 
 # -- General configuration ---------------------------------------------------
 
