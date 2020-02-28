@@ -10,22 +10,35 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import configparser
+import datetime
 import os
 import sys
 import django
+
+from pathlib import Path
+
 sys.path.insert(0, os.path.abspath('..'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'chord_metadata_service.metadata.settings'
 django.setup()
+
+config = configparser.ConfigParser()
+config.read(os.path.join(Path(os.path.dirname(os.path.realpath(__file__))).parent,
+                         "chord_metadata_service",
+                         "package.cfg"))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Metadata service'
-copyright = '2020, Ksenia Zaytseva, David Lougheed, Simon Chénard'
-author = 'Ksenia Zaytseva, David Lougheed, Simon Chénard'
+author = config["package"]["authors"]
+# noinspection PyShadowingBuiltins
+copyright = f"{datetime.datetime.now().year} {author}"
 
 # The full version, including alpha/beta/rc tags
-release = '0.5.1'
+release = config["package"]["version"]
+
+version = ".".join(release.split(".")[:2])
 
 # -- General configuration ---------------------------------------------------
 
