@@ -13,10 +13,13 @@ def transform_keys(obj):
     It iterates over a dict and changes all keys in nested objects to camelCase.
     """
 
+    if isinstance(obj, list):
+        return [transform_keys(i) for i in obj]
+
     if isinstance(obj, dict):
-        transformed_obj = {}
-        for key, value in obj.items():
-            if isinstance(value, dict):
-                value = transform_keys(value)
-            transformed_obj[camel_case_field_names(key)] = value
-        return transformed_obj
+        return {
+            camel_case_field_names(key): transform_keys(value)
+            for key, value in obj.items()
+        }
+
+    return obj
