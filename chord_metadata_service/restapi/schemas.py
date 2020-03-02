@@ -129,22 +129,22 @@ AGE = {"type": "string", "description": "An ISO8601 string represent age."}
 
 AGE_RANGE = {
     "type": "object",
-     "properties": {
-         "start": {
-             "type": "object",
-             "properties": {
-                 "age": AGE
-             }
-         },
-         "end": {
-             "type": "object",
-             "properties": {
-                 "age": AGE
-             }
-         }
+    "properties": {
+        "start": {
+            "type": "object",
+            "properties": {
+                "age": AGE
+            }
+        },
+        "end": {
+            "type": "object",
+            "properties": {
+                "age": AGE
+            }
+        }
     },
-     "additionalProperties": False,
-     "required": ["start", "end"]
+    "additionalProperties": False,
+    "required": ["start", "end"]
 }
 
 AGE_OR_AGE_RANGE = {
