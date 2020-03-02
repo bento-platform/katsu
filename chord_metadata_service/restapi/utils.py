@@ -1,14 +1,10 @@
 def camel_case_field_names(string):
     """ Function to convert snake_case field names to camelCase """
-
-    if '_' in string:
-        splitted = string.split('_')
-        capitilized = []
-        capitilized.append(splitted[0])
-        for each in splitted[1:]:
-            capitilized.append(each.title())
-        return ''.join(capitilized)
-    return string
+    # Capitalize every part except the first
+    return "".join(
+        part.title() if i > 0 else part
+        for i, part in enumerate(string.split("_"))
+    )
 
 
 def transform_keys(obj):
