@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 
+import configparser
+import os
 import setuptools
 
 with open("README.md", "r") as rf:
     long_description = rf.read()
 
+config = configparser.ConfigParser()
+config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), "chord_metadata_service", "package.cfg"))
+
 setuptools.setup(
-    name="chord_metadata_service",
-    version="0.5.1",
+    name=config["package"]["name"],
+    version=config["package"]["version"],
 
     python_requires=">=3.6",
     install_requires=[
@@ -29,7 +34,7 @@ setuptools.setup(
         "uritemplate>=3.0,<4.0",
     ],
 
-    author="Ksenia Zaytseva, David Lougheed, Simon Chénard",
+    author=config["package"]["authors"],
 
     description="An implementation of a variant store for the CHORD project.",
     long_description=long_description,
