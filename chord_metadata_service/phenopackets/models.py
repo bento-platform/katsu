@@ -2,7 +2,6 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
-from elasticsearch import Elasticsearch
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.models import IndexableMixin
@@ -55,7 +54,7 @@ class MetaData(models.Model):
         JSONField(null=True, blank=True), blank=True, null=True,
         help_text=rec_help(d.META_DATA, "updates"))
     phenopacket_schema_version = models.CharField(max_length=200, blank=True,
-        help_text='Schema version of the current phenopacket.')
+                                                  help_text='Schema version of the current phenopacket.')
     external_references = ArrayField(
         JSONField(null=True, blank=True), blank=True, null=True,
         help_text=rec_help(d.META_DATA, "external_references"))
