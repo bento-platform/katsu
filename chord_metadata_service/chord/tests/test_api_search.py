@@ -1,4 +1,6 @@
 import json
+import uuid
+
 from unittest.mock import patch
 
 from django.test import override_settings
@@ -83,10 +85,14 @@ class TableTest(APITestCase):
         self.assertEqual(len(c), 1)
         self.assertEqual(c[0], self.dataset_rep(self.dataset, c[0]["metadata"]["created"], c[0]["metadata"]["updated"]))
 
+    def test_table_summary(self):
+        r = self.client.get(reverse("table-summary", kwargs={"table_id": str(uuid.uuid4())}))
+        self.assertEqual(r.status_code, 404)
+
         r = self.client.get(reverse("table-summary", kwargs={"table_id": self.dataset["identifier"]}))
         s = r.json()
-        assert s["count"] == 0  # No phenopackets
-        assert "data_type_specific" in s
+        self.assertEqual(s["count"], 0)  # No phenopackets
+        self.assertIn("data_type_specific", s)
 
 
 class SearchTest(APITestCase):
