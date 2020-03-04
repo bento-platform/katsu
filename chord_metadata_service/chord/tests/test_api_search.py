@@ -83,6 +83,11 @@ class TableTest(APITestCase):
         self.assertEqual(len(c), 1)
         self.assertEqual(c[0], self.dataset_rep(self.dataset, c[0]["metadata"]["created"], c[0]["metadata"]["updated"]))
 
+        r = self.client.get(reverse("table-summary", kwargs={"table_id": self.dataset["identifier"]}))
+        s = r.json()
+        assert s["count"] == 0  # No phenopackets
+        assert "data_type_specific" in s
+
 
 class SearchTest(APITestCase):
     def setUp(self) -> None:

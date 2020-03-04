@@ -1,6 +1,7 @@
 import itertools
-from datetime import datetime
 
+from collections import Counter
+from datetime import datetime
 from django.db import connection
 from django.conf import settings
 from psycopg2 import sql
@@ -11,11 +12,13 @@ from rest_framework.response import Response
 from chord_lib.responses.errors import *
 from chord_lib.search import build_search_response, postgres
 from chord_metadata_service.metadata.settings import DEBUG
+from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
-from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.metadata.elastic import es
+
 from .models import Dataset
 from .permissions import OverrideOrSuperUserOnly
 
@@ -90,6 +93,57 @@ def table_detail(request, table_id):  # pragma: no cover
     if request.method == "DELETE":
         table.delete()
         return Response(status=204)
+
+
+# Mounted on /private/, so will get protected anyway; this allows for access from federation service
+# TODO: Ugly and misleading permissions
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def chord_private_table_summary(_request, table_id):
+    try:
+        table = Dataset.objects.get(identifier=table_id)
+        phenopackets = Phenopacket.objects.filter(dataset=table)
+
+        biosamples_set = frozenset(
+            p["biosamples__id"] for p in phenopackets.prefetch_related("biosamples").values("biosamples__id"))
+
+        biosamples_cs = Counter(b.is_control_sample for b in Biosample.objects.filter(id__in=biosamples_set))
+
+        biosamples_taxonomy = Counter(b.taxonomy["id"] for b in Biosample.objects.filter(id__in=biosamples_set)
+                                      if b.taxonomy is not None)
+
+        individuals_set = frozenset({
+            *(p["subject"] for p in phenopackets.values("subject")),
+            *(p["biosamples__individual_id"]
+              for p in phenopackets.prefetch_related("biosamples").values("biosamples__individual_id")),
+        })
+
+        individuals_sex = Counter(i.sex for i in Individual.objects.filter(id__in=individuals_set))
+        individuals_k_sex = Counter(i.karyotypic_sex for i in Individual.objects.filter(id__in=individuals_set))
+        individuals_taxonomy = Counter(i.taxonomy["id"] for i in Individual.objects.filter(id__in=individuals_set)
+                                       if i.taxonomy is not None)
+
+        return Response({
+            "count": phenopackets.count(),
+            "data_type_specific": {
+                "biosamples": {
+                    "count": len(biosamples_set),
+                    "is_control_sample": dict(biosamples_cs),
+                    "taxonomy": dict(biosamples_taxonomy),
+                },
+                "individuals": {
+                    "count": len(individuals_set),
+                    "sex": {k: individuals_sex[k] for k in (s[0] for s in Individual.SEX)},
+                    "karyotypic_sex": {k: individuals_k_sex[k] for k in (s[0] for s in Individual.KARYOTYPIC_SEX)},
+                    "diseases": {},
+                    "taxonomy": dict(individuals_taxonomy),
+                    # TODO: age histogram
+                },
+            }
+        })
+
+    except Dataset.DoesNotExist:
+        return Response(not_found_error(f"Table with ID {table_id} not found"), status=404)
 
 
 # TODO: CHORD-standardized logging
