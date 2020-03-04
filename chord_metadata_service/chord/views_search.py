@@ -84,7 +84,8 @@ def table_list(request):
 @permission_classes([OverrideOrSuperUserOnly])
 def table_detail(request, table_id):  # pragma: no cover
     # TODO: Implement GET, POST
-    # TODO: Permissions: Check if user has control / more direct access over this dataset? Or just always use owner...
+    # TODO: Permissions: Check if user has control / more direct access over this table and/or dataset?
+    #  Or just always use owner...
     try:
         table = Dataset.objects.get(identifier=table_id)
     except Dataset.DoesNotExist:
@@ -95,11 +96,9 @@ def table_detail(request, table_id):  # pragma: no cover
         return Response(status=204)
 
 
-# Mounted on /private/, so will get protected anyway; this allows for access from federation service
-# TODO: Ugly and misleading permissions
 @api_view(["GET"])
-@permission_classes([AllowAny])
-def chord_private_table_summary(_request, table_id):
+@permission_classes([OverrideOrSuperUserOnly])
+def chord_table_summary(_request, table_id):
     try:
         table = Dataset.objects.get(identifier=table_id)
         phenopackets = Phenopacket.objects.filter(dataset=table)
