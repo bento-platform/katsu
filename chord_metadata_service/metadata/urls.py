@@ -18,20 +18,22 @@ from django.urls import path, include
 from chord_metadata_service.restapi import api_views, urls as restapi_urls
 from chord_metadata_service.chord import views_ingest, views_search
 from rest_framework.schemas import get_schema_view
+from rest_framework_swagger.views import get_swagger_view
 
 # TODO: django.conf.settings breaks reverse(), how to import properly?
 from .settings import DEBUG
 
+swagger_schema_view = get_swagger_view(title="Metadata Service API")
 
 urlpatterns = [
-    path('', get_schema_view(
+    path('api/schema', get_schema_view(
         title="Metadata Service API",
         description="Metadata Service provides a phenotypic description of an Individual "
         "in the context of biomedical research.",
         version="0.1"
         ),
         name='openapi-schema'),
-
+    path('', swagger_schema_view),
     path('api/', include(restapi_urls)),
     path('service-info', api_views.service_info, name="service-info"),
 
