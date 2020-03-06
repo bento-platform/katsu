@@ -324,16 +324,9 @@ def fhir_private_search(request):
     return fhir_search(request, internal_data=True)
 
 
-# Mounted on /private/, so will get protected anyway; this allows for access from federation service
-# TODO: Ugly and misleading permissions
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def chord_private_table_search(request, table_id):
-    # Search phenopacket data types in specific tables
-    # Private search endpoints are protected by URL namespace, not by Django permissions.
-
+def chord_table_search(request, table_id, internal=False):
     start = datetime.now()
-    debug_log("Started private table search")
+    debug_log(f"Started {'private' if internal else 'public'} table search")
 
     if request.data is None or "query" not in request.data:
         # TODO: Better error
@@ -357,7 +350,27 @@ def chord_private_table_search(request, table_id):
 
     debug_log(f"Finished running query in {datetime.now() - start}")
 
-    serialized_data = PhenopacketSerializer(query_results, many=True).data
-    debug_log(f"Finished running query and serializing in {datetime.now() - start}")
+    if internal:
+        serialized_data = PhenopacketSerializer(query_results, many=True).data
+        debug_log(f"Finished running query and serializing in {datetime.now() - start}")
 
-    return Response(build_search_response(serialized_data, start))
+        return Response(build_search_response(serialized_data, start))
+
+    return Response(len(query_results) > 0)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def chord_public_table_search(request, table_id):
+    # Search phenopacket data types in specific tables without leaking internal data
+    return chord_table_search(request, table_id, internal=False)
+
+
+# Mounted on /private/, so will get protected anyway; this allows for access from federation service
+# TODO: Ugly and misleading permissions
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def chord_private_table_search(request, table_id):
+    # Search phenopacket data types in specific tables
+    # Private search endpoints are protected by URL namespace, not by Django permissions.
+    return chord_table_search(request, table_id, internal=True)
