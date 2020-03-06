@@ -32,6 +32,7 @@ setuptools.setup(
         "rdflib-jsonld==0.4.0",
         "requests>=2.23,<3.0",
         "uritemplate>=3.0,<4.0",
+        "django-rest-swagger==2.2.0",
     ],
 
     author=config["package"]["authors"],
