@@ -50,9 +50,10 @@ urlpatterns = [
     path('tables', views_search.table_list, name="table-list"),
     path('tables/<str:table_id>', views_search.table_detail, name="table-detail"),
     path('tables/<str:table_id>/summary', views_search.chord_table_summary, name="table-summary"),
+    path('tables/<str:table_id>/search', views_search.chord_public_table_search, name="public-table-search"),
     path('search', views_search.chord_search, name="search"),
     path('fhir-search', views_search.fhir_public_search, name="fhir-search"),
     path('private/fhir-search', views_search.fhir_private_search, name="fhir-private-search"),
     path('private/search', views_search.chord_private_search, name="private-search"),
-    path('private/tables/<str:table_id>/search', views_search.chord_private_table_search, name="table-search"),
+    path('private/tables/<str:table_id>/search', views_search.chord_private_table_search, name="private-table-search"),
 ] + ([path('admin/', admin.site.urls)] if DEBUG else [])
