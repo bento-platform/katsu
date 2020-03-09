@@ -11,6 +11,7 @@ __all__ = ["Project", "Dataset", "TableOwnership"]
 def version_default():
     return f"version_{timezone.now()}"
 
+
 #############################################################
 #                                                           #
 #                   Project Management                      #

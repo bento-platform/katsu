@@ -19,12 +19,21 @@ __all__ = ["ProjectSerializer", "DatasetSerializer", "TableOwnershipSerializer"]
 #############################################################
 
 
+class TableOwnershipSerializer(GenericSerializer):
+    class Meta:
+        model = TableOwnership
+        fields = '__all__'
+
+
 class DatasetSerializer(GenericSerializer):
     always_include = (
         "description",
         "contact_info",
         "linked_field_sets",
+        "table_ownerships",
     )
+
+    table_ownerships = TableOwnershipSerializer(read_only=True, many=True, exclude_when_nested=["dataset"])
 
     # noinspection PyMethodMayBeStatic
     def validate_title(self, value):
@@ -139,10 +148,4 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = '__all__'
-
-
-class TableOwnershipSerializer(GenericSerializer):
-    class Meta:
-        model = TableOwnership
         fields = '__all__'
