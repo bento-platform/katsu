@@ -18,6 +18,7 @@ class GeneticVariantTested(models.Model, IndexableMixin):
     # TODO Discuss: Connection to Gene from Phenopackets
     id = models.CharField(primary_key=True, max_length=200,
                           help_text='An arbitrary identifier for the genetic variant tested.')
+    # make writable if it doesn't exist
     gene_studied = models.ForeignKey(Gene, blank=True, null=True, on_delete=models.SET_NULL,
                                      help_text='A gene targeted for mutation analysis, '
                                                'identified in HUGO Gene Nomenclature Committee (HGNC) notation.')
@@ -58,7 +59,6 @@ class GeneticVariantFound(models.Model, IndexableMixin):
     method = JSONField(blank=True, null=True, help_text='An ontology or controlled vocabulary term to indetify '
                                                         'the method used to perform the genetic test. '
                                                         'Accepted value set: NCIT')
-
     variant_found_identifier = JSONField(blank=True, null=True,
                                          help_text='The variation ID assigned by HGVS, for example, 360448 is the'
                                                    ' identifier for NM_005228.4(EGFR):c.-237A>G (single nucleotide '

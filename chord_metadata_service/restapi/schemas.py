@@ -183,3 +183,32 @@ DISEASE_ONSET = {
     },
     "additionalProperties": False
 }
+
+#mCode/FHIR Quantity
+
+QUANTITY = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "todo",
+    "title": "Quantity schema.",
+    "description": "Schema for the datatype Quantity.",
+    "type": "object",
+    "properties": {
+        "value": {
+            "type": "number"
+        },
+        "comparator": {
+            "enum": ["<", ">", "<=", ">=", "="]
+        },
+        "unit": {
+            "type": "string"
+        },
+        "system": {
+            "type": "string",
+            "format": "uri"
+        },
+        "code": {
+            "type": "string"
+        }
+    },
+    "additionalProperties": False
+}
