@@ -102,6 +102,7 @@ class GenomicsReport(models.Model, IndexableMixin):
     genetic_variant_found = models.ManyToManyField(GeneticVariantFound, blank=True, null=True,
                                                    help_text='Records an alteration in the most common DNA '
                                                              'nucleotide sequence.')
+    subject = models.ForeignKey(Individual, help_text='Subject of genomics report.')
 
     def __str__(self):
         return str(self.id)
@@ -145,62 +146,7 @@ class LabsVital(models.Model, IndexableMixin):
                                   'Diastolic Blood Pressure.')
 
 
-################################# Treatment #################################
-
-###### Procedure ######
-
-class CancerRelatedProcedure(models.Model, IndexableMixin):
-    """
-    Class to represent radiological treatment or surgical action addressing a cancer condition.
-    """
-
-    PROCEDURE_TYPES = (
-        ('radiation', 'radiation'),
-        ('surgical', 'surgical')
-    )
-    #TODO Ontology class
-    id = models.CharField(primary_key=True, max_length=200,
-                          help_text='An arbitrary identifier for the procedure.')
-    procedure_type = models.CharField(choices=PROCEDURE_TYPES, help_text='Type of cancer related procedure: '
-                                                                         'radion or surgical procedure.')
-    #Ontology
-    code = JSONField(help_text='Code for the procedure performed.')
-    #DateTime or Ontology
-    occurence_time_or_period = JSONField(help_text='The date/time that a procedure was performed.')
-    #List of Ontologies
-    target_body_site = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                                  help_text='The body location(s) where the procedure was performed.')
-    #Ontology
-    treatment_intent = JSONField(blank=True, null=True, help_text='The purpose of a treatment.')
-
-    def __str__(self):
-        return str(self.id)
-
-###### Medication Statement ######
-
-class MedicationStatement(models.Model, IndexableMixin):
-    """
-    Class to record the use of a medication.
-    """
-
-    id = models.CharField(primary_key=True, max_length=200,
-                          help_text='An arbitrary identifier for the medication statement.')
-    medication_code = JSONField(help_text='A code for medication. Accepted code systems:'
-                                          'Medication Clinical Drug (RxNorm) and other.')
-    # List of Ontologies
-    termination_reason = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                                  help_text='A code explaining unplanned or premature termination of a course of'
-                                            'medication. Accepted ontologies: SNOMED CT.')
-    #Ontology
-    treatment_intent = JSONField(blank=True, null=True, help_text='The purpose of a treatment.'
-                                                                  'Accepted ontologies: SNOMED CT.')
-    start_date = models.DateTimeField(blank=True, null=True, help_text='The start date/time of the medication.')
-    end_date = models.DateTimeField(blank=True, null=True, help_text='The end date/time of the medication.')
-    date_time = models.DateTimeField(blank=True, null=True, help_text='The date/time the medication was administered.')
-
-    def __str__(self):
-        return str(self.id)
-
+################################# Disease #################################
 
 class CancerCondition(models.Model, IndexableMixin):
     """
@@ -232,6 +178,7 @@ class CancerCondition(models.Model, IndexableMixin):
                                               help_text='A description of the morphologic and behavioral '
                                                         'characteristics of the cancer. Accepted ontologies:'
                                                         'SNOMED CT, ICD-O-3 and others.')
+    subject = models.ForeignKey(Individual, help_text='The subject of the study that has a cancer condition.')
 
     def __str__(self):
         return str(self.id)
@@ -241,40 +188,88 @@ class TNMStaging(models.Model, IndexableMixin):
     """
     Class to describe the spread of cancer in a patient’s body.
     """
+
+    TNM_TYPES = (
+        ('clinical', 'clinical'),
+        ('pathologic', 'pathologic')
+    )
     id = models.CharField(primary_key=True, max_length=200,
                           help_text='An arbitrary identifier for the TNM staging.')
     #TODO Extended Ontology class: stage group - required and staging system - not required
-    clinical_stage_group = JSONField(help_text='The extent of the cancer in the body, according to the TNM '
+    tnm_type = models.CharField(choices=TNM_TYPES, help_text='TNM type: clinical or pathological.')
+    stage_group = JSONField(help_text='The extent of the cancer in the body, according to the TNM '
                                                'classification system. Accepted ontologies: SNOMED CT, AJCC and others.')
-    clinical_primary_tumor_category = JSONField(help_text='Category of the primary tumor, based on its size and '
-                                                          'extent, assessed prior to surgery, based on evidence '
-                                                          'such as physical examination, imaging, and/or biopsy.'
-                                                          'Accepted ontologies: SNOMED CT, AJCC and others.')
-    clinical_regional_nodes_category = JSONField(help_text='Category of the presence or absence of metastases in '
-                                                           'regional lymph nodes, assessed using tests that are '
-                                                           'done before surgery. Accepted ontologies: '
+    primary_tumor_category = JSONField(help_text='Category of the primary tumor, based on its size and '
+                                                          'extent. Accepted ontologies: SNOMED CT, AJCC and others.')
+    regional_nodes_category = JSONField(help_text='Category of the presence or absence of metastases in '
+                                                           'regional lymph nodes. Accepted ontologies: '
                                                            'SNOMED CT, AJCC and others.')
-    clinical_distant_metastases_category = JSONField(help_text='Category describing the presence or absence of '
-                                                               'metastases in remote anatomical locations, assessed '
-                                                               'using tests that are done before surgery. '
-                                                               'Accepted ontologies: SNOMED CT, AJCC and others.')
-    pathologic_stage_group = JSONField(help_text='The extent of the cancer in the body, according to the TNM '
-                                                 'classification system, based on examination of tissue samples '
-                                                 'removed during surgery, in addition to physical examination and '
-                                                 'imaging and potentially, other prognostic factors. '
-                                                 'Accepted ontologies: SNOMED CT, AJCC and others.')
-    pathologic_primary_tumor_category = JSONField(help_text='Category describing the primary tumor, based on its '
-                                                            'size and extent, assessed through pathologic analysis '
-                                                            'of a tumor specimen. Accepted ontologies: SNOMED CT, '
-                                                            'AJCC and others.')
-    pathologic_regional_nodes_category = JSONField(help_text='Category describing the presence or absence of '
-                                                             'metastases in regional lymph nodes, assessed through '
-                                                             'pathologic analysis of a specimen. Accepted ontologies: '
-                                                             'SNOMED CT, AJCC and others.')
-    pathologic_distant_metastases_category = JSONField(help_text='Category describing the presence or absence of '
-                                                                 'metastases in remote anatomical locations, assessed '
-                                                                 'through pathologic analysis of a specimen. '
+    distant_metastases_category = JSONField(help_text='Category describing the presence or absence of '
+                                                                 'metastases in remote anatomical locations. '
                                                                  'Accepted ontologies: SNOMED CT, AJCC and others.')
+    # TODO check if one cancer condition has many TNM Staging
+    cancer_condition = models.ForeignKey(CancerCondition, help_text='Cancer condition.')
 
     def __str__(self):
         return str(self.id)
+
+
+################################# Treatment #################################
+
+###### Procedure ######
+
+class CancerRelatedProcedure(models.Model, IndexableMixin):
+    """
+    Class to represent radiological treatment or surgical action addressing a cancer condition.
+    """
+
+    PROCEDURE_TYPES = (
+        ('radiation', 'radiation'),
+        ('surgical', 'surgical')
+    )
+    #TODO Ontology class
+    id = models.CharField(primary_key=True, max_length=200,
+                          help_text='An arbitrary identifier for the procedure.')
+    procedure_type = models.CharField(choices=PROCEDURE_TYPES, help_text='Type of cancer related procedure: '
+                                                                         'radion or surgical procedure.')
+    #Ontology
+    code = JSONField(help_text='Code for the procedure performed.')
+    #DateTime or Ontology
+    occurence_time_or_period = JSONField(help_text='The date/time that a procedure was performed.')
+    #List of Ontologies
+    target_body_site = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
+                                  help_text='The body location(s) where the procedure was performed.')
+    #Ontology
+    treatment_intent = JSONField(blank=True, null=True, help_text='The purpose of a treatment.')
+    subject = models.ForeignKey(Individual, help_text='The patient who has a cancer condition.')
+
+    def __str__(self):
+        return str(self.id)
+
+###### Medication Statement ######
+
+class MedicationStatement(models.Model, IndexableMixin):
+    """
+    Class to record the use of a medication.
+    """
+
+    id = models.CharField(primary_key=True, max_length=200,
+                          help_text='An arbitrary identifier for the medication statement.')
+    medication_code = JSONField(help_text='A code for medication. Accepted code systems:'
+                                          'Medication Clinical Drug (RxNorm) and other.')
+    # List of Ontologies
+    termination_reason = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
+                                  help_text='A code explaining unplanned or premature termination of a course of'
+                                            'medication. Accepted ontologies: SNOMED CT.')
+    #Ontology
+    treatment_intent = JSONField(blank=True, null=True, help_text='The purpose of a treatment.'
+                                                                  'Accepted ontologies: SNOMED CT.')
+    start_date = models.DateTimeField(blank=True, null=True, help_text='The start date/time of the medication.')
+    end_date = models.DateTimeField(blank=True, null=True, help_text='The end date/time of the medication.')
+    date_time = models.DateTimeField(blank=True, null=True, help_text='The date/time the medication was administered.')
+    subject = models.ForeignKey(Individual, help_text="Subject of medication statement.")
+
+    def __str__(self):
+        return str(self.id)
+
+
