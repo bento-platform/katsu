@@ -97,12 +97,12 @@ class GenomicsReport(models.Model, IndexableMixin):
                               help_text='An ontology or controlled vocabulary term to indetify the type of '
                                         'material the specimen contains or consists of.'
                                         'Accepted value set: HL7 Version 2 and Specimen Type.')
-    genetic_variant_tested = models.ManyToManyField(GeneticVariantTested, blank=True, null=True,
+    genetic_variant_tested = models.ManyToManyField(GeneticVariantTested, blank=True,
                                                     help_text='A test for a specific mutation on a particular gene.')
-    genetic_variant_found = models.ManyToManyField(GeneticVariantFound, blank=True, null=True,
+    genetic_variant_found = models.ManyToManyField(GeneticVariantFound, blank=True,
                                                    help_text='Records an alteration in the most common DNA '
                                                              'nucleotide sequence.')
-    subject = models.ForeignKey(Individual, help_text='Subject of genomics report.')
+    subject = models.ForeignKey(Individual, help_text='Subject of genomics report.', on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.id)
@@ -115,7 +115,7 @@ class LabsVital(models.Model, IndexableMixin):
     """
     Class  to record tests performed on patient.
     """
-
+    # TODO Should this class be a part of Patients app? patient related metadata
     # TODO the data value should be in form of Quantity datatype - ADD json schema for Quantity
     id = models.CharField(primary_key=True, max_length=200,
                           help_text='An arbitrary identifier for the labs/vital tests.')
@@ -158,7 +158,7 @@ class CancerCondition(models.Model, IndexableMixin):
     )
     id = models.CharField(primary_key=True, max_length=200,
                           help_text='An arbitrary identifier for the cancer condition.')
-    condition_type = models.CharField(choices=CANCER_CONDITION_TYPE,
+    condition_type = models.CharField(choices=CANCER_CONDITION_TYPE, max_length=200,
                                       help_text='Cancer condition type: primary or secondary.')
     body_location_code = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
                                   help_text='Code for the body location, optionally pre-coordinating laterality '
@@ -178,7 +178,8 @@ class CancerCondition(models.Model, IndexableMixin):
                                               help_text='A description of the morphologic and behavioral '
                                                         'characteristics of the cancer. Accepted ontologies:'
                                                         'SNOMED CT, ICD-O-3 and others.')
-    subject = models.ForeignKey(Individual, help_text='The subject of the study that has a cancer condition.')
+    subject = models.ForeignKey(Individual, help_text='The subject of the study that has a cancer condition.',
+                                on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.id)
@@ -196,7 +197,8 @@ class TNMStaging(models.Model, IndexableMixin):
     id = models.CharField(primary_key=True, max_length=200,
                           help_text='An arbitrary identifier for the TNM staging.')
     #TODO Extended Ontology class: stage group - required and staging system - not required
-    tnm_type = models.CharField(choices=TNM_TYPES, help_text='TNM type: clinical or pathological.')
+    tnm_type = models.CharField(choices=TNM_TYPES, max_length=200,
+                                help_text='TNM type: clinical or pathological.')
     stage_group = JSONField(help_text='The extent of the cancer in the body, according to the TNM '
                                                'classification system. Accepted ontologies: SNOMED CT, AJCC and others.')
     primary_tumor_category = JSONField(help_text='Category of the primary tumor, based on its size and '
@@ -208,7 +210,7 @@ class TNMStaging(models.Model, IndexableMixin):
                                                                  'metastases in remote anatomical locations. '
                                                                  'Accepted ontologies: SNOMED CT, AJCC and others.')
     # TODO check if one cancer condition has many TNM Staging
-    cancer_condition = models.ForeignKey(CancerCondition, help_text='Cancer condition.')
+    cancer_condition = models.ForeignKey(CancerCondition, help_text='Cancer condition.', on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.id)
@@ -230,8 +232,8 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
     #TODO Ontology class
     id = models.CharField(primary_key=True, max_length=200,
                           help_text='An arbitrary identifier for the procedure.')
-    procedure_type = models.CharField(choices=PROCEDURE_TYPES, help_text='Type of cancer related procedure: '
-                                                                         'radion or surgical procedure.')
+    procedure_type = models.CharField(choices=PROCEDURE_TYPES, max_length=200,
+                                      help_text='Type of cancer related procedure: radion or surgical procedure.')
     #Ontology
     code = JSONField(help_text='Code for the procedure performed.')
     #DateTime or Ontology
@@ -241,7 +243,8 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
                                   help_text='The body location(s) where the procedure was performed.')
     #Ontology
     treatment_intent = JSONField(blank=True, null=True, help_text='The purpose of a treatment.')
-    subject = models.ForeignKey(Individual, help_text='The patient who has a cancer condition.')
+    subject = models.ForeignKey(Individual, help_text='The patient who has a cancer condition.',
+                                on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.id)
@@ -267,7 +270,8 @@ class MedicationStatement(models.Model, IndexableMixin):
     start_date = models.DateTimeField(blank=True, null=True, help_text='The start date/time of the medication.')
     end_date = models.DateTimeField(blank=True, null=True, help_text='The end date/time of the medication.')
     date_time = models.DateTimeField(blank=True, null=True, help_text='The date/time the medication was administered.')
-    subject = models.ForeignKey(Individual, help_text="Subject of medication statement.")
+    subject = models.ForeignKey(Individual, help_text='Subject of medication statement.',
+                                on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.id)

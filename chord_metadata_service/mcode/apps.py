@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class McodeConfig(AppConfig):
-    name = 'mcode'
+    name = 'chord_metadata_service.mcode'
