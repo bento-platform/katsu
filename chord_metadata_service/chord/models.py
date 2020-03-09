@@ -147,7 +147,7 @@ class TableOwnership(models.Model):
     data_type = models.CharField(max_length=200)  # TODO: Is this needed?
 
     # Delete table ownership upon project/dataset deletion
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name='table_ownerships')
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name='table_ownership')
     # If not specified, compound table which may link to many samples TODO: ???
     sample = models.ForeignKey("phenopackets.Biosample", on_delete=models.CASCADE, blank=True, null=True)
 

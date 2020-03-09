@@ -30,10 +30,10 @@ class DatasetSerializer(GenericSerializer):
         "description",
         "contact_info",
         "linked_field_sets",
-        "table_ownerships",
+        "table_ownership",
     )
 
-    table_ownerships = TableOwnershipSerializer(read_only=True, many=True, exclude_when_nested=["dataset"])
+    table_ownership = TableOwnershipSerializer(read_only=True, many=True, exclude_when_nested=["dataset"])
 
     # noinspection PyMethodMayBeStatic
     def validate_title(self, value):
