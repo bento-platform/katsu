@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from .models import *
-from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, QUANTITY, COMPLEX_ONTOLOGY
+from chord_metadata_service.restapi.schemas import (
+    ONTOLOGY_CLASS, QUANTITY, COMPLEX_ONTOLOGY, TIME_OR_PERIOD
+)
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from jsonschema import Draft7Validator
 
@@ -53,16 +55,16 @@ class GenomicsReportSerializer(GenericSerializer):
 
 class LabsVitalSerializer(GenericSerializer):
     body_height = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=QUANTITY)],
+        validators=[JsonSchemaValidator(schema=QUANTITY, format_checker=['uri'])],
         allow_null=True, required=False)
     body_weight = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=QUANTITY)],
+        validators=[JsonSchemaValidator(schema=QUANTITY, format_checker=['uri'])],
         allow_null=True, required=False)
     blood_pressure_diastolic = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=QUANTITY)],
+        validators=[JsonSchemaValidator(schema=QUANTITY, format_checker=['uri'])],
         allow_null=True, required=False)
     blood_pressure_systolic = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=QUANTITY)],
+        validators=[JsonSchemaValidator(schema=QUANTITY, format_checker=['uri'])],
         allow_null=True, required=False)
 
     class Meta:
@@ -95,8 +97,19 @@ class CancerConditionSerializer(GenericSerializer):
 
 
 class TNMStagingSerializer(GenericSerializer):
+    #TODO Complex Ontology needs format checker
+    #TODO URI syntax examples for tests https://tools.ietf.org/html/rfc3986
     stage_group = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=COMPLEX_ONTOLOGY)],
+        validators=[JsonSchemaValidator(schema=COMPLEX_ONTOLOGY, format_checker=['uri'])],
+        allow_null=True, required=False)
+    primary_tumor_category = serializers.JSONField(
+        validators=[JsonSchemaValidator(schema=COMPLEX_ONTOLOGY, format_checker=['uri'])],
+        allow_null=True, required=False)
+    regional_nodes_category = serializers.JSONField(
+        validators=[JsonSchemaValidator(schema=COMPLEX_ONTOLOGY, format_checker=['uri'])],
+        allow_null=True, required=False)
+    distant_metastases_category = serializers.JSONField(
+        validators=[JsonSchemaValidator(schema=COMPLEX_ONTOLOGY, format_checker=['uri'])],
         allow_null=True, required=False)
 
     class Meta:
@@ -105,12 +118,44 @@ class TNMStagingSerializer(GenericSerializer):
 
 
 class CancerRelatedProcedureSerializer(GenericSerializer):
+    code = serializers.JSONField(
+        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+        allow_null=True, required=False)
+    occurence_time_or_period = serializers.JSONField(
+        validators=[JsonSchemaValidator(schema=TIME_OR_PERIOD, format_checker=['date-time'])],
+        allow_null=True, required=False)
+    treatment_intent = serializers.JSONField(
+        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+        allow_null=True, required=False)
+
     class Meta:
         model = CancerRelatedProcedure
         fields = '__all__'
 
+    def validate_target_body_site(self, value):
+        if isinstance(value, list):
+            for item in value:
+                validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(item)
+                if not validation:
+                    raise serializers.ValidationError("Not valid JSON schema for this field.")
+        return value
+
 
 class MedicationStatementSerializer(GenericSerializer):
+    medication_code = serializers.JSONField(validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
+    treatment_intent = serializers.JSONField(
+        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+        allow_null=True, required=False)
+
+    def validate_termination_reason(self, value):
+        if isinstance(value, list):
+            for item in value:
+                validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(item)
+                if not validation:
+                    raise serializers.ValidationError("Not valid JSON schema for this field.")
+        return value
+
+
     class Meta:
         model = MedicationStatement
         fields = '__all__'

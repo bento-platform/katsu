@@ -32,6 +32,7 @@ setuptools.setup(
         "rdflib-jsonld==0.4.0",
         "requests>=2.23,<3.0",
         "uritemplate>=3.0,<4.0",
+        "rfc3987==1.3.8",
     ],
 
     author=config["package"]["authors"],

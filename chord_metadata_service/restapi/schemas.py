@@ -126,9 +126,7 @@ EVIDENCE = {
     "required": ["evidence_code"]
 }
 
-
 AGE = {"type": "string", "description": "An ISO8601 string represent age."}
-
 
 AGE_RANGE = {
     "type": "object",
@@ -168,7 +166,6 @@ AGE_OR_AGE_RANGE = {
     "additionalProperties": False
 }
 
-
 DISEASE_ONSET = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "todo",
@@ -187,16 +184,15 @@ DISEASE_ONSET = {
     "additionalProperties": False
 }
 
-
 ################################## mCode/FHIR based schemas ##################################
 
 
-#mCode/FHIR Quantity
+# mCode/FHIR Quantity
 
 QUANTITY = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "todo",
-    "title": "Quantity schema.",
+    "title": "Quantity schema",
     "description": "Schema for the datatype Quantity.",
     "type": "object",
     "properties": {
@@ -220,13 +216,12 @@ QUANTITY = {
     "additionalProperties": False
 }
 
-
 # mCode/FHIR CodeableConcept
 
 CODEABLE_CONCEPT = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "todo",
-    "title": "Codeable Concept schema.",
+    "title": "Codeable Concept schema",
     "description": "Schema for the datatype Concept.",
     "type": "object",
     "properties": {
@@ -250,11 +245,10 @@ CODEABLE_CONCEPT = {
     "additionalProperties": False
 }
 
-
 COMPLEX_ONTOLOGY = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "todo",
-    "title": "Complex ontology.",
+    "title": "Complex ontology",
     "description": "Complex object to combine data value and staging system.",
     "type": "object",
     "properties": {
@@ -262,5 +256,43 @@ COMPLEX_ONTOLOGY = {
         "staging_system": CODEABLE_CONCEPT
     },
     "required": ["data_value"],
+    "additionalProperties": False
+}
+
+
+PERIOD = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "todo",
+    "title": "Period",
+    "description": "Period schema.",
+    "type": "object",
+    "properties": {
+        "start": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "end": {
+            "type": "string",
+            "format": "date-time"
+        }
+    },
+    "additionalProperties": False
+}
+
+
+TIME_OR_PERIOD = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "todo",
+    "title": "Time of Period",
+    "description": "Time of Period schema.",
+    "type": "object",
+    "properties": {
+        "value": {
+            "anyOf": [
+                {"type": "string", "format": "date-time"},
+                PERIOD
+            ]
+        }
+    },
     "additionalProperties": False
 }
