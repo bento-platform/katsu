@@ -1,5 +1,8 @@
 # Individual schemas for validation of JSONField values
 
+################################ Phenopackets based schemas ################################
+
+
 ALLELE_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "todo",
@@ -184,6 +187,10 @@ DISEASE_ONSET = {
     "additionalProperties": False
 }
 
+
+################################## mCode/FHIR based schemas ##################################
+
+
 #mCode/FHIR Quantity
 
 QUANTITY = {
@@ -210,5 +217,50 @@ QUANTITY = {
             "type": "string"
         }
     },
+    "additionalProperties": False
+}
+
+
+# mCode/FHIR CodeableConcept
+
+CODEABLE_CONCEPT = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "todo",
+    "title": "Codeable Concept schema.",
+    "description": "Schema for the datatype Concept.",
+    "type": "object",
+    "properties": {
+        "coding": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "system": {"type": "string", "format": "uri"},
+                    "version": {"type": "string"},
+                    "code": {"type": "string"},
+                    "display": {"type": "string"},
+                    "user_selected": {"type": "boolean"}
+                }
+            }
+        },
+        "text": {
+            "type": "string"
+        }
+    },
+    "additionalProperties": False
+}
+
+
+COMPLEX_ONTOLOGY = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "todo",
+    "title": "Complex ontology.",
+    "description": "Complex object to combine data value and staging system.",
+    "type": "object",
+    "properties": {
+        "data_value": CODEABLE_CONCEPT,
+        "staging_system": CODEABLE_CONCEPT
+    },
+    "required": ["data_value"],
     "additionalProperties": False
 }

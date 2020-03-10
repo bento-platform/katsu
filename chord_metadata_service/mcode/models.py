@@ -199,13 +199,17 @@ class TNMStaging(models.Model, IndexableMixin):
     #TODO Extended Ontology class: stage group - required and staging system - not required
     tnm_type = models.CharField(choices=TNM_TYPES, max_length=200,
                                 help_text='TNM type: clinical or pathological.')
-    stage_group = JSONField(help_text='The extent of the cancer in the body, according to the TNM '
-                                               'classification system. Accepted ontologies: SNOMED CT, AJCC and others.')
+    # Complex contains Ontology (required) + FHIR Observation.method  - CodeableConcept (not required)
+    stage_group = JSONField(help_text='The extent of the cancer in the body, according to the TNM classification '
+                                      'system. Accepted ontologies: SNOMED CT, AJCC and others.')
+    # Complex contains Ontology (required) + FHIR Observation.method  - CodeableConcept (not required)
     primary_tumor_category = JSONField(help_text='Category of the primary tumor, based on its size and '
                                                           'extent. Accepted ontologies: SNOMED CT, AJCC and others.')
+    # Complex contains Ontology (required) + FHIR Observation.method  - CodeableConcept (not required)
     regional_nodes_category = JSONField(help_text='Category of the presence or absence of metastases in '
                                                            'regional lymph nodes. Accepted ontologies: '
                                                            'SNOMED CT, AJCC and others.')
+    # Complex contains Ontology (required) + FHIR Observation.method  - CodeableConcept (not required)
     distant_metastases_category = JSONField(help_text='Category describing the presence or absence of '
                                                                  'metastases in remote anatomical locations. '
                                                                  'Accepted ontologies: SNOMED CT, AJCC and others.')
