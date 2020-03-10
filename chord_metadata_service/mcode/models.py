@@ -4,8 +4,9 @@ from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.phenopackets.models import Gene
 from chord_metadata_service.patients.models import Individual
 from django.core.exceptions import ValidationError
+from chord_metadata_service.restapi.description_utils import rec_help
+import chord_metadata_service.mcode.descriptions as d
 
-#TODO MOVE all help_text in sep doc
 
 ################################# Genomics #################################
 
@@ -17,26 +18,20 @@ class GeneticVariantTested(models.Model, IndexableMixin):
 
     # TODO Discuss: Connection to Gene from Phenopackets
     id = models.CharField(primary_key=True, max_length=200,
-                          help_text='An arbitrary identifier for the genetic variant tested.')
+                          help_text=rec_help(d.GENETIC_VARIANT_TESTED, "id"))
     # make writable if it doesn't exist
     gene_studied = models.ForeignKey(Gene, blank=True, null=True, on_delete=models.SET_NULL,
-                                     help_text='A gene targeted for mutation analysis, '
-                                               'identified in HUGO Gene Nomenclature Committee (HGNC) notation.')
-    method = JSONField(blank=True, null=True, help_text='An ontology or controlled vocabulary term to indetify '
-                                                        'the method used to perform the genetic test. '
-                                                        'Accepted value set: NCIT')
+                                     help_text=rec_help(d.GENETIC_VARIANT_TESTED, "gene_studied"))
+    method = JSONField(blank=True, null=True, help_text=rec_help(d.GENETIC_VARIANT_TESTED, "method"))
     variant_tested_identifier = JSONField(blank=True, null=True,
-                                          help_text='The variation ID assigned by HGVS, for example, '
-                                                    '360448 is the identifier for NM_005228.4(EGFR):c.-237A>G '
-                                                    '(single nucleotide variant in EGFR).')
+                                          help_text=rec_help(d.GENETIC_VARIANT_TESTED, "variant_tested_identifier"))
     variant_tested_hgvs_name = ArrayField(models.CharField(max_length=200), blank=True, null=True,
-                                          help_text='Symbolic representation of the variant used in HGVS, for example, '
-                                                    'NM_005228.4(EGFR):c.-237A>G for HVGS variation ID 360448.')
+                                          help_text=rec_help(d.GENETIC_VARIANT_TESTED, "variant_tested_hgvs_name"))
     variant_tested_description = models.CharField(max_length=200, blank=True,
-                                                  help_text='Description of the variant.')
+                                                  help_text=rec_help(d.GENETIC_VARIANT_TESTED,
+                                                                     "variant_tested_description"))
     data_value = JSONField(blank=True, null=True,
-                           help_text='An ontology or controlled vocabulary term to indetify '
-                                     'positive or negative value for the mutation. Accepted value set: SNOMED CT.')
+                           help_text=rec_help(d.GENETIC_VARIANT_TESTED, "data_value"))
 
     def __str__(self):
         return str(self.id)
@@ -55,22 +50,16 @@ class GeneticVariantFound(models.Model, IndexableMixin):
 
     # TODO Discuss: Connection to Gene from Phenopackets
     id = models.CharField(primary_key=True, max_length=200,
-                          help_text='An arbitrary identifier for the genetic variant found.')
-    method = JSONField(blank=True, null=True, help_text='An ontology or controlled vocabulary term to indetify '
-                                                        'the method used to perform the genetic test. '
-                                                        'Accepted value set: NCIT')
+                          help_text=rec_help(d.GENETIC_VARIANT_FOUND, "id"))
+    method = JSONField(blank=True, null=True, help_text=rec_help(d.GENETIC_VARIANT_FOUND, "method"))
     variant_found_identifier = JSONField(blank=True, null=True,
-                                         help_text='The variation ID assigned by HGVS, for example, 360448 is the'
-                                                   ' identifier for NM_005228.4(EGFR):c.-237A>G (single nucleotide '
-                                                   'variant in EGFR). Accepted value set: ClinVar.')
+                                         help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_identifier"))
     variant_found_hgvs_name = ArrayField(models.CharField(max_length=200), blank=True, null=True,
-                                         help_text='Symbolic representation of the variant used in HGVS, for example, '
-                                                   'NM_005228.4(EGFR):c.-237A>G for HVGS variation ID 360448.')
+                                         help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_hgvs_name"))
     variant_found_description = models.CharField(max_length=200, blank=True,
-                                                 help_text='Description of the variant.')
+                                            help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_description"))
     genomic_source_class = JSONField(blank=True, null=True,
-                                     help_text='An ontology or controlled vocabulary term to indetify '
-                                               'the genomic class of the specimen being analyzed.')
+                                     help_text=rec_help(d.GENETIC_VARIANT_FOUND, "genomic_source_class"))
 
     def __str__(self):
         return str(self.id)
@@ -86,23 +75,16 @@ class GenomicsReport(models.Model, IndexableMixin):
     Genetic Analysis Summary
     """
 
-    id = models.CharField(primary_key=True, max_length=200,
-                          help_text='An arbitrary identifier for the genetics report.')
-    test_name = JSONField(help_text='An ontology or controlled vocabulary term to identify the laboratory test.'
-                                    'Accepted value sets: LOINC, GTR')
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENOMICS_REPORT, "id"))
+    test_name = JSONField(help_text=rec_help(d.GENOMICS_REPORT, "test_name"))
     performing_ogranization_name = models.CharField(max_length=200, blank=True,
-                                                    help_text='The name of the organization '
-                                                              'producing the genomics report.')
-    specimen_type = JSONField(blank=True, null=True,
-                              help_text='An ontology or controlled vocabulary term to indetify the type of '
-                                        'material the specimen contains or consists of.'
-                                        'Accepted value set: HL7 Version 2 and Specimen Type.')
+                                                help_text=rec_help(d.GENOMICS_REPORT, "performing_ogranization_name"))
+    specimen_type = JSONField(blank=True, null=True, help_text=rec_help(d.GENOMICS_REPORT, "specimen_type"))
     genetic_variant_tested = models.ManyToManyField(GeneticVariantTested, blank=True,
-                                                    help_text='A test for a specific mutation on a particular gene.')
+                                                    help_text=rec_help(d.GENOMICS_REPORT, "genetic_variant_tested"))
     genetic_variant_found = models.ManyToManyField(GeneticVariantFound, blank=True,
-                                                   help_text='Records an alteration in the most common DNA '
-                                                             'nucleotide sequence.')
-    subject = models.ForeignKey(Individual, help_text='Subject of genomics report.', on_delete=models.CASCADE)
+                                                   help_text=rec_help(d.GENOMICS_REPORT, "genetic_variant_found"))
+    subject = models.ForeignKey(Individual, on_delete=models.CASCADE, help_text=rec_help(d.GENOMICS_REPORT, "subject"))
 
     def __str__(self):
         return str(self.id)
@@ -118,24 +100,21 @@ class LabsVital(models.Model, IndexableMixin):
     # TODO Should this class be a part of Patients app? patient related metadata
     # TODO the data value should be in form of Quantity datatype - ADD json schema for Quantity
     id = models.CharField(primary_key=True, max_length=200,
-                          help_text='An arbitrary identifier for the labs/vital tests.')
+                          help_text=rec_help(d.LABS_VITAL, "id"))
     individual = models.ForeignKey(Individual, on_delete=models.CASCADE,
-                                   help_text='The individual who is the subject of the tests.')
-    body_height = JSONField(help_text='The patient\'s height.')
-    body_weight = JSONField(help_text='The patient\'s weight.')
+                                   help_text=rec_help(d.LABS_VITAL, "individual"))
+    body_height = JSONField(help_text=rec_help(d.LABS_VITAL, "body_height"))
+    body_weight = JSONField(help_text=rec_help(d.LABS_VITAL, "body_weight"))
     cbc_with_auto_differential_panel = ArrayField(models.CharField(max_length=200), blank=True, null=True,
-                                                  help_text='Reference to a laboratory observation in the CBC with'
-                                                            ' Auto Differential Panel test. ')
+                                                  help_text=rec_help(d.LABS_VITAL, "cbc_with_auto_differential_panel"))
     comprehensive_metabolic_2000 = ArrayField(models.CharField(max_length=200), blank=True, null=True,
-                                              help_text='Reference to a laboratory observation in the CMP 2000 test.')
+                                              help_text=rec_help(d.LABS_VITAL, "comprehensive_metabolic_2000"))
     blood_pressure_diastolic = JSONField(blank=True, null=True,
-                                         help_text='The blood pressure after the contraction of the heart while the '
-                                                   'chambers of the heart refill with blood, when the pressure is lowest.')
+                                         help_text=rec_help(d.LABS_VITAL, "blood_pressure_diastolic"))
     blood_pressure_systolic = JSONField(blank=True, null=True,
-                                        help_text='The blood pressure during the contraction of the left '
-                                                  'ventricle of the heart, when blood pressure is at its highest.')
+                                        help_text=rec_help(d.LABS_VITAL, "blood_pressure_systolic"))
     #TODO Ontology or Quantity or Ratio (?)
-    tumor_marker_test = JSONField(help_text='An ontology or controlled vocabulary term to indetify tumor marker test.')
+    tumor_marker_test = JSONField(help_text=rec_help(d.LABS_VITAL, "tumor_marker_test"))
 
     def __str__(self):
         return str(self.id)
@@ -156,30 +135,18 @@ class CancerCondition(models.Model, IndexableMixin):
         ('primary', 'primary'),
         ('secondary', 'secondary')
     )
-    id = models.CharField(primary_key=True, max_length=200,
-                          help_text='An arbitrary identifier for the cancer condition.')
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.CANCER_CONDITION, "id"))
     condition_type = models.CharField(choices=CANCER_CONDITION_TYPE, max_length=200,
-                                      help_text='Cancer condition type: primary or secondary.')
+                                      help_text=rec_help(d.CANCER_CONDITION, "condition_type"))
     body_location_code = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                                  help_text='Code for the body location, optionally pre-coordinating laterality '
-                                            'or direction. Accepted ontologies: SNOMED CT, ICD-O-3 and others.')
-    clinical_status = JSONField(blank=True, null=True,
-                                help_text='A flag indicating whether the condition is active '
-                                          'or inactive, recurring, in remission, or resolved (as of the last update '
-                                          'of the Condition). Accepted code system: '
-                                          'http://terminology.hl7.org/CodeSystem/condition-clinical')
-    condition_code = JSONField(help_text='A code describing the type of primary or secondary malignant '
-                                         'neoplastic disease.')
+                                  help_text=rec_help(d.CANCER_CONDITION, "body_location_code"))
+    clinical_status = JSONField(blank=True, null=True, help_text=rec_help(d.CANCER_CONDITION, "clinical_status"))
+    condition_code = JSONField(help_text=rec_help(d.CANCER_CONDITION, "condition_code"))
     date_of_diagnosis = models.DateTimeField(blank=True, null=True,
-                                             help_text='The date the disease was first clinically recognized with '
-                                                       'sufficient certainty, regardless of whether it was fully '
-                                                       'characterized at that time.')
+                                             help_text=rec_help(d.CANCER_CONDITION, "date_of_diagnosis"))
     histology_morphology_behavior = JSONField(blank=True, null=True,
-                                              help_text='A description of the morphologic and behavioral '
-                                                        'characteristics of the cancer. Accepted ontologies:'
-                                                        'SNOMED CT, ICD-O-3 and others.')
-    subject = models.ForeignKey(Individual, help_text='The subject of the study that has a cancer condition.',
-                                on_delete=models.CASCADE)
+                                              help_text=rec_help(d.CANCER_CONDITION, "histology_morphology_behavior"))
+    subject = models.ForeignKey(Individual, on_delete=models.CASCADE, help_text=rec_help(d.CANCER_CONDITION, "subject"))
 
     def __str__(self):
         return str(self.id)
@@ -194,23 +161,15 @@ class TNMStaging(models.Model, IndexableMixin):
         ('clinical', 'clinical'),
         ('pathologic', 'pathologic')
     )
-    id = models.CharField(primary_key=True, max_length=200,
-                          help_text='An arbitrary identifier for the TNM staging.')
-    #TODO Extended Ontology class: stage group - required and staging system - not required
-    tnm_type = models.CharField(choices=TNM_TYPES, max_length=200,
-                                help_text='TNM type: clinical or pathological.')
-    stage_group = JSONField(help_text='The extent of the cancer in the body, according to the TNM classification '
-                                      'system. Accepted ontologies: SNOMED CT, AJCC and others.')
-    primary_tumor_category = JSONField(help_text='Category of the primary tumor, based on its size and '
-                                                          'extent. Accepted ontologies: SNOMED CT, AJCC and others.')
-    regional_nodes_category = JSONField(help_text='Category of the presence or absence of metastases in '
-                                                           'regional lymph nodes. Accepted ontologies: '
-                                                           'SNOMED CT, AJCC and others.')
-    distant_metastases_category = JSONField(help_text='Category describing the presence or absence of '
-                                                                 'metastases in remote anatomical locations. '
-                                                                 'Accepted ontologies: SNOMED CT, AJCC and others.')
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.TNM_STAGING, "id"))
+    tnm_type = models.CharField(choices=TNM_TYPES, max_length=200, help_text=rec_help(d.TNM_STAGING, "tnm_type"))
+    stage_group = JSONField(help_text=rec_help(d.TNM_STAGING, "stage_group"))
+    primary_tumor_category = JSONField(help_text=rec_help(d.TNM_STAGING, "primary_tumor_category"))
+    regional_nodes_category = JSONField(help_text=rec_help(d.TNM_STAGING, "regional_nodes_category"))
+    distant_metastases_category = JSONField(help_text=rec_help(d.TNM_STAGING, "distant_metastases_category"))
     # TODO check if one cancer condition has many TNM Staging
-    cancer_condition = models.ForeignKey(CancerCondition, help_text='Cancer condition.', on_delete=models.CASCADE)
+    cancer_condition = models.ForeignKey(CancerCondition, on_delete=models.CASCADE,
+                                         help_text=rec_help(d.TNM_STAGING, "cancer_condition"))
 
     def __str__(self):
         return str(self.id)
@@ -229,22 +188,17 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
         ('radiation', 'radiation'),
         ('surgical', 'surgical')
     )
-    #TODO Ontology class
-    id = models.CharField(primary_key=True, max_length=200,
-                          help_text='An arbitrary identifier for the procedure.')
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "id"))
     procedure_type = models.CharField(choices=PROCEDURE_TYPES, max_length=200,
-                                      help_text='Type of cancer related procedure: radion or surgical procedure.')
-    #Ontology
-    code = JSONField(help_text='Code for the procedure performed.')
-    #DateTime or Ontology
-    occurence_time_or_period = JSONField(help_text='The date/time that a procedure was performed.')
-    #List of Ontologies
+                                      help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "procedure_type"))
+    code = JSONField(help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "code"))
+    occurence_time_or_period = JSONField(help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "occurence_time_or_period"))
     target_body_site = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                                  help_text='The body location(s) where the procedure was performed.')
-    #Ontology
-    treatment_intent = JSONField(blank=True, null=True, help_text='The purpose of a treatment.')
-    subject = models.ForeignKey(Individual, help_text='The patient who has a cancer condition.',
-                                on_delete=models.CASCADE)
+                                  help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "target_body_site"))
+    treatment_intent = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "treatment_intent"))
+    subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
+                                help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "subject"))
 
     def __str__(self):
         return str(self.id)
@@ -256,20 +210,16 @@ class MedicationStatement(models.Model, IndexableMixin):
     Class to record the use of a medication.
     """
 
-    id = models.CharField(primary_key=True, max_length=200,
-                          help_text='An arbitrary identifier for the medication statement.')
-    medication_code = JSONField(help_text='A code for medication. Accepted code systems:'
-                                          'Medication Clinical Drug (RxNorm) and other.')
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.MEDICATION_STATEMENT, "id"))
+    medication_code = JSONField(help_text=rec_help(d.MEDICATION_STATEMENT, "medication_code"))
     termination_reason = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                                  help_text='A code explaining unplanned or premature termination of a course of'
-                                            'medication. Accepted ontologies: SNOMED CT.')
-    treatment_intent = JSONField(blank=True, null=True, help_text='The purpose of a treatment.'
-                                                                  'Accepted ontologies: SNOMED CT.')
-    start_date = models.DateTimeField(blank=True, null=True, help_text='The start date/time of the medication.')
-    end_date = models.DateTimeField(blank=True, null=True, help_text='The end date/time of the medication.')
-    date_time = models.DateTimeField(blank=True, null=True, help_text='The date/time the medication was administered.')
-    subject = models.ForeignKey(Individual, help_text='Subject of medication statement.',
-                                on_delete=models.CASCADE)
+                                  help_text=rec_help(d.MEDICATION_STATEMENT, "termination_reason"))
+    treatment_intent = JSONField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "treatment_intent"))
+    start_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "start_date"))
+    end_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "end_date"))
+    date_time = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "date_time"))
+    subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
+                                help_text=rec_help(d.MEDICATION_STATEMENT, "subject"))
 
     def __str__(self):
         return str(self.id)
