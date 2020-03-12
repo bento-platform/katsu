@@ -1,3 +1,6 @@
+from typing import List
+
+
 # Individual schemas for validation of JSONField values
 
 ################################ Phenopackets based schemas ################################
@@ -245,20 +248,6 @@ CODEABLE_CONCEPT = {
     "additionalProperties": False
 }
 
-COMPLEX_ONTOLOGY = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "todo",
-    "title": "Complex ontology",
-    "description": "Complex object to combine data value and staging system.",
-    "type": "object",
-    "properties": {
-        "data_value": CODEABLE_CONCEPT,
-        "staging_system": CODEABLE_CONCEPT
-    },
-    "required": ["data_value"],
-    "additionalProperties": False
-}
-
 
 PERIOD = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -296,3 +285,37 @@ TIME_OR_PERIOD = {
     },
     "additionalProperties": False
 }
+
+
+def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
+                    id: str=None, title: str=None, description: str=None, additionalProperties=False,
+                    required=None) -> dict:
+    if required is None:
+        required = []
+    return {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "$id": id,
+            "title": title,
+            "description": description,
+            "type": "object",
+            "properties": {
+                first_property: first_typeof,
+                second_property: second_typeof
+            },
+            "required": required,
+            "additionalProperties": additionalProperties
+            }
+
+
+COMORBID_CONDITION = customize_schema(first_typeof=CODEABLE_CONCEPT, second_typeof=CODEABLE_CONCEPT,
+                                     first_property="clinical_status", second_property="code",
+                                     id="chord_metadata_service:comorbid_condition_schema",
+                                     title="Comorbid Condition schema",
+                                     description="Comorbid condition schema.")
+
+
+COMPLEX_ONTOLOGY = customize_schema(first_typeof=CODEABLE_CONCEPT, second_typeof=CODEABLE_CONCEPT,
+                                   first_property="data_value", second_property="staging_system",
+                                   id="chord_metadata_service:complex_ontology_schema", title="Complex ontology",
+                                   description="Complex object to combine data value and staging system.",
+                                   required=["data_value"])
