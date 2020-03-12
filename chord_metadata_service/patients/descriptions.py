@@ -25,6 +25,9 @@ INDIVIDUAL = {
         # mCode-specific
         "race": "A code for a person's race (mCode).",
         "ethnicity": "A code for a person's ethnicity (mCode).",
+        "comorbid_condition": "One or more conditions that occur with primary condition.",
+        "ecog_performance_status": "Value representing the Eastern Cooperative Oncology Group performance status.",
+        "karnofsky": "Value representing the Karnofsky Performance status.",
 
         **EXTRA_PROPERTIES
     }
