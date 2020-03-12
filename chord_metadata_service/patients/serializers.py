@@ -23,6 +23,7 @@ class IndividualSerializer(GenericSerializer):
         allow_null=True,
         required=False
     )
+    #TODO add these fields to FHIR converter ?
     comorbid_condition = serializers.JSONField(
         validators=[JsonSchemaValidator(schema=COMORBID_CONDITION)],
         allow_null=True,

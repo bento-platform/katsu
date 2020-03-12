@@ -2,7 +2,7 @@ from rest_framework import serializers
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from .models import *
 from chord_metadata_service.restapi.schemas import (
-    ONTOLOGY_CLASS, QUANTITY, COMPLEX_ONTOLOGY, TIME_OR_PERIOD
+    ONTOLOGY_CLASS, QUANTITY, COMPLEX_ONTOLOGY, TIME_OR_PERIOD, TUMOR_MARKER_TEST
 )
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from jsonschema import Draft7Validator
@@ -65,6 +65,9 @@ class LabsVitalSerializer(GenericSerializer):
         allow_null=True, required=False)
     blood_pressure_systolic = serializers.JSONField(
         validators=[JsonSchemaValidator(schema=QUANTITY, format_checker=['uri'])],
+        allow_null=True, required=False)
+    tumor_marker_test = serializers.JSONField(
+        validators=[JsonSchemaValidator(schema=TUMOR_MARKER_TEST)],
         allow_null=True, required=False)
 
     class Meta:

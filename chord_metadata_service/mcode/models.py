@@ -98,7 +98,6 @@ class LabsVital(models.Model, IndexableMixin):
     Class  to record tests performed on patient.
     """
     # TODO Should this class be a part of Patients app? patient related metadata
-    # TODO the data value should be in form of Quantity datatype - ADD json schema for Quantity
     id = models.CharField(primary_key=True, max_length=200,
                           help_text=rec_help(d.LABS_VITAL, "id"))
     individual = models.ForeignKey(Individual, on_delete=models.CASCADE,
@@ -223,5 +222,3 @@ class MedicationStatement(models.Model, IndexableMixin):
 
     def __str__(self):
         return str(self.id)
-
-
