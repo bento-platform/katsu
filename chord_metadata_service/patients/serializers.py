@@ -3,7 +3,9 @@ from chord_metadata_service.phenopackets.serializers import (
     BiosampleSerializer,
     SimplePhenopacketSerializer
 )
-from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, AGE_OR_AGE_RANGE, COMORBID_CONDITION
+from chord_metadata_service.restapi.schemas import (
+    ONTOLOGY_CLASS, AGE_OR_AGE_RANGE, COMORBID_CONDITION, CODEABLE_CONCEPT
+)
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.restapi.fhir_utils import fhir_patient
@@ -23,6 +25,16 @@ class IndividualSerializer(GenericSerializer):
     )
     comorbid_condition = serializers.JSONField(
         validators=[JsonSchemaValidator(schema=COMORBID_CONDITION)],
+        allow_null=True,
+        required=False
+    )
+    ecog_performance_status = serializers.JSONField(
+        validators=[JsonSchemaValidator(schema=CODEABLE_CONCEPT)],
+        allow_null=True,
+        required=False
+    )
+    karnofsky = serializers.JSONField(
+        validators=[JsonSchemaValidator(schema=CODEABLE_CONCEPT)],
         allow_null=True,
         required=False
     )

@@ -47,10 +47,9 @@ class Individual(models.Model, IndexableMixin):
     # this field should be complex Ontology - clinical status and code - two Codeable concept - single, cl status has enum list of values
     comorbid_condition = JSONField(blank=True, null=True, help_text='One or more conditions that occur with primary'
                                                                     ' condition.')
-    # Codeable concept single
+    #TODO decide use ONTOLOGY_CLASS vs. CODEABLE_CONCEPT
     ecog_performance_status = JSONField(blank=True, null=True, help_text='Value representing the Eastern Cooperative '
                                                                          'Oncology Group performance status.')
-    # Codeable concept single
     karnofsky = JSONField(blank=True, null=True, help_text='Value representing the Karnofsky Performance status.')
     race = models.CharField(max_length=200, blank=True, help_text='A code for the person\'s race.')
     ethnicity = models.CharField(max_length=200, blank=True, help_text='A code for the person\'s ethnicity.')
