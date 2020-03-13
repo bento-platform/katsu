@@ -58,6 +58,7 @@ class GeneticVariantFound(models.Model, IndexableMixin):
                                          help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_hgvs_name"))
     variant_found_description = models.CharField(max_length=200, blank=True,
                                             help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_description"))
+    # loinc value set https://loinc.org/48002-0/
     genomic_source_class = JSONField(blank=True, null=True,
                                      help_text=rec_help(d.GENETIC_VARIANT_FOUND, "genomic_source_class"))
 
@@ -104,6 +105,7 @@ class LabsVital(models.Model, IndexableMixin):
                                    help_text=rec_help(d.LABS_VITAL, "individual"))
     body_height = JSONField(help_text=rec_help(d.LABS_VITAL, "body_height"))
     body_weight = JSONField(help_text=rec_help(d.LABS_VITAL, "body_weight"))
+    # corresponds to DiagnosticReport.result - complex element, probably should be changed to Array of json
     cbc_with_auto_differential_panel = ArrayField(models.CharField(max_length=200), blank=True, null=True,
                                                   help_text=rec_help(d.LABS_VITAL, "cbc_with_auto_differential_panel"))
     comprehensive_metabolic_2000 = ArrayField(models.CharField(max_length=200), blank=True, null=True,
