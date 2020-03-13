@@ -138,3 +138,81 @@ def valid_labs_vital(individual):
         },
         "individual": individual,
     }
+
+
+def valid_cancer_condition(subject):
+    return {
+        "id": "cancer_condition:01",
+        "condition_type": "primary",
+        "body_location_code": [
+            {
+                "id": "442083009",
+                "label": "Anatomical or acquired body structure (body structure)"
+            }
+        ],
+        "clinical_status": {
+            "id": "active",
+            "label": "Active"
+        },
+        "condition_code": {
+            "id": "404087009",
+            "label": "Carcinosarcoma of skin (disorder)",
+        },
+        "date_of_diagnosis": "2018-11-13T20:20:39+00:00",
+        "histology_morphology_behavior": {
+            "id": "372147008",
+            "label": "Kaposi's sarcoma - category (morphologic abnormality)",
+        },
+        "subject": subject,
+    }
+
+
+def valid_tnm_staging(cancer_condition):
+    return {
+        "id": "tnm_staging:01",
+        "tnm_type": "clinical",
+        "stage_group": {
+            "data_value": {
+                "coding": [
+                    {
+                        "code": "123",
+                        "display": "test",
+                        "system": "https://example.com/path/resource.txt#fragment"
+                    }
+                ]
+            }
+        },
+        "primary_tumor_category": {
+            "data_value": {
+                "coding": [
+                    {
+                        "code": "123",
+                        "display": "test",
+                        "system": "https://example.com/path/resource.txt#fragment"
+                    }
+                ]
+            }
+        },
+        "regional_nodes_category": {
+            "data_value": {
+                "coding": [
+                    {
+                        "code": "123",
+                        "display": "test",
+                        "system": "https://example.com/path/resource.txt#fragment"
+                    }
+                ]
+            }
+        },
+        "distant_metastases_category": {
+            "data_value": {
+                "coding": [
+                    {
+                        "code": "123",
+                        "display": "test"
+                    }
+                ]
+            }
+        },
+        "cancer_condition": cancer_condition,
+    }

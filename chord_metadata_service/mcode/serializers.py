@@ -76,6 +76,7 @@ class LabsVitalSerializer(GenericSerializer):
 
 
 class CancerConditionSerializer(GenericSerializer):
+    #TODO add body_location_code validator array of json
     clinical_status = serializers.JSONField(
         validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
         allow_null=True, required=False)

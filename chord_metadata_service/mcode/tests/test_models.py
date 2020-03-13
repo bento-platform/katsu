@@ -82,3 +82,34 @@ class LabsVitalTest(TestCase):
         self.assertIsInstance(labs_vital.tumor_marker_test['code']['coding'], list)
         self.assertEqual(labs_vital.tumor_marker_test['data_value']['value'], 10)
 
+
+class CancerConditionTest(TestCase):
+    """ Test module for CancerCondition model """
+
+    def setUp(self):
+        self.subject = Individual.objects.create(**VALID_INDIVIDUAL)
+        self.cancer_condition = CancerCondition.objects.create(**valid_cancer_condition(self.subject))
+
+    def test_cancer_condition(self):
+        cancer_condition = CancerCondition.objects.get(id='cancer_condition:01')
+        self.assertEqual(cancer_condition.condition_type, 'primary')
+        self.assertIsInstance(cancer_condition.body_location_code, list)
+        self.assertEqual(cancer_condition.body_location_code[0]['id'], '442083009')
+        self.assertEqual(cancer_condition.clinical_status['id'], 'active')
+        condition_code_keys = [key for key in cancer_condition.condition_code.keys()]
+        self.assertEqual(condition_code_keys, ['id', 'label'])
+        self.assertEqual(cancer_condition.histology_morphology_behavior['id'], '372147008')
+
+
+class TNMStagingTest(TestCase):
+    """ Test module for TNMstaging model """
+
+    def setUp(self):
+        self.subject = Individual.objects.create(**VALID_INDIVIDUAL)
+        self.cancer_condition = CancerCondition.objects.create(**valid_cancer_condition(self.subject))
+        self.tnm_staging = TNMStaging.objects.create(**valid_tnm_staging(self.cancer_condition))
+
+    def test_tnm_staging(self):
+        tnm_staging = TNMStaging.objects.get(id='tnm_staging:01')
+        self.assertEqual(tnm_staging.tnm_type, 'clinical')
+        self.assertIsInstance(tnm_staging.stage_group['data_value']['coding'], list)
