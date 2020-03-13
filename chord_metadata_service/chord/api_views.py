@@ -1,11 +1,12 @@
 from rest_framework import viewsets
 from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.settings import api_settings
+
+from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from .models import *
 from .permissions import OverrideOrSuperUserOnly
 from .serializers import *
-from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
-from rest_framework.settings import api_settings
 
 
 __all__ = ["ProjectViewSet", "DatasetViewSet", "TableOwnershipViewSet"]

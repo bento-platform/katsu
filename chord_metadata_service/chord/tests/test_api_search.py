@@ -193,25 +193,48 @@ class SearchTest(APITestCase):
 
     def test_private_table_search_1(self):
         # No body
-        r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]))
+
+        r = self.client.post(reverse("public-table-search", args=[str(self.dataset.identifier)]))
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        r = self.client.post(reverse("private-table-search", args=[str(self.dataset.identifier)]))
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_private_table_search_2(self):
         # No query
-        r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]), data=json.dumps({}),
+
+        r = self.client.post(reverse("public-table-search", args=[str(self.dataset.identifier)]), data=json.dumps({}),
+                             content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        r = self.client.post(reverse("private-table-search", args=[str(self.dataset.identifier)]), data=json.dumps({}),
                              content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_private_table_search_3(self):
         # Bad syntax for query
-        r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
+
+        r = self.client.post(reverse("public-table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
+            "query": ["hello", "world"]
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        r = self.client.post(reverse("private-table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
             "query": ["hello", "world"]
         }), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_private_table_search_4(self):
         # Valid query with one result
-        r = self.client.post(reverse("table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
+
+        r = self.client.post(reverse("public-table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
+            "query": TEST_SEARCH_QUERY_1
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertEqual(c, True)
+
+        r = self.client.post(reverse("private-table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
             "query": TEST_SEARCH_QUERY_1
         }), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
