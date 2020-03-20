@@ -22,13 +22,13 @@ class Experiment(models.Model, IndexableMixin):
 
     MOLECULE = (
         ('total RNA', 'total RNA'),
-        ('polyA RNA', 'polyA RNA')
-        ('cytoplasmic RNA', 'cytoplasmic RNA')
-        ('nuclear RNA', 'nuclear RNA')
-        ('small RNA', 'small RNA')
-        ('genomic DNA', 'genomic DNA')
-        ('protein', 'protein')
-        ('other', 'other')
+        ('polyA RNA', 'polyA RNA'),
+        ('cytoplasmic RNA', 'cytoplasmic RNA'),
+        ('nuclear RNA', 'nuclear RNA'),
+        ('small RNA', 'small RNA'),
+        ('genomic DNA', 'genomic DNA'),
+        ('protein', 'protein'),
+        ('other', 'other'),
     )
 
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for the individual.')
