@@ -1,3 +1,4 @@
+import datetime
 from django.test import TestCase
 from chord_metadata_service.patients.models import Individual
 from ..models import *
@@ -113,3 +114,39 @@ class TNMStagingTest(TestCase):
         tnm_staging = TNMStaging.objects.get(id='tnm_staging:01')
         self.assertEqual(tnm_staging.tnm_type, 'clinical')
         self.assertIsInstance(tnm_staging.stage_group['data_value']['coding'], list)
+
+
+class CancerRelatedProcedureTest(TestCase):
+    """ Test module for CancerRelatedProcedure model """
+
+    def setUp(self):
+        self.subject = Individual.objects.create(**VALID_INDIVIDUAL)
+        self.cancer_related_procedure = CancerRelatedProcedure.objects.create(
+            **valid_cancer_related_procedure(self.subject)
+        )
+
+    def test_cancer_related_procedure(self):
+        cancer_related_procedure = CancerRelatedProcedure.objects.get(id='cancer_related_procedure:01')
+        self.assertEqual(cancer_related_procedure.procedure_type, 'radiation')
+        self.assertEqual(cancer_related_procedure.code['id'], '33356009')
+        self.assertEqual(cancer_related_procedure.occurence_time_or_period['start'], '2018-11-13T20:20:39+00:00')
+        self.assertIsInstance(cancer_related_procedure.target_body_site, list)
+        self.assertEqual(cancer_related_procedure.treatment_intent['label'], 'Curative - procedure intent')
+
+
+class MedicationStatementTest(TestCase):
+    """ Test module for MedicationStatement model """
+
+    def setUp(self):
+        self.subject = Individual.objects.create(**VALID_INDIVIDUAL)
+        self.cancer_related_procedure = MedicationStatement.objects.create(
+            **valid_medication_statement(self.subject)
+        )
+
+    def test_cancer_related_procedure(self):
+        medication_statement = MedicationStatement.objects.get(id='medication_statement:01')
+        self.assertEqual(medication_statement.medication_code['id'], '92052')
+        self.assertIsInstance(medication_statement.termination_reason, list)
+        self.assertEqual(medication_statement.treatment_intent['label'], 'Curative - procedure intent')
+        for date in [medication_statement.start_date, medication_statement.end_date, medication_statement.date_time]:
+            self.assertIsInstance(date, datetime.datetime)

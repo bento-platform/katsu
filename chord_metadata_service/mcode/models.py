@@ -212,6 +212,7 @@ class MedicationStatement(models.Model, IndexableMixin):
     """
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.MEDICATION_STATEMENT, "id"))
+    # list http://hl7.org/fhir/us/core/STU3.1/ValueSet-us-core-medication-codes.html
     medication_code = JSONField(help_text=rec_help(d.MEDICATION_STATEMENT, "medication_code"))
     termination_reason = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
                                   help_text=rec_help(d.MEDICATION_STATEMENT, "termination_reason"))

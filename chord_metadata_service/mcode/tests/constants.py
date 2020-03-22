@@ -216,3 +216,53 @@ def valid_tnm_staging(cancer_condition):
         },
         "cancer_condition": cancer_condition,
     }
+
+
+def valid_cancer_related_procedure(subject):
+    return {
+        "id": "cancer_related_procedure:01",
+        "procedure_type": "radiation",
+        "code": {
+            "id": "33356009",
+            "label": "Betatron teleradiotherapy (procedure)"
+        },
+        "occurence_time_or_period": {
+            "start": "2018-11-13T20:20:39+00:00",
+            "end": "2019-04-13T20:20:39+00:00"
+        },
+        "target_body_site": [
+            {
+                "id": "74805009",
+                "label": "Mammary gland sinus"
+            }
+        ],
+        "treatment_intent": {
+            "id": "373808002",
+            "label": "Curative - procedure intent"
+        },
+        "subject": subject,
+    }
+
+
+def valid_medication_statement(subject):
+    return {
+        "id": "medication_statement:01",
+        "medication_code": {
+            "id": "92052",
+            "label": "Verapamil Oral Tablet [Calan]"
+        },
+        "termination_reason": [
+            {
+                "id": "182992009",
+                "label": "Treatment completed"
+            }
+        ],
+        "treatment_intent": {
+            "id": "373808002",
+            "label": "Curative - procedure intent"
+        },
+        "start_date": "2018-11-13T20:20:39+00:00",
+        "end_date": "2019-04-13T20:20:39+00:00",
+        "date_time": "2019-04-13T20:20:39+00:00",
+        "subject": subject,
+    }
