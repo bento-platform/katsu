@@ -13,3 +13,13 @@ class JsonSchemaValidator(object):
         if not validation:
             raise serializers.ValidationError("Not valid JSON schema for this field.")
         return value
+
+    def __eq__(self, other):
+        return self.schema == other.schema
+
+    def deconstruct(self):
+        return (
+            'chord_metadata_service.restapi.validators.JsonSchemaValidator',
+            [self.schema],
+            {}
+        )
