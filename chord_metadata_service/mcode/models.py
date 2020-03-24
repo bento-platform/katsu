@@ -85,7 +85,7 @@ class GenomicsReport(models.Model, IndexableMixin):
                                                     help_text=rec_help(d.GENOMICS_REPORT, "genetic_variant_tested"))
     genetic_variant_found = models.ManyToManyField(GeneticVariantFound, blank=True,
                                                    help_text=rec_help(d.GENOMICS_REPORT, "genetic_variant_found"))
-    subject = models.ForeignKey(Individual, on_delete=models.CASCADE, help_text=rec_help(d.GENOMICS_REPORT, "subject"))
+    # subject = models.ForeignKey(Individual, on_delete=models.CASCADE, help_text=rec_help(d.GENOMICS_REPORT, "subject"))
 
     def __str__(self):
         return str(self.id)
@@ -147,7 +147,7 @@ class CancerCondition(models.Model, IndexableMixin):
                                              help_text=rec_help(d.CANCER_CONDITION, "date_of_diagnosis"))
     histology_morphology_behavior = JSONField(blank=True, null=True,
                                               help_text=rec_help(d.CANCER_CONDITION, "histology_morphology_behavior"))
-    subject = models.ForeignKey(Individual, on_delete=models.CASCADE, help_text=rec_help(d.CANCER_CONDITION, "subject"))
+    # subject = models.ForeignKey(Individual, on_delete=models.CASCADE, help_text=rec_help(d.CANCER_CONDITION, "subject"))
 
     def __str__(self):
         return str(self.id)
@@ -198,8 +198,8 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
                                   help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "target_body_site"))
     treatment_intent = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "treatment_intent"))
-    subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
-                                help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "subject"))
+    # subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
+    #                             help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "subject"))
 
     def __str__(self):
         return str(self.id)
@@ -220,8 +220,29 @@ class MedicationStatement(models.Model, IndexableMixin):
     start_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "start_date"))
     end_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "end_date"))
     date_time = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "date_time"))
+    # subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
+    #                             help_text=rec_help(d.MEDICATION_STATEMENT, "subject"))
+
+    def __str__(self):
+        return str(self.id)
+
+
+class MCodePacket(models.Model, IndexableMixin):
+    """
+    Class to aggregate Individual's cancer related metadata
+    """
+
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.MCODEPACKET, "id"))
     subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
-                                help_text=rec_help(d.MEDICATION_STATEMENT, "subject"))
+                                help_text=rec_help(d.MCODEPACKET, "subject"))
+    genomics_report = models.ForeignKey(GenomicsReport, blank=True, null=True, on_delete=models.SET_NULL,
+                                        help_text=rec_help(d.MCODEPACKET, "genomics_report"))
+    cancer_condition = models.ForeignKey(CancerCondition, blank=True, null=True, on_delete=models.SET_NULL,
+                                         help_text=rec_help(d.MCODEPACKET, "cancer_condition"))
+    cancer_related_procedures = models.ManyToManyField(CancerRelatedProcedure, blank=True,
+                                                       help_text=rec_help(d.MCODEPACKET, "cancer_related_procedures"))
+    medication_statement = models.ForeignKey(MedicationStatement, blank=True, null=True, on_delete=models.SET_NULL,
+                                             help_text=rec_help(d.MCODEPACKET, "medication_statement"))
 
     def __str__(self):
         return str(self.id)

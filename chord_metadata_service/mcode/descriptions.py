@@ -52,8 +52,7 @@ GENOMICS_REPORT = {
         "specimen_type": "An ontology or controlled vocabulary term to identify the type of material the specimen "
                          "contains or consists of. Accepted value set: HL7 Version 2 and Specimen Type.",
         "genetic_variant_tested": "A test for a specific mutation on a particular gene.",
-        "genetic_variant_found": "Records an alteration in the most common DNA nucleotide sequence.",
-        "subject": "Subject (Patient) of genomics report."
+        "genetic_variant_found": "Records an alteration in the most common DNA nucleotide sequence."
     }
 }
 
@@ -91,8 +90,7 @@ CANCER_CONDITION = {
         "date_of_diagnosis": "The date the disease was first clinically recognized with sufficient certainty, "
                              "regardless of whether it was fully characterized at that time.",
         "histology_morphology_behavior": "A description of the morphologic and behavioral characteristics of "
-                                         "the cancer. Accepted ontologies: SNOMED CT, ICD-O-3 and others.",
-        "subject": "The subject (Patient) of the study that has a cancer condition."
+                                         "the cancer. Accepted ontologies: SNOMED CT, ICD-O-3 and others."
     }
 }
 
@@ -123,8 +121,7 @@ CANCER_RELATED_PROCEDURE = {
         "code": "Code for the procedure performed.",
         "occurence_time_or_period": "The date/time that a procedure was performed.",
         "target_body_site": "The body location(s) where the procedure was performed.",
-        "treatment_intent": "The purpose of a treatment.",
-        "subject": "The patient who has a cancer condition."
+        "treatment_intent": "The purpose of a treatment."
     }
 }
 
@@ -139,7 +136,19 @@ MEDICATION_STATEMENT = {
         "treatment_intent": "The purpose of a treatment. Accepted ontologies: SNOMED CT.",
         "start_date": "The start date/time of the medication.",
         "end_date": "The end date/time of the medication.",
-        "date_time": "The date/time the medication was administered.",
-        "subject": "Subject of medication statement."
+        "date_time": "The date/time the medication was administered."
+    }
+}
+
+
+MCODEPACKET = {
+    "description": "Collection of cancer related metadata.",
+    "properties": {
+        "id": "An arbitrary identifier for the mcodepacket.",
+        "subject": "An individual who is a subject of mcodepacket.",
+        "genomics_report": "A genomics report associated with an Individual.",
+        "cancer_condition": "An Individual's cancer condition.",
+        "cancer_related_procedures": "A radiological or surgical procedures addressing a cancer condition.",
+        "medication_statement": "Medication treatment addressed to an Individual."
     }
 }
