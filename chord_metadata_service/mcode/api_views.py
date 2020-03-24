@@ -51,3 +51,7 @@ class MedicationStatementViewSet(McodeModelViewSet):
     queryset = MedicationStatement.objects.all().order_by("id")
     serializer_class = MedicationStatementSerializer
 
+
+class MCodePacketViewSet(McodeModelViewSet):
+    queryset = MCodePacket.objects.all().order_by("id")
+    serializer_class = MCodePacketSerializer

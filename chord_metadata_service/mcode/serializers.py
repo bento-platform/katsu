@@ -163,3 +163,10 @@ class MedicationStatementSerializer(GenericSerializer):
     class Meta:
         model = MedicationStatement
         fields = '__all__'
+
+
+class MCodePacketSerializer(GenericSerializer):
+
+    class Meta:
+        model = MCodePacket
+        fields = '__all__'

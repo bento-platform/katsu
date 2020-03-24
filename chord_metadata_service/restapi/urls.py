@@ -41,6 +41,7 @@ router.register(r'cancerconditions', mcode_views.CancerConditionViewSet)
 router.register(r'tnmstaging', mcode_views.TNMStagingViewSet)
 router.register(r'cancerrelatedprocedures', mcode_views.CancerRelatedProcedureViewSet)
 router.register(r'medicationstatements', mcode_views.MedicationStatementViewSet)
+router.register(r'mcodepackets', mcode_views.MCodePacketViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
