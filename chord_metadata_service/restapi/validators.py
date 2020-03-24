@@ -9,8 +9,7 @@ class JsonSchemaValidator(object):
         self.validator = Draft7Validator(self.schema)
 
     def __call__(self, value):
-        validation = self.validator.is_valid(value)
-        if not validation:
+        if not self.validator.is_valid(value):
             raise serializers.ValidationError("Not valid JSON schema for this field.")
         return value
 
