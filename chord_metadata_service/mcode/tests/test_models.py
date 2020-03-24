@@ -48,10 +48,9 @@ class GenomicsReportTest(TestCase):
     """ Test module for Genomics Report model """
 
     def setUp(self):
-        self.individual = Individual.objects.create(**VALID_INDIVIDUAL)
         self.variant_tested = GeneticVariantTested.objects.create(**VALID_GENETIC_VARIANT_TESTED)
         self.variant_found = GeneticVariantFound.objects.create(**VALID_GENETIC_VARIANT_FOUND)
-        self.genomics_report = GenomicsReport.objects.create(**valid_genetic_report(self.individual))
+        self.genomics_report = GenomicsReport.objects.create(**valid_genetic_report())
         self.genomics_report.genetic_variant_tested.set([self.variant_tested])
         self.genomics_report.genetic_variant_found.set([self.variant_found])
 
@@ -62,7 +61,6 @@ class GenomicsReportTest(TestCase):
         self.assertIsNotNone(genomics_report.genetic_variant_tested)
         self.assertEqual(genomics_report.genetic_variant_tested.count(), 1)
         self.assertEqual(genomics_report.genetic_variant_found.count(), 1)
-        self.assertEqual(genomics_report.subject, self.individual)
 
 
 class LabsVitalTest(TestCase):
@@ -88,8 +86,7 @@ class CancerConditionTest(TestCase):
     """ Test module for CancerCondition model """
 
     def setUp(self):
-        self.subject = Individual.objects.create(**VALID_INDIVIDUAL)
-        self.cancer_condition = CancerCondition.objects.create(**valid_cancer_condition(self.subject))
+        self.cancer_condition = CancerCondition.objects.create(**valid_cancer_condition())
 
     def test_cancer_condition(self):
         cancer_condition = CancerCondition.objects.get(id='cancer_condition:01')
@@ -106,8 +103,7 @@ class TNMStagingTest(TestCase):
     """ Test module for TNMstaging model """
 
     def setUp(self):
-        self.subject = Individual.objects.create(**VALID_INDIVIDUAL)
-        self.cancer_condition = CancerCondition.objects.create(**valid_cancer_condition(self.subject))
+        self.cancer_condition = CancerCondition.objects.create(**valid_cancer_condition())
         self.tnm_staging = TNMStaging.objects.create(**valid_tnm_staging(self.cancer_condition))
 
     def test_tnm_staging(self):
@@ -120,9 +116,8 @@ class CancerRelatedProcedureTest(TestCase):
     """ Test module for CancerRelatedProcedure model """
 
     def setUp(self):
-        self.subject = Individual.objects.create(**VALID_INDIVIDUAL)
         self.cancer_related_procedure = CancerRelatedProcedure.objects.create(
-            **valid_cancer_related_procedure(self.subject)
+            **valid_cancer_related_procedure()
         )
 
     def test_cancer_related_procedure(self):
@@ -138,9 +133,8 @@ class MedicationStatementTest(TestCase):
     """ Test module for MedicationStatement model """
 
     def setUp(self):
-        self.subject = Individual.objects.create(**VALID_INDIVIDUAL)
         self.cancer_related_procedure = MedicationStatement.objects.create(
-            **valid_medication_statement(self.subject)
+            **valid_medication_statement()
         )
 
     def test_cancer_related_procedure(self):
