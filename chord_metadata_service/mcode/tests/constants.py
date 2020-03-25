@@ -51,7 +51,6 @@ VALID_GENETIC_VARIANT_TESTED = {
     }
 }
 
-
 INVALID_GENETIC_VARIANT_TESTED = {
     "id": "variant_tested:02",
     "method": ["invalid_value"],
@@ -80,7 +79,6 @@ INVALID_GENETIC_VARIANT_TESTED = {
         "label": "Positive",
     }
 }
-
 
 VALID_GENETIC_VARIANT_FOUND = {
     "id": "variant_found:01",
@@ -186,12 +184,12 @@ def valid_cancer_condition():
         },
         "condition_code": {
             "id": "404087009",
-            "label": "Carcinosarcoma of skin (disorder)",
+            "label": "Carcinosarcoma of skin (disorder)"
         },
         "date_of_diagnosis": "2018-11-13T20:20:39+00:00",
         "histology_morphology_behavior": {
             "id": "372147008",
-            "label": "Kaposi's sarcoma - category (morphologic abnormality)",
+            "label": "Kaposi's sarcoma - category (morphologic abnormality)"
         }
     }
 
@@ -256,8 +254,10 @@ def valid_cancer_related_procedure():
             "label": "Betatron teleradiotherapy (procedure)"
         },
         "occurence_time_or_period": {
-            "start": "2018-11-13T20:20:39+00:00",
-            "end": "2019-04-13T20:20:39+00:00"
+            "value": {
+                "start": "2018-11-13T20:20:39+00:00",
+                "end": "2019-04-13T20:20:39+00:00"
+            }
         },
         "target_body_site": [
             {

@@ -18,6 +18,7 @@ ontology_class_validator = JsonSchemaValidator(ONTOLOGY_CLASS)
 quantity_validator = JsonSchemaValidator(schema=QUANTITY, format_checker=['uri'])
 tumor_marker_test_validator = JsonSchemaValidator(schema=TUMOR_MARKER_TEST)
 complex_ontology_validator = JsonSchemaValidator(schema=COMPLEX_ONTOLOGY, format_checker=['uri'])
+time_or_period_validator = JsonSchemaValidator(schema=TIME_OR_PERIOD, format_checker=['date-time'])
 
 ################################# Genomics #################################
 
@@ -155,7 +156,8 @@ class CancerCondition(models.Model, IndexableMixin):
     condition_type = models.CharField(choices=CANCER_CONDITION_TYPE, max_length=200,
                                       help_text=rec_help(d.CANCER_CONDITION, "condition_type"))
     # TODO add body_location_code validator array of json
-    body_location_code = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
+    body_location_code = ArrayField(JSONField(null=True, blank=True, validators=[ontology_class_validator]),
+                                    blank=True, null=True,
                                   help_text=rec_help(d.CANCER_CONDITION, "body_location_code"))
     clinical_status = JSONField(blank=True, null=True, validators=[ontology_class_validator],
                                 help_text=rec_help(d.CANCER_CONDITION, "clinical_status"))
@@ -213,11 +215,12 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "id"))
     procedure_type = models.CharField(choices=PROCEDURE_TYPES, max_length=200,
                                       help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "procedure_type"))
-    code = JSONField(help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "code"))
+    code = JSONField(validators=[ontology_class_validator], help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "code"))
     occurence_time_or_period = JSONField(help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "occurence_time_or_period"))
-    target_body_site = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
+    target_body_site = ArrayField(JSONField(null=True, blank=True, validators=[ontology_class_validator]),
+                                  blank=True, null=True,
                                   help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "target_body_site"))
-    treatment_intent = JSONField(blank=True, null=True,
+    treatment_intent = JSONField(blank=True, null=True, validators=[ontology_class_validator],
                                  help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "treatment_intent"))
     # subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
     #                             help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "subject"))
@@ -234,10 +237,13 @@ class MedicationStatement(models.Model, IndexableMixin):
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.MEDICATION_STATEMENT, "id"))
     # list http://hl7.org/fhir/us/core/STU3.1/ValueSet-us-core-medication-codes.html
-    medication_code = JSONField(help_text=rec_help(d.MEDICATION_STATEMENT, "medication_code"))
-    termination_reason = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
+    medication_code = JSONField(validators=[ontology_class_validator],
+                                help_text=rec_help(d.MEDICATION_STATEMENT, "medication_code"))
+    termination_reason = ArrayField(JSONField(null=True, blank=True, validators=[ontology_class_validator]),
+                                    blank=True, null=True,
                                   help_text=rec_help(d.MEDICATION_STATEMENT, "termination_reason"))
-    treatment_intent = JSONField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "treatment_intent"))
+    treatment_intent = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+                                 help_text=rec_help(d.MEDICATION_STATEMENT, "treatment_intent"))
     start_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "start_date"))
     end_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "end_date"))
     date_time = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "date_time"))
