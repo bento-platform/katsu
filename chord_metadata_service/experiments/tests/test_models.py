@@ -28,17 +28,20 @@ class ExperimentTest(TestCase):
         self.assertRaises(serializers.ValidationError, self.create,
                 id='experiment:2',
                 library_strategy='Bisulfite-Seq',
+                experiment_type='Chromatin Accessibility',
                 experiment_ontology=["invalid_value"],
         )
 
         self.assertRaises(serializers.ValidationError, self.create,
                 id='experiment:2',
                 library_strategy='Bisulfite-Seq',
+                experiment_type='Chromatin Accessibility',
                 molecule_ontology=[{"id": "some_id"}],
         )
 
         self.assertRaises(serializers.ValidationError, self.create,
                 id='experiment:2',
                 library_strategy='Bisulfite-Seq',
+                experiment_type='Chromatin Accessibility',
                 other_fields={"some_field": "value", "invalid_value": 42}
         )

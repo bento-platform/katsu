@@ -43,7 +43,7 @@ class Experiment(models.Model, IndexableMixin):
 
     reference_registry_id = CharField(max_length=30, null=True, blank=True, help_text=rec_help(d.EXPERIMENT, 'reference_registry_id'))
     qc_flags = ArrayField(CharField(max_length=100, help_text=rec_help(d.EXPERIMENT, 'qc_flags')), null=True, default=list)
-    experiment_type = CharField(max_length=30, null=True, blank=True, help_text=rec_help(d.EXPERIMENT, 'experiment_type'))
+    experiment_type = CharField(max_length=30, null=False, blank=False, help_text=rec_help(d.EXPERIMENT, 'experiment_type'))
     experiment_ontology = JSONField(null=True, blank=True, validators=[ontologyListValidator], help_text=rec_help(d.EXPERIMENT, 'experiment_ontology'))
     molecule_ontology = JSONField(null=True, blank=True, validators=[ontologyListValidator], help_text=rec_help(d.EXPERIMENT, 'molecule_ontology'))
     molecule = CharField(choices=MOLECULE, max_length=20, null=True, blank=True, help_text=rec_help(d.EXPERIMENT, 'molecule'))
