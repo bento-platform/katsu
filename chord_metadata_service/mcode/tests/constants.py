@@ -51,6 +51,37 @@ VALID_GENETIC_VARIANT_TESTED = {
     }
 }
 
+
+INVALID_GENETIC_VARIANT_TESTED = {
+    "id": "variant_tested:02",
+    "method": ["invalid_value"],
+    "variant_tested_identifier": {
+        "id": "360448",
+        "label": "360448",
+    },
+    "variant_tested_hgvs_name": [
+        "NC_000007.13:g.55086734A>G",
+        "NC_000007.14:g.55019041A>G",
+        "NM_001346897.2:c.-237A>G",
+        "NM_001346898.2:c.-237A>G",
+        "NM_001346899.1:c.-237A>G",
+        "NM_001346941.2:c.-237A>G",
+        "NM_005228.5:c.-237A>G",
+        "NM_201282.2:c.-237A>G",
+        "NM_201283.1:c.-237A>G",
+        "NM_201284.2:c.-237A>G",
+        "LRG_304t1:c.-237A>G",
+        "LRG_304:g.5010A>G",
+        "NG_007726.3:g.5010A>G"
+    ],
+    "variant_tested_description": "single nucleotide variant",
+    "data_value": {
+        "id": "LA6576-8",
+        "label": "Positive",
+    }
+}
+
+
 VALID_GENETIC_VARIANT_FOUND = {
     "id": "variant_found:01",
     "method": {

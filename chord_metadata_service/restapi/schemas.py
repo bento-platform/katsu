@@ -330,14 +330,14 @@ COMORBID_CONDITION = customize_schema(first_typeof=CODEABLE_CONCEPT, second_type
                                      title="Comorbid Condition schema",
                                      description="Comorbid condition schema.")
 
-
+#TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
 COMPLEX_ONTOLOGY = customize_schema(first_typeof=CODEABLE_CONCEPT, second_typeof=CODEABLE_CONCEPT,
                                    first_property="data_value", second_property="staging_system",
                                    id="chord_metadata_service:complex_ontology_schema", title="Complex ontology",
                                    description="Complex object to combine data value and staging system.",
                                    required=["data_value"])
 
-
+#TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
 TUMOR_MARKER_TEST = customize_schema(first_typeof=CODEABLE_CONCEPT,
                                      second_typeof={
                                         "anyOf": [

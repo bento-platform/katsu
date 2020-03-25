@@ -3,6 +3,7 @@ from django.test import TestCase
 from chord_metadata_service.patients.models import Individual
 from ..models import *
 from .constants import *
+from rest_framework import serializers
 
 class GeneticVariantTestedTest(TestCase):
     """ Test module for GeneticVariantTested model """
@@ -22,6 +23,15 @@ class GeneticVariantTestedTest(TestCase):
         self.assertEqual(variant_tested.variant_tested_description, 'single nucleotide variant')
         self.assertEqual(variant_tested.data_value['id'], 'LA6576-8')
         self.assertEqual(variant_tested.data_value['label'], 'Positive')
+
+    def create(self, **kwargs):
+        e = GeneticVariantTested(**kwargs)
+        e.full_clean()
+        e.save()
+
+    def test_validation(self):
+        # invalid = GeneticVariantTested.objects.create(**INVALID_GENETIC_VARIANT_TESTED)
+        self.assertRaises(serializers.ValidationError, self.create, **INVALID_GENETIC_VARIANT_TESTED)
 
 
 class GeneticVariantFoundTest(TestCase):
