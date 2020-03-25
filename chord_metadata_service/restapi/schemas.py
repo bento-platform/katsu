@@ -80,6 +80,15 @@ ONTOLOGY_CLASS = {
     "required": ["id", "label"]
 }
 
+ONTOLOGY_CLASS_LIST = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "ONTOLOGY_CLASS_LIST",
+    "title": "Ontology class list",
+    "description": "Ontology class list",
+    "type": "array",
+    "items": ONTOLOGY_CLASS,
+}
+
 EXTERNAL_REFERENCE = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:external_reference_schema",
@@ -125,6 +134,20 @@ EVIDENCE = {
     "additionalProperties": False,
     "required": ["evidence_code"]
 }
+
+
+KEY_VALUE_OBJECT = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "KEY_VALUE_OBJECT",
+    "title": "Key-value object",
+    "description": "The schema represents a key-value object.",
+    "type": "object",
+    "patternProperties": {
+        "^.*$": { "type": "string" }
+    },
+    "additionalProperties": False
+}
+
 
 AGE = {"type": "string", "description": "An ISO8601 string represent age."}
 
