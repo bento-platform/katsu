@@ -151,13 +151,8 @@ def valid_labs_vital(individual):
         },
         "tumor_marker_test": {
             "code": {
-                "coding": [
-                    {
-                        "code": "50610-5",
-                        "display": "Alpha-1-Fetoprotein",
-                        "system": "https://loinc.org/"
-                    }
-                ]
+                "id": "50610-5",
+                "label": "Alpha-1-Fetoprotein"
             },
             "data_value": {
                 "value": 10,
@@ -194,7 +189,7 @@ def valid_cancer_condition():
     }
 
 
-def valid_tnm_staging(cancer_condition):
+def invalid_tnm_staging(cancer_condition):
     return {
         "id": "tnm_staging:01",
         "tnm_type": "clinical",

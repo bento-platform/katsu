@@ -4,6 +4,7 @@ from chord_metadata_service.patients.models import Individual
 from ..models import *
 from .constants import *
 from rest_framework import serializers
+from django.core.validators import ValidationError
 
 class GeneticVariantTestedTest(TestCase):
     """ Test module for GeneticVariantTested model """
@@ -87,8 +88,24 @@ class LabsVitalTest(TestCase):
         self.assertEqual(labs_vital.blood_pressure_diastolic['value'], 80)
         self.assertEqual(labs_vital.blood_pressure_systolic['value'], 120)
         self.assertIsInstance(labs_vital.tumor_marker_test, dict)
-        self.assertIsInstance(labs_vital.tumor_marker_test['code']['coding'], list)
+        self.assertIsInstance(labs_vital.tumor_marker_test['code'], dict)
         self.assertEqual(labs_vital.tumor_marker_test['data_value']['value'], 10)
+
+    def test_validation(self):
+        invalid_obj = valid_labs_vital(self.individual)
+        invalid_obj["id"] = "labs_vital:02"
+        invalid_obj["tumor_marker_test"]["code"] = {
+            "coding": [
+                {
+                    "code": "50610-5",
+                    "display": "Alpha-1-Fetoprotein",
+                    "system": "loinc.org"
+                }
+            ]
+        }
+        invalid = LabsVital.objects.create(**invalid_obj)
+        with self.assertRaises(serializers.ValidationError):
+            invalid.full_clean()
 
 
 class CancerConditionTest(TestCase):
@@ -115,12 +132,20 @@ class TNMStagingTest(TestCase):
 
     def setUp(self):
         self.cancer_condition = CancerCondition.objects.create(**valid_cancer_condition())
-        self.tnm_staging = TNMStaging.objects.create(**valid_tnm_staging(self.cancer_condition))
+        self.tnm_staging = TNMStaging.objects.create(**invalid_tnm_staging(self.cancer_condition))
 
     def test_tnm_staging(self):
         tnm_staging = TNMStaging.objects.get(id='tnm_staging:01')
         self.assertEqual(tnm_staging.tnm_type, 'clinical')
+        # this should fails in validation below
         self.assertIsInstance(tnm_staging.stage_group['data_value']['coding'], list)
+
+    def test_validation(self):
+        invalid_obj = invalid_tnm_staging(self.cancer_condition)
+        invalid_obj["id"] = "tnm_staging:02"
+        invalid = TNMStaging.objects.create(**invalid_obj)
+        with self.assertRaises(serializers.ValidationError):
+            invalid.full_clean()
 
 
 class CancerRelatedProcedureTest(TestCase):

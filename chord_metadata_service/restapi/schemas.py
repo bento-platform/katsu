@@ -213,11 +213,9 @@ DISEASE_ONSET = {
 
 ################################## mCode/FHIR based schemas ##################################
 
-#TODO currently these schemas are not distiguished by their provenance: some of them are FHIR elements,
-# some are aggregated from FHIR and mCODE
+### FHIR datatypes
 
-# mCode/FHIR Quantity
-
+# FHIR Quantity https://www.hl7.org/fhir/datatypes.html#Quantity
 QUANTITY = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:quantity_schema",
@@ -245,8 +243,8 @@ QUANTITY = {
     "additionalProperties": False
 }
 
-# mCode/FHIR CodeableConcept
 
+# FHIR CodeableConcept https://www.hl7.org/fhir/datatypes.html#CodeableConcept
 CODEABLE_CONCEPT = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:codeable_concept_schema",
@@ -275,6 +273,7 @@ CODEABLE_CONCEPT = {
 }
 
 
+# FHIR Period https://www.hl7.org/fhir/datatypes.html#Period
 PERIOD = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:period_schema",
@@ -295,6 +294,23 @@ PERIOD = {
 }
 
 
+# FHIR Ratio https://www.hl7.org/fhir/datatypes.html#Ratio
+RATIO = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "chord_metadata_service:ratio",
+    "title": "Ratio",
+    "description": "Ratio schema.",
+    "type": "object",
+    "properties": {
+        "numerator": QUANTITY,
+        "denominator": QUANTITY
+    },
+    "additionalProperties": False
+}
+
+
+### FHIR based mCode elements
+
 TIME_OR_PERIOD = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:time_or_period",
@@ -308,20 +324,6 @@ TIME_OR_PERIOD = {
                 PERIOD
             ]
         }
-    },
-    "additionalProperties": False
-}
-
-
-RATIO = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:ratio",
-    "title": "Ratio",
-    "description": "Ratio schema.",
-    "type": "object",
-    "properties": {
-        "numerator": QUANTITY,
-        "denominator": QUANTITY
     },
     "additionalProperties": False
 }
@@ -347,24 +349,24 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
             }
 
 
-COMORBID_CONDITION = customize_schema(first_typeof=CODEABLE_CONCEPT, second_typeof=CODEABLE_CONCEPT,
+COMORBID_CONDITION = customize_schema(first_typeof=ONTOLOGY_CLASS, second_typeof=ONTOLOGY_CLASS,
                                      first_property="clinical_status", second_property="code",
                                      id="chord_metadata_service:comorbid_condition_schema",
                                      title="Comorbid Condition schema",
                                      description="Comorbid condition schema.")
 
 #TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
-COMPLEX_ONTOLOGY = customize_schema(first_typeof=CODEABLE_CONCEPT, second_typeof=CODEABLE_CONCEPT,
+COMPLEX_ONTOLOGY = customize_schema(first_typeof=ONTOLOGY_CLASS, second_typeof=ONTOLOGY_CLASS,
                                    first_property="data_value", second_property="staging_system",
                                    id="chord_metadata_service:complex_ontology_schema", title="Complex ontology",
                                    description="Complex object to combine data value and staging system.",
                                    required=["data_value"])
 
 #TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
-TUMOR_MARKER_TEST = customize_schema(first_typeof=CODEABLE_CONCEPT,
+TUMOR_MARKER_TEST = customize_schema(first_typeof=ONTOLOGY_CLASS,
                                      second_typeof={
                                         "anyOf": [
-                                            CODEABLE_CONCEPT,
+                                            ONTOLOGY_CLASS,
                                             QUANTITY,
                                             RATIO
                                         ]

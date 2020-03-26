@@ -216,7 +216,8 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
     procedure_type = models.CharField(choices=PROCEDURE_TYPES, max_length=200,
                                       help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "procedure_type"))
     code = JSONField(validators=[ontology_class_validator], help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "code"))
-    occurence_time_or_period = JSONField(help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "occurence_time_or_period"))
+    occurence_time_or_period = JSONField(validators=[time_or_period_validator],
+                                         help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "occurence_time_or_period"))
     target_body_site = ArrayField(JSONField(null=True, blank=True, validators=[ontology_class_validator]),
                                   blank=True, null=True,
                                   help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "target_body_site"))
