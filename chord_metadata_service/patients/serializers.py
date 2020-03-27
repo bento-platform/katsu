@@ -30,12 +30,12 @@ class IndividualSerializer(GenericSerializer):
         required=False
     )
     ecog_performance_status = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=CODEABLE_CONCEPT)],
+        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
         allow_null=True,
         required=False
     )
     karnofsky = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=CODEABLE_CONCEPT)],
+        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
         allow_null=True,
         required=False
     )
