@@ -5,12 +5,9 @@ from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
-from chord_metadata_service.restapi.validators import JsonSchemaValidator
+from chord_metadata_service.restapi.validators import ontologyListValidator, keyValueValidator
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
 import chord_metadata_service.experiments.descriptions as d
-
-ontologyListValidator = JsonSchemaValidator(ONTOLOGY_CLASS_LIST)
-keyValueValidator     = JsonSchemaValidator(KEY_VALUE_OBJECT)
 
 class Experiment(models.Model, IndexableMixin):
     """ Class to store Experiment information """
