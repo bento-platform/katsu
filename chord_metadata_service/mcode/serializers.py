@@ -31,7 +31,7 @@ class GenomicsReportSerializer(GenericSerializer):
         response = super().to_representation(instance)
         response['genetic_variant_tested'] = GeneticVariantTestedSerializer(instance.genetic_variant_tested,
                                                                             many=True, required=False).data
-        response['genetic_variant_found'] = GeneticVariantTestedSerializer(instance.genetic_variant_found,
+        response['genetic_variant_found'] = GeneticVariantFoundSerializer(instance.genetic_variant_found,
                                                                            many=True, required=False).data
         return response
 
