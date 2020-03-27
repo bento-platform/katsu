@@ -18,12 +18,22 @@ class GeneticVariantFoundSerializer(GenericSerializer):
 
 
 class GenomicsReportSerializer(GenericSerializer):
-    genetic_variant_tested = GeneticVariantTestedSerializer(read_only=True, many=True)
-    genetic_variant_found = GeneticVariantTestedSerializer(read_only=True, many=True)
 
     class Meta:
         model = GenomicsReport
         fields = '__all__'
+
+    def to_representation(self, instance):
+        """"
+        Overriding this method to allow post Primary Key for FK and M2M
+        objects and return their nested serialization.
+        """
+        response = super().to_representation(instance)
+        response['genetic_variant_tested'] = GeneticVariantTestedSerializer(instance.genetic_variant_tested,
+                                                                            many=True, required=False).data
+        response['genetic_variant_found'] = GeneticVariantTestedSerializer(instance.genetic_variant_found,
+                                                                           many=True, required=False).data
+        return response
 
 
 class LabsVitalSerializer(GenericSerializer):
@@ -63,11 +73,21 @@ class MedicationStatementSerializer(GenericSerializer):
 
 
 class MCodePacketSerializer(GenericSerializer):
-    subject = IndividualSerializer()
-    genomics_report = GenomicsReportSerializer()
-    cancer_condition = CancerConditionSerializer()
-    cancer_related_procedures = CancerRelatedProcedureSerializer(many=True)
-    medication_statement = MedicationStatementSerializer()
+
+    def to_representation(self, instance):
+        """"
+        Overriding this method to allow post Primary Key for FK and M2M
+        objects and return their nested serialization.
+        """
+        response = super().to_representation(instance)
+        response['subject'] = IndividualSerializer(instance.subject).data
+        response['genomics_report'] = GenomicsReportSerializer(instance.genomics_report, required=False).data
+        response['cancer_condition'] = CancerConditionSerializer(instance.cancer_condition, required=False).data
+        response['cancer_related_procedures'] = CancerRelatedProcedureSerializer(instance.cancer_related_procedures,
+                                                                                 many=True, required=False).data
+        response['medication_statement'] = MedicationStatementSerializer(instance.medication_statement,
+                                                                         required=False).data
+        return response
 
     class Meta:
         model = MCodePacket
