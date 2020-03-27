@@ -1,0 +1,154 @@
+{
+  "id": "mcodepacket:01",
+  "subject": {
+    "id": "ind:HG00096",
+    "taxonomy": {
+      "id": "NCBITaxon:9606",
+      "label": "Homo sapiens"
+    },
+    "date_of_birth": "1923-12-07",
+    "sex": "MALE",
+    "karyotypic_sex": "XY",
+    "created": "2020-03-25T18:10:14.017215Z",
+    "updated": "2020-03-25T18:10:14.017215Z"
+  },
+  "genomics_report": {
+    "id": "genomics_resport:01",
+    "test_name": {
+      "id": "GTR000511179.13",
+      "label": "Clinical Exome"
+    },
+    "performing_ogranization_name": "Test organization",
+    "specimen_type": {
+      "id": "BDY",
+      "label": "Whole body"
+    },
+    "genetic_variant_tested": [
+      {
+        "id": "variant:03",
+        "method": {
+          "id": "FISH",
+          "label": "Fluorescent in situ hybridization (FISH)"
+        },
+        "variant_tested_identifier": {
+          "id": "t12",
+          "label": "test"
+        },
+        "variant_tested_description": "test"
+      }
+    ],
+    "genetic_variant_found": [
+      {
+        "id": "variant_found:01",
+        "method": {
+          "id": "t12",
+          "label": "test"
+        }
+      }
+    ]
+  },
+  "cancer_condition": {
+    "id": "cancer_condition:01",
+    "tnm_staging": [
+      {
+        "id": "tnmstaging:01",
+        "tnm_type": "clinical",
+        "stage_group": {
+          "data_value": {
+            "id": "test",
+            "label": "t12"
+          }
+        },
+        "primary_tumor_category": {
+          "data_value": {
+            "id": "test",
+            "label": "t12"
+          }
+        },
+        "regional_nodes_category": {
+          "data_value": {
+            "id": "test",
+            "label": "t12"
+          }
+        },
+        "distant_metastases_category": {
+          "data_value": {
+            "id": "test",
+            "label": "t12"
+          }
+        },
+        "cancer_condition": "cancer_condition:01"
+      }
+    ],
+    "condition_type": "primary",
+    "body_location_code": [
+      {
+        "id": "442083009",
+        "label": "Anatomical or acquired body structure (body structure)"
+      }
+    ],
+    "clinical_status": {
+      "id": "active",
+      "label": "Active"
+    },
+    "condition_code": {
+      "id": "404087009",
+      "label": "Carcinosarcoma of skin (disorder)"
+    },
+    "date_of_diagnosis": "2018-11-13T20:20:39Z",
+    "histology_morphology_behavior": {
+      "id": "372147008",
+      "label": "Kaposi's sarcoma - category (morphologic abnormality)"
+    }
+  },
+  "medication_statement": {
+    "id": "medication_statement:02",
+    "medication_code": {
+      "id": "92052",
+      "label": "Verapamil Oral Tablet [Calan]"
+    },
+    "termination_reason": [
+      {
+        "id": "182992009",
+        "label": "Treatment completed"
+      },
+      {
+        "id": "1821212992009",
+        "label": "Treatment completed"
+      }
+    ],
+    "treatment_intent": {
+      "id": "373808002",
+      "label": "Curative - procedure intent"
+    },
+    "start_date": "2018-11-13T20:20:39Z",
+    "end_date": "2019-04-13T20:20:39Z",
+    "date_time": "2019-04-13T20:20:39Z"
+  },
+  "cancer_related_procedures": [
+    {
+      "id": "cancer_related_procedure:03",
+      "procedure_type": "radiation",
+      "code": {
+        "id": "33356009",
+        "label": "Betatron teleradiotherapy (procedure)"
+      },
+      "occurence_time_or_period": {
+        "value": {
+          "end": "2019-04-13T20:20:39+00:00",
+          "start": "2018-11-13T20:20:39+00:00"
+        }
+      },
+      "target_body_site": [
+        {
+          "id": "74805009",
+          "label": "Mammary gland sinus"
+        }
+      ],
+      "treatment_intent": {
+        "id": "373808002",
+        "label": "Curative - procedure intent"
+      }
+    }
+  ]
+}
