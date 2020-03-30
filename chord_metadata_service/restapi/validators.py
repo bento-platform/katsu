@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from jsonschema import Draft7Validator
+from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT, AGE_OR_AGE_RANGE
 
 class JsonSchemaValidator(object):
     """ Custom class based validator to validate against Json schema for JSONField """
@@ -22,3 +23,8 @@ class JsonSchemaValidator(object):
             [self.schema],
             {}
         )
+
+ontologyValidator      = JsonSchemaValidator(ONTOLOGY_CLASS)
+ontologyListValidator  = JsonSchemaValidator(ONTOLOGY_CLASS_LIST)
+keyValueValidator      = JsonSchemaValidator(KEY_VALUE_OBJECT)
+ageOrAgeRangeValidator = JsonSchemaValidator(AGE_OR_AGE_RANGE)
