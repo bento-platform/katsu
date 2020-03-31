@@ -1,6 +1,5 @@
 from django.db import models
 from django.db.models import CharField
-from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
@@ -44,10 +43,16 @@ class Experiment(models.Model, IndexableMixin):
     experiment_ontology = JSONField(null=True, validators=[ontologyListValidator], help_text=rec_help(d.EXPERIMENT, 'experiment_ontology'))
     molecule_ontology = JSONField(null=True, validators=[ontologyListValidator], help_text=rec_help(d.EXPERIMENT, 'molecule_ontology'))
     molecule = CharField(choices=MOLECULE, max_length=20, null=True, help_text=rec_help(d.EXPERIMENT, 'molecule'))
-
     library_strategy = CharField(choices=LIBRARY_STRATEGY, max_length=25, help_text=rec_help(d.EXPERIMENT, 'library_strategy'))
 
     other_fields = JSONField(null=True, validators=[keyValueValidator], help_text=rec_help(d.EXPERIMENT, 'other_fields'))
+
+    biosamples = models.ManyToManyField(Biosample, null=True, help_text=rec_help(d.EXPERIMENT, 'biosamples'))
+    donor = models.ForeignKey("Individual", on_delete=models.SET_NULL, null=True, help_text=rec_help(d.EXPERIMENT, 'donor'))
+
+    def clean(self):
+        if not (self.biosamples or self.donor):
+            raise ValidationError('Either Biosamples or Donor must be specified')
 
     def __str__(self):
         return str(self.id)

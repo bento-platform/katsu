@@ -15,6 +15,9 @@ EXPERIMENT = {
 
         "other_fields": "The other fields for the experiment",
 
+        "biosamples": "Biosamples on which this experiment was done",
+        "donor": "Donor on which this experiment was done",
+
         **EXTRA_PROPERTIES
     }
 }
