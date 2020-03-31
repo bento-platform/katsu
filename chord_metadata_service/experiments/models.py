@@ -6,6 +6,8 @@ from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.validators import ontologyListValidator, keyValueValidator
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
+from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.phenopackets.models import Biosample
 import chord_metadata_service.experiments.descriptions as d
 
 class Experiment(models.Model, IndexableMixin):
@@ -48,11 +50,11 @@ class Experiment(models.Model, IndexableMixin):
     other_fields = JSONField(null=True, validators=[keyValueValidator], help_text=rec_help(d.EXPERIMENT, 'other_fields'))
 
     biosamples = models.ManyToManyField(Biosample, null=True, help_text=rec_help(d.EXPERIMENT, 'biosamples'))
-    donor = models.ForeignKey("Individual", on_delete=models.SET_NULL, null=True, help_text=rec_help(d.EXPERIMENT, 'donor'))
+    individual = models.ForeignKey(Individual, on_delete=models.SET_NULL, null=True, help_text=rec_help(d.EXPERIMENT, 'individual'))
 
     def clean(self):
-        if not (self.biosamples or self.donor):
-            raise ValidationError('Either Biosamples or Donor must be specified')
+        if not (self.biosamples or self.individual):
+            raise ValidationError('Either Biosamples or Individual must be specified')
 
     def __str__(self):
         return str(self.id)
