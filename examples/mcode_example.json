@@ -18,7 +18,7 @@
       "id": "GTR000511179.13",
       "label": "Clinical Exome"
     },
-    "performing_ogranization_name": "Test organization",
+    "performing_organization_name": "Test organization",
     "specimen_type": {
       "id": "BDY",
       "label": "Whole body"

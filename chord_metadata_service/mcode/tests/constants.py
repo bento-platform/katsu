@@ -120,7 +120,7 @@ def valid_genetic_report():
             "id": "GTR000567625.2",
             "label": "PREVENTEST",
         },
-        "performing_ogranization_name": "Test organization",
+        "performing_organization_name": "Test organization",
         "specimen_type": {
             "id": "119342007 ",
             "label": "SAL (Saliva)",

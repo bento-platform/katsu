@@ -48,7 +48,7 @@ GENOMICS_REPORT = {
         "id": "An arbitrary identifier for the genetics report.",
         "test_name": "An ontology or controlled vocabulary term to identify the laboratory test. "
                      "Accepted value sets: LOINC, GTR.",
-        "performing_ogranization_name": "The name of the organization  producing the genomics report.",
+        "performing_organization_name": "The name of the organization  producing the genomics report.",
         "specimen_type": "An ontology or controlled vocabulary term to identify the type of material the specimen "
                          "contains or consists of. Accepted value set: HL7 Version 2 and Specimen Type.",
         "genetic_variant_tested": "A test for a specific mutation on a particular gene.",

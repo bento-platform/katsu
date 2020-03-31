@@ -6,21 +6,10 @@ from chord_metadata_service.patients.models import Individual
 from django.core.exceptions import ValidationError
 from chord_metadata_service.restapi.description_utils import rec_help
 import chord_metadata_service.mcode.descriptions as d
-from chord_metadata_service.restapi.validators import JsonSchemaValidator
-from chord_metadata_service.restapi.schemas import (
-    ONTOLOGY_CLASS, QUANTITY, COMPLEX_ONTOLOGY, TIME_OR_PERIOD, TUMOR_MARKER_TEST
+from chord_metadata_service.restapi.validators import (
+    ontologyValidator, quantity_validator, tumor_marker_test_validator,
+    complex_ontology_validator, time_or_period_validator, ontologyListValidator
 )
-
-
-############################ Field validators #############################
-
-ontology_class_validator = JsonSchemaValidator(ONTOLOGY_CLASS)
-quantity_validator = JsonSchemaValidator(schema=QUANTITY, format_checker=['uri'])
-tumor_marker_test_validator = JsonSchemaValidator(schema=TUMOR_MARKER_TEST)
-complex_ontology_validator = JsonSchemaValidator(schema=COMPLEX_ONTOLOGY, format_checker=['uri'])
-time_or_period_validator = JsonSchemaValidator(schema=TIME_OR_PERIOD, format_checker=['date-time'])
-
-################################# Genomics #################################
 
 
 class GeneticVariantTested(models.Model, IndexableMixin):
@@ -34,17 +23,20 @@ class GeneticVariantTested(models.Model, IndexableMixin):
     # make writable if it doesn't exist
     gene_studied = models.ForeignKey(Gene, blank=True, null=True, on_delete=models.SET_NULL,
                                      help_text=rec_help(d.GENETIC_VARIANT_TESTED, "gene_studied"))
-    method = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+    method = JSONField(blank=True, null=True, validators=[ontologyValidator],
                        help_text=rec_help(d.GENETIC_VARIANT_TESTED, "method"))
-    variant_tested_identifier = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+    variant_tested_identifier = JSONField(blank=True, null=True, validators=[ontologyValidator],
                                           help_text=rec_help(d.GENETIC_VARIANT_TESTED, "variant_tested_identifier"))
     variant_tested_hgvs_name = ArrayField(models.CharField(max_length=200), blank=True, null=True,
                                           help_text=rec_help(d.GENETIC_VARIANT_TESTED, "variant_tested_hgvs_name"))
     variant_tested_description = models.CharField(max_length=200, blank=True,
                                                   help_text=rec_help(d.GENETIC_VARIANT_TESTED,
                                                                      "variant_tested_description"))
-    data_value = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+    data_value = JSONField(blank=True, null=True, validators=[ontologyValidator],
                            help_text=rec_help(d.GENETIC_VARIANT_TESTED, "data_value"))
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return str(self.id)
@@ -64,17 +56,20 @@ class GeneticVariantFound(models.Model, IndexableMixin):
     # TODO Discuss: Connection to Gene from Phenopackets
     id = models.CharField(primary_key=True, max_length=200,
                           help_text=rec_help(d.GENETIC_VARIANT_FOUND, "id"))
-    method = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+    method = JSONField(blank=True, null=True, validators=[ontologyValidator],
                        help_text=rec_help(d.GENETIC_VARIANT_FOUND, "method"))
-    variant_found_identifier = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+    variant_found_identifier = JSONField(blank=True, null=True, validators=[ontologyValidator],
                                          help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_identifier"))
     variant_found_hgvs_name = ArrayField(models.CharField(max_length=200), blank=True, null=True,
                                          help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_hgvs_name"))
     variant_found_description = models.CharField(max_length=200, blank=True,
                                             help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_description"))
     # loinc value set https://loinc.org/48002-0/
-    genomic_source_class = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+    genomic_source_class = JSONField(blank=True, null=True, validators=[ontologyValidator],
                                      help_text=rec_help(d.GENETIC_VARIANT_FOUND, "genomic_source_class"))
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return str(self.id)
@@ -91,16 +86,18 @@ class GenomicsReport(models.Model, IndexableMixin):
     """
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENOMICS_REPORT, "id"))
-    test_name = JSONField(validators=[ontology_class_validator], help_text=rec_help(d.GENOMICS_REPORT, "test_name"))
-    performing_ogranization_name = models.CharField(max_length=200, blank=True,
-                                                help_text=rec_help(d.GENOMICS_REPORT, "performing_ogranization_name"))
-    specimen_type = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+    test_name = JSONField(validators=[ontologyValidator], help_text=rec_help(d.GENOMICS_REPORT, "test_name"))
+    performing_organization_name = models.CharField(max_length=200, blank=True,
+                                                help_text=rec_help(d.GENOMICS_REPORT, "performing_organization_name"))
+    specimen_type = JSONField(blank=True, null=True, validators=[ontologyValidator],
                               help_text=rec_help(d.GENOMICS_REPORT, "specimen_type"))
     genetic_variant_tested = models.ManyToManyField(GeneticVariantTested, blank=True,
                                                     help_text=rec_help(d.GENOMICS_REPORT, "genetic_variant_tested"))
     genetic_variant_found = models.ManyToManyField(GeneticVariantFound, blank=True,
                                                    help_text=rec_help(d.GENOMICS_REPORT, "genetic_variant_found"))
-    # subject = models.ForeignKey(Individual, on_delete=models.CASCADE, help_text=rec_help(d.GENOMICS_REPORT, "subject"))
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return str(self.id)
@@ -133,6 +130,9 @@ class LabsVital(models.Model, IndexableMixin):
     tumor_marker_test = JSONField(validators=[tumor_marker_test_validator],
                                   help_text=rec_help(d.LABS_VITAL, "tumor_marker_test"))
 
+    class Meta:
+        ordering = ['id']
+
     def __str__(self):
         return str(self.id)
 
@@ -156,18 +156,19 @@ class CancerCondition(models.Model, IndexableMixin):
     condition_type = models.CharField(choices=CANCER_CONDITION_TYPE, max_length=200,
                                       help_text=rec_help(d.CANCER_CONDITION, "condition_type"))
     # TODO add body_location_code validator array of json
-    body_location_code = ArrayField(JSONField(null=True, blank=True, validators=[ontology_class_validator]),
-                                    blank=True, null=True,
-                                  help_text=rec_help(d.CANCER_CONDITION, "body_location_code"))
-    clinical_status = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+    body_location_code = JSONField(null=True, validators=[ontologyListValidator],
+                                   help_text=rec_help(d.CANCER_CONDITION, 'body_location_code'))
+    clinical_status = JSONField(blank=True, null=True, validators=[ontologyValidator],
                                 help_text=rec_help(d.CANCER_CONDITION, "clinical_status"))
-    condition_code = JSONField(validators=[ontology_class_validator],
+    condition_code = JSONField(validators=[ontologyValidator],
                                help_text=rec_help(d.CANCER_CONDITION, "condition_code"))
     date_of_diagnosis = models.DateTimeField(blank=True, null=True,
                                              help_text=rec_help(d.CANCER_CONDITION, "date_of_diagnosis"))
-    histology_morphology_behavior = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+    histology_morphology_behavior = JSONField(blank=True, null=True, validators=[ontologyValidator],
                                               help_text=rec_help(d.CANCER_CONDITION, "histology_morphology_behavior"))
-    # subject = models.ForeignKey(Individual, on_delete=models.CASCADE, help_text=rec_help(d.CANCER_CONDITION, "subject"))
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return str(self.id)
@@ -195,6 +196,9 @@ class TNMStaging(models.Model, IndexableMixin):
     cancer_condition = models.ForeignKey(CancerCondition, on_delete=models.CASCADE,
                                          help_text=rec_help(d.TNM_STAGING, "cancer_condition"))
 
+    class Meta:
+        ordering = ['id']
+
     def __str__(self):
         return str(self.id)
 
@@ -215,16 +219,16 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "id"))
     procedure_type = models.CharField(choices=PROCEDURE_TYPES, max_length=200,
                                       help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "procedure_type"))
-    code = JSONField(validators=[ontology_class_validator], help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "code"))
+    code = JSONField(validators=[ontologyValidator], help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "code"))
     occurence_time_or_period = JSONField(validators=[time_or_period_validator],
                                          help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "occurence_time_or_period"))
-    target_body_site = ArrayField(JSONField(null=True, blank=True, validators=[ontology_class_validator]),
-                                  blank=True, null=True,
-                                  help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "target_body_site"))
-    treatment_intent = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+    target_body_site = JSONField(null=True, validators=[ontologyListValidator],
+                                   help_text=rec_help(d.CANCER_RELATED_PROCEDURE, 'target_body_site'))
+    treatment_intent = JSONField(blank=True, null=True, validators=[ontologyValidator],
                                  help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "treatment_intent"))
-    # subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
-    #                             help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "subject"))
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return str(self.id)
@@ -238,18 +242,18 @@ class MedicationStatement(models.Model, IndexableMixin):
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.MEDICATION_STATEMENT, "id"))
     # list http://hl7.org/fhir/us/core/STU3.1/ValueSet-us-core-medication-codes.html
-    medication_code = JSONField(validators=[ontology_class_validator],
+    medication_code = JSONField(validators=[ontologyValidator],
                                 help_text=rec_help(d.MEDICATION_STATEMENT, "medication_code"))
-    termination_reason = ArrayField(JSONField(null=True, blank=True, validators=[ontology_class_validator]),
-                                    blank=True, null=True,
-                                  help_text=rec_help(d.MEDICATION_STATEMENT, "termination_reason"))
-    treatment_intent = JSONField(blank=True, null=True, validators=[ontology_class_validator],
+    termination_reason = JSONField(null=True, validators=[ontologyListValidator],
+                                   help_text=rec_help(d.MEDICATION_STATEMENT, 'termination_reason'))
+    treatment_intent = JSONField(blank=True, null=True, validators=[ontologyValidator],
                                  help_text=rec_help(d.MEDICATION_STATEMENT, "treatment_intent"))
     start_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "start_date"))
     end_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "end_date"))
     date_time = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "date_time"))
-    # subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
-    #                             help_text=rec_help(d.MEDICATION_STATEMENT, "subject"))
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return str(self.id)
@@ -271,6 +275,9 @@ class MCodePacket(models.Model, IndexableMixin):
                                                        help_text=rec_help(d.MCODEPACKET, "cancer_related_procedures"))
     medication_statement = models.ForeignKey(MedicationStatement, blank=True, null=True, on_delete=models.SET_NULL,
                                              help_text=rec_help(d.MCODEPACKET, "medication_statement"))
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return str(self.id)
