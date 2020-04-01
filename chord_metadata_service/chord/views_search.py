@@ -14,7 +14,7 @@ from chord_lib.search import build_search_response, postgres
 from chord_metadata_service.metadata.settings import DEBUG
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
-from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
+from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.metadata.elastic import es
@@ -103,24 +103,40 @@ def chord_table_summary(_request, table_id):
         table = Dataset.objects.get(identifier=table_id)
         phenopackets = Phenopacket.objects.filter(dataset=table)
 
-        biosamples_set = frozenset(
-            p["biosamples__id"] for p in phenopackets.prefetch_related("biosamples").values("biosamples__id"))
+        diseases_counter = Counter()
+        biosamples_set = set()
+        individuals_set = set()
 
-        biosamples_cs = Counter(b.is_control_sample for b in Biosample.objects.filter(id__in=biosamples_set))
+        biosamples_cs = Counter()
+        biosamples_taxonomy = Counter()
 
-        biosamples_taxonomy = Counter(b.taxonomy["id"] for b in Biosample.objects.filter(id__in=biosamples_set)
-                                      if b.taxonomy is not None)
+        individuals_sex = Counter()
+        individuals_k_sex = Counter()
+        individuals_taxonomy = Counter()
 
-        individuals_set = frozenset({
-            *(p["subject"] for p in phenopackets.values("subject")),
-            *(p["biosamples__individual_id"]
-              for p in phenopackets.prefetch_related("biosamples").values("biosamples__individual_id")),
-        })
+        def count_individual(ind):
+            individuals_set.add(ind.id)
+            individuals_sex.update((ind.sex,))
+            individuals_k_sex.update((ind.karyotypic_sex,))
+            if ind.taxonomy is not None:
+                individuals_taxonomy.update((ind.taxonomy["id"],))
 
-        individuals_sex = Counter(i.sex for i in Individual.objects.filter(id__in=individuals_set))
-        individuals_k_sex = Counter(i.karyotypic_sex for i in Individual.objects.filter(id__in=individuals_set))
-        individuals_taxonomy = Counter(i.taxonomy["id"] for i in Individual.objects.filter(id__in=individuals_set)
-                                       if i.taxonomy is not None)
+        for p in phenopackets.prefetch_related("biosamples"):
+            for b in p.biosamples.all():
+                biosamples_set.add(b.id)
+                biosamples_cs.update((b.is_control_sample,))
+
+                if b.taxonomy is not None:
+                    biosamples_taxonomy.update((b.taxonomy["id"],))
+
+                if b.individual is not None:
+                    count_individual(b.individual)
+
+            for d in p.diseases.all():
+                diseases_counter.update((d.term["id"],))
+
+            # Currently, phenopacket subject is required so we can assume it's not None
+            count_individual(p.subject)
 
         return Response({
             "count": phenopackets.count(),
@@ -130,11 +146,11 @@ def chord_table_summary(_request, table_id):
                     "is_control_sample": dict(biosamples_cs),
                     "taxonomy": dict(biosamples_taxonomy),
                 },
+                "diseases": dict(diseases_counter),
                 "individuals": {
                     "count": len(individuals_set),
                     "sex": {k: individuals_sex[k] for k in (s[0] for s in Individual.SEX)},
                     "karyotypic_sex": {k: individuals_k_sex[k] for k in (s[0] for s in Individual.KARYOTYPIC_SEX)},
-                    "diseases": {},
                     "taxonomy": dict(individuals_taxonomy),
                     # TODO: age histogram
                 },
