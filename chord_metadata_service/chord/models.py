@@ -122,7 +122,7 @@ class Dataset(models.Model):
     keywords = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
                           help_text="Tags associated with the dataset, which will help in its discovery.")
     version = models.CharField(max_length=200, blank=True, default=version_default,
-                                  help_text="A release point for the dataset when applicable.")
+                               help_text="A release point for the dataset when applicable.")
     extra_properties = JSONField(blank=True, null=True,
                                  help_text="Extra properties that do not fit in the previous specified attributes.")
 
