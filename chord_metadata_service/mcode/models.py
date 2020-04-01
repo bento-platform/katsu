@@ -34,6 +34,10 @@ class GeneticVariantTested(models.Model, IndexableMixin):
                                                                      "variant_tested_description"))
     data_value = JSONField(blank=True, null=True, validators=[ontologyValidator],
                            help_text=rec_help(d.GENETIC_VARIANT_TESTED, "data_value"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.GENETIC_VARIANT_TESTED, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['id']
@@ -67,6 +71,10 @@ class GeneticVariantFound(models.Model, IndexableMixin):
     # loinc value set https://loinc.org/48002-0/
     genomic_source_class = JSONField(blank=True, null=True, validators=[ontologyValidator],
                                      help_text=rec_help(d.GENETIC_VARIANT_FOUND, "genomic_source_class"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.GENETIC_VARIANT_FOUND, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['id']
@@ -95,6 +103,10 @@ class GenomicsReport(models.Model, IndexableMixin):
                                                     help_text=rec_help(d.GENOMICS_REPORT, "genetic_variant_tested"))
     genetic_variant_found = models.ManyToManyField(GeneticVariantFound, blank=True,
                                                    help_text=rec_help(d.GENOMICS_REPORT, "genetic_variant_found"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.GENOMICS_REPORT, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['id']
@@ -129,6 +141,10 @@ class LabsVital(models.Model, IndexableMixin):
     #TODO Change CodeableConcept to Ontology class
     tumor_marker_test = JSONField(validators=[tumor_marker_test_validator],
                                   help_text=rec_help(d.LABS_VITAL, "tumor_marker_test"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.LABS_VITAL, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['id']
@@ -166,6 +182,10 @@ class CancerCondition(models.Model, IndexableMixin):
                                              help_text=rec_help(d.CANCER_CONDITION, "date_of_diagnosis"))
     histology_morphology_behavior = JSONField(blank=True, null=True, validators=[ontologyValidator],
                                               help_text=rec_help(d.CANCER_CONDITION, "histology_morphology_behavior"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.CANCER_CONDITION, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['id']
@@ -195,6 +215,10 @@ class TNMStaging(models.Model, IndexableMixin):
     # TODO check if one cancer condition has many TNM Staging
     cancer_condition = models.ForeignKey(CancerCondition, on_delete=models.CASCADE,
                                          help_text=rec_help(d.TNM_STAGING, "cancer_condition"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.TNM_STAGING, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['id']
@@ -226,6 +250,10 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
                                    help_text=rec_help(d.CANCER_RELATED_PROCEDURE, 'target_body_site'))
     treatment_intent = JSONField(blank=True, null=True, validators=[ontologyValidator],
                                  help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "treatment_intent"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['id']
@@ -251,6 +279,10 @@ class MedicationStatement(models.Model, IndexableMixin):
     start_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "start_date"))
     end_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "end_date"))
     date_time = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "date_time"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.MEDICATION_STATEMENT, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['id']
@@ -275,6 +307,10 @@ class MCodePacket(models.Model, IndexableMixin):
                                                        help_text=rec_help(d.MCODEPACKET, "cancer_related_procedures"))
     medication_statement = models.ForeignKey(MedicationStatement, blank=True, null=True, on_delete=models.SET_NULL,
                                              help_text=rec_help(d.MCODEPACKET, "medication_statement"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.MCODEPACKET, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['id']

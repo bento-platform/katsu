@@ -4,6 +4,7 @@
 # Portions of this text copyright (c) 2019-2020 the Canadian Centre for Computational Genomics; licensed under the
 # GNU Lesser General Public License version 3.
 
+from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES
 
 GENETIC_VARIANT_TESTED = {
     "description": "A description of an alteration in the most common DNA nucleotide sequence.",
@@ -19,10 +20,10 @@ GENETIC_VARIANT_TESTED = {
                                     "NM_005228.4(EGFR):c.-237A>G for HVGS variation ID 360448.",
         "variant_tested_description": "Description of the variant.",
         "data_value": "An ontology or controlled vocabulary term to identify positive or negative value for"
-                      "the mutation. Accepted value set: SNOMED CT."
+                      "the mutation. Accepted value set: SNOMED CT.",
+        **EXTRA_PROPERTIES
     }
 }
-
 
 GENETIC_VARIANT_FOUND = {
     "description": "Description of single discrete variant tested.",
@@ -34,13 +35,13 @@ GENETIC_VARIANT_FOUND = {
                                     "NM_005228.4(EGFR):c.-237A>G (single nucleotide variant in EGFR). "
                                     "Accepted value set: ClinVar.",
         "variant_found_hgvs_name": "Symbolic representation of the variant used in HGVS, for example, "
-                                    "NM_005228.4(EGFR):c.-237A>G for HVGS variation ID 360448.",
+                                   "NM_005228.4(EGFR):c.-237A>G for HVGS variation ID 360448.",
         "variant_found_description": "Description of the variant.",
         "genomic_source_class": "An ontology or controlled vocabulary term to identify the genomic class of the "
-                                "specimen being analyzed."
+                                "specimen being analyzed.",
+        **EXTRA_PROPERTIES
     }
 }
-
 
 GENOMICS_REPORT = {
     "description": "Genetic Analysis Summary.",
@@ -52,10 +53,10 @@ GENOMICS_REPORT = {
         "specimen_type": "An ontology or controlled vocabulary term to identify the type of material the specimen "
                          "contains or consists of. Accepted value set: HL7 Version 2 and Specimen Type.",
         "genetic_variant_tested": "A test for a specific mutation on a particular gene.",
-        "genetic_variant_found": "Records an alteration in the most common DNA nucleotide sequence."
+        "genetic_variant_found": "Records an alteration in the most common DNA nucleotide sequence.",
+        **EXTRA_PROPERTIES
     }
 }
-
 
 LABS_VITAL = {
     "description": "A description of tests performed on patient.",
@@ -70,11 +71,11 @@ LABS_VITAL = {
         "blood_pressure_diastolic": "The blood pressure after the contraction of the heart while the chambers of "
                                     "the heart refill with blood, when the pressure is lowest.",
         "blood_pressure_systolic": "The blood pressure during the contraction of the left ventricle of the heart, "
-                                    "when blood pressure is at its highest.",
-        "tumor_marker_test": "An ontology or controlled vocabulary term to identify tumor marker test."
+                                   "when blood pressure is at its highest.",
+        "tumor_marker_test": "An ontology or controlled vocabulary term to identify tumor marker test.",
+        **EXTRA_PROPERTIES
     }
 }
-
 
 CANCER_CONDITION = {
     "description": "A description of history of primary or secondary cancer conditions.",
@@ -85,15 +86,15 @@ CANCER_CONDITION = {
                               "Accepted ontologies: SNOMED CT, ICD-O-3 and others.",
         "clinical_status": "A flag indicating whether the condition is active or inactive, recurring, in remission, "
                            "or resolved (as of the last update of the Condition). Accepted code system: "
-                            "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                           "http://terminology.hl7.org/CodeSystem/condition-clinical",
         "condition_code": "A code describing the type of primary or secondary malignant neoplastic disease.",
         "date_of_diagnosis": "The date the disease was first clinically recognized with sufficient certainty, "
                              "regardless of whether it was fully characterized at that time.",
         "histology_morphology_behavior": "A description of the morphologic and behavioral characteristics of "
-                                         "the cancer. Accepted ontologies: SNOMED CT, ICD-O-3 and others."
+                                         "the cancer. Accepted ontologies: SNOMED CT, ICD-O-3 and others.",
+        **EXTRA_PROPERTIES
     }
 }
-
 
 TNM_STAGING = {
     "description": "A description of the cancer spread in a patient's body.",
@@ -101,17 +102,17 @@ TNM_STAGING = {
         "id": "An arbitrary identifier for the TNM staging.",
         "tnm_type": "TNM type: clinical or pathological.",
         "stage_group": "The extent of the cancer in the body, according to the TNM classification system."
-                        "Accepted ontologies: SNOMED CT, AJCC and others.",
+                       "Accepted ontologies: SNOMED CT, AJCC and others.",
         "primary_tumor_category": "Category of the primary tumor, based on its size and extent. "
                                   "Accepted ontologies: SNOMED CT, AJCC and others.",
         "regional_nodes_category": "Category of the presence or absence of metastases in regional lymph nodes. "
-                                    "Accepted ontologies: SNOMED CT, AJCC and others.",
+                                   "Accepted ontologies: SNOMED CT, AJCC and others.",
         "distant_metastases_category": "Category describing the presence or absence of metastases in remote "
                                        "anatomical locations. Accepted ontologies: SNOMED CT, AJCC and others.",
-        "cancer_condition": "Cancer condition."
+        "cancer_condition": "Cancer condition.",
+        **EXTRA_PROPERTIES
     }
 }
-
 
 CANCER_RELATED_PROCEDURE = {
     "description": "Description of radiological treatment or surgical action addressing a cancer condition.",
@@ -121,10 +122,10 @@ CANCER_RELATED_PROCEDURE = {
         "code": "Code for the procedure performed.",
         "occurence_time_or_period": "The date/time that a procedure was performed.",
         "target_body_site": "The body location(s) where the procedure was performed.",
-        "treatment_intent": "The purpose of a treatment."
+        "treatment_intent": "The purpose of a treatment.",
+        **EXTRA_PROPERTIES
     }
 }
-
 
 MEDICATION_STATEMENT = {
     "description": "Description of medication use.",
@@ -136,10 +137,10 @@ MEDICATION_STATEMENT = {
         "treatment_intent": "The purpose of a treatment. Accepted ontologies: SNOMED CT.",
         "start_date": "The start date/time of the medication.",
         "end_date": "The end date/time of the medication.",
-        "date_time": "The date/time the medication was administered."
+        "date_time": "The date/time the medication was administered.",
+        **EXTRA_PROPERTIES
     }
 }
-
 
 MCODEPACKET = {
     "description": "Collection of cancer related metadata.",
@@ -149,6 +150,7 @@ MCODEPACKET = {
         "genomics_report": "A genomics report associated with an Individual.",
         "cancer_condition": "An Individual's cancer condition.",
         "cancer_related_procedures": "A radiological or surgical procedures addressing a cancer condition.",
-        "medication_statement": "Medication treatment addressed to an Individual."
+        "medication_statement": "Medication treatment addressed to an Individual.",
+        **EXTRA_PROPERTIES
     }
 }
