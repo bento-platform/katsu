@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'chord_metadata_service.experiments.apps.ExperimentsConfig',
     'chord_metadata_service.patients.apps.PatientsConfig',
     'chord_metadata_service.phenopackets.apps.PhenopacketsConfig',
+    'chord_metadata_service.mcode.apps.McodeConfig',
     'chord_metadata_service.restapi',
 
     'rest_framework',
