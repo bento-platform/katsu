@@ -30,10 +30,10 @@ class JsonSchemaValidator(object):
         )
 
 
-ontologyValidator = JsonSchemaValidator(ONTOLOGY_CLASS)
-ontologyListValidator = JsonSchemaValidator(ONTOLOGY_CLASS_LIST)
-keyValueValidator = JsonSchemaValidator(KEY_VALUE_OBJECT)
-ageOrAgeRangeValidator = JsonSchemaValidator(AGE_OR_AGE_RANGE)
+ontology_validator = JsonSchemaValidator(ONTOLOGY_CLASS)
+ontology_list_validator = JsonSchemaValidator(ONTOLOGY_CLASS_LIST)
+key_value_validator = JsonSchemaValidator(KEY_VALUE_OBJECT)
+age_or_age_range_validator = JsonSchemaValidator(AGE_OR_AGE_RANGE)
 quantity_validator = JsonSchemaValidator(schema=QUANTITY, format_checker=['uri'])
 tumor_marker_test_validator = JsonSchemaValidator(schema=TUMOR_MARKER_TEST)
 complex_ontology_validator = JsonSchemaValidator(schema=COMPLEX_ONTOLOGY, format_checker=['uri'])
