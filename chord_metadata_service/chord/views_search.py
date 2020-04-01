@@ -104,6 +104,8 @@ def chord_table_summary(_request, table_id):
         phenopackets = Phenopacket.objects.filter(dataset=table)
 
         diseases_counter = Counter()
+        phenotypic_features_counter = Counter()
+
         biosamples_set = set()
         individuals_set = set()
 
@@ -132,8 +134,14 @@ def chord_table_summary(_request, table_id):
                 if b.individual is not None:
                     count_individual(b.individual)
 
+                for pf in b.phenotypic_features.all():
+                    phenotypic_features_counter.update((pf.pftype["id"],))
+
             for d in p.diseases.all():
                 diseases_counter.update((d.term["id"],))
+
+            for pf in p.phenotypic_features.all():
+                phenotypic_features_counter.update((pf.pftype["id"],))
 
             # Currently, phenopacket subject is required so we can assume it's not None
             count_individual(p.subject)
@@ -154,6 +162,7 @@ def chord_table_summary(_request, table_id):
                     "taxonomy": dict(individuals_taxonomy),
                     # TODO: age histogram
                 },
+                "phenotypic_features": dict(phenotypic_features_counter),
             }
         })
 
