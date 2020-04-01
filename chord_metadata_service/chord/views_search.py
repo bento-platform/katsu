@@ -271,42 +271,40 @@ def fhir_search(request, internal_data=False):
 
     res = es.search(index=settings.FHIR_INDEX_NAME, body=query)
 
-    subject_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'Patient']
-    htsfile_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'DocumentReference']
-    disease_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'Condition']
-    biosample_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'Specimen']
-    phenotypicfeature_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'Observation']
-    phenopacket_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'Composition']
+    def hits_for(resource_type: str):
+        return frozenset(hit["_id"].split("|")[1] for hit in res["hits"]["hits"]
+                         if hit['_source']['resourceType'] == resource_type)
 
-    if (not subject_ids and not htsfile_ids and not disease_ids
-        and not biosample_ids and not phenotypicfeature_ids and not phenopacket_ids):
+    subject_ids = hits_for('Patient')
+    htsfile_ids = hits_for('DocumentReference')
+    disease_ids = hits_for('Condition')
+    biosample_ids = hits_for('Specimen')
+    phenotypicfeature_ids = hits_for('Observation')
+    phenopacket_ids = hits_for('Composition')
+
+    if all((not subject_ids, not htsfile_ids, not disease_ids, not biosample_ids, not phenotypicfeature_ids,
+            not phenopacket_ids)):
         return Response(build_search_response([], start))
-    else:
-        phenopackets = phenopacket_filter_results(
-            subject_ids,
-            htsfile_ids,
-            disease_ids,
-            biosample_ids,
-            phenotypicfeature_ids,
-            phenopacket_ids
-        )
+
+    phenopackets = phenopacket_filter_results(
+        subject_ids,
+        htsfile_ids,
+        disease_ids,
+        biosample_ids,
+        phenotypicfeature_ids,
+        phenopacket_ids
+    )
 
     if not internal_data:
-        datasets = Dataset.objects.filter(
-            identifier__in = [
-                p.dataset_id for p in phenopackets
-            ]
-        )  # TODO: Maybe can avoid hitting DB here
+        # TODO: Maybe can avoid hitting DB here
+        datasets = Dataset.objects.filter(identifier__in=frozenset(p.dataset_id for p in phenopackets))
         return Response(build_search_response([{"id": d.identifier, "data_type": PHENOPACKET_DATA_TYPE_ID}
                                                for d in datasets], start))
     return Response(build_search_response({
         dataset_id: {
             "data_type": PHENOPACKET_DATA_TYPE_ID,
             "matches": list(PhenopacketSerializer(p).data for p in dataset_phenopackets)
-        } for dataset_id, dataset_phenopackets in itertools.groupby(
-            phenopackets,
-            key=lambda p: str(p.dataset_id)
-        )
+        } for dataset_id, dataset_phenopackets in itertools.groupby(phenopackets, key=lambda p: str(p.dataset_id))
     }, start))
 
 

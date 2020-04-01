@@ -44,10 +44,11 @@ class Individual(models.Model, IndexableMixin):
     active = models.BooleanField(default=False, help_text='Whether this patient\'s record is in active use.')
     deceased = models.BooleanField(default=False, help_text='Indicates if the individual is deceased or not.')
     # mCode specific
-    # this field should be complex Ontology - clinical status and code - two Codeable concept - single, cl status has enum list of values
+    # this field should be complex Ontology - clinical status and code - two Codeable concept - single, cl status has
+    # enum list of values
     comorbid_condition = JSONField(blank=True, null=True, help_text='One or more conditions that occur with primary'
                                                                     ' condition.')
-    #TODO decide use ONTOLOGY_CLASS vs. CODEABLE_CONCEPT
+    # TODO decide use ONTOLOGY_CLASS vs. CODEABLE_CONCEPT
     ecog_performance_status = JSONField(blank=True, null=True, help_text='Value representing the Eastern Cooperative '
                                                                          'Oncology Group performance status.')
     karnofsky = JSONField(blank=True, null=True, help_text='Value representing the Karnofsky Performance status.')
