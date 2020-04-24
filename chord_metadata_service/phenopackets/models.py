@@ -11,9 +11,7 @@ from chord_metadata_service.restapi.schemas import (
 )
 import chord_metadata_service.phenopackets.descriptions as d
 from chord_metadata_service.restapi.validators import (
-    ontology_validator, quantity_validator, tumor_marker_test_validator,
-    complex_ontology_validator, time_or_period_validator, ontology_list_validator,
-    age_or_age_range_validator
+    ontology_validator, ontology_list_validator, age_or_age_range_validator
 )
 
 
