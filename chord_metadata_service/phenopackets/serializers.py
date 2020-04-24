@@ -27,30 +27,30 @@ class MetaDataSerializer(GenericSerializer):
         model = MetaData
         fields = '__all__'
 
-    def validate_updates(self, value):
-        """
-        Check updates against schema.
-        Timestamp must follow ISO8601 UTC standard
-        e.g. 2018-06-10T10:59:06Z
-
-        """
-
-        if isinstance(value, list):
-            for item in value:
-                validation = Draft7Validator(
-                    UPDATE_SCHEMA, format_checker=FormatChecker(formats=['date-time'])
-                    ).is_valid(item)
-                if not validation:
-                    raise serializers.ValidationError("Update is not valid")
-        return value
-
-    def validate_external_references(self, value):
-        if isinstance(value, list):
-            for item in value:
-                validation = Draft7Validator(EXTERNAL_REFERENCE).is_valid(item)
-                if not validation:
-                    raise serializers.ValidationError("Not valid JSON schema for this field.")
-        return value
+    # def validate_updates(self, value):
+    #     """
+    #     Check updates against schema.
+    #     Timestamp must follow ISO8601 UTC standard
+    #     e.g. 2018-06-10T10:59:06Z
+    #
+    #     """
+    #
+    #     if isinstance(value, list):
+    #         for item in value:
+    #             validation = Draft7Validator(
+    #                 UPDATE_SCHEMA, format_checker=FormatChecker(formats=['date-time'])
+    #                 ).is_valid(item)
+    #             if not validation:
+    #                 raise serializers.ValidationError("Update is not valid")
+    #     return value
+    #
+    # def validate_external_references(self, value):
+    #     if isinstance(value, list):
+    #         for item in value:
+    #             validation = Draft7Validator(EXTERNAL_REFERENCE).is_valid(item)
+    #             if not validation:
+    #                 raise serializers.ValidationError("Not valid JSON schema for this field.")
+    #     return value
 
 
 #############################################################
@@ -60,16 +60,7 @@ class MetaDataSerializer(GenericSerializer):
 #############################################################
 
 class PhenotypicFeatureSerializer(GenericSerializer):
-    type = serializers.JSONField(source='pftype', validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
-    severity = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-        allow_null=True, required=False)
-    onset = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-        allow_null=True, required=False)
-    evidence = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=EVIDENCE)],
-        allow_null=True, required=False)
+    type = serializers.JSONField(source='pftype')
 
     class Meta:
         model = PhenotypicFeature
@@ -78,21 +69,13 @@ class PhenotypicFeatureSerializer(GenericSerializer):
         fhir_datatype_plural = 'observations'
         class_converter = fhir_observation
 
-    def validate_modifier(self, value):
-        if isinstance(value, list):
-            for item in value:
-                validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(item)
-                if not validation:
-                    raise serializers.ValidationError("Not valid JSON schema for this field.")
-        return value
-
 
 class ProcedureSerializer(GenericSerializer):
-    code = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
-    body_site = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-        allow_null=True, required=False)
+    # code = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
+    # body_site = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+    #     allow_null=True, required=False)
 
     class Meta:
         model = Procedure
@@ -134,11 +117,11 @@ class GeneSerializer(GenericSerializer):
 
 
 class VariantSerializer(GenericSerializer):
-    allele = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ALLELE_SCHEMA)])
-    zygosity = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-        allow_null=True, required=False)
+    # allele = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=ALLELE_SCHEMA)])
+    # zygosity = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+    #     allow_null=True, required=False)
 
     class Meta:
         model = Variant
@@ -167,11 +150,11 @@ class VariantSerializer(GenericSerializer):
 
 
 class DiseaseSerializer(GenericSerializer):
-    term = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
-    onset = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=DISEASE_ONSET)],
-        allow_null=True, required=False)
+    # term = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
+    # onset = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=DISEASE_ONSET)],
+    #     allow_null=True, required=False)
 
     class Meta:
         model = Disease
@@ -180,35 +163,35 @@ class DiseaseSerializer(GenericSerializer):
         fhir_datatype_plural = 'conditions'
         class_converter = fhir_condition
 
-    def validate_disease_stage(self, value):
-        if isinstance(value, list):
-            for item in value:
-                validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(item)
-                if not validation:
-                    raise serializers.ValidationError(
-                        "Not valid JSON schema for this field."
-                        )
-        return value
+    # def validate_disease_stage(self, value):
+    #     if isinstance(value, list):
+    #         for item in value:
+    #             validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(item)
+    #             if not validation:
+    #                 raise serializers.ValidationError(
+    #                     "Not valid JSON schema for this field."
+    #                     )
+    #     return value
 
 
 class BiosampleSerializer(GenericSerializer):
-    sampled_tissue = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
-    taxonomy = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-        allow_null=True, required=False)
-    individual_age_at_collection = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=AGE_OR_AGE_RANGE)],
-        allow_null=True, required=False)
-    histological_diagnosis = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-        allow_null=True, required=False)
-    tumor_progression = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-        allow_null=True, required=False)
-    tumor_grade = serializers.JSONField(
-        validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
-        allow_null=True, required=False)
+    # sampled_tissue = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)])
+    # taxonomy = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+    #     allow_null=True, required=False)
+    # individual_age_at_collection = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=AGE_OR_AGE_RANGE)],
+    #     allow_null=True, required=False)
+    # histological_diagnosis = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+    #     allow_null=True, required=False)
+    # tumor_progression = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+    #     allow_null=True, required=False)
+    # tumor_grade = serializers.JSONField(
+    #     validators=[JsonSchemaValidator(schema=ONTOLOGY_CLASS)],
+    #     allow_null=True, required=False)
     phenotypic_features = PhenotypicFeatureSerializer(
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
     procedure = ProcedureSerializer(exclude_when_nested=['id'])
@@ -220,15 +203,15 @@ class BiosampleSerializer(GenericSerializer):
         fhir_datatype_plural = 'specimens'
         class_converter = fhir_specimen
 
-    def validate_diagnostic_markers(self, value):
-        if isinstance(value, list):
-            for item in value:
-                validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(item)
-                if not validation:
-                    raise serializers.ValidationError(
-                        "Not valid JSON schema for this field."
-                        )
-        return value
+    # def validate_diagnostic_markers(self, value):
+    #     if isinstance(value, list):
+    #         for item in value:
+    #             validation = Draft7Validator(ONTOLOGY_CLASS).is_valid(item)
+    #             if not validation:
+    #                 raise serializers.ValidationError(
+    #                     "Not valid JSON schema for this field."
+    #                     )
+    #     return value
 
     def create(self, validated_data):
         procedure_data = validated_data.pop('procedure')
