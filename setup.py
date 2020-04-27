@@ -20,7 +20,7 @@ setuptools.setup(
         "Django>=2.2,<3.0",
         "django-filter>=2.2,<3.0",
         "django-nose>=1.4,<2.0",
-        "djangorestframework>=3.10,<3.11",
+        "djangorestframework>=3.11,<3.12",
         "djangorestframework-camel-case>=1.1,<2.0",
         "django-rest-swagger==2.2.0",
         "elasticsearch==7.1.0",
