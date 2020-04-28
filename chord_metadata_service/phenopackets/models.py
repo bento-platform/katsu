@@ -66,8 +66,7 @@ class MetaData(models.Model):
     external_references = ArrayField(
         JSONField(null=True, blank=True, validators=[JsonSchemaValidator(EXTERNAL_REFERENCE)]),
         blank=True, null=True, help_text=rec_help(d.META_DATA, "external_references"))
-    extra_properties = JSONField(
-        blank=True, null=True, help_text=rec_help(d.META_DATA, "extra_properties"))
+    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.META_DATA, "extra_properties"))
     updated = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
