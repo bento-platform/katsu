@@ -3,7 +3,7 @@ attrs==19.3.0
 Babel==2.8.0
 certifi==2020.4.5.1
 chardet==3.0.4
-chord-lib==0.7.0
+chord-lib==0.8.0
 codecov==2.0.22
 colorama==0.4.3
 coreapi==2.3.3
