@@ -244,8 +244,8 @@ class Disease(models.Model, IndexableMixin):
                       help_text=rec_help(d.DISEASE, "onset"))
     disease_stage = ArrayField(JSONField(null=True, blank=True, validators=[ontology_validator]),
                                blank=True, null=True, help_text=rec_help(d.DISEASE, "disease_stage"))
-    tnm_finding = ArrayField(
-        JSONField(null=True, blank=True), blank=True, null=True, help_text=rec_help(d.DISEASE, "tnm_finding"))
+    tnm_finding = ArrayField(JSONField(null=True, blank=True, validators=[ontology_validator]),
+                             blank=True, null=True, help_text=rec_help(d.DISEASE, "tnm_finding"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.DISEASE, "extra_properties"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
