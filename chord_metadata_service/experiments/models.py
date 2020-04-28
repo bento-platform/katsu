@@ -4,8 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
-from chord_metadata_service.restapi.validators import ontologyListValidator, keyValueValidator
-from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
+from chord_metadata_service.restapi.validators import ontology_list_validator, key_value_validator
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample
 import chord_metadata_service.experiments.descriptions as d
@@ -42,12 +41,12 @@ class Experiment(models.Model, IndexableMixin):
     reference_registry_id = CharField(max_length=30, blank=True, null=True, help_text=rec_help(d.EXPERIMENT, 'reference_registry_id'))
     qc_flags = ArrayField(CharField(max_length=100, help_text=rec_help(d.EXPERIMENT, 'qc_flags')), null=True, blank=True, default=list)
     experiment_type = CharField(max_length=30, help_text=rec_help(d.EXPERIMENT, 'experiment_type'))
-    experiment_ontology = JSONField(blank=True, null=True, validators=[ontologyListValidator], help_text=rec_help(d.EXPERIMENT, 'experiment_ontology'))
-    molecule_ontology   = JSONField(blank=True, null=True, validators=[ontologyListValidator], help_text=rec_help(d.EXPERIMENT, 'molecule_ontology'))
+    experiment_ontology = JSONField(blank=True, null=True, validators=[ontology_list_validator], help_text=rec_help(d.EXPERIMENT, 'experiment_ontology'))
+    molecule_ontology   = JSONField(blank=True, null=True, validators=[ontology_list_validator], help_text=rec_help(d.EXPERIMENT, 'molecule_ontology'))
     molecule = CharField(choices=MOLECULE, max_length=20, blank=True, null=True, help_text=rec_help(d.EXPERIMENT, 'molecule'))
     library_strategy = CharField(choices=LIBRARY_STRATEGY, max_length=25, help_text=rec_help(d.EXPERIMENT, 'library_strategy'))
 
-    other_fields = JSONField(blank=True, null=True, validators=[keyValueValidator], help_text=rec_help(d.EXPERIMENT, 'other_fields'))
+    other_fields = JSONField(blank=True, null=True, validators=[key_value_validator], help_text=rec_help(d.EXPERIMENT, 'other_fields'))
 
     biosample  = models.ForeignKey(Biosample,  on_delete=models.SET_NULL, blank=True, null=True, help_text=rec_help(d.EXPERIMENT, 'biosample'))
     individual = models.ForeignKey(Individual, on_delete=models.SET_NULL, blank=True, null=True, help_text=rec_help(d.EXPERIMENT, 'individual'))

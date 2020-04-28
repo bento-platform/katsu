@@ -8,6 +8,7 @@ def get_response(viewname, obj):
     """ Generic POST function. """
 
     client = APIClient()
+    #print(json.dumps(obj))
     response = client.post(
         reverse(viewname),
         data=json.dumps(obj),
