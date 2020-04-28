@@ -16,11 +16,11 @@ setuptools.setup(
 
     python_requires=">=3.6",
     install_requires=[
-        "chord_lib[django]==0.6.0",
+        "chord_lib[django]==0.7.0",
         "Django>=2.2,<3.0",
         "django-filter>=2.2,<3.0",
         "django-nose>=1.4,<2.0",
-        "djangorestframework>=3.10,<3.11",
+        "djangorestframework>=3.11,<3.12",
         "djangorestframework-camel-case>=1.1,<2.0",
         "django-rest-swagger==2.2.0",
         "elasticsearch==7.1.0",
@@ -29,6 +29,7 @@ setuptools.setup(
         "psycopg2-binary>=2.8,<3.0",
         "python-dateutil>=2.8,<3.0",
         "PyYAML>=5.3,<6.0",
+        "strict-rfc3339==0.7",
         "rdflib==4.2.2",
         "rdflib-jsonld==0.4.0",
         "requests>=2.23,<3.0",
