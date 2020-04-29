@@ -2,10 +2,12 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.phenopackets.tests.constants import *
 from chord_metadata_service.patients.tests.constants import *
 from chord_metadata_service.restapi.tests.utils import get_response
-from chord_metadata_service.phenopackets.serializers import *
+from chord_metadata_service.phenopackets.models import *
 from rest_framework import status
 
+
 # Tests for FHIR conversion functions
+
 
 class FHIRPhenopacketTest(APITestCase):
 
@@ -227,4 +229,3 @@ class FHIRDiseaseTest(APITestCase):
         self.assertEqual(get_resp_obj['conditions'][0]['extension'][0]['url'],
                               'http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-tumor-stage')
         self.assertEqual(get_resp_obj['conditions'][0]['subject']['reference'], 'unknown')
-        

@@ -3,6 +3,19 @@ from chord_metadata_service.patients.serializers import IndividualSerializer
 from .models import *
 
 
+__all__ = [
+    "GeneticVariantTestedSerializer",
+    "GeneticVariantFoundSerializer",
+    "GenomicsReportSerializer",
+    "LabsVitalSerializer",
+    "TNMStagingSerializer",
+    "CancerConditionSerializer",
+    "CancerRelatedProcedureSerializer",
+    "MedicationStatementSerializer",
+    "MCodePacketSerializer",
+]
+
+
 class GeneticVariantTestedSerializer(GenericSerializer):
 
     class Meta:

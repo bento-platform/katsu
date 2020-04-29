@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from ..models import Individual
-from .constants import *
+from . import constants as c
 
 
 class CreateIndividualTest(APITestCase):
@@ -11,8 +11,8 @@ class CreateIndividualTest(APITestCase):
 
     def setUp(self):
 
-        self.valid_payload = VALID_INDIVIDUAL
-        self.invalid_payload = INVALID_INDIVIDUAL
+        self.valid_payload = c.VALID_INDIVIDUAL
+        self.invalid_payload = c.INVALID_INDIVIDUAL
 
     def test_create_individual(self):
         """ POST a new individual. """
@@ -42,7 +42,7 @@ class UpdateIndividualTest(APITestCase):
     """ Test module for updating an existing Individual record. """
 
     def setUp(self):
-        self.individual_one = Individual.objects.create(**VALID_INDIVIDUAL)
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
 
         self.put_valid_payload = {
             "id": "patient:1",
@@ -64,7 +64,7 @@ class UpdateIndividualTest(APITestCase):
             "active": False
         }
 
-        self.invalid_payload = INVALID_INDIVIDUAL
+        self.invalid_payload = c.INVALID_INDIVIDUAL
 
     def test_update_individual(self):
         """ PUT new data in an existing Individual record. """
@@ -97,7 +97,7 @@ class DeleteIndividualTest(APITestCase):
     """ Test module for deleting an existing Individual record. """
 
     def setUp(self):
-        self.individual_one = Individual.objects.create(**VALID_INDIVIDUAL)
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
 
     def test_delete_individual(self):
         """ DELETE an existing Individual record. """

@@ -1,9 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.settings import api_settings
+from .models import *
 from .serializers import *
-from chord_metadata_service.restapi.api_renderers import (
-    PhenopacketsRenderer
-)
+from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 
