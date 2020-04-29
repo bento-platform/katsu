@@ -7,12 +7,14 @@ from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.schemas import (
-    UPDATE_SCHEMA, EXTERNAL_REFERENCE, EVIDENCE, ALLELE_SCHEMA, DISEASE_ONSET
+    UPDATE_SCHEMA,
+    EXTERNAL_REFERENCE,
+    EVIDENCE,
+    ALLELE_SCHEMA,
+    DISEASE_ONSET,
 )
 import chord_metadata_service.phenopackets.descriptions as d
-from chord_metadata_service.restapi.validators import (
-    ontology_validator, ontology_list_validator, age_or_age_range_validator
-)
+from chord_metadata_service.restapi.validators import ontology_validator, age_or_age_range_validator
 
 
 #############################################################
@@ -59,7 +61,7 @@ class MetaData(models.Model):
     resources = models.ManyToManyField(Resource, help_text=rec_help(d.META_DATA, "resources"))
     updates = ArrayField(
         JSONField(null=True, blank=True,
-                  validators=[JsonSchemaValidator(schema=UPDATE_SCHEMA, format_checker=['date-time'])]),
+                  validators=[JsonSchemaValidator(schema=UPDATE_SCHEMA, formats=['date-time'])]),
         blank=True, null=True, help_text=rec_help(d.META_DATA, "updates"))
     phenopacket_schema_version = models.CharField(max_length=200, blank=True,
                                                   help_text='Schema version of the current phenopacket.')
@@ -90,8 +92,7 @@ class PhenotypicFeature(models.Model, IndexableMixin):
     FHIR: Condition or Observation
     """
 
-    description = models.CharField(
-        max_length=200, blank=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "description"))
+    description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "description"))
     pftype = JSONField(verbose_name='type', validators=[ontology_validator],
                        help_text=rec_help(d.PHENOTYPIC_FEATURE, "type"))
     negated = models.BooleanField(default=False, help_text=rec_help(d.PHENOTYPIC_FEATURE, "negated"))
@@ -152,7 +153,7 @@ class HtsFile(models.Model, IndexableMixin):
         ('CRAM', 'CRAM'),
         ('VCF', 'VCF'),
         ('BCF', 'BCF'),
-        ('GVCF', 'GVCF')
+        ('GVCF', 'GVCF'),
     )
     uri = models.URLField(primary_key=True, max_length=200, help_text=rec_help(d.HTS_FILE, "uri"))
     description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.HTS_FILE, "description"))
@@ -208,7 +209,7 @@ class Variant(models.Model):
         ('hgvsAllele', 'hgvsAllele'),
         ('vcfAllele', 'vcfAllele'),
         ('spdiAllele', 'spdiAllele'),
-        ('iscnAllele', 'iscnAllele')
+        ('iscnAllele', 'iscnAllele'),
     )
     allele_type = models.CharField(max_length=200, choices=ALLELE, help_text="One of four allele types.")
     allele = JSONField(validators=[JsonSchemaValidator(schema=ALLELE_SCHEMA)],

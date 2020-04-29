@@ -143,7 +143,7 @@ KEY_VALUE_OBJECT = {
     "description": "The schema represents a key-value object.",
     "type": "object",
     "patternProperties": {
-        "^.*$": { "type": "string" }
+        "^.*$": {"type": "string"}
     },
     "additionalProperties": False
 }
@@ -330,51 +330,61 @@ TIME_OR_PERIOD = {
 
 
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
-                    id: str=None, title: str=None, description: str=None, additionalProperties=False,
-                    required=None) -> dict:
+                     schema_id: str, title: str = None, description: str = None, additional_properties: bool = False,
+                     required=None) -> dict:
     if required is None:
         required = []
     return {
-            "$schema": "http://json-schema.org/draft-07/schema#",
-            "$id": id,
-            "title": title,
-            "description": description,
-            "type": "object",
-            "properties": {
-                first_property: first_typeof,
-                second_property: second_typeof
-            },
-            "required": required,
-            "additionalProperties": additionalProperties
-            }
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": schema_id,
+        "title": title,
+        "description": description,
+        "type": "object",
+        "properties": {
+            first_property: first_typeof,
+            second_property: second_typeof
+        },
+        "required": required,
+        "additionalProperties": additional_properties
+    }
 
 
-COMORBID_CONDITION = customize_schema(first_typeof=ONTOLOGY_CLASS, second_typeof=ONTOLOGY_CLASS,
-                                     first_property="clinical_status", second_property="code",
-                                     id="chord_metadata_service:comorbid_condition_schema",
-                                     title="Comorbid Condition schema",
-                                     description="Comorbid condition schema.")
+COMORBID_CONDITION = customize_schema(
+    first_typeof=ONTOLOGY_CLASS,
+    second_typeof=ONTOLOGY_CLASS,
+    first_property="clinical_status",
+    second_property="code",
+    schema_id="chord_metadata_service:comorbid_condition_schema",
+    title="Comorbid Condition schema",
+    description="Comorbid condition schema."
+)
 
-#TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
-COMPLEX_ONTOLOGY = customize_schema(first_typeof=ONTOLOGY_CLASS, second_typeof=ONTOLOGY_CLASS,
-                                   first_property="data_value", second_property="staging_system",
-                                   id="chord_metadata_service:complex_ontology_schema", title="Complex ontology",
-                                   description="Complex object to combine data value and staging system.",
-                                   required=["data_value"])
+# TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
+COMPLEX_ONTOLOGY = customize_schema(
+    first_typeof=ONTOLOGY_CLASS,
+    second_typeof=ONTOLOGY_CLASS,
+    first_property="data_value",
+    second_property="staging_system",
+    schema_id="chord_metadata_service:complex_ontology_schema",
+    title="Complex ontology",
+    description="Complex object to combine data value and staging system.",
+    required=["data_value"]
+)
 
-#TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
-TUMOR_MARKER_TEST = customize_schema(first_typeof=ONTOLOGY_CLASS,
-                                     second_typeof={
-                                        "anyOf": [
-                                            ONTOLOGY_CLASS,
-                                            QUANTITY,
-                                            RATIO
-                                        ]
-                                     },
-                                     first_property="code", second_property="data_value",
-                                     id="chord_metadata_service:tumor_marker_test",
-                                     title="Tumor marker test",
-                                     description="Tumor marker test schema.",
-                                     required=["code"]
-                                     )
-
+# TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
+TUMOR_MARKER_TEST = customize_schema(
+    first_typeof=ONTOLOGY_CLASS,
+    second_typeof={
+       "anyOf": [
+           ONTOLOGY_CLASS,
+           QUANTITY,
+           RATIO
+       ]
+    },
+    first_property="code",
+    second_property="data_value",
+    schema_id="chord_metadata_service:tumor_marker_test",
+    title="Tumor marker test",
+    description="Tumor marker test schema.",
+    required=["code"]
+)
