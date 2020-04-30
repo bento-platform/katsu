@@ -1,14 +1,19 @@
 from django.urls import path, include
 from rest_framework import routers
 from chord_metadata_service.chord import api_views as chord_views
+from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
+from chord_metadata_service.mcode import api_views as mcode_views
 
 
 # from .settings import DEBUG
 
 
 router = routers.DefaultRouter(trailing_slash=False)
+
+# Experiments app urls
+router.register(r'experiments', experiment_views.ExperimentViewSet)
 
 # Patients app urls
 router.register(r'individuals', individual_views.IndividualViewSet)
@@ -30,6 +35,17 @@ router.register(r'interpretations', phenopacket_views.InterpretationViewSet)
 router.register(r'projects', chord_views.ProjectViewSet)
 router.register(r'datasets', chord_views.DatasetViewSet)
 router.register(r'table_ownership', chord_views.TableOwnershipViewSet)
+
+# mCode app urls
+router.register(r'geneticvariantstested', mcode_views.GeneticVariantTestedViewSet)
+router.register(r'geneticvariantsfound', mcode_views.GeneticVariantFoundViewSet)
+router.register(r'genomicsreports', mcode_views.GenomicsReportViewSet)
+router.register(r'labsvital', mcode_views.LabsVitalViewSet)
+router.register(r'cancerconditions', mcode_views.CancerConditionViewSet)
+router.register(r'tnmstaging', mcode_views.TNMStagingViewSet)
+router.register(r'cancerrelatedprocedures', mcode_views.CancerRelatedProcedureViewSet)
+router.register(r'medicationstatements', mcode_views.MedicationStatementViewSet)
+router.register(r'mcodepackets', mcode_views.MCodePacketViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

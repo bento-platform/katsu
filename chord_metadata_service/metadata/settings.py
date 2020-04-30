@@ -62,12 +62,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'chord_metadata_service.chord',
+    'chord_metadata_service.experiments.apps.ExperimentsConfig',
     'chord_metadata_service.patients.apps.PatientsConfig',
     'chord_metadata_service.phenopackets.apps.PhenopacketsConfig',
+    'chord_metadata_service.mcode.apps.McodeConfig',
     'chord_metadata_service.restapi',
 
     'rest_framework',
     'django_nose',
+    'rest_framework_swagger',
 ]
 
 MIDDLEWARE = [
@@ -165,7 +168,8 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
-    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly']
+    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 }
 
 # Password validation

@@ -9,7 +9,6 @@ VALID_PROCEDURE_1 = {
     }
 }
 
-
 VALID_PROCEDURE_2 = {
     "code": {
         "id": "NCIT:C28743",
@@ -21,36 +20,33 @@ VALID_PROCEDURE_2 = {
     }
 }
 
-
 VALID_META_DATA_1 = {
     "created_by": "David Lougheed",
     "submitted_by": "David Lougheed"
 }
-
 
 VALID_META_DATA_2 = {
     "created_by": "Ksenia Zaytseva",
     "submitted_by": "Ksenia Zaytseva",
     "external_references": [
         {
-        "id": "PMID:30808312",
-        "description": "Bao M, et al. COL6A1 mutation leading to Bethlem myopathy with recurrent hematuria: a case report. BMC Neurol. 2019;19(1):32."
+            "id": "PMID:30808312",
+            "description": "Bao M, et al. COL6A1 mutation leading to Bethlem myopathy with recurrent hematuria: a case report. BMC Neurol. 2019;19(1):32."
         },
         {
-        "id": "PMID:3080844",
-        "description": "Test"
+            "id": "PMID:3080844",
+            "description": "Test"
         }
-  ],
+    ],
     "updates": [
         {
-          "timestamp": "2018-06-10T10:59:06Z",
-          "updated_by": "Julius J.",
-          "comment": "added phenotypic features to individual patient:1"
+            "timestamp": "2018-06-10T10:59:06Z",
+            "updated_by": "Julius J.",
+            "comment": "added phenotypic features to individual patient:1"
         }
     ],
     "phenopacket_schema_version": "0.1"
 }
-
 
 VALID_INDIVIDUAL_1 = {
     "id": "patient:1",
@@ -58,13 +54,11 @@ VALID_INDIVIDUAL_1 = {
     "sex": "MALE"
 }
 
-
 VALID_INDIVIDUAL_2 = {
     "id": "patient:2",
     "date_of_birth": "1978-01-01",
     "sex": "FEMALE"
 }
-
 
 VALID_HTS_FILE = {
     "uri": "https://data.example/genomes/germline_wgs.vcf.gz",
@@ -72,77 +66,71 @@ VALID_HTS_FILE = {
     "hts_format": "VCF",
     "genome_assembly": "GRCh38",
     "individual_to_sample_identifiers": {
-      "patient:1": "NA12345"
+        "patient:1": "NA12345"
     },
     "extra_properties": {
         "comment": "test data"
     }
 }
 
-
 VALID_GENE_1 = {
-  "id": "HGNC:347",
-  "alternate_ids": ["ensembl:ENSRNOG00000019450", "ncbigene:307503"],
-  "symbol": "ETF1",
-  "extra_properties": {
-    "comment": "test data"
-  }
+    "id": "HGNC:347",
+    "alternate_ids": ["ensembl:ENSRNOG00000019450", "ncbigene:307503"],
+    "symbol": "ETF1",
+    "extra_properties": {
+        "comment": "test data"
+    }
 }
-
 
 INVALID_GENE_2 = {
-  "id": "HGNC:347",
-  "alternate_ids": "ensembl:ENSRNOG00000019450",
-  "symbol": "ETF1",
-  "extra_properties": {
-    "comment": "test data"
-  }
+    "id": "HGNC:347",
+    "alternate_ids": "ensembl:ENSRNOG00000019450",
+    "symbol": "ETF1",
+    "extra_properties": {
+        "comment": "test data"
+    }
 }
-
 
 DUPLICATE_GENE_2 = {
-  "id": "HGNC:347",
-  "symbol": "DYI"
+    "id": "HGNC:347",
+    "symbol": "DYI"
 }
-
 
 VALID_VARIANT_1 = {
     "allele_type": "spdiAllele",
     "allele": {
-      "id": "clinvar:13294",
-      "seq_id": "NC_000010.10",
-      "position": 123256214,
-      "deleted_sequence": "T",
-      "inserted_sequence": "G"
+        "id": "clinvar:13294",
+        "seq_id": "NC_000010.10",
+        "position": 123256214,
+        "deleted_sequence": "T",
+        "inserted_sequence": "G"
     },
     "zygosity": {
-      "id": "NCBITaxon:9606",
-      "label": "human"
+        "id": "NCBITaxon:9606",
+        "label": "human"
     },
     "extra_properties": {
         "comment": "test data"
     }
 }
-
 
 VALID_VARIANT_2 = {
     "allele_type": "spdiAllele",
     "spdiAllele": {
-      "id": "clinvar:13294",
-      "seq_id": "NC_000010.10",
-      "position": 123256214,
-      "deleted_sequence": "T",
-      "inserted_sequence": "G"
+        "id": "clinvar:13294",
+        "seq_id": "NC_000010.10",
+        "position": 123256214,
+        "deleted_sequence": "T",
+        "inserted_sequence": "G"
     },
     "zygosity": {
-      "id": "NCBITaxon:9606",
-      "label": "human"
+        "id": "NCBITaxon:9606",
+        "label": "human"
     },
     "extra_properties": {
         "comment": "test data"
     }
 }
-
 
 VALID_DISEASE_1 = {
     "term": {
@@ -154,15 +142,20 @@ VALID_DISEASE_1 = {
     },
     "disease_stage": [
         {
-        "id": "NCIT:C28091",
-        "label": "Gleason Score 7"
+            "id": "NCIT:C48233",
+            "label": "Cancer TNM Finding by Site"
+        }
+    ],
+    "tnm_finding": [
+        {
+            "id": "NCIT:C28091",
+            "label": "Gleason Score 7"
         }
     ],
     "extra_properties": {
         "comment": "test data"
     }
 }
-
 
 INVALID_DISEASE_2 = {
     "term": {
@@ -174,14 +167,13 @@ INVALID_DISEASE_2 = {
     },
     "disease_stage": [
         {
-        "id": "NCIT:C28091"
+            "id": "NCIT:C28091"
         }
     ],
     "extra_properties": {
         "comment": "test data"
     }
 }
-
 
 VALID_RESOURCE_1 = {
     "id": "so",
@@ -192,7 +184,6 @@ VALID_RESOURCE_1 = {
     "iri_prefix": "http://purl.obolibrary.org/obo/SO_"
 }
 
-
 VALID_RESOURCE_2 = {
     "id": "hgnc",
     "name": "HUGO Gene Nomenclature Committee",
@@ -201,7 +192,6 @@ VALID_RESOURCE_2 = {
     "namespace_prefix": "HGNC",
     "iri_prefix": "https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/"
 }
-
 
 DUPLICATE_RESOURCE_3 = {
     "id": "hgnc",
@@ -217,7 +207,7 @@ def valid_phenopacket(subject, meta_data):
         id='phenopacket:1',
         subject=subject,
         meta_data=meta_data
-        )
+    )
 
 
 def valid_biosample_1(individual, procedure):
@@ -234,15 +224,13 @@ def valid_biosample_1(individual, procedure):
             "label": "Homo sapiens"
         },
         individual_age_at_collection={
-                "age": {
-                    "start": {
-                        "age": "P45Y"
-                    },
-                    "end": {
-                        "age": "P49Y"
-                    }
-                }
+            "start": {
+                "age": "P45Y"
             },
+            "end": {
+                "age": "P49Y"
+            }
+        },
         histological_diagnosis={
             "id": "NCIT:C39853",
             "label": "Infiltrating Urothelial Carcinoma"
@@ -284,15 +272,13 @@ def valid_biosample_2(individual, procedure):
             "label": "Homo sapiens"
         },
         individual_age_at_collection={
-                "age": {
-                    "start": {
-                        "age": "P45Y"
-                    },
-                    "end": {
-                        "age": "P49Y"
-                    }
-                }
+            "start": {
+                "age": "P45Y"
             },
+            "end": {
+                "age": "P49Y"
+            }
+        },
         histological_diagnosis={
             "id": "NCIT:C39853",
             "label": "Infiltrating Urothelial Carcinoma"
@@ -325,7 +311,7 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
         description='This is a test phenotypic feature',
         pftype={
             "id": "HP:0000520",
-            "label": "Proptosis" 
+            "label": "Proptosis"
         },
         negated=True,
         severity={
@@ -334,12 +320,12 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
         },
         modifier=[
             {
-            "id": "HP: 0012825 ",
-            "label": "Mild"
+                "id": "HP: 0012825 ",
+                "label": "Mild"
             },
             {
-            "id": "HP: 0012823 ",
-            "label": "Semi-mild"
+                "id": "HP: 0012823 ",
+                "label": "Semi-mild"
             }
         ],
         onset={
@@ -361,7 +347,7 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
         },
         biosample=biosample,
         phenopacket=phenopacket
-        )
+    )
 
 
 def invalid_phenotypic_feature():
@@ -374,10 +360,10 @@ def invalid_phenotypic_feature():
         },
         modifier=[
             {
-            "label": "Mild"
+                "label": "Mild"
             },
             {
-            "id": "HP: 0012823 "
+                "id": "HP: 0012823 "
             }
         ],
         onset={
@@ -397,18 +383,18 @@ def invalid_phenotypic_feature():
         extra_properties={
             "comment": "test data"
         }
-        )
+    )
 
 
 def valid_genomic_interpretation(gene=None, variant=None):
     return dict(
-            status='CANDIDATE',
-            gene=gene,
-            variant=variant,
-            extra_properties={
-                "comment": "test data"
-            }
-        )
+        status='CANDIDATE',
+        gene=gene,
+        variant=variant,
+        extra_properties={
+            "comment": "test data"
+        }
+    )
 
 
 def valid_diagnosis(disease):
@@ -417,7 +403,7 @@ def valid_diagnosis(disease):
         extra_properties={
             "comment": "test data"
         }
-        )
+    )
 
 
 def valid_interpretation(phenopacket, meta_data):
@@ -429,4 +415,4 @@ def valid_interpretation(phenopacket, meta_data):
         extra_properties={
             "comment": "test data"
         }
-        )
+    )

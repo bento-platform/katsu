@@ -51,13 +51,12 @@ class UpdateIndividualTest(APITestCase):
                 "label": "human"
             },
             "date_of_birth": "2001-01-01",
-            "age": {"age": {
-                  "start": {
-                      "age": "P45Y"
-                  },
-                  "end": {
-                      "age": "P49Y"
-                  }
+            "age": {
+                "start": {
+                    "age": "P45Y"
+                },
+                "end": {
+                    "age": "P49Y"
                 }
             },
             "sex": "FEMALE",

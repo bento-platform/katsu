@@ -1,6 +1,7 @@
 import itertools
-from datetime import datetime
 
+from collections import Counter
+from datetime import datetime
 from django.db import connection
 from django.conf import settings
 from psycopg2 import sql
@@ -11,11 +12,13 @@ from rest_framework.response import Response
 from chord_lib.responses.errors import *
 from chord_lib.search import build_search_response, postgres
 from chord_metadata_service.metadata.settings import DEBUG
+from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.metadata.elastic import es
+
 from .models import Dataset
 from .permissions import OverrideOrSuperUserOnly
 
@@ -81,7 +84,8 @@ def table_list(request):
 @permission_classes([OverrideOrSuperUserOnly])
 def table_detail(request, table_id):  # pragma: no cover
     # TODO: Implement GET, POST
-    # TODO: Permissions: Check if user has control / more direct access over this dataset? Or just always use owner...
+    # TODO: Permissions: Check if user has control / more direct access over this table and/or dataset?
+    #  Or just always use owner...
     try:
         table = Dataset.objects.get(identifier=table_id)
     except Dataset.DoesNotExist:
@@ -90,6 +94,80 @@ def table_detail(request, table_id):  # pragma: no cover
     if request.method == "DELETE":
         table.delete()
         return Response(status=204)
+
+
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly])
+def chord_table_summary(_request, table_id):
+    try:
+        table = Dataset.objects.get(identifier=table_id)
+        phenopackets = Phenopacket.objects.filter(dataset=table)
+
+        diseases_counter = Counter()
+        phenotypic_features_counter = Counter()
+
+        biosamples_set = set()
+        individuals_set = set()
+
+        biosamples_cs = Counter()
+        biosamples_taxonomy = Counter()
+
+        individuals_sex = Counter()
+        individuals_k_sex = Counter()
+        individuals_taxonomy = Counter()
+
+        def count_individual(ind):
+            individuals_set.add(ind.id)
+            individuals_sex.update((ind.sex,))
+            individuals_k_sex.update((ind.karyotypic_sex,))
+            if ind.taxonomy is not None:
+                individuals_taxonomy.update((ind.taxonomy["id"],))
+
+        for p in phenopackets.prefetch_related("biosamples"):
+            for b in p.biosamples.all():
+                biosamples_set.add(b.id)
+                biosamples_cs.update((b.is_control_sample,))
+
+                if b.taxonomy is not None:
+                    biosamples_taxonomy.update((b.taxonomy["id"],))
+
+                if b.individual is not None:
+                    count_individual(b.individual)
+
+                for pf in b.phenotypic_features.all():
+                    phenotypic_features_counter.update((pf.pftype["id"],))
+
+            for d in p.diseases.all():
+                diseases_counter.update((d.term["id"],))
+
+            for pf in p.phenotypic_features.all():
+                phenotypic_features_counter.update((pf.pftype["id"],))
+
+            # Currently, phenopacket subject is required so we can assume it's not None
+            count_individual(p.subject)
+
+        return Response({
+            "count": phenopackets.count(),
+            "data_type_specific": {
+                "biosamples": {
+                    "count": len(biosamples_set),
+                    "is_control_sample": dict(biosamples_cs),
+                    "taxonomy": dict(biosamples_taxonomy),
+                },
+                "diseases": dict(diseases_counter),
+                "individuals": {
+                    "count": len(individuals_set),
+                    "sex": {k: individuals_sex[k] for k in (s[0] for s in Individual.SEX)},
+                    "karyotypic_sex": {k: individuals_k_sex[k] for k in (s[0] for s in Individual.KARYOTYPIC_SEX)},
+                    "taxonomy": dict(individuals_taxonomy),
+                    # TODO: age histogram
+                },
+                "phenotypic_features": dict(phenotypic_features_counter),
+            }
+        })
+
+    except Dataset.DoesNotExist:
+        return Response(not_found_error(f"Table with ID {table_id} not found"), status=404)
 
 
 # TODO: CHORD-standardized logging
@@ -218,42 +296,40 @@ def fhir_search(request, internal_data=False):
 
     res = es.search(index=settings.FHIR_INDEX_NAME, body=query)
 
-    subject_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'Patient']
-    htsfile_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'DocumentReference']
-    disease_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'Condition']
-    biosample_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'Specimen']
-    phenotypicfeature_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'Observation']
-    phenopacket_ids = [hit['_id'].split('|')[1] for hit in res['hits']['hits'] if hit['_source']['resourceType'] == 'Composition']
+    def hits_for(resource_type: str):
+        return frozenset(hit["_id"].split("|")[1] for hit in res["hits"]["hits"]
+                         if hit['_source']['resourceType'] == resource_type)
 
-    if (not subject_ids and not htsfile_ids and not disease_ids
-        and not biosample_ids and not phenotypicfeature_ids and not phenopacket_ids):
+    subject_ids = hits_for('Patient')
+    htsfile_ids = hits_for('DocumentReference')
+    disease_ids = hits_for('Condition')
+    biosample_ids = hits_for('Specimen')
+    phenotypicfeature_ids = hits_for('Observation')
+    phenopacket_ids = hits_for('Composition')
+
+    if all((not subject_ids, not htsfile_ids, not disease_ids, not biosample_ids, not phenotypicfeature_ids,
+            not phenopacket_ids)):
         return Response(build_search_response([], start))
-    else:
-        phenopackets = phenopacket_filter_results(
-            subject_ids,
-            htsfile_ids,
-            disease_ids,
-            biosample_ids,
-            phenotypicfeature_ids,
-            phenopacket_ids
-        )
+
+    phenopackets = phenopacket_filter_results(
+        subject_ids,
+        htsfile_ids,
+        disease_ids,
+        biosample_ids,
+        phenotypicfeature_ids,
+        phenopacket_ids
+    )
 
     if not internal_data:
-        datasets = Dataset.objects.filter(
-            identifier__in = [
-                p.dataset_id for p in phenopackets
-            ]
-        )  # TODO: Maybe can avoid hitting DB here
+        # TODO: Maybe can avoid hitting DB here
+        datasets = Dataset.objects.filter(identifier__in=frozenset(p.dataset_id for p in phenopackets))
         return Response(build_search_response([{"id": d.identifier, "data_type": PHENOPACKET_DATA_TYPE_ID}
                                                for d in datasets], start))
     return Response(build_search_response({
         dataset_id: {
             "data_type": PHENOPACKET_DATA_TYPE_ID,
             "matches": list(PhenopacketSerializer(p).data for p in dataset_phenopackets)
-        } for dataset_id, dataset_phenopackets in itertools.groupby(
-            phenopackets,
-            key=lambda p: str(p.dataset_id)
-        )
+        } for dataset_id, dataset_phenopackets in itertools.groupby(phenopackets, key=lambda p: str(p.dataset_id))
     }, start))
 
 
@@ -271,16 +347,9 @@ def fhir_private_search(request):
     return fhir_search(request, internal_data=True)
 
 
-# Mounted on /private/, so will get protected anyway; this allows for access from federation service
-# TODO: Ugly and misleading permissions
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def chord_private_table_search(request, table_id):
-    # Search phenopacket data types in specific tables
-    # Private search endpoints are protected by URL namespace, not by Django permissions.
-
+def chord_table_search(request, table_id, internal=False):
     start = datetime.now()
-    debug_log("Started private table search")
+    debug_log(f"Started {'private' if internal else 'public'} table search")
 
     if request.data is None or "query" not in request.data:
         # TODO: Better error
@@ -304,7 +373,27 @@ def chord_private_table_search(request, table_id):
 
     debug_log(f"Finished running query in {datetime.now() - start}")
 
-    serialized_data = PhenopacketSerializer(query_results, many=True).data
-    debug_log(f"Finished running query and serializing in {datetime.now() - start}")
+    if internal:
+        serialized_data = PhenopacketSerializer(query_results, many=True).data
+        debug_log(f"Finished running query and serializing in {datetime.now() - start}")
 
-    return Response(build_search_response(serialized_data, start))
+        return Response(build_search_response(serialized_data, start))
+
+    return Response(len(query_results) > 0)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def chord_public_table_search(request, table_id):
+    # Search phenopacket data types in specific tables without leaking internal data
+    return chord_table_search(request, table_id, internal=False)
+
+
+# Mounted on /private/, so will get protected anyway; this allows for access from federation service
+# TODO: Ugly and misleading permissions
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def chord_private_table_search(request, table_id):
+    # Search phenopacket data types in specific tables
+    # Private search endpoints are protected by URL namespace, not by Django permissions.
+    return chord_table_search(request, table_id, internal=True)

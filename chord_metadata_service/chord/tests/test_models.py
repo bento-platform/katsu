@@ -65,6 +65,6 @@ class TableOwnershipTest(TestCase):
         self.assertEqual(t.data_type, "variant")
         self.assertEqual(t.dataset, d)
 
-        self.assertIn(t, d.table_ownerships.all())
+        self.assertIn(t, d.table_ownership.all())
 
         self.assertEqual(str(t), f"{str(d)} -> {t.table_id}")
