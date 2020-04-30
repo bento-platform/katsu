@@ -143,33 +143,36 @@ KEY_VALUE_OBJECT = {
     "description": "The schema represents a key-value object.",
     "type": "object",
     "patternProperties": {
-        "^.*$": { "type": "string" }
+        "^.*$": {"type": "string"}
     },
     "additionalProperties": False
 }
 
 
-AGE = {"type": "string", "description": "An ISO8601 string represent age."}
+AGE_STRING = {"type": "string", "description": "An ISO8601 string represent age."}
+
+AGE = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "chord_metadata_service:age_schema",
+    "title": "Age schema",
+    "description": "An age of a subject.",
+    "type": "object",
+    "properties": {
+        "age": AGE_STRING
+    },
+    "additionalProperties": False,
+    "required": ["age"]
+}
 
 AGE_RANGE = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:age_range_schema",
-    "title": "Age schema",
+    "title": "Age range schema",
     "description": "An age range of a subject.",
     "type": "object",
     "properties": {
-        "start": {
-            "type": "object",
-            "properties": {
-                "age": AGE
-            }
-        },
-        "end": {
-            "type": "object",
-            "properties": {
-                "age": AGE
-            }
-        }
+        "start": AGE,
+        "end": AGE
     },
     "additionalProperties": False,
     "required": ["start", "end"]
@@ -182,15 +185,10 @@ AGE_OR_AGE_RANGE = {
     "description": "An age object describing the age of the individual at the time of collection of biospecimens or "
                    "phenotypic observations.",
     "type": "object",
-    "properties": {
-        "age": {
-            "anyOf": [
-                AGE,
-                AGE_RANGE
-            ]
-        }
-    },
-    "additionalProperties": False
+    "oneOf": [
+        AGE,
+        AGE_RANGE
+    ]
 }
 
 DISEASE_ONSET = {
@@ -199,16 +197,11 @@ DISEASE_ONSET = {
     "title": "Onset age",
     "description": "Schema for the age of the onset of the disease.",
     "type": "object",
-    "properties": {
-        "age": {
-            "anyOf": [
-                AGE,
-                AGE_RANGE,
-                ONTOLOGY_CLASS
-            ]
-        }
-    },
-    "additionalProperties": False
+    "oneOf": [
+        AGE,
+        AGE_RANGE,
+        ONTOLOGY_CLASS
+    ]
 }
 
 ################################## mCode/FHIR based schemas ##################################
