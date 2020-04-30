@@ -81,7 +81,7 @@ UPDATE = {
     "description": "An update event for a record (e.g. a phenopacket.)",
     "properties": {
         "timestamp": {
-            "description": "ISO8601 timestamp specifying when when this update occurred.",
+            "description": "ISO8601 UTC timestamp specifying when when this update occurred.",
             "help": "Timestamp specifying when when this update occurred.",
         },
         "updated_by": "Information about the person/organization/network that performed the update.",

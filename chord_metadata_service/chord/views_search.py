@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from chord_lib.responses.errors import *
+from chord_lib.responses import errors
 from chord_lib.search import build_search_response, postgres
 from chord_metadata_service.metadata.settings import DEBUG
 from chord_metadata_service.patients.models import Individual
@@ -63,7 +63,7 @@ def data_type_phenopacket_metadata_schema(_request):
 def table_list(request):
     data_types = request.query_params.getlist("data-type")
     if PHENOPACKET_DATA_TYPE_ID not in data_types:
-        return Response(bad_request_error(f"Missing or invalid data type (Specified: {data_types})"), status=400)
+        return Response(errors.bad_request_error(f"Missing or invalid data type (Specified: {data_types})"), status=400)
 
     return Response([{
         "id": d.identifier,
@@ -89,7 +89,7 @@ def table_detail(request, table_id):  # pragma: no cover
     try:
         table = Dataset.objects.get(identifier=table_id)
     except Dataset.DoesNotExist:
-        return Response(not_found_error(f"Table with ID {table_id} not found"), status=404)
+        return Response(errors.not_found_error(f"Table with ID {table_id} not found"), status=404)
 
     if request.method == "DELETE":
         table.delete()
@@ -167,7 +167,7 @@ def chord_table_summary(_request, table_id):
         })
 
     except Dataset.DoesNotExist:
-        return Response(not_found_error(f"Table with ID {table_id} not found"), status=404)
+        return Response(errors.not_found_error(f"Table with ID {table_id} not found"), status=404)
 
 
 # TODO: CHORD-standardized logging
@@ -202,21 +202,23 @@ def phenopacket_query_results(query, params):
 
 def search(request, internal_data=False):
     if "data_type" not in request.data:
-        return Response(bad_request_error("Missing data_type in request body"), status=400)
+        return Response(errors.bad_request_error("Missing data_type in request body"), status=400)
 
     if "query" not in request.data:
-        return Response(bad_request_error("Missing query in request body"), status=400)
+        return Response(errors.bad_request_error("Missing query in request body"), status=400)
 
     start = datetime.now()
 
     if request.data["data_type"] != PHENOPACKET_DATA_TYPE_ID:
-        return Response(bad_request_error(f"Missing or invalid data type (Specified: {request.data['data_type']})"),
-                        status=400)
+        return Response(
+            errors.bad_request_error(f"Missing or invalid data type (Specified: {request.data['data_type']})"),
+            status=400
+        )
 
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
     except (SyntaxError, TypeError, ValueError) as e:
-        return Response(bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
+        return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
     if not internal_data:
         datasets = Dataset.objects.filter(identifier__in=phenopacket_results(
@@ -254,7 +256,7 @@ def chord_private_search(request):
 
 
 def phenopacket_filter_results(subject_ids, htsfile_ids, disease_ids, biosample_ids,
-                               phenotypicfeature_ids, phenopacket_ids, prefetch=False):
+                               phenotypicfeature_ids, phenopacket_ids):
 
     query = Phenopacket.objects.get_queryset()
 
@@ -286,7 +288,7 @@ def fhir_search(request, internal_data=False):
     # TODO: not all that sure about the query format we'll want
     # keep it simple for now
     if "query" not in request.data:
-        return Response(bad_request_error("Missing query in request body"), status=400)
+        return Response(errors.bad_request_error("Missing query in request body"), status=400)
 
     query = request.data["query"]
     start = datetime.now()
@@ -353,7 +355,7 @@ def chord_table_search(request, table_id, internal=False):
 
     if request.data is None or "query" not in request.data:
         # TODO: Better error
-        return Response(bad_request_error("Missing query in request body"), status=400)
+        return Response(errors.bad_request_error("Missing query in request body"), status=400)
 
     # Check that dataset exists
     dataset = Dataset.objects.get(identifier=table_id)
@@ -362,7 +364,7 @@ def chord_table_search(request, table_id, internal=False):
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
     except (SyntaxError, TypeError, ValueError) as e:
         print("[CHORD Metadata] Error encountered compiling query {}:\n    {}".format(request.data["query"], str(e)))
-        return Response(bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
+        return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
     debug_log(f"Finished compiling query in {datetime.now() - start}")
 

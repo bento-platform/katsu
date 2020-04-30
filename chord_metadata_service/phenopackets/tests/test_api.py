@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
 from .constants import *
+from ..models import *
 from ..serializers import *
 from chord_metadata_service.restapi.tests.utils import get_response
 
@@ -74,7 +75,7 @@ class CreatePhenotypicFeatureTest(APITestCase):
 
     def setUp(self):
         valid_payload = valid_phenotypic_feature()
-        removed_pftype = valid_payload.pop('pftype', None)
+        valid_payload.pop('pftype', None)
         valid_payload['type'] = {
             "id": "HP:0000520",
             "label": "Proptosis"
