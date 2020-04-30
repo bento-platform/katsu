@@ -6,13 +6,11 @@ VALID_INDIVIDUAL = {
     },
     "date_of_birth": "1960-01-01",
     "age": {
-        "age": {
-            "start": {
-                "age": "P45Y"
-            },
-            "end": {
-                "age": "P49Y"
-            }
+        "start": {
+            "age": "P45Y"
+        },
+        "end": {
+            "age": "P49Y"
         }
     },
     "sex": "FEMALE",
@@ -26,13 +24,11 @@ INVALID_INDIVIDUAL = {
     },
     "date_of_birth": "1960-01-01",
     "age": {
-        "age": {
-            "start": {
-                "age": "P45Y"
-            },
-            "end": {
-                "age": "P49Y"
-            }
+        "start": {
+            "age": "P45Y"
+        },
+        "end": {
+            "age": "P49Y"
         }
     },
     "sex": "FEM",

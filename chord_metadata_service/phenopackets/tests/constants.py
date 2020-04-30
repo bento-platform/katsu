@@ -224,13 +224,11 @@ def valid_biosample_1(individual, procedure):
             "label": "Homo sapiens"
         },
         individual_age_at_collection={
-            "age": {
-                "start": {
-                    "age": "P45Y"
-                },
-                "end": {
-                    "age": "P49Y"
-                }
+            "start": {
+                "age": "P45Y"
+            },
+            "end": {
+                "age": "P49Y"
             }
         },
         histological_diagnosis={
@@ -274,13 +272,11 @@ def valid_biosample_2(individual, procedure):
             "label": "Homo sapiens"
         },
         individual_age_at_collection={
-            "age": {
-                "start": {
-                    "age": "P45Y"
-                },
-                "end": {
-                    "age": "P49Y"
-                }
+            "start": {
+                "age": "P45Y"
+            },
+            "end": {
+                "age": "P49Y"
             }
         },
         histological_diagnosis={

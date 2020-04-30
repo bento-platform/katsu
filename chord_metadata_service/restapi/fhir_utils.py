@@ -56,13 +56,13 @@ def fhir_age(obj, mapping, field):
     age_extension = extension.Extension()
     age_extension.url = mapping
 
-    if isinstance(obj[field]['age'], dict):
+    if "start" in obj[field]:  # Is an age range
         age_extension.valueRange = range.Range()
         age_extension.valueRange.low = quantity.Quantity()
-        age_extension.valueRange.low.unit = obj[field]['age']['start']['age']
+        age_extension.valueRange.low.unit = obj[field]['start']['age']
         age_extension.valueRange.high = quantity.Quantity()
-        age_extension.valueRange.high.unit = obj[field]['age']['end']['age']
-    else:
+        age_extension.valueRange.high.unit = obj[field]['end']['age']
+    else:  # Is a precise age
         age_extension.valueAge = age.Age()
         age_extension.valueAge.unit = obj[field]['age']
     return age_extension
