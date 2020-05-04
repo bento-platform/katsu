@@ -1,6 +1,17 @@
 from rest_framework.test import APITestCase
-from chord_metadata_service.phenopackets.tests.constants import *
-from chord_metadata_service.patients.tests.constants import *
+from chord_metadata_service.phenopackets.tests.constants import (
+    VALID_INDIVIDUAL_1,
+    VALID_META_DATA_2,
+    VALID_PROCEDURE_1,
+    VALID_HTS_FILE,
+    VALID_DISEASE_1,
+    VALID_GENE_1,
+    VALID_VARIANT_1,
+    valid_biosample_1,
+    valid_biosample_2,
+    valid_phenotypic_feature,
+)
+from chord_metadata_service.patients.tests.constants import VALID_INDIVIDUAL, VALID_INDIVIDUAL_2
 from chord_metadata_service.restapi.tests.utils import get_response
 from chord_metadata_service.phenopackets.models import *
 from rest_framework import status
@@ -58,6 +69,7 @@ class FHIRIndividualTest(APITestCase):
     def test_get_fhir(self):
         response_1 = get_response('individual-list', self.individual)
         response_2 = get_response('individual-list', self.individual_second)
+        print(response_1.data, response_2.data)
         get_resp = self.client.get('/api/individuals?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -82,18 +94,17 @@ class FHIRPhenotypicFeatureTest(APITestCase):
         self.phenotypic_feature_2 = PhenotypicFeature.objects.create(
             **valid_phenotypic_feature(biosample=self.biosample_2))
 
-
     def test_get_fhir(self):
         get_resp = self.client.get('/api/phenotypicfeatures?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
         severity = {
-            'url':'http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-severity',
-            'valueCodeableConcept':{
-                'coding':[
+            'url': 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-severity',
+            'valueCodeableConcept': {
+                'coding': [
                     {
-                    'code':'HP: 0012825',
-                    'display':'Mild'
+                        'code': 'HP: 0012825',
+                        'display': 'Mild'
                     }
                 ]
             }
@@ -105,7 +116,7 @@ class FHIRPhenotypicFeatureTest(APITestCase):
         self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['display'], 'Proptosis')
         self.assertEqual(get_resp_obj['observations'][0]['interpretation']['coding'][0]['code'], 'POS')
         self.assertEqual(get_resp_obj['observations'][0]['extension'][3]['url'],
-                              'http://ga4gh.org/fhir/phenopackets/StructureDefinition/evidence')
+                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/evidence')
         self.assertEqual(get_resp_obj['observations'][0]['extension'][3]['extension'][1]['extension'][1]['url'],
                          'description')
         self.assertIsNotNone(get_resp_obj['observations'][0]['specimen'])
@@ -139,7 +150,7 @@ class FHIRBiosampleTest(APITestCase):
     def test_get_fhir(self):
         """ POST a new biosample. """
 
-        response = get_response('biosample-list', self.valid_payload)
+        get_response('biosample-list', self.valid_payload)
         get_resp = self.client.get('/api/biosamples?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -150,7 +161,7 @@ class FHIRBiosampleTest(APITestCase):
         self.assertEqual(get_resp_obj['specimens'][0]['extension'][4]['url'],
                          'http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-diagnostic-markers')
         self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][4]['valueCodeableConcept']['coding'],
-                         list)
+                              list)
         self.assertTrue(get_resp_obj['specimens'][0]['extension'][5]['valueBoolean'])
 
 
@@ -160,7 +171,7 @@ class FHIRHtsFileTest(APITestCase):
         self.hts_file = VALID_HTS_FILE
 
     def test_get_fhir(self):
-        response = get_response('htsfile-list', self.hts_file)
+        get_response('htsfile-list', self.hts_file)
         get_resp = self.client.get('/api/htsfiles?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -227,5 +238,5 @@ class FHIRDiseaseTest(APITestCase):
         self.assertIsNotNone(get_resp_obj['conditions'][0]['code']['coding'][0])
         self.assertIsInstance(get_resp_obj['conditions'][0]['extension'], list)
         self.assertEqual(get_resp_obj['conditions'][0]['extension'][0]['url'],
-                              'http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-tumor-stage')
+                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-tumor-stage')
         self.assertEqual(get_resp_obj['conditions'][0]['subject']['reference'], 'unknown')
