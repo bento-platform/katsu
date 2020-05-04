@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from jsonschema import Draft7Validator, FormatChecker
 from chord_metadata_service.restapi.schemas import (
+    AGE_OR_AGE_RANGE,
     ONTOLOGY_CLASS,
     QUANTITY,
     COMPLEX_ONTOLOGY,
@@ -8,7 +9,6 @@ from chord_metadata_service.restapi.schemas import (
     TUMOR_MARKER_TEST,
     ONTOLOGY_CLASS_LIST,
     KEY_VALUE_OBJECT,
-    AGE_OR_AGE_RANGE,
     COMORBID_CONDITION,
 )
 
@@ -37,10 +37,10 @@ class JsonSchemaValidator:
         )
 
 
+age_or_age_range_validator = JsonSchemaValidator(AGE_OR_AGE_RANGE)
 ontology_validator = JsonSchemaValidator(ONTOLOGY_CLASS)
 ontology_list_validator = JsonSchemaValidator(ONTOLOGY_CLASS_LIST)
 key_value_validator = JsonSchemaValidator(KEY_VALUE_OBJECT)
-age_or_age_range_validator = JsonSchemaValidator(AGE_OR_AGE_RANGE)
 quantity_validator = JsonSchemaValidator(schema=QUANTITY, formats=['uri'])
 tumor_marker_test_validator = JsonSchemaValidator(schema=TUMOR_MARKER_TEST)
 complex_ontology_validator = JsonSchemaValidator(schema=COMPLEX_ONTOLOGY, formats=['uri'])

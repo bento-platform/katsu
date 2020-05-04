@@ -1,70 +1,32 @@
+from . import descriptions
+from .description_utils import describe_schema
+
 # Individual schemas for validation of JSONField values
+
+
+__all__ = [
+    "ONTOLOGY_CLASS",
+    "ONTOLOGY_CLASS_LIST",
+    "KEY_VALUE_OBJECT",
+    "AGE_STRING",
+    "AGE",
+    "AGE_RANGE",
+    "AGE_OR_AGE_RANGE",
+
+    "QUANTITY",
+    "CODEABLE_CONCEPT",
+    "PERIOD",
+    "RATIO",
+
+    "TIME_OR_PERIOD",
+    "COMORBID_CONDITION",
+    "COMPLEX_ONTOLOGY",
+    "TUMOR_MARKER_TEST",
+]
+
 
 ################################ Phenopackets based schemas ################################
 
-
-ALLELE_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:allele_schema",
-    "title": "Allele schema",
-    "description": "Variant allele types",
-    "type": "object",
-    "properties": {
-        "id": {"type": "string"},
-
-        "hgvs": {"type": "string"},
-
-        "genome_assembly": {"type": "string"},
-        "chr": {"type": "string"},
-        "pos": {"type": "integer"},
-        "re": {"type": "string"},
-        "alt": {"type": "string"},
-        "info": {"type": "string"},
-
-        "seq_id": {"type": "string"},
-        "position": {"type": "integer"},
-        "deleted_sequence": {"type": "string"},
-        "inserted_sequence": {"type": "string"},
-
-        "iscn": {"type": "string"}
-    },
-    "additionalProperties": False,
-    "oneOf": [
-        {
-            "required": ["hgvs"]
-        },
-        {
-            "required": ["genome_assembly"]
-        },
-        {
-            "required": ["seq_id"]
-        },
-        {
-            "required": ["iscn"]
-        }
-
-    ],
-    "dependencies": {
-        "genome_assembly": ["chr", "pos", "re", "alt", "info"],
-        "seq_id": ["position", "deleted_sequence", "inserted_sequence"]
-    }
-}
-
-UPDATE_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:update_schema",
-    "title": "Updates schema",
-    "description": "Schema to check incoming updates format",
-    "type": "object",
-    "properties": {
-        "timestamp": {"type": "string", "format": "date-time",
-                      "description": "ISO8601 UTC timestamp at which this record was updated."},
-        "updated_by": {"type": "string", "description": "Who updated the phenopacket"},
-        "comment": {"type": "string", "description": "Comment about updates or reasons for an update."}
-    },
-    "additionalProperties": False,
-    "required": ["timestamp", "comment"]
-}
 
 ONTOLOGY_CLASS = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -82,63 +44,17 @@ ONTOLOGY_CLASS = {
 
 ONTOLOGY_CLASS_LIST = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "ONTOLOGY_CLASS_LIST",
+    "$id": "chord_metadata_service:ontology_class_list_schema",
     "title": "Ontology class list",
     "description": "Ontology class list",
     "type": "array",
     "items": ONTOLOGY_CLASS,
 }
 
-EXTERNAL_REFERENCE = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:external_reference_schema",
-    "title": "External reference schema",
-    "description": "The schema encodes information about an external reference.",
-    "type": "object",
-    "properties": {
-        "id": {"type": "string", "description": "An application specific identifier."},
-        "description": {"type": "string", "description": "An application specific description."}
-    },
-    "additionalProperties": False,
-    "required": ["id"]
-}
-
-EVIDENCE = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:evidence_schema",
-    "title": "Evidence schema",
-    "description": "The schema represents the evidence for an assertion such as an observation of a PhenotypicFeature.",
-    "type": "object",
-    "properties": {
-        "evidence_code": {
-            "type": "object",
-            "description": "An ontology class that represents the evidence type.",
-            "properties": {
-                "id": {"type": "string", "description": "CURIE style identifier."},
-                "label": {"type": "string", "description": "Human-readable class name."}
-            },
-            "additionalProperties": False,
-            "required": ["id", "label"]
-        },
-        "reference": {
-            "type": "object",
-            "description": "Representation of the source of the evidence.",
-            "properties": {
-                "id": {"type": "string", "description": "An application specific identifier."},
-                "description": {"type": "string", "description": "An application specific description."}
-            },
-            "additionalProperties": False,
-            "required": ["id"]
-        }
-    },
-    "additionalProperties": False,
-    "required": ["evidence_code"]
-}
-
 
 KEY_VALUE_OBJECT = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "KEY_VALUE_OBJECT",
+    "$id": "chord_metadata_service:key_value_object_schema",
     "title": "Key-value object",
     "description": "The schema represents a key-value object.",
     "type": "object",
@@ -149,34 +65,34 @@ KEY_VALUE_OBJECT = {
 }
 
 
-AGE_STRING = {"type": "string", "description": "An ISO8601 string represent age."}
+AGE_STRING = describe_schema({"type": "string"}, descriptions.AGE)
 
-AGE = {
+AGE = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:age_schema",
     "title": "Age schema",
-    "description": "An age of a subject.",
     "type": "object",
     "properties": {
         "age": AGE_STRING
     },
     "additionalProperties": False,
     "required": ["age"]
-}
+}, descriptions.AGE_NESTED)
 
-AGE_RANGE = {
+
+AGE_RANGE = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:age_range_schema",
     "title": "Age range schema",
-    "description": "An age range of a subject.",
     "type": "object",
     "properties": {
         "start": AGE,
-        "end": AGE
+        "end": AGE,
     },
     "additionalProperties": False,
     "required": ["start", "end"]
-}
+}, descriptions.AGE_RANGE)
+
 
 AGE_OR_AGE_RANGE = {
     "$schema": "http://json-schema.org/draft-07/schema#",

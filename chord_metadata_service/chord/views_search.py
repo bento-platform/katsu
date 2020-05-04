@@ -15,7 +15,7 @@ from chord_metadata_service.metadata.settings import DEBUG
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
-from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
+from chord_metadata_service.phenopackets.search_schemas import PHENOPACKET_SEARCH_SCHEMA
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.metadata.elastic import es
 
@@ -33,7 +33,7 @@ PHENOPACKET_METADATA_SCHEMA = {
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def data_type_list(_request):
-    return Response([{"id": PHENOPACKET_DATA_TYPE_ID, "schema": PHENOPACKET_SCHEMA}])
+    return Response([{"id": PHENOPACKET_DATA_TYPE_ID, "schema": PHENOPACKET_SEARCH_SCHEMA}])
 
 
 @api_view(["GET"])
@@ -41,7 +41,7 @@ def data_type_list(_request):
 def data_type_phenopacket(_request):
     return Response({
         "id": PHENOPACKET_DATA_TYPE_ID,
-        "schema": PHENOPACKET_SCHEMA,
+        "schema": PHENOPACKET_SEARCH_SCHEMA,
         "metadata_schema": PHENOPACKET_METADATA_SCHEMA
     })
 
@@ -49,7 +49,7 @@ def data_type_phenopacket(_request):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def data_type_phenopacket_schema(_request):
-    return Response(PHENOPACKET_SCHEMA)
+    return Response(PHENOPACKET_SEARCH_SCHEMA)
 
 
 @api_view(["GET"])
@@ -74,7 +74,7 @@ def table_list(request):
             "created": d.created.isoformat(),
             "updated": d.updated.isoformat()
         },
-        "schema": PHENOPACKET_SCHEMA
+        "schema": PHENOPACKET_SEARCH_SCHEMA
     } for d in Dataset.objects.all()])
 
 
@@ -216,7 +216,8 @@ def search(request, internal_data=False):
         )
 
     try:
-        compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
+        compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"],
+                                                                       PHENOPACKET_SEARCH_SCHEMA)
     except (SyntaxError, TypeError, ValueError) as e:
         return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
@@ -361,7 +362,8 @@ def chord_table_search(request, table_id, internal=False):
     dataset = Dataset.objects.get(identifier=table_id)
 
     try:
-        compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"], PHENOPACKET_SCHEMA)
+        compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"],
+                                                                       PHENOPACKET_SEARCH_SCHEMA)
     except (SyntaxError, TypeError, ValueError) as e:
         print("[CHORD Metadata] Error encountered compiling query {}:\n    {}".format(request.data["query"], str(e)))
         return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
