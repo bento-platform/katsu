@@ -1,7 +1,12 @@
 from rest_framework import viewsets
 from rest_framework.settings import api_settings
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
 from .serializers import ExperimentSerializer
 from .models import Experiment
+from .schemas import EXPERIMENT_SCHEMA
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 
@@ -18,3 +23,14 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     serializer_class = ExperimentSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_experiment_schema(_request):
+    """
+    get:
+    Experiment schema
+    """
+    return Response(EXPERIMENT_SCHEMA)
+
