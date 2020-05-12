@@ -1,5 +1,6 @@
 # Most parts of this text are taken from the mCODE:Minimal Common Oncology Data Elements Data Dictionary.
-# The mCODE is made available under the Creative Commons 0 "No Rights Reserved" license https://creativecommons.org/share-your-work/public-domain/cc0/
+# The mCODE is made available under the Creative Commons 0 "No Rights Reserved" license
+# https://creativecommons.org/share-your-work/public-domain/cc0/
 
 # Portions of this text copyright (c) 2019-2020 the Canadian Centre for Computational Genomics; licensed under the
 # GNU Lesser General Public License version 3.

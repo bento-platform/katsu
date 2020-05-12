@@ -3,10 +3,7 @@ from rest_framework.settings import api_settings
 from .serializers import IndividualSerializer
 from .models import Individual
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
-from chord_metadata_service.restapi.api_renderers import (
-    FHIRRenderer,
-    PhenopacketsRenderer
-)
+from chord_metadata_service.restapi.api_renderers import FHIRRenderer, PhenopacketsRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 
@@ -25,4 +22,4 @@ class IndividualViewSet(viewsets.ModelViewSet):
     ).order_by("id")
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
-    renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES) + (FHIRRenderer, PhenopacketsRenderer)
+    renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer, PhenopacketsRenderer)

@@ -1,8 +1,6 @@
+from django.db.utils import IntegrityError
 from django.test import TestCase
 from ..models import *
-from chord_metadata_service.patients.models import Individual
-from django.db.utils import IntegrityError
-from django.core.exceptions import ValidationError
 from .constants import *
 
 

@@ -81,7 +81,7 @@ UPDATE = {
     "description": "An update event for a record (e.g. a phenopacket.)",
     "properties": {
         "timestamp": {
-            "description": "ISO8601 timestamp specifying when when this update occurred.",
+            "description": "ISO8601 UTC timestamp specifying when when this update occurred.",
             "help": "Timestamp specifying when when this update occurred.",
         },
         "updated_by": "Information about the person/organization/network that performed the update.",
@@ -225,20 +225,6 @@ DISEASE = {
     }
 }
 
-AGE = {
-    "description": "An ISO8601 duration string (e.g. P40Y10M05D for 40 years, 10 months, 5 days) representing an age "
-                   "of a subject.",
-    "help": "Age of a subject."
-}
-
-AGE_RANGE = "Age range (e.g. when a subject's age falls into a bin)"  # TODO
-
-AGE_NESTED = {
-    "description": AGE["description"],
-    "properties": {
-        "age": AGE
-    }
-}
 
 BIOSAMPLE = {
     "description": ("A unit of biological material from which the substrate molecules (e.g. genomic DNA, RNA, "

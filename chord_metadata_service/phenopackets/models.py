@@ -5,13 +5,18 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.models import IndexableMixin
-from chord_metadata_service.restapi.validators import JsonSchemaValidator
-from chord_metadata_service.restapi.schemas import (
-    UPDATE_SCHEMA, EXTERNAL_REFERENCE, EVIDENCE, ALLELE_SCHEMA, DISEASE_ONSET
-)
-import chord_metadata_service.phenopackets.descriptions as d
 from chord_metadata_service.restapi.validators import (
-    ontology_validator, ontology_list_validator, age_or_age_range_validator
+    JsonSchemaValidator,
+    age_or_age_range_validator,
+    ontology_validator,
+)
+from . import descriptions as d
+from .schemas import (
+    ALLELE_SCHEMA,
+    PHENOPACKET_DISEASE_ONSET_SCHEMA,
+    PHENOPACKET_EVIDENCE_SCHEMA,
+    PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA,
+    PHENOPACKET_UPDATE_SCHEMA,
 )
 
 
@@ -59,12 +64,12 @@ class MetaData(models.Model):
     resources = models.ManyToManyField(Resource, help_text=rec_help(d.META_DATA, "resources"))
     updates = ArrayField(
         JSONField(null=True, blank=True,
-                  validators=[JsonSchemaValidator(schema=UPDATE_SCHEMA, format_checker=['date-time'])]),
+                  validators=[JsonSchemaValidator(schema=PHENOPACKET_UPDATE_SCHEMA, formats=['date-time'])]),
         blank=True, null=True, help_text=rec_help(d.META_DATA, "updates"))
     phenopacket_schema_version = models.CharField(max_length=200, blank=True,
                                                   help_text='Schema version of the current phenopacket.')
     external_references = ArrayField(
-        JSONField(null=True, blank=True, validators=[JsonSchemaValidator(EXTERNAL_REFERENCE)]),
+        JSONField(null=True, blank=True, validators=[JsonSchemaValidator(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA)]),
         blank=True, null=True, help_text=rec_help(d.META_DATA, "external_references"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.META_DATA, "extra_properties"))
     updated = models.DateTimeField(auto_now_add=True)
@@ -90,8 +95,7 @@ class PhenotypicFeature(models.Model, IndexableMixin):
     FHIR: Condition or Observation
     """
 
-    description = models.CharField(
-        max_length=200, blank=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "description"))
+    description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "description"))
     pftype = JSONField(verbose_name='type', validators=[ontology_validator],
                        help_text=rec_help(d.PHENOTYPIC_FEATURE, "type"))
     negated = models.BooleanField(default=False, help_text=rec_help(d.PHENOTYPIC_FEATURE, "negated"))
@@ -105,7 +109,7 @@ class PhenotypicFeature(models.Model, IndexableMixin):
     # evidence can stay here because evidence is given for an observation of PF
     # JSON schema to check evidence_code is present
     # FHIR: Condition.evidence
-    evidence = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=EVIDENCE)],
+    evidence = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_EVIDENCE_SCHEMA)],
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "evidence"))
     biosample = models.ForeignKey(
         "Biosample", on_delete=models.SET_NULL, blank=True, null=True, related_name='phenotypic_features')
@@ -152,7 +156,7 @@ class HtsFile(models.Model, IndexableMixin):
         ('CRAM', 'CRAM'),
         ('VCF', 'VCF'),
         ('BCF', 'BCF'),
-        ('GVCF', 'GVCF')
+        ('GVCF', 'GVCF'),
     )
     uri = models.URLField(primary_key=True, max_length=200, help_text=rec_help(d.HTS_FILE, "uri"))
     description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.HTS_FILE, "description"))
@@ -208,7 +212,7 @@ class Variant(models.Model):
         ('hgvsAllele', 'hgvsAllele'),
         ('vcfAllele', 'vcfAllele'),
         ('spdiAllele', 'spdiAllele'),
-        ('iscnAllele', 'iscnAllele')
+        ('iscnAllele', 'iscnAllele'),
     )
     allele_type = models.CharField(max_length=200, choices=ALLELE, help_text="One of four allele types.")
     allele = JSONField(validators=[JsonSchemaValidator(schema=ALLELE_SCHEMA)],
@@ -240,7 +244,7 @@ class Disease(models.Model, IndexableMixin):
     # "id": "HP:0003581",
     # "label": "Adult onset"
     # }
-    onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=DISEASE_ONSET)],
+    onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_DISEASE_ONSET_SCHEMA)],
                       help_text=rec_help(d.DISEASE, "onset"))
     disease_stage = ArrayField(JSONField(null=True, blank=True, validators=[ontology_validator]),
                                blank=True, null=True, help_text=rec_help(d.DISEASE, "disease_stage"))

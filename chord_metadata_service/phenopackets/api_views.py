@@ -3,8 +3,8 @@ from rest_framework.settings import api_settings
 
 from chord_metadata_service.restapi.api_renderers import *
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
-from .serializers import *
 from .models import *
+from .serializers import *
 
 
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
