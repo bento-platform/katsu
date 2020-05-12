@@ -5,7 +5,6 @@ from chord_metadata_service.restapi.schemas import (
     ONTOLOGY_CLASS,
     ONTOLOGY_CLASS_LIST,
     KEY_VALUE_OBJECT,
-    COMORBID_CONDITION,
 )
 
 
@@ -37,8 +36,3 @@ age_or_age_range_validator = JsonSchemaValidator(AGE_OR_AGE_RANGE)
 ontology_validator = JsonSchemaValidator(ONTOLOGY_CLASS)
 ontology_list_validator = JsonSchemaValidator(ONTOLOGY_CLASS_LIST)
 key_value_validator = JsonSchemaValidator(KEY_VALUE_OBJECT)
-# quantity_validator = JsonSchemaValidator(schema=QUANTITY, formats=['uri'])
-# tumor_marker_test_validator = JsonSchemaValidator(schema=TUMOR_MARKER_TEST)
-# complex_ontology_validator = JsonSchemaValidator(schema=COMPLEX_ONTOLOGY, formats=['uri'])
-# time_or_period_validator = JsonSchemaValidator(schema=TIME_OR_PERIOD, formats=['date-time'])
-comorbid_condition_validator = JsonSchemaValidator(COMORBID_CONDITION)

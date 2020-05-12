@@ -1,6 +1,5 @@
 from . import descriptions
 from .description_utils import describe_schema, EXTRA_PROPERTIES
-from .schema_utils import customize_schema
 
 # Individual schemas for validation of JSONField values
 
@@ -13,8 +12,6 @@ __all__ = [
     "AGE",
     "AGE_RANGE",
     "AGE_OR_AGE_RANGE",
-
-    "COMORBID_CONDITION",
 ]
 
 
@@ -116,14 +113,3 @@ DISEASE_ONSET = {
         ONTOLOGY_CLASS
     ]
 }
-
-
-COMORBID_CONDITION = customize_schema(
-    first_typeof=ONTOLOGY_CLASS,
-    second_typeof=ONTOLOGY_CLASS,
-    first_property="clinical_status",
-    second_property="code",
-    schema_id="chord_metadata_service:comorbid_condition_schema",
-    title="Comorbid Condition schema",
-    description="Comorbid condition schema."
-)
