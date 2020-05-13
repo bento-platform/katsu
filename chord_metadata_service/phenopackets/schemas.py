@@ -3,7 +3,10 @@
 import chord_metadata_service.phenopackets.descriptions as descriptions
 from chord_metadata_service.patients.descriptions import INDIVIDUAL
 from chord_metadata_service.restapi.description_utils import describe_schema, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
-from chord_metadata_service.restapi.schemas import AGE, AGE_RANGE, AGE_OR_AGE_RANGE, ONTOLOGY_CLASS
+from chord_metadata_service.restapi.schemas import (
+    AGE, AGE_RANGE, AGE_OR_AGE_RANGE, ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA
+)
+from chord_metadata_service.patients.schemas import COMORBID_CONDITION
 
 
 __all__ = [
@@ -127,6 +130,22 @@ PHENOPACKET_INDIVIDUAL_SCHEMA = describe_schema({
             "description": "An individual's karyotypic sex.",
         },
         "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "active": {
+            "type": "boolean"
+        },
+        "deceased": {
+            "type": "boolean"
+        },
+        "race": {
+            "type": "string"
+        },
+        "ethnicity": {
+            "type": "string"
+        },
+        "comorbid_condition": COMORBID_CONDITION,
+        "ecog_performance_status": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "karnofsky": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA,
     },
     "required": ["id"]
 }, INDIVIDUAL)
@@ -152,7 +171,8 @@ PHENOPACKET_RESOURCE_SCHEMA = describe_schema({
         },
         "iri_prefix": {
             "type": "string",
-        }
+        },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "name", "namespace_prefix", "url", "version", "iri_prefix"],
 }, descriptions.RESOURCE)
@@ -209,7 +229,8 @@ PHENOPACKET_META_DATA_SCHEMA = describe_schema({
         "external_references": {
             "type": "array",
             "items": PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
-        }
+        },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
 }, descriptions.META_DATA)
 
@@ -242,6 +263,7 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
         },
         "onset": PHENOPACKET_ONTOLOGY_SCHEMA,
         "evidence": PHENOPACKET_EVIDENCE_SCHEMA,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
 }, descriptions.PHENOTYPIC_FEATURE)
 
@@ -261,7 +283,8 @@ PHENOPACKET_GENE_SCHEMA = describe_schema({
         },
         "symbol": {
             "type": "string",
-        }
+        },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "symbol"]
 }, descriptions.GENE)
@@ -285,7 +308,8 @@ PHENOPACKET_HTS_FILE_SCHEMA = describe_schema({
         },
         "individual_to_sample_identifiers": {
             "type": "object"  # TODO
-        }
+        },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     }
 }, descriptions.HTS_FILE)
 
@@ -295,7 +319,8 @@ PHENOPACKET_VARIANT_SCHEMA = describe_schema({
     "type": "object",  # TODO
     "properties": {
         "allele": ALLELE_SCHEMA,  # TODO
-        "zygosity": PHENOPACKET_ONTOLOGY_SCHEMA
+        "zygosity": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     }
 }, descriptions.VARIANT)
 
@@ -345,6 +370,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
         "is_control_sample": {
             "type": "boolean"
         },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "sampled_tissue", "procedure"],
 }, descriptions.BIOSAMPLE)
@@ -379,6 +405,7 @@ PHENOPACKET_DISEASE_SCHEMA = describe_schema({
             "type": "array",
             "items": PHENOPACKET_ONTOLOGY_SCHEMA,
         },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["term"],
 }, descriptions.DISEASE)
@@ -420,7 +447,8 @@ PHENOPACKET_SCHEMA = describe_schema({
             "type": "array",
             "items": PHENOPACKET_HTS_FILE_SCHEMA  # TODO
         },
-        "meta_data": PHENOPACKET_META_DATA_SCHEMA
+        "meta_data": PHENOPACKET_META_DATA_SCHEMA,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "meta_data"],
 }, descriptions.PHENOPACKET)

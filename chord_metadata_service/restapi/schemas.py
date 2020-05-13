@@ -12,6 +12,7 @@ __all__ = [
     "AGE",
     "AGE_RANGE",
     "AGE_OR_AGE_RANGE",
+    "EXTRA_PROPERTIES_SCHEMA",
 ]
 
 
