@@ -191,6 +191,24 @@ GENE = {
     }
 }
 
+ALLELE = {
+    "properties": {
+        "id": "An arbitrary identifier.",
+        "hgvs": "",
+        "genome_assembly": "The reference genome identifier e.g. GRCh38.",
+        "chr": "A chromosome identifier e.g. chr2 or 2.",
+        "pos": "The 1-based genomic position e.g. 134327882.",
+        "ref": "The reference base(s).",
+        "alt": "The alternate base(s).",
+        "info": "Relevant parts of the INFO field.",
+        "seq_id": "Sequence ID, e.g. Seq1.",
+        "position": "Position , a 0-based coordinate for where the Deleted Sequence starts, e.g. 4.",
+        "deleted_sequence": "Deleted sequence , sequence for the deletion, can be empty, e.g. A",
+        "inserted_sequence": "Inserted sequence , sequence for the insertion, can be empty, e.g. G",
+        "iscn": "E.g. t(8;9;11)(q12;p24;p12)."
+    }
+}
+
 VARIANT = {
     "description": "A representation used to describe candidate or diagnosed causative variants.",  # TODO: GA4GH VR
     "properties": {

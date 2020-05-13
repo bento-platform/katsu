@@ -27,7 +27,7 @@ __all__ = [
 ]
 
 
-ALLELE_SCHEMA = {
+ALLELE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:allele_schema",
     "title": "Allele schema",
@@ -41,7 +41,7 @@ ALLELE_SCHEMA = {
         "genome_assembly": {"type": "string"},
         "chr": {"type": "string"},
         "pos": {"type": "integer"},
-        "re": {"type": "string"},
+        "ref": {"type": "string"},
         "alt": {"type": "string"},
         "info": {"type": "string"},
 
@@ -60,10 +60,10 @@ ALLELE_SCHEMA = {
         {"required": ["iscn"]}
     ],
     "dependencies": {
-        "genome_assembly": ["chr", "pos", "re", "alt", "info"],
+        "genome_assembly": ["chr", "pos", "ref", "alt", "info"],
         "seq_id": ["position", "deleted_sequence", "inserted_sequence"]
     }
-}  # TODO: Descriptions
+}, descriptions.ALLELE)
 
 
 PHENOPACKET_ONTOLOGY_SCHEMA = describe_schema(ONTOLOGY_CLASS, ONTOLOGY_CLASS_DESC)
@@ -195,6 +195,7 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
         "severity": PHENOPACKET_ONTOLOGY_SCHEMA,
         "modifier": {  # TODO: Plural?
             "type": "array",
+            "items": PHENOPACKET_ONTOLOGY_SCHEMA
         },
         "onset": PHENOPACKET_ONTOLOGY_SCHEMA,
         "evidence": PHENOPACKET_EVIDENCE_SCHEMA,
