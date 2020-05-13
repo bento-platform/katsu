@@ -1,11 +1,8 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
-from chord_metadata_service.restapi.validators import (
-    ontology_validator,
-    age_or_age_range_validator,
-    comorbid_condition_validator,
-)
+from chord_metadata_service.restapi.validators import ontology_validator, age_or_age_range_validator
+from .validators import comorbid_condition_validator
 
 
 class Individual(models.Model, IndexableMixin):

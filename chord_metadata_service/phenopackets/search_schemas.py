@@ -1,4 +1,5 @@
 from . import models, schemas
+from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.restapi.schema_utils import tag_schema_with_search_properties
 
 
@@ -84,7 +85,7 @@ EXTERNAL_REFERENCE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
     }
 })
 
-INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_INDIVIDUAL_SCHEMA, {
+INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, {
     "properties": {
         "id": {
             "search": {

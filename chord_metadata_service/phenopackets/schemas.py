@@ -1,16 +1,17 @@
 # Individual schemas for validation of JSONField values
 
 import chord_metadata_service.phenopackets.descriptions as descriptions
-from chord_metadata_service.patients.descriptions import INDIVIDUAL
+from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.restapi.description_utils import describe_schema, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
-from chord_metadata_service.restapi.schemas import AGE, AGE_RANGE, AGE_OR_AGE_RANGE, ONTOLOGY_CLASS
+from chord_metadata_service.restapi.schemas import (
+    AGE, AGE_RANGE, AGE_OR_AGE_RANGE, ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA
+)
 
 
 __all__ = [
     "ALLELE_SCHEMA",
     "PHENOPACKET_ONTOLOGY_SCHEMA",
     "PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA",
-    "PHENOPACKET_INDIVIDUAL_SCHEMA",
     "PHENOPACKET_RESOURCE_SCHEMA",
     "PHENOPACKET_UPDATE_SCHEMA",
     "PHENOPACKET_META_DATA_SCHEMA",
@@ -84,53 +85,6 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
 }, descriptions.EXTERNAL_REFERENCE)
 
 
-PHENOPACKET_INDIVIDUAL_SCHEMA = describe_schema({
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "properties": {
-        "id": {
-            "type": "string",
-            "description": "Unique researcher-specified identifier for the individual.",
-        },
-        "alternate_ids": {
-            "type": "array",
-            "items": {
-                "type": "string",
-            },
-            "description": "A list of alternative identifiers for the individual.",  # TODO: More specific
-        },
-        "date_of_birth": {
-            # TODO: This is a special ISO format... need UI for this
-            "type": "string",
-        },
-        "age": AGE_OR_AGE_RANGE,
-        "sex": {
-            "type": "string",
-            "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
-            "description": "An individual's phenotypic sex.",
-        },
-        "karyotypic_sex": {
-            "type": "string",
-            "enum": [
-                "UNKNOWN_KARYOTYPE",
-                "XX",
-                "XY",
-                "XO",
-                "XXY",
-                "XXX",
-                "XXYY",
-                "XXXY",
-                "XXXX",
-                "XYY",
-                "OTHER_KARYOTYPE"
-            ],
-            "description": "An individual's karyotypic sex.",
-        },
-        "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA,
-    },
-    "required": ["id"]
-}, INDIVIDUAL)
-
 PHENOPACKET_RESOURCE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",  # TODO
@@ -152,7 +106,8 @@ PHENOPACKET_RESOURCE_SCHEMA = describe_schema({
         },
         "iri_prefix": {
             "type": "string",
-        }
+        },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "name", "namespace_prefix", "url", "version", "iri_prefix"],
 }, descriptions.RESOURCE)
@@ -209,7 +164,8 @@ PHENOPACKET_META_DATA_SCHEMA = describe_schema({
         "external_references": {
             "type": "array",
             "items": PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
-        }
+        },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
 }, descriptions.META_DATA)
 
@@ -242,6 +198,7 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
         },
         "onset": PHENOPACKET_ONTOLOGY_SCHEMA,
         "evidence": PHENOPACKET_EVIDENCE_SCHEMA,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
 }, descriptions.PHENOTYPIC_FEATURE)
 
@@ -261,7 +218,8 @@ PHENOPACKET_GENE_SCHEMA = describe_schema({
         },
         "symbol": {
             "type": "string",
-        }
+        },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "symbol"]
 }, descriptions.GENE)
@@ -285,7 +243,8 @@ PHENOPACKET_HTS_FILE_SCHEMA = describe_schema({
         },
         "individual_to_sample_identifiers": {
             "type": "object"  # TODO
-        }
+        },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     }
 }, descriptions.HTS_FILE)
 
@@ -295,7 +254,8 @@ PHENOPACKET_VARIANT_SCHEMA = describe_schema({
     "type": "object",  # TODO
     "properties": {
         "allele": ALLELE_SCHEMA,  # TODO
-        "zygosity": PHENOPACKET_ONTOLOGY_SCHEMA
+        "zygosity": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     }
 }, descriptions.VARIANT)
 
@@ -345,6 +305,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
         "is_control_sample": {
             "type": "boolean"
         },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "sampled_tissue", "procedure"],
 }, descriptions.BIOSAMPLE)
@@ -379,6 +340,7 @@ PHENOPACKET_DISEASE_SCHEMA = describe_schema({
             "type": "array",
             "items": PHENOPACKET_ONTOLOGY_SCHEMA,
         },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["term"],
 }, descriptions.DISEASE)
@@ -395,7 +357,7 @@ PHENOPACKET_SCHEMA = describe_schema({
         "id": {
             "type": "string",
         },
-        "subject": PHENOPACKET_INDIVIDUAL_SCHEMA,
+        "subject": INDIVIDUAL_SCHEMA,
         "phenotypic_features": {
             "type": "array",
             "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA
@@ -420,7 +382,8 @@ PHENOPACKET_SCHEMA = describe_schema({
             "type": "array",
             "items": PHENOPACKET_HTS_FILE_SCHEMA  # TODO
         },
-        "meta_data": PHENOPACKET_META_DATA_SCHEMA
+        "meta_data": PHENOPACKET_META_DATA_SCHEMA,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "meta_data"],
 }, descriptions.PHENOPACKET)

@@ -6,9 +6,12 @@ from chord_metadata_service.patients.models import Individual
 from django.core.exceptions import ValidationError
 from chord_metadata_service.restapi.description_utils import rec_help
 import chord_metadata_service.mcode.descriptions as d
-from chord_metadata_service.restapi.validators import (
-    ontology_validator, quantity_validator, tumor_marker_test_validator,
-    complex_ontology_validator, time_or_period_validator, ontology_list_validator
+from chord_metadata_service.restapi.validators import ontology_validator, ontology_list_validator
+from .validators import (
+    quantity_validator,
+    tumor_marker_test_validator,
+    complex_ontology_validator,
+    time_or_period_validator
 )
 
 

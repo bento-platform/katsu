@@ -6,7 +6,6 @@ from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
 from chord_metadata_service.mcode import api_views as mcode_views
 
-
 # from .settings import DEBUG
 
 
@@ -49,4 +48,11 @@ router.register(r'mcodepackets', mcode_views.MCodePacketViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    # apps schemas
+    path('chord_phenopacket_schema', phenopacket_views.get_chord_phenopacket_schema,
+         name="chord-phenopacket-schema"),
+    path('experiment_schema', experiment_views.get_experiment_schema,
+         name="experiment-schema"),
+    path('mcode_schema', mcode_views.get_mcode_schema,
+         name="mcode-schema"),
 ]

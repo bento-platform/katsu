@@ -1,5 +1,5 @@
 from . import descriptions
-from .description_utils import describe_schema
+from .description_utils import describe_schema, EXTRA_PROPERTIES
 
 # Individual schemas for validation of JSONField values
 
@@ -12,16 +12,7 @@ __all__ = [
     "AGE",
     "AGE_RANGE",
     "AGE_OR_AGE_RANGE",
-
-    "QUANTITY",
-    "CODEABLE_CONCEPT",
-    "PERIOD",
-    "RATIO",
-
-    "TIME_OR_PERIOD",
-    "COMORBID_CONDITION",
-    "COMPLEX_ONTOLOGY",
-    "TUMOR_MARKER_TEST",
+    "EXTRA_PROPERTIES_SCHEMA",
 ]
 
 
@@ -63,6 +54,10 @@ KEY_VALUE_OBJECT = {
     },
     "additionalProperties": False
 }
+
+EXTRA_PROPERTIES_SCHEMA = describe_schema({
+    "type": "object"
+}, EXTRA_PROPERTIES)
 
 
 AGE_STRING = describe_schema({"type": "string"}, descriptions.AGE)
@@ -119,181 +114,3 @@ DISEASE_ONSET = {
         ONTOLOGY_CLASS
     ]
 }
-
-################################## mCode/FHIR based schemas ##################################
-
-### FHIR datatypes
-
-# FHIR Quantity https://www.hl7.org/fhir/datatypes.html#Quantity
-QUANTITY = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:quantity_schema",
-    "title": "Quantity schema",
-    "description": "Schema for the datatype Quantity.",
-    "type": "object",
-    "properties": {
-        "value": {
-            "type": "number"
-        },
-        "comparator": {
-            "enum": ["<", ">", "<=", ">=", "="]
-        },
-        "unit": {
-            "type": "string"
-        },
-        "system": {
-            "type": "string",
-            "format": "uri"
-        },
-        "code": {
-            "type": "string"
-        }
-    },
-    "additionalProperties": False
-}
-
-
-# FHIR CodeableConcept https://www.hl7.org/fhir/datatypes.html#CodeableConcept
-CODEABLE_CONCEPT = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:codeable_concept_schema",
-    "title": "Codeable Concept schema",
-    "description": "Schema for the datatype Concept.",
-    "type": "object",
-    "properties": {
-        "coding": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "system": {"type": "string", "format": "uri"},
-                    "version": {"type": "string"},
-                    "code": {"type": "string"},
-                    "display": {"type": "string"},
-                    "user_selected": {"type": "boolean"}
-                }
-            }
-        },
-        "text": {
-            "type": "string"
-        }
-    },
-    "additionalProperties": False
-}
-
-
-# FHIR Period https://www.hl7.org/fhir/datatypes.html#Period
-PERIOD = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:period_schema",
-    "title": "Period",
-    "description": "Period schema.",
-    "type": "object",
-    "properties": {
-        "start": {
-            "type": "string",
-            "format": "date-time"
-        },
-        "end": {
-            "type": "string",
-            "format": "date-time"
-        }
-    },
-    "additionalProperties": False
-}
-
-
-# FHIR Ratio https://www.hl7.org/fhir/datatypes.html#Ratio
-RATIO = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:ratio",
-    "title": "Ratio",
-    "description": "Ratio schema.",
-    "type": "object",
-    "properties": {
-        "numerator": QUANTITY,
-        "denominator": QUANTITY
-    },
-    "additionalProperties": False
-}
-
-
-### FHIR based mCode elements
-
-TIME_OR_PERIOD = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:time_or_period",
-    "title": "Time of Period",
-    "description": "Time of Period schema.",
-    "type": "object",
-    "properties": {
-        "value": {
-            "anyOf": [
-                {"type": "string", "format": "date-time"},
-                PERIOD
-            ]
-        }
-    },
-    "additionalProperties": False
-}
-
-
-def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
-                     schema_id: str, title: str = None, description: str = None, additional_properties: bool = False,
-                     required=None) -> dict:
-    if required is None:
-        required = []
-    return {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "$id": schema_id,
-        "title": title,
-        "description": description,
-        "type": "object",
-        "properties": {
-            first_property: first_typeof,
-            second_property: second_typeof
-        },
-        "required": required,
-        "additionalProperties": additional_properties
-    }
-
-
-COMORBID_CONDITION = customize_schema(
-    first_typeof=ONTOLOGY_CLASS,
-    second_typeof=ONTOLOGY_CLASS,
-    first_property="clinical_status",
-    second_property="code",
-    schema_id="chord_metadata_service:comorbid_condition_schema",
-    title="Comorbid Condition schema",
-    description="Comorbid condition schema."
-)
-
-# TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
-COMPLEX_ONTOLOGY = customize_schema(
-    first_typeof=ONTOLOGY_CLASS,
-    second_typeof=ONTOLOGY_CLASS,
-    first_property="data_value",
-    second_property="staging_system",
-    schema_id="chord_metadata_service:complex_ontology_schema",
-    title="Complex ontology",
-    description="Complex object to combine data value and staging system.",
-    required=["data_value"]
-)
-
-# TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
-TUMOR_MARKER_TEST = customize_schema(
-    first_typeof=ONTOLOGY_CLASS,
-    second_typeof={
-       "anyOf": [
-           ONTOLOGY_CLASS,
-           QUANTITY,
-           RATIO
-       ]
-    },
-    first_property="code",
-    second_property="data_value",
-    schema_id="chord_metadata_service:tumor_marker_test",
-    title="Tumor marker test",
-    description="Tumor marker test schema.",
-    required=["code"]
-)
