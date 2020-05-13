@@ -1,19 +1,17 @@
 # Individual schemas for validation of JSONField values
 
 import chord_metadata_service.phenopackets.descriptions as descriptions
-from chord_metadata_service.patients.descriptions import INDIVIDUAL
+from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.restapi.description_utils import describe_schema, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
 from chord_metadata_service.restapi.schemas import (
     AGE, AGE_RANGE, AGE_OR_AGE_RANGE, ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA
 )
-from chord_metadata_service.patients.schemas import COMORBID_CONDITION
 
 
 __all__ = [
     "ALLELE_SCHEMA",
     "PHENOPACKET_ONTOLOGY_SCHEMA",
     "PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA",
-    "PHENOPACKET_INDIVIDUAL_SCHEMA",
     "PHENOPACKET_RESOURCE_SCHEMA",
     "PHENOPACKET_UPDATE_SCHEMA",
     "PHENOPACKET_META_DATA_SCHEMA",
@@ -86,69 +84,6 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
     "required": ["id"]
 }, descriptions.EXTERNAL_REFERENCE)
 
-
-PHENOPACKET_INDIVIDUAL_SCHEMA = describe_schema({
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "properties": {
-        "id": {
-            "type": "string",
-            "description": "Unique researcher-specified identifier for the individual.",
-        },
-        "alternate_ids": {
-            "type": "array",
-            "items": {
-                "type": "string",
-            },
-            "description": "A list of alternative identifiers for the individual.",  # TODO: More specific
-        },
-        "date_of_birth": {
-            # TODO: This is a special ISO format... need UI for this
-            "type": "string",
-        },
-        "age": AGE_OR_AGE_RANGE,
-        "sex": {
-            "type": "string",
-            "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
-            "description": "An individual's phenotypic sex.",
-        },
-        "karyotypic_sex": {
-            "type": "string",
-            "enum": [
-                "UNKNOWN_KARYOTYPE",
-                "XX",
-                "XY",
-                "XO",
-                "XXY",
-                "XXX",
-                "XXYY",
-                "XXXY",
-                "XXXX",
-                "XYY",
-                "OTHER_KARYOTYPE"
-            ],
-            "description": "An individual's karyotypic sex.",
-        },
-        "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA,
-        "active": {
-            "type": "boolean"
-        },
-        "deceased": {
-            "type": "boolean"
-        },
-        "race": {
-            "type": "string"
-        },
-        "ethnicity": {
-            "type": "string"
-        },
-        "comorbid_condition": COMORBID_CONDITION,
-        "ecog_performance_status": PHENOPACKET_ONTOLOGY_SCHEMA,
-        "karnofsky": PHENOPACKET_ONTOLOGY_SCHEMA,
-        "extra_properties": EXTRA_PROPERTIES_SCHEMA,
-    },
-    "required": ["id"]
-}, INDIVIDUAL)
 
 PHENOPACKET_RESOURCE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -422,7 +357,7 @@ PHENOPACKET_SCHEMA = describe_schema({
         "id": {
             "type": "string",
         },
-        "subject": PHENOPACKET_INDIVIDUAL_SCHEMA,
+        "subject": INDIVIDUAL_SCHEMA,
         "phenotypic_features": {
             "type": "array",
             "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA

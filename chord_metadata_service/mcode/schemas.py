@@ -1,8 +1,8 @@
 from chord_metadata_service.restapi.schema_utils import customize_schema
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ONTOLOGY_CLASS_LIST, EXTRA_PROPERTIES_SCHEMA
 from chord_metadata_service.restapi.description_utils import describe_schema
+from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from .descriptions import *
-from chord_metadata_service.phenopackets.schemas import PHENOPACKET_GENE_SCHEMA
 
 
 ################################## mCode/FHIR based schemas ##################################
@@ -386,6 +386,7 @@ MCODE_SCHEMA = describe_schema({
         "id": {
             "type": "string"
         },
+        "subject": INDIVIDUAL_SCHEMA,
         "genomics_report": MCODE_GENOMICS_REPORT_SCHEMA,
         "cancer_condition": MCODE_CANCER_CONDITION_SCHEMA,
         "cancer_related_procedures": MCODE_CANCER_RELATED_PROCEDURE_SCHEMA,
