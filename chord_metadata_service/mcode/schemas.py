@@ -181,6 +181,7 @@ MCODE_GENETIC_VARIANT_TESTED_SCHEMA = describe_schema({
     "required": ["id"]
 }, GENETIC_VARIANT_TESTED)
 
+
 MCODE_GENETIC_VARIANT_FOUND_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
@@ -203,6 +204,7 @@ MCODE_GENETIC_VARIANT_FOUND_SCHEMA = describe_schema({
     },
     "required": ["id"]
 }, GENETIC_VARIANT_FOUND)
+
 
 MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
     "type": "object",
@@ -231,6 +233,7 @@ MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
     },
     "required": ["id", "test_name"]
 }, GENOMICS_REPORT)
+
 
 MCODE_LABS_VITAL_SCHEMA = describe_schema({
     "type": "object",
