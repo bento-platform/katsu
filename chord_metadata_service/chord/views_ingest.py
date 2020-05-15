@@ -159,7 +159,6 @@ def _query_and_check_nulls(obj: dict, key: str, transform: Callable = lambda x: 
 def ingest_phenopacket(phenopacket_data, table_id):
     """ Ingests one phenopacket. """
 
-    #new_phenopacket_id = str(uuid.uuid4())  # TODO: Is this provided?
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
 
     subject = phenopacket_data.get("subject", None)
@@ -223,7 +222,6 @@ def ingest_phenopacket(phenopacket_data, table_id):
             term=disease["term"],
             disease_stage=disease.get("disease_stage", []),
             tnm_finding=disease.get("tnm_finding", []),
-            #**_query_and_check_nulls(disease, "onset")
             onset=disease.get("onset", None)
         )
         diseases_db.append(d_obj.id)
