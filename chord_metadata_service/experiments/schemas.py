@@ -3,6 +3,9 @@ from chord_metadata_service.restapi.description_utils import describe_schema
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
 
 
+__all__ = ["EXPERIMENT_SCHEMA"]
+
+
 EXPERIMENT_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:experiment_schema",
@@ -27,7 +30,17 @@ EXPERIMENT_SCHEMA = describe_schema({
         },
         "experiment_ontology": ONTOLOGY_CLASS_LIST,
         "molecule": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+                "total RNA",
+                "polyA RNA",
+                "cytoplasmic RNA",
+                "nuclear RNA",
+                "small RNA",
+                "genomic DNA",
+                "protein",
+                "other",
+            ]
         },
         "molecule_ontology": ONTOLOGY_CLASS_LIST,
         "library_strategy": {
