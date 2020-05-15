@@ -1,10 +1,14 @@
 from rest_framework import viewsets
 from rest_framework.settings import api_settings
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from chord_metadata_service.restapi.api_renderers import *
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
-from .serializers import *
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from .models import *
+from .serializers import *
 
 
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
@@ -207,3 +211,13 @@ class InterpretationViewSet(PhenopacketsModelViewSet):
     """
     queryset = Interpretation.objects.all().order_by("id")
     serializer_class = InterpretationSerializer
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_chord_phenopacket_schema(_request):
+    """
+    get:
+    Chord phenopacket schema that can be shared with data providers.
+    """
+    return Response(PHENOPACKET_SCHEMA)

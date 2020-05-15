@@ -16,8 +16,8 @@ setuptools.setup(
 
     python_requires=">=3.6",
     install_requires=[
-        "chord_lib[django]==0.8.0",
-        "Django>=2.2,<3.0",
+        "chord_lib[django]==0.9.0",
+        "Django>=2.2.12,<3.0",
         "django-filter>=2.2,<3.0",
         "django-nose>=1.4,<2.0",
         "djangorestframework>=3.11,<3.12",

@@ -6,9 +6,12 @@ from chord_metadata_service.patients.models import Individual
 from django.core.exceptions import ValidationError
 from chord_metadata_service.restapi.description_utils import rec_help
 import chord_metadata_service.mcode.descriptions as d
-from chord_metadata_service.restapi.validators import (
-    ontology_validator, quantity_validator, tumor_marker_test_validator,
-    complex_ontology_validator, time_or_period_validator, ontology_list_validator
+from chord_metadata_service.restapi.validators import ontology_validator, ontology_list_validator
+from .validators import (
+    quantity_validator,
+    tumor_marker_test_validator,
+    complex_ontology_validator,
+    time_or_period_validator
 )
 
 
@@ -66,8 +69,8 @@ class GeneticVariantFound(models.Model, IndexableMixin):
                                          help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_identifier"))
     variant_found_hgvs_name = ArrayField(models.CharField(max_length=200), blank=True, null=True,
                                          help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_hgvs_name"))
-    variant_found_description = models.CharField(max_length=200, blank=True,
-                                            help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_description"))
+    variant_found_description = models.CharField(
+        max_length=200, blank=True, help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_description"))
     # loinc value set https://loinc.org/48002-0/
     genomic_source_class = JSONField(blank=True, null=True, validators=[ontology_validator],
                                      help_text=rec_help(d.GENETIC_VARIANT_FOUND, "genomic_source_class"))
@@ -95,8 +98,8 @@ class GenomicsReport(models.Model, IndexableMixin):
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENOMICS_REPORT, "id"))
     test_name = JSONField(validators=[ontology_validator], help_text=rec_help(d.GENOMICS_REPORT, "test_name"))
-    performing_organization_name = models.CharField(max_length=200, blank=True,
-                                                help_text=rec_help(d.GENOMICS_REPORT, "performing_organization_name"))
+    performing_organization_name = models.CharField(
+        max_length=200, blank=True, help_text=rec_help(d.GENOMICS_REPORT, "performing_organization_name"))
     specimen_type = JSONField(blank=True, null=True, validators=[ontology_validator],
                               help_text=rec_help(d.GENOMICS_REPORT, "specimen_type"))
     genetic_variant_tested = models.ManyToManyField(GeneticVariantTested, blank=True,
@@ -138,7 +141,7 @@ class LabsVital(models.Model, IndexableMixin):
                                          help_text=rec_help(d.LABS_VITAL, "blood_pressure_diastolic"))
     blood_pressure_systolic = JSONField(blank=True, null=True, validators=[quantity_validator],
                                         help_text=rec_help(d.LABS_VITAL, "blood_pressure_systolic"))
-    #TODO Change CodeableConcept to Ontology class
+    # TODO Change CodeableConcept to Ontology class
     tumor_marker_test = JSONField(validators=[tumor_marker_test_validator],
                                   help_text=rec_help(d.LABS_VITAL, "tumor_marker_test"))
     extra_properties = JSONField(blank=True, null=True,
@@ -247,7 +250,7 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
     occurence_time_or_period = JSONField(validators=[time_or_period_validator],
                                          help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "occurence_time_or_period"))
     target_body_site = JSONField(null=True, validators=[ontology_list_validator],
-                                   help_text=rec_help(d.CANCER_RELATED_PROCEDURE, 'target_body_site'))
+                                 help_text=rec_help(d.CANCER_RELATED_PROCEDURE, 'target_body_site'))
     treatment_intent = JSONField(blank=True, null=True, validators=[ontology_validator],
                                  help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "treatment_intent"))
     extra_properties = JSONField(blank=True, null=True,
@@ -261,7 +264,9 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
     def __str__(self):
         return str(self.id)
 
+
 ###### Medication Statement ######
+
 
 class MedicationStatement(models.Model, IndexableMixin):
     """

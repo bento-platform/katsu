@@ -1,9 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.settings import api_settings
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from .serializers import *
-from chord_metadata_service.restapi.api_renderers import (
-    PhenopacketsRenderer
-)
+from .schemas import MCODE_SCHEMA
+from .models import *
+from .serializers import *
+from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 
@@ -55,3 +59,13 @@ class MedicationStatementViewSet(McodeModelViewSet):
 class MCodePacketViewSet(McodeModelViewSet):
     queryset = MCodePacket.objects.all()
     serializer_class = MCodePacketSerializer
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_mcode_schema(_request):
+    """
+    get:
+    Mcodepacket schema
+    """
+    return Response(MCODE_SCHEMA)

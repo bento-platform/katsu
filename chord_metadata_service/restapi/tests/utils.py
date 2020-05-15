@@ -2,6 +2,7 @@ import json
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+
 # Helper functions for tests
 
 def get_response(viewname, obj):

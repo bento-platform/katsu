@@ -1,9 +1,8 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
-from chord_metadata_service.restapi.validators import (
-    ontology_validator, age_or_age_range_validator, comorbid_condition_validator
-)
+from chord_metadata_service.restapi.validators import ontology_validator, age_or_age_range_validator
+from .validators import comorbid_condition_validator
 
 
 class Individual(models.Model, IndexableMixin):
@@ -48,11 +47,12 @@ class Individual(models.Model, IndexableMixin):
     active = models.BooleanField(default=False, help_text='Whether this patient\'s record is in active use.')
     deceased = models.BooleanField(default=False, help_text='Indicates if the individual is deceased or not.')
     # mCode specific
-    # this field should be complex Ontology - clinical status and code - two Codeable concept - single, cl status has enum list of values
+    # this field should be complex Ontology - clinical status and code - two Codeable concept - single, cl status has
+    # enum list of values
     # TODO add these fields to FHIR converter ?
     comorbid_condition = JSONField(blank=True, null=True, validators=[comorbid_condition_validator],
                                    help_text='One or more conditions that occur with primary condition.')
-    #TODO decide use ONTOLOGY_CLASS vs. CODEABLE_CONCEPT - currently Ontology class
+    # TODO decide use ONTOLOGY_CLASS vs. CODEABLE_CONCEPT - currently Ontology class
     ecog_performance_status = JSONField(blank=True, null=True, validators=[ontology_validator],
                                         help_text='Value representing the Eastern Cooperative '
                                                   'Oncology Group performance status.')

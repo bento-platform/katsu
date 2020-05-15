@@ -10,11 +10,12 @@ from rest_framework.test import APITestCase
 
 from chord_metadata_service.phenopackets.tests.constants import *
 from chord_metadata_service.phenopackets.models import *
+from chord_metadata_service.phenopackets.search_schemas import PHENOPACKET_SEARCH_SCHEMA
 
 from chord_metadata_service.chord.tests.es_mocks import SEARCH_SUCCESS
 from .constants import *
 from ..models import *
-from ..views_search import PHENOPACKET_DATA_TYPE_ID, PHENOPACKET_SCHEMA, PHENOPACKET_METADATA_SCHEMA
+from ..views_search import PHENOPACKET_DATA_TYPE_ID, PHENOPACKET_METADATA_SCHEMA
 
 
 class DataTypeTest(APITestCase):
@@ -31,7 +32,7 @@ class DataTypeTest(APITestCase):
         c = r.json()
         self.assertDictEqual(c, {
             "id": PHENOPACKET_DATA_TYPE_ID,
-            "schema": PHENOPACKET_SCHEMA,
+            "schema": PHENOPACKET_SEARCH_SCHEMA,
             "metadata_schema": PHENOPACKET_METADATA_SCHEMA
         })
 
@@ -39,7 +40,7 @@ class DataTypeTest(APITestCase):
         r = self.client.get(reverse("data-type-schema"))  # Only mounted with phenopacket right now
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
-        self.assertDictEqual(c, PHENOPACKET_SCHEMA)
+        self.assertDictEqual(c, PHENOPACKET_SEARCH_SCHEMA)
 
     def test_data_type_metadata_schema(self):
         r = self.client.get(reverse("data-type-metadata-schema"))  # Only mounted with phenopacket right now
@@ -60,7 +61,7 @@ class TableTest(APITestCase):
                 "created": created,
                 "updated": updated
             },
-            "schema": PHENOPACKET_SCHEMA
+            "schema": PHENOPACKET_SEARCH_SCHEMA
         }
 
     @override_settings(AUTH_OVERRIDE=True)  # For permissions
@@ -236,6 +237,16 @@ class SearchTest(APITestCase):
 
         r = self.client.post(reverse("private-table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
             "query": TEST_SEARCH_QUERY_1
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertEqual(len(c["results"]), 1)
+        self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
+
+    def test_private_table_search_5(self):
+        # Valid query: literal "true"
+        r = self.client.post(reverse("private-table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
+            "query": True
         }), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
