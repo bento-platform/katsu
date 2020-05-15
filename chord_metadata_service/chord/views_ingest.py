@@ -12,13 +12,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 
-from chord_lib.responses.errors import *
+from chord_lib.responses import errors
 from chord_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
 from typing import Callable
 
 from chord_metadata_service.chord.models import *
-from chord_metadata_service.phenopackets.models import *
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
+from chord_metadata_service.phenopackets import models as pm
 
 
 METADATA_WORKFLOWS = {
@@ -67,7 +68,7 @@ def workflow_list(_request):
 @permission_classes([AllowAny])
 def workflow_item(_request, workflow_id):
     if not workflow_exists(workflow_id, METADATA_WORKFLOWS):
-        return Response(not_found_error(f"No workflow with ID {workflow_id}"), status=404)
+        return Response(errors.not_found_error(f"No workflow with ID {workflow_id}"), status=404)
 
     return Response(get_workflow(workflow_id, METADATA_WORKFLOWS))
 
@@ -87,7 +88,7 @@ def workflow_file(_request, workflow_id):
 
 
 def create_phenotypic_feature(pf):
-    pf_obj = PhenotypicFeature(
+    pf_obj = pm.PhenotypicFeature(
         description=pf.get("description", ""),
         pftype=pf["type"],
         negated=pf.get("negated", False),
@@ -115,12 +116,12 @@ def ingest(request):
     try:
         jsonschema.validate(request.data, chord_lib.schemas.chord.CHORD_INGEST_SCHEMA)
     except jsonschema.exceptions.ValidationError:
-        return Response(bad_request_error("Invalid ingest request body"), status=400)  # TODO: Validation errors
+        return Response(errors.bad_request_error("Invalid ingest request body"), status=400)  # TODO: Validation errors
 
     table_id = request.data["table_id"]
 
     if not Dataset.objects.filter(identifier=table_id).exists():
-        return Response(bad_request_error(f"Table with ID {table_id} does not exist"), status=400)
+        return Response(errors.bad_request_error(f"Table with ID {table_id} does not exist"), status=400)
 
     table_id = str(uuid.UUID(table_id))  # Normalize dataset ID to UUID's str format.
 
@@ -128,10 +129,10 @@ def ingest(request):
     workflow_outputs = request.data["workflow_outputs"]
 
     if not chord_lib.workflows.workflow_exists(workflow_id, METADATA_WORKFLOWS):  # Check that the workflow exists
-        return Response(bad_request_error(f"Workflow with ID {workflow_id} does not exist"), status=400)
+        return Response(errors.bad_request_error(f"Workflow with ID {workflow_id} does not exist"), status=400)
 
     if "json_document" not in workflow_outputs:
-        return Response(bad_request_error("Missing workflow output 'json_document'"), status=400)
+        return Response(errors.bad_request_error("Missing workflow output 'json_document'"), status=400)
 
     with open(workflow_outputs["json_document"], "r") as jf:
         try:
@@ -143,7 +144,7 @@ def ingest(request):
                 ingest_phenopacket(phenopacket_data, table_id)
 
         except json.decoder.JSONDecodeError as e:
-            return Response(bad_request_error(f"Invalid JSON provided for phenopacket document (message: {e})"),
+            return Response(errors.bad_request_error(f"Invalid JSON provided for phenopacket document (message: {e})"),
                             status=400)
 
         # TODO: Schema validation
@@ -172,21 +173,21 @@ def ingest_phenopacket(phenopacket_data, table_id):
         subject_query = _query_and_check_nulls(subject, "date_of_birth", transform=isoparse)
         for k in ("alternate_ids", "age", "sex", "karyotypic_sex", "taxonomy"):
             subject_query.update(_query_and_check_nulls(subject, k))
-        subject, _ = Individual.objects.get_or_create(id=subject["id"], **subject_query)
+        subject, _ = pm.Individual.objects.get_or_create(id=subject["id"], **subject_query)
 
     phenotypic_features_db = [create_phenotypic_feature(pf) for pf in phenotypic_features]
 
     biosamples_db = []
     for bs in biosamples:
         # TODO: This should probably be a JSON field, or compound key with code/body_site
-        procedure, _ = Procedure.objects.get_or_create(**bs["procedure"])
+        procedure, _ = pm.Procedure.objects.get_or_create(**bs["procedure"])
 
-        bs_query = _query_and_check_nulls(bs, "individual_id", lambda i: Individual.objects.get(id=i))
+        bs_query = _query_and_check_nulls(bs, "individual_id", lambda i: pm.Individual.objects.get(id=i))
         for k in ("sampled_tissue", "taxonomy", "individual_age_at_collection", "histological_diagnosis",
                   "tumor_progression", "tumor_grade"):
             bs_query.update(_query_and_check_nulls(bs, k))
 
-        bs_obj, bs_created = Biosample.objects.get_or_create(
+        bs_obj, bs_created = pm.Biosample.objects.get_or_create(
             id=bs["id"],
             description=bs.get("description", ""),
             procedure=procedure,
@@ -208,7 +209,7 @@ def ingest_phenopacket(phenopacket_data, table_id):
     for g in genes:
         # TODO: Validate CURIE
         # TODO: Rename alternate_id
-        g_obj, _ = Gene.objects.get_or_create(
+        g_obj, _ = pm.Gene.objects.get_or_create(
             id=g["id"],
             alternate_ids=g.get("alternate_ids", []),
             symbol=g["symbol"]
@@ -218,7 +219,7 @@ def ingest_phenopacket(phenopacket_data, table_id):
     diseases_db = []
     for disease in diseases:
         # TODO: Primary key, should this be a model?
-        d_obj, _ = Disease.objects.get_or_create(
+        d_obj, _ = pm.Disease.objects.get_or_create(
             term=disease["term"],
             disease_stage=disease.get("disease_stage", []),
             tnm_finding=disease.get("tnm_finding", []),
@@ -228,7 +229,7 @@ def ingest_phenopacket(phenopacket_data, table_id):
 
     resources_db = []
     for rs in meta_data.get("resources", []):
-        rs_obj, _ = Resource.objects.get_or_create(
+        rs_obj, _ = pm.Resource.objects.get_or_create(
             id=rs["id"],  # TODO: This ID is a bit iffy, because they're researcher-provided
             name=rs["name"],
             namespace_prefix=rs["namespace_prefix"],
@@ -238,7 +239,7 @@ def ingest_phenopacket(phenopacket_data, table_id):
         )
         resources_db.append(rs_obj)
 
-    meta_data_obj = MetaData(
+    meta_data_obj = pm.MetaData(
         created_by=meta_data["created_by"],
         submitted_by=meta_data.get("submitted_by", None),
         phenopacket_schema_version="1.0.0-RC3",
@@ -248,7 +249,7 @@ def ingest_phenopacket(phenopacket_data, table_id):
 
     meta_data_obj.resources.set(resources_db)  # TODO: primary key ???
 
-    new_phenopacket = Phenopacket(
+    new_phenopacket = pm.Phenopacket(
         id=new_phenopacket_id,
         subject=subject,
         meta_data=meta_data_obj,
