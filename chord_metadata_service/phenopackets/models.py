@@ -3,12 +3,14 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.restapi.schema_utils import schema_list
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.validators import (
     JsonSchemaValidator,
     age_or_age_range_validator,
     ontology_validator,
+    ontology_list_validator
 )
 from . import descriptions as d
 from .schemas import (
@@ -62,15 +64,14 @@ class MetaData(models.Model):
     created_by = models.CharField(max_length=200, help_text=rec_help(d.META_DATA, "created_by"))
     submitted_by = models.CharField(max_length=200, blank=True, help_text=rec_help(d.META_DATA, "submitted_by"))
     resources = models.ManyToManyField(Resource, help_text=rec_help(d.META_DATA, "resources"))
-    updates = ArrayField(
-        JSONField(null=True, blank=True,
-                  validators=[JsonSchemaValidator(schema=PHENOPACKET_UPDATE_SCHEMA, formats=['date-time'])]),
-        blank=True, null=True, help_text=rec_help(d.META_DATA, "updates"))
+    updates = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(
+                        schema=schema_list(PHENOPACKET_UPDATE_SCHEMA), formats=['date-time'])],
+                        help_text=rec_help(d.META_DATA, "updates"))
     phenopacket_schema_version = models.CharField(max_length=200, blank=True,
                                                   help_text='Schema version of the current phenopacket.')
-    external_references = ArrayField(
-        JSONField(null=True, blank=True, validators=[JsonSchemaValidator(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA)]),
-        blank=True, null=True, help_text=rec_help(d.META_DATA, "external_references"))
+    external_references = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(
+                                    schema=schema_list(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA))],
+                                    help_text=rec_help(d.META_DATA, "external_references"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.META_DATA, "extra_properties"))
     updated = models.DateTimeField(auto_now_add=True)
 
@@ -101,9 +102,8 @@ class PhenotypicFeature(models.Model, IndexableMixin):
     negated = models.BooleanField(default=False, help_text=rec_help(d.PHENOTYPIC_FEATURE, "negated"))
     severity = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "severity"))
-    modifier = ArrayField(
-        JSONField(null=True, blank=True, validators=[ontology_validator]), blank=True, null=True,
-        help_text=rec_help(d.PHENOTYPIC_FEATURE, "modifier"))
+    modifier = JSONField(blank=True, null=True, validators=[ontology_list_validator],
+                         help_text=rec_help(d.PHENOTYPIC_FEATURE, "modifier"))
     onset = JSONField(blank=True, null=True, validators=[ontology_validator],
                       help_text=rec_help(d.PHENOTYPIC_FEATURE, "onset"))
     # evidence can stay here because evidence is given for an observation of PF
@@ -188,9 +188,8 @@ class Gene(models.Model):
     # Gene id is unique
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENE, "id"))
     # CURIE style? Yes!
-    alternate_ids = ArrayField(
-        models.CharField(max_length=200, blank=True), blank=True, null=True,
-        help_text=rec_help(d.GENE, "alternate_ids"))
+    alternate_ids = ArrayField(models.CharField(max_length=200, blank=True), blank=True, null=True,
+                               help_text=rec_help(d.GENE, "alternate_ids"))
     symbol = models.CharField(max_length=200, help_text=rec_help(d.GENE, "symbol"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.GENE, "extra_properties"))
     created = models.DateTimeField(auto_now=True)
@@ -246,10 +245,10 @@ class Disease(models.Model, IndexableMixin):
     # }
     onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_DISEASE_ONSET_SCHEMA)],
                       help_text=rec_help(d.DISEASE, "onset"))
-    disease_stage = ArrayField(JSONField(null=True, blank=True, validators=[ontology_validator]),
-                               blank=True, null=True, help_text=rec_help(d.DISEASE, "disease_stage"))
-    tnm_finding = ArrayField(JSONField(null=True, blank=True, validators=[ontology_validator]),
-                             blank=True, null=True, help_text=rec_help(d.DISEASE, "tnm_finding"))
+    disease_stage = JSONField(blank=True, null=True, validators=[ontology_list_validator],
+                              help_text=rec_help(d.DISEASE, "disease_stage"))
+    tnm_finding = JSONField(blank=True, null=True, validators=[ontology_list_validator],
+                            help_text=rec_help(d.DISEASE, "tnm_finding"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.DISEASE, "extra_properties"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -287,8 +286,8 @@ class Biosample(models.Model, IndexableMixin):
                                   help_text=rec_help(d.BIOSAMPLE, "tumor_progression"))
     tumor_grade = JSONField(blank=True, null=True, validators=[ontology_validator],
                             help_text=rec_help(d.BIOSAMPLE, "tumor_grade"))
-    diagnostic_markers = ArrayField(JSONField(null=True, blank=True, validators=[ontology_validator]),
-                                    blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "diagnostic_markers"))
+    diagnostic_markers = JSONField(blank=True, null=True, validators=[ontology_list_validator],
+                                   help_text=rec_help(d.BIOSAMPLE, "diagnostic_markers"))
     # CHECK! if Procedure instance is deleted Biosample instance is deleted too
     procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE, help_text=rec_help(d.BIOSAMPLE, "procedure"))
     hts_files = models.ManyToManyField(
