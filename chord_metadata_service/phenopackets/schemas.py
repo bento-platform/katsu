@@ -2,15 +2,18 @@
 
 import chord_metadata_service.phenopackets.descriptions as descriptions
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
-from chord_metadata_service.restapi.description_utils import describe_schema, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
+from chord_metadata_service.restapi.description_utils import describe_schema
 from chord_metadata_service.restapi.schemas import (
-    AGE, AGE_RANGE, AGE_OR_AGE_RANGE, ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA
+    AGE,
+    AGE_RANGE,
+    AGE_OR_AGE_RANGE,
+    EXTRA_PROPERTIES_SCHEMA,
+    ONTOLOGY_CLASS,
 )
 
 
 __all__ = [
     "ALLELE_SCHEMA",
-    "PHENOPACKET_ONTOLOGY_SCHEMA",
     "PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA",
     "PHENOPACKET_RESOURCE_SCHEMA",
     "PHENOPACKET_UPDATE_SCHEMA",
@@ -65,8 +68,6 @@ ALLELE_SCHEMA = describe_schema({
     }
 }, descriptions.ALLELE)
 
-
-PHENOPACKET_ONTOLOGY_SCHEMA = describe_schema(ONTOLOGY_CLASS, ONTOLOGY_CLASS_DESC)
 
 PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -175,7 +176,7 @@ PHENOPACKET_EVIDENCE_SCHEMA = describe_schema({
     "title": "Evidence schema",
     "type": "object",
     "properties": {
-        "evidence_code": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "evidence_code": ONTOLOGY_CLASS,
         "reference": PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
     },
     "additionalProperties": False,
@@ -188,16 +189,16 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
         "description": {
             "type": "string",
         },
-        "type": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "type": ONTOLOGY_CLASS,
         "negated": {
             "type": "boolean",
         },
-        "severity": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "severity": ONTOLOGY_CLASS,
         "modifier": {  # TODO: Plural?
             "type": "array",
-            "items": PHENOPACKET_ONTOLOGY_SCHEMA
+            "items": ONTOLOGY_CLASS
         },
-        "onset": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "onset": ONTOLOGY_CLASS,
         "evidence": PHENOPACKET_EVIDENCE_SCHEMA,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
@@ -255,7 +256,7 @@ PHENOPACKET_VARIANT_SCHEMA = describe_schema({
     "type": "object",  # TODO
     "properties": {
         "allele": ALLELE_SCHEMA,  # TODO
-        "zygosity": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "zygosity": ONTOLOGY_CLASS,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     }
 }, descriptions.VARIANT)
@@ -273,25 +274,25 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
         "description": {
             "type": "string",
         },
-        "sampled_tissue": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "sampled_tissue": ONTOLOGY_CLASS,
         "phenotypic_features": {
             "type": "array",
             "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA,
         },
-        "taxonomy": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "taxonomy": ONTOLOGY_CLASS,
         "individual_age_at_collection": AGE_OR_AGE_RANGE,
-        "histological_diagnosis": PHENOPACKET_ONTOLOGY_SCHEMA,
-        "tumor_progression": PHENOPACKET_ONTOLOGY_SCHEMA,
-        "tumor_grade": PHENOPACKET_ONTOLOGY_SCHEMA,  # TODO: Is this a list?
+        "histological_diagnosis": ONTOLOGY_CLASS,
+        "tumor_progression": ONTOLOGY_CLASS,
+        "tumor_grade": ONTOLOGY_CLASS,  # TODO: Is this a list?
         "diagnostic_markers": {
             "type": "array",
-            "items": PHENOPACKET_ONTOLOGY_SCHEMA,
+            "items": ONTOLOGY_CLASS,
         },
         "procedure": {
             "type": "object",
             "properties": {
-                "code": PHENOPACKET_ONTOLOGY_SCHEMA,
-                "body_site": PHENOPACKET_ONTOLOGY_SCHEMA
+                "code": ONTOLOGY_CLASS,
+                "body_site": ONTOLOGY_CLASS
             },
             "required": ["code"],
         },
@@ -321,7 +322,7 @@ PHENOPACKET_DISEASE_ONSET_SCHEMA = {
     "anyOf": [
         AGE,
         AGE_RANGE,
-        PHENOPACKET_ONTOLOGY_SCHEMA
+        ONTOLOGY_CLASS
     ]
 }
 
@@ -331,15 +332,15 @@ PHENOPACKET_DISEASE_SCHEMA = describe_schema({
     "title": "Disease schema",
     "type": "object",
     "properties": {
-        "term": PHENOPACKET_ONTOLOGY_SCHEMA,
+        "term": ONTOLOGY_CLASS,
         "onset": PHENOPACKET_DISEASE_ONSET_SCHEMA,
         "disease_stage": {
             "type": "array",
-            "items": PHENOPACKET_ONTOLOGY_SCHEMA,
+            "items": ONTOLOGY_CLASS,
         },
         "tnm_finding": {
             "type": "array",
-            "items": PHENOPACKET_ONTOLOGY_SCHEMA,
+            "items": ONTOLOGY_CLASS,
         },
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },

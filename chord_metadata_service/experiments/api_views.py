@@ -33,4 +33,3 @@ def get_experiment_schema(_request):
     Experiment schema
     """
     return Response(EXPERIMENT_SCHEMA)
-
