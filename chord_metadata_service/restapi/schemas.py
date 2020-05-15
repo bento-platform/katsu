@@ -23,7 +23,7 @@ ONTOLOGY_CLASS = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:ontology_class_schema",
     "title": "Ontology class schema",
-    "description": "todo",
+    "description": "Schema to describe terms from ontologies.",
     "type": "object",
     "properties": {
         "id": {"type": "string", "description": "CURIE style identifier."},
