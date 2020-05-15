@@ -9,6 +9,15 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample
 import chord_metadata_service.experiments.descriptions as d
 
+
+__all__ = ["Experiment"]
+
+
+# The experiment class here is primarily designed for *genomic* experiments - thus the need for a biosample ID. If, in
+# the future, medical imaging or something which isn't sample-based is desired, it may be best to create a separate
+# model for the desired purposes.
+
+
 class Experiment(models.Model, IndexableMixin):
     """ Class to store Experiment information """
 
