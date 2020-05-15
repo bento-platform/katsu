@@ -191,6 +191,24 @@ GENE = {
     }
 }
 
+ALLELE = {
+    "properties": {
+        "id": "An arbitrary identifier.",
+        "hgvs": "",
+        "genome_assembly": "The reference genome identifier e.g. GRCh38.",
+        "chr": "A chromosome identifier e.g. chr2 or 2.",
+        "pos": "The 1-based genomic position e.g. 134327882.",
+        "ref": "The reference base(s).",
+        "alt": "The alternate base(s).",
+        "info": "Relevant parts of the INFO field.",
+        "seq_id": "Sequence ID, e.g. Seq1.",
+        "position": "Position , a 0-based coordinate for where the Deleted Sequence starts, e.g. 4.",
+        "deleted_sequence": "Deleted sequence , sequence for the deletion, can be empty, e.g. A",
+        "inserted_sequence": "Inserted sequence , sequence for the insertion, can be empty, e.g. G",
+        "iscn": "E.g. t(8;9;11)(q12;p24;p12)."
+    }
+}
+
 VARIANT = {
     "description": "A representation used to describe candidate or diagnosed causative variants.",  # TODO: GA4GH VR
     "properties": {
@@ -249,7 +267,7 @@ BIOSAMPLE = {
         "tumor_progression": ontology_class("representing if the specimen is from a primary tumour, a metastasis, or a "
                                             "recurrence. There are multiple ways of representing this using ontology "
                                             "terms, and the terms chosen will have a specific meaning that is "
-                                            "application specific."),
+                                            "application specific"),
         "tumor_grade": ontology_class("representing the tumour grade. This should be a child term of NCIT:C28076 "
                                       "(Disease Grade Qualifier) or equivalent"),
         "diagnostic_markers": {
@@ -257,7 +275,7 @@ BIOSAMPLE = {
             "items": ontology_class("representing a clinically-relevant bio-marker. Most of the assays, such as "
                                     "immunohistochemistry (IHC), are covered by the NCIT ontology under the "
                                     "sub-hierarchy NCIT:C25294 (Laboratory Procedure), e.g. NCIT:C68748 "
-                                    "(HER2/Neu Positive), or NCIT:C131711 Human Papillomavirus-18 Positive).")
+                                    "(HER2/Neu Positive), or NCIT:C131711 Human Papillomavirus-18 Positive)")
         },
         "procedure": PROCEDURE,
         "hts_files": {
