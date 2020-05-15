@@ -243,6 +243,16 @@ class SearchTest(APITestCase):
         self.assertEqual(len(c["results"]), 1)
         self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
 
+    def test_private_table_search_5(self):
+        # Valid query: literal "true"
+        r = self.client.post(reverse("private-table-search", args=[str(self.dataset.identifier)]), data=json.dumps({
+            "query": True
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertEqual(len(c["results"]), 1)
+        self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
+
     @patch('chord_metadata_service.chord.views_search.es')
     def test_fhir_search(self, mocked_es):
         mocked_es.search.return_value = SEARCH_SUCCESS
