@@ -76,3 +76,15 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
         "required": required or [],
         "additionalProperties": additional_properties
     }
+
+
+def schema_list(schema):
+    """ Schema to validate JSON array values. """
+
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "chord_metadata_service:schema_list",
+        "title": "Schema list",
+        "type": "array",
+        "items": schema
+    }
