@@ -4,6 +4,8 @@ __all__ = [
     "search_optional_eq",
     "search_optional_str",
     "tag_schema_with_search_properties",
+    "customize_schema",
+    "schema_list",
 ]
 
 
