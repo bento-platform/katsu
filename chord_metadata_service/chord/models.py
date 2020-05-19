@@ -4,8 +4,10 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
 
+from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET
 
-__all__ = ["Project", "Dataset", "TableOwnership"]
+
+__all__ = ["Project", "Dataset", "TableOwnership", "Table"]
 
 
 def version_default():
@@ -67,7 +69,8 @@ class Dataset(models.Model):
     # TODO: Can this be auto-synthesized? (Specified in settings)
     stored_in = JSONField(blank=True, null=True, help_text="The data repository hosting the dataset.")
     spatial_coverage = JSONField(blank=True, default=list, help_text="The geographical extension and span covered "
-                                                           "by the dataset and its measured dimensions/variables.")
+                                                                     "by the dataset and its measured "
+                                                                     "dimensions/variables.")
     types = JSONField(blank=True, default=list, help_text="A term, ideally from a controlled terminology, identifying "
                                                           "the dataset type or nature of the data, placing it in a "
                                                           "typology.")
@@ -135,7 +138,7 @@ class TableOwnership(models.Model):
     table_id = models.CharField(primary_key=True, max_length=200)
     service_id = models.UUIDField(max_length=200)
     service_artifact = models.CharField(max_length=200, default="")
-    data_type = models.CharField(max_length=200)  # TODO: Is this needed?
+    data_type = models.CharField(max_length=200)  # TODO: Is this needed? TODO: Remove
 
     # Delete table ownership upon project/dataset deletion
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name='table_ownership')
@@ -144,3 +147,21 @@ class TableOwnership(models.Model):
 
     def __str__(self):
         return f"{self.dataset if not self.sample else self.sample} -> {self.table_id}"
+
+
+class Table(models.Model):
+    TABLE_DATA_TYPE_CHOICES = (
+        (DATA_TYPE_EXPERIMENT, DATA_TYPE_EXPERIMENT),
+        (DATA_TYPE_PHENOPACKET, DATA_TYPE_PHENOPACKET),
+    )
+
+    ownership_record = models.OneToOneField(TableOwnership, on_delete=models.CASCADE, primary_key=True)
+    name = models.CharField(max_length=200, unique=True)
+    data_type = models.CharField(max_length=30, choices=TABLE_DATA_TYPE_CHOICES)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    @property
+    def identifier(self):
+        return self.ownership_record_id

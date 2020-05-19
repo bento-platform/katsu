@@ -5,7 +5,7 @@ from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
 from chord_metadata_service.restapi.utils import transform_keys
 
-from .models import *
+from .models import Project, Dataset, TableOwnership, Table
 from .schemas import LINKED_FIELD_SETS_SCHEMA
 
 
@@ -23,6 +23,14 @@ class TableOwnershipSerializer(GenericSerializer):
     class Meta:
         model = TableOwnership
         fields = '__all__'
+
+
+class TableSerializer(GenericSerializer):
+    identifier = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Table
+        fields = "__all__"
 
 
 class DatasetSerializer(GenericSerializer):
