@@ -25,14 +25,6 @@ class TableOwnershipSerializer(GenericSerializer):
         fields = '__all__'
 
 
-class TableSerializer(GenericSerializer):
-    identifier = serializers.CharField(read_only=True)
-
-    class Meta:
-        model = Table
-        fields = "__all__"
-
-
 class DatasetSerializer(GenericSerializer):
     always_include = (
         "description",
@@ -157,3 +149,12 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = '__all__'
+
+
+class TableSerializer(GenericSerializer):
+    identifier = serializers.CharField(read_only=True)
+    dataset = DatasetSerializer(read_only=True, exclude_when_nested=["table_ownership"])
+
+    class Meta:
+        model = Table
+        fields = "__all__"

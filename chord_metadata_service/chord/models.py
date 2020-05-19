@@ -165,3 +165,7 @@ class Table(models.Model):
     @property
     def identifier(self):
         return self.ownership_record_id
+
+    @property
+    def dataset(self):
+        return self.ownership_record.dataset

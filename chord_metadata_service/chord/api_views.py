@@ -61,7 +61,7 @@ class TableOwnershipViewSet(CHORDPublicModelViewSet):
 
     post:
     Create a new relationship between a dataset (and optionally a specific biosample) and a table
-    in another service
+    in a data service
     """
 
     queryset = TableOwnership.objects.all().order_by("table_id")
@@ -69,5 +69,15 @@ class TableOwnershipViewSet(CHORDPublicModelViewSet):
 
 
 class TableViewSet(CHORDPublicModelViewSet):
-    queryset = Table.objects.all().order_by("ownership_record_id")
+    """
+    get:
+    Return a list of tables
+
+    post:
+    Create a new table
+    """
+
+    # TODO: Create TableOwnership if needed - here or model?
+
+    queryset = Table.objects.all().prefetch_related("ownership_record").order_by("ownership_record_id")
     serializer_class = TableSerializer
