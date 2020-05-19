@@ -57,8 +57,7 @@ class Dataset(models.Model):
 
     @property
     def n_of_tables(self):
-        # TODO: No hard-code: +1 for phenopackets table
-        return TableOwnership.objects.filter(dataset=self).count() + 1
+        return TableOwnership.objects.filter(dataset=self).count()
 
     # --------------------------- DATS model fields ---------------------------
 

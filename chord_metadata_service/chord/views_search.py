@@ -101,8 +101,7 @@ def table_detail(request, table_id):  # pragma: no cover
         return Response(status=204)
 
 
-def experiment_table_summary(table_id):
-    table = Table.objects.get(ownership_record_id=table_id)
+def experiment_table_summary(table):
     experiments = Experiment.objects.filter(table=table)  # TODO
 
     return Response({
@@ -111,8 +110,7 @@ def experiment_table_summary(table_id):
     })
 
 
-def phenopacket_table_summary(table_id):
-    table = Table.objects.get(ownership_record_id=table_id)
+def phenopacket_table_summary(table):
     phenopackets = Phenopacket.objects.filter(table=table)  # TODO
 
     diseases_counter = Counter()
@@ -187,13 +185,12 @@ SUMMARY_HANDLERS: Dict[str, Callable[[Any], Response]] = {
 
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly])
-def chord_table_summary(_request, data_type: str, table_id):
+def chord_table_summary(_request, table_id):
     try:
-        return SUMMARY_HANDLERS[data_type](table_id)
+        table = Table.objects.get(ownership_record_id=table_id)
+        return SUMMARY_HANDLERS[table.data_type](table)
     except Table.DoesNotExist:
         return Response(errors.not_found_error(f"Table with ID {table_id} not found"), status=404)
-    except KeyError:
-        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
 
 
 # TODO: CHORD-standardized logging
