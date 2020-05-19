@@ -3,9 +3,9 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.restapi.schema_utils import schema_list
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.models import IndexableMixin
+from chord_metadata_service.restapi.schema_utils import schema_list
 from chord_metadata_service.restapi.validators import (
     JsonSchemaValidator,
     age_or_age_range_validator,
@@ -188,7 +188,7 @@ class Gene(models.Model):
     # Gene id is unique
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENE, "id"))
     # CURIE style? Yes!
-    alternate_ids = ArrayField(models.CharField(max_length=200, blank=True), blank=True, null=True,
+    alternate_ids = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
                                help_text=rec_help(d.GENE, "alternate_ids"))
     symbol = models.CharField(max_length=200, help_text=rec_help(d.GENE, "symbol"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.GENE, "extra_properties"))
