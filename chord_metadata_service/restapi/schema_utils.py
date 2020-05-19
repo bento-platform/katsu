@@ -38,7 +38,8 @@ def tag_schema_with_search_properties(schema, search_descriptions: Optional[dict
 
 
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
-                     schema_id: str = None, title: str = None, description: str = None, additional_properties: bool = False,
+                     schema_id: str = None, title: str = None, description: str = None,
+                     additional_properties: bool = False,
                      required=None) -> dict:
     if required is None:
         required = []
@@ -54,4 +55,16 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
         },
         "required": required,
         "additionalProperties": additional_properties
+    }
+
+
+def schema_list(schema):
+    """ Schema to validate JSON array values. """
+
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "chord_metadata_service:schema_list",
+        "title": "Schema list",
+        "type": "array",
+        "items": schema
     }

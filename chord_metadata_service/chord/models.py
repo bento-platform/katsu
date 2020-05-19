@@ -1,6 +1,6 @@
 import uuid
 
-from django.contrib.postgres.fields import JSONField, ArrayField
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
 
@@ -51,9 +51,7 @@ class Dataset(models.Model):
     )
 
     data_use = JSONField()
-
-    linked_field_sets = ArrayField(JSONField(), blank=True, default=list,
-                                   help_text="Data type fields which are linked together.")
+    linked_field_sets = JSONField(blank=True, default=list, help_text="Data type fields which are linked together.")
 
     @property
     def n_of_tables(self):
@@ -62,21 +60,17 @@ class Dataset(models.Model):
 
     # --------------------------- DATS model fields ---------------------------
 
-    alternate_identifiers = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                                       help_text="Alternate identifiers for the dataset.")
-    related_identifiers = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                                     help_text="Related identifiers for the dataset.")
-    dates = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                       help_text="Relevant dates for the datasets, a date must be added, e.g. creation date or last "
-                                 "modification date should be added.")
+    alternate_identifiers = JSONField(blank=True, default=list, help_text="Alternate identifiers for the dataset.")
+    related_identifiers = JSONField(blank=True, default=list, help_text="Related identifiers for the dataset.")
+    dates = JSONField(blank=True, default=list, help_text="Relevant dates for the datasets, a date must be added, e.g. "
+                                                          "creation date or last modification date should be added.")
     # TODO: Can this be auto-synthesized? (Specified in settings)
     stored_in = JSONField(blank=True, null=True, help_text="The data repository hosting the dataset.")
-    spatial_coverage = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                                  help_text="The geographical extension and span covered by the dataset and its "
-                                            "measured dimensions/variables.")
-    types = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                       help_text="A term, ideally from a controlled terminology, identifying the dataset type or "
-                                 "nature of the data, placing it in a typology.")
+    spatial_coverage = JSONField(blank=True, default=list, help_text="The geographical extension and span covered "
+                                                           "by the dataset and its measured dimensions/variables.")
+    types = JSONField(blank=True, default=list, help_text="A term, ideally from a controlled terminology, identifying "
+                                                          "the dataset type or nature of the data, placing it in a "
+                                                          "typology.")
     # TODO: Can this be derived from / combined with DUO stuff?
     availability = models.CharField(max_length=200, blank=True,
                                     help_text="A qualifier indicating the different types of availability for a "
@@ -91,40 +85,37 @@ class Dataset(models.Model):
     privacy = models.CharField(max_length=200, blank=True,
                                help_text="A qualifier to describe the data protection applied to the dataset. This is "
                                          "relevant for clinical data.")
-    distributions = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                               help_text="The distribution(s) by which datasets are made available (for example: "
-                                         "mySQL dump).")
-    dimensions = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                            help_text="The different dimensions (granular components) making up a dataset.")
-    primary_publications = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                                      help_text="The primary publication(s) associated with the dataset, usually "
-                                                "describing how the dataset was produced.")
-    citations = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                           help_text="The publication(s) that cite this dataset.")
+    distributions = JSONField(blank=True, default=list, help_text="The distribution(s) by which datasets are made "
+                                                                  "available (for example: mySQL dump).")
+    dimensions = JSONField(blank=True, default=list, help_text="The different dimensions (granular components) "
+                                                               "making up a dataset.")
+    primary_publications = JSONField(blank=True, default=list, help_text="The primary publication(s) associated with "
+                                                                         "the dataset, usually describing how the "
+                                                                         "dataset was produced.")
+    citations = JSONField(blank=True, default=list, help_text="The publication(s) that cite this dataset.")
     citation_count = models.IntegerField(blank=True, null=True,
                                          help_text="The number of publications that cite this dataset (enumerated in "
                                                    "the citations property).")
     produced_by = JSONField(blank=True, null=True, help_text="A study process which generated a given dataset, if any.")
-    creators = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                          help_text="The person(s) or organization(s) which contributed to the creation of the "
-                                    "dataset.")
+    creators = JSONField(blank=True, default=list, help_text="The person(s) or organization(s) which contributed to "
+                                                             "the creation of the dataset.")
     # TODO: How to reconcile this and data_use?
-    licenses = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                          help_text="The terms of use of the dataset.")
+    licenses = JSONField(blank=True, default=list, help_text="The terms of use of the dataset.")
     # is_about this field will be calculated based on sample field
     # in tableOwnership
-    has_part = models.ManyToManyField("self", blank=True,
-                                      help_text="A Dataset that is a subset of this Dataset; Datasets declaring the "
-                                                "'hasPart' relationship are considered a collection of Datasets, the "
-                                                "aggregation criteria could be included in the 'description' field.")
-    acknowledges = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                              help_text="The grant(s) which funded and supported the work reported by the dataset.")
-    keywords = ArrayField(JSONField(null=True, blank=True), blank=True, null=True,
-                          help_text="Tags associated with the dataset, which will help in its discovery.")
+    has_part = models.ManyToManyField("self", blank=True, help_text="A Dataset that is a subset of this Dataset; "
+                                                                    "Datasets declaring the 'hasPart' relationship are "
+                                                                    "considered a collection of Datasets, the "
+                                                                    "aggregation criteria could be included in "
+                                                                    "the 'description' field.")
+    acknowledges = JSONField(blank=True, default=list, help_text="The grant(s) which funded and supported the work "
+                                                                 "reported by the dataset.")
+    keywords = JSONField(blank=True, default=list, help_text="Tags associated with the dataset, which will help in "
+                                                             "its discovery.")
     version = models.CharField(max_length=200, blank=True, default=version_default,
                                help_text="A release point for the dataset when applicable.")
-    extra_properties = JSONField(blank=True, null=True,
-                                 help_text="Extra properties that do not fit in the previous specified attributes.")
+    extra_properties = JSONField(blank=True, null=True, help_text="Extra properties that do not fit in the previous "
+                                                                  "specified attributes.")
 
     # -------------------------------------------------------------------------
 
