@@ -62,6 +62,20 @@ def data_type_metadata_schema(_request, data_type: str):
     return Response(DATA_TYPES[DATA_TYPE_PHENOPACKET]["metadata_schema"])
 
 
+def chord_table_representation(table: Table) -> dict:
+    return {
+        "id": table.identifier,
+        "name": table.name,
+        "metadata": {
+            "dataset_id": table.ownership_record.dataset_id,
+            "created": table.created.isoformat(),
+            "updated": table.updated.isoformat()
+        },
+        "data_type": table.data_type,
+        "schema": DATA_TYPES[table.data_type]["schema"],
+    }
+
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def table_list(request):
@@ -71,21 +85,11 @@ def table_list(request):
         return Response(errors.bad_request_error(f"Missing or invalid data type(s) (Specified: {data_types})"),
                         status=400)
 
-    return Response([{
-        "id": t.identifier,
-        "name": t.name,
-        "metadata": {
-            "dataset_id": t.ownership_record.dataset_id,
-            "created": t.created.isoformat(),
-            "updated": t.updated.isoformat()
-        },
-        "schema": DATA_TYPES[t.data_type]["schema"],
-    } for t in Table.objects.filter(data_type__in=data_types)])
+    return Response([chord_table_representation(t) for t in Table.objects.filter(data_type__in=data_types)])
 
 
-# TODO: Remove pragma: no cover when GET/POST implemented
-# TODO: Should this exist? managed
-@api_view(["DELETE"])
+# TODO: Remove pragma: no cover when POST implemented
+@api_view(["GET", "DELETE"])
 @permission_classes([OverrideOrSuperUserOnly])
 def table_detail(request, table_id):  # pragma: no cover
     # TODO: Implement GET, POST
@@ -99,6 +103,8 @@ def table_detail(request, table_id):  # pragma: no cover
     if request.method == "DELETE":
         table.delete()
         return Response(status=204)
+
+    return Response(chord_table_representation(table))
 
 
 def experiment_table_summary(table):
