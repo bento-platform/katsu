@@ -1,4 +1,5 @@
 import itertools
+import json
 import uuid
 
 from collections import Counter
@@ -81,9 +82,11 @@ def chord_table_representation(table: Table) -> dict:
 @permission_classes([AllowAny])
 def table_list(request):
     if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        data_type = request.POST.get("data_type", "")
-        dataset = request.POST.get("dataset")
+        request_data = json.loads(request.body)  # TODO: Handle JSON errors here
+
+        name = request_data.get("name", "").strip()
+        data_type = request_data.get("data_type", "")
+        dataset = request_data.get("dataset")
 
         if name == "":
             return Response(errors.bad_request_error("Missing or blank name field"), status=400)
