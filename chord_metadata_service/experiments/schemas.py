@@ -55,16 +55,13 @@ EXPERIMENT_SCHEMA = describe_schema({
                 "ChIP-Seq",
                 "RNA-Seq",
                 "miRNA-Seq",
-                "WGS"
+                "WGS",
             ]
         },
         "other_fields": KEY_VALUE_OBJECT,
         "biosample": {
             "type": "string"
         },
-        "individual": {
-            "type": "string"
-        }
     },
     "required": ["id", "experiment_type", "library_strategy"]
 }, EXPERIMENT)
