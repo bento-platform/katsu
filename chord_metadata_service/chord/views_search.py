@@ -1,4 +1,5 @@
 import itertools
+import uuid
 
 from collections import Counter
 from datetime import datetime
@@ -15,14 +16,14 @@ from chord_lib.search import build_search_response, postgres
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.metadata.elastic import es
-from chord_metadata_service.metadata.settings import DEBUG
+from chord_metadata_service.metadata.settings import DEBUG, CHORD_SERVICE_ARTIFACT, CHORD_SERVICE_ID
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
-from .models import Table
+from .models import Dataset, TableOwnership, Table
 from .permissions import OverrideOrSuperUserOnly
 
 
@@ -76,9 +77,40 @@ def chord_table_representation(table: Table) -> dict:
     }
 
 
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def table_list(request):
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        data_type = request.POST.get("data_type", "")
+        dataset = request.POST.get("dataset")
+
+        if name == "":
+            return Response(errors.bad_request_error("Missing or blank name field"), status=400)
+
+        if data_type not in DATA_TYPES:
+            return Response(errors.bad_request_error(f"Invalid data type for table: {data_type}"), status=400)
+
+        table_id = str(uuid.uuid4())
+
+        table_ownership = TableOwnership.objects.create(
+            table_id=table_id,
+            service_id=CHORD_SERVICE_ID,
+            service_artifact=CHORD_SERVICE_ARTIFACT,
+            data_type=data_type,
+            dataset=Dataset.objects.get(identifier=dataset),
+        )
+
+        table = Table.objects.create(
+            ownership_record=table_ownership,
+            name=name,
+            data_type=data_type,
+        )
+
+        return Response(chord_table_representation(table))
+
+    # GET
+
     data_types = request.query_params.getlist("data-type")
 
     if len(data_types) == 0 or next((dt for dt in data_types if dt not in DATA_TYPES), None) is not None:
@@ -104,6 +136,7 @@ def table_detail(request, table_id):  # pragma: no cover
         table.delete()
         return Response(status=204)
 
+    # GET
     return Response(chord_table_representation(table))
 
 

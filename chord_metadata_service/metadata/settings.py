@@ -44,7 +44,8 @@ CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for runn
 # unless an alternative permissions system is in place.
 CHORD_PERMISSIONS = os.environ.get("CHORD_PERMISSIONS", str(not DEBUG)).lower() == "true"
 
-CHORD_SERVICE_TYPE = "ca.c3g.chord:metadata:{}".format(__version__)
+CHORD_SERVICE_ARTIFACT = "metadata"
+CHORD_SERVICE_TYPE = f"ca.c3g.chord:{CHORD_SERVICE_ARTIFACT}:{__version__}"
 CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE)
 
 # SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
