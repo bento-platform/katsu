@@ -135,7 +135,7 @@ class TableOwnership(models.Model):
     """
 
     table_id = models.CharField(primary_key=True, max_length=200)
-    service_id = models.UUIDField(max_length=200)
+    service_id = models.CharField(max_length=200)
     service_artifact = models.CharField(max_length=200, default="")
     data_type = models.CharField(max_length=200)  # TODO: Is this needed? TODO: Remove
 
