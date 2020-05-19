@@ -11,6 +11,12 @@ from chord_metadata_service.mcode import api_views as mcode_views
 
 router = routers.DefaultRouter(trailing_slash=False)
 
+# CHORD app urls
+router.register(r'projects', chord_views.ProjectViewSet)
+router.register(r'datasets', chord_views.DatasetViewSet)
+router.register(r'table_ownership', chord_views.TableOwnershipViewSet)
+router.register(r'tables', chord_views.TableViewSet)
+
 # Experiments app urls
 router.register(r'experiments', experiment_views.ExperimentViewSet)
 
@@ -31,9 +37,6 @@ router.register(r'phenopackets', phenopacket_views.PhenopacketViewSet)
 router.register(r'genomicinterpretations', phenopacket_views.GenomicInterpretationViewSet)
 router.register(r'diagnoses', phenopacket_views.DiagnosisViewSet)
 router.register(r'interpretations', phenopacket_views.InterpretationViewSet)
-router.register(r'projects', chord_views.ProjectViewSet)
-router.register(r'datasets', chord_views.DatasetViewSet)
-router.register(r'table_ownership', chord_views.TableOwnershipViewSet)
 
 # mCode app urls
 router.register(r'geneticvariantstested', mcode_views.GeneticVariantTestedViewSet)

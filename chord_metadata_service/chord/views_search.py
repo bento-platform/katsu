@@ -8,74 +8,79 @@ from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from typing import Any, Callable, Dict
 
 from chord_lib.responses import errors
 from chord_lib.search import build_search_response, postgres
+from chord_metadata_service.experiments.models import Experiment
+from chord_metadata_service.experiments.serializers import ExperimentSerializer
+from chord_metadata_service.metadata.elastic import es
 from chord_metadata_service.metadata.settings import DEBUG
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
-from chord_metadata_service.phenopackets.search_schemas import PHENOPACKET_SEARCH_SCHEMA
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
-from chord_metadata_service.metadata.elastic import es
 
-from .models import Dataset
+from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
+from .models import Table
 from .permissions import OverrideOrSuperUserOnly
-
-PHENOPACKET_DATA_TYPE_ID = "phenopacket"
-
-PHENOPACKET_METADATA_SCHEMA = {
-    "type": "object"
-    # TODO
-}
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def data_type_list(_request):
-    return Response([{"id": PHENOPACKET_DATA_TYPE_ID, "schema": PHENOPACKET_SEARCH_SCHEMA}])
+    return Response([
+        {"id": DATA_TYPE_EXPERIMENT, "schema": DATA_TYPES[DATA_TYPE_EXPERIMENT]["schema"]},
+        {"id": DATA_TYPE_PHENOPACKET, "schema": DATA_TYPES[DATA_TYPE_PHENOPACKET]["schema"]},
+    ])
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def data_type_phenopacket(_request):
-    return Response({
-        "id": PHENOPACKET_DATA_TYPE_ID,
-        "schema": PHENOPACKET_SEARCH_SCHEMA,
-        "metadata_schema": PHENOPACKET_METADATA_SCHEMA
-    })
+def data_type_detail(_request, data_type: str):
+    if data_type not in DATA_TYPES:
+        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
+
+    return Response({"id": data_type, **DATA_TYPES[data_type]})
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def data_type_phenopacket_schema(_request):
-    return Response(PHENOPACKET_SEARCH_SCHEMA)
+def data_type_schema(_request, data_type: str):
+    if data_type not in DATA_TYPES:
+        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
+
+    return Response(DATA_TYPES[data_type]["schema"])
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def data_type_phenopacket_metadata_schema(_request):
-    return Response(PHENOPACKET_METADATA_SCHEMA)
+def data_type_metadata_schema(_request, data_type: str):
+    if data_type not in DATA_TYPES:
+        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
+
+    return Response(DATA_TYPES[DATA_TYPE_PHENOPACKET]["metadata_schema"])
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def table_list(request):
     data_types = request.query_params.getlist("data-type")
-    if PHENOPACKET_DATA_TYPE_ID not in data_types:
-        return Response(errors.bad_request_error(f"Missing or invalid data type (Specified: {data_types})"), status=400)
+
+    if len(data_types) == 0 or next((dt for dt in data_types if dt not in DATA_TYPES), None) is not None:
+        return Response(errors.bad_request_error(f"Missing or invalid data type(s) (Specified: {data_types})"),
+                        status=400)
 
     return Response([{
-        "id": d.identifier,
-        "name": d.title,
+        "id": t.identifier,
+        "name": t.name,
         "metadata": {
-            "description": d.description,
-            "project_id": d.project_id,
-            "created": d.created.isoformat(),
-            "updated": d.updated.isoformat()
+            "dataset_id": t.ownership_record.dataset_id,
+            "created": t.created.isoformat(),
+            "updated": t.updated.isoformat()
         },
-        "schema": PHENOPACKET_SEARCH_SCHEMA
-    } for d in Dataset.objects.all()])
+        "schema": DATA_TYPES[t.data_type]["schema"],
+    } for t in Table.objects.filter(data_type__in=data_types)])
 
 
 # TODO: Remove pragma: no cover when GET/POST implemented
@@ -87,8 +92,8 @@ def table_detail(request, table_id):  # pragma: no cover
     # TODO: Permissions: Check if user has control / more direct access over this table and/or dataset?
     #  Or just always use owner...
     try:
-        table = Dataset.objects.get(identifier=table_id)
-    except Dataset.DoesNotExist:
+        table = Table.objects.get(ownership_record_id=table_id)
+    except Table.DoesNotExist:
         return Response(errors.not_found_error(f"Table with ID {table_id} not found"), status=404)
 
     if request.method == "DELETE":
@@ -96,78 +101,99 @@ def table_detail(request, table_id):  # pragma: no cover
         return Response(status=204)
 
 
-@api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly])
-def chord_table_summary(_request, table_id):
-    try:
-        table = Dataset.objects.get(identifier=table_id)
-        phenopackets = Phenopacket.objects.filter(dataset=table)
+def experiment_table_summary(table_id):
+    table = Table.objects.get(ownership_record_id=table_id)
+    experiments = Experiment.objects.filter(table=table)  # TODO
 
-        diseases_counter = Counter()
-        phenotypic_features_counter = Counter()
+    return Response({
+        "count": experiments.count(),
+        "data_type_specific": {},  # TODO
+    })
 
-        biosamples_set = set()
-        individuals_set = set()
 
-        biosamples_cs = Counter()
-        biosamples_taxonomy = Counter()
+def phenopacket_table_summary(table_id):
+    table = Table.objects.get(ownership_record_id=table_id)
+    phenopackets = Phenopacket.objects.filter(table=table)  # TODO
 
-        individuals_sex = Counter()
-        individuals_k_sex = Counter()
-        individuals_taxonomy = Counter()
+    diseases_counter = Counter()
+    phenotypic_features_counter = Counter()
 
-        def count_individual(ind):
-            individuals_set.add(ind.id)
-            individuals_sex.update((ind.sex,))
-            individuals_k_sex.update((ind.karyotypic_sex,))
-            if ind.taxonomy is not None:
-                individuals_taxonomy.update((ind.taxonomy["id"],))
+    biosamples_set = set()
+    individuals_set = set()
 
-        for p in phenopackets.prefetch_related("biosamples"):
-            for b in p.biosamples.all():
-                biosamples_set.add(b.id)
-                biosamples_cs.update((b.is_control_sample,))
+    biosamples_cs = Counter()
+    biosamples_taxonomy = Counter()
 
-                if b.taxonomy is not None:
-                    biosamples_taxonomy.update((b.taxonomy["id"],))
+    individuals_sex = Counter()
+    individuals_k_sex = Counter()
+    individuals_taxonomy = Counter()
 
-                if b.individual is not None:
-                    count_individual(b.individual)
+    def count_individual(ind):
+        individuals_set.add(ind.id)
+        individuals_sex.update((ind.sex,))
+        individuals_k_sex.update((ind.karyotypic_sex,))
+        if ind.taxonomy is not None:
+            individuals_taxonomy.update((ind.taxonomy["id"],))
 
-                for pf in b.phenotypic_features.all():
-                    phenotypic_features_counter.update((pf.pftype["id"],))
+    for p in phenopackets.prefetch_related("biosamples"):
+        for b in p.biosamples.all():
+            biosamples_set.add(b.id)
+            biosamples_cs.update((b.is_control_sample,))
 
-            for d in p.diseases.all():
-                diseases_counter.update((d.term["id"],))
+            if b.taxonomy is not None:
+                biosamples_taxonomy.update((b.taxonomy["id"],))
 
-            for pf in p.phenotypic_features.all():
+            if b.individual is not None:
+                count_individual(b.individual)
+
+            for pf in b.phenotypic_features.all():
                 phenotypic_features_counter.update((pf.pftype["id"],))
 
-            # Currently, phenopacket subject is required so we can assume it's not None
-            count_individual(p.subject)
+        for d in p.diseases.all():
+            diseases_counter.update((d.term["id"],))
 
-        return Response({
-            "count": phenopackets.count(),
-            "data_type_specific": {
-                "biosamples": {
-                    "count": len(biosamples_set),
-                    "is_control_sample": dict(biosamples_cs),
-                    "taxonomy": dict(biosamples_taxonomy),
-                },
-                "diseases": dict(diseases_counter),
-                "individuals": {
-                    "count": len(individuals_set),
-                    "sex": {k: individuals_sex[k] for k in (s[0] for s in Individual.SEX)},
-                    "karyotypic_sex": {k: individuals_k_sex[k] for k in (s[0] for s in Individual.KARYOTYPIC_SEX)},
-                    "taxonomy": dict(individuals_taxonomy),
-                    # TODO: age histogram
-                },
-                "phenotypic_features": dict(phenotypic_features_counter),
-            }
-        })
+        for pf in p.phenotypic_features.all():
+            phenotypic_features_counter.update((pf.pftype["id"],))
 
-    except Dataset.DoesNotExist:
+        # Currently, phenopacket subject is required so we can assume it's not None
+        count_individual(p.subject)
+
+    return Response({
+        "count": phenopackets.count(),
+        "data_type_specific": {
+            "biosamples": {
+                "count": len(biosamples_set),
+                "is_control_sample": dict(biosamples_cs),
+                "taxonomy": dict(biosamples_taxonomy),
+            },
+            "diseases": dict(diseases_counter),
+            "individuals": {
+                "count": len(individuals_set),
+                "sex": {k: individuals_sex[k] for k in (s[0] for s in Individual.SEX)},
+                "karyotypic_sex": {k: individuals_k_sex[k] for k in (s[0] for s in Individual.KARYOTYPIC_SEX)},
+                "taxonomy": dict(individuals_taxonomy),
+                # TODO: age histogram
+            },
+            "phenotypic_features": dict(phenotypic_features_counter),
+        }
+    })
+
+
+SUMMARY_HANDLERS: Dict[str, Callable[[Any], Response]] = {
+    DATA_TYPE_EXPERIMENT: experiment_table_summary,
+    DATA_TYPE_PHENOPACKET: phenopacket_table_summary,
+}
+
+
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly])
+def chord_table_summary(_request, data_type: str, table_id):
+    try:
+        return SUMMARY_HANDLERS[data_type](table_id)
+    except Table.DoesNotExist:
         return Response(errors.not_found_error(f"Table with ID {table_id} not found"), status=404)
+    except KeyError:
+        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
 
 
 # TODO: CHORD-standardized logging
@@ -176,11 +202,17 @@ def debug_log(message):  # pragma: no cover
         print(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}", flush=True)
 
 
-def phenopacket_results(query, params, key="id"):
+def data_type_results(query, params, key="id"):
     with connection.cursor() as cursor:
         debug_log(f"Executing SQL:\n    {query.as_string(cursor.connection)}")
         cursor.execute(query.as_string(cursor.connection), params)
         return set(dict(zip([col[0] for col in cursor.description], row))[key] for row in cursor.fetchall())
+
+
+def experiment_query_results(query, params):
+    # TODO: possibly a quite inefficient way of doing things...
+    # TODO: Prefetch related biosample or no?
+    return Experiment.objects.filter(id__in=data_type_results(query, params, "id"))
 
 
 def phenopacket_query_results(query, params):
@@ -191,7 +223,7 @@ def phenopacket_query_results(query, params):
     # sure that, for instance, when querying diseases, we won't make multiple call
     # for the same set of data
     return Phenopacket.objects.filter(
-        id__in=phenopacket_results(query, params, "id")
+        id__in=data_type_results(query, params, "id")
     ).select_related(
         'subject',
         'meta_data'
@@ -201,7 +233,9 @@ def phenopacket_query_results(query, params):
 
 
 def search(request, internal_data=False):
-    if "data_type" not in request.data:
+    data_type = request.data.get("data_type")
+
+    if not data_type:
         return Response(errors.bad_request_error("Missing data_type in request body"), status=400)
 
     if "query" not in request.data:
@@ -209,7 +243,7 @@ def search(request, internal_data=False):
 
     start = datetime.now()
 
-    if request.data["data_type"] != PHENOPACKET_DATA_TYPE_ID:
+    if data_type not in DATA_TYPES:
         return Response(
             errors.bad_request_error(f"Missing or invalid data type (Specified: {request.data['data_type']})"),
             status=400
@@ -217,26 +251,30 @@ def search(request, internal_data=False):
 
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"],
-                                                                       PHENOPACKET_SEARCH_SCHEMA)
+                                                                       DATA_TYPES[data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
         return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
     if not internal_data:
-        datasets = Dataset.objects.filter(identifier__in=phenopacket_results(
+        tables = Table.objects.filter(ownership_record_id__in=data_type_results(
             query=compiled_query,
             params=params,
-            key="dataset_id"
+            key="table_id"
         ))  # TODO: Maybe can avoid hitting DB here
-        return Response(build_search_response([{"id": d.identifier, "data_type": PHENOPACKET_DATA_TYPE_ID}
-                                               for d in datasets], start))
+        return Response(build_search_response([{"id": t.identifier, "data_type": DATA_TYPE_PHENOPACKET}
+                                               for t in tables], start))
+
+    # TODO: Dict-ify
+    serializer_class = PhenopacketSerializer if data_type == DATA_TYPE_PHENOPACKET else ExperimentSerializer
+    query_function = phenopacket_query_results if data_type == DATA_TYPE_PHENOPACKET else experiment_query_results
 
     return Response(build_search_response({
-        dataset_id: {
-            "data_type": PHENOPACKET_DATA_TYPE_ID,
-            "matches": list(PhenopacketSerializer(p).data for p in dataset_phenopackets)
-        } for dataset_id, dataset_phenopackets in itertools.groupby(
-            phenopacket_query_results(compiled_query, params),
-            key=lambda p: str(p.dataset_id)
+        table_id: {
+            "data_type": data_type,
+            "matches": list(serializer_class(p).data for p in table_objects)
+        } for table_id, table_objects in itertools.groupby(
+            query_function(compiled_query, params),
+            key=lambda o: str(o.table_id)
         )
     }, start))
 
@@ -325,14 +363,14 @@ def fhir_search(request, internal_data=False):
 
     if not internal_data:
         # TODO: Maybe can avoid hitting DB here
-        datasets = Dataset.objects.filter(identifier__in=frozenset(p.dataset_id for p in phenopackets))
-        return Response(build_search_response([{"id": d.identifier, "data_type": PHENOPACKET_DATA_TYPE_ID}
+        datasets = Table.objects.filter(ownership_record_id__in=frozenset(p.table_id for p in phenopackets))
+        return Response(build_search_response([{"id": d.identifier, "data_type": DATA_TYPE_PHENOPACKET}
                                                for d in datasets], start))
     return Response(build_search_response({
-        dataset_id: {
-            "data_type": PHENOPACKET_DATA_TYPE_ID,
-            "matches": list(PhenopacketSerializer(p).data for p in dataset_phenopackets)
-        } for dataset_id, dataset_phenopackets in itertools.groupby(phenopackets, key=lambda p: str(p.dataset_id))
+        table_id: {
+            "data_type": DATA_TYPE_PHENOPACKET,
+            "matches": list(PhenopacketSerializer(p).data for p in table_phenopackets)
+        } for table_id, table_phenopackets in itertools.groupby(phenopackets, key=lambda p: str(p.table_id))
     }, start))
 
 
@@ -359,20 +397,20 @@ def chord_table_search(request, table_id, internal=False):
         return Response(errors.bad_request_error("Missing query in request body"), status=400)
 
     # Check that dataset exists
-    dataset = Dataset.objects.get(identifier=table_id)
+    table = Table.objects.get(ownership_record_id=table_id)
 
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"],
-                                                                       PHENOPACKET_SEARCH_SCHEMA)
+                                                                       DATA_TYPES[table.data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
         print("[CHORD Metadata] Error encountered compiling query {}:\n    {}".format(request.data["query"], str(e)))
         return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
     debug_log(f"Finished compiling query in {datetime.now() - start}")
 
-    query_results = phenopacket_query_results(
-        query=sql.SQL("{} AND dataset_id = {}").format(compiled_query, sql.Placeholder()),
-        params=params + (dataset.identifier,)
+    query_results = phenopacket_query_results(  # TODO: Generic
+        query=sql.SQL("{} AND table_id = {}").format(compiled_query, sql.Placeholder()),
+        params=params + (table.identifier,)
     )
 
     debug_log(f"Finished running query in {datetime.now() - start}")
@@ -389,7 +427,7 @@ def chord_table_search(request, table_id, internal=False):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def chord_public_table_search(request, table_id):
-    # Search phenopacket data types in specific tables without leaking internal data
+    # Search data types in specific tables without leaking internal data
     return chord_table_search(request, table_id, internal=False)
 
 
@@ -398,6 +436,6 @@ def chord_public_table_search(request, table_id):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def chord_private_table_search(request, table_id):
-    # Search phenopacket data types in specific tables
+    # Search data types in specific tables
     # Private search endpoints are protected by URL namespace, not by Django permissions.
     return chord_table_search(request, table_id, internal=True)
