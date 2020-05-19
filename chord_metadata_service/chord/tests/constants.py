@@ -1,9 +1,14 @@
+import uuid
+
+from ..data_types import DATA_TYPE_PHENOPACKET
+
 __all__ = [
     "VALID_DATA_USE_1",
     "VALID_PROJECT_1",
     "VALID_DATS_CREATORS",
     "INVALID_DATS_CREATORS",
     "valid_dataset_1",
+    "valid_table_1",
     "dats_dataset",
     "TEST_SEARCH_QUERY_1",
     "TEST_SEARCH_QUERY_2",
@@ -71,6 +76,25 @@ def valid_dataset_1(project_id):
         "data_use": VALID_DATA_USE_1,
         "project": project_id
     }
+
+
+def valid_table_1(dataset_id, model_compatible=False):
+    table_id = str(uuid.uuid4())
+    service_id = str(uuid.uuid4())  # TODO: Real service ID
+    return (
+        {
+            "table_id": table_id,
+            "service_id": service_id,
+            "service_artifact": "metadata",
+            "data_type": DATA_TYPE_PHENOPACKET,  # TODO: Remove
+            ("dataset_id" if model_compatible else "dataset"): dataset_id,
+        },
+        {
+            ("ownership_record_id" if model_compatible else "ownership_record"): table_id,
+            "name": "Table 1",
+            "data_type": DATA_TYPE_PHENOPACKET,
+        }
+    )
 
 
 def dats_dataset(project_id, creators):

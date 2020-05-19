@@ -1,15 +1,12 @@
 from django.test import TestCase
 from jsonschema import Draft7Validator
 
-from chord_metadata_service.phenopackets.search_schemas import PHENOPACKET_SEARCH_SCHEMA
-from ..views_search import PHENOPACKET_METADATA_SCHEMA
+from ..data_types import DATA_TYPES
 
 
 class SchemaTest(TestCase):
     @staticmethod
-    def test_phenopacket_schema():
-        Draft7Validator.check_schema(PHENOPACKET_SEARCH_SCHEMA)
-
-    @staticmethod
-    def test_phenopacket_metadata_schema():
-        Draft7Validator.check_schema(PHENOPACKET_METADATA_SCHEMA)
+    def test_data_type_schemas():
+        for d in DATA_TYPES.values():
+            Draft7Validator.check_schema(d["schema"])
+            Draft7Validator.check_schema(d["metadata_schema"])

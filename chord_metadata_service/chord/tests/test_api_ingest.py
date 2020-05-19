@@ -59,6 +59,12 @@ class IngestTest(APITestCase):
                              content_type="application/json")
         self.dataset = r.json()
 
+        table_ownership, table_record = valid_table_1(self.dataset["identifier"])
+        self.client.post(reverse("tableownership-list"), data=json.dumps(table_ownership),
+                         content_type="application/json")
+        r = self.client.post(reverse("table-list"), data=json.dumps(table_record), content_type="application/json")
+        self.table = r.json()
+
     @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_ingest(self):
         # No ingestion body
@@ -69,19 +75,19 @@ class IngestTest(APITestCase):
         r = self.client.post(reverse("ingest"), data=json.dumps({}), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # Non-existent dataset ID
+        # Non-existent table ID
         r = self.client.post(reverse("ingest"), data=json.dumps(generate_ingest(str(uuid4()))),
                              content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Non-existent workflow ID
-        bad_wf = generate_ingest(self.dataset["identifier"])
+        bad_wf = generate_ingest(self.table["identifier"])
         bad_wf["workflow_id"] += "_invalid"
         r = self.client.post(reverse("ingest"), data=json.dumps(bad_wf), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # json_document not in output
-        bad_wf = generate_ingest(self.dataset["identifier"])
+        bad_wf = generate_ingest(self.table["identifier"])
         bad_wf["workflow_outputs"] = {}
         r = self.client.post(reverse("ingest"), data=json.dumps(bad_wf), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
