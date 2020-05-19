@@ -38,7 +38,7 @@ APPEND_SLASH = False
 
 # CHORD-specific settings
 
-CHORD_URL = os.environ.get("CHORD_URL", None)  # Leave None if not specified, for running in other contexts
+CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
 
 # SECURITY WARNING: Don't run with CHORD_PERMISSIONS turned off in production,
 # unless an alternative permissions system is in place.

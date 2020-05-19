@@ -6,8 +6,6 @@ from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
 from chord_metadata_service.mcode import api_views as mcode_views
 
-# from .settings import DEBUG
-
 
 router = routers.DefaultRouter(trailing_slash=False)
 
