@@ -1,0 +1,409 @@
+FHIR_PATIENT = {
+  "address": [
+    {
+      "city": "Carver",
+      "country": "US",
+      "extension": [
+        {
+          "extension": [
+            {
+              "url": "latitude",
+              "valueDecimal": 41.875179
+            },
+            {
+              "url": "longitude",
+              "valueDecimal": -70.74671500000002
+            }
+          ],
+          "url": "http://hl7.org/fhir/StructureDefinition/geolocation"
+        }
+      ],
+      "line": [
+        "1087 Halvorson Light"
+      ],
+      "postalCode": "02330",
+      "state": "Massachusetts"
+    }
+  ],
+  "birthDate": "1991-02-10",
+  "communication": [
+    {
+      "language": {
+        "coding": [
+          {
+            "code": "pt",
+            "display": "Portuguese",
+            "system": "urn:ietf:bcp:47"
+          }
+        ],
+        "text": "Portuguese"
+      }
+    }
+  ],
+  "extension": [
+    {
+      "extension": [
+        {
+          "url": "ombCategory",
+          "valueCoding": {
+            "code": "2106-3",
+            "display": "White",
+            "system": "urn:oid:2.16.840.1.113883.6.238"
+          }
+        },
+        {
+          "url": "text",
+          "valueString": "White"
+        }
+      ],
+      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+    },
+    {
+      "extension": [
+        {
+          "url": "ombCategory",
+          "valueCoding": {
+            "code": "2186-5",
+            "display": "Not Hispanic or Latino",
+            "system": "urn:oid:2.16.840.1.113883.6.238"
+          }
+        },
+        {
+          "url": "text",
+          "valueString": "Not Hispanic or Latino"
+        }
+      ],
+      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName",
+      "valueString": "Krysta658 Terry864"
+    },
+    {
+      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+      "valueCode": "M"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/birthPlace",
+      "valueAddress": {
+        "city": "Lisbon",
+        "country": "PT",
+        "state": "Estremadura"
+      }
+    },
+    {
+      "url": "http://synthetichealth.github.io/synthea/disability-adjusted-life-years",
+      "valueDecimal": 0
+    },
+    {
+      "url": "http://synthetichealth.github.io/synthea/quality-adjusted-life-years",
+      "valueDecimal": 27
+    }
+  ],
+  "gender": "male",
+  "id": "6f7acde5-db81-4361-82cf-886893a3280c",
+  "identifier": [
+    {
+      "system": "https://github.com/synthetichealth/synthea",
+      "value": "a238ebf2-392b-44be-9a17-da07a15220e2"
+    },
+    {
+      "system": "http://hospital.smarthealthit.org",
+      "type": {
+        "coding": [
+          {
+            "code": "MR",
+            "display": "Medical Record Number",
+            "system": "http://hl7.org/fhir/v2/0203"
+          }
+        ],
+        "text": "Medical Record Number"
+      },
+      "value": "a238ebf2-392b-44be-9a17-da07a15220e2"
+    },
+    {
+      "system": "http://hl7.org/fhir/sid/us-ssn",
+      "type": {
+        "coding": [
+          {
+            "code": "SB",
+            "display": "Social Security Number",
+            "system": "http://hl7.org/fhir/identifier-type"
+          }
+        ],
+        "text": "Social Security Number"
+      },
+      "value": "999-99-7515"
+    },
+    {
+      "system": "urn:oid:2.16.840.1.113883.4.3.25",
+      "type": {
+        "coding": [
+          {
+            "code": "DL",
+            "display": "Driver's License",
+            "system": "http://hl7.org/fhir/v2/0203"
+          }
+        ],
+        "text": "Driver's License"
+      },
+      "value": "S99942098"
+    },
+    {
+      "system": "http://standardhealthrecord.org/fhir/StructureDefinition/passportNumber",
+      "type": {
+        "coding": [
+          {
+            "code": "PPN",
+            "display": "Passport Number",
+            "system": "http://hl7.org/fhir/v2/0203"
+          }
+        ],
+        "text": "Passport Number"
+      },
+      "value": "X19416767X"
+    }
+  ],
+  "maritalStatus": {
+    "coding": [
+      {
+        "code": "M",
+        "display": "M",
+        "system": "http://hl7.org/fhir/v3/MaritalStatus"
+      }
+    ],
+    "text": "M"
+  },
+  "meta": {
+    "lastUpdated": "2019-04-09T12:25:36.451316+00:00",
+    "versionId": "MTU1NDgxMjczNjQ1MTMxNjAwMA"
+  },
+  "multipleBirthBoolean": False,
+  "name": [
+    {
+      "family": "Hettinger594",
+      "given": [
+        "Gregg522"
+      ],
+      "prefix": [
+        "Mr."
+      ],
+      "use": "official"
+    }
+  ],
+  "resourceType": "Patient",
+  "telecom": [
+    {
+      "system": "phone",
+      "use": "home",
+      "value": "555-282-3544"
+    }
+  ],
+  "text": {
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Generated by <a href=\"https://github.com/synthetichealth/synthea\">Synthea</a>.Version identifier: v2.2.0-56-g113d8a2d\n .   Person seed: 8417064283020065324  Population seed: 5</div>",
+    "status": "generated"
+  }
+}
+
+
+FHIR_OBSERVATION = {
+    "category": [
+        {
+            "coding": [
+                {
+                    "code": "laboratory",
+                    "display": "laboratory",
+                    "system": "http://hl7.org/fhir/observation-category"
+                }
+            ]
+        }
+    ],
+    "code": {
+        "coding": [
+            {
+                "code": "785-6",
+                "display": "MCH [Entitic mass] by Automated count",
+                "system": "http://loinc.org"
+            }
+        ],
+        "text": "MCH [Entitic mass] by Automated count"
+    },
+    "context": {
+        "reference": "Encounter/2a0e0f6c-493f-4c5b-bf89-5f98aee24f21"
+    },
+    "effectiveDateTime": "2014-03-02T10:12:53-05:00",
+    "id": "1c8d2ee3-2a7e-47f9-be16-abe4e9fa306b",
+    "issued": "2014-03-02T10:12:53.714-05:00",
+    "meta": {
+        "lastUpdated": "2019-04-09T12:25:36.531997+00:00",
+        "versionId": "MTU1NDgxMjczNjUzMTk5NzAwMA"
+    },
+    "resourceType": "Observation",
+    "status": "final",
+    "subject": {
+        "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+    },
+    "valueQuantity": {
+        "code": "pg",
+        "system": "http://unitsofmeasure.org",
+        "unit": "pg",
+        "value": 27.035236044041877
+    }
+}
+
+
+FHIR_OBSERVATION_BUNDLE = {
+    "entry": [
+        {
+            "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Observation/97684895-3a6e-4d46-9edd-31984bc7c3a6",
+            "resource": {
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "code": "laboratory",
+                                "display": "laboratory",
+                                "system": "http://hl7.org/fhir/observation-category"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "code": "718-7",
+                            "display": "Hemoglobin [Mass/volume] in Blood",
+                            "system": "http://loinc.org"
+                        }
+                    ],
+                    "text": "Hemoglobin [Mass/volume] in Blood"
+                },
+                "context": {
+                    "reference": "Encounter/2a0e0f6c-493f-4c5b-bf89-5f98aee24f21"
+                },
+                "effectiveDateTime": "2014-03-02T10:12:53-05:00",
+                "id": "97684895-3a6e-4d46-9edd-31984bc7c3a6",
+                "issued": "2014-03-02T10:12:53.714-05:00",
+                "meta": {
+                    "lastUpdated": "2019-04-09T12:25:36.531998+00:00",
+                    "versionId": "MTU1NDgxMjczNjUzMTk5ODAwMA"
+                },
+                "resourceType": "Observation",
+                "status": "final",
+                "subject": {
+                    "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+                },
+                "valueQuantity": {
+                    "code": "g/dL",
+                    "system": "http://unitsofmeasure.org",
+                    "unit": "g/dL",
+                    "value": 17.14301557752162
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Observation/1c8d2ee3-2a7e-47f9-be16-abe4e9fa306b",
+            "resource": {
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "code": "laboratory",
+                                "display": "laboratory",
+                                "system": "http://hl7.org/fhir/observation-category"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "code": "785-6",
+                            "display": "MCH [Entitic mass] by Automated count",
+                            "system": "http://loinc.org"
+                        }
+                    ],
+                    "text": "MCH [Entitic mass] by Automated count"
+                },
+                "context": {
+                    "reference": "Encounter/2a0e0f6c-493f-4c5b-bf89-5f98aee24f21"
+                },
+                "effectiveDateTime": "2014-03-02T10:12:53-05:00",
+                "id": "1c8d2ee3-2a7e-47f9-be16-abe4e9fa306b",
+                "issued": "2014-03-02T10:12:53.714-05:00",
+                "meta": {
+                    "lastUpdated": "2019-04-09T12:25:36.531997+00:00",
+                    "versionId": "MTU1NDgxMjczNjUzMTk5NzAwMA"
+                },
+                "resourceType": "Observation",
+                "status": "final",
+                "subject": {
+                    "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+                },
+                "valueQuantity": {
+                    "code": "pg",
+                    "system": "http://unitsofmeasure.org",
+                    "unit": "pg",
+                    "value": 27.035236044041877
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Observation/b0598af4-8ffe-43ba-84e5-b7fb49d3dcd7",
+            "resource": {
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "code": "laboratory",
+                                "display": "laboratory",
+                                "system": "http://hl7.org/fhir/observation-category"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "code": "777-3",
+                            "display": "Platelets [#/volume] in Blood by Automated count",
+                            "system": "http://loinc.org"
+                        }
+                    ],
+                    "text": "Platelets [#/volume] in Blood by Automated count"
+                },
+                "context": {
+                    "reference": "Encounter/2a0e0f6c-493f-4c5b-bf89-5f98aee24f21"
+                },
+                "effectiveDateTime": "2014-03-02T10:12:53-05:00",
+                "id": "b0598af4-8ffe-43ba-84e5-b7fb49d3dcd7",
+                "issued": "2014-03-02T10:12:53.714-05:00",
+                "meta": {
+                    "lastUpdated": "2019-04-09T12:25:36.530961+00:00",
+                    "versionId": "MTU1NDgxMjczNjUzMDk2MTAwMA"
+                },
+                "resourceType": "Observation",
+                "status": "final",
+                "subject": {
+                    "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+                },
+                "valueQuantity": {
+                    "code": "10*3/uL",
+                    "system": "http://unitsofmeasure.org",
+                    "unit": "10*3/uL",
+                    "value": 306.49607523265786
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        }
+    ],
+    "resourceType": "Bundle"
+}

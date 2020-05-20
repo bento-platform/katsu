@@ -2,11 +2,11 @@ from datetime import datetime
 from chord_metadata_service.restapi.semantic_mappings.phenopackets_on_fhir_mapping import PHENOPACKETS_ON_FHIR_MAPPING
 from chord_metadata_service.restapi.semantic_mappings.hl7_genomics_mapping import HL7_GENOMICS_MAPPING
 from fhirclient.models import (observation as obs, patient as p, extension, age, coding as c,
-                            codeableconcept, specimen as s, identifier as fhir_indentifier,
-                            annotation as a, range, quantity, fhirreference,
-                            documentreference, attachment, fhirdate, condition as cond,
-                            composition as comp
-                            )
+                               codeableconcept, specimen as s, identifier as fhir_indentifier,
+                               annotation as a, range, quantity, fhirreference,
+                               documentreference, attachment, fhirdate, condition as cond,
+                               composition as comp
+                               )
 
 
 ##################### Generic FHIR conversion functions #####################
@@ -20,7 +20,7 @@ def fhir_coding_util(obj):
     coding.code = obj['id']
     if 'system' in obj.keys():
         coding.system = obj['system']
-    return  coding
+    return coding
 
 
 def fhir_codeable_concept(obj):
@@ -283,10 +283,10 @@ def fhir_obs_component_region_studied(obj):
     component = obs.ObservationComponent()
     component.code = fhir_codeable_concept(HL7_GENOMICS_MAPPING['gene']['gene_studied_code'])
     component.valueCodeableConcept = fhir_codeable_concept({
-            "id": obj['id'],
-            "label": obj['symbol'],
-            "system": HL7_GENOMICS_MAPPING['gene']['gene_studied_value']['system']
-        })
+        "id": obj['id'],
+        "label": obj['symbol'],
+        "system": HL7_GENOMICS_MAPPING['gene']['gene_studied_value']['system']
+    })
     return component.as_json()
 
 
@@ -384,3 +384,45 @@ def fhir_composition(obj):
             composition.section.append(section_content)
 
     return composition.as_json()
+
+
+################################# FHIR to Phenopackets #################################
+# There is no guide to map FHIR to Phenopackets
+
+def patient_to_individual(obj):
+    """ FHIR Patient to Individual. """
+    patient = p.Patient(obj)
+    individual = {
+        "id": patient.id,
+        "alternate_ids": [alternate_id.value for alternate_id in patient.identifier]
+    }
+    gender_to_sex = {
+        "male": "MALE",
+        "female": "FEMALE",
+        "other": "OTHER_SEX",
+        "unknown": "UNKNOWN_SEX"
+    }
+    individual["sex"] = gender_to_sex.get(patient.gender, "unknown")
+    individual["date_of_birth"] = patient.birthDate.isostring
+    if patient.active:
+        individual["active"] = patient.active
+    if patient.deceasedBoolean:
+        individual["deceased"] = patient.deceasedBoolean
+    print(individual)
+    return individual
+
+
+def observation_to_phenotypic_feature(obj):
+    """ FHIR Observation to PhenotypicFeature. """
+    observation = obs.Observation(obj)
+    codeable_concept = observation.code #CodeableConcept
+    phenotypic_feature = {
+        "id": observation.id,
+        "type": {
+            "id": codeable_concept.coding[0].code,
+            "label": codeable_concept.coding[0].display
+        }
+    }
+    if observation.specimen: #FK to Biosample
+        phenotypic_feature["biosample"] = observation.specimen.reference
+    return phenotypic_feature
