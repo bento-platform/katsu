@@ -407,3 +407,223 @@ FHIR_OBSERVATION_BUNDLE = {
     ],
     "resourceType": "Bundle"
 }
+
+
+FHIR_CONDITION = {
+    "abatementDateTime": "2018-09-21T11:12:53-04:00",
+    "assertedDate": "2018-08-22T11:12:53-04:00",
+    "clinicalStatus": "resolved",
+    "code": {
+        "coding": [
+            {
+                "code": "62106007",
+                "display": "Concussion with no loss of consciousness",
+                "system": "http://snomed.info/sct"
+            }
+        ],
+        "text": "Concussion with no loss of consciousness"
+    },
+    "context": {
+        "reference": "Encounter/1d91f8e0-74f1-4071-a681-9d4fa0f9b93a"
+    },
+    "id": "4f2c2598-7e60-4752-b603-b330ca166829",
+    "meta": {
+        "lastUpdated": "2019-04-09T12:25:36.531999+00:00",
+        "versionId": "MTU1NDgxMjczNjUzMTk5OTAwMA"
+    },
+    "onsetDateTime": "2018-08-22T11:12:53-04:00",
+    "resourceType": "Condition",
+    "subject": {
+        "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+    },
+    "verificationStatus": "confirmed"
+}
+
+
+FHIR_CONDITION_BUNDLE = {
+    "entry": [
+        {
+            "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Condition/4f2c2598-7e60-4752-b603-b330ca166829",
+            "resource": {
+                "abatementDateTime": "2018-09-21T11:12:53-04:00",
+                "assertedDate": "2018-08-22T11:12:53-04:00",
+                "clinicalStatus": "resolved",
+                "code": {
+                    "coding": [
+                        {
+                            "code": "62106007",
+                            "display": "Concussion with no loss of consciousness",
+                            "system": "http://snomed.info/sct"
+                        }
+                    ],
+                    "text": "Concussion with no loss of consciousness"
+                },
+                "context": {
+                    "reference": "Encounter/1d91f8e0-74f1-4071-a681-9d4fa0f9b93a"
+                },
+                "id": "4f2c2598-7e60-4752-b603-b330ca166829",
+                "meta": {
+                    "lastUpdated": "2019-04-09T12:25:36.531999+00:00",
+                    "versionId": "MTU1NDgxMjczNjUzMTk5OTAwMA"
+                },
+                "onsetDateTime": "2018-08-22T11:12:53-04:00",
+                "resourceType": "Condition",
+                "subject": {
+                    "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+                },
+                "verificationStatus": "confirmed"
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Condition/cc454676-ccdc-4792-a5c9-cfbedce2ab33",
+            "resource": {
+                "abatementDateTime": "2011-03-19T11:12:53-04:00",
+                "assertedDate": "2011-02-26T10:12:53-05:00",
+                "clinicalStatus": "resolved",
+                "code": {
+                    "coding": [
+                        {
+                            "code": "444814009",
+                            "display": "Viral sinusitis (disorder)",
+                            "system": "http://snomed.info/sct"
+                        }
+                    ],
+                    "text": "Viral sinusitis (disorder)"
+                },
+                "context": {
+                    "reference": "Encounter/ee9bd275-49c9-4e40-bc78-ebe53bbfb123"
+                },
+                "id": "cc454676-ccdc-4792-a5c9-cfbedce2ab33",
+                "meta": {
+                    "lastUpdated": "2019-04-09T12:25:36.525019+00:00",
+                    "versionId": "MTU1NDgxMjczNjUyNTAxOTAwMA"
+                },
+                "onsetDateTime": "2011-02-26T10:12:53-05:00",
+                "resourceType": "Condition",
+                "subject": {
+                    "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+                },
+                "verificationStatus": "confirmed"
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Condition/bab430ff-5b09-4e4a-8871-6e4fcb84fa17",
+            "resource": {
+                "assertedDate": "2009-04-05T11:12:53-04:00",
+                "clinicalStatus": "active",
+                "code": {
+                    "coding": [
+                        {
+                            "code": "38341003",
+                            "display": "Hypertension",
+                            "system": "http://snomed.info/sct"
+                        }
+                    ],
+                    "text": "Hypertension"
+                },
+                "context": {
+                    "reference": "Encounter/630a642d-0402-454c-9426-c399cf9b2aab"
+                },
+                "id": "bab430ff-5b09-4e4a-8871-6e4fcb84fa17",
+                "meta": {
+                    "lastUpdated": "2019-04-09T12:25:36.486194+00:00",
+                    "versionId": "MTU1NDgxMjczNjQ4NjE5NDAwMA"
+                },
+                "onsetDateTime": "2009-04-05T11:12:53-04:00",
+                "resourceType": "Condition",
+                "subject": {
+                    "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+                },
+                "verificationStatus": "confirmed"
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Condition/25b86d4b-5d09-47c6-9446-b93b067e63ec",
+            "resource": {
+                "abatementDateTime": "2009-01-31T10:12:53-05:00",
+                "assertedDate": "2009-01-10T10:12:53-05:00",
+                "clinicalStatus": "resolved",
+                "code": {
+                    "coding": [
+                        {
+                            "code": "75498004",
+                            "display": "Acute bacterial sinusitis (disorder)",
+                            "system": "http://snomed.info/sct"
+                        }
+                    ],
+                    "text": "Acute bacterial sinusitis (disorder)"
+                },
+                "context": {
+                    "reference": "Encounter/051b0d30-03d3-4d6d-a070-f8d363ef277f"
+                },
+                "id": "25b86d4b-5d09-47c6-9446-b93b067e63ec",
+                "meta": {
+                    "lastUpdated": "2019-04-09T12:25:36.461769+00:00",
+                    "versionId": "MTU1NDgxMjczNjQ2MTc2OTAwMA"
+                },
+                "onsetDateTime": "2009-01-10T10:12:53-05:00",
+                "resourceType": "Condition",
+                "subject": {
+                    "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+                },
+                "verificationStatus": "confirmed"
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Condition/33d0016b-3d90-4647-b797-49d5b874537b",
+            "resource": {
+                "abatementDateTime": "2009-10-27T11:12:53-04:00",
+                "assertedDate": "2009-10-06T11:12:53-04:00",
+                "clinicalStatus": "resolved",
+                "code": {
+                    "coding": [
+                        {
+                            "code": "444814009",
+                            "display": "Viral sinusitis (disorder)",
+                            "system": "http://snomed.info/sct"
+                        }
+                    ],
+                    "text": "Viral sinusitis (disorder)"
+                },
+                "context": {
+                    "reference": "Encounter/6956bf29-4bc2-4e41-af3d-1cd3d398eb84"
+                },
+                "id": "33d0016b-3d90-4647-b797-49d5b874537b",
+                "meta": {
+                    "lastUpdated": "2019-04-09T12:25:36.478091+00:00",
+                    "versionId": "MTU1NDgxMjczNjQ3ODA5MTAwMA"
+                },
+                "onsetDateTime": "2009-10-06T11:12:53-04:00",
+                "resourceType": "Condition",
+                "subject": {
+                    "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+                },
+                "verificationStatus": "confirmed"
+            },
+            "search": {
+                "mode": "match"
+            }
+        }
+    ],
+    "link": [
+        {
+            "relation": "search",
+            "url": "https://syntheticmass.mitre.org/v1/fhir/Condition/?subject%3Areference=Patient%2F6f7acde5-db81-4361-82cf-886893a3280c"
+        }
+    ],
+    "resourceType": "Bundle",
+    "total": 5,
+    "type": "searchset"
+}

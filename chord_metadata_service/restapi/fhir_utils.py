@@ -413,7 +413,7 @@ def patient_to_individual(obj):
 
 
 def observation_to_phenotypic_feature(obj):
-    """ FHIR Observation to PhenotypicFeature. """
+    """ FHIR Observation to Phenopackets PhenotypicFeature. """
     observation = obs.Observation(obj)
     codeable_concept = observation.code #CodeableConcept
     phenotypic_feature = {
@@ -421,8 +421,25 @@ def observation_to_phenotypic_feature(obj):
         "type": {
             "id": codeable_concept.coding[0].code,
             "label": codeable_concept.coding[0].display
+            # TODO collect system info in metadata
         }
     }
     if observation.specimen: #FK to Biosample
         phenotypic_feature["biosample"] = observation.specimen.reference
     return phenotypic_feature
+
+
+def condition_to_disease(obj):
+    """ FHIR Condition to Phenopackets Disease. """
+    condition = cond.Condition(obj)
+    codeable_concept = condition.code  # CodeableConcept
+    disease = {
+        "id": condition.id,
+        "type": {
+            "id": codeable_concept.coding[0].code,
+            "label": codeable_concept.coding[0].display
+            # TODO collect system info in metadata
+        }
+    }
+    # condition.stage.type is only in FHIR 4.0.0 version
+    return disease
