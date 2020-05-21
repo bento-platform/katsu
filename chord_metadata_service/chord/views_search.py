@@ -25,7 +25,7 @@ from chord_metadata_service.phenopackets.serializers import PhenopacketSerialize
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset, TableOwnership, Table
-from .permissions import OverrideOrSuperUserOnly
+from .permissions import ReadOnly, OverrideOrSuperUserOnly
 
 
 @api_view(["GET"])
@@ -79,7 +79,7 @@ def chord_table_representation(table: Table) -> dict:
 
 
 @api_view(["GET", "POST"])
-@permission_classes([AllowAny])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
 def table_list(request):
     if request.method == "POST":
         request_data = json.loads(request.body)  # TODO: Handle JSON errors here
@@ -125,7 +125,7 @@ def table_list(request):
 
 # TODO: Remove pragma: no cover when POST implemented
 @api_view(["GET", "DELETE"])
-@permission_classes([OverrideOrSuperUserOnly])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
 def table_detail(request, table_id):  # pragma: no cover
     # TODO: Implement GET, POST
     # TODO: Permissions: Check if user has control / more direct access over this table and/or dataset?
