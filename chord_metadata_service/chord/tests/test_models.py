@@ -69,3 +69,23 @@ class TableOwnershipTest(TestCase):
         self.assertIn(t, d.table_ownership.all())
 
         self.assertEqual(str(t), f"{str(d)} -> {t.table_id}")
+
+
+class TableTest(TestCase):
+    def setUp(self) -> None:
+        p = Project.objects.create(title="Project 1", description="")
+        self.d = Dataset.objects.create(title="Dataset 1", description="", data_use=VALID_DATA_USE_1, project=p)
+        to = TableOwnership.objects.create(
+            table_id=TABLE_ID,
+            service_id=SERVICE_ID,
+            service_artifact="variant",
+            data_type="variant",
+            dataset=self.d
+        )
+        Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
+
+    def test_table(self):
+        t = Table.objects.get(ownership_record_id=TABLE_ID)
+        self.assertEqual(t.data_type, DATA_TYPE_PHENOPACKET)
+        self.assertEqual(t.identifier, TABLE_ID)
+        self.assertEqual(t.dataset, self.d)
