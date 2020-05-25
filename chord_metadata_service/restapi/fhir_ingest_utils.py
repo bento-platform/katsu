@@ -60,6 +60,22 @@ def ingest_fhir(request):
         except json.decoder.JSONDecodeError as e:
             return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
 
+    with open(request.data["observations"], "r") as obs_file:
+        try:
+            observations_data = json.load(obs_file)
+            for item in observations_data["entry"]:
+                phenotypic_feature_data = observation_to_phenotypic_feature(item["resource"])
+                if not item["resource"]["subject"]:
+                    return Response(bad_request_error(f"Subject is required."), status=404)
+                # FHIR test data has reference object in a format "ResourceType/uuid"
+                subject = item["resource"]["subject"]["reference"].split('Patient/')[1] # Individual ID
+                phenotypic_feature, _ = PhenotypicFeature.objects.get_or_create(
+                    phenopacket=Phenopacket.objects.get(subject=Individual.objects.get(id=subject)),
+                    **phenotypic_feature_data
+                )
+        except json.decoder.JSONDecodeError as e:
+            return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
+
 
     return Response(status=204)
 
