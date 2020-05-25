@@ -76,6 +76,23 @@ def ingest_fhir(request):
         except json.decoder.JSONDecodeError as e:
             return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
 
+    with open(request.data["conditions"]) as c_file:
+        try:
+            conditions_data = json.load(c_file)
+            for item in conditions_data["entry"]:
+                disease_data = condition_to_disease(item["resource"])
+                disease = Disease.objects.create(**disease_data)
+                if not item["resource"]["subject"]:
+                    return Response(bad_request_error(f"Subject is required."), status=404)
+                # FHIR test data has reference object in a format "ResourceType/uuid"
+                subject = item["resource"]["subject"]["reference"].split('Patient/')[1] # Individual ID
+                # a1.publications.add(p1)
+                phenopacket = Phenopacket.objects.get(subject=Individual.objects.get(id=subject))
+                phenopacket.diseases.add(disease)
+
+        except json.decoder.JSONDecodeError as e:
+            return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
+
 
     return Response(status=204)
 
@@ -134,8 +151,9 @@ def condition_to_disease(obj):
     condition = cond.Condition(obj)
     codeable_concept = condition.code  # CodeableConcept
     disease = {
-        "id": condition.id,
-        "type": {
+        # id is an integer AutoField, legacy id can be a string
+        # "id": condition.id,
+        "term": {
             "id": codeable_concept.coding[0].code,
             "label": codeable_concept.coding[0].display
             # TODO collect system info in metadata
