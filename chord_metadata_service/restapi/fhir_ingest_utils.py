@@ -93,6 +93,23 @@ def ingest_fhir(request):
         except json.decoder.JSONDecodeError as e:
             return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
 
+    with open(request.data["specimens"], "r") as s_file:
+        try:
+            specimens_data = json.load(s_file)
+            for item in specimens_data["entry"]:
+                biosample_data = specimen_to_biosample(item["resource"])
+                procedure, _ = Procedure.objects.get_or_create(**biosample_data["procedure"])
+                individual_id = biosample_data["individual"].split('Patient/')[1]  # Individual ID
+                Biosample.objects.create(
+                    id=biosample_data["id"],
+                    procedure=procedure,
+                    individual=Individual.objects.get(id=individual_id),
+                    sampled_tissue=biosample_data["sampled_tissue"]
+                )
+
+        except json.decoder.JSONDecodeError as e:
+            return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
+
 
     return Response(status=204)
 
