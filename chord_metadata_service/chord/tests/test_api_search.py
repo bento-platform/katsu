@@ -68,7 +68,8 @@ class TableTest(APITestCase):
                 "created": created,
                 "updated": updated
             },
-            "schema": DATA_TYPES[table["data_type"]]["schema"]
+            "data_type": table["data_type"],
+            "schema": DATA_TYPES[table["data_type"]]["schema"],
         }
 
     @override_settings(AUTH_OVERRIDE=True)  # For permissions
