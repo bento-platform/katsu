@@ -1,5 +1,6 @@
 import json
 import uuid
+import jsonschema
 
 from fhirclient.models import observation as obs, patient as p, condition as cond, specimen as s
 
@@ -11,37 +12,64 @@ from chord_lib.responses.errors import *
 from chord_metadata_service.chord.models import *
 from chord_metadata_service.phenopackets.models import *
 
-FHIR_INGEST = {
-    "dataset_id": "",
-    "patients": "",
-    "observations": "",
-    "conditions": "",
-    "specimens": ""
+
+FHIR_INGEST_SCHEMA = {
+    "$id": "chord_metadata_service_fhir_ingest_schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "FHIR Ingest schema",
+    "type": "object",
+    "properties": {
+        "dataset_id": {"type": "string"},
+        "patients": {"type": "string", "description": "Path to a patients file location."},
+        "observations": {"type": "string", "description": "Path to an observations file location."},
+        "conditions": {"type": "string", "description": "Path to a conditions file location."},
+        "specimens": {"type": "string", "description": "Path to a specimens file location."},
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "created_by": {"type": "string"}
+            },
+            "required": ["created_by"]
+        }
+    },
+    "required": [
+        "dataset_id",
+        "patients",
+        "metadata"
+    ],
 }
+
+
+def _parse_reference(ref):
+    """ FHIR test data has reference object in a format "ResourceType/uuid" """
+    return ref.split('/')[-1]
 
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def ingest_fhir(request):
-    if not request.data["dataset_id"]:
-        return Response(bad_request_error(f"Dataset ID is required."), status=404)
-    else:
-        if not Dataset.objects.filter(identifier=request.data["dataset_id"]).exists():
-            return Response(bad_request_error(f"Dataset with ID {request.data['dataset_id']} does not exist"), status=400)
+    try:
+        jsonschema.validate(request.data, FHIR_INGEST_SCHEMA)
+    except jsonschema.exceptions.ValidationError:
+        v = jsonschema.Draft7Validator(FHIR_INGEST_SCHEMA)
+        errors = [e for e in v.iter_errors(request.data)]
+        for i, error in enumerate(errors, 1):
+            return Response(bad_request_error(
+                f"{i} Validation error in {'.'.join(str(v) for v in error.path)}: {error.message}"
+            ))
+    if not Dataset.objects.filter(identifier=request.data["dataset_id"]).exists():
+        return Response(bad_request_error(f"Dataset with ID {request.data['dataset_id']} does not exist"),
+                        status=400)
 
-    if not request.data["patients"]:
-        return Response(bad_request_error(f"Patients data is required."), status=404)
-
-
-    # create new phenopacket for each individual, it uuid, subject, meta_data and dataset_id
+    # create new phenopacket for each individual
     # fake metadata
     meta_data_obj = MetaData.objects.create(
-        created_by="unknown",
-        submitted_by="unknown",
+        created_by=request.data["metadata"]["created_by"],
         phenopacket_schema_version="1.0.0-RC3",
         external_references=[]
     )
 
+    # patients-individuals
     with open(request.data["patients"], "r") as p_file:
         try:
             patients_data = json.load(p_file)
@@ -60,56 +88,59 @@ def ingest_fhir(request):
         except json.decoder.JSONDecodeError as e:
             return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
 
-    with open(request.data["observations"], "r") as obs_file:
-        try:
-            observations_data = json.load(obs_file)
-            for item in observations_data["entry"]:
-                phenotypic_feature_data = observation_to_phenotypic_feature(item["resource"])
-                if not item["resource"]["subject"]:
-                    return Response(bad_request_error(f"Subject is required."), status=404)
-                # FHIR test data has reference object in a format "ResourceType/uuid"
-                subject = item["resource"]["subject"]["reference"].split('Patient/')[1] # Individual ID
-                phenotypic_feature, _ = PhenotypicFeature.objects.get_or_create(
-                    phenopacket=Phenopacket.objects.get(subject=Individual.objects.get(id=subject)),
-                    **phenotypic_feature_data
-                )
-        except json.decoder.JSONDecodeError as e:
-            return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
+    # observations-phenotypicFeatures
+    if "observations" in request.data:
+        with open(request.data["observations"], "r") as obs_file:
+            try:
+                observations_data = json.load(obs_file)
+                for item in observations_data["entry"]:
+                    phenotypic_feature_data = observation_to_phenotypic_feature(item["resource"])
+                    if not item["resource"]["subject"]:
+                        return Response(bad_request_error(f"Subject is required."), status=404)
 
-    with open(request.data["conditions"]) as c_file:
-        try:
-            conditions_data = json.load(c_file)
-            for item in conditions_data["entry"]:
-                disease_data = condition_to_disease(item["resource"])
-                disease = Disease.objects.create(**disease_data)
-                if not item["resource"]["subject"]:
-                    return Response(bad_request_error(f"Subject is required."), status=404)
-                # FHIR test data has reference object in a format "ResourceType/uuid"
-                subject = item["resource"]["subject"]["reference"].split('Patient/')[1] # Individual ID
-                # a1.publications.add(p1)
-                phenopacket = Phenopacket.objects.get(subject=Individual.objects.get(id=subject))
-                phenopacket.diseases.add(disease)
+                    subject = _parse_reference(item["resource"]["subject"]["reference"])
+                    phenotypic_feature, _ = PhenotypicFeature.objects.get_or_create(
+                        phenopacket=Phenopacket.objects.get(subject=Individual.objects.get(id=subject)),
+                        **phenotypic_feature_data
+                    )
+            except json.decoder.JSONDecodeError as e:
+                return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
 
-        except json.decoder.JSONDecodeError as e:
-            return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
+    # conditions-diseases
+    if "conditions" in request.data:
+        with open(request.data["conditions"]) as c_file:
+            try:
+                conditions_data = json.load(c_file)
+                for item in conditions_data["entry"]:
+                    disease_data = condition_to_disease(item["resource"])
+                    disease = Disease.objects.create(**disease_data)
+                    if not item["resource"]["subject"]:
+                        return Response(bad_request_error(f"Subject is required."), status=404)
+                    subject = _parse_reference(item["resource"]["subject"]["reference"])
+                    phenopacket = Phenopacket.objects.get(subject=Individual.objects.get(id=subject))
+                    phenopacket.diseases.add(disease)
 
-    with open(request.data["specimens"], "r") as s_file:
-        try:
-            specimens_data = json.load(s_file)
-            for item in specimens_data["entry"]:
-                biosample_data = specimen_to_biosample(item["resource"])
-                procedure, _ = Procedure.objects.get_or_create(**biosample_data["procedure"])
-                individual_id = biosample_data["individual"].split('Patient/')[1]  # Individual ID
-                Biosample.objects.create(
-                    id=biosample_data["id"],
-                    procedure=procedure,
-                    individual=Individual.objects.get(id=individual_id),
-                    sampled_tissue=biosample_data["sampled_tissue"]
-                )
+            except json.decoder.JSONDecodeError as e:
+                return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
 
-        except json.decoder.JSONDecodeError as e:
-            return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
+    # specimens-biosamples
+    if "specimens" in request.data:
+        with open(request.data["specimens"], "r") as s_file:
+            try:
+                specimens_data = json.load(s_file)
+                for item in specimens_data["entry"]:
+                    biosample_data = specimen_to_biosample(item["resource"])
+                    procedure, _ = Procedure.objects.get_or_create(**biosample_data["procedure"])
+                    individual_id = _parse_reference(biosample_data["individual"])
+                    Biosample.objects.create(
+                        id=biosample_data["id"],
+                        procedure=procedure,
+                        individual=Individual.objects.get(id=individual_id),
+                        sampled_tissue=biosample_data["sampled_tissue"]
+                    )
 
+            except json.decoder.JSONDecodeError as e:
+                return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
 
     return Response(status=204)
 
@@ -150,6 +181,7 @@ def observation_to_phenotypic_feature(obj):
     codeable_concept = observation.code  # CodeableConcept
     phenotypic_feature = {
         # id is an integer AutoField, store legacy id in description
+        # TODO change
         "description": observation.id,
         "pftype": {
             "id": codeable_concept.coding[0].code,
