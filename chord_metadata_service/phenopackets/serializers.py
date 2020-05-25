@@ -1,7 +1,6 @@
 import re
 from rest_framework import serializers
 from .models import (
-    Resource,
     MetaData,
     PhenotypicFeature,
     Procedure,
@@ -15,12 +14,12 @@ from .models import (
     Diagnosis,
     Interpretation,
 )
+from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi import fhir_utils
 from chord_metadata_service.restapi.serializers import GenericSerializer
 
 
 __all__ = [
-    "ResourceSerializer",
     "MetaDataSerializer",
     "PhenotypicFeatureSerializer",
     "ProcedureSerializer",
@@ -42,11 +41,6 @@ __all__ = [
 #                  Metadata  Serializers                    #
 #                                                           #
 #############################################################
-
-class ResourceSerializer(GenericSerializer):
-    class Meta:
-        model = Resource
-        fields = '__all__'
 
 
 class MetaDataSerializer(GenericSerializer):

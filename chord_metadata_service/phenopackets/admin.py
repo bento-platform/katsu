@@ -2,11 +2,6 @@ from django.contrib import admin
 from .models import *
 
 
-@admin.register(Resource)
-class ResourceAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(MetaData)
 class MetaDataAdmin(admin.ModelAdmin):
     pass
