@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import *
+from .models import Project, Dataset, TableOwnership, Table
 
 
 @admin.register(Project)
@@ -15,4 +15,9 @@ class DatasetAdmin(admin.ModelAdmin):
 
 @admin.register(TableOwnership)
 class TableOwnershipAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Table)
+class TableAdmin(admin.ModelAdmin):
     pass

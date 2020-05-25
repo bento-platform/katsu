@@ -73,10 +73,10 @@ def create_phenotypic_feature(pf):
         description=pf.get("description", ""),
         pftype=pf["type"],
         negated=pf.get("negated", False),
-        severity=pf.get("severity", None),
+        severity=pf.get("severity"),
         modifier=pf.get("modifier", []),  # TODO: Validate ontology term in schema...
         onset=pf.get("onset", None),
-        evidence=pf.get("evidence", None)  # TODO: Separate class?
+        evidence=pf.get("evidence")  # TODO: Separate class?
     )
 
     pf_obj.save()
@@ -84,7 +84,7 @@ def create_phenotypic_feature(pf):
 
 
 def _query_and_check_nulls(obj: dict, key: str, transform: Callable = lambda x: x):
-    value = obj.get(key, None)
+    value = obj.get(key)
     return {f"{key}__isnull": True} if value is None else {key: transform(value)}
 
 
@@ -128,7 +128,7 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
 
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
 
-    subject = phenopacket_data.get("subject", None)
+    subject = phenopacket_data.get("subject")
     phenotypic_features = phenopacket_data.get("phenotypic_features", [])
     biosamples = phenopacket_data.get("biosamples", [])
     genes = phenopacket_data.get("genes", [])
@@ -209,7 +209,7 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
 
     meta_data_obj = pm.MetaData(
         created_by=meta_data["created_by"],
-        submitted_by=meta_data.get("submitted_by", None),
+        submitted_by=meta_data.get("submitted_by"),
         phenopacket_schema_version="1.0.0-RC3",
         external_references=meta_data.get("external_references", [])
     )

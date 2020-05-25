@@ -13,8 +13,8 @@ from chord_lib.schemas.chord import CHORD_INGEST_SCHEMA
 from chord_lib.responses import errors
 from chord_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
-from chord_metadata_service.chord.ingest import METADATA_WORKFLOWS, WORKFLOWS_PATH, DATA_TYPE_INGEST_FUNCTION_MAP
-from chord_metadata_service.chord.models import Table
+from .ingest import METADATA_WORKFLOWS, WORKFLOWS_PATH, DATA_TYPE_INGEST_FUNCTION_MAP
+from .models import Table
 
 
 class WDLRenderer(BaseRenderer):

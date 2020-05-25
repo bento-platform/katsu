@@ -9,7 +9,7 @@ from .models import Project, Dataset, TableOwnership, Table
 from .schemas import LINKED_FIELD_SETS_SCHEMA
 
 
-__all__ = ["ProjectSerializer", "DatasetSerializer", "TableOwnershipSerializer"]
+__all__ = ["ProjectSerializer", "DatasetSerializer", "TableOwnershipSerializer", "TableSerializer"]
 
 
 #############################################################

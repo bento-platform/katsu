@@ -10,7 +10,7 @@ from .constants import VALID_PROJECT_1, valid_dataset_1, valid_table_1
 from ..views_ingest import METADATA_WORKFLOWS
 
 
-def generate_ingest(table_id):
+def generate_phenopackets_ingest(table_id):
     return {
         "table_id": table_id,
         "workflow_id": "phenopackets_json",
@@ -66,30 +66,28 @@ class IngestTest(APITestCase):
         self.table = r.json()
 
     @override_settings(AUTH_OVERRIDE=True)  # For permissions
-    def test_ingest(self):
+    def test_phenopackets_ingest(self):
         # No ingestion body
         r = self.client.post(reverse("ingest"), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # Invalid ingestion request
-        r = self.client.post(reverse("ingest"), data=json.dumps({}), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        bad_ingest_bodies = (
+            # Invalid ingest request
+            {},
 
-        # Non-existent table ID
-        r = self.client.post(reverse("ingest"), data=json.dumps(generate_ingest(str(uuid4()))),
-                             content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+            # Non-existent table ID
+            generate_phenopackets_ingest(str(uuid4())),
 
-        # Non-existent workflow ID
-        bad_wf = generate_ingest(self.table["identifier"])
-        bad_wf["workflow_id"] += "_invalid"
-        r = self.client.post(reverse("ingest"), data=json.dumps(bad_wf), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+            # Non-existent workflow ID
+            {**generate_phenopackets_ingest(self.table["identifier"]), "workflow_id": "phenopackets_json_invalid"},
 
-        # json_document not in output
-        bad_wf = generate_ingest(self.table["identifier"])
-        bad_wf["workflow_outputs"] = {}
-        r = self.client.post(reverse("ingest"), data=json.dumps(bad_wf), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+            # json_document not in output
+            {**generate_phenopackets_ingest(self.table["identifier"]), "workflow_outputs": {}},
+        )
+
+        for data in bad_ingest_bodies:
+            print(data, flush=True)
+            r = self.client.post(reverse("ingest"), data=json.dumps(data), content_type="application/json")
+            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # TODO: More
