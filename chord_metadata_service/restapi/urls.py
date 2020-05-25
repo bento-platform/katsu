@@ -5,7 +5,7 @@ from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
 from chord_metadata_service.mcode import api_views as mcode_views
-
+from .fhir_ingest_utils import ingest_fhir
 # from .settings import DEBUG
 
 
@@ -55,4 +55,6 @@ urlpatterns = [
          name="experiment-schema"),
     path('mcode_schema', mcode_views.get_mcode_schema,
          name="mcode-schema"),
+    # ingest fhir
+    path('fhir/ingest', ingest_fhir, name="ingest-fhir"),
 ]
