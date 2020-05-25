@@ -9,7 +9,12 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets.tests.constants import *
+from chord_metadata_service.phenopackets.tests.constants import (
+    VALID_PROCEDURE_1,
+    valid_biosample_1,
+    valid_biosample_2,
+    VALID_META_DATA_1,
+)
 from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, Procedure
 
 from chord_metadata_service.chord.tests.es_mocks import SEARCH_SUCCESS

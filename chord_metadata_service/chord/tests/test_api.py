@@ -4,8 +4,15 @@ from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from .constants import *
-from ..models import *
+from .constants import (
+    VALID_PROJECT_1,
+    VALID_DATA_USE_1,
+    valid_dataset_1,
+    dats_dataset,
+    VALID_DATS_CREATORS,
+    INVALID_DATS_CREATORS,
+)
+from ..models import Project, Dataset
 
 
 class CreateProjectTest(APITestCase):

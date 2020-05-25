@@ -1,6 +1,7 @@
 from django.test import TestCase
 from uuid import uuid4
-from ..models import *
+from ..data_types import DATA_TYPE_PHENOPACKET
+from ..models import Project, Dataset, TableOwnership, Table
 from .constants import VALID_DATA_USE_1
 
 
