@@ -1,4 +1,5 @@
 {
+  "resourceType": "Bundle",
   "entry": [
     {
       "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Condition/bab430ff-5b09-4e4a-8871-6e4fcb84fa17",
