@@ -12,7 +12,6 @@ from chord_lib.responses.errors import *
 from chord_metadata_service.chord.models import *
 from chord_metadata_service.phenopackets.models import *
 
-
 FHIR_INGEST_SCHEMA = {
     "$id": "chord_metadata_service_fhir_ingest_schema",
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -40,9 +39,41 @@ FHIR_INGEST_SCHEMA = {
 }
 
 
+FHIR_BUNDLE_SCHEMA = {
+    "$id": "chord_metadata_service_fhir_bundle_schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "FHIR Bundle schema",
+    "type": "object",
+    "properties": {
+        "resourceType": {
+            "type": "string",
+            "const": "Bundle",
+            "description": "Collection of resources."
+        },
+        "entry": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "resource": {"type": "object"}
+                },
+                "additionalProperties": True,
+                "required": ["resource"]
+            }
+        }
+    },
+    "additionalProperties": True,
+    "required": ["resourceType", "entry"]
+}
+
+
 def _parse_reference(ref):
     """ FHIR test data has reference object in a format "ResourceType/uuid" """
     return ref.split('/')[-1]
+
+
+def _check_fhir_schema(schema, obj):
+    return
 
 
 @api_view(["POST"])
