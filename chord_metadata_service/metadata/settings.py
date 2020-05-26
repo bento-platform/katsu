@@ -146,7 +146,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get("POSTGRES_DATABASE", 'metadata'),
+        'NAME': os.environ.get("POSTGRES_DATABASE", 'metadatadevelop'),
         'USER': os.environ.get("POSTGRES_USER", 'admin'),
         'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'admin'),
 
