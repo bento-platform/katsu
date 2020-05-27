@@ -13,6 +13,8 @@ __all__ = [
     "AGE_RANGE",
     "AGE_OR_AGE_RANGE",
     "EXTRA_PROPERTIES_SCHEMA",
+    "FHIR_BUNDLE_SCHEMA",
+    "FHIR_INGEST_SCHEMA",
 ]
 
 
@@ -113,4 +115,62 @@ DISEASE_ONSET = {
         AGE_RANGE,
         ONTOLOGY_CLASS
     ]
+}
+
+
+############################### FHIR INGEST SCHEMAS ###############################
+# The schemas used to validate FHIR data for ingestion
+
+FHIR_INGEST_SCHEMA = {
+    "$id": "chord_metadata_service_fhir_ingest_schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "FHIR Ingest schema",
+    "type": "object",
+    "properties": {
+        "dataset_id": {"type": "string"},
+        "patients": {"type": "string", "description": "Path to a patients file location."},
+        "observations": {"type": "string", "description": "Path to an observations file location."},
+        "conditions": {"type": "string", "description": "Path to a conditions file location."},
+        "specimens": {"type": "string", "description": "Path to a specimens file location."},
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "created_by": {"type": "string"}
+            },
+            "required": ["created_by"]
+        }
+    },
+    "required": [
+        "dataset_id",
+        "patients",
+        "metadata"
+    ],
+}
+
+
+FHIR_BUNDLE_SCHEMA = {
+    "$id": "chord_metadata_service_fhir_bundle_schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "FHIR Bundle schema",
+    "type": "object",
+    "properties": {
+        "resourceType": {
+            "type": "string",
+            "const": "Bundle",
+            "description": "Collection of resources."
+        },
+        "entry": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "resource": {"type": "object"}
+                },
+                "additionalProperties": True,
+                "required": ["resource"]
+            }
+        }
+    },
+    "additionalProperties": True,
+    "required": ["resourceType", "entry"]
 }

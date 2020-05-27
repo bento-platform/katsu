@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from chord_metadata_service.restapi import api_views, urls as restapi_urls
+from chord_metadata_service.restapi import api_views, views_ingest_fhir, urls as restapi_urls
 from chord_metadata_service.chord import views_ingest, views_search
 from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.views import get_swagger_view
@@ -56,6 +56,7 @@ urlpatterns = [
     path('search', views_search.chord_search, name="search"),
     path('fhir-search', views_search.fhir_public_search, name="fhir-search"),
     path('private/fhir-search', views_search.fhir_private_search, name="fhir-private-search"),
+    path('private/ingest-fhir', views_ingest_fhir.ingest_fhir, name="ingest-fhir"),
     path('private/search', views_search.chord_private_search, name="private-search"),
     path('private/tables/<str:table_id>/search', views_search.chord_private_table_search, name="private-table-search"),
 ] + ([path('admin/', admin.site.urls)] if DEBUG else [])
