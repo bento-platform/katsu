@@ -1,8 +1,12 @@
+import collections
 import uuid
 
+from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
+from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.resources.models import Resource
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET
 
@@ -54,6 +58,24 @@ class Dataset(models.Model):
 
     data_use = JSONField()
     linked_field_sets = JSONField(blank=True, default=list, help_text="Data type fields which are linked together.")
+
+    additional_resources = models.ManyToManyField(Resource, blank=True, help_text="Any resource objects linked to this "
+                                                                                  "dataset that aren't specified by a "
+                                                                                  "phenopacket in the dataset.")
+
+    @property
+    def resources(self):
+        # Union of phenopacket resources and any additional resources for other table types
+        return Resource.objects.filter(id__in={
+            *(r.id for r in self.additional_resources.objects.all()),
+            *(
+                r.id
+                for p in Phenopacket.objects.filter(
+                    table_id__in={t.id for t in self.table_ownership}
+                ).prefetch_related("meta_data", "meta_data__resources")
+                for r in p.meta_data.resources.objects.all()
+            ),
+        })
 
     @property
     def n_of_tables(self):
@@ -123,6 +145,17 @@ class Dataset(models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        # Check that all namespace prefices are unique within a dataset
+        c = collections.Counter(r.namespace_prefix for r in self.resources)
+        mc = next(c.most_common(1), (None, 0))
+        if mc[1] > 1:
+            raise ValidationError(f"Dataset {self.identifier} cannot have ambiguous resource namespace prefix {mc[0]}")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} (ID: {self.identifier})"
