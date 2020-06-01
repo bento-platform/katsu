@@ -55,7 +55,7 @@ EXAMPLE_INGEST = {
         "submitted_by": "Peter R",
         "resources": [
             {
-                "id": "hp",
+                "id": "HP:2019-04-08",
                 "name": "human phenotype ontology",
                 "namespace_prefix": "HP",
                 "url": "http://purl.obolibrary.org/obo/hp.owl",
@@ -63,7 +63,7 @@ EXAMPLE_INGEST = {
                 "iri_prefix": "http://purl.obolibrary.org/obo/HP_"
             },
             {
-                "id": "uberon",
+                "id": "UBERON:2019-03-08",
                 "name": "uber anatomy ontology",
                 "namespace_prefix": "UBERON",
                 "url": "http://purl.obolibrary.org/obo/uberon.owl",
@@ -71,7 +71,7 @@ EXAMPLE_INGEST = {
                 "iri_prefix": "http://purl.obolibrary.org/obo/UBERON_"
             },
             {
-                "id": "ncit",
+                "id": "NCIT:18.05d",
                 "name": "NCI Thesaurus OBO Edition",
                 "namespace_prefix": "NCIT",
                 "url": "http://purl.obolibrary.org/obo/ncit.owl",

@@ -8,6 +8,7 @@ from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_T
 from chord_metadata_service.chord.models import Table
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.phenopackets import models as pm
+from chord_metadata_service.resources import models as rm, utils as ru
 
 
 __all__ = [
@@ -197,12 +198,17 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
 
     resources_db = []
     for rs in meta_data.get("resources", []):
-        rs_obj, _ = pm.Resource.objects.get_or_create(
-            id=rs["id"],  # TODO: This ID is a bit iffy, because they're researcher-provided
+        namespace_prefix = rs["namespace_prefix"].strip()
+        version = rs.get("version", "").strip()
+        assigned_resource_id = ru.make_resource_id(namespace_prefix, version)
+
+        rs_obj, _ = rm.Resource.objects.get_or_create(
+            # If this doesn't match assigned_resource_id, it'll throw anyway
+            id=rs.get("id", assigned_resource_id),
             name=rs["name"],
-            namespace_prefix=rs["namespace_prefix"],
+            namespace_prefix=namespace_prefix,
             url=rs["url"],
-            version=rs["version"],
+            version=version,
             iri_prefix=rs["iri_prefix"]
         )
         resources_db.append(rs_obj)
