@@ -100,7 +100,6 @@ def table_list(request):
             table_id=table_id,
             service_id=CHORD_SERVICE_ID,
             service_artifact=CHORD_SERVICE_ARTIFACT,
-            data_type=data_type,
             dataset=Dataset.objects.get(identifier=dataset),
         )
 
