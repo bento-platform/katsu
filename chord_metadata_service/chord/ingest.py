@@ -14,6 +14,7 @@ from chord_metadata_service.resources import models as rm, utils as ru
 __all__ = [
     "METADATA_WORKFLOWS",
     "WORKFLOWS_PATH",
+    "ingest_resource",
     "DATA_TYPE_INGEST_FUNCTION_MAP",
 ]
 
@@ -87,6 +88,24 @@ def create_phenotypic_feature(pf):
 def _query_and_check_nulls(obj: dict, key: str, transform: Callable = lambda x: x):
     value = obj.get(key)
     return {f"{key}__isnull": True} if value is None else {key: transform(value)}
+
+
+def ingest_resource(resource: dict) -> rm.Resource:
+    namespace_prefix = resource["namespace_prefix"].strip()
+    version = resource.get("version", "").strip()
+    assigned_resource_id = ru.make_resource_id(namespace_prefix, version)
+
+    rs_obj, _ = rm.Resource.objects.get_or_create(
+        # If this doesn't match assigned_resource_id, it'll throw anyway
+        id=resource.get("id", assigned_resource_id),
+        name=resource["name"],
+        namespace_prefix=namespace_prefix,
+        url=resource["url"],
+        version=version,
+        iri_prefix=resource["iri_prefix"]
+    )
+
+    return rs_obj
 
 
 def ingest_experiment(experiment_data, table_id) -> em.Experiment:
@@ -196,22 +215,7 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
         )
         diseases_db.append(d_obj.id)
 
-    resources_db = []
-    for rs in meta_data.get("resources", []):
-        namespace_prefix = rs["namespace_prefix"].strip()
-        version = rs.get("version", "").strip()
-        assigned_resource_id = ru.make_resource_id(namespace_prefix, version)
-
-        rs_obj, _ = rm.Resource.objects.get_or_create(
-            # If this doesn't match assigned_resource_id, it'll throw anyway
-            id=rs.get("id", assigned_resource_id),
-            name=rs["name"],
-            namespace_prefix=namespace_prefix,
-            url=rs["url"],
-            version=version,
-            iri_prefix=rs["iri_prefix"]
-        )
-        resources_db.append(rs_obj)
+    resources_db = [ingest_resource(rs) for rs in meta_data.get("resources", [])]
 
     meta_data_obj = pm.MetaData(
         created_by=meta_data["created_by"],
@@ -221,7 +225,7 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
     )
     meta_data_obj.save()
 
-    meta_data_obj.resources.set(resources_db)  # TODO: primary key ???
+    meta_data_obj.resources.set(resources_db)
 
     new_phenopacket = pm.Phenopacket(
         id=new_phenopacket_id,
