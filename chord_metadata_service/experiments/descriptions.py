@@ -1,4 +1,4 @@
-from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES
+from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES, ontology_class
 
 
 EXPERIMENT = {
@@ -8,11 +8,20 @@ EXPERIMENT = {
 
         "reference_registry_id": "The IHEC EpiRR ID for this dataset, only for IHEC Reference Epigenome datasets. "
                                  "Otherwise leave empty.",
-        "qc_flags": "Any quanlity control observations can be noted here. This field can be omitted if empty",
+        "qc_flags": {
+            "description": "Any quality control observations can be noted here. This field can be omitted if empty",
+            "items": "A quality control observation.",
+        },
         "experiment_type": "(Controlled Vocabulary) The assay target (e.g. ‘DNA Methylation’, ‘mRNA-Seq’, ‘smRNA-Seq’, "
                            "'Histone H3K4me1').",
-        "experiment_ontology": "(Ontology: OBI) links to experiment ontology information.",
-        "molecule_ontology": "(Ontology: SO) links to molecule ontology information.",
+        "experiment_ontology": {
+            "description": "Links to experiment ontology information (e.g. via the OBI ontology.)",
+            "items": ontology_class("describing the experiment"),
+        },
+        "molecule_ontology": {
+            "description": "Links to molecule ontology information (e.g. via the SO ontology.)",
+            "items": ontology_class("describing a molecular property"),
+        },
         "molecule": "(Controlled Vocabulary) The type of molecule that was extracted from the biological material."
                     "Include one of the following: total RNA, polyA RNA, cytoplasmic RNA, nuclear RNA, small RNA, "
                     "genomic DNA, protein, or other.",
