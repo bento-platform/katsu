@@ -19,9 +19,8 @@ class IngestTest(TestCase):
         self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
                                         project=p)
         # TODO: Real service ID
-        # TODO: Remove data_type here
         to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
-                                           data_type=DATA_TYPE_PHENOPACKET, dataset=self.d)
+                                           dataset=self.d)
         self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
 
     def test_create_pf(self):

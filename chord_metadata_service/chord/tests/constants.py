@@ -86,7 +86,6 @@ def valid_table_1(dataset_id, model_compatible=False):
             "table_id": table_id,
             "service_id": service_id,
             "service_artifact": "metadata",
-            "data_type": DATA_TYPE_PHENOPACKET,  # TODO: Remove
             ("dataset_id" if model_compatible else "dataset"): dataset_id,
         },
         {
