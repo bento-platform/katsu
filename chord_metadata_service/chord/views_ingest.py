@@ -13,8 +13,9 @@ from chord_lib.schemas.chord import CHORD_INGEST_SCHEMA
 from chord_lib.responses import errors
 from chord_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
-from .ingest import METADATA_WORKFLOWS, WORKFLOWS_PATH, DATA_TYPE_INGEST_FUNCTION_MAP
-from .models import Table
+from .data_types import DATA_TYPE_EXPERIMENT
+from .ingest import METADATA_WORKFLOWS, WORKFLOWS_PATH, DATA_TYPE_INGEST_FUNCTION_MAP, ingest_resource
+from .models import Table, TableOwnership
 
 
 class WDLRenderer(BaseRenderer):
@@ -75,6 +76,8 @@ def ingest(request):
 
     table_id = str(uuid.UUID(table_id))  # Normalize dataset ID to UUID's str format.
 
+    dataset = TableOwnership.objects.get(table_id=table_id).dataset
+
     workflow_id = request.data["workflow_id"].strip()
     workflow_outputs = request.data["workflow_outputs"]
 
@@ -88,11 +91,23 @@ def ingest(request):
 
     with open(workflow_outputs["json_document"], "r") as jf:
         try:
+            dt = workflow["data_type"]
             json_data = json.load(jf)
-            ingest_fn = DATA_TYPE_INGEST_FUNCTION_MAP[workflow["data_type"]]
-            if isinstance(json_data, list):
+            ingest_fn = DATA_TYPE_INGEST_FUNCTION_MAP[dt]
+
+            # TODO: Better mechanism for workflow-specific ingestion handling
+
+            if dt == DATA_TYPE_EXPERIMENT:
+                for rs in json_data.get("resources", []):
+                    dataset.additional_resources.add(ingest_resource(rs))
+
+                for exp in json_data.get("experiments", []):
+                    ingest_fn(exp, table_id)
+
+            elif isinstance(json_data, list):
                 for obj in json_data:
                     ingest_fn(obj, table_id)
+
             else:
                 ingest_fn(json_data, table_id)
 

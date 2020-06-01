@@ -62,12 +62,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'chord_metadata_service.chord',
+    'chord_metadata_service.chord.apps.ChordConfig',
     'chord_metadata_service.experiments.apps.ExperimentsConfig',
     'chord_metadata_service.patients.apps.PatientsConfig',
     'chord_metadata_service.phenopackets.apps.PhenopacketsConfig',
     'chord_metadata_service.mcode.apps.McodeConfig',
-    'chord_metadata_service.restapi',
+    'chord_metadata_service.resources.apps.ResourcesConfig',
+    'chord_metadata_service.restapi.apps.RestapiConfig',
 
     'rest_framework',
     'django_nose',

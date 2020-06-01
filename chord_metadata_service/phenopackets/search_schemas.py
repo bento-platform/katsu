@@ -1,5 +1,6 @@
 from . import models, schemas
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
+from chord_metadata_service.resources.search_schemas import RESOURCE_SEARCH_SCHEMA
 from chord_metadata_service.restapi.schema_utils import (
     search_optional_eq,
     search_optional_str,
@@ -84,37 +85,6 @@ INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, 
             "primary_key": models.Individual._meta.pk.column,
         }
     },
-})
-
-RESOURCE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_RESOURCE_SCHEMA, {
-    "properties": {
-        "id": {
-            "search": search_optional_str(0)
-        },
-        "name": {
-            "search": search_optional_str(1, multiple=True)
-        },
-        "namespace_prefix": {
-            "search": search_optional_str(2, multiple=True)
-        },
-        "url": {
-            "search": search_optional_str(3, multiple=True)
-        },
-        "version": {
-            "search": search_optional_str(4, multiple=True)
-        },
-        "iri_prefix": {
-            "search": search_optional_str(5, multiple=True)
-        }
-    },
-    "search": {
-        "database": {
-            "relationship": {
-                "type": "MANY_TO_ONE",
-                "foreign_key": "resource_id"  # TODO: No hard-code, from M2M
-            }
-        }
-    }
 })
 
 UPDATE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_UPDATE_SCHEMA, {

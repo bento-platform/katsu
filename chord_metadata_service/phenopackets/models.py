@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.schema_utils import schema_list
@@ -27,29 +28,6 @@ from .schemas import (
 #                        Metadata                           #
 #                                                           #
 #############################################################
-
-
-class Resource(models.Model):
-    """
-    Class to represent a description of an external resource
-    used for referencing an object
-
-    FHIR: CodeSystem
-    """
-
-    # resource_id e.g. "id": "uniprot"
-    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.RESOURCE, "id"))
-    name = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "name"))
-    namespace_prefix = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "namespace_prefix"))
-    url = models.URLField(max_length=200, help_text=rec_help(d.RESOURCE, "url"))
-    version = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "version"))
-    iri_prefix = models.URLField(max_length=200, help_text=rec_help(d.RESOURCE, "iri_prefix"))
-    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.RESOURCE, "extra_properties"))
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return str(self.id)
 
 
 class MetaData(models.Model):

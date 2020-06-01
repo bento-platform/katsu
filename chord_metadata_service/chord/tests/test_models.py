@@ -53,8 +53,6 @@ class TableOwnershipTest(TestCase):
             table_id=TABLE_ID,
             service_id=SERVICE_ID,
             service_artifact="variant",
-            data_type="variant",
-
             dataset=d
         )
 
@@ -63,7 +61,6 @@ class TableOwnershipTest(TestCase):
         t = TableOwnership.objects.get(table_id=TABLE_ID, service_id=SERVICE_ID)
 
         self.assertEqual(t.service_artifact, "variant")
-        self.assertEqual(t.data_type, "variant")
         self.assertEqual(t.dataset, d)
 
         self.assertIn(t, d.table_ownership.all())
@@ -79,7 +76,6 @@ class TableTest(TestCase):
             table_id=TABLE_ID,
             service_id=SERVICE_ID,
             service_artifact="variant",
-            data_type="variant",
             dataset=self.d
         )
         Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
