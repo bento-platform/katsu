@@ -2,7 +2,17 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from .constants import *
 from ..models import *
-from ..serializers import *
+from ..serializers import (
+    BiosampleSerializer,
+    DiagnosisSerializer,
+    DiseaseSerializer,
+    GeneSerializer,
+    GenomicInterpretationSerializer,
+    MetaDataSerializer,
+    PhenopacketSerializer,
+    PhenotypicFeatureSerializer,
+    VariantSerializer,
+)
 from chord_metadata_service.restapi.tests.utils import get_response
 
 
