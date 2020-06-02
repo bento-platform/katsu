@@ -4,6 +4,8 @@ import jsonschema.exceptions
 import os
 import uuid
 
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import BaseRenderer
@@ -97,23 +99,32 @@ def ingest(request):
 
             # TODO: Better mechanism for workflow-specific ingestion handling
 
-            if dt == DATA_TYPE_EXPERIMENT:
-                for rs in json_data.get("resources", []):
-                    dataset.additional_resources.add(ingest_resource(rs))
+            with transaction.atomic():
+                # Wrap ingestion in a transaction, so if it fails we don't end up in a partial state in the database.
 
-                for exp in json_data.get("experiments", []):
-                    ingest_fn(exp, table_id)
+                if dt == DATA_TYPE_EXPERIMENT:
+                    for rs in json_data.get("resources", []):
+                        dataset.additional_resources.add(ingest_resource(rs))
 
-            elif isinstance(json_data, list):
-                for obj in json_data:
-                    ingest_fn(obj, table_id)
+                    for exp in json_data.get("experiments", []):
+                        ingest_fn(exp, table_id)
 
-            else:
-                ingest_fn(json_data, table_id)
+                elif isinstance(json_data, list):
+                    for obj in json_data:
+                        ingest_fn(obj, table_id)
+
+                else:
+                    ingest_fn(json_data, table_id)
 
         except json.decoder.JSONDecodeError as e:
             return Response(errors.bad_request_error(f"Invalid JSON provided for ingest document (message: {e})"),
                             status=400)
+
+        except ValidationError as e:
+            return Response(errors.bad_request_error(
+                "Encountered validation errors during ingestion",
+                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
+            ))
 
         # TODO: Schema validation
         # TODO: Rollback in case of failures
