@@ -32,7 +32,6 @@ class TestFhirIngest(APITestCase):
         invalid_dataset_id_ingest["metadata"] = {
             "created_by": "Name"
         }
-        print(invalid_dataset_id_ingest)
         request = factory.post('/private/ingest-fhir', invalid_dataset_id_ingest, format='json')
         response = ingest_fhir(request)
         self.assertEqual(response.status_code, 400)

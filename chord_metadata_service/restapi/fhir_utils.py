@@ -425,7 +425,7 @@ def observation_to_phenotypic_feature(obj):
         # TODO change
         "description": observation.id,
         "pftype": {
-            "id": codeable_concept.coding[0].code,
+            "id": f"{codeable_concept.coding[0].system}:{codeable_concept.coding[0].code}",
             "label": codeable_concept.coding[0].display
             # TODO collect system info in metadata
         }
@@ -444,7 +444,7 @@ def condition_to_disease(obj):
         # id is an integer AutoField, legacy id can be a string
         # "id": condition.id,
         "term": {
-            "id": codeable_concept.coding[0].code,
+            "id": f"{codeable_concept.coding[0].system}:{codeable_concept.coding[0].code}",
             "label": codeable_concept.coding[0].display
             # TODO collect system info in metadata
         }
@@ -482,7 +482,7 @@ def specimen_to_biosample(obj):
     if specimen.type:
         codeable_concept = specimen.type  # CodeableConcept
         biosample["sampled_tissue"] = {
-            "id": codeable_concept.coding[0].code,
+            "id": f"{codeable_concept.coding[0].system}:{codeable_concept.coding[0].code}",
             "label": codeable_concept.coding[0].display
             # TODO collect system info in metadata
         }
@@ -491,12 +491,19 @@ def specimen_to_biosample(obj):
         bodysite_codeable_concept = specimen.collection.bodySite
         biosample["procedure"] = {
             "code": {
-                "id": method_codeable_concept.coding[0].code,
+                "id": f"{method_codeable_concept.coding[0].system}:{method_codeable_concept.coding[0].code}",
                 "label": method_codeable_concept.coding[0].display
             },
             "body_site": {
-                "id": bodysite_codeable_concept.coding[0].code,
+                "id": f"{bodysite_codeable_concept.coding[0].system}:{bodysite_codeable_concept.coding[0].code}",
                 "label": bodysite_codeable_concept.coding[0].display
+            }
+        }
+    else:
+        biosample["procedure"] = {
+            "code": {
+                "id": "SNOMED:42630001",
+                "label": "Procedure code not assigned",
             }
         }
     return biosample

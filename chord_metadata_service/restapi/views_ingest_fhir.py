@@ -154,6 +154,9 @@ def ingest_fhir(request):
                         individual=Individual.objects.get(id=individual_id),
                         sampled_tissue=biosample_data["sampled_tissue"]
                     )
+                    phenopacket = Phenopacket.objects.get(subject=Individual.objects.get(id=individual_id))
+                    phenopacket.biosamples.add(biosample)
+
 
             except json.decoder.JSONDecodeError as e:
                 return Response(bad_request_error(f"Invalid JSON provided (message: {e})"), status=400)
