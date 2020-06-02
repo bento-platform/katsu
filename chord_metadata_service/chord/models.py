@@ -71,7 +71,7 @@ class Dataset(models.Model):
             *(
                 r.id
                 for p in Phenopacket.objects.filter(
-                    table_id__in={t.id for t in self.table_ownership.all()}
+                    table_id__in={t.table_id for t in self.table_ownership.all()}
                 ).prefetch_related("meta_data", "meta_data__resources")
                 for r in p.meta_data.resources.all()
             ),
