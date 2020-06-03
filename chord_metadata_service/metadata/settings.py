@@ -14,6 +14,8 @@ import os
 import sys
 import logging
 
+from urllib.parse import urlparse
+
 from .. import __version__
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -28,12 +30,6 @@ SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("CHORD_DEBUG", "true").lower() == "true"
-
-ALLOWED_HOSTS = [os.environ.get("CHORD_HOST", "localhost")]
-if DEBUG:
-    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
-
-APPEND_SLASH = False
 
 
 # CHORD-specific settings
@@ -50,6 +46,16 @@ CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE)
 
 # SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
 AUTH_OVERRIDE = not CHORD_PERMISSIONS
+
+
+# Allowed hosts - TODO: Derive from CHORD_URL
+
+CHORD_HOST = urlparse(CHORD_URL or "").netloc
+ALLOWED_HOSTS = [CHORD_HOST or "localhost"]
+if DEBUG:
+    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
+
+APPEND_SLASH = False
 
 
 # Application definition
