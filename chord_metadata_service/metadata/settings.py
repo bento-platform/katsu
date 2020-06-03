@@ -38,13 +38,14 @@ APPEND_SLASH = False
 
 # CHORD-specific settings
 
-CHORD_URL = os.environ.get("CHORD_URL", None)  # Leave None if not specified, for running in other contexts
+CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
 
 # SECURITY WARNING: Don't run with CHORD_PERMISSIONS turned off in production,
 # unless an alternative permissions system is in place.
 CHORD_PERMISSIONS = os.environ.get("CHORD_PERMISSIONS", str(not DEBUG)).lower() == "true"
 
-CHORD_SERVICE_TYPE = "ca.c3g.chord:metadata:{}".format(__version__)
+CHORD_SERVICE_ARTIFACT = "metadata"
+CHORD_SERVICE_TYPE = f"ca.c3g.chord:{CHORD_SERVICE_ARTIFACT}:{__version__}"
 CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE)
 
 # SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
@@ -61,12 +62,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'chord_metadata_service.chord',
+    'chord_metadata_service.chord.apps.ChordConfig',
     'chord_metadata_service.experiments.apps.ExperimentsConfig',
     'chord_metadata_service.patients.apps.PatientsConfig',
     'chord_metadata_service.phenopackets.apps.PhenopacketsConfig',
     'chord_metadata_service.mcode.apps.McodeConfig',
-    'chord_metadata_service.restapi',
+    'chord_metadata_service.resources.apps.ResourcesConfig',
+    'chord_metadata_service.restapi.apps.RestapiConfig',
 
     'rest_framework',
     'django_nose',

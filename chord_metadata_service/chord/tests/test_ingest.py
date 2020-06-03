@@ -1,8 +1,12 @@
+import uuid
+
 from django.test import TestCase
 from dateutil.parser import isoparse
 
-from chord_metadata_service.chord.models import Project, Dataset
-from chord_metadata_service.chord.views_ingest import create_phenotypic_feature, ingest_phenopacket
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
+from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+# noinspection PyProtectedMember
+from chord_metadata_service.chord.ingest import create_phenotypic_feature, DATA_TYPE_INGEST_FUNCTION_MAP
 from chord_metadata_service.phenopackets.models import PhenotypicFeature, Phenopacket
 
 from .constants import VALID_DATA_USE_1
@@ -14,6 +18,10 @@ class IngestTest(TestCase):
         p = Project.objects.create(title="Project 1", description="")
         self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
                                         project=p)
+        # TODO: Real service ID
+        to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
+                                           dataset=self.d)
+        self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
 
     def test_create_pf(self):
         p1 = create_phenotypic_feature({
@@ -31,8 +39,8 @@ class IngestTest(TestCase):
 
         self.assertEqual(p1.pk, p2.pk)
 
-    def test_ingesting_json(self):
-        p = ingest_phenopacket(EXAMPLE_INGEST, self.d.identifier)
+    def test_ingesting_phenopackets_json(self):
+        p = DATA_TYPE_INGEST_FUNCTION_MAP[DATA_TYPE_PHENOPACKET](EXAMPLE_INGEST, self.t.identifier)
         self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
 
         self.assertEqual(p.subject.id, EXAMPLE_INGEST["subject"]["id"])
@@ -60,6 +68,6 @@ class IngestTest(TestCase):
         # TODO: More
 
         # Test ingesting again
-        p2 = ingest_phenopacket(EXAMPLE_INGEST, self.d.identifier)
+        p2 = DATA_TYPE_INGEST_FUNCTION_MAP[DATA_TYPE_PHENOPACKET](EXAMPLE_INGEST, self.t.identifier)
         self.assertNotEqual(p.id, p2.id)
         # TODO: More

@@ -2,6 +2,7 @@ from django.db.utils import IntegrityError
 from django.test import TestCase
 from ..models import *
 from .constants import *
+from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
 
 
 class BiosampleTest(TestCase):
@@ -216,21 +217,6 @@ class InterpretationTest(TestCase):
 
     def test_interpretation_str(self):
         self.assertEqual(str(self.interpretation), str(self.interpretation.id))
-
-
-class ResourceTest(TestCase):
-    def setUp(self):
-        self.resource_1 = Resource.objects.create(**VALID_RESOURCE_1)
-        self.resource_2 = Resource.objects.create(**VALID_RESOURCE_2)
-
-    def test_resource(self):
-        self.assertEqual(Resource.objects.count(), 2)
-        with self.assertRaises(IntegrityError):
-            Resource.objects.create(**DUPLICATE_RESOURCE_3)
-
-    def test_resource_str(self):
-        self.assertEqual(str(self.resource_1), "so")
-        self.assertEqual(str(self.resource_2), "hgnc")
 
 
 class MetaDataTest(TestCase):

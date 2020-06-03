@@ -2,7 +2,17 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from .constants import *
 from ..models import *
-from ..serializers import *
+from ..serializers import (
+    BiosampleSerializer,
+    DiagnosisSerializer,
+    DiseaseSerializer,
+    GeneSerializer,
+    GenomicInterpretationSerializer,
+    MetaDataSerializer,
+    PhenopacketSerializer,
+    PhenotypicFeatureSerializer,
+    VariantSerializer,
+)
 from chord_metadata_service.restapi.tests.utils import get_response
 
 
@@ -187,22 +197,6 @@ class CreateDiseaseTest(APITestCase):
         serializer = DiseaseSerializer(data=self.invalid_disease)
         self.assertEqual(serializer.is_valid(), False)
         self.assertEqual(Disease.objects.count(), 0)
-
-
-class CreateResourceTest(APITestCase):
-
-    def setUp(self):
-        self.resource = VALID_RESOURCE_2
-        self.duplicate_resource = DUPLICATE_RESOURCE_3
-
-    def test_resource(self):
-        response = get_response('resource-list', self.resource)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Resource.objects.count(), 1)
-
-    def test_serializer(self):
-        serializer = ResourceSerializer(data=self.resource)
-        self.assertEqual(serializer.is_valid(), True)
 
 
 class CreateMetaDataTest(APITestCase):

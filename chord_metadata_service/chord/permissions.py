@@ -1,5 +1,16 @@
 from django.conf import settings
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+
+
+__all__ = [
+    "ReadOnly",
+    "OverrideOrSuperUserOnly",
+]
+
+
+class ReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        return request.method in SAFE_METHODS
 
 
 class OverrideOrSuperUserOnly(BasePermission):
