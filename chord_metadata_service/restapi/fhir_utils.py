@@ -389,6 +389,15 @@ def fhir_composition(obj):
 ##################### FHIR to Phenopackets class conversion functions #####################
 # There is no guide to map FHIR to Phenopackets
 
+# SNOMED term to use as placeholder when collection method is not present in Specimen
+procedure_not_assigned = {
+            "code": {
+                "id": "SNOMED:42630001",
+                "label": "Procedure code not assigned",
+            }
+        }
+
+
 def patient_to_individual(obj):
     """ FHIR Patient to Individual. """
 
@@ -453,23 +462,6 @@ def condition_to_disease(obj):
     return disease
 
 
-def diagnostic_report_to_interpretation(obj):
-    """ FHIR DiagnosticReport to Phenopackets Interpretation. """
-    # it hardly maps at all
-    return
-
-
-def procedure_to_procedure(obj):
-    """ FHIR Procedure to Phenopackets Procedure.
-    The main semantic difference:
-    - phenopackets procedure is a procedure performed to extract a biosample;
-    - fhir procedure is a procedure performed on or for a patient
-    (e.g. documentation of patient's medication)
-    """
-
-    return
-
-
 def specimen_to_biosample(obj):
     """ FHIR Specimen to Phenopackets Biosample. """
 
@@ -500,10 +492,5 @@ def specimen_to_biosample(obj):
             }
         }
     else:
-        biosample["procedure"] = {
-            "code": {
-                "id": "SNOMED:42630001",
-                "label": "Procedure code not assigned",
-            }
-        }
+        biosample["procedure"] = procedure_not_assigned
     return biosample
