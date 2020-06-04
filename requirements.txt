@@ -9,7 +9,7 @@ colorama==0.4.3
 coreapi==2.3.3
 coreschema==0.0.4
 coverage==5.1
-Django==2.2.12
+Django==2.2.13
 django-filter==2.2.0
 django-nose==1.4.6
 django-rest-swagger==2.2.0
