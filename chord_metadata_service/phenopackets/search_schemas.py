@@ -1,42 +1,18 @@
 from . import models, schemas
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
-from chord_metadata_service.restapi.schema_utils import tag_schema_with_search_properties
+from chord_metadata_service.resources.search_schemas import RESOURCE_SEARCH_SCHEMA
+from chord_metadata_service.restapi.schema_utils import (
+    search_optional_eq,
+    search_optional_str,
+    tag_schema_with_search_properties,
+)
+from chord_metadata_service.restapi.search_schemas import ONTOLOGY_SEARCH_SCHEMA
 
 
 __all__ = [
-    "ONTOLOGY_SEARCH_SCHEMA",
     "EXTERNAL_REFERENCE_SEARCH_SCHEMA",
     "PHENOPACKET_SEARCH_SCHEMA",
 ]
-
-
-def _single_optional_eq_search(order, queryable: str = "all"):
-    return {
-        "operations": ["eq"],
-        "queryable": queryable,
-        "canNegate": True,
-        "required": False,
-        "type": "single",
-        "order": order
-    }
-
-
-def _optional_str_search(order, queryable: str = "all"):
-    return {
-        "operations": ["eq", "co"],
-        "queryable": queryable,
-        "canNegate": True,
-        "required": False,
-        "order": order
-    }
-
-
-def _single_optional_str_search(order, queryable: str = "all"):
-    return {**_optional_str_search(order, queryable), "type": "single"}
-
-
-def _multiple_optional_str_search(order, queryable: str = "all"):
-    return {**_optional_str_search(order, queryable), "type": "multiple"}
 
 
 # TODO: Rewrite and use
@@ -53,29 +29,13 @@ def _tag_with_database_attrs(schema: dict, db_attrs: dict):
     }
 
 
-ONTOLOGY_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_ONTOLOGY_SCHEMA, {
-    "properties": {
-        "id": {
-            "search": _multiple_optional_str_search(0)
-        },
-        "label": {
-            "search": _multiple_optional_str_search(1)
-        }
-    },
-    "search": {
-        "database": {
-            "type": "jsonb"  # TODO: parameterize?
-        }
-    }
-})
-
 EXTERNAL_REFERENCE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA, {
     "properties": {
         "id": {
-            "search": _single_optional_str_search(0)
+            "search": search_optional_str(0)
         },
         "description": {
-            "search": _multiple_optional_str_search(1)  # TODO: Searchable? may leak
+            "search": search_optional_str(1, multiple=True)  # TODO: Searchable? may leak
         }
     },
     "search": {
@@ -89,7 +49,7 @@ INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, 
     "properties": {
         "id": {
             "search": {
-                **_single_optional_eq_search(0, queryable="internal"),
+                **search_optional_eq(0, queryable="internal"),
                 "database": {
                     "field": models.Individual._meta.pk.column
                 }
@@ -97,7 +57,7 @@ INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, 
         },
         "alternate_ids": {
             "items": {
-                "search": _multiple_optional_str_search(0, queryable="internal")
+                "search": search_optional_str(0, queryable="internal", multiple=True)
             },
             "search": {
                 "database": {
@@ -107,14 +67,15 @@ INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, 
         },
         "date_of_birth": {
             # TODO: Internal?
-            "search": _single_optional_eq_search(1, queryable="internal")
+            # TODO: Allow lt / gt
+            "search": search_optional_eq(1, queryable="internal")
         },
         # TODO: Age
         "sex": {
-            "search": _single_optional_eq_search(2)
+            "search": search_optional_eq(2)
         },
         "karyotypic_sex": {
-            "search": _single_optional_eq_search(3)
+            "search": search_optional_eq(3)
         },
         "taxonomy": ONTOLOGY_SEARCH_SCHEMA,
     },
@@ -126,45 +87,14 @@ INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, 
     },
 })
 
-RESOURCE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_RESOURCE_SCHEMA, {
-    "properties": {
-        "id": {
-            "search": _single_optional_str_search(0)
-        },
-        "name": {
-            "search": _multiple_optional_str_search(1)
-        },
-        "namespace_prefix": {
-            "search": _multiple_optional_str_search(2)
-        },
-        "url": {
-            "search": _multiple_optional_str_search(3)
-        },
-        "version": {
-            "search": _multiple_optional_str_search(4)
-        },
-        "iri_prefix": {
-            "search": _multiple_optional_str_search(5)
-        }
-    },
-    "search": {
-        "database": {
-            "relationship": {
-                "type": "MANY_TO_ONE",
-                "foreign_key": "resource_id"  # TODO: No hard-code, from M2M
-            }
-        }
-    }
-})
-
 UPDATE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_UPDATE_SCHEMA, {
     "properties": {
         # TODO: timestamp
         "updated_by": {
-            "search": _multiple_optional_str_search(0),
+            "search": search_optional_str(0, multiple=True),
         },
         "comment": {
-            "search": _multiple_optional_str_search(1)
+            "search": search_optional_str(1, multiple=True),
         }
     },
     "search": {
@@ -179,10 +109,10 @@ META_DATA_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
     "properties": {
         # TODO: created
         "created_by": {
-            "search": _multiple_optional_str_search(0)
+            "search": search_optional_str(0, multiple=True),
         },
         "submitted_by": {
-            "search": _multiple_optional_str_search(1)
+            "search": search_optional_str(1, multiple=True),
         },
         "resources": {
             "items": RESOURCE_SEARCH_SCHEMA,
@@ -233,11 +163,11 @@ EVIDENCE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_E
 PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA, {
     "properties": {
         "description": {
-            "search": _multiple_optional_str_search(0),  # TODO: Searchable? may leak
+            "search": search_optional_str(0, multiple=True),  # TODO: Searchable? may leak
         },
         "type": ONTOLOGY_SEARCH_SCHEMA,
         "negated": {
-            "search": _single_optional_eq_search(1)
+            "search": search_optional_eq(1),
         },
         "severity": ONTOLOGY_SEARCH_SCHEMA,
         "modifier": {  # TODO: Plural?
@@ -258,15 +188,15 @@ PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
 GENE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENE_SCHEMA, {
     "properties": {
         "id": {
-            "search": _single_optional_str_search(0)
+            "search": search_optional_str(0),
         },
         "alternate_ids": {
             "items": {
-                "search": _single_optional_str_search(1)
+                "search": search_optional_str(1),
             }
         },
         "symbol": {
-            "search": _single_optional_str_search(2)
+            "search": search_optional_str(2),
         }
     },
 })
@@ -286,15 +216,15 @@ BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
     "properties": {
         "id": {
             "search": {
-                **_single_optional_eq_search(0, queryable="internal"),
+                **search_optional_eq(0, queryable="internal"),
                 "database": {"field": models.Biosample._meta.pk.column}
             }
         },
         "individual_id": {  # TODO: Does this work?
-            "search": _single_optional_eq_search(1, queryable="internal"),
+            "search": search_optional_eq(1, queryable="internal"),
         },
         "description": {
-            "search": _multiple_optional_str_search(2),  # TODO: Searchable? may leak
+            "search": search_optional_str(2, multiple=True),  # TODO: Searchable? may leak
         },
         "sampled_tissue": ONTOLOGY_SEARCH_SCHEMA,
         "phenotypic_features": {
@@ -343,7 +273,7 @@ BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
             "items": VARIANT_SEARCH_SCHEMA,  # TODO: search?
         },
         "is_control_sample": {
-            "search": _single_optional_eq_search(1),  # TODO: Boolean search
+            "search": search_optional_eq(1),  # TODO: Boolean search
         },
     },
     "search": {

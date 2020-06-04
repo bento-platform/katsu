@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from chord_metadata_service.restapi.api_renderers import *
+from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, FHIRRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from .models import *
@@ -96,19 +96,6 @@ class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
     """
     queryset = Disease.objects.all().order_by("id")
     serializer_class = DiseaseSerializer
-
-
-class ResourceViewSet(PhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing resources
-
-    post:
-    Create a new resource
-
-    """
-    queryset = Resource.objects.all().order_by("id")
-    serializer_class = ResourceSerializer
 
 
 META_DATA_PREFETCH = (

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from chord_metadata_service.restapi import description_utils as du
+from .. import description_utils as du
 
 
 TEST_SCHEMA_1 = {"type": "string"}

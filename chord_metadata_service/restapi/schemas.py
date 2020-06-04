@@ -1,5 +1,5 @@
 from . import descriptions
-from .description_utils import describe_schema, EXTRA_PROPERTIES
+from .description_utils import describe_schema, EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
 
 # Individual schemas for validation of JSONField values
 
@@ -21,19 +21,18 @@ __all__ = [
 ################################ Phenopackets based schemas ################################
 
 
-ONTOLOGY_CLASS = {
+ONTOLOGY_CLASS = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:ontology_class_schema",
     "title": "Ontology class schema",
-    "description": "Schema to describe terms from ontologies.",
     "type": "object",
     "properties": {
-        "id": {"type": "string", "description": "CURIE style identifier."},
-        "label": {"type": "string", "description": "Human-readable class name."}
+        "id": {"type": "string"},
+        "label": {"type": "string"}
     },
     "additionalProperties": False,
     "required": ["id", "label"]
-}
+}, ONTOLOGY_CLASS_DESC)
 
 ONTOLOGY_CLASS_LIST = {
     "$schema": "http://json-schema.org/draft-07/schema#",
