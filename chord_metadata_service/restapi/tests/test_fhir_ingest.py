@@ -1,12 +1,14 @@
 from rest_framework.test import APITestCase
 from rest_framework.test import APIRequestFactory
-from chord_metadata_service.chord.models import Project, Dataset
+from chord_metadata_service.chord.models import *
 from chord_metadata_service.phenopackets.models import *
 from chord_metadata_service.patients.models import Individual
 from .constants import INVALID_INGEST_BODY, INVALID_FHIR_BUNDLE_1
 from ..views_ingest_fhir import ingest_fhir
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 import copy
+import uuid
 
 
 class TestFhirIngest(APITestCase):
@@ -15,6 +17,9 @@ class TestFhirIngest(APITestCase):
         p = Project.objects.create(title="Project 1", description="Test")
         self.d = Dataset.objects.create(title="Dataset 1", description="Test dataset", data_use=VALID_DATA_USE_1,
                                         project=p)
+        to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
+                                           dataset=self.d)
+        self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
 
     def test_ingest_body(self):
         factory = APIRequestFactory()

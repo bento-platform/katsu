@@ -414,7 +414,7 @@ def patient_to_individual(obj):
         "unknown": "UNKNOWN_SEX"
     }
     if patient.gender:
-        individual["sex"] = gender_to_sex.get(patient.gender, "unknown")
+        individual["sex"] = gender_to_sex[patient.gender]
     if patient.birthDate:
         individual["date_of_birth"] = patient.birthDate.isostring
     if patient.active:

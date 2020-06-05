@@ -61,10 +61,11 @@ def ingest_fhir(request):
     # check schema of ingest body
     _check_schema(FHIR_INGEST_SCHEMA, request.data, 'ingest body')
 
-    # check if dataset exists
-    if not Dataset.objects.filter(identifier=request.data["dataset_id"]).exists():
-        return Response(bad_request_error(f"Dataset with ID {request.data['dataset_id']} does not exist"),
-                        status=400)
+    # check if table exists
+    table_id = request.data["table_id"]
+
+    if not Table.objects.filter(ownership_record_id=table_id).exists():
+        return Response(bad_request_error(f"Table with ID {table_id} does not exist"), status=400)
 
     # patients-individuals
     with open(request.data["patients"], "r") as p_file:
@@ -86,7 +87,7 @@ def ingest_fhir(request):
                     id=str(uuid.uuid4()),
                     subject=individual,
                     meta_data=meta_data_obj,
-                    dataset=Dataset.objects.get(identifier=request.data["dataset_id"])
+                    table=Table.objects.get(ownership_record_id=table_id)
                 )
                 print(f'Phenopacket {phenopacket.id} created')
         except json.decoder.JSONDecodeError as e:

@@ -1,5 +1,5 @@
 INVALID_INGEST_BODY = {
-    "dataset_id": "62b5fc67-d925-4409-bb59-e1e9a1ef10af",
+    "table_id": "62b5fc67-d925-4409-bb59-e1e9a1ef10af",
     "patients": "patients_file",
     "metadata": {
         "test": "required created_by is not present"

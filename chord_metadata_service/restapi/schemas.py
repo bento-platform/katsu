@@ -126,7 +126,7 @@ FHIR_INGEST_SCHEMA = {
     "description": "FHIR Ingest schema",
     "type": "object",
     "properties": {
-        "dataset_id": {"type": "string"},
+        "table_id": {"type": "string"},
         "patients": {"type": "string", "description": "Path to a patients file location."},
         "observations": {"type": "string", "description": "Path to an observations file location."},
         "conditions": {"type": "string", "description": "Path to a conditions file location."},
@@ -140,7 +140,7 @@ FHIR_INGEST_SCHEMA = {
         }
     },
     "required": [
-        "dataset_id",
+        "table_id",
         "patients",
         "metadata"
     ],
