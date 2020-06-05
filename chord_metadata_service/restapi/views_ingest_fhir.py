@@ -20,7 +20,7 @@ from chord_metadata_service.phenopackets.models import *
 
 
 INGEST_BODY_EXAMPLE = {
-    "dataset_id": "62b5fc67-d925-4409-bb59-e1e9a1ef10ae",
+    "table_id": "62b5fc67-d925-4409-bb59-e1e9a1ef10ae",
     "patients": "examples/patients.json",
     "observations": "examples/observations.json",
     "conditions": "examples/conditions.json",

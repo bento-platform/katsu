@@ -4,11 +4,12 @@ import uuid
 from dateutil.parser import isoparse
 from typing import Callable
 
-from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET
+from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_FHIR
 from chord_metadata_service.chord.models import Table
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.resources import models as rm, utils as ru
+from chord_metadata_service.restapi.views_ingest_fhir import ingest_fhir
 
 
 __all__ = [
@@ -45,6 +46,27 @@ METADATA_WORKFLOWS = {
         "experiments_json": {
             "name": "Bento Experiments JSON",
             "description": "This ingestion workflow will validate and import a Bento Experiments schema-compatible "
+                           "JSON document.",
+            "data_type": "experiment",
+            "file": "experiments_json.wdl",
+            "inputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "extensions": [".json"]
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "value": "{json_document}"
+                }
+            ]
+        },
+        "fhir_json": {
+            "name": "FHIR resources json",
+            "description": "This ingestion workflow will validate and import a FHIR schema-compatible "
                            "JSON document.",
             "data_type": "experiment",
             "file": "experiments_json.wdl",
@@ -247,4 +269,5 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
 DATA_TYPE_INGEST_FUNCTION_MAP = {
     DATA_TYPE_EXPERIMENT: ingest_experiment,
     DATA_TYPE_PHENOPACKET: ingest_phenopacket,
+    DATA_TYPE_FHIR: ingest_fhir
 }

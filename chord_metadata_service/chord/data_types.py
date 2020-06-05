@@ -9,6 +9,7 @@ __all__ = [
 
 DATA_TYPE_EXPERIMENT = "experiment"
 DATA_TYPE_PHENOPACKET = "phenopacket"
+DATA_TYPE_FHIR = "fhir"
 
 DATA_TYPES = {
     DATA_TYPE_EXPERIMENT: {
