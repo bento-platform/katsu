@@ -15,9 +15,8 @@ from chord_lib.schemas.chord import CHORD_INGEST_SCHEMA
 from chord_lib.responses import errors
 from chord_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
-from .data_types import DATA_TYPE_EXPERIMENT
-from .ingest import METADATA_WORKFLOWS, WORKFLOWS_PATH, DATA_TYPE_INGEST_FUNCTION_MAP, ingest_resource
-from .models import Table, TableOwnership
+from .ingest import METADATA_WORKFLOWS, WORKFLOWS_PATH, WORKFLOW_INGEST_FUNCTION_MAP
+from .models import Table
 
 
 class WDLRenderer(BaseRenderer):
@@ -78,54 +77,30 @@ def ingest(request):
 
     table_id = str(uuid.UUID(table_id))  # Normalize dataset ID to UUID's str format.
 
-    dataset = TableOwnership.objects.get(table_id=table_id).dataset
-
     workflow_id = request.data["workflow_id"].strip()
     workflow_outputs = request.data["workflow_outputs"]
 
     if not workflow_exists(workflow_id, METADATA_WORKFLOWS):  # Check that the workflow exists
         return Response(errors.bad_request_error(f"Workflow with ID {workflow_id} does not exist"), status=400)
 
-    workflow = get_workflow(workflow_id, METADATA_WORKFLOWS)
-
     if "json_document" not in workflow_outputs:
         return Response(errors.bad_request_error("Missing workflow output 'json_document'"), status=400)
 
-    with open(workflow_outputs["json_document"], "r") as jf:
-        try:
-            dt = workflow["data_type"]
-            json_data = json.load(jf)
-            ingest_fn = DATA_TYPE_INGEST_FUNCTION_MAP[dt]
+    try:
+        with transaction.atomic():
+            # Wrap ingestion in a transaction, so if it fails we don't end up in a partial state in the database.
+            WORKFLOW_INGEST_FUNCTION_MAP[workflow_id](workflow_outputs, table_id)
 
-            # TODO: Better mechanism for workflow-specific ingestion handling
+    except json.decoder.JSONDecodeError as e:
+        return Response(errors.bad_request_error(f"Invalid JSON provided for ingest document (message: {e})"),
+                        status=400)
 
-            with transaction.atomic():
-                # Wrap ingestion in a transaction, so if it fails we don't end up in a partial state in the database.
+    except ValidationError as e:
+        return Response(errors.bad_request_error(
+            "Encountered validation errors during ingestion",
+            *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
+        ))
 
-                if dt == DATA_TYPE_EXPERIMENT:
-                    for rs in json_data.get("resources", []):
-                        dataset.additional_resources.add(ingest_resource(rs))
-
-                    for exp in json_data.get("experiments", []):
-                        ingest_fn(exp, table_id)
-
-                elif isinstance(json_data, list):
-                    for obj in json_data:
-                        ingest_fn(obj, table_id)
-
-                else:
-                    ingest_fn(json_data, table_id)
-
-        except json.decoder.JSONDecodeError as e:
-            return Response(errors.bad_request_error(f"Invalid JSON provided for ingest document (message: {e})"),
-                            status=400)
-
-        except ValidationError as e:
-            return Response(errors.bad_request_error(
-                "Encountered validation errors during ingestion",
-                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
-            ))
-
-        # TODO: Schema validation
-        # TODO: Rollback in case of failures
-        return Response(status=204)
+    # TODO: Schema validation
+    # TODO: Rollback in case of failures
+    return Response(status=204)
