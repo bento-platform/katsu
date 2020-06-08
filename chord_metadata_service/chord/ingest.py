@@ -68,8 +68,8 @@ METADATA_WORKFLOWS = {
             "name": "FHIR resources json",
             "description": "This ingestion workflow will validate and import a FHIR schema-compatible "
                            "JSON document.",
-            "data_type": "experiment",
-            "file": "experiments_json.wdl",
+            "data_type": "phenopacket",
+            "file": "fhir_json.wdl",
             "inputs": [
                 {
                     "id": "json_document",
