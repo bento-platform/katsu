@@ -6,7 +6,7 @@ from dateutil.parser import isoparse
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 # noinspection PyProtectedMember
-from chord_metadata_service.chord.ingest import create_phenotypic_feature, DATA_TYPE_INGEST_FUNCTION_MAP
+from chord_metadata_service.chord.ingest import create_phenotypic_feature, WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.phenopackets.models import PhenotypicFeature, Phenopacket
 
 from .constants import VALID_DATA_USE_1
@@ -40,7 +40,7 @@ class IngestTest(TestCase):
         self.assertEqual(p1.pk, p2.pk)
 
     def test_ingesting_phenopackets_json(self):
-        p = DATA_TYPE_INGEST_FUNCTION_MAP[DATA_TYPE_PHENOPACKET](EXAMPLE_INGEST, self.t.identifier)
+        p = WORKFLOW_INGEST_FUNCTION_MAP[DATA_TYPE_PHENOPACKET](EXAMPLE_INGEST, self.t.identifier)
         self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
 
         self.assertEqual(p.subject.id, EXAMPLE_INGEST["subject"]["id"])
@@ -68,6 +68,6 @@ class IngestTest(TestCase):
         # TODO: More
 
         # Test ingesting again
-        p2 = DATA_TYPE_INGEST_FUNCTION_MAP[DATA_TYPE_PHENOPACKET](EXAMPLE_INGEST, self.t.identifier)
+        p2 = WORKFLOW_INGEST_FUNCTION_MAP[DATA_TYPE_PHENOPACKET](EXAMPLE_INGEST, self.t.identifier)
         self.assertNotEqual(p.id, p2.id)
         # TODO: More
