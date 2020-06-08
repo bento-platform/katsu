@@ -289,20 +289,19 @@ def ingest_experiments_workflow(workflow_outputs, table_id):
         for rs in json_data.get("resources", []):
             dataset.additional_resources.add(ingest_resource(rs))
 
-        for exp in json_data.get("experiments", []):
-            ingest_experiment(exp, table_id)
+        return [ingest_experiment(exp, table_id) for exp in json_data.get("experiments", [])]
 
 
 def ingest_phenopacket_workflow(workflow_outputs, table_id):
     with open(workflow_outputs["json_document"], "r") as jf:
         json_data = json.load(jf)
-        _map_if_list(ingest_phenopacket, json_data, table_id)
+        return _map_if_list(ingest_phenopacket, json_data, table_id)
 
 
 def ingest_fhir_workflow(workflow_outputs, table_id):
     with open(workflow_outputs["json_document"], "r") as jf:
         json_data = json.load(jf)
-        _map_if_list(ingest_fhir, json_data, table_id)
+        return _map_if_list(ingest_fhir, json_data, table_id)
 
 
 WORKFLOW_INGEST_FUNCTION_MAP = {
