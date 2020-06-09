@@ -10,7 +10,12 @@ from chord_metadata_service.chord.models import Table, TableOwnership
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.resources import models as rm, utils as ru
-from chord_metadata_service.restapi.views_ingest_fhir import ingest_fhir
+from chord_metadata_service.restapi.views_ingest_fhir import (
+    ingest_patients,
+    ingest_observations,
+    ingest_conditions,
+    ingest_specimens
+)
 
 
 __all__ = [
@@ -20,11 +25,9 @@ __all__ = [
     "WORKFLOW_INGEST_FUNCTION_MAP",
 ]
 
-
 WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
-
 
 METADATA_WORKFLOWS = {
     "ingestion": {
@@ -82,14 +85,54 @@ METADATA_WORKFLOWS = {
                     "id": "json_document",
                     "type": "file",
                     "extensions": [".json"]
-                }
+                },
+                {
+                    "id": "observations",
+                    "type": "file",
+                    "extensions": [".json"]
+                },
+                {
+                    "id": "conditions",
+                    "type": "file",
+                    "extensions": [".json"]
+                },
+                {
+                    "id": "specimens",
+                    "type": "file",
+                    "extensions": [".json"]
+                },
+                {
+                    "id": "created_by",
+                    "type": "string"
+                },
+
             ],
             "outputs": [
                 {
                     "id": "json_document",
                     "type": "file",
                     "value": "{json_document}"
-                }
+                },
+                {
+                    "id": "observations",
+                    "type": "file",
+                    "value": "{json_document}"
+                },
+                {
+                    "id": "conditions",
+                    "type": "file",
+                    "value": "{json_document}"
+                },
+                {
+                    "id": "specimens",
+                    "type": "file",
+                    "value": "{json_document}"
+                },
+                {
+                    "id": "created_by",
+                    "type": "string"
+                },
+
             ]
         }
     },
@@ -140,7 +183,7 @@ def ingest_resource(resource: dict) -> rm.Resource:
 def ingest_experiment(experiment_data, table_id) -> em.Experiment:
     """Ingests a single experiment."""
 
-    new_experiment_id = experiment_data["id"]    # TODO: Is this provided?
+    new_experiment_id = experiment_data["id"]  # TODO: Is this provided?
 
     reference_registry_id = experiment_data.get("reference_registry_id")
     qc_flags = experiment_data.get("qc_flags", [])
@@ -299,9 +342,25 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id):
 
 
 def ingest_fhir_workflow(workflow_outputs, table_id):
-    with open(workflow_outputs["json_document"], "r") as jf:
-        json_data = json.load(jf)
-        return _map_if_list(ingest_fhir, json_data, table_id)
+    with open(workflow_outputs["json_document"], "r") as pf:
+        patients_data = json.load(pf)
+        ingest_patients(patients_data, table_id,
+                        workflow_outputs["created_by"] if "created_by" in workflow_outputs else "Imported from file.")
+
+    if "observations" in workflow_outputs:
+        with open(workflow_outputs["observations"], "r") as of:
+            observations_data = json.load(of)
+            ingest_observations(observations_data)
+
+    if "conditions" in workflow_outputs:
+        with open(workflow_outputs["conditions"], "r") as cf:
+            conditions_data = json.load(cf)
+            ingest_conditions(conditions_data)
+
+    if "specimens" in workflow_outputs:
+        with open(workflow_outputs["specimens"], "r") as sf:
+            specimens_data = json.load(sf)
+            ingest_specimens(specimens_data)
 
 
 WORKFLOW_INGEST_FUNCTION_MAP = {

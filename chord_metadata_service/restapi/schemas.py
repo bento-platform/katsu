@@ -131,18 +131,12 @@ FHIR_INGEST_SCHEMA = {
         "observations": {"type": "string", "description": "Path to an observations file location."},
         "conditions": {"type": "string", "description": "Path to a conditions file location."},
         "specimens": {"type": "string", "description": "Path to a specimens file location."},
-        "metadata": {
-            "type": "object",
-            "properties": {
-                "created_by": {"type": "string"}
-            },
-            "required": ["created_by"]
-        }
+        "created_by": {"type": "string"}
     },
     "required": [
         "table_id",
         "patients",
-        "metadata"
+        "created_by"
     ],
 }
 

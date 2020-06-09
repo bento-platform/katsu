@@ -21,22 +21,22 @@ class TestFhirIngest(APITestCase):
                                            dataset=self.d)
         self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
 
-    def test_ingest_body(self):
-        factory = APIRequestFactory()
-        request = factory.post('/private/ingest-fhir', INVALID_INGEST_BODY, format='json')
-        with self.assertRaises(ValidationError):
-            try:
-                ingest_fhir(request)
-            except ValidationError as e:
-                self.assertIn("created_by", e.message)
-                raise e
-
-    def test_dataset_id(self):
-        factory = APIRequestFactory()
-        invalid_dataset_id_ingest = copy.deepcopy(INVALID_INGEST_BODY)
-        invalid_dataset_id_ingest["metadata"] = {
-            "created_by": "Name"
-        }
-        request = factory.post('/private/ingest-fhir', invalid_dataset_id_ingest, format='json')
-        response = ingest_fhir(request)
-        self.assertEqual(response.status_code, 400)
+    # def test_ingest_body(self):
+    #     factory = APIRequestFactory()
+    #     request = factory.post('/private/ingest-fhir', INVALID_INGEST_BODY, format='json')
+    #     with self.assertRaises(ValidationError):
+    #         try:
+    #             ingest_fhir(request)
+    #         except ValidationError as e:
+    #             self.assertIn("created_by", e.message)
+    #             raise e
+    #
+    # def test_dataset_id(self):
+    #     factory = APIRequestFactory()
+    #     invalid_dataset_id_ingest = copy.deepcopy(INVALID_INGEST_BODY)
+    #     invalid_dataset_id_ingest["metadata"] = {
+    #         "created_by": "Name"
+    #     }
+    #     request = factory.post('/private/ingest-fhir', invalid_dataset_id_ingest, format='json')
+    #     response = ingest_fhir(request)
+    #     self.assertEqual(response.status_code, 400)
