@@ -4,7 +4,6 @@ from chord_metadata_service.chord.models import *
 from chord_metadata_service.phenopackets.models import *
 from chord_metadata_service.patients.models import Individual
 from .constants import INVALID_INGEST_BODY, INVALID_FHIR_BUNDLE_1
-from ..views_ingest_fhir import ingest_fhir
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 import copy

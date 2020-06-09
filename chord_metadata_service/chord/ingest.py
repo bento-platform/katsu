@@ -10,7 +10,7 @@ from chord_metadata_service.chord.models import Table, TableOwnership
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.resources import models as rm, utils as ru
-from chord_metadata_service.restapi.views_ingest_fhir import (
+from chord_metadata_service.restapi.fhir_ingest import (
     ingest_patients,
     ingest_observations,
     ingest_conditions,
