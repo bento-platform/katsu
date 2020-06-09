@@ -82,7 +82,7 @@ METADATA_WORKFLOWS = {
             "file": "fhir_json.wdl",
             "inputs": [
                 {
-                    "id": "json_document",
+                    "id": "patients",
                     "type": "file",
                     "extensions": [".json"]
                 },
@@ -109,7 +109,7 @@ METADATA_WORKFLOWS = {
             ],
             "outputs": [
                 {
-                    "id": "json_document",
+                    "id": "patients",
                     "type": "file",
                     "value": "{json_document}"
                 },
@@ -342,7 +342,7 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id):
 
 
 def ingest_fhir_workflow(workflow_outputs, table_id):
-    with open(workflow_outputs["json_document"], "r") as pf:
+    with open(workflow_outputs["patients"], "r") as pf:
         patients_data = json.load(pf)
         ingest_patients(patients_data, table_id,
                         workflow_outputs["created_by"] if "created_by" in workflow_outputs else "Imported from file.")
