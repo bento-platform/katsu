@@ -83,13 +83,15 @@ def ingest(request):
     if not workflow_exists(workflow_id, METADATA_WORKFLOWS):  # Check that the workflow exists
         return Response(errors.bad_request_error(f"Workflow with ID {workflow_id} does not exist"), status=400)
 
-    if "json_document" not in workflow_outputs:
-        return Response(errors.bad_request_error("Missing workflow output 'json_document'"), status=400)
-
     try:
         with transaction.atomic():
             # Wrap ingestion in a transaction, so if it fails we don't end up in a partial state in the database.
             WORKFLOW_INGEST_FUNCTION_MAP[workflow_id](workflow_outputs, table_id)
+
+    except KeyError:
+        # Tried to access a non-existant workflow output
+        # TODO: More precise error (which key?)
+        return Response(errors.bad_request_error("Missing workflow output"), status=400)
 
     except json.decoder.JSONDecodeError as e:
         return Response(errors.bad_request_error(f"Invalid JSON provided for ingest document (message: {e})"),

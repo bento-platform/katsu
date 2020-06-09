@@ -317,10 +317,8 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
 
 
 def _map_if_list(fn, data, *args):
-    if isinstance(data, list):
-        return [fn(d, *args) for d in data]
-
-    return fn(data, *args)
+    # TODO: Any sequence?
+    return [fn(d, *args) for d in data] if isinstance(data, list) else fn(data, *args)
 
 
 def ingest_experiments_workflow(workflow_outputs, table_id):
@@ -344,8 +342,7 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id):
 def ingest_fhir_workflow(workflow_outputs, table_id):
     with open(workflow_outputs["patients"], "r") as pf:
         patients_data = json.load(pf)
-        ingest_patients(patients_data, table_id,
-                        workflow_outputs["created_by"] if "created_by" in workflow_outputs else "Imported from file.")
+        ingest_patients(patients_data, table_id, workflow_outputs.get("created_by") or "Imported from file.")
 
     if "observations" in workflow_outputs:
         with open(workflow_outputs["observations"], "r") as of:
