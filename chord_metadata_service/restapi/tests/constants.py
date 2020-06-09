@@ -1,17 +1,31 @@
-INVALID_INGEST_BODY = {
-    "table_id": "62b5fc67-d925-4409-bb59-e1e9a1ef10af",
-    "patients": "patients_file",
-    "metadata": {
-        "test": "required created_by is not present"
-    }
-}
-
-
 INVALID_FHIR_BUNDLE_1 = {
     "resourceType": "NotBundle",
     "entry": [
         {
             "test": "required resource is not present"
+        }
+    ]
+}
+
+INVALID_SUBJECT_NOT_PRESENT = {
+    "resourceType": "Bundle",
+    "entry": [
+        {
+            "resource": {
+                "id": "1c8d2ee3-2a7e-47f9-be16-abe4e9fa306b",
+                "resourceType": "Observation",
+                "status": "final",
+                "code": {
+                    "coding": [
+                        {
+                            "code": "718-7",
+                            "display": "Hemoglobin [Mass/volume] in Blood",
+                            "system": "http://loinc.org"
+                        }
+                    ],
+                    "text": "Hemoglobin [Mass/volume] in Blood"
+                }
+            }
         }
     ]
 }

@@ -118,27 +118,7 @@ DISEASE_ONSET = {
 
 
 ############################### FHIR INGEST SCHEMAS ###############################
-# The schemas used to validate FHIR data for ingestion
-
-FHIR_INGEST_SCHEMA = {
-    "$id": "chord_metadata_service_fhir_ingest_schema",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "description": "FHIR Ingest schema",
-    "type": "object",
-    "properties": {
-        "table_id": {"type": "string"},
-        "patients": {"type": "string", "description": "Path to a patients file location."},
-        "observations": {"type": "string", "description": "Path to an observations file location."},
-        "conditions": {"type": "string", "description": "Path to a conditions file location."},
-        "specimens": {"type": "string", "description": "Path to a specimens file location."},
-        "created_by": {"type": "string"}
-    },
-    "required": [
-        "table_id",
-        "patients",
-        "created_by"
-    ],
-}
+# The schema used to validate FHIR data for ingestion
 
 
 FHIR_BUNDLE_SCHEMA = {
