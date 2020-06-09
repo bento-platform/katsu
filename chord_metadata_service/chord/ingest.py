@@ -183,7 +183,7 @@ def ingest_resource(resource: dict) -> rm.Resource:
 def ingest_experiment(experiment_data, table_id) -> em.Experiment:
     """Ingests a single experiment."""
 
-    new_experiment_id = experiment_data["id"]  # TODO: Is this provided?
+    new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
 
     reference_registry_id = experiment_data.get("reference_registry_id")
     qc_flags = experiment_data.get("qc_flags", [])
