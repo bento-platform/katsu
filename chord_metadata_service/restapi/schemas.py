@@ -14,7 +14,6 @@ __all__ = [
     "AGE_OR_AGE_RANGE",
     "EXTRA_PROPERTIES_SCHEMA",
     "FHIR_BUNDLE_SCHEMA",
-    "FHIR_INGEST_SCHEMA",
 ]
 
 
