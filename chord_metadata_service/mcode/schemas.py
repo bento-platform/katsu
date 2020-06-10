@@ -155,6 +155,49 @@ TUMOR_MARKER_TEST = customize_schema(
 ############################## Metadata service mCode based schemas ##############################
 
 
+MCODE_GENETIC_SPECIMEN_SCHEMA = describe_schema({
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "specimen_type": ONTOLOGY_CLASS,
+        "collection_body": ONTOLOGY_CLASS,
+        "laterality": ONTOLOGY_CLASS,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
+    },
+    "required": ["id", "specimen_type"]
+}, GENOMICS_REPORT)
+
+MCODE_CANCER_GENETIC_VARIANT_SCHEMA = describe_schema({
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "data_value": ONTOLOGY_CLASS,
+        "method": ONTOLOGY_CLASS,
+        "amino_acid_change": ONTOLOGY_CLASS,
+        "amino_acid_change_type": ONTOLOGY_CLASS,
+        "cytogenetic_location": {
+            "type": "object"
+        },
+        "cytogenetic_nomenclature": ONTOLOGY_CLASS,
+        "gene_studied": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "genomic_dna_change": ONTOLOGY_CLASS,
+        "genomic_source_class": ONTOLOGY_CLASS,
+        "variation_code": ONTOLOGY_CLASS_LIST,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
+    },
+    "required": ["id", "specimen_type"]
+}, GENOMICS_REPORT)
+
+
 MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
