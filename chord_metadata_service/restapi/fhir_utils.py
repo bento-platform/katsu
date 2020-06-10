@@ -391,11 +391,11 @@ def fhir_composition(obj):
 
 # SNOMED term to use as placeholder when collection method is not present in Specimen
 procedure_not_assigned = {
-            "code": {
-                "id": "SNOMED:42630001",
-                "label": "Procedure code not assigned",
-            }
-        }
+    "code": {
+        "id": "SNOMED:42630001",
+        "label": "Procedure code not assigned",
+    }
+}
 
 
 def patient_to_individual(obj):
@@ -421,6 +421,7 @@ def patient_to_individual(obj):
         individual["active"] = patient.active
     if patient.deceasedBoolean:
         individual["deceased"] = patient.deceasedBoolean
+    individual["extra_properties"] = patient.as_json()
     return individual
 
 
@@ -441,6 +442,7 @@ def observation_to_phenotypic_feature(obj):
     }
     if observation.specimen:  # FK to Biosample
         phenotypic_feature["biosample"] = observation.specimen.reference
+    phenotypic_feature["extra_properties"] = observation.as_json()
     return phenotypic_feature
 
 
@@ -450,13 +452,14 @@ def condition_to_disease(obj):
     condition = cond.Condition(obj)
     codeable_concept = condition.code  # CodeableConcept
     disease = {
-        # id is an integer AutoField, legacy id can be a string
-        # "id": condition.id,
         "term": {
+            # id is an integer AutoField, legacy id can be a string
+            # "id": condition.id,
             "id": f"{codeable_concept.coding[0].system}:{codeable_concept.coding[0].code}",
             "label": codeable_concept.coding[0].display
             # TODO collect system info in metadata
-        }
+        },
+        "extra_properties": condition.as_json()
     }
     # condition.stage.type is only in FHIR 4.0.0 version
     return disease
@@ -493,4 +496,5 @@ def specimen_to_biosample(obj):
         }
     else:
         biosample["procedure"] = procedure_not_assigned
+    biosample["extra_properties"] = specimen.as_json()
     return biosample
