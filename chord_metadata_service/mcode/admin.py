@@ -2,16 +2,6 @@ from django.contrib import admin
 from .models import *
 
 
-@admin.register(GeneticVariantTested)
-class GeneticVariantTestedAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(GeneticVariantFound)
-class GeneticVariantFoundAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(GenomicsReport)
 class GenomicsReportAdmin(admin.ModelAdmin):
     pass

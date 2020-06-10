@@ -6,71 +6,16 @@ from .constants import *
 from rest_framework import serializers
 from django.core.validators import ValidationError
 
-class GeneticVariantTestedTest(TestCase):
-    """ Test module for GeneticVariantTested model """
-
-    def setUp(self):
-        GeneticVariantTested.objects.create(**VALID_GENETIC_VARIANT_TESTED)
-
-    def test_variant_tested(self):
-        variant_tested = GeneticVariantTested.objects.get(id='variant_tested:01')
-        self.assertIsInstance(variant_tested.method, dict)
-        self.assertEqual(variant_tested.method['label'], 'Polymerase Chain Reaction')
-        self.assertEqual(variant_tested.variant_tested_identifier['id'],
-                         variant_tested.variant_tested_identifier['label'])
-        self.assertIsInstance(variant_tested.variant_tested_hgvs_name, list)
-        self.assertIn("NM_001346897.2:c.-237A>G", variant_tested.variant_tested_hgvs_name)
-        self.assertIsInstance(variant_tested.variant_tested_description, str)
-        self.assertEqual(variant_tested.variant_tested_description, 'single nucleotide variant')
-        self.assertEqual(variant_tested.data_value['id'], 'LA6576-8')
-        self.assertEqual(variant_tested.data_value['label'], 'Positive')
-
-    def create(self, **kwargs):
-        e = GeneticVariantTested(**kwargs)
-        e.full_clean()
-        e.save()
-
-    def test_validation(self):
-        self.assertRaises(serializers.ValidationError, self.create, **INVALID_GENETIC_VARIANT_TESTED)
-
-
-class GeneticVariantFoundTest(TestCase):
-    """ Test module for GeneticVariantFound model """
-
-    def setUp(self):
-        GeneticVariantFound.objects.create(**VALID_GENETIC_VARIANT_FOUND)
-
-    def test_variant_found(self):
-        variant_found = GeneticVariantFound.objects.get(id='variant_found:01')
-        self.assertIsInstance(variant_found.method, dict)
-        self.assertEqual(variant_found.method['label'], 'Polymerase Chain Reaction')
-        self.assertEqual(variant_found.variant_found_identifier['id'],
-                         variant_found.variant_found_identifier['label'])
-        self.assertIsInstance(variant_found.variant_found_hgvs_name, list)
-        self.assertIn("NM_001346897.2:c.-237A>G", variant_found.variant_found_hgvs_name)
-        self.assertIsInstance(variant_found.variant_found_description, str)
-        self.assertEqual(variant_found.variant_found_description, 'single nucleotide variant')
-        self.assertEqual(variant_found.genomic_source_class['id'], 'LA6684-0')
-        self.assertEqual(variant_found.genomic_source_class['label'], 'Somatic')
-
 
 class GenomicsReportTest(TestCase):
     """ Test module for Genomics Report model """
 
     def setUp(self):
-        self.variant_tested = GeneticVariantTested.objects.create(**VALID_GENETIC_VARIANT_TESTED)
-        self.variant_found = GeneticVariantFound.objects.create(**VALID_GENETIC_VARIANT_FOUND)
         self.genomics_report = GenomicsReport.objects.create(**valid_genetic_report())
-        self.genomics_report.genetic_variant_tested.set([self.variant_tested])
-        self.genomics_report.genetic_variant_found.set([self.variant_found])
 
     def test_genomics_report(self):
         genomics_report = GenomicsReport.objects.get(id='genomics_report:01')
-        self.assertEqual(genomics_report.test_name['id'], 'GTR000567625.2')
-        self.assertIsInstance(genomics_report.specimen_type, dict)
-        self.assertIsNotNone(genomics_report.genetic_variant_tested)
-        self.assertEqual(genomics_report.genetic_variant_tested.count(), 1)
-        self.assertEqual(genomics_report.genetic_variant_found.count(), 1)
+        self.assertEqual(genomics_report.code['id'], 'GTR000567625.2')
 
 
 class LabsVitalTest(TestCase):
@@ -117,11 +62,11 @@ class CancerConditionTest(TestCase):
     def test_cancer_condition(self):
         cancer_condition = CancerCondition.objects.get(id='cancer_condition:01')
         self.assertEqual(cancer_condition.condition_type, 'primary')
-        self.assertIsInstance(cancer_condition.body_location_code, list)
-        self.assertEqual(cancer_condition.body_location_code[0]['id'], '442083009')
+        self.assertIsInstance(cancer_condition.body_site, list)
+        self.assertEqual(cancer_condition.body_site[0]['id'], '442083009')
         self.assertEqual(cancer_condition.clinical_status['id'], 'active')
-        condition_code_keys = [key for key in cancer_condition.condition_code.keys()]
-        self.assertEqual(condition_code_keys, ['id', 'label'])
+        code_keys = [key for key in cancer_condition.code.keys()]
+        self.assertEqual(code_keys, ['id', 'label'])
         self.assertEqual(cancer_condition.histology_morphology_behavior['id'], '372147008')
 
 

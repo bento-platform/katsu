@@ -19,112 +19,109 @@ VALID_INDIVIDUAL = {
     "active": True
 }
 
-VALID_GENETIC_VARIANT_TESTED = {
-    "id": "variant_tested:01",
-    "method": {
-        "id": "C17003",
-        "label": "Polymerase Chain Reaction"
-    },
-    "variant_tested_identifier": {
-        "id": "360448",
-        "label": "360448",
-    },
-    "variant_tested_hgvs_name": [
-        "NC_000007.13:g.55086734A>G",
-        "NC_000007.14:g.55019041A>G",
-        "NM_001346897.2:c.-237A>G",
-        "NM_001346898.2:c.-237A>G",
-        "NM_001346899.1:c.-237A>G",
-        "NM_001346941.2:c.-237A>G",
-        "NM_005228.5:c.-237A>G",
-        "NM_201282.2:c.-237A>G",
-        "NM_201283.1:c.-237A>G",
-        "NM_201284.2:c.-237A>G",
-        "LRG_304t1:c.-237A>G",
-        "LRG_304:g.5010A>G",
-        "NG_007726.3:g.5010A>G"
-    ],
-    "variant_tested_description": "single nucleotide variant",
-    "data_value": {
-        "id": "LA6576-8",
-        "label": "Positive",
-    }
-}
+# VALID_GENETIC_VARIANT_TESTED = {
+#     "id": "variant_tested:01",
+#     "method": {
+#         "id": "C17003",
+#         "label": "Polymerase Chain Reaction"
+#     },
+#     "variant_tested_identifier": {
+#         "id": "360448",
+#         "label": "360448",
+#     },
+#     "variant_tested_hgvs_name": [
+#         "NC_000007.13:g.55086734A>G",
+#         "NC_000007.14:g.55019041A>G",
+#         "NM_001346897.2:c.-237A>G",
+#         "NM_001346898.2:c.-237A>G",
+#         "NM_001346899.1:c.-237A>G",
+#         "NM_001346941.2:c.-237A>G",
+#         "NM_005228.5:c.-237A>G",
+#         "NM_201282.2:c.-237A>G",
+#         "NM_201283.1:c.-237A>G",
+#         "NM_201284.2:c.-237A>G",
+#         "LRG_304t1:c.-237A>G",
+#         "LRG_304:g.5010A>G",
+#         "NG_007726.3:g.5010A>G"
+#     ],
+#     "variant_tested_description": "single nucleotide variant",
+#     "data_value": {
+#         "id": "LA6576-8",
+#         "label": "Positive",
+#     }
+# }
 
-INVALID_GENETIC_VARIANT_TESTED = {
-    "id": "variant_tested:02",
-    "method": ["invalid_value"],
-    "variant_tested_identifier": {
-        "id": "360448",
-        "label": "360448",
-    },
-    "variant_tested_hgvs_name": [
-        "NC_000007.13:g.55086734A>G",
-        "NC_000007.14:g.55019041A>G",
-        "NM_001346897.2:c.-237A>G",
-        "NM_001346898.2:c.-237A>G",
-        "NM_001346899.1:c.-237A>G",
-        "NM_001346941.2:c.-237A>G",
-        "NM_005228.5:c.-237A>G",
-        "NM_201282.2:c.-237A>G",
-        "NM_201283.1:c.-237A>G",
-        "NM_201284.2:c.-237A>G",
-        "LRG_304t1:c.-237A>G",
-        "LRG_304:g.5010A>G",
-        "NG_007726.3:g.5010A>G"
-    ],
-    "variant_tested_description": "single nucleotide variant",
-    "data_value": {
-        "id": "LA6576-8",
-        "label": "Positive",
-    }
-}
-
-VALID_GENETIC_VARIANT_FOUND = {
-    "id": "variant_found:01",
-    "method": {
-        "id": "C17003",
-        "label": "Polymerase Chain Reaction"
-    },
-    "variant_found_identifier": {
-        "id": "360448",
-        "label": "360448",
-    },
-    "variant_found_hgvs_name": [
-        "NC_000007.13:g.55086734A>G",
-        "NC_000007.14:g.55019041A>G",
-        "NM_001346897.2:c.-237A>G",
-        "NM_001346898.2:c.-237A>G",
-        "NM_001346899.1:c.-237A>G",
-        "NM_001346941.2:c.-237A>G",
-        "NM_005228.5:c.-237A>G",
-        "NM_201282.2:c.-237A>G",
-        "NM_201283.1:c.-237A>G",
-        "NM_201284.2:c.-237A>G",
-        "LRG_304t1:c.-237A>G",
-        "LRG_304:g.5010A>G",
-        "NG_007726.3:g.5010A>G"
-    ],
-    "variant_found_description": "single nucleotide variant",
-    "genomic_source_class": {
-        "id": "LA6684-0",
-        "label": "Somatic",
-    }
-}
+# INVALID_GENETIC_VARIANT_TESTED = {
+#     "id": "variant_tested:02",
+#     "method": ["invalid_value"],
+#     "variant_tested_identifier": {
+#         "id": "360448",
+#         "label": "360448",
+#     },
+#     "variant_tested_hgvs_name": [
+#         "NC_000007.13:g.55086734A>G",
+#         "NC_000007.14:g.55019041A>G",
+#         "NM_001346897.2:c.-237A>G",
+#         "NM_001346898.2:c.-237A>G",
+#         "NM_001346899.1:c.-237A>G",
+#         "NM_001346941.2:c.-237A>G",
+#         "NM_005228.5:c.-237A>G",
+#         "NM_201282.2:c.-237A>G",
+#         "NM_201283.1:c.-237A>G",
+#         "NM_201284.2:c.-237A>G",
+#         "LRG_304t1:c.-237A>G",
+#         "LRG_304:g.5010A>G",
+#         "NG_007726.3:g.5010A>G"
+#     ],
+#     "variant_tested_description": "single nucleotide variant",
+#     "data_value": {
+#         "id": "LA6576-8",
+#         "label": "Positive",
+#     }
+# }
+#
+# VALID_GENETIC_VARIANT_FOUND = {
+#     "id": "variant_found:01",
+#     "method": {
+#         "id": "C17003",
+#         "label": "Polymerase Chain Reaction"
+#     },
+#     "variant_found_identifier": {
+#         "id": "360448",
+#         "label": "360448",
+#     },
+#     "variant_found_hgvs_name": [
+#         "NC_000007.13:g.55086734A>G",
+#         "NC_000007.14:g.55019041A>G",
+#         "NM_001346897.2:c.-237A>G",
+#         "NM_001346898.2:c.-237A>G",
+#         "NM_001346899.1:c.-237A>G",
+#         "NM_001346941.2:c.-237A>G",
+#         "NM_005228.5:c.-237A>G",
+#         "NM_201282.2:c.-237A>G",
+#         "NM_201283.1:c.-237A>G",
+#         "NM_201284.2:c.-237A>G",
+#         "LRG_304t1:c.-237A>G",
+#         "LRG_304:g.5010A>G",
+#         "NG_007726.3:g.5010A>G"
+#     ],
+#     "variant_found_description": "single nucleotide variant",
+#     "genomic_source_class": {
+#         "id": "LA6684-0",
+#         "label": "Somatic",
+#     }
+# }
 
 
 def valid_genetic_report():
     return {
         "id": "genomics_report:01",
-        "test_name": {
+        "code": {
             "id": "GTR000567625.2",
             "label": "PREVENTEST",
         },
-        "performing_organization_name": "Test organization",
-        "specimen_type": {
-            "id": "119342007 ",
-            "label": "SAL (Saliva)",
-        }
+        "issued": "2018-11-13T20:20:39+00:00",
+        "performing_organization_name": "Test organization"
     }
 
 
@@ -167,7 +164,7 @@ def valid_cancer_condition():
     return {
         "id": "cancer_condition:01",
         "condition_type": "primary",
-        "body_location_code": [
+        "body_site": [
             {
                 "id": "442083009",
                 "label": "Anatomical or acquired body structure (body structure)"
@@ -177,7 +174,7 @@ def valid_cancer_condition():
             "id": "active",
             "label": "Active"
         },
-        "condition_code": {
+        "code": {
             "id": "404087009",
             "label": "Carcinosarcoma of skin (disorder)"
         },

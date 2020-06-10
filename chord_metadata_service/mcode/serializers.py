@@ -4,8 +4,6 @@ from .models import *
 
 
 __all__ = [
-    "GeneticVariantTestedSerializer",
-    "GeneticVariantFoundSerializer",
     "GenomicsReportSerializer",
     "LabsVitalSerializer",
     "TNMStagingSerializer",
@@ -14,20 +12,6 @@ __all__ = [
     "MedicationStatementSerializer",
     "MCodePacketSerializer",
 ]
-
-
-class GeneticVariantTestedSerializer(GenericSerializer):
-
-    class Meta:
-        model = GeneticVariantTested
-        fields = '__all__'
-
-
-class GeneticVariantFoundSerializer(GenericSerializer):
-    
-    class Meta:
-        model = GeneticVariantFound
-        fields = '__all__'
 
 
 class GenomicsReportSerializer(GenericSerializer):
@@ -42,10 +26,6 @@ class GenomicsReportSerializer(GenericSerializer):
         objects and return their nested serialization.
         """
         response = super().to_representation(instance)
-        response['genetic_variant_tested'] = GeneticVariantTestedSerializer(instance.genetic_variant_tested,
-                                                                            many=True, required=False).data
-        response['genetic_variant_found'] = GeneticVariantFoundSerializer(instance.genetic_variant_found,
-                                                                           many=True, required=False).data
         return response
 
 

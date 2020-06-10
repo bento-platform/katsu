@@ -15,17 +15,6 @@ class McodeModelViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
 
-
-class GeneticVariantTestedViewSet(McodeModelViewSet):
-    queryset = GeneticVariantTested.objects.all()
-    serializer_class = GeneticVariantTestedSerializer
-
-
-class GeneticVariantFoundViewSet(McodeModelViewSet):
-    queryset = GeneticVariantFound.objects.all()
-    serializer_class = GeneticVariantFoundSerializer
-
-
 class GenomicsReportViewSet(McodeModelViewSet):
     queryset = GenomicsReport.objects.all()
     serializer_class = GenomicsReportSerializer

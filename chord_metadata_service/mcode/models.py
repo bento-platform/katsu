@@ -15,97 +15,16 @@ from .validators import (
 )
 
 
-class GeneticVariantTested(models.Model, IndexableMixin):
-    """
-    Class  to record an alteration in the most common DNA nucleotide sequence.
-    """
-
-    # TODO Discuss: Connection to Gene from Phenopackets
-    id = models.CharField(primary_key=True, max_length=200,
-                          help_text=rec_help(d.GENETIC_VARIANT_TESTED, "id"))
-    # make writable if it doesn't exist
-    gene_studied = models.ForeignKey(Gene, blank=True, null=True, on_delete=models.SET_NULL,
-                                     help_text=rec_help(d.GENETIC_VARIANT_TESTED, "gene_studied"))
-    method = JSONField(blank=True, null=True, validators=[ontology_validator],
-                       help_text=rec_help(d.GENETIC_VARIANT_TESTED, "method"))
-    variant_tested_identifier = JSONField(blank=True, null=True, validators=[ontology_validator],
-                                          help_text=rec_help(d.GENETIC_VARIANT_TESTED, "variant_tested_identifier"))
-    variant_tested_hgvs_name = ArrayField(models.CharField(max_length=200), blank=True, null=True,
-                                          help_text=rec_help(d.GENETIC_VARIANT_TESTED, "variant_tested_hgvs_name"))
-    variant_tested_description = models.CharField(max_length=200, blank=True,
-                                                  help_text=rec_help(d.GENETIC_VARIANT_TESTED,
-                                                                     "variant_tested_description"))
-    data_value = JSONField(blank=True, null=True, validators=[ontology_validator],
-                           help_text=rec_help(d.GENETIC_VARIANT_TESTED, "data_value"))
-    extra_properties = JSONField(blank=True, null=True,
-                                 help_text=rec_help(d.GENETIC_VARIANT_TESTED, "extra_properties"))
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['id']
-
-    def __str__(self):
-        return str(self.id)
-
-    def clean(self):
-        if not (self.variant_tested_identifier or self.variant_tested_hgvs_name or self.variant_tested_description):
-            raise ValidationError('At least one element out of the following must be reported: '
-                                  'Variant Tested Identifier, Variant Tested HGVS Name, and Variant Tested Description')
-
-
-class GeneticVariantFound(models.Model, IndexableMixin):
-    """
-    Class to record whether a single discrete variant tested is present
-    or absent (denoted as positive or negative respectively).
-    """
-
-    # TODO Discuss: Connection to Gene from Phenopackets
-    id = models.CharField(primary_key=True, max_length=200,
-                          help_text=rec_help(d.GENETIC_VARIANT_FOUND, "id"))
-    method = JSONField(blank=True, null=True, validators=[ontology_validator],
-                       help_text=rec_help(d.GENETIC_VARIANT_FOUND, "method"))
-    variant_found_identifier = JSONField(blank=True, null=True, validators=[ontology_validator],
-                                         help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_identifier"))
-    variant_found_hgvs_name = ArrayField(models.CharField(max_length=200), blank=True, null=True,
-                                         help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_hgvs_name"))
-    variant_found_description = models.CharField(
-        max_length=200, blank=True, help_text=rec_help(d.GENETIC_VARIANT_FOUND, "variant_found_description"))
-    # loinc value set https://loinc.org/48002-0/
-    genomic_source_class = JSONField(blank=True, null=True, validators=[ontology_validator],
-                                     help_text=rec_help(d.GENETIC_VARIANT_FOUND, "genomic_source_class"))
-    extra_properties = JSONField(blank=True, null=True,
-                                 help_text=rec_help(d.GENETIC_VARIANT_FOUND, "extra_properties"))
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['id']
-
-    def __str__(self):
-        return str(self.id)
-
-    def clean(self):
-        if not (self.variant_found_identifier or self.variant_found_hgvs_name or self.variant_found_description):
-            raise ValidationError('At least one element out of the following must be reported: '
-                                  'Variant Found Identifier, Variant Found HGVS Name, and Variant Found Description')
-
-
 class GenomicsReport(models.Model, IndexableMixin):
     """
     Genetic Analysis Summary
     """
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENOMICS_REPORT, "id"))
-    test_name = JSONField(validators=[ontology_validator], help_text=rec_help(d.GENOMICS_REPORT, "test_name"))
+    code = JSONField(validators=[ontology_validator], help_text=rec_help(d.GENOMICS_REPORT, "code"))
     performing_organization_name = models.CharField(
         max_length=200, blank=True, help_text=rec_help(d.GENOMICS_REPORT, "performing_organization_name"))
-    specimen_type = JSONField(blank=True, null=True, validators=[ontology_validator],
-                              help_text=rec_help(d.GENOMICS_REPORT, "specimen_type"))
-    genetic_variant_tested = models.ManyToManyField(GeneticVariantTested, blank=True,
-                                                    help_text=rec_help(d.GENOMICS_REPORT, "genetic_variant_tested"))
-    genetic_variant_found = models.ManyToManyField(GeneticVariantFound, blank=True,
-                                                   help_text=rec_help(d.GENOMICS_REPORT, "genetic_variant_found"))
+    issued = models.DateTimeField(help_text=rec_help(d.GENOMICS_REPORT, "issued"))
     extra_properties = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.GENOMICS_REPORT, "extra_properties"))
     created = models.DateTimeField(auto_now=True)
@@ -174,17 +93,20 @@ class CancerCondition(models.Model, IndexableMixin):
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.CANCER_CONDITION, "id"))
     condition_type = models.CharField(choices=CANCER_CONDITION_TYPE, max_length=200,
                                       help_text=rec_help(d.CANCER_CONDITION, "condition_type"))
-    # TODO add body_location_code validator array of json
-    body_location_code = JSONField(null=True, validators=[ontology_list_validator],
-                                   help_text=rec_help(d.CANCER_CONDITION, 'body_location_code'))
+    body_site = JSONField(null=True, validators=[ontology_list_validator],
+                                   help_text=rec_help(d.CANCER_CONDITION, 'body_site'))
+    laterality = JSONField(blank=True, null=True, validators=[ontology_validator],
+                                help_text=rec_help(d.CANCER_CONDITION, "clinical_status"))
     clinical_status = JSONField(blank=True, null=True, validators=[ontology_validator],
                                 help_text=rec_help(d.CANCER_CONDITION, "clinical_status"))
-    condition_code = JSONField(validators=[ontology_validator],
-                               help_text=rec_help(d.CANCER_CONDITION, "condition_code"))
+    code = JSONField(validators=[ontology_validator],
+                               help_text=rec_help(d.CANCER_CONDITION, "code"))
     date_of_diagnosis = models.DateTimeField(blank=True, null=True,
                                              help_text=rec_help(d.CANCER_CONDITION, "date_of_diagnosis"))
     histology_morphology_behavior = JSONField(blank=True, null=True, validators=[ontology_validator],
                                               help_text=rec_help(d.CANCER_CONDITION, "histology_morphology_behavior"))
+    verification_status = JSONField(blank=True, null=True, validators=[ontology_validator],
+                           help_text=rec_help(d.CANCER_CONDITION, "verification_status"))
     extra_properties = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.CANCER_CONDITION, "extra_properties"))
     created = models.DateTimeField(auto_now=True)

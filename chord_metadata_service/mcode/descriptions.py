@@ -7,54 +7,15 @@
 
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES
 
-GENETIC_VARIANT_TESTED = {
-    "description": "A description of an alteration in the most common DNA nucleotide sequence.",
-    "properties": {
-        "id": "An arbitrary identifier for the genetic variant tested.",
-        "gene_studied": "A gene targeted for mutation analysis, identified in HUGO Gene Nomenclature Committee "
-                        "(HGNC) notation.",
-        "method": "An ontology or controlled vocabulary term to identify the method used to perform the genetic test. "
-                  "Accepted value set: NCIT.",
-        "variant_tested_identifier": "The variation ID assigned by HGVS, for example, 360448 is the identifier for "
-                                     "NM_005228.4(EGFR):c.-237A>G (single nucleotide variant in EGFR).",
-        "variant_tested_hgvs_name": "Symbolic representation of the variant used in HGVS, for example, "
-                                    "NM_005228.4(EGFR):c.-237A>G for HVGS variation ID 360448.",
-        "variant_tested_description": "Description of the variant.",
-        "data_value": "An ontology or controlled vocabulary term to identify positive or negative value for"
-                      "the mutation. Accepted value set: SNOMED CT.",
-        **EXTRA_PROPERTIES
-    }
-}
-
-GENETIC_VARIANT_FOUND = {
-    "description": "Description of single discrete variant tested.",
-    "properties": {
-        "id": "An arbitrary identifier for the genetic variant found.",
-        "method": "An ontology or controlled vocabulary term to identify the method used to perform the genetic test. "
-                  "Accepted value set: NCIT.",
-        "variant_found_identifier": "The variation ID assigned by HGVS, for example, 360448 is the identifier for "
-                                    "NM_005228.4(EGFR):c.-237A>G (single nucleotide variant in EGFR). "
-                                    "Accepted value set: ClinVar.",
-        "variant_found_hgvs_name": "Symbolic representation of the variant used in HGVS, for example, "
-                                   "NM_005228.4(EGFR):c.-237A>G for HVGS variation ID 360448.",
-        "variant_found_description": "Description of the variant.",
-        "genomic_source_class": "An ontology or controlled vocabulary term to identify the genomic class of the "
-                                "specimen being analyzed.",
-        **EXTRA_PROPERTIES
-    }
-}
 
 GENOMICS_REPORT = {
     "description": "Genetic Analysis Summary.",
     "properties": {
         "id": "An arbitrary identifier for the genetics report.",
-        "test_name": "An ontology or controlled vocabulary term to identify the laboratory test. "
+        "code": "An ontology or controlled vocabulary term to identify the laboratory test. "
                      "Accepted value sets: LOINC, GTR.",
         "performing_organization_name": "The name of the organization  producing the genomics report.",
-        "specimen_type": "An ontology or controlled vocabulary term to identify the type of material the specimen "
-                         "contains or consists of. Accepted value set: HL7 Version 2 and Specimen Type.",
-        "genetic_variant_tested": "A test for a specific mutation on a particular gene.",
-        "genetic_variant_found": "Records an alteration in the most common DNA nucleotide sequence.",
+        "issued": "The date/time this report was issued.",
         **EXTRA_PROPERTIES
     }
 }
@@ -83,16 +44,20 @@ CANCER_CONDITION = {
     "properties": {
         "id": "An arbitrary identifier for the cancer condition.",
         "condition_type": "Cancer condition type: primary or secondary.",
-        "body_location_code": "Code for the body location, optionally pre-coordinating laterality or direction. "
+        "body_site": "Code for the body location, optionally pre-coordinating laterality or direction. "
                               "Accepted ontologies: SNOMED CT, ICD-O-3 and others.",
+        "laterality": "Body side of the body location, if needed to distinguish from a similar location "
+                      "on the other side of the body.",
         "clinical_status": "A flag indicating whether the condition is active or inactive, recurring, in remission, "
                            "or resolved (as of the last update of the Condition). Accepted code system: "
                            "http://terminology.hl7.org/CodeSystem/condition-clinical",
-        "condition_code": "A code describing the type of primary or secondary malignant neoplastic disease.",
+        "code": "A code describing the type of primary or secondary malignant neoplastic disease.",
         "date_of_diagnosis": "The date the disease was first clinically recognized with sufficient certainty, "
                              "regardless of whether it was fully characterized at that time.",
         "histology_morphology_behavior": "A description of the morphologic and behavioral characteristics of "
                                          "the cancer. Accepted ontologies: SNOMED CT, ICD-O-3 and others.",
+        "verification_status": "A flag indicating whether the condition is unconfirmed, provisional, differential, "
+                               "confirmed, refuted, or entered-in-error.",
         **EXTRA_PROPERTIES
     }
 }

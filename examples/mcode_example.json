@@ -14,38 +14,11 @@
   },
   "genomics_report": {
     "id": "genomics_resport:01",
-    "test_name": {
+    "code": {
       "id": "GTR000511179.13",
       "label": "Clinical Exome"
     },
-    "performing_organization_name": "Test organization",
-    "specimen_type": {
-      "id": "BDY",
-      "label": "Whole body"
-    },
-    "genetic_variant_tested": [
-      {
-        "id": "variant:03",
-        "method": {
-          "id": "FISH",
-          "label": "Fluorescent in situ hybridization (FISH)"
-        },
-        "variant_tested_identifier": {
-          "id": "t12",
-          "label": "test"
-        },
-        "variant_tested_description": "test"
-      }
-    ],
-    "genetic_variant_found": [
-      {
-        "id": "variant_found:01",
-        "method": {
-          "id": "t12",
-          "label": "test"
-        }
-      }
-    ]
+    "performing_organization_name": "Test organization"
   },
   "cancer_condition": {
     "id": "cancer_condition:01",
@@ -81,7 +54,7 @@
       }
     ],
     "condition_type": "primary",
-    "body_location_code": [
+    "body_site": [
       {
         "id": "442083009",
         "label": "Anatomical or acquired body structure (body structure)"
@@ -91,7 +64,7 @@
       "id": "active",
       "label": "Active"
     },
-    "condition_code": {
+    "code": {
       "id": "404087009",
       "label": "Carcinosarcoma of skin (disorder)"
     },
@@ -99,6 +72,10 @@
     "histology_morphology_behavior": {
       "id": "372147008",
       "label": "Kaposi's sarcoma - category (morphologic abnormality)"
+    },
+    "verification_status": {
+      "id": "unconfirmed",
+      "label": "Unconfirmed"
     }
   },
   "medication_statement": {

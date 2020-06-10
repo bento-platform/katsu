@@ -155,83 +155,23 @@ TUMOR_MARKER_TEST = customize_schema(
 ############################## Metadata service mCode based schemas ##############################
 
 
-MCODE_GENETIC_VARIANT_TESTED_SCHEMA = describe_schema({
-    "type": "object",
-    "properties": {
-        "id": {
-            "type": "string"
-        },
-        "gene_studied": {
-            "type": "string"
-        },
-        "method": ONTOLOGY_CLASS,
-        "variant_tested_identifier": ONTOLOGY_CLASS,
-        "variant_tested_hgvs_name": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
-        },
-        "variant_tested_description": {
-            "type": "string"
-        },
-        "data_value": ONTOLOGY_CLASS,
-        "extra_properties": EXTRA_PROPERTIES_SCHEMA
-    },
-    "required": ["id"]
-}, GENETIC_VARIANT_TESTED)
-
-
-MCODE_GENETIC_VARIANT_FOUND_SCHEMA = describe_schema({
-    "type": "object",
-    "properties": {
-        "id": {
-            "type": "string"
-        },
-        "method": ONTOLOGY_CLASS,
-        "variant_found_identifier": ONTOLOGY_CLASS,
-        "variant_found_hgvs_name": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
-        },
-        "variant_found_description": {
-            "type": "string"
-        },
-        "genomic_source_class": ONTOLOGY_CLASS,
-        "extra_properties": EXTRA_PROPERTIES_SCHEMA
-    },
-    "required": ["id"]
-}, GENETIC_VARIANT_FOUND)
-
-
 MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": {
             "type": "string"
         },
-        "test_name": ONTOLOGY_CLASS,
+        "code": ONTOLOGY_CLASS,
         "performing_organization_name": {
             "type": "string"
         },
-        "specimen_type": ONTOLOGY_CLASS,
-        "genetic_variant_tested": {
-            "type": "array",
-            "items": {
-                "string"
-            }
-        },
-        "genetic_variant_found": {
-            "type": "array",
-            "items": {
-                "string"
-            }
+        "issued": {
+            "type": "string",
+            "format": "date-time"
         },
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "test_name"]
+    "required": ["id", "code", "issued"]
 }, GENOMICS_REPORT)
 
 
@@ -280,9 +220,9 @@ MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
                 "secondary"
             ]
         },
-        "body_location_code": ONTOLOGY_CLASS_LIST,
+        "body_site": ONTOLOGY_CLASS_LIST,
         "clinical_status": ONTOLOGY_CLASS,
-        "condition_code": ONTOLOGY_CLASS,
+        "code": ONTOLOGY_CLASS,
         "date_of_diagnosis": {
             "type": "string",
             "format": "date-time"
@@ -290,7 +230,7 @@ MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
         "histology_morphology_behavior": ONTOLOGY_CLASS,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "condition_type", "condition_code"]
+    "required": ["id", "condition_type", "code"]
 }, LABS_VITAL)
 
 

@@ -5,11 +5,8 @@ MCODE_COMORBID_CONDITION = "http://hl7.org/fhir/us/mcode/StructureDefinition/mco
 MCODE_ECOG_PERFORMANCE_STATUS = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-ecog-performance-status"
 MCODE_KARNOFSKY = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-karnofsky-performance-status"
 
-# GeneticVariantTested
-MCODE_GENETIC_VARIANT_TESTED = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genetic-variant"
-
-# GeneticVariantFound
-MCODE_GENETIC_VARIANT_FOUND = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genetic-variant"
+# GeneticVariant
+MCODE_GENETIC_VARIANT = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genetic-variant"
 
 # GenomicsReport
 MCODE_GENOMICS_REPORT = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genomics-report"
