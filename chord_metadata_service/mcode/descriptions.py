@@ -8,7 +8,7 @@
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES
 
 
-GENOMIC_SPECIMEN = {
+GENETIC_SPECIMEN = {
     "description": "Class to describe a biosample used for genomics testing or analysis.",
     "properties": {
         "id": "An arbitrary identifier for the genetic specimen.",

@@ -167,7 +167,7 @@ MCODE_GENETIC_SPECIMEN_SCHEMA = describe_schema({
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "specimen_type"]
-}, GENOMICS_REPORT)
+}, GENETIC_SPECIMEN)
 
 MCODE_CANCER_GENETIC_VARIANT_SCHEMA = describe_schema({
     "type": "object",
@@ -195,7 +195,7 @@ MCODE_CANCER_GENETIC_VARIANT_SCHEMA = describe_schema({
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "specimen_type"]
-}, GENOMICS_REPORT)
+}, CANCER_GENETIC_VARIANT)
 
 
 MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
