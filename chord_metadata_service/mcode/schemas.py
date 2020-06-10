@@ -235,6 +235,18 @@ MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
             "type": "string",
             "format": "date-time"
         },
+        "genetic_specimen": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "genetic_variant": {
+            "type": "string"
+        },
+        "genomic_region_studied": {
+            "type": "string"
+        },
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "code", "issued"]

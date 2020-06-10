@@ -66,6 +66,9 @@ GENOMICS_REPORT = {
                      "Accepted value sets: LOINC, GTR.",
         "performing_organization_name": "The name of the organization  producing the genomics report.",
         "issued": "The date/time this report was issued.",
+        "genetic_specimen": "List of related genetic specimens.",
+        "genetic_variant": "Related genetic variant.",
+        "genomic_region_studied": "Related genomic region studied.",
         **EXTRA_PROPERTIES
     }
 }

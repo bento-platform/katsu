@@ -118,6 +118,12 @@ class GenomicsReport(models.Model, IndexableMixin):
     performing_organization_name = models.CharField(
         max_length=200, blank=True, help_text=rec_help(d.GENOMICS_REPORT, "performing_organization_name"))
     issued = models.DateTimeField(help_text=rec_help(d.GENOMICS_REPORT, "issued"))
+    genetic_specimen = models.ManyToManyField(GeneticSpecimen, blank=True,
+                                              help_text=rec_help(d.GENOMICS_REPORT, "genetic_specimen"))
+    genetic_variant = models.ForeignKey(CancerGeneticVariant, blank=True, null=True, on_delete=models.SET_NULL,
+                                        help_text=rec_help(d.GENOMICS_REPORT, "genetic_variant"))
+    genomic_region_studied = models.ForeignKey(GenomicRegionStudied, blank=True, null=True, on_delete=models.SET_NULL,
+                                               help_text=rec_help(d.GENOMICS_REPORT, "genomic_region_studied"))
     extra_properties = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.GENOMICS_REPORT, "extra_properties"))
     created = models.DateTimeField(auto_now=True)
