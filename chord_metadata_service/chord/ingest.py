@@ -111,26 +111,27 @@ METADATA_WORKFLOWS = {
                 {
                     "id": "patients",
                     "type": "file",
-                    "value": "{json_document}"
+                    "value": "{patients}"
                 },
                 {
                     "id": "observations",
                     "type": "file",
-                    "value": "{json_document}"
+                    "value": "{observations}"
                 },
                 {
                     "id": "conditions",
                     "type": "file",
-                    "value": "{json_document}"
+                    "value": "{conditions}"
                 },
                 {
                     "id": "specimens",
                     "type": "file",
-                    "value": "{json_document}"
+                    "value": "{specimens}"
                 },
                 {
                     "id": "created_by",
-                    "type": "string"
+                    "type": "string",
+                    "value": "{created_by}"
                 },
 
             ]
