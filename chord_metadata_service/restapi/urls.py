@@ -5,7 +5,9 @@ from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
 from chord_metadata_service.mcode import api_views as mcode_views
+
 from chord_metadata_service.resources import api_views as resources_views
+
 
 
 router = routers.DefaultRouter(trailing_slash=False)

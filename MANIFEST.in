@@ -1,3 +1,4 @@
 include chord_metadata_service/chord/workflows/phenopackets_json.wdl
+include chord_metadata_service/chord/tests/example_phenopacket.json
 include chord_metadata_service/dats/*
 include chord_metadata_service/package.cfg

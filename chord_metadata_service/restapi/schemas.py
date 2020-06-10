@@ -13,6 +13,7 @@ __all__ = [
     "AGE_RANGE",
     "AGE_OR_AGE_RANGE",
     "EXTRA_PROPERTIES_SCHEMA",
+    "FHIR_BUNDLE_SCHEMA",
 ]
 
 
@@ -112,4 +113,36 @@ DISEASE_ONSET = {
         AGE_RANGE,
         ONTOLOGY_CLASS
     ]
+}
+
+
+############################### FHIR INGEST SCHEMAS ###############################
+# The schema used to validate FHIR data for ingestion
+
+
+FHIR_BUNDLE_SCHEMA = {
+    "$id": "chord_metadata_service_fhir_bundle_schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "FHIR Bundle schema",
+    "type": "object",
+    "properties": {
+        "resourceType": {
+            "type": "string",
+            "const": "Bundle",
+            "description": "Collection of resources."
+        },
+        "entry": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "resource": {"type": "object"}
+                },
+                "additionalProperties": True,
+                "required": ["resource"]
+            }
+        }
+    },
+    "additionalProperties": True,
+    "required": ["resourceType", "entry"]
 }
