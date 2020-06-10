@@ -15,9 +15,69 @@ from .validators import (
 )
 
 
+class GeneticSpecimen(models.Model, IndexableMixin):
+    """
+    Class to describe a biosample used for genomics testing or analysis.
+    """
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENOMIC_SPECIMEN, "id"))
+    specimen_type = JSONField(validators=[ontology_validator], help_text=rec_help(d.GENOMIC_SPECIMEN, "specimen_type"))
+    collection_body = JSONField(blank=True, null=True, validators=[ontology_validator],
+                                help_text=rec_help(d.GENOMIC_SPECIMEN, "collection_body"))
+    laterality = JSONField(blank=True, null=True, validators=[ontology_validator],
+                           help_text=rec_help(d.GENOMIC_SPECIMEN, "laterality"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.GENOMIC_SPECIMEN, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return str(self.id)
+
+
+class CancerGeneticVariant(models.Model, IndexableMixin):
+    """
+    Class to record an alteration in DNA.
+    """
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.CANCER_GENETIC_VARIANT, "id"))
+    data_value = JSONField(blank=True, null=True, validators=[ontology_validator],
+                           help_text=rec_help(d.CANCER_GENETIC_VARIANT, "data_value"))
+    method = JSONField(blank=True, null=True, validators=[ontology_validator],
+                       help_text=rec_help(d.CANCER_GENETIC_VARIANT, "method"))
+    amino_acid_change = JSONField(blank=True, null=True, validators=[ontology_validator],
+                                  help_text=rec_help(d.CANCER_GENETIC_VARIANT, "amino_acid_change"))
+    amino_acid_change_type = JSONField(blank=True, null=True, validators=[ontology_validator],
+                                  help_text=rec_help(d.CANCER_GENETIC_VARIANT, "amino_acid_change_type"))
+    cytogenetic_location = JSONField(blank=True, null=True,
+                                     help_text=rec_help(d.CANCER_GENETIC_VARIANT, "cytogenetic_location"))
+    cytogenetic_nomenclature = JSONField(blank=True, null=True, validators=[ontology_validator],
+                                         help_text=rec_help(d.CANCER_GENETIC_VARIANT, "cytogenetic_nomenclature"))
+    gene_studied = models.ManyToManyField(Gene, blank=True, on_delete=models.SET_NULL,
+                                     help_text=rec_help(d.CANCER_GENETIC_VARIANT, "gene_studied"))
+    genomic_dna_change = JSONField(blank=True, null=True, validators=[ontology_validator],
+                                   help_text=rec_help(d.CANCER_GENETIC_VARIANT, "genomic_dna_change"))
+    genomic_source_class = JSONField(blank=True, null=True, validators=[ontology_validator],
+                                   help_text=rec_help(d.CANCER_GENETIC_VARIANT, "genomic_source_class"))
+    variation_code = JSONField(blank=True, null=True, validators=[ontology_list_validator],
+                                     help_text=rec_help(d.CANCER_GENETIC_VARIANT, "variation_code"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.CANCER_GENETIC_VARIANT, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return str(self.id)
+
+
+
 class GenomicsReport(models.Model, IndexableMixin):
     """
-    Genetic Analysis Summary
+    Genetic Analysis Summary.
     """
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENOMICS_REPORT, "id"))
@@ -96,7 +156,7 @@ class CancerCondition(models.Model, IndexableMixin):
     body_site = JSONField(null=True, validators=[ontology_list_validator],
                                    help_text=rec_help(d.CANCER_CONDITION, 'body_site'))
     laterality = JSONField(blank=True, null=True, validators=[ontology_validator],
-                                help_text=rec_help(d.CANCER_CONDITION, "clinical_status"))
+                                help_text=rec_help(d.CANCER_CONDITION, "laterality"))
     clinical_status = JSONField(blank=True, null=True, validators=[ontology_validator],
                                 help_text=rec_help(d.CANCER_CONDITION, "clinical_status"))
     code = JSONField(validators=[ontology_validator],
