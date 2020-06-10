@@ -74,6 +74,39 @@ class CancerGeneticVariant(models.Model, IndexableMixin):
         return str(self.id)
 
 
+class GenomicRegionStudied(models.Model, IndexableMixin):
+    """
+    Class to describe the area of the genome region referenced in testing for variants.
+    """
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENOMIC_REGION_STUDIED, "id"))
+    # TODO schema Range list
+    dna_ranges_examined = JSONField(blank=True, null=True, validators=[ontology_list_validator],
+                                   help_text=rec_help(d.GENOMIC_REGION_STUDIED, "dna_ranges_examined"))
+    dna_region_description = ArrayField(models.CharField(max_length=100,
+                                        help_text=rec_help(d.GENOMIC_REGION_STUDIED, 'dna_region_description')),
+                                        blank=True, default=list)
+    gene_mutation = JSONField(blank=True, null=True, validators=[ontology_list_validator],
+                              help_text=rec_help(d.GENOMIC_REGION_STUDIED, "gene_mutation"))
+    # TODO check: thisis not a Reference in mcode data dictionary why not?
+    gene_studied = JSONField(blank=True, null=True, validators=[ontology_list_validator],
+                              help_text=rec_help(d.GENOMIC_REGION_STUDIED, "gene_studied"))
+    genomic_reference_sequence_id = JSONField(blank=True, null=True,
+                                              help_text=rec_help(d.GENOMIC_REGION_STUDIED,
+                                                                 "genomic_reference_sequence_id"))
+    genomic_region_coordinate_system = JSONField(blank=True, null=True, validators=[ontology_validator],
+                                                 help_text=rec_help(d.GENOMIC_REGION_STUDIED,
+                                                                    "genomic_region_coordinate_system"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text=rec_help(d.GENOMIC_REGION_STUDIED, "extra_properties"))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return str(self.id)
+
 
 class GenomicsReport(models.Model, IndexableMixin):
     """

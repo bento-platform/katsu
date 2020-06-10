@@ -197,6 +197,29 @@ MCODE_CANCER_GENETIC_VARIANT_SCHEMA = describe_schema({
     "required": ["id", "specimen_type"]
 }, CANCER_GENETIC_VARIANT)
 
+MCODE_GENOMIC_REGION_STUDIED_SCHEMA = describe_schema({
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "dna_ranges_examined": ONTOLOGY_CLASS_LIST,
+        "dna_region_description": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "gene_mutation": ONTOLOGY_CLASS_LIST,
+        "gene_studied": ONTOLOGY_CLASS_LIST,
+        "genomic_reference_sequence_id": {
+            "type": "object"
+        },
+        "genomic_region_coordinate_system": ONTOLOGY_CLASS,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
+    },
+    "required": ["id", "specimen_type"]
+}, GENOMIC_REGION_STUDIED)
 
 MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
     "type": "object",

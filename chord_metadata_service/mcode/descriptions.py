@@ -44,6 +44,20 @@ CANCER_GENETIC_VARIANT = {
     }
 }
 
+GENOMIC_REGION_STUDIED = {
+    "description": "Class to describe the area of the genome region referenced in testing for variants.",
+    "properties": {
+        "id": "An arbitrary identifier for the genomic region studied.",
+        "dna_ranges_examined": "The range(s) of the DNA sequence examined.",
+        "dna_region_description": "The description for the DNA region studied in the genomics report.",
+        "gene_mutation": "The gene mutations tested for in blood or tissue by molecular genetics methods.",
+        "gene_studied": "The ID for the gene studied.",
+        "genomic_reference_sequence_id": "Range(s) of DNA sequence examined.",
+        "genomic_region_coordinate_system": "The method of counting along the genome.",
+        **EXTRA_PROPERTIES
+    }
+}
+
 GENOMICS_REPORT = {
     "description": "Genetic Analysis Summary.",
     "properties": {
