@@ -19,14 +19,14 @@ class GeneticSpecimen(models.Model, IndexableMixin):
     """
     Class to describe a biosample used for genomics testing or analysis.
     """
-    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENOMIC_SPECIMEN, "id"))
-    specimen_type = JSONField(validators=[ontology_validator], help_text=rec_help(d.GENOMIC_SPECIMEN, "specimen_type"))
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENETIC_SPECIMEN, "id"))
+    specimen_type = JSONField(validators=[ontology_validator], help_text=rec_help(d.GENETIC_SPECIMEN, "specimen_type"))
     collection_body = JSONField(blank=True, null=True, validators=[ontology_validator],
-                                help_text=rec_help(d.GENOMIC_SPECIMEN, "collection_body"))
+                                help_text=rec_help(d.GENETIC_SPECIMEN, "collection_body"))
     laterality = JSONField(blank=True, null=True, validators=[ontology_validator],
-                           help_text=rec_help(d.GENOMIC_SPECIMEN, "laterality"))
+                           help_text=rec_help(d.GENETIC_SPECIMEN, "laterality"))
     extra_properties = JSONField(blank=True, null=True,
-                                 help_text=rec_help(d.GENOMIC_SPECIMEN, "extra_properties"))
+                                 help_text=rec_help(d.GENETIC_SPECIMEN, "extra_properties"))
     created = models.DateTimeField(auto_now=True)
     updated = models.DateTimeField(auto_now_add=True)
 
@@ -54,8 +54,8 @@ class CancerGeneticVariant(models.Model, IndexableMixin):
                                      help_text=rec_help(d.CANCER_GENETIC_VARIANT, "cytogenetic_location"))
     cytogenetic_nomenclature = JSONField(blank=True, null=True, validators=[ontology_validator],
                                          help_text=rec_help(d.CANCER_GENETIC_VARIANT, "cytogenetic_nomenclature"))
-    gene_studied = models.ManyToManyField(Gene, blank=True, on_delete=models.SET_NULL,
-                                     help_text=rec_help(d.CANCER_GENETIC_VARIANT, "gene_studied"))
+    gene_studied = models.ManyToManyField(Gene, blank=True,
+                                          help_text=rec_help(d.CANCER_GENETIC_VARIANT, "gene_studied"))
     genomic_dna_change = JSONField(blank=True, null=True, validators=[ontology_validator],
                                    help_text=rec_help(d.CANCER_GENETIC_VARIANT, "genomic_dna_change"))
     genomic_source_class = JSONField(blank=True, null=True, validators=[ontology_validator],
@@ -323,7 +323,7 @@ class MCodePacket(models.Model, IndexableMixin):
                                                        help_text=rec_help(d.MCODEPACKET, "cancer_related_procedures"))
     medication_statement = models.ForeignKey(MedicationStatement, blank=True, null=True, on_delete=models.SET_NULL,
                                              help_text=rec_help(d.MCODEPACKET, "medication_statement"))
-    date_of_death = models.CharField(blank=True, help_text=rec_help(d.MCODEPACKET, "date_of_death"))
+    date_of_death = models.CharField(max_length=200, blank=True, help_text=rec_help(d.MCODEPACKET, "date_of_death"))
     cancer_disease_status = JSONField(blank=True, null=True, validators=[ontology_validator],
                                       help_text=rec_help(d.MCODEPACKET, "cancer_disease_status"))
     extra_properties = JSONField(blank=True, null=True,
