@@ -1,3 +1,4 @@
+from django.utils.timezone import now
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
@@ -117,7 +118,7 @@ class GenomicsReport(models.Model, IndexableMixin):
     code = JSONField(validators=[ontology_validator], help_text=rec_help(d.GENOMICS_REPORT, "code"))
     performing_organization_name = models.CharField(
         max_length=200, blank=True, help_text=rec_help(d.GENOMICS_REPORT, "performing_organization_name"))
-    issued = models.DateTimeField(help_text=rec_help(d.GENOMICS_REPORT, "issued"))
+    issued = models.DateTimeField(default=now, help_text=rec_help(d.GENOMICS_REPORT, "issued"))
     genetic_specimen = models.ManyToManyField(GeneticSpecimen, blank=True,
                                               help_text=rec_help(d.GENOMICS_REPORT, "genetic_specimen"))
     genetic_variant = models.ForeignKey(CancerGeneticVariant, blank=True, null=True, on_delete=models.SET_NULL,
