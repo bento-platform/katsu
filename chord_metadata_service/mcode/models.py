@@ -1,18 +1,15 @@
-from django.utils.timezone import now
+from django.utils import timezone
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.phenopackets.models import Gene
 from chord_metadata_service.patients.models import Individual
-from django.core.exceptions import ValidationError
 from chord_metadata_service.restapi.description_utils import rec_help
 import chord_metadata_service.mcode.descriptions as d
 from chord_metadata_service.restapi.validators import ontology_validator, ontology_list_validator
 from .validators import (
-    quantity_validator,
     tumor_marker_data_value_validator,
-    complex_ontology_validator,
-    time_or_period_validator
+    complex_ontology_validator
 )
 
 
@@ -118,7 +115,7 @@ class GenomicsReport(models.Model, IndexableMixin):
     code = JSONField(validators=[ontology_validator], help_text=rec_help(d.GENOMICS_REPORT, "code"))
     performing_organization_name = models.CharField(
         max_length=200, blank=True, help_text=rec_help(d.GENOMICS_REPORT, "performing_organization_name"))
-    issued = models.DateTimeField(default=now, help_text=rec_help(d.GENOMICS_REPORT, "issued"))
+    issued = models.DateTimeField(default=timezone.now(), help_text=rec_help(d.GENOMICS_REPORT, "issued"))
     genetic_specimen = models.ManyToManyField(GeneticSpecimen, blank=True,
                                               help_text=rec_help(d.GENOMICS_REPORT, "genetic_specimen"))
     genetic_variant = models.ForeignKey(CancerGeneticVariant, blank=True, null=True, on_delete=models.SET_NULL,

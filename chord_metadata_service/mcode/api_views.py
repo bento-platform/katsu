@@ -15,6 +15,22 @@ class McodeModelViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
 
+
+class GeneticSpecimenViewSet(McodeModelViewSet):
+    queryset = GeneticSpecimen.objects.all()
+    serializer_class = GeneticSpecimenSerializer
+
+
+class CancerGeneticVariantViewSet(McodeModelViewSet):
+    queryset = CancerGeneticVariant.objects.all()
+    serializer_class = CancerGeneticVariantSerializer
+
+
+class GenomicRegionStudiedViewSet(McodeModelViewSet):
+    queryset = GenomicRegionStudied.objects.all()
+    serializer_class = GenomicRegionStudiedSerializer
+
+
 class GenomicsReportViewSet(McodeModelViewSet):
     queryset = GenomicsReport.objects.all()
     serializer_class = GenomicsReportSerializer

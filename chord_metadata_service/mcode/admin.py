@@ -2,6 +2,21 @@ from django.contrib import admin
 from .models import *
 
 
+@admin.register(GeneticSpecimen)
+class GeneticSpecimenAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(CancerGeneticVariant)
+class CancerGeneticVariantAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(GenomicRegionStudied)
+class GenomicRegionStudiedAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(GenomicsReport)
 class GenomicsReportAdmin(admin.ModelAdmin):
     pass
@@ -32,3 +47,6 @@ class MedicationStatementAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(MCodePacket)
+class MCodePacketAdmin(admin.ModelAdmin):
+    pass

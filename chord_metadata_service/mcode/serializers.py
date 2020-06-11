@@ -4,6 +4,9 @@ from .models import *
 
 
 __all__ = [
+    "GeneticSpecimenSerializer",
+    "CancerGeneticVariantSerializer",
+    "GenomicRegionStudiedSerializer",
     "GenomicsReportSerializer",
     "LabsVitalSerializer",
     "TNMStagingSerializer",
@@ -12,6 +15,27 @@ __all__ = [
     "MedicationStatementSerializer",
     "MCodePacketSerializer",
 ]
+
+
+class GeneticSpecimenSerializer(GenericSerializer):
+
+    class Meta:
+        model = GeneticSpecimen
+        fields = '__all__'
+
+
+class CancerGeneticVariantSerializer(GenericSerializer):
+
+    class Meta:
+        model = CancerGeneticVariant
+        fields = '__all__'
+
+
+class GenomicRegionStudiedSerializer(GenericSerializer):
+
+    class Meta:
+        model = GenomicRegionStudied
+        fields = '__all__'
 
 
 class GenomicsReportSerializer(GenericSerializer):
