@@ -338,12 +338,19 @@ MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = describe_schema({
             ]
         },
         "code": ONTOLOGY_CLASS,
-        "occurence_time_or_period": TIME_OR_PERIOD,
-        "target_body_site": ONTOLOGY_CLASS_LIST,
+        "body_site": ONTOLOGY_CLASS_LIST,
+        "laterality": ONTOLOGY_CLASS,
         "treatment_intent": ONTOLOGY_CLASS,
+        "reason_code": ONTOLOGY_CLASS,
+        "reason_reference": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "procedure_type", "code", "occurence_time_or_period"]
+    "required": ["id", "procedure_type", "code"]
 }, CANCER_RELATED_PROCEDURE)
 
 MCODE_MEDICATION_STATEMENT_SCHEMA = describe_schema({
@@ -363,11 +370,6 @@ MCODE_MEDICATION_STATEMENT_SCHEMA = describe_schema({
             "type": "string",
             "format": "date-time"
         },
-        "date_time": {
-            "type": "string",
-            "format": "date-time"
-        },
-
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "medication_code"]
@@ -389,6 +391,10 @@ MCODE_SCHEMA = describe_schema({
         "cancer_condition": MCODE_CANCER_CONDITION_SCHEMA,
         "cancer_related_procedures": MCODE_CANCER_RELATED_PROCEDURE_SCHEMA,
         "medication_statement": MCODE_MEDICATION_STATEMENT_SCHEMA,
+        "date_of_death": {
+            "type": "string"
+        },
+        "cancer_disease_status": ONTOLOGY_CLASS,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     }
 }, MCODEPACKET)

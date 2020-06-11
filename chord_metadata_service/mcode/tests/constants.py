@@ -221,13 +221,7 @@ def valid_cancer_related_procedure():
             "id": "33356009",
             "label": "Betatron teleradiotherapy (procedure)"
         },
-        "occurence_time_or_period": {
-            "value": {
-                "start": "2018-11-13T20:20:39+00:00",
-                "end": "2019-04-13T20:20:39+00:00"
-            }
-        },
-        "target_body_site": [
+        "body_site": [
             {
                 "id": "74805009",
                 "label": "Mammary gland sinus"
@@ -258,6 +252,5 @@ def valid_medication_statement():
             "label": "Curative - procedure intent"
         },
         "start_date": "2018-11-13T20:20:39+00:00",
-        "end_date": "2019-04-13T20:20:39+00:00",
-        "date_time": "2019-04-13T20:20:39+00:00"
+        "end_date": "2019-04-13T20:20:39+00:00"
     }

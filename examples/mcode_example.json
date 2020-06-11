@@ -99,8 +99,7 @@
       "label": "Curative - procedure intent"
     },
     "start_date": "2018-11-13T20:20:39Z",
-    "end_date": "2019-04-13T20:20:39Z",
-    "date_time": "2019-04-13T20:20:39Z"
+    "end_date": "2019-04-13T20:20:39Z"
   },
   "cancer_related_procedures": [
     {
@@ -110,13 +109,7 @@
         "id": "33356009",
         "label": "Betatron teleradiotherapy (procedure)"
       },
-      "occurence_time_or_period": {
-        "value": {
-          "end": "2019-04-13T20:20:39+00:00",
-          "start": "2018-11-13T20:20:39+00:00"
-        }
-      },
-      "target_body_site": [
+      "body_site": [
         {
           "id": "74805009",
           "label": "Mammary gland sinus"

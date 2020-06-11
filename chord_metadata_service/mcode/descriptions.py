@@ -129,11 +129,14 @@ CANCER_RELATED_PROCEDURE = {
     "description": "Description of radiological treatment or surgical action addressing a cancer condition.",
     "properties": {
         "id": "An arbitrary identifier for the procedure.",
-        "procedure_type": "Type of cancer related procedure: radion or surgical.",
+        "procedure_type": "Type of cancer related procedure: radiation or surgical.",
         "code": "Code for the procedure performed.",
-        "occurence_time_or_period": "The date/time that a procedure was performed.",
-        "target_body_site": "The body location(s) where the procedure was performed.",
+        "body_site": "The body location(s) where the procedure was performed.",
+        "laterality": "Body side of the body location, if needed to distinguish from a similar location "
+                      "on the other side of the body.",
         "treatment_intent": "The purpose of a treatment.",
+        "reason_code": "The explanation or justification for why the surgical procedure was performed.",
+        "reason_reference": "Reference to a primary or secondary cancer condition.",
         **EXTRA_PROPERTIES
     }
 }
@@ -148,7 +151,6 @@ MEDICATION_STATEMENT = {
         "treatment_intent": "The purpose of a treatment. Accepted ontologies: SNOMED CT.",
         "start_date": "The start date/time of the medication.",
         "end_date": "The end date/time of the medication.",
-        "date_time": "The date/time the medication was administered.",
         **EXTRA_PROPERTIES
     }
 }
@@ -162,6 +164,9 @@ MCODEPACKET = {
         "cancer_condition": "An Individual's cancer condition.",
         "cancer_related_procedures": "A radiological or surgical procedures addressing a cancer condition.",
         "medication_statement": "Medication treatment addressed to an Individual.",
+        "date_of_death": "An indication that the patient is no longer living, given by a date of death or boolean.",
+        "cancer_disease_status": "A clinician's qualitative judgment on the current trend of the cancer, e.g., "
+                                 "whether it is stable, worsening (progressing), or improving (responding).",
         **EXTRA_PROPERTIES
     }
 }

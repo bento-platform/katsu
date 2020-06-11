@@ -98,8 +98,7 @@ class CancerRelatedProcedureTest(TestCase):
         cancer_related_procedure = CancerRelatedProcedure.objects.get(id='cancer_related_procedure:01')
         self.assertEqual(cancer_related_procedure.procedure_type, 'radiation')
         self.assertEqual(cancer_related_procedure.code['id'], '33356009')
-        self.assertEqual(cancer_related_procedure.occurence_time_or_period['value']['start'], '2018-11-13T20:20:39+00:00')
-        self.assertIsInstance(cancer_related_procedure.target_body_site, list)
+        self.assertIsInstance(cancer_related_procedure.body_site, list)
         self.assertEqual(cancer_related_procedure.treatment_intent['label'], 'Curative - procedure intent')
 
 
@@ -116,5 +115,5 @@ class MedicationStatementTest(TestCase):
         self.assertEqual(medication_statement.medication_code['id'], '92052')
         self.assertIsInstance(medication_statement.termination_reason, list)
         self.assertEqual(medication_statement.treatment_intent['label'], 'Curative - procedure intent')
-        for date in [medication_statement.start_date, medication_statement.end_date, medication_statement.date_time]:
+        for date in [medication_statement.start_date, medication_statement.end_date]:
             self.assertIsInstance(date, datetime.datetime)

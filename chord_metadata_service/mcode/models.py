@@ -254,12 +254,17 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
     procedure_type = models.CharField(choices=PROCEDURE_TYPES, max_length=200,
                                       help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "procedure_type"))
     code = JSONField(validators=[ontology_validator], help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "code"))
-    occurence_time_or_period = JSONField(validators=[time_or_period_validator],
-                                         help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "occurence_time_or_period"))
-    target_body_site = JSONField(null=True, validators=[ontology_list_validator],
-                                 help_text=rec_help(d.CANCER_RELATED_PROCEDURE, 'target_body_site'))
+    body_site = JSONField(null=True, validators=[ontology_list_validator],
+                                 help_text=rec_help(d.CANCER_RELATED_PROCEDURE, 'body_site'))
+    laterality = JSONField(blank=True, null=True, validators=[ontology_validator],
+                           help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "laterality"))
     treatment_intent = JSONField(blank=True, null=True, validators=[ontology_validator],
                                  help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "treatment_intent"))
+    # Only for Surgical Procedure
+    reason_code = JSONField(blank=True, null=True, validators=[ontology_validator],
+                            help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "reason_code"))
+    reason_reference = models.ManyToManyField(CancerCondition, blank=True,
+                                              help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "reason_reference"))
     extra_properties = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "extra_properties"))
     created = models.DateTimeField(auto_now=True)
@@ -290,7 +295,6 @@ class MedicationStatement(models.Model, IndexableMixin):
                                  help_text=rec_help(d.MEDICATION_STATEMENT, "treatment_intent"))
     start_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "start_date"))
     end_date = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "end_date"))
-    date_time = models.DateTimeField(blank=True, null=True, help_text=rec_help(d.MEDICATION_STATEMENT, "date_time"))
     extra_properties = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.MEDICATION_STATEMENT, "extra_properties"))
     created = models.DateTimeField(auto_now=True)
@@ -319,6 +323,9 @@ class MCodePacket(models.Model, IndexableMixin):
                                                        help_text=rec_help(d.MCODEPACKET, "cancer_related_procedures"))
     medication_statement = models.ForeignKey(MedicationStatement, blank=True, null=True, on_delete=models.SET_NULL,
                                              help_text=rec_help(d.MCODEPACKET, "medication_statement"))
+    date_of_death = models.CharField(blank=True, help_text=rec_help(d.MCODEPACKET, "date_of_death"))
+    cancer_disease_status = JSONField(blank=True, null=True, validators=[ontology_validator],
+                                      help_text=rec_help(d.MCODEPACKET, "cancer_disease_status"))
     extra_properties = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.MCODEPACKET, "extra_properties"))
     created = models.DateTimeField(auto_now=True)
