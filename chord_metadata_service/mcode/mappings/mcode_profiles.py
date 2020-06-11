@@ -9,7 +9,7 @@ MCODE_KARNOFSKY = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-karnof
 MCODE_GENETIC_SPECIMEN = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-genetic-specimen"
 
 # GeneticVariant
-MCODE_GENETIC_VARIANT = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genetic-variant"
+MCODE_CANCER_GENETIC_VARIANT = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-genetic-variant"
 
 # GenomicRegionStudied
 MCODE_GENOMIC_REGION_STUDIED = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-genomic-region-studied"
