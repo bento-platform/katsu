@@ -27,30 +27,23 @@ class LabsVitalTest(TestCase):
 
     def test_labs_vital(self):
         labs_vital = LabsVital.objects.get(id='labs_vital:01')
-        self.assertEqual(labs_vital.body_height['value'], 1.70)
-        self.assertEqual(labs_vital.body_height['unit'], 'm')
-        self.assertEqual(labs_vital.body_weight['value'], 60)
-        self.assertEqual(labs_vital.blood_pressure_diastolic['value'], 80)
-        self.assertEqual(labs_vital.blood_pressure_systolic['value'], 120)
-        self.assertIsInstance(labs_vital.tumor_marker_test, dict)
-        self.assertIsInstance(labs_vital.tumor_marker_test['code'], dict)
-        self.assertEqual(labs_vital.tumor_marker_test['data_value']['value'], 10)
+        self.assertIsInstance(labs_vital.tumor_marker_code, dict)
 
-    def test_validation(self):
-        invalid_obj = valid_labs_vital(self.individual)
-        invalid_obj["id"] = "labs_vital:02"
-        invalid_obj["tumor_marker_test"]["code"] = {
-            "coding": [
-                {
-                    "code": "50610-5",
-                    "display": "Alpha-1-Fetoprotein",
-                    "system": "loinc.org"
-                }
-            ]
-        }
-        invalid = LabsVital.objects.create(**invalid_obj)
-        with self.assertRaises(serializers.ValidationError):
-            invalid.full_clean()
+    # def test_validation(self):
+    #     invalid_obj = valid_labs_vital(self.individual)
+    #     invalid_obj["id"] = "labs_vital:02"
+    #     invalid_obj["tumor_marker_test"]["code"] = {
+    #         "coding": [
+    #             {
+    #                 "code": "50610-5",
+    #                 "display": "Alpha-1-Fetoprotein",
+    #                 "system": "loinc.org"
+    #             }
+    #         ]
+    #     }
+    #     invalid = LabsVital.objects.create(**invalid_obj)
+    #     with self.assertRaises(serializers.ValidationError):
+    #         invalid.full_clean()
 
 
 class CancerConditionTest(TestCase):

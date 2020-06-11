@@ -78,16 +78,8 @@ LABS_VITAL = {
     "properties": {
         "id": "An arbitrary identifier for the labs/vital tests.",
         "individual": "The individual who is the subject of the tests.",
-        "body_height": "The patient\'s height.",
-        "body_weight": "The patient\'s weight.",
-        "cbc_with_auto_differential_panel": "Reference to a laboratory observation in the CBC with Auto Differential"
-                                            "Panel test.",
-        "comprehensive_metabolic_2000": "Reference to a laboratory observation in the CMP 2000 test.",
-        "blood_pressure_diastolic": "The blood pressure after the contraction of the heart while the chambers of "
-                                    "the heart refill with blood, when the pressure is lowest.",
-        "blood_pressure_systolic": "The blood pressure during the contraction of the left ventricle of the heart, "
-                                   "when blood pressure is at its highest.",
-        "tumor_marker_test": "An ontology or controlled vocabulary term to identify tumor marker test.",
+        "tumor_marker_code": "A code identifying the type of tumor marker test.",
+        "tumor_marker_data_value": "The result of a tumor marker test.",
         **EXTRA_PROPERTIES
     }
 }

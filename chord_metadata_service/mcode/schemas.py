@@ -4,7 +4,6 @@ from chord_metadata_service.restapi.description_utils import describe_schema
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from .descriptions import *
 
-
 ################################## mCode/FHIR based schemas ##################################
 
 ### FHIR datatypes
@@ -37,7 +36,6 @@ QUANTITY = {
     "additionalProperties": False
 }
 
-
 # FHIR CodeableConcept https://www.hl7.org/fhir/datatypes.html#CodeableConcept
 CODEABLE_CONCEPT = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -66,7 +64,6 @@ CODEABLE_CONCEPT = {
     "additionalProperties": False
 }
 
-
 # FHIR Period https://www.hl7.org/fhir/datatypes.html#Period
 PERIOD = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -87,7 +84,6 @@ PERIOD = {
     "additionalProperties": False
 }
 
-
 # FHIR Ratio https://www.hl7.org/fhir/datatypes.html#Ratio
 RATIO = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -101,7 +97,6 @@ RATIO = {
     },
     "additionalProperties": False
 }
-
 
 ### FHIR based mCode elements
 
@@ -122,6 +117,24 @@ TIME_OR_PERIOD = {
     "additionalProperties": False
 }
 
+TUMOR_MARKER_DATA_VALUE = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "chord_metadata_service:tumor_marker_data_value",
+    "title": "Tumor marker data value",
+    "description": "Tumor marker data value schema.",
+    "type": "object",
+    "properties": {
+        "value": {
+            "anyOf": [
+                ONTOLOGY_CLASS,
+                QUANTITY,
+                RATIO
+            ]
+        }
+    },
+    "additionalProperties": False
+}
+
 # TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
 COMPLEX_ONTOLOGY = customize_schema(
     first_typeof=ONTOLOGY_CLASS,
@@ -134,23 +147,6 @@ COMPLEX_ONTOLOGY = customize_schema(
     required=["data_value"]
 )
 
-# TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
-TUMOR_MARKER_TEST = customize_schema(
-    first_typeof=ONTOLOGY_CLASS,
-    second_typeof={
-       "anyOf": [
-           ONTOLOGY_CLASS,
-           QUANTITY,
-           RATIO
-       ]
-    },
-    first_property="code",
-    second_property="data_value",
-    schema_id="chord_metadata_service:tumor_marker_test",
-    title="Tumor marker test",
-    description="Tumor marker test schema.",
-    required=["code"]
-)
 
 ############################## Metadata service mCode based schemas ##############################
 
@@ -252,36 +248,20 @@ MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
     "required": ["id", "code", "issued"]
 }, GENOMICS_REPORT)
 
-
 MCODE_LABS_VITAL_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": {
             "type": "string"
         },
-        "subject": {
+        "individual": {
             "type": "string"
         },
-        "body_height": QUANTITY,
-        "body_weight": QUANTITY,
-        "cbc_with_auto_differential_panel": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
-        },
-        "comprehensive_metabolic_2000": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
-        },
-        "blood_pressure_diastolic": QUANTITY,
-        "blood_pressure_systolic": QUANTITY,
-        "tumor_marker_test": TUMOR_MARKER_TEST,
+        "tumor_marker_code": ONTOLOGY_CLASS,
+        "tumor_marker_data_value": TUMOR_MARKER_DATA_VALUE,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "individual", "body_height", "body_weight", "tumor_marker_test"]
+    "required": ["id", "individual", "tumor_marker_code"]
 }, LABS_VITAL)
 
 # TODO check required inb data dictionary
@@ -310,7 +290,6 @@ MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
     },
     "required": ["id", "condition_type", "code"]
 }, LABS_VITAL)
-
 
 MCODE_TNM_STAGING_SCHEMA = describe_schema({
     "type": "object",
@@ -345,7 +324,6 @@ MCODE_TNM_STAGING_SCHEMA = describe_schema({
     ]
 }, TNM_STAGING)
 
-
 MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
@@ -367,7 +345,6 @@ MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = describe_schema({
     },
     "required": ["id", "procedure_type", "code", "occurence_time_or_period"]
 }, CANCER_RELATED_PROCEDURE)
-
 
 MCODE_MEDICATION_STATEMENT_SCHEMA = describe_schema({
     "type": "object",

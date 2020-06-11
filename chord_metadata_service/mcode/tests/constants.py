@@ -128,33 +128,9 @@ def valid_genetic_report():
 def valid_labs_vital(individual):
     return {
         "id": "labs_vital:01",
-        "body_height": {
-            "value": 1.70,
-            "unit": "m"
-        },
-        "body_weight": {
-            "value": 60,
-            "unit": "kg"
-        },
-        "cbc_with_auto_differential_panel": ["Test"],
-        "comprehensive_metabolic_2000": ["Test"],
-        "blood_pressure_diastolic": {
-            "value": 80,
-            "unit": "mmHg"
-        },
-        "blood_pressure_systolic": {
-            "value": 120,
-            "unit": "mmHg"
-        },
-        "tumor_marker_test": {
-            "code": {
-                "id": "50610-5",
-                "label": "Alpha-1-Fetoprotein"
-            },
-            "data_value": {
-                "value": 10,
-                "unit": "ng/mL"
-            }
+        "tumor_marker_code": {
+            "id": "50610-5",
+            "label": "Alpha-1-Fetoprotein"
         },
         "individual": individual,
     }

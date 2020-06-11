@@ -9,7 +9,7 @@ import chord_metadata_service.mcode.descriptions as d
 from chord_metadata_service.restapi.validators import ontology_validator, ontology_list_validator
 from .validators import (
     quantity_validator,
-    tumor_marker_test_validator,
+    tumor_marker_data_value_validator,
     complex_ontology_validator,
     time_or_period_validator
 )
@@ -148,20 +148,11 @@ class LabsVital(models.Model, IndexableMixin):
                           help_text=rec_help(d.LABS_VITAL, "id"))
     individual = models.ForeignKey(Individual, on_delete=models.CASCADE,
                                    help_text=rec_help(d.LABS_VITAL, "individual"))
-    body_height = JSONField(validators=[quantity_validator], help_text=rec_help(d.LABS_VITAL, "body_height"))
-    body_weight = JSONField(validators=[quantity_validator], help_text=rec_help(d.LABS_VITAL, "body_weight"))
-    # corresponds to DiagnosticReport.result - complex element, probably should be changed to Array of json
-    cbc_with_auto_differential_panel = ArrayField(models.CharField(max_length=200), blank=True, null=True,
-                                                  help_text=rec_help(d.LABS_VITAL, "cbc_with_auto_differential_panel"))
-    comprehensive_metabolic_2000 = ArrayField(models.CharField(max_length=200), blank=True, null=True,
-                                              help_text=rec_help(d.LABS_VITAL, "comprehensive_metabolic_2000"))
-    blood_pressure_diastolic = JSONField(blank=True, null=True, validators=[quantity_validator],
-                                         help_text=rec_help(d.LABS_VITAL, "blood_pressure_diastolic"))
-    blood_pressure_systolic = JSONField(blank=True, null=True, validators=[quantity_validator],
-                                        help_text=rec_help(d.LABS_VITAL, "blood_pressure_systolic"))
     # TODO Change CodeableConcept to Ontology class
-    tumor_marker_test = JSONField(validators=[tumor_marker_test_validator],
-                                  help_text=rec_help(d.LABS_VITAL, "tumor_marker_test"))
+    tumor_marker_code = JSONField(validators=[ontology_validator],
+                                  help_text=rec_help(d.LABS_VITAL, "tumor_marker_code"))
+    tumor_marker_data_value = JSONField(blank=True, null=True, validators=[tumor_marker_data_value_validator],
+                                  help_text=rec_help(d.LABS_VITAL, "tumor_marker_data_value"))
     extra_properties = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.LABS_VITAL, "extra_properties"))
     created = models.DateTimeField(auto_now=True)
@@ -172,11 +163,6 @@ class LabsVital(models.Model, IndexableMixin):
 
     def __str__(self):
         return str(self.id)
-
-    def clean(self):
-        if not (self.blood_pressure_diastolic or self.blood_pressure_systolic):
-            raise ValidationError('At least one of the following must be reported: Systolic Blood Pressure or'
-                                  'Diastolic Blood Pressure.')
 
 
 ################################# Disease #################################
