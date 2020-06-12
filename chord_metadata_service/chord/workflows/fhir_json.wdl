@@ -3,33 +3,46 @@ workflow fhir_json {
     File? observations
     File? conditions
     File? specimens
-    String? created_by
 
     call identity_task {
-        input:
-            patients_in = patients,
-            observations_in = observations,
-            conditions_in = conditions,
-            specimens_in = specimens,
-            created_by_in = created_by
+        input: json_in = patients
+    }
+
+    call optional_fhir_json_task {
+        input: json_in = observations, file_name = "observations.json"
+    }
+    call optional_fhir_json_task {
+        input: json_in = conditions, file_name = "conditions.json"
+    }
+    call optional_fhir_json_task {
+        input: json_in = specimens, file_name = "specimens.json"
     }
 }
 
 task identity_task {
-    File patients_in
-    File? observations_in
-    File? conditions_in
-    File? specimens_in
-    String? created_by_in
+    File json_in
 
     command {
         true
     }
+
     output {
-        File patients = "${patients_in}"
-        File? observations = "${observations_in}"
-        File? conditions = "${conditions_in}"
-        File? specimens = "${specimens_in}"
-        String? created_by = "${created_by_in}"
+        File json_out = "${json_in}"
+    }
+}
+
+task optional_fhir_json_task {
+    File? json_in
+    String file_name
+
+    command {
+        if [[ "${json_in}" = "None" ]]; then
+          echo '{"resourceType": "bundle", "entry": []}' > "${file_name}";
+        else
+          mv "${observations_in}" "${file_name}";
+        fi
+    }
+    output {
+        File json_out = "${file_name}"
     }
 }
