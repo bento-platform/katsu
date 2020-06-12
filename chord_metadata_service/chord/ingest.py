@@ -41,6 +41,7 @@ METADATA_WORKFLOWS = {
                 {
                     "id": "json_document",
                     "type": "file",
+                    "required": True,
                     "extensions": [".json"]
                 }
             ],
@@ -62,6 +63,7 @@ METADATA_WORKFLOWS = {
                 {
                     "id": "json_document",
                     "type": "file",
+                    "required": True,
                     "extensions": [".json"]
                 }
             ],
@@ -84,25 +86,30 @@ METADATA_WORKFLOWS = {
                 {
                     "id": "patients",
                     "type": "file",
+                    "required": True,
                     "extensions": [".json"]
                 },
                 {
                     "id": "observations",
                     "type": "file",
+                    "required": False,
                     "extensions": [".json"]
                 },
                 {
                     "id": "conditions",
                     "type": "file",
+                    "required": False,
                     "extensions": [".json"]
                 },
                 {
                     "id": "specimens",
                     "type": "file",
+                    "required": False,
                     "extensions": [".json"]
                 },
                 {
                     "id": "created_by",
+                    "required": False,
                     "type": "string"
                 },
 
