@@ -96,7 +96,10 @@ def parse_bundle(bundle):
             for cc in cancer_conditions:
                 if cc in resource_profiles:
                     cancer_condition = condition_to_cancer_condition(resource)
-                    mcodepacket["cancer_condition"] = cancer_condition
+                    for key, value in MCODE_PROFILES_MAPPING["cancer_condition"]["profile"].items():
+                        if cc == value:
+                            cancer_condition["condition_type"] = key
+                            mcodepacket["cancer_condition"] = cancer_condition
 
         if resource["resourceType"] == "Observation" and "meta" in resource:
             if MCODE_TUMOR_MARKER in resource["meta"]["profile"]:
