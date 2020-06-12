@@ -56,7 +56,6 @@ def ingest_patients(patients_data, table_id, created_by):
             table=Table.objects.get(ownership_record_id=table_id)
         )
         logger.info(f'Phenopacket {phenopacket.id} created')
-    return
 
 
 def ingest_observations(observations_data):
@@ -77,7 +76,6 @@ def ingest_observations(observations_data):
             **phenotypic_feature_data
         )
         logger.info(f'PhenotypicFeature {phenotypic_feature.id} created')
-    return
 
 
 def ingest_conditions(conditions_data):
@@ -97,7 +95,6 @@ def ingest_conditions(conditions_data):
         phenopacket = Phenopacket.objects.get(subject=Individual.objects.get(id=subject))
         phenopacket.diseases.add(disease)
         logger.info(f'Disease {disease.id} created')
-    return
 
 
 def ingest_specimens(specimens_data):
@@ -123,4 +120,3 @@ def ingest_specimens(specimens_data):
         phenopacket = Phenopacket.objects.get(subject=Individual.objects.get(id=individual_id))
         phenopacket.biosamples.add(biosample)
         logger.info(f'Biosample {biosample.id} created')
-    return
