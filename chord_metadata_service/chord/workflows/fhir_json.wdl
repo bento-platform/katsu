@@ -8,13 +8,13 @@ workflow fhir_json {
         input: json_in = patients
     }
 
-    call optional_fhir_json_task {
+    call optional_fhir_json_task as ofjt1 {
         input: json_in = observations, file_name = "observations.json"
     }
-    call optional_fhir_json_task {
+    call optional_fhir_json_task as ofjt2 {
         input: json_in = conditions, file_name = "conditions.json"
     }
-    call optional_fhir_json_task {
+    call optional_fhir_json_task as ofjt3 {
         input: json_in = specimens, file_name = "specimens.json"
     }
 }
@@ -35,13 +35,13 @@ task optional_fhir_json_task {
     File? json_in
     String file_name
 
-    command {
+    command <<<
         if [[ "${json_in}" = "None" ]]; then
           echo '*{"resourceType": "bundle", "entry": []}*' > "${file_name}";
         else
           mv "${observations_in}" "${file_name}";
         fi
-    }
+    >>>
     output {
         File json_out = "${file_name}"
     }
