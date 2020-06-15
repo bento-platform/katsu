@@ -37,8 +37,6 @@ task optional_fhir_json_task {
 
     command <<<
         if [[ -f "${json_in}" ]]; then
-          echo "${json_in}" > "/chord/data/${file_name}" &&
-          echo '{"resourceType": "bundle", "entry": []}' > "/chord/data/${file_name}_test.json" &&
           mv "${json_in}" "${file_name}";
         else
           echo '{"resourceType": "bundle", "entry": []}' > "${file_name}";
