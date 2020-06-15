@@ -36,6 +36,7 @@ task optional_fhir_json_task {
     String file_name
 
     command <<<
+        echo "${json_in}" &&
         if [[ "${json_in}" = "None" ]]; then
           echo '*{"resourceType": "bundle", "entry": []}*' > "${file_name}";
         else
