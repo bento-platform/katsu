@@ -36,10 +36,11 @@ task optional_fhir_json_task {
     String file_name
 
     command <<<
-        if [[ "${json_in}" = "None" ]]; then
+        if [[ "${json_in}" = *"None"* ]]; then
           echo '*{"resourceType": "bundle", "entry": []}*' > "${file_name}";
         else
-          echo "${json_in}" > "/chord/data/${file_name}";
+          echo "${json_in}" > "/chord/data/${file_name}" &&
+          echo '*{"resourceType": "bundle", "entry": []}*' > "/chord/data/{file_name}_test.json";
           # mv "${json_in}" "${file_name}";
         fi
     >>>
