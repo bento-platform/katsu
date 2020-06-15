@@ -41,6 +41,7 @@ METADATA_WORKFLOWS = {
                 {
                     "id": "json_document",
                     "type": "file",
+                    "required": True,
                     "extensions": [".json"]
                 }
             ],
@@ -62,6 +63,7 @@ METADATA_WORKFLOWS = {
                 {
                     "id": "json_document",
                     "type": "file",
+                    "required": True,
                     "extensions": [".json"]
                 }
             ],
@@ -84,25 +86,30 @@ METADATA_WORKFLOWS = {
                 {
                     "id": "patients",
                     "type": "file",
+                    "required": True,
                     "extensions": [".json"]
                 },
                 {
                     "id": "observations",
                     "type": "file",
+                    "required": False,
                     "extensions": [".json"]
                 },
                 {
                     "id": "conditions",
                     "type": "file",
+                    "required": False,
                     "extensions": [".json"]
                 },
                 {
                     "id": "specimens",
                     "type": "file",
+                    "required": False,
                     "extensions": [".json"]
                 },
                 {
                     "id": "created_by",
+                    "required": False,
                     "type": "string"
                 },
 
@@ -111,26 +118,27 @@ METADATA_WORKFLOWS = {
                 {
                     "id": "patients",
                     "type": "file",
-                    "value": "{json_document}"
+                    "value": "{patients}"
                 },
                 {
                     "id": "observations",
                     "type": "file",
-                    "value": "{json_document}"
+                    "value": "{observations}"
                 },
                 {
                     "id": "conditions",
                     "type": "file",
-                    "value": "{json_document}"
+                    "value": "{conditions}"
                 },
                 {
                     "id": "specimens",
                     "type": "file",
-                    "value": "{json_document}"
+                    "value": "{specimens}"
                 },
                 {
                     "id": "created_by",
-                    "type": "string"
+                    "type": "string",
+                    "value": "{created_by}"
                 },
 
             ]
@@ -342,22 +350,26 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id):
 def ingest_fhir_workflow(workflow_outputs, table_id):
     with open(workflow_outputs["patients"], "r") as pf:
         patients_data = json.load(pf)
-        ingest_patients(patients_data, table_id, workflow_outputs.get("created_by") or "Imported from file.")
+        phenopacket_ids = ingest_patients(
+            patients_data,
+            table_id,
+            workflow_outputs.get("created_by") or "Imported from file.",
+        )
 
     if "observations" in workflow_outputs:
         with open(workflow_outputs["observations"], "r") as of:
             observations_data = json.load(of)
-            ingest_observations(observations_data)
+            ingest_observations(phenopacket_ids, observations_data)
 
     if "conditions" in workflow_outputs:
         with open(workflow_outputs["conditions"], "r") as cf:
             conditions_data = json.load(cf)
-            ingest_conditions(conditions_data)
+            ingest_conditions(phenopacket_ids, conditions_data)
 
     if "specimens" in workflow_outputs:
         with open(workflow_outputs["specimens"], "r") as sf:
             specimens_data = json.load(sf)
-            ingest_specimens(specimens_data)
+            ingest_specimens(phenopacket_ids, specimens_data)
 
 
 WORKFLOW_INGEST_FUNCTION_MAP = {
