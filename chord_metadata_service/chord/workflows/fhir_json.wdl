@@ -37,7 +37,7 @@ task optional_fhir_json_task {
 
     command {
         if [[ "${json_in}" = "None" ]]; then
-          echo '{"resourceType": "bundle", "entry": []}' > "${file_name}";
+          echo '*{"resourceType": "bundle", "entry": []}*' > "${file_name}";
         else
           mv "${observations_in}" "${file_name}";
         fi
