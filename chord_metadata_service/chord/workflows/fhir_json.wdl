@@ -39,7 +39,7 @@ task optional_fhir_json_task {
         if [[ "${json_in}" = "None" ]]; then
           echo '*{"resourceType": "bundle", "entry": []}*' > "${file_name}";
         else
-          mv "${observations_in}" "${file_name}";
+          mv "${json_in}" "${file_name}";
         fi
     >>>
     output {
