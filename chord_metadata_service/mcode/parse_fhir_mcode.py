@@ -8,21 +8,37 @@ from chord_metadata_service.restapi.fhir_ingest import _check_schema
 from chord_metadata_service.restapi.fhir_utils import patient_to_individual
 
 
+def get_ontology_value(resource, codeable_concept_property):
+    """
+    The function covers the most encountered use cases.
+     """
+    try:
+        ontology_value = {}
+        if "system" in resource[codeable_concept_property]['coding'][0]:
+            ontology_value["id"] = f"{resource[codeable_concept_property]['coding'][0]['system']}:" \
+                                   f"{resource[codeable_concept_property]['coding'][0]['code']}"
+        else:
+            ontology_value["id"] = f"{resource[codeable_concept_property]['coding'][0]['code']}"
+
+        if "display" in resource[codeable_concept_property]['coding'][0]:
+            ontology_value["label"] = f"{resource[codeable_concept_property]['coding'][0]['display']}"
+        else:
+            ontology_value["label"] = f"{resource[codeable_concept_property]['coding'][0]['code']}"
+        return ontology_value
+    # will be raised if there is no "code" in Coding element
+    except KeyError as e:
+        raise KeyError(e)
+
+
 def observation_to_labs_vital(resource):
     """ Observation with tumor marker to LabsVital. """
     labs_vital = {
         "id": resource["id"]
     }
     if "code" in resource:
-        labs_vital["tumor_marker_code"] = {
-            "id": f"{resource['code']['coding'][0]['system']}:{resource['code']['coding'][0]['code']}",
-            "label": f"{resource['code']['coding'][0]['display']}"
-        }
+        labs_vital["tumor_marker_code"] = get_ontology_value(resource, "code")
     if "valueCodeableConcept" in resource:
-        labs_vital["tumor_marker_data_value"] = {
-            "id": f"{resource['valueCodeableConcept']['coding'][0]['system']}:{resource['code']['coding'][0]['code']}",
-            "label": f"{resource['valueCodeableConcept']['coding'][0]['display']}"
-        }
+        labs_vital["tumor_marker_data_value"] = get_ontology_value(resource, "valueCodeableConcept")
     return labs_vital
 
 
@@ -33,16 +49,9 @@ def observation_to_tnm_staging(resource):
         "tnm_staging_value": {}
     }
     if "valueCodeableConcept" in resource:
-        tnm_staging["tnm_staging_value"]["data_value"] = {
-            "id": f"{resource['valueCodeableConcept']['coding'][0]['system']}:"
-                  f"{resource['valueCodeableConcept']['coding'][0]['code']}",
-            "label": f"{resource['valueCodeableConcept']['coding'][0]['display']}"
-        }
+        tnm_staging["tnm_staging_value"]["data_value"] = get_ontology_value(resource, "valueCodeableConcept")
     if "method" in resource:
-        tnm_staging["tnm_staging_value"]["staging_system"] = {
-            "id": f"{resource['method']['coding'][0]['system']}:{resource['method']['coding'][0]['code']}",
-            "label": f"{resource['method']['coding'][0]['display']}"
-        }
+        tnm_staging["tnm_staging_value"]["staging_system"] = get_ontology_value(resource, "method")
     return tnm_staging
 
 
@@ -53,16 +62,9 @@ def procedure_to_crprocedure(resource):
         "id": resource["id"]
     }
     if "code" in resource:
-        cancer_related_procedure["code"] = {
-            "id": f"{resource['code']['coding'][0]['system']}:"
-                  f"{resource['code']['coding'][0]['code']}",
-            "label": f"{resource['code']['coding'][0]['display']}"
-        }
+        cancer_related_procedure["code"] = get_ontology_value(resource, "code")
     if "bodySite" in resource:
-        cancer_related_procedure["body_site"] = {
-            "id": f"{resource['bodySite']['coding'][0]['system']}:{resource['bodySite']['coding'][0]['code']}",
-            "label": f"{resource['bodySite']['coding'][0]['display']}"
-        }
+        cancer_related_procedure["body_site"] = get_ontology_value(resource, "bodySite")
     if "reasonCode" in resource:
         codes = []
         for code in resource["reasonCode"]["coding"]:
@@ -84,11 +86,7 @@ def get_medication_statement(resource):
         "id": resource["id"]
     }
     if "medicationCodeableConcept" in resource:
-        medication_statement["medication_code"] = {
-            "id": f"{resource['medicationCodeableConcept']['coding'][0]['system']}:"
-                  f"{resource['medicationCodeableConcept']['coding'][0]['code']}",
-            "label": f"{resource['medicationCodeableConcept']['coding'][0]['display']}"
-        }
+        medication_statement["medication_code"] = get_ontology_value(resource, "medicationCodeableConcept")
     # TODO the rest
     return medication_statement
 
@@ -116,24 +114,16 @@ def _get_profiles(resource: dict, profile_urls: list):
 def condition_to_cancer_condition(resource):
     """ FHIR Condition to Mcode Cancer Condition. """
 
-    cancer_condition = {}
-    cancer_condition["id"] = resource["id"]
+    cancer_condition = {
+        "id": resource["id"]
+    }
     # condition = cond.Condition(resource)
     if "clinicalStatus" in resource:
-        cancer_condition["clinical_status"] = {
-            "id": f"{resource['clinicalStatus']['coding'][0]['code']}",
-            "label": f"{resource['clinicalStatus']['coding'][0]['code']}"
-        }
+        cancer_condition["clinical_status"] = get_ontology_value(resource, "clinicalStatus")
     if "verificationStatus" in resource:
-        cancer_condition["verification_status"] = {
-            "id": f"{resource['verificationStatus']['coding'][0]['code']}",
-            "label": f"{resource['verificationStatus']['coding'][0]['code']}"
-        }
+        cancer_condition["verification_status"] = get_ontology_value(resource, "verificationStatus")
     if "code" in resource:
-        cancer_condition["code"] = {
-            "id": f"{resource['code']['coding'][0]['system']}:{resource['code']['coding'][0]['code']}",
-            "label": f"{resource['code']['coding'][0]['display']}"
-        }
+        cancer_condition["code"] = get_ontology_value(resource, "code")
     if "recordedDate" in resource:
         cancer_condition["date_of_diagnosis"] = resource["recordedDate"]
     if "bodySite" in resource:
@@ -145,17 +135,9 @@ def condition_to_cancer_condition(resource):
             }
             cancer_condition["body_site"].append(coding)
     if "laterality" in resource:
-        cancer_condition["laterality"] = {
-            "id": f"{resource['laterality']['coding'][0]['system']}:"
-                  f"{resource['laterality']['coding'][0]['code']}",
-            "label": f"{resource['laterality']['coding'][0]['display']}"
-        }
+        cancer_condition["laterality"] = get_ontology_value(resource, "laterality")
     if "histologyMorphologyBehavior" in resource:
-        cancer_condition["histology_morphology_behavior"] = {
-            "id": f"{resource['histologyMorphologyBehavior']['coding'][0]['system']}:"
-                  f"{resource['histologyMorphologyBehavior']['coding'][0]['code']}",
-            "label": f"{resource['histologyMorphologyBehavior']['coding'][0]['display']}"
-        }
+        cancer_condition["histology_morphology_behavior"] = get_ontology_value(resource, "histologyMorphologyBehavior")
     return cancer_condition
 
 
