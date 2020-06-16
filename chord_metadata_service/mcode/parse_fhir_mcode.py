@@ -78,6 +78,21 @@ def procedure_to_crprocedure(resource):
     return cancer_related_procedure
 
 
+def get_medication_statement(resource):
+    """ Medication Statement to Medication Statement. """
+    medication_statement = {
+        "id": resource["id"]
+    }
+    if "medicationCodeableConcept" in resource:
+        medication_statement["medication_code"] = {
+            "id": f"{resource['medicationCodeableConcept']['coding'][0]['system']}:"
+                  f"{resource['medicationCodeableConcept']['coding'][0]['code']}",
+            "label": f"{resource['medicationCodeableConcept']['coding'][0]['display']}"
+        }
+    # TODO the rest
+    return medication_statement
+
+
 def _get_tnm_staging_property(resource: dict, profile_urls: list, category_type=None):
     """" Retrieve Observation based on its profile. """
     for profile in profile_urls:
@@ -240,6 +255,11 @@ def parse_bundle(bundle):
             if MCODE_TUMOR_MARKER in resource["meta"]["profile"]:
                 labs_vital = observation_to_labs_vital(resource)
                 tumor_markers.append(labs_vital)
+
+        # get Medication Statement
+        if resource["resourceType"] == "MedicationStatement" and "meta" in resource:
+            if MCODE_MEDICATION_STATEMENT in resource["meta"]["profile"]:
+                mcodepacket["medication_statement"] = get_medication_statement(resource)
 
     # annotate tnm staging with its members
     for tnm_staging_item in tnm_stagings:
