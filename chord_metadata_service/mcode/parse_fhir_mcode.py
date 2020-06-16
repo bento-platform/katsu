@@ -26,6 +26,47 @@ def observation_to_labs_vital(resource):
     return labs_vital
 
 
+def observation_to_tnm_staging(resource):
+    """ Observation with tnm staging to TNMStaging. """
+    tnm_staging = {
+        "id": resource["id"],
+        "tnm_staging_value": {}
+    }
+    if "valueCodeableConcept" in resource:
+        tnm_staging["tnm_staging_value"]["data_value"] = {
+            "id": f"{resource['valueCodeableConcept']['coding'][0]['system']}:"
+                  f"{resource['valueCodeableConcept']['coding'][0]['code']}",
+            "label": f"{resource['valueCodeableConcept']['coding'][0]['display']}"
+        }
+    if "method" in resource:
+        tnm_staging["tnm_staging_value"]["staging_system"] = {
+            "id": f"{resource['method']['coding'][0]['system']}:{resource['method']['coding'][0]['code']}",
+            "label": f"{resource['method']['coding'][0]['display']}"
+        }
+    print(f"This is tnm stagin {tnm_staging}")
+    return tnm_staging
+
+
+def _get_tnm_staging_property(resource: dict, profile_urls: list, category_type=None):
+    """" Retrieve Observation based on its profile. """
+    for profile in profile_urls:
+        if profile in resource["meta"]["profile"]:
+            property_value = observation_to_tnm_staging(resource)
+            if type:
+                property_value["category_type"] = category_type
+            return property_value
+
+
+def _get_profiles(resource: dict, profile_urls: list):
+    try:
+        resource_profiles = resource["meta"]["profile"]
+        for p in profile_urls:
+            if p in resource_profiles:
+                return True
+    except KeyError as e:
+        raise KeyError(e)
+
+
 def condition_to_cancer_condition(resource):
     """ FHIR Condition to Mcode Cancer Condition. """
 
@@ -76,20 +117,28 @@ def parse_bundle(bundle):
     """
     Parse fhir Bundle and extract all relevant profiles.
     :param bundle: FHIR resourceType Bundle object
-    :return:
+    :return: mcodepacket object
     """
     _check_schema(FHIR_BUNDLE_SCHEMA, bundle, 'bundle')
     mcodepacket = {
         "id": str(uuid.uuid4())
     }
     tumor_markers = []
+    # all tnm_stagings
+    tnm_stagings = []
+    # dict that maps tnm_staging value to its member
+    staging_to_members = {}
+    # all tnm staging members
+    tnm_staging_members = []
     for item in bundle["entry"]:
         resource = item["resource"]
+        # get Patient data
         if resource["resourceType"] == "Patient":
             # patient = patient_to_individual(resource)
             mcodepacket["subject"] = {
                 "id": resource["id"]
             }
+        # get Patient's Cancer Condition
         if resource["resourceType"] == "Condition":
             resource_profiles = resource["meta"]["profile"]
             cancer_conditions = [MCODE_PRIMARY_CANCER_CONDITION, MCODE_SECONDARY_CANCER_CONDITION]
@@ -101,10 +150,59 @@ def parse_bundle(bundle):
                             cancer_condition["condition_type"] = key
                             mcodepacket["cancer_condition"] = cancer_condition
 
+        # get TNM staging stage category
+        if resource["resourceType"] == "Observation" and "meta" in resource:
+            resource_profiles = resource["meta"]["profile"]
+            stage_groups = [MCODE_TNM_CLINICAL_STAGE_GROUP, MCODE_TNM_PATHOLOGIC_STAGE_GROUP]
+            for sg in stage_groups:
+                if sg in resource_profiles:
+                    tnm_staging = {"id": resource["id"]}
+                    tnm_stage_group = observation_to_tnm_staging(resource)
+                    tnm_staging["stage_group"] = tnm_stage_group["tnm_staging_value"]
+                    for key, value in MCODE_PROFILES_MAPPING["tnm_staging"]["properties_profile"]["stage_group"].items():
+                        if sg == value:
+                            tnm_staging["tnm_type"] = key
+                    if "hasMember" in resource:
+                        members = []
+                        for member in resource["hasMember"]:
+                            member_observation_id = member["reference"].split('/')[-1]
+                            members.append(member_observation_id)
+                        # collect all members of this staging in a dict
+                        staging_to_members[resource["id"]] = members
+                    tnm_stagings.append(tnm_staging)
+
+        # get all TNM staging members
+        if resource["resourceType"] == "Observation" and "meta" in resource:
+            primary_tumor_category = _get_tnm_staging_property(resource,
+                                                               [MCODE_TNM_CLINICAL_PRIMARY_TUMOR_CATEGORY,
+                                                                MCODE_TNM_PATHOLOGIC_PRIMARY_TUMOR_CATEGORY],
+                                                               'primary_tumor_category')
+            regional_nodes_category = _get_tnm_staging_property(resource,
+                                                                [MCODE_TNM_CLINICAL_REGIONAL_NODES_CATEGORY,
+                                                                 MCODE_TNM_PATHOLOGIC_REGIONAL_NODES_CATEGORY],
+                                                                'regional_nodes_category')
+            distant_metastases_category = _get_tnm_staging_property(resource,
+                                                                    [MCODE_TNM_CLINICAL_REGIONAL_NODES_CATEGORY,
+                                                                     MCODE_TNM_PATHOLOGIC_REGIONAL_NODES_CATEGORY],
+                                                                    'distant_metastases_category')
+
+            for category in [primary_tumor_category, regional_nodes_category, distant_metastases_category]:
+                if category:
+                    tnm_staging_members.append(category)
+
+        # get tumor marker
         if resource["resourceType"] == "Observation" and "meta" in resource:
             if MCODE_TUMOR_MARKER in resource["meta"]["profile"]:
                 labs_vital = observation_to_labs_vital(resource)
                 tumor_markers.append(labs_vital)
+
+    # annotate tnm staging with its members
+    for tnm_staging_item in tnm_stagings:
+        for member in tnm_staging_members:
+            if member["id"] in staging_to_members[tnm_staging_item["id"]]:
+                tnm_staging_item[member["category_type"]] = member["tnm_staging_value"]
+
+    mcodepacket["tnm_staging"] = tnm_stagings
     mcodepacket["tumor_marker"] = tumor_markers
 
     return mcodepacket
