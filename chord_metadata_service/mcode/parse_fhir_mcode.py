@@ -261,6 +261,12 @@ def parse_bundle(bundle):
             if MCODE_MEDICATION_STATEMENT in resource["meta"]["profile"]:
                 mcodepacket["medication_statement"] = get_medication_statement(resource)
 
+        # get Cancer Disease Status
+        if resource["resourceType"] == "Observation" and "meta" in resource:
+            if MCODE_CANCER_DISEASE_STATUS in resource["meta"]["profile"]:
+                # TODO change refactor observation conversion
+                mcodepacket["cancer_disease_status"] = observation_to_labs_vital(resource)["tumor_marker_data_value"]
+
     # annotate tnm staging with its members
     for tnm_staging_item in tnm_stagings:
         for member in tnm_staging_members:
