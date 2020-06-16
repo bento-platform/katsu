@@ -18,7 +18,6 @@ class TestFhirIngest(APITestCase):
                                            dataset=self.d)
         self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
 
-
     def test_fhir_bundle_schema(self):
 
         with self.assertRaises(ValidationError):
@@ -32,6 +31,6 @@ class TestFhirIngest(APITestCase):
 
         with self.assertRaises(KeyError):
             try:
-                ingest_observations(INVALID_SUBJECT_NOT_PRESENT)
+                ingest_observations({}, INVALID_SUBJECT_NOT_PRESENT)
             except KeyError as e:
                 raise e
