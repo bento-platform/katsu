@@ -43,8 +43,39 @@ def observation_to_tnm_staging(resource):
             "id": f"{resource['method']['coding'][0]['system']}:{resource['method']['coding'][0]['code']}",
             "label": f"{resource['method']['coding'][0]['display']}"
         }
-    print(f"This is tnm stagin {tnm_staging}")
     return tnm_staging
+
+
+def procedure_to_crprocedure(resource):
+    """ Procedure to Cancer related Procedure. """
+
+    cancer_related_procedure = {
+        "id": resource["id"]
+    }
+    if "code" in resource:
+        cancer_related_procedure["code"] = {
+            "id": f"{resource['code']['coding'][0]['system']}:"
+                  f"{resource['code']['coding'][0]['code']}",
+            "label": f"{resource['code']['coding'][0]['display']}"
+        }
+    if "bodySite" in resource:
+        cancer_related_procedure["body_site"] = {
+            "id": f"{resource['bodySite']['coding'][0]['system']}:{resource['bodySite']['coding'][0]['code']}",
+            "label": f"{resource['bodySite']['coding'][0]['display']}"
+        }
+    if "reasonCode" in resource:
+        codes = []
+        for code in resource["reasonCode"]["coding"]:
+            reason_code = {
+                "id": f"{code['system']}:{code['code']}",
+                "label": f"{code['display']}"
+            }
+            codes.append(reason_code)
+        cancer_related_procedure["reason_code"] = codes
+    if "reasonReference" in resource:
+        cancer_conditions = [cc["reference"].split("uuid:")[-1] for cc in resource["reasonReference"]]
+        cancer_related_procedure["reason_reference"] = cancer_conditions
+    return cancer_related_procedure
 
 
 def _get_tnm_staging_property(resource: dict, profile_urls: list, category_type=None):
@@ -130,6 +161,8 @@ def parse_bundle(bundle):
     staging_to_members = {}
     # all tnm staging members
     tnm_staging_members = []
+    # all procedure
+    cancer_related_procedures = []
     for item in bundle["entry"]:
         resource = item["resource"]
         # get Patient data
@@ -190,6 +223,18 @@ def parse_bundle(bundle):
                 if category:
                     tnm_staging_members.append(category)
 
+        # get Cancer Related Procedure
+        if resource["resourceType"] == "Procedure" and "meta" in resource:
+            resource_profiles = resource["meta"]["profile"]
+            procedure_profiles = [MCODE_CANCER_RELATED_RADIATION_PROCEDURE, MCODE_CANCER_RELATED_SURGICAL_PROCEDURE]
+            for pp in procedure_profiles:
+                if pp in resource_profiles:
+                    procedure = procedure_to_crprocedure(resource)
+                    for key, value in MCODE_PROFILES_MAPPING["cancer_related_procedure"]["profile"].items():
+                        if pp == value:
+                            procedure["procedure_type"] = key
+                    cancer_related_procedures.append(procedure)
+
         # get tumor marker
         if resource["resourceType"] == "Observation" and "meta" in resource:
             if MCODE_TUMOR_MARKER in resource["meta"]["profile"]:
@@ -204,5 +249,6 @@ def parse_bundle(bundle):
 
     mcodepacket["tnm_staging"] = tnm_stagings
     mcodepacket["tumor_marker"] = tumor_markers
+    mcodepacket["cancer_related_procedures"] = cancer_related_procedures
 
     return mcodepacket

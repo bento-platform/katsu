@@ -259,6 +259,7 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
     treatment_intent = JSONField(blank=True, null=True, validators=[ontology_validator],
                                  help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "treatment_intent"))
     # Only for Surgical Procedure
+    # TODO CHANGE to ontology list validator
     reason_code = JSONField(blank=True, null=True, validators=[ontology_validator],
                             help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "reason_code"))
     reason_reference = models.ManyToManyField(CancerCondition, blank=True,
