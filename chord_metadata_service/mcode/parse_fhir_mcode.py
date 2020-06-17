@@ -39,6 +39,8 @@ def observation_to_labs_vital(resource):
         labs_vital["tumor_marker_code"] = get_ontology_value(resource, "code")
     if "valueCodeableConcept" in resource:
         labs_vital["tumor_marker_data_value"] = get_ontology_value(resource, "valueCodeableConcept")
+    if "subject":
+        labs_vital["individual"] = resource["subject"]["reference"].split("uuid:")[-1]
     return labs_vital
 
 
@@ -52,6 +54,9 @@ def observation_to_tnm_staging(resource):
         tnm_staging["tnm_staging_value"]["data_value"] = get_ontology_value(resource, "valueCodeableConcept")
     if "method" in resource:
         tnm_staging["tnm_staging_value"]["staging_system"] = get_ontology_value(resource, "method")
+    # reference to Condition
+    if "focus" in resource:
+        tnm_staging["cancer_condition"] = resource["focus"][0]["reference"].split("/")[-1]
     return tnm_staging
 
 
@@ -77,6 +82,7 @@ def procedure_to_crprocedure(resource):
     if "reasonReference" in resource:
         cancer_conditions = [cc["reference"].split("uuid:")[-1] for cc in resource["reasonReference"]]
         cancer_related_procedure["reason_reference"] = cancer_conditions
+    # TODO add laterality
     return cancer_related_procedure
 
 
@@ -96,7 +102,7 @@ def _get_tnm_staging_property(resource: dict, profile_urls: list, category_type=
     for profile in profile_urls:
         if profile in resource["meta"]["profile"]:
             property_value = observation_to_tnm_staging(resource)
-            if type:
+            if category_type:
                 property_value["category_type"] = category_type
             return property_value
 
@@ -188,6 +194,7 @@ def parse_bundle(bundle):
                 if sg in resource_profiles:
                     tnm_staging = {"id": resource["id"]}
                     tnm_stage_group = observation_to_tnm_staging(resource)
+                    tnm_staging["cancer_condition"] = tnm_stage_group["cancer_condition"]
                     tnm_staging["stage_group"] = tnm_stage_group["tnm_staging_value"]
                     for key, value in MCODE_PROFILES_MAPPING["tnm_staging"]["properties_profile"]["stage_group"].items():
                         if sg == value:
@@ -255,8 +262,14 @@ def parse_bundle(bundle):
             if member["id"] in staging_to_members[tnm_staging_item["id"]]:
                 tnm_staging_item[member["category_type"]] = member["tnm_staging_value"]
 
-    mcodepacket["tnm_staging"] = tnm_stagings
+    # mcodepacket["tnm_staging"] = tnm_stagings
     mcodepacket["tumor_marker"] = tumor_markers
     mcodepacket["cancer_related_procedures"] = cancer_related_procedures
 
+    # TODO add nested tnm_stagings to cancer_condition
+    for tnms in tnm_stagings:
+        if tnms["cancer_condition"] == mcodepacket["cancer_condition"]["id"]:
+            mcodepacket["cancer_condition"]["tnm_staging"] = tnm_stagings
+
     return mcodepacket
+
