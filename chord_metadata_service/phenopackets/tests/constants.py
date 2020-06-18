@@ -31,7 +31,8 @@ VALID_META_DATA_2 = {
     "external_references": [
         {
             "id": "PMID:30808312",
-            "description": "Bao M, et al. COL6A1 mutation leading to Bethlem myopathy with recurrent hematuria: a case report. BMC Neurol. 2019;19(1):32."
+            "description": "Bao M, et al. COL6A1 mutation leading to Bethlem myopathy with recurrent hematuria: a case "
+                           "report. BMC Neurol. 2019;19(1):32."
         },
         {
             "id": "PMID:3080844",
