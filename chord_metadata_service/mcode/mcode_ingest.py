@@ -1,11 +1,5 @@
-import uuid
-import jsonschema
 import logging
-
-from chord_metadata_service.restapi.schemas import FHIR_BUNDLE_SCHEMA
 from chord_metadata_service.patients.models import Individual
-
-from .parse_fhir_mcode import parse_bundle
 from .models import *
 
 
@@ -113,11 +107,6 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                 tumor_marker_data_value=tm.get("tumor_marker_data_value", None),
                 individual=Individual.objects.get(id=tm["individual"])
             )
-    # if cancer_conditions:
-    #     new_mcodepacket["cancer_condition"] = cancer_conditions
-    #
-    # if crprocedures:
-    #     new_mcodepacket["cancer_related_procedures"] = crprocedures
 
     mcodepacket = MCodePacket(
         id=new_mcodepacket["id"],

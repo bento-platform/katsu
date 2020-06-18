@@ -166,6 +166,7 @@ def parse_bundle(bundle):
     tnm_staging_members = []
     # all procedure
     cancer_related_procedures = []
+    # all cancer conditions
     cancer_conditions = []
     for item in bundle["entry"]:
         resource = item["resource"]
@@ -186,7 +187,6 @@ def parse_bundle(bundle):
                         if cc == value:
                             cancer_condition["condition_type"] = key
                             cancer_conditions.append(cancer_condition)
-                            # mcodepacket["cancer_condition"] = cancer_condition
 
         # get TNM staging stage category
         if resource["resourceType"] == "Observation" and "meta" in resource:
@@ -276,4 +276,3 @@ def parse_bundle(bundle):
             mcodepacket["cancer_condition"]["tnm_staging"] = tnm_stagings
 
     return mcodepacket
-
