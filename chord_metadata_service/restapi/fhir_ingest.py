@@ -2,6 +2,7 @@ import uuid
 import jsonschema
 import logging
 
+from django.core.exceptions import ValidationError
 from typing import Dict
 
 from .schemas import FHIR_BUNDLE_SCHEMA
@@ -11,8 +12,16 @@ from .fhir_utils import (
     condition_to_disease,
     specimen_to_biosample
 )
-from chord_metadata_service.chord.models import *
-from chord_metadata_service.phenopackets.models import *
+from chord_metadata_service.chord.models import Table
+from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.phenopackets.models import (
+    Biosample,
+    Disease,
+    MetaData,
+    Phenopacket,
+    PhenotypicFeature,
+    Procedure,
+)
 
 
 logger = logging.getLogger("fhir_ingest")

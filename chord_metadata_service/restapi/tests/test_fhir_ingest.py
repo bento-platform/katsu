@@ -1,11 +1,13 @@
-from rest_framework.test import APITestCase
-from chord_metadata_service.chord.models import *
-from chord_metadata_service.phenopackets.models import *
-from .constants import INVALID_FHIR_BUNDLE_1, INVALID_SUBJECT_NOT_PRESENT
-from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
-from chord_metadata_service.restapi.fhir_ingest import ingest_patients, ingest_observations
 import uuid
+
+from django.core.exceptions import ValidationError
+from rest_framework.test import APITestCase
+
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
+from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+from chord_metadata_service.restapi.fhir_ingest import ingest_patients, ingest_observations
+from .constants import INVALID_FHIR_BUNDLE_1, INVALID_SUBJECT_NOT_PRESENT
 
 
 class TestFhirIngest(APITestCase):

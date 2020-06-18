@@ -1,4 +1,15 @@
+from rest_framework import status
 from rest_framework.test import APITestCase
+
+from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.patients.tests.constants import VALID_INDIVIDUAL, VALID_INDIVIDUAL_2
+from chord_metadata_service.phenopackets.models import (
+    MetaData,
+    Procedure,
+    Biosample,
+    Phenopacket,
+    PhenotypicFeature,
+)
 from chord_metadata_service.phenopackets.tests.constants import (
     VALID_INDIVIDUAL_1,
     VALID_META_DATA_2,
@@ -11,10 +22,7 @@ from chord_metadata_service.phenopackets.tests.constants import (
     valid_biosample_2,
     valid_phenotypic_feature,
 )
-from chord_metadata_service.patients.tests.constants import VALID_INDIVIDUAL, VALID_INDIVIDUAL_2
 from chord_metadata_service.restapi.tests.utils import get_response
-from chord_metadata_service.phenopackets.models import *
-from rest_framework import status
 
 
 # Tests for FHIR conversion functions
@@ -130,7 +138,7 @@ class FHIRProcedureTest(APITestCase):
         self.valid_procedure = VALID_PROCEDURE_1
 
     def test_get_fhir(self):
-        response = get_response('procedure-list', self.valid_procedure)
+        get_response('procedure-list', self.valid_procedure)
         get_resp = self.client.get('/api/procedures?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -191,7 +199,7 @@ class FHIRGeneTest(APITestCase):
         self.gene = VALID_GENE_1
 
     def test_get_fhir(self):
-        response = get_response('gene-list', self.gene)
+        get_response('gene-list', self.gene)
         get_resp = self.client.get('/api/genes?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -211,7 +219,7 @@ class FHIRVariantTest(APITestCase):
         self.variant = VALID_VARIANT_1
 
     def test_get_fhir(self):
-        response = get_response('variant-list', self.variant)
+        get_response('variant-list', self.variant)
         get_resp = self.client.get('/api/variants?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -230,7 +238,7 @@ class FHIRDiseaseTest(APITestCase):
         self.disease = VALID_DISEASE_1
 
     def test_get_fhir(self):
-        response = get_response('disease-list', self.disease)
+        get_response('disease-list', self.disease)
         get_resp = self.client.get('/api/diseases?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()

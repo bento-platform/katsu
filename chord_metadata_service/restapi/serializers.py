@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from collections import OrderedDict
+from rest_framework import serializers
 from typing import Tuple
 
 
