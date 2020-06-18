@@ -325,6 +325,8 @@ class MCodePacket(models.Model, IndexableMixin):
     date_of_death = models.CharField(max_length=200, blank=True, help_text=rec_help(d.MCODEPACKET, "date_of_death"))
     cancer_disease_status = JSONField(blank=True, null=True, validators=[ontology_validator],
                                       help_text=rec_help(d.MCODEPACKET, "cancer_disease_status"))
+    # link to dataset via the table
+    table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
     extra_properties = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.MCODEPACKET, "extra_properties"))
     created = models.DateTimeField(auto_now=True)

@@ -13,9 +13,10 @@ logger = logging.getLogger("mcode_ingest")
 logger.setLevel(logging.INFO)
 
 
-def ingest_mcodepacket(mcodepacket_data):
+def ingest_mcodepacket(mcodepacket_data, table_id):
     """ Ingests a single mcodepacket in mcode app and patients' metadata int patients app."""
-    new_mcodepacket = mcodepacket_data["id"]
+
+    new_mcodepacket = {"id": mcodepacket_data["id"]}
     subject = mcodepacket_data["subject"]
     genomics_report_data = mcodepacket_data.get("genomics_report", None)
     cancer_condition_data = mcodepacket_data.get("cancer_condition", None)
@@ -28,6 +29,7 @@ def ingest_mcodepacket(mcodepacket_data):
     # get and create Patient
     if subject:
         subject, _ = Individual.objects.get_or_create(**subject)
+        new_mcodepacket["subject"] = subject.id
 
     if genomics_report_data:
         # don't have data for genomics report yet
@@ -35,11 +37,30 @@ def ingest_mcodepacket(mcodepacket_data):
 
     # get and create CancerCondition
     if cancer_condition_data:
-        cancer_condition, _ = CancerCondition.objects.get_or_create(**cancer_condition_data)
+        # cancer_condition, _ = CancerCondition.objects.get_or_create(**cancer_condition_data)
+        cancer_condition, _ = CancerCondition.objects.get_or_create(
+            id=cancer_condition_data["id"],
+            code=cancer_condition_data["code"],
+            condition_type=cancer_condition_data["condition_type"],
+            clinical_status=cancer_condition_data.get("clinical_status", None),
+            verification_status=cancer_condition_data.get("verification_status", None),
+            date_of_diagnosis=cancer_condition_data.get("date_of_diagnosis", None),
+            body_site=cancer_condition_data.get("body_site", None),
+            laterality=cancer_condition_data.get("laterality", None),
+            histology_morphology_behavior=cancer_condition_data.get("histology_morphology_behavior", None)
+        )
         new_mcodepacket["cancer_condition"] = cancer_condition
         if "tnm_staging" in cancer_condition_data:
             for tnms in cancer_condition_data["tnm_staging"]:
-                tnm_staging, _ = TNMStaging.objects.get_or_create(**tnms)
+                tnm_staging, _ = TNMStaging.objects.get_or_create(
+                    id=tnms["id"],
+                    cancer_condition=cancer_condition,
+                    stage_group=tnms["stage_group"],
+                    tnm_type=tnms["tnm_type"],
+                    primary_tumor_category=tnms.get("primary_tumor_category", None),
+                    regional_nodes_category=tnms.get("regional_nodes_category", None),
+                    distant_metastases_category=tnms.get("distant_metastases_category", None)
+                )
 
     # get and create Cancer Related Procedure
     crprocedures = []
@@ -55,11 +76,13 @@ def ingest_mcodepacket(mcodepacket_data):
                 reason_code=crp.get("reason_code", None),
                 extra_properties=crp.get("extra_properties", None)
             )
-            crprocedures.append(cancer_related_procedure)
+            crprocedures.append(cancer_related_procedure.id)
             if "reason_reference" in crp:
+                related_cancer_conditions = []
                 for rr_id in crp["reason_reference"]:
-                    related_cancer_condition = CancerCondition.objects.get(id=rr_id)
-                    cancer_related_procedure.add(related_cancer_condition)
+                    condition = CancerCondition.objects.get(id=rr_id)
+                    related_cancer_conditions.append(condition)
+                cancer_related_procedure.reason_reference.set(related_cancer_conditions)
 
     # get and create CancerCondition
     if medication_statement_data:
@@ -81,9 +104,25 @@ def ingest_mcodepacket(mcodepacket_data):
     if tumor_markers:
         for tm in tumor_markers:
             tumor_marker, _ = LabsVital.objects.get_or_create(
+                id=tm["id"],
                 tumor_marker_code=tm["tumor_marker_code"],
                 tumor_marker_data_value=tm.get("tumor_marker_data_value", None),
-                individual=tm["individual"]
+                individual=Individual.objects.get(id=tm["individual"])
             )
+    if crprocedures:
+        new_mcodepacket["cancer_related_procedures"] = crprocedures
 
-    return new_mcodepacket
+    mcodepacket = MCodePacket(
+        id=new_mcodepacket["id"],
+        subject=Individual.objects.get(id=new_mcodepacket["subject"]),
+        genomics_report=new_mcodepacket.get("genomics_report", None),
+        cancer_condition=new_mcodepacket.get("cancer_condition", None),
+        medication_statement=new_mcodepacket.get("medication_statement", None),
+        date_of_death=new_mcodepacket.get("date_of_death", ""),
+        cancer_disease_status=new_mcodepacket.get("cancer_disease_status", None),
+        table_id=table_id
+    )
+    mcodepacket.save()
+    mcodepacket.cancer_related_procedures.set(crprocedures)
+
+    return mcodepacket
