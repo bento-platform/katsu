@@ -166,6 +166,7 @@ def parse_bundle(bundle):
     tnm_staging_members = []
     # all procedure
     cancer_related_procedures = []
+    cancer_conditions = []
     for item in bundle["entry"]:
         resource = item["resource"]
         # get Patient data
@@ -177,14 +178,15 @@ def parse_bundle(bundle):
         # get Patient's Cancer Condition
         if resource["resourceType"] == "Condition":
             resource_profiles = resource["meta"]["profile"]
-            cancer_conditions = [MCODE_PRIMARY_CANCER_CONDITION, MCODE_SECONDARY_CANCER_CONDITION]
-            for cc in cancer_conditions:
+            cancer_conditions_profiles = [MCODE_PRIMARY_CANCER_CONDITION, MCODE_SECONDARY_CANCER_CONDITION]
+            for cc in cancer_conditions_profiles:
                 if cc in resource_profiles:
                     cancer_condition = condition_to_cancer_condition(resource)
                     for key, value in MCODE_PROFILES_MAPPING["cancer_condition"]["profile"].items():
                         if cc == value:
                             cancer_condition["condition_type"] = key
-                            mcodepacket["cancer_condition"] = cancer_condition
+                            cancer_conditions.append(cancer_condition)
+                            # mcodepacket["cancer_condition"] = cancer_condition
 
         # get TNM staging stage category
         if resource["resourceType"] == "Observation" and "meta" in resource:
@@ -262,6 +264,8 @@ def parse_bundle(bundle):
             if member["id"] in staging_to_members[tnm_staging_item["id"]]:
                 tnm_staging_item[member["category_type"]] = member["tnm_staging_value"]
 
+    if cancer_conditions:
+        mcodepacket["cancer_condition"] = cancer_conditions
     # mcodepacket["tnm_staging"] = tnm_stagings
     mcodepacket["tumor_marker"] = tumor_markers
     mcodepacket["cancer_related_procedures"] = cancer_related_procedures

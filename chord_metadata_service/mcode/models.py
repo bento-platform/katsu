@@ -115,7 +115,7 @@ class GenomicsReport(models.Model, IndexableMixin):
     code = JSONField(validators=[ontology_validator], help_text=rec_help(d.GENOMICS_REPORT, "code"))
     performing_organization_name = models.CharField(
         max_length=200, blank=True, help_text=rec_help(d.GENOMICS_REPORT, "performing_organization_name"))
-    issued = models.DateTimeField(default=timezone.now(), help_text=rec_help(d.GENOMICS_REPORT, "issued"))
+    issued = models.DateTimeField(default=timezone.now, help_text=rec_help(d.GENOMICS_REPORT, "issued"))
     genetic_specimen = models.ManyToManyField(GeneticSpecimen, blank=True,
                                               help_text=rec_help(d.GENOMICS_REPORT, "genetic_specimen"))
     genetic_variant = models.ForeignKey(CancerGeneticVariant, blank=True, null=True, on_delete=models.SET_NULL,
@@ -316,8 +316,10 @@ class MCodePacket(models.Model, IndexableMixin):
                                 help_text=rec_help(d.MCODEPACKET, "subject"))
     genomics_report = models.ForeignKey(GenomicsReport, blank=True, null=True, on_delete=models.SET_NULL,
                                         help_text=rec_help(d.MCODEPACKET, "genomics_report"))
-    cancer_condition = models.ForeignKey(CancerCondition, blank=True, null=True, on_delete=models.SET_NULL,
-                                         help_text=rec_help(d.MCODEPACKET, "cancer_condition"))
+    # cancer_condition = models.ForeignKey(CancerCondition, blank=True, null=True, on_delete=models.SET_NULL,
+    #                                      help_text=rec_help(d.MCODEPACKET, "cancer_condition"))
+    cancer_condition = models.ManyToManyField(CancerCondition, blank=True,
+                                              help_text=rec_help(d.MCODEPACKET, "cancer_condition"))
     cancer_related_procedures = models.ManyToManyField(CancerRelatedProcedure, blank=True,
                                                        help_text=rec_help(d.MCODEPACKET, "cancer_related_procedures"))
     medication_statement = models.ForeignKey(MedicationStatement, blank=True, null=True, on_delete=models.SET_NULL,
