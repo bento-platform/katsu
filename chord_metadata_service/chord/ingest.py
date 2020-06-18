@@ -5,7 +5,7 @@ import uuid
 from dateutil.parser import isoparse
 from typing import Callable
 
-from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET
+from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
 from chord_metadata_service.chord.models import Table, TableOwnership
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.phenopackets import models as pm
@@ -16,6 +16,8 @@ from chord_metadata_service.restapi.fhir_ingest import (
     ingest_conditions,
     ingest_specimens
 )
+from chord_metadata_service.mcode.parse_fhir_mcode import parse_bundle
+from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
 
 
 __all__ = [
@@ -28,6 +30,7 @@ __all__ = [
 WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
+WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
 
 METADATA_WORKFLOWS = {
     "ingestion": {
@@ -141,6 +144,29 @@ METADATA_WORKFLOWS = {
                     "value": "{created_by}"
                 },
 
+            ]
+        },
+        WORKFLOW_MCODE_FHIR_JSON: {
+            "name": "MCODE FHIR Resources JSON",
+            "description": "This ingestion workflow will validate and import a mCODE FHIR 4.0. schema-compatible "
+                           "JSON document, and convert it to the Bento metadata service's internal mCODE-based "
+                           "data model.",
+            "data_type": DATA_TYPE_MCODEPACKET,
+            "file": "mcode_fhir_json.wdl",
+            "inputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "required": True,
+                    "extensions": [".json"]
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "value": "{json_document}"
+                }
             ]
         }
     },
@@ -372,8 +398,16 @@ def ingest_fhir_workflow(workflow_outputs, table_id):
             ingest_specimens(phenopacket_ids, specimens_data)
 
 
+def ingest_mcode_fhir_workflow(workflow_outputs, table_id):
+    with open(workflow_outputs["json_document"], "r") as jf:
+        json_data = json.load(jf)
+        mcodepacket = parse_bundle(json_data)
+        ingest_mcodepacket(mcodepacket, table_id)
+
+
 WORKFLOW_INGEST_FUNCTION_MAP = {
     WORKFLOW_EXPERIMENTS_JSON: ingest_experiments_workflow,
     WORKFLOW_PHENOPACKETS_JSON: ingest_phenopacket_workflow,
     WORKFLOW_FHIR_JSON: ingest_fhir_workflow,
+    WORKFLOW_MCODE_FHIR_JSON: ingest_mcode_fhir_workflow,
 }
