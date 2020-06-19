@@ -270,9 +270,14 @@ def parse_bundle(bundle):
     mcodepacket["tumor_marker"] = tumor_markers
     mcodepacket["cancer_related_procedures"] = cancer_related_procedures
 
-    # TODO add nested tnm_stagings to cancer_condition
     for tnms in tnm_stagings:
-        if tnms["cancer_condition"] == mcodepacket["cancer_condition"]["id"]:
-            mcodepacket["cancer_condition"]["tnm_staging"] = tnm_stagings
+        if tnms["cancer_condition"] in [cc_id["id"] for cc_id in mcodepacket["cancer_condition"]]:
+            for cc in mcodepacket["cancer_condition"]:
+                if cc["id"] == tnms["cancer_condition"]:
+                    if "tnm_staging" in cc:
+                        cc["tnm_staging"].append(tnms)
+                    else:
+                        cc["tnm_staging"] = []
+                        cc["tnm_staging"].append(tnms)
 
     return mcodepacket

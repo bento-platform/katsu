@@ -93,7 +93,6 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
             if "reason_reference" in crp:
                 related_cancer_conditions = []
                 for rr_id in crp["reason_reference"]:
-                    print(f"REASON REFERENCE CANCER CONDITION {rr_id}")
                     condition = CancerCondition.objects.get(id=rr_id)
                     related_cancer_conditions.append(condition)
                 cancer_related_procedure.reason_reference.set(related_cancer_conditions)
