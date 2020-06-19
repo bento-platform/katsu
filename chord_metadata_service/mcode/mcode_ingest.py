@@ -7,6 +7,13 @@ logger = logging.getLogger("mcode_ingest")
 logger.setLevel(logging.INFO)
 
 
+def _logger_message(created, obj, obj_id):
+    if created:
+        logger.info(f"New {obj.__class__.__name__} {obj_id} created")
+    else:
+        logger.info(f"Existing {obj.__class__.__name__} {obj_id} retrieved")
+
+
 def ingest_mcodepacket(mcodepacket_data, table_id):
     """ Ingests a single mcodepacket in mcode app and patients' metadata int patients app."""
 
@@ -48,10 +55,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                     "histology_morphology_behavior": cc.get("histology_morphology_behavior", None)
                 }
             )
-            if cc_created:
-                logger.info(f"New Cancer Condition {cancer_condition.id} created")
-            else:
-                logger.info(f"Existing Cancer Condition {cancer_condition.id} retrieved")
+            _logger_message(cc_created, cancer_condition, cancer_condition.id)
             cancer_conditions.append(cancer_condition.id)
             if "tnm_staging" in cc:
                 for tnms in cc["tnm_staging"]:
@@ -64,10 +68,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                         regional_nodes_category=tnms.get("regional_nodes_category", None),
                         distant_metastases_category=tnms.get("distant_metastases_category", None)
                     )
-                    if tnms_created:
-                        logger.info(f"New TNM Staging {tnm_staging.id} created")
-                    else:
-                        logger.info(f"Existing TNM Staging {tnm_staging.id} retrieved")
+                    _logger_message(tnms_created, tnm_staging, tnm_staging.id)
 
     # get and create Cancer Related Procedure
     crprocedures = []
@@ -85,10 +86,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                     "extra_properties": crp.get("extra_properties", None)
                 }
             )
-            if crp_created:
-                logger.info(f'New Cancer Related Procedure {cancer_related_procedure.id} created')
-            else:
-                logger.info(f'Existing Cancer Related Procedure {cancer_related_procedure.id} retrieved')
+            _logger_message(crp_created, cancer_related_procedure, cancer_related_procedure.id)
             crprocedures.append(cancer_related_procedure.id)
             if "reason_reference" in crp:
                 related_cancer_conditions = []
@@ -105,10 +103,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                 "medication_code": medication_statement_data["medication_code"]
             }
         )
-        if ms_created:
-            logger.info(f"New Medication Statement {medication_statement.id} created")
-        else:
-            logger.info(f"Existing Medication Statement {medication_statement.id} retrieved")
+        _logger_message(ms_created, medication_statement, medication_statement.id)
         new_mcodepacket["medication_statement"] = medication_statement
 
     # get date of death
@@ -130,10 +125,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                     "individual": Individual.objects.get(id=tm["individual"])
                 }
             )
-            if tm_created:
-                logger.info(f"New LabsVital with tumor marker {tumor_marker.id} created")
-            else:
-                logger.info(f"Existing LabsVital with tumor marker {tumor_marker.id} retrieved")
+            _logger_message(tm_created, tumor_marker, tumor_marker.id)
 
     mcodepacket = MCodePacket(
         id=new_mcodepacket["id"],
@@ -145,7 +137,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
         table_id=table_id
     )
     mcodepacket.save()
-    logger.info(f"Mcodepacket {mcodepacket.id} created")
+    logger.info(f"New Mcodepacket {mcodepacket.id} created")
     if cancer_conditions:
         mcodepacket.cancer_condition.set(cancer_conditions)
     if crprocedures:
