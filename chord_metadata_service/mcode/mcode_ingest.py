@@ -7,15 +7,15 @@ logger = logging.getLogger("mcode_ingest")
 logger.setLevel(logging.INFO)
 
 
-def _logger_message(created, obj, obj_id):
+def _logger_message(created, obj):
     if created:
-        logger.info(f"New {obj.__class__.__name__} {obj_id} created")
+        logger.info(f"New {obj.__class__.__name__} {obj.id} created")
     else:
-        logger.info(f"Existing {obj.__class__.__name__} {obj_id} retrieved")
+        logger.info(f"Existing {obj.__class__.__name__} {obj.id} retrieved")
 
 
 def ingest_mcodepacket(mcodepacket_data, table_id):
-    """ Ingests a single mcodepacket in mcode app and patients' metadata int patients app."""
+    """ Ingests a single mcodepacket in mcode app and patients' metadata into patients app."""
 
     new_mcodepacket = {"id": mcodepacket_data["id"]}
     subject = mcodepacket_data["subject"]
@@ -29,8 +29,17 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
 
     # get and create Patient
     if subject:
-        subject, _ = Individual.objects.get_or_create(**subject)
-        logger.info(f"Individual {subject.id} created")
+        subject, s_created = Individual.objects.get_or_create(
+            id=subject["id"],
+            defaults={
+                "alternate_ids": subject.get("alternate_ids", None),
+                "sex": subject.get("sex", ""),
+                "date_of_birth": subject.get("date_of_birth", None),
+                "active": subject.get("active", None),
+                "deceased": subject.get("deceased", None)
+            }
+        )
+        _logger_message(s_created, subject)
         new_mcodepacket["subject"] = subject.id
 
     if genomics_report_data:
@@ -55,20 +64,23 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                     "histology_morphology_behavior": cc.get("histology_morphology_behavior", None)
                 }
             )
-            _logger_message(cc_created, cancer_condition, cancer_condition.id)
+            _logger_message(cc_created, cancer_condition)
             cancer_conditions.append(cancer_condition.id)
             if "tnm_staging" in cc:
                 for tnms in cc["tnm_staging"]:
                     tnm_staging, tnms_created = TNMStaging.objects.get_or_create(
                         id=tnms["id"],
-                        cancer_condition=cancer_condition,
-                        stage_group=tnms["stage_group"],
-                        tnm_type=tnms["tnm_type"],
-                        primary_tumor_category=tnms.get("primary_tumor_category", None),
-                        regional_nodes_category=tnms.get("regional_nodes_category", None),
-                        distant_metastases_category=tnms.get("distant_metastases_category", None)
+                        defaults={
+                            "cancer_condition": cancer_condition,
+                            "stage_group": tnms["stage_group"],
+                            "tnm_type": tnms["tnm_type"],
+                            "primary_tumor_category": tnms.get("primary_tumor_category", None),
+                            "regional_nodes_category": tnms.get("regional_nodes_category", None),
+                            "distant_metastases_category": tnms.get("distant_metastases_category", None)
+
+                        }
                     )
-                    _logger_message(tnms_created, tnm_staging, tnm_staging.id)
+                    _logger_message(tnms_created, tnm_staging)
 
     # get and create Cancer Related Procedure
     crprocedures = []
@@ -86,7 +98,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                     "extra_properties": crp.get("extra_properties", None)
                 }
             )
-            _logger_message(crp_created, cancer_related_procedure, cancer_related_procedure.id)
+            _logger_message(crp_created, cancer_related_procedure)
             crprocedures.append(cancer_related_procedure.id)
             if "reason_reference" in crp:
                 related_cancer_conditions = []
@@ -103,7 +115,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                 "medication_code": medication_statement_data["medication_code"]
             }
         )
-        _logger_message(ms_created, medication_statement, medication_statement.id)
+        _logger_message(ms_created, medication_statement)
         new_mcodepacket["medication_statement"] = medication_statement
 
     # get date of death
@@ -125,7 +137,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                     "individual": Individual.objects.get(id=tm["individual"])
                 }
             )
-            _logger_message(tm_created, tumor_marker, tumor_marker.id)
+            _logger_message(tm_created, tumor_marker)
 
     mcodepacket = MCodePacket(
         id=new_mcodepacket["id"],

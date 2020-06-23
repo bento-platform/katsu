@@ -1,11 +1,9 @@
 import uuid
-import json
 
 from .mappings.mappings import *
 from .mappings.mcode_profiles import *
 from chord_metadata_service.restapi.schemas import FHIR_BUNDLE_SCHEMA
-from chord_metadata_service.restapi.fhir_ingest import _check_schema
-from chord_metadata_service.restapi.fhir_utils import patient_to_individual
+from chord_metadata_service.restapi.fhir_ingest import check_schema
 
 
 def get_ontology_value(resource, codeable_concept_property):
@@ -28,6 +26,33 @@ def get_ontology_value(resource, codeable_concept_property):
     # will be raised if there is no "code" in Coding element
     except KeyError as e:
         raise KeyError(e)
+
+
+def patient_to_individual(resource):
+    """ Patient to Individual. """
+
+    # TODO when smart-on-fhir for fhir 4.0 is issued change it for  function form fhir-utils
+    individual = {
+        "id": resource["id"]
+    }
+    if "identifier" in resource:
+        individual["alternate_ids"] = [alternate_id["value"] for alternate_id in resource["identifier"]]
+    gender_to_sex = {
+        "male": "MALE",
+        "female": "FEMALE",
+        "other": "OTHER_SEX",
+        "unknown": "UNKNOWN_SEX"
+    }
+    if "gender" in resource:
+        individual["sex"] = gender_to_sex[resource["gender"]]
+    if "birthDate" in resource:
+        individual["date_of_birth"] = resource["birthDate"]
+    if "active" in resource:
+        if resource["active"]:
+            individual["active"] = True
+    if "deceasedBoolean" in resource:
+        individual["deceased"] = True
+    return individual
 
 
 def observation_to_labs_vital(resource):
@@ -153,7 +178,7 @@ def parse_bundle(bundle):
     :param bundle: FHIR resourceType Bundle object
     :return: mcodepacket object
     """
-    _check_schema(FHIR_BUNDLE_SCHEMA, bundle, 'bundle')
+    check_schema(FHIR_BUNDLE_SCHEMA, bundle, 'bundle')
     mcodepacket = {
         "id": str(uuid.uuid4())
     }
@@ -172,10 +197,8 @@ def parse_bundle(bundle):
         resource = item["resource"]
         # get Patient data
         if resource["resourceType"] == "Patient":
-            # patient = patient_to_individual(resource)
-            mcodepacket["subject"] = {
-                "id": resource["id"]
-            }
+            mcodepacket["subject"] = patient_to_individual(resource)
+
         # get Patient's Cancer Condition
         if resource["resourceType"] == "Condition":
             resource_profiles = resource["meta"]["profile"]
