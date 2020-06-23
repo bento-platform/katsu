@@ -258,33 +258,6 @@ MCODE_LABS_VITAL_SCHEMA = describe_schema({
     "required": ["id", "individual", "tumor_marker_code"]
 }, LABS_VITAL)
 
-# TODO check required inb data dictionary
-MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
-    "type": "object",
-    "properties": {
-        "id": {
-            "type": "string"
-        },
-        "condition_type": {
-            "type": "string",
-            "enum": [
-                "primary",
-                "secondary"
-            ]
-        },
-        "body_site": ONTOLOGY_CLASS_LIST,
-        "clinical_status": ONTOLOGY_CLASS,
-        "code": ONTOLOGY_CLASS,
-        "date_of_diagnosis": {
-            "type": "string",
-            "format": "date-time"
-        },
-        "histology_morphology_behavior": ONTOLOGY_CLASS,
-        "extra_properties": EXTRA_PROPERTIES_SCHEMA
-    },
-    "required": ["id", "condition_type", "code"]
-}, LABS_VITAL)
-
 MCODE_TNM_STAGING_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
@@ -317,6 +290,38 @@ MCODE_TNM_STAGING_SCHEMA = describe_schema({
         "cancer_condition"
     ]
 }, TNM_STAGING)
+
+# TODO check required inb data dictionary
+MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "condition_type": {
+            "type": "string",
+            "enum": [
+                "primary",
+                "secondary"
+            ]
+        },
+        "body_site": ONTOLOGY_CLASS_LIST,
+        "clinical_status": ONTOLOGY_CLASS,
+        "code": ONTOLOGY_CLASS,
+        "date_of_diagnosis": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "histology_morphology_behavior": ONTOLOGY_CLASS,
+        "tnm_staging": {
+            "type": "array",
+            "items": MCODE_TNM_STAGING_SCHEMA
+        },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
+    },
+    "required": ["id", "condition_type", "code"]
+}, LABS_VITAL)
+
 
 MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = describe_schema({
     "type": "object",
@@ -387,6 +392,10 @@ MCODE_SCHEMA = describe_schema({
         "medication_statement": MCODE_MEDICATION_STATEMENT_SCHEMA,
         "date_of_death": {
             "type": "string"
+        },
+        "tumor_marker": {
+            "type": "array",
+            "items": MCODE_LABS_VITAL_SCHEMA
         },
         "cancer_disease_status": ONTOLOGY_CLASS,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
