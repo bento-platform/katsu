@@ -1,5 +1,4 @@
 # Individual
-# TODO there are two version of mcode profile URLs, both are not resolvable, monitor when stable URLs are being release
 MCODE_PATIENT = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-cancer-patient"
 MCODE_COMORBID_CONDITION = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-comorbid-condition"
 MCODE_ECOG_PERFORMANCE_STATUS = "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-ecog-performance-status"

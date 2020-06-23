@@ -4,7 +4,6 @@ from chord_metadata_service.patients.models import Individual
 from ..models import *
 from .constants import *
 from rest_framework import serializers
-from django.core.validators import ValidationError
 
 
 class GenomicsReportTest(TestCase):
@@ -29,21 +28,21 @@ class LabsVitalTest(TestCase):
         labs_vital = LabsVital.objects.get(id='labs_vital:01')
         self.assertIsInstance(labs_vital.tumor_marker_code, dict)
 
-    # def test_validation(self):
-    #     invalid_obj = valid_labs_vital(self.individual)
-    #     invalid_obj["id"] = "labs_vital:02"
-    #     invalid_obj["tumor_marker_test"]["code"] = {
-    #         "coding": [
-    #             {
-    #                 "code": "50610-5",
-    #                 "display": "Alpha-1-Fetoprotein",
-    #                 "system": "loinc.org"
-    #             }
-    #         ]
-    #     }
-    #     invalid = LabsVital.objects.create(**invalid_obj)
-    #     with self.assertRaises(serializers.ValidationError):
-    #         invalid.full_clean()
+    def test_validation(self):
+        invalid_obj = valid_labs_vital(self.individual)
+        invalid_obj["id"] = "labs_vital:02"
+        invalid_obj["tumor_marker_code"] = {
+            "coding": [
+                {
+                    "code": "50610-5",
+                    "display": "Alpha-1-Fetoprotein",
+                    "system": "loinc.org"
+                }
+            ]
+        }
+        invalid = LabsVital.objects.create(**invalid_obj)
+        with self.assertRaises(serializers.ValidationError):
+            invalid.full_clean()
 
 
 class CancerConditionTest(TestCase):

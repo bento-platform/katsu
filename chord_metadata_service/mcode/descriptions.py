@@ -7,7 +7,6 @@
 
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES
 
-
 GENETIC_SPECIMEN = {
     "description": "Class to describe a biosample used for genomics testing or analysis.",
     "properties": {
@@ -63,7 +62,7 @@ GENOMICS_REPORT = {
     "properties": {
         "id": "An arbitrary identifier for the genetics report.",
         "code": "An ontology or controlled vocabulary term to identify the laboratory test. "
-                     "Accepted value sets: LOINC, GTR.",
+                "Accepted value sets: LOINC, GTR.",
         "performing_organization_name": "The name of the organization  producing the genomics report.",
         "issued": "The date/time this report was issued.",
         "genetic_specimen": "List of related genetic specimens.",
@@ -90,7 +89,7 @@ CANCER_CONDITION = {
         "id": "An arbitrary identifier for the cancer condition.",
         "condition_type": "Cancer condition type: primary or secondary.",
         "body_site": "Code for the body location, optionally pre-coordinating laterality or direction. "
-                              "Accepted ontologies: SNOMED CT, ICD-O-3 and others.",
+                     "Accepted ontologies: SNOMED CT, ICD-O-3 and others.",
         "laterality": "Body side of the body location, if needed to distinguish from a similar location "
                       "on the other side of the body.",
         "clinical_status": "A flag indicating whether the condition is active or inactive, recurring, in remission, "

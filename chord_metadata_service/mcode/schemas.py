@@ -165,6 +165,7 @@ MCODE_GENETIC_SPECIMEN_SCHEMA = describe_schema({
     "required": ["id", "specimen_type"]
 }, GENETIC_SPECIMEN)
 
+
 MCODE_CANCER_GENETIC_VARIANT_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
@@ -193,6 +194,7 @@ MCODE_CANCER_GENETIC_VARIANT_SCHEMA = describe_schema({
     "required": ["id", "specimen_type"]
 }, CANCER_GENETIC_VARIANT)
 
+
 MCODE_GENOMIC_REGION_STUDIED_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
@@ -216,6 +218,7 @@ MCODE_GENOMIC_REGION_STUDIED_SCHEMA = describe_schema({
     },
     "required": ["id", "specimen_type"]
 }, GENOMIC_REGION_STUDIED)
+
 
 MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
     "type": "object",
@@ -242,6 +245,7 @@ MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
     "required": ["id", "code", "issued"]
 }, GENOMICS_REPORT)
 
+
 MCODE_LABS_VITAL_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
@@ -257,6 +261,7 @@ MCODE_LABS_VITAL_SCHEMA = describe_schema({
     },
     "required": ["id", "individual", "tumor_marker_code"]
 }, LABS_VITAL)
+
 
 MCODE_TNM_STAGING_SCHEMA = describe_schema({
     "type": "object",
@@ -291,7 +296,7 @@ MCODE_TNM_STAGING_SCHEMA = describe_schema({
     ]
 }, TNM_STAGING)
 
-# TODO check required inb data dictionary
+
 MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
@@ -352,6 +357,7 @@ MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = describe_schema({
     "required": ["id", "procedure_type", "code"]
 }, CANCER_RELATED_PROCEDURE)
 
+
 MCODE_MEDICATION_STATEMENT_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
@@ -374,7 +380,7 @@ MCODE_MEDICATION_STATEMENT_SCHEMA = describe_schema({
     "required": ["id", "medication_code"]
 }, MEDICATION_STATEMENT)
 
-# TODO add subject fk to individual
+
 MCODE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:mcode_schema",
