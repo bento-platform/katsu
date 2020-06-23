@@ -35,8 +35,8 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                 "alternate_ids": subject.get("alternate_ids", None),
                 "sex": subject.get("sex", ""),
                 "date_of_birth": subject.get("date_of_birth", None),
-                "active": subject.get("active", None),
-                "deceased": subject.get("deceased", None)
+                "active": subject.get("active", False),
+                "deceased": subject.get("deceased", False)
             }
         )
         _logger_message(s_created, subject)
