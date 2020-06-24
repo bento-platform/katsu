@@ -1,6 +1,6 @@
 import logging
 from chord_metadata_service.patients.models import Individual
-from .models import *
+from . import models as m
 
 
 logger = logging.getLogger("mcode_ingest")
@@ -29,7 +29,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
 
     # get and create Patient
     if subject:
-        subject, s_created = Individual.objects.get_or_create(
+        subject, s_created = m.Individual.objects.get_or_create(
             id=subject["id"],
             defaults={
                 "alternate_ids": subject.get("alternate_ids", None),
@@ -51,7 +51,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
     if cancer_condition_data:
         for cc in cancer_condition_data:
 
-            cancer_condition, cc_created = CancerCondition.objects.get_or_create(
+            cancer_condition, cc_created = m.CancerCondition.objects.get_or_create(
                 id=cc["id"],
                 defaults={
                     "code": cc["code"],
@@ -68,7 +68,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
             cancer_conditions.append(cancer_condition.id)
             if "tnm_staging" in cc:
                 for tnms in cc["tnm_staging"]:
-                    tnm_staging, tnms_created = TNMStaging.objects.get_or_create(
+                    tnm_staging, tnms_created = m.TNMStaging.objects.get_or_create(
                         id=tnms["id"],
                         defaults={
                             "cancer_condition": cancer_condition,
@@ -86,7 +86,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
     crprocedures = []
     if cancer_related_procedures:
         for crp in cancer_related_procedures:
-            cancer_related_procedure, crp_created = CancerRelatedProcedure.objects.get_or_create(
+            cancer_related_procedure, crp_created = m.CancerRelatedProcedure.objects.get_or_create(
                 id=crp["id"],
                 defaults={
                     "code": crp["code"],
@@ -103,13 +103,13 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
             if "reason_reference" in crp:
                 related_cancer_conditions = []
                 for rr_id in crp["reason_reference"]:
-                    condition = CancerCondition.objects.get(id=rr_id)
+                    condition = m.CancerCondition.objects.get(id=rr_id)
                     related_cancer_conditions.append(condition)
                 cancer_related_procedure.reason_reference.set(related_cancer_conditions)
 
     # get and create MedicationStatement
     if medication_statement_data:
-        medication_statement, ms_created = MedicationStatement.objects.get_or_create(
+        medication_statement, ms_created = m.MedicationStatement.objects.get_or_create(
             id=medication_statement_data["id"],
             defaults={
                 "medication_code": medication_statement_data["medication_code"]
@@ -129,17 +129,17 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
     # get tumor marker
     if tumor_markers:
         for tm in tumor_markers:
-            tumor_marker, tm_created = LabsVital.objects.get_or_create(
+            tumor_marker, tm_created = m.LabsVital.objects.get_or_create(
                 id=tm["id"],
                 defaults={
                     "tumor_marker_code": tm["tumor_marker_code"],
                     "tumor_marker_data_value": tm.get("tumor_marker_data_value", None),
-                    "individual": Individual.objects.get(id=tm["individual"])
+                    "individual": m.Individual.objects.get(id=tm["individual"])
                 }
             )
             _logger_message(tm_created, tumor_marker)
 
-    mcodepacket = MCodePacket(
+    mcodepacket = m.MCodePacket(
         id=new_mcodepacket["id"],
         subject=Individual.objects.get(id=new_mcodepacket["subject"]),
         genomics_report=new_mcodepacket.get("genomics_report", None),

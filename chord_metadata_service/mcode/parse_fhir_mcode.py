@@ -1,7 +1,7 @@
 import uuid
 
-from .mappings.mappings import *
-from .mappings.mcode_profiles import *
+from .mappings.mappings import MCODE_PROFILES_MAPPING
+from .mappings import mcode_profiles as p
 from chord_metadata_service.restapi.schemas import FHIR_BUNDLE_SCHEMA
 from chord_metadata_service.restapi.fhir_ingest import check_schema
 
@@ -25,7 +25,7 @@ def get_ontology_value(resource, codeable_concept_property):
         return ontology_value
     # will be raised if there is no "code" in Coding element
     except KeyError as e:
-        raise KeyError(e)
+        raise e
 
 
 def patient_to_individual(resource):
@@ -96,18 +96,16 @@ def procedure_to_crprocedure(resource):
     if "bodySite" in resource:
         cancer_related_procedure["body_site"] = get_ontology_value(resource, "bodySite")
     if "reasonCode" in resource:
-        codes = []
-        for code in resource["reasonCode"]["coding"]:
-            reason_code = {
-                "id": f"{code['system']}:{code['code']}",
-                "label": f"{code['display']}"
-            }
-            codes.append(reason_code)
+        codes = [{"id": f"{code['system']}:{code['code']}", "label": f"{code['display']}"}
+                 for code in resource["reasonCode"]["coding"]]
         cancer_related_procedure["reason_code"] = codes
     if "reasonReference" in resource:
         cancer_conditions = [cc["reference"].split("uuid:")[-1] for cc in resource["reasonReference"]]
         cancer_related_procedure["reason_reference"] = cancer_conditions
     # TODO add laterality
+    # TODO add performed_period
+    if "performedPeriod" in resource:
+        cancer_related_procedure["extra_properties"] = resource["performedPeriod"]
     return cancer_related_procedure
 
 
@@ -139,7 +137,7 @@ def _get_profiles(resource: dict, profile_urls: list):
             if p in resource_profiles:
                 return True
     except KeyError as e:
-        raise KeyError(e)
+        raise e
 
 
 def condition_to_cancer_condition(resource):
@@ -202,7 +200,7 @@ def parse_bundle(bundle):
         # get Patient's Cancer Condition
         if resource["resourceType"] == "Condition":
             resource_profiles = resource["meta"]["profile"]
-            cancer_conditions_profiles = [MCODE_PRIMARY_CANCER_CONDITION, MCODE_SECONDARY_CANCER_CONDITION]
+            cancer_conditions_profiles = [p.MCODE_PRIMARY_CANCER_CONDITION, p.MCODE_SECONDARY_CANCER_CONDITION]
             for cc in cancer_conditions_profiles:
                 if cc in resource_profiles:
                     cancer_condition = condition_to_cancer_condition(resource)
@@ -214,7 +212,7 @@ def parse_bundle(bundle):
         # get TNM staging stage category
         if resource["resourceType"] == "Observation" and "meta" in resource:
             resource_profiles = resource["meta"]["profile"]
-            stage_groups = [MCODE_TNM_CLINICAL_STAGE_GROUP, MCODE_TNM_PATHOLOGIC_STAGE_GROUP]
+            stage_groups = [p.MCODE_TNM_CLINICAL_STAGE_GROUP, p.MCODE_TNM_PATHOLOGIC_STAGE_GROUP]
             for sg in stage_groups:
                 if sg in resource_profiles:
                     tnm_staging = {"id": resource["id"]}
@@ -225,10 +223,7 @@ def parse_bundle(bundle):
                         if sg == value:
                             tnm_staging["tnm_type"] = key
                     if "hasMember" in resource:
-                        members = []
-                        for member in resource["hasMember"]:
-                            member_observation_id = member["reference"].split('/')[-1]
-                            members.append(member_observation_id)
+                        members = [member["reference"].split('/')[-1] for member in resource["hasMember"]]
                         # collect all members of this staging in a dict
                         staging_to_members[resource["id"]] = members
                     tnm_stagings.append(tnm_staging)
@@ -236,16 +231,16 @@ def parse_bundle(bundle):
         # get all TNM staging members
         if resource["resourceType"] == "Observation" and "meta" in resource:
             primary_tumor_category = _get_tnm_staging_property(resource,
-                                                               [MCODE_TNM_CLINICAL_PRIMARY_TUMOR_CATEGORY,
-                                                                MCODE_TNM_PATHOLOGIC_PRIMARY_TUMOR_CATEGORY],
+                                                               [p.MCODE_TNM_CLINICAL_PRIMARY_TUMOR_CATEGORY,
+                                                                p.MCODE_TNM_PATHOLOGIC_PRIMARY_TUMOR_CATEGORY],
                                                                'primary_tumor_category')
             regional_nodes_category = _get_tnm_staging_property(resource,
-                                                                [MCODE_TNM_CLINICAL_REGIONAL_NODES_CATEGORY,
-                                                                 MCODE_TNM_PATHOLOGIC_REGIONAL_NODES_CATEGORY],
+                                                                [p.MCODE_TNM_CLINICAL_REGIONAL_NODES_CATEGORY,
+                                                                 p.MCODE_TNM_PATHOLOGIC_REGIONAL_NODES_CATEGORY],
                                                                 'regional_nodes_category')
             distant_metastases_category = _get_tnm_staging_property(resource,
-                                                                    [MCODE_TNM_CLINICAL_REGIONAL_NODES_CATEGORY,
-                                                                     MCODE_TNM_PATHOLOGIC_REGIONAL_NODES_CATEGORY],
+                                                                    [p.MCODE_TNM_CLINICAL_REGIONAL_NODES_CATEGORY,
+                                                                     p.MCODE_TNM_PATHOLOGIC_REGIONAL_NODES_CATEGORY],
                                                                     'distant_metastases_category')
 
             for category in [primary_tumor_category, regional_nodes_category, distant_metastases_category]:
@@ -255,7 +250,7 @@ def parse_bundle(bundle):
         # get Cancer Related Procedure
         if resource["resourceType"] == "Procedure" and "meta" in resource:
             resource_profiles = resource["meta"]["profile"]
-            procedure_profiles = [MCODE_CANCER_RELATED_RADIATION_PROCEDURE, MCODE_CANCER_RELATED_SURGICAL_PROCEDURE]
+            procedure_profiles = [p.MCODE_CANCER_RELATED_RADIATION_PROCEDURE, p.MCODE_CANCER_RELATED_SURGICAL_PROCEDURE]
             for pp in procedure_profiles:
                 if pp in resource_profiles:
                     procedure = procedure_to_crprocedure(resource)
@@ -266,18 +261,18 @@ def parse_bundle(bundle):
 
         # get tumor marker
         if resource["resourceType"] == "Observation" and "meta" in resource:
-            if MCODE_TUMOR_MARKER in resource["meta"]["profile"]:
+            if p.MCODE_TUMOR_MARKER in resource["meta"]["profile"]:
                 labs_vital = observation_to_labs_vital(resource)
                 tumor_markers.append(labs_vital)
 
         # get Medication Statement
         if resource["resourceType"] == "MedicationStatement" and "meta" in resource:
-            if MCODE_MEDICATION_STATEMENT in resource["meta"]["profile"]:
+            if p.MCODE_MEDICATION_STATEMENT in resource["meta"]["profile"]:
                 mcodepacket["medication_statement"] = get_medication_statement(resource)
 
         # get Cancer Disease Status
         if resource["resourceType"] == "Observation" and "meta" in resource:
-            if MCODE_CANCER_DISEASE_STATUS in resource["meta"]["profile"]:
+            if p.MCODE_CANCER_DISEASE_STATUS in resource["meta"]["profile"]:
                 # TODO change refactor observation conversion
                 mcodepacket["cancer_disease_status"] = observation_to_labs_vital(resource)["tumor_marker_data_value"]
 
@@ -289,7 +284,7 @@ def parse_bundle(bundle):
 
     if cancer_conditions:
         mcodepacket["cancer_condition"] = cancer_conditions
-    # mcodepacket["tnm_staging"] = tnm_stagings
+
     mcodepacket["tumor_marker"] = tumor_markers
     mcodepacket["cancer_related_procedures"] = cancer_related_procedures
 
@@ -300,7 +295,6 @@ def parse_bundle(bundle):
                     if "tnm_staging" in cc:
                         cc["tnm_staging"].append(tnms)
                     else:
-                        cc["tnm_staging"] = []
-                        cc["tnm_staging"].append(tnms)
+                        cc["tnm_staging"] = [tnms]
 
     return mcodepacket

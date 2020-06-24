@@ -47,7 +47,7 @@ class CancerGeneticVariant(models.Model, IndexableMixin):
     amino_acid_change = JSONField(blank=True, null=True, validators=[ontology_validator],
                                   help_text=rec_help(d.CANCER_GENETIC_VARIANT, "amino_acid_change"))
     amino_acid_change_type = JSONField(blank=True, null=True, validators=[ontology_validator],
-                                  help_text=rec_help(d.CANCER_GENETIC_VARIANT, "amino_acid_change_type"))
+                                       help_text=rec_help(d.CANCER_GENETIC_VARIANT, "amino_acid_change_type"))
     cytogenetic_location = JSONField(blank=True, null=True,
                                      help_text=rec_help(d.CANCER_GENETIC_VARIANT, "cytogenetic_location"))
     cytogenetic_nomenclature = JSONField(blank=True, null=True, validators=[ontology_validator],
@@ -57,9 +57,9 @@ class CancerGeneticVariant(models.Model, IndexableMixin):
     genomic_dna_change = JSONField(blank=True, null=True, validators=[ontology_validator],
                                    help_text=rec_help(d.CANCER_GENETIC_VARIANT, "genomic_dna_change"))
     genomic_source_class = JSONField(blank=True, null=True, validators=[ontology_validator],
-                                   help_text=rec_help(d.CANCER_GENETIC_VARIANT, "genomic_source_class"))
+                                     help_text=rec_help(d.CANCER_GENETIC_VARIANT, "genomic_source_class"))
     variation_code = JSONField(blank=True, null=True, validators=[ontology_list_validator],
-                                     help_text=rec_help(d.CANCER_GENETIC_VARIANT, "variation_code"))
+                               help_text=rec_help(d.CANCER_GENETIC_VARIANT, "variation_code"))
     extra_properties = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.CANCER_GENETIC_VARIANT, "extra_properties"))
     created = models.DateTimeField(auto_now=True)
@@ -79,15 +79,16 @@ class GenomicRegionStudied(models.Model, IndexableMixin):
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENOMIC_REGION_STUDIED, "id"))
     # TODO schema Range list
     dna_ranges_examined = JSONField(blank=True, null=True, validators=[ontology_list_validator],
-                                   help_text=rec_help(d.GENOMIC_REGION_STUDIED, "dna_ranges_examined"))
+                                    help_text=rec_help(d.GENOMIC_REGION_STUDIED, "dna_ranges_examined"))
     dna_region_description = ArrayField(models.CharField(max_length=100,
-                                        help_text=rec_help(d.GENOMIC_REGION_STUDIED, 'dna_region_description')),
+                                                         help_text=rec_help(d.GENOMIC_REGION_STUDIED,
+                                                                            'dna_region_description')),
                                         blank=True, default=list)
     gene_mutation = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                               help_text=rec_help(d.GENOMIC_REGION_STUDIED, "gene_mutation"))
     # TODO check: thisis not a Reference in mcode data dictionary why not?
     gene_studied = JSONField(blank=True, null=True, validators=[ontology_list_validator],
-                              help_text=rec_help(d.GENOMIC_REGION_STUDIED, "gene_studied"))
+                             help_text=rec_help(d.GENOMIC_REGION_STUDIED, "gene_studied"))
     genomic_reference_sequence_id = JSONField(blank=True, null=True,
                                               help_text=rec_help(d.GENOMIC_REGION_STUDIED,
                                                                  "genomic_reference_sequence_id"))
@@ -150,7 +151,7 @@ class LabsVital(models.Model, IndexableMixin):
     tumor_marker_code = JSONField(validators=[ontology_validator],
                                   help_text=rec_help(d.LABS_VITAL, "tumor_marker_code"))
     tumor_marker_data_value = JSONField(blank=True, null=True, validators=[tumor_marker_data_value_validator],
-                                  help_text=rec_help(d.LABS_VITAL, "tumor_marker_data_value"))
+                                        help_text=rec_help(d.LABS_VITAL, "tumor_marker_data_value"))
     extra_properties = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.LABS_VITAL, "extra_properties"))
     created = models.DateTimeField(auto_now=True)
@@ -177,19 +178,19 @@ class CancerCondition(models.Model, IndexableMixin):
     condition_type = models.CharField(choices=CANCER_CONDITION_TYPE, max_length=200,
                                       help_text=rec_help(d.CANCER_CONDITION, "condition_type"))
     body_site = JSONField(null=True, validators=[ontology_list_validator],
-                                   help_text=rec_help(d.CANCER_CONDITION, 'body_site'))
+                          help_text=rec_help(d.CANCER_CONDITION, 'body_site'))
     laterality = JSONField(blank=True, null=True, validators=[ontology_validator],
-                                help_text=rec_help(d.CANCER_CONDITION, "laterality"))
+                           help_text=rec_help(d.CANCER_CONDITION, "laterality"))
     clinical_status = JSONField(blank=True, null=True, validators=[ontology_validator],
                                 help_text=rec_help(d.CANCER_CONDITION, "clinical_status"))
     code = JSONField(validators=[ontology_validator],
-                               help_text=rec_help(d.CANCER_CONDITION, "code"))
+                     help_text=rec_help(d.CANCER_CONDITION, "code"))
     date_of_diagnosis = models.DateTimeField(blank=True, null=True,
                                              help_text=rec_help(d.CANCER_CONDITION, "date_of_diagnosis"))
     histology_morphology_behavior = JSONField(blank=True, null=True, validators=[ontology_validator],
                                               help_text=rec_help(d.CANCER_CONDITION, "histology_morphology_behavior"))
     verification_status = JSONField(blank=True, null=True, validators=[ontology_validator],
-                           help_text=rec_help(d.CANCER_CONDITION, "verification_status"))
+                                    help_text=rec_help(d.CANCER_CONDITION, "verification_status"))
     extra_properties = JSONField(blank=True, null=True,
                                  help_text=rec_help(d.CANCER_CONDITION, "extra_properties"))
     created = models.DateTimeField(auto_now=True)
@@ -253,7 +254,7 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
                                       help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "procedure_type"))
     code = JSONField(validators=[ontology_validator], help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "code"))
     body_site = JSONField(null=True, validators=[ontology_list_validator],
-                                 help_text=rec_help(d.CANCER_RELATED_PROCEDURE, 'body_site'))
+                          help_text=rec_help(d.CANCER_RELATED_PROCEDURE, 'body_site'))
     laterality = JSONField(blank=True, null=True, validators=[ontology_validator],
                            help_text=rec_help(d.CANCER_RELATED_PROCEDURE, "laterality"))
     treatment_intent = JSONField(blank=True, null=True, validators=[ontology_validator],
