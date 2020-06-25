@@ -84,13 +84,15 @@
       "id":"http://snomed.info/sct:268910001",
       "label":"Patient's condition improved"
    },
-   "medication_statement":{
+   "medication_statement": [
+      {
       "id":"fd5416ee-78ad-41ea-b847-dcc3e975dec9",
       "medication_code":{
          "id":"http://www.nlm.nih.gov/research/umls/rxnorm:198240",
          "label":"tamoxifen citrate 10 MG Oral Tablet"
       }
-   },
+   }
+   ],
    "tumor_marker":[
       {
          "id":"9f785640-bdd2-4afe-93e2-3959b8994567",
