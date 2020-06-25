@@ -1,13 +1,15 @@
 from django.urls import path, include
 from rest_framework import routers
+
 from chord_metadata_service.chord import api_views as chord_views
 from chord_metadata_service.experiments import api_views as experiment_views
+from chord_metadata_service.mcode import api_views as mcode_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
-from chord_metadata_service.mcode import api_views as mcode_views
-
 from chord_metadata_service.resources import api_views as resources_views
 
+
+__all__ = ["router", "urlpatterns"]
 
 
 router = routers.DefaultRouter(trailing_slash=False)

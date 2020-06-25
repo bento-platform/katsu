@@ -15,6 +15,7 @@ class Command(BaseCommand):
         Takes every individual in the DB, port them over to FHIR-compliant
         JSON and upload them into elasticsearch
     """
+
     def handle(self, *args, **options):
         # TODO: currently only place we create the index, will have to review
         if es:

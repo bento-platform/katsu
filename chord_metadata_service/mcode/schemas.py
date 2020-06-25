@@ -2,11 +2,11 @@ from chord_metadata_service.restapi.schema_utils import customize_schema
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ONTOLOGY_CLASS_LIST, EXTRA_PROPERTIES_SCHEMA
 from chord_metadata_service.restapi.description_utils import describe_schema
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
-from .descriptions import *
+from . import descriptions as d
 
-################################## mCode/FHIR based schemas ##################################
+# ========================= mCode/FHIR based schemas =========================
 
-### FHIR datatypes
+# === FHIR datatypes ===
 
 # FHIR Quantity https://www.hl7.org/fhir/datatypes.html#Quantity
 QUANTITY = {
@@ -98,7 +98,7 @@ RATIO = {
     "additionalProperties": False
 }
 
-### FHIR based mCode elements
+# === FHIR based mCode elements ===
 
 TIME_OR_PERIOD = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -148,7 +148,7 @@ COMPLEX_ONTOLOGY = customize_schema(
 )
 
 
-############################## Metadata service mCode based schemas ##############################
+# =================== Metadata service mCode based schemas ===================
 
 
 MCODE_GENETIC_SPECIMEN_SCHEMA = describe_schema({
@@ -163,7 +163,7 @@ MCODE_GENETIC_SPECIMEN_SCHEMA = describe_schema({
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "specimen_type"]
-}, GENETIC_SPECIMEN)
+}, d.GENETIC_SPECIMEN)
 
 
 MCODE_CANCER_GENETIC_VARIANT_SCHEMA = describe_schema({
@@ -192,7 +192,7 @@ MCODE_CANCER_GENETIC_VARIANT_SCHEMA = describe_schema({
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "specimen_type"]
-}, CANCER_GENETIC_VARIANT)
+}, d.CANCER_GENETIC_VARIANT)
 
 
 MCODE_GENOMIC_REGION_STUDIED_SCHEMA = describe_schema({
@@ -217,7 +217,7 @@ MCODE_GENOMIC_REGION_STUDIED_SCHEMA = describe_schema({
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "specimen_type"]
-}, GENOMIC_REGION_STUDIED)
+}, d.GENOMIC_REGION_STUDIED)
 
 
 MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
@@ -243,7 +243,7 @@ MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "code", "issued"]
-}, GENOMICS_REPORT)
+}, d.GENOMICS_REPORT)
 
 
 MCODE_LABS_VITAL_SCHEMA = describe_schema({
@@ -260,7 +260,7 @@ MCODE_LABS_VITAL_SCHEMA = describe_schema({
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "individual", "tumor_marker_code"]
-}, LABS_VITAL)
+}, d.LABS_VITAL)
 
 
 MCODE_TNM_STAGING_SCHEMA = describe_schema({
@@ -294,7 +294,7 @@ MCODE_TNM_STAGING_SCHEMA = describe_schema({
         "distant_metastases_category",
         "cancer_condition"
     ]
-}, TNM_STAGING)
+}, d.TNM_STAGING)
 
 
 MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
@@ -325,7 +325,7 @@ MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "condition_type", "code"]
-}, LABS_VITAL)
+}, d.LABS_VITAL)
 
 
 MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = describe_schema({
@@ -355,7 +355,7 @@ MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = describe_schema({
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "procedure_type", "code"]
-}, CANCER_RELATED_PROCEDURE)
+}, d.CANCER_RELATED_PROCEDURE)
 
 
 MCODE_MEDICATION_STATEMENT_SCHEMA = describe_schema({
@@ -378,7 +378,7 @@ MCODE_MEDICATION_STATEMENT_SCHEMA = describe_schema({
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "medication_code"]
-}, MEDICATION_STATEMENT)
+}, d.MEDICATION_STATEMENT)
 
 
 MCODE_SCHEMA = describe_schema({
@@ -409,4 +409,4 @@ MCODE_SCHEMA = describe_schema({
         "cancer_disease_status": ONTOLOGY_CLASS,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     }
-}, MCODEPACKET)
+}, d.MCODEPACKET)

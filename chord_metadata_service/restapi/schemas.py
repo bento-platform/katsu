@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-################################ Phenopackets based schemas ################################
+# ======================== Phenopackets based schemas =========================
 
 
 ONTOLOGY_CLASS = describe_schema({
@@ -116,7 +116,7 @@ DISEASE_ONSET = {
 }
 
 
-############################### FHIR INGEST SCHEMAS ###############################
+# ============================ FHIR INGEST SCHEMAS ============================
 # The schema used to validate FHIR data for ingestion
 
 

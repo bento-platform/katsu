@@ -43,7 +43,7 @@ class Resource(models.Model):
 
     def save(self, *args, **kwargs):
         self.clean()
-        return super().save(*args, **kwargs )
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.id)

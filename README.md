@@ -131,22 +131,28 @@ out and tagged from the tagged major/minor release in `master`.
 
 Tests are located in tests directory in an individual app folder.
 
+Run all tests and linting checks for the whole project:
+
+```bash
+tox
+```
+
 Run all tests for the whole project:
 
-```
+```bash
 python manage.py test
 ```
 
 Run tests for an individual app, e.g.:
 
-```
+```bash
 python manage.py test chord_metadata_service.phenopackets.tests.test_api
 ```
 
-Create coverage html report:
+Test and create `coverage` HTML report:
 
-```
-coverage run manage.py test
+```bash
+tox
 coverage html
 ```
 

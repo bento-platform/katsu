@@ -1,15 +1,29 @@
 from datetime import datetime
+from fhirclient.models import (
+    observation as obs,
+    patient as p,
+    extension,
+    age,
+    coding as c,
+    codeableconcept,
+    specimen as s,
+    identifier as fhir_indentifier,
+    annotation as a,
+    range as range_,
+    quantity,
+    fhirreference,
+    documentreference,
+    attachment,
+    fhirdate,
+    condition as cond,
+    composition as comp,
+)
+
 from chord_metadata_service.restapi.semantic_mappings.phenopackets_on_fhir_mapping import PHENOPACKETS_ON_FHIR_MAPPING
 from chord_metadata_service.restapi.semantic_mappings.hl7_genomics_mapping import HL7_GENOMICS_MAPPING
-from fhirclient.models import (observation as obs, patient as p, extension, age, coding as c,
-                               codeableconcept, specimen as s, identifier as fhir_indentifier,
-                               annotation as a, range, quantity, fhirreference,
-                               documentreference, attachment, fhirdate, condition as cond,
-                               composition as comp
-                               )
 
 
-##################### Generic FHIR conversion functions #####################
+# ===================== Generic FHIR conversion functions =====================
 
 
 def fhir_coding_util(obj):
@@ -57,7 +71,7 @@ def fhir_age(obj, mapping, field):
     age_extension.url = mapping
 
     if "start" in obj[field]:  # Is an age range
-        age_extension.valueRange = range.Range()
+        age_extension.valueRange = range_.Range()
         age_extension.valueRange.low = quantity.Quantity()
         age_extension.valueRange.low.unit = obj[field]['start']['age']
         age_extension.valueRange.high = quantity.Quantity()
@@ -81,7 +95,7 @@ def check_disease_onset(disease):
     return False
 
 
-##################### Phenopackets to FHIR class conversion functions #####################
+# ============== Phenopackets to FHIR class conversion functions ==============
 
 
 def fhir_patient(obj):
@@ -141,7 +155,7 @@ def fhir_observation(obj):
     if 'description' in obj.keys():
         observation.note = []
         annotation = a.Annotation()
-        annotation.text = obj.get('description', None)
+        annotation.text = obj.get('description')
         observation.note.append(annotation)
     observation.code = fhir_codeable_concept(obj['type'])
     # required by FHIR specs but omitted by phenopackets, for now set for unknown
@@ -158,8 +172,8 @@ def fhir_observation(obj):
     concept_extensions = codeable_concepts_fields(
         ['severity', 'modifier', 'onset'], 'phenotypic_feature', obj
     )
-    for c in concept_extensions:
-        observation.extension.append(c)
+    for ce in concept_extensions:
+        observation.extension.append(ce)
     if 'evidence' in obj.keys():
         evidence = extension.Extension()
         evidence.url = PHENOPACKETS_ON_FHIR_MAPPING['phenotypic_feature']['evidence']['url']
@@ -386,7 +400,7 @@ def fhir_composition(obj):
     return composition.as_json()
 
 
-##################### FHIR to Phenopackets class conversion functions #####################
+# ============== FHIR to Phenopackets class conversion functions ==============
 # There is no guide to map FHIR to Phenopackets
 
 # SNOMED term to use as placeholder when collection method is not present in Specimen

@@ -4,7 +4,6 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.validators import ontology_list_validator, key_value_validator
-from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample
 import chord_metadata_service.experiments.descriptions as d
 
@@ -53,8 +52,8 @@ class Experiment(models.Model, IndexableMixin):
     experiment_type = CharField(max_length=30, help_text=rec_help(d.EXPERIMENT, 'experiment_type'))
     experiment_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
                                     help_text=rec_help(d.EXPERIMENT, 'experiment_ontology'))
-    molecule_ontology   = JSONField(blank=True, default=list, validators=[ontology_list_validator],
-                                    help_text=rec_help(d.EXPERIMENT, 'molecule_ontology'))
+    molecule_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
+                                  help_text=rec_help(d.EXPERIMENT, 'molecule_ontology'))
     molecule = CharField(choices=MOLECULE, max_length=20, blank=True, null=True,
                          help_text=rec_help(d.EXPERIMENT, 'molecule'))
     library_strategy = CharField(choices=LIBRARY_STRATEGY, max_length=25,

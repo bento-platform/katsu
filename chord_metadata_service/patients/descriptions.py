@@ -19,7 +19,7 @@ INDIVIDUAL = {
                                    "from the NCBI Taxonomy resource are used, e.g. NCBITaxon:9606 for humans"),
 
         # FHIR-specific
-         "active": {
+        "active": {
             "description": "Whether a patient's record is in active use.",
             "help": "FHIR-specific property."
         },
