@@ -103,9 +103,10 @@ def procedure_to_crprocedure(resource):
         cancer_conditions = [cc["reference"].split("uuid:")[-1] for cc in resource["reasonReference"]]
         cancer_related_procedure["reason_reference"] = cancer_conditions
     # TODO add laterality
-    # TODO add performed_period
     if "performedPeriod" in resource:
-        cancer_related_procedure["extra_properties"] = resource["performedPeriod"]
+        cancer_related_procedure["extra_properties"] = {
+            "performed_period": resource["performedPeriod"]
+        }
     return cancer_related_procedure
 
 
@@ -191,6 +192,8 @@ def parse_bundle(bundle):
     cancer_related_procedures = []
     # all cancer conditions
     cancer_conditions = []
+    # all medication statements
+    medication_statements = []
     for item in bundle["entry"]:
         resource = item["resource"]
         # get Patient data
@@ -268,7 +271,7 @@ def parse_bundle(bundle):
         # get Medication Statement
         if resource["resourceType"] == "MedicationStatement" and "meta" in resource:
             if p.MCODE_MEDICATION_STATEMENT in resource["meta"]["profile"]:
-                mcodepacket["medication_statement"] = get_medication_statement(resource)
+                medication_statements.append(get_medication_statement(resource))
 
         # get Cancer Disease Status
         if resource["resourceType"] == "Observation" and "meta" in resource:
@@ -284,6 +287,9 @@ def parse_bundle(bundle):
 
     if cancer_conditions:
         mcodepacket["cancer_condition"] = cancer_conditions
+
+    if medication_statements:
+        mcodepacket["medication_statement"] = medication_statements
 
     mcodepacket["tumor_marker"] = tumor_markers
     mcodepacket["cancer_related_procedures"] = cancer_related_procedures

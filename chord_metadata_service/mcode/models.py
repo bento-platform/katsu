@@ -321,8 +321,8 @@ class MCodePacket(models.Model, IndexableMixin):
                                               help_text=rec_help(d.MCODEPACKET, "cancer_condition"))
     cancer_related_procedures = models.ManyToManyField(CancerRelatedProcedure, blank=True,
                                                        help_text=rec_help(d.MCODEPACKET, "cancer_related_procedures"))
-    medication_statement = models.ForeignKey(MedicationStatement, blank=True, null=True, on_delete=models.SET_NULL,
-                                             help_text=rec_help(d.MCODEPACKET, "medication_statement"))
+    medication_statement = models.ManyToManyField(MedicationStatement, blank=True,
+                                                  help_text=rec_help(d.MCODEPACKET, "medication_statement"))
     date_of_death = models.CharField(max_length=200, blank=True, help_text=rec_help(d.MCODEPACKET, "date_of_death"))
     cancer_disease_status = JSONField(blank=True, null=True, validators=[ontology_validator],
                                       help_text=rec_help(d.MCODEPACKET, "cancer_disease_status"))

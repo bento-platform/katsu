@@ -395,7 +395,10 @@ MCODE_SCHEMA = describe_schema({
         "genomics_report": MCODE_GENOMICS_REPORT_SCHEMA,
         "cancer_condition": MCODE_CANCER_CONDITION_SCHEMA,
         "cancer_related_procedures": MCODE_CANCER_RELATED_PROCEDURE_SCHEMA,
-        "medication_statement": MCODE_MEDICATION_STATEMENT_SCHEMA,
+        "medication_statement": {
+            "type": "array",
+            "items": MCODE_MEDICATION_STATEMENT_SCHEMA
+        },
         "date_of_death": {
             "type": "string"
         },

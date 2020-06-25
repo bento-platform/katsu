@@ -107,16 +107,18 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                     related_cancer_conditions.append(condition)
                 cancer_related_procedure.reason_reference.set(related_cancer_conditions)
 
-    # get and create MedicationStatement
+    # get and create MedicationStatements
+    medication_statements = []
     if medication_statement_data:
-        medication_statement, ms_created = m.MedicationStatement.objects.get_or_create(
-            id=medication_statement_data["id"],
-            defaults={
-                "medication_code": medication_statement_data["medication_code"]
-            }
-        )
-        _logger_message(ms_created, medication_statement)
-        new_mcodepacket["medication_statement"] = medication_statement
+        for ms in medication_statement_data:
+            medication_statement, ms_created = m.MedicationStatement.objects.get_or_create(
+                id=ms["id"],
+                defaults={
+                    "medication_code": ms["medication_code"]
+                }
+            )
+            _logger_message(ms_created, medication_statement)
+            medication_statements.append(medication_statement.id)
 
     # get date of death
     if date_of_death_data:
@@ -143,7 +145,6 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
         id=new_mcodepacket["id"],
         subject=Individual.objects.get(id=new_mcodepacket["subject"]),
         genomics_report=new_mcodepacket.get("genomics_report", None),
-        medication_statement=new_mcodepacket.get("medication_statement", None),
         date_of_death=new_mcodepacket.get("date_of_death", ""),
         cancer_disease_status=new_mcodepacket.get("cancer_disease_status", None),
         table_id=table_id
@@ -154,5 +155,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
         mcodepacket.cancer_condition.set(cancer_conditions)
     if crprocedures:
         mcodepacket.cancer_related_procedures.set(crprocedures)
+    if medication_statements:
+        mcodepacket.medication_statement.set(medication_statements)
 
     return mcodepacket
