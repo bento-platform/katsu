@@ -41,8 +41,9 @@ router.register(r'diagnoses', phenopacket_views.DiagnosisViewSet)
 router.register(r'interpretations', phenopacket_views.InterpretationViewSet)
 
 # mCode app urls
-router.register(r'geneticvariantstested', mcode_views.GeneticVariantTestedViewSet)
-router.register(r'geneticvariantsfound', mcode_views.GeneticVariantFoundViewSet)
+router.register(r'geneticspecimens', mcode_views.GeneticSpecimenViewSet)
+router.register(r'cancergeneticvariants', mcode_views.CancerGeneticVariantViewSet)
+router.register(r'genomicregionsstudied', mcode_views.GenomicRegionStudiedViewSet)
 router.register(r'genomicsreports', mcode_views.GenomicsReportViewSet)
 router.register(r'labsvital', mcode_views.LabsVitalViewSet)
 router.register(r'cancerconditions', mcode_views.CancerConditionViewSet)

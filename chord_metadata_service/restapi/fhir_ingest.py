@@ -33,7 +33,7 @@ def _parse_reference(ref):
     return ref.split('/')[-1]
 
 
-def _check_schema(schema, obj, additional_info=None):
+def check_schema(schema, obj, additional_info=None):
     """ Validates schema and catches errors. """
     try:
         jsonschema.validate(obj, schema)
@@ -50,7 +50,7 @@ def _check_schema(schema, obj, additional_info=None):
 def ingest_patients(patients_data, table_id, created_by):
     """ Takes FHIR Bundle containing Patient resources. """
     # check if Patients data follows FHIR Bundle schema
-    _check_schema(FHIR_BUNDLE_SCHEMA, patients_data, 'patients data')
+    check_schema(FHIR_BUNDLE_SCHEMA, patients_data, 'patients data')
 
     phenopacket_ids = {}
     for item in patients_data["entry"]:
@@ -78,7 +78,7 @@ def ingest_patients(patients_data, table_id, created_by):
 def ingest_observations(phenopacket_ids: Dict[str, str], observations_data):
     """ Takes FHIR Bundle containing Observation resources. """
     # check if Observations data follows FHIR Bundle schema
-    _check_schema(FHIR_BUNDLE_SCHEMA, observations_data, 'observations data')
+    check_schema(FHIR_BUNDLE_SCHEMA, observations_data, 'observations data')
 
     for item in observations_data["entry"]:
         phenotypic_feature_data = observation_to_phenotypic_feature(item["resource"])
@@ -101,7 +101,7 @@ def ingest_observations(phenopacket_ids: Dict[str, str], observations_data):
 def ingest_conditions(phenopacket_ids: Dict[str, str], conditions_data):
     """ Takes FHIR Bundle containing Condition resources. """
     # check if Conditions data follows FHIR Bundle schema
-    _check_schema(FHIR_BUNDLE_SCHEMA, conditions_data, 'conditions data')
+    check_schema(FHIR_BUNDLE_SCHEMA, conditions_data, 'conditions data')
 
     for item in conditions_data["entry"]:
         disease_data = condition_to_disease(item["resource"])
@@ -124,7 +124,7 @@ def ingest_conditions(phenopacket_ids: Dict[str, str], conditions_data):
 def ingest_specimens(phenopacket_ids: Dict[str, str], specimens_data):
     """ Takes FHIR Bundle containing Specimen resources. """
     # check if Specimens data follows FHIR Bundle schema
-    _check_schema(FHIR_BUNDLE_SCHEMA, specimens_data, 'specimens data')
+    check_schema(FHIR_BUNDLE_SCHEMA, specimens_data, 'specimens data')
 
     for item in specimens_data["entry"]:
         biosample_data = specimen_to_biosample(item["resource"])

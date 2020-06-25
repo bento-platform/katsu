@@ -19,145 +19,25 @@ VALID_INDIVIDUAL = {
     "active": True
 }
 
-VALID_GENETIC_VARIANT_TESTED = {
-    "id": "variant_tested:01",
-    "method": {
-        "id": "C17003",
-        "label": "Polymerase Chain Reaction"
-    },
-    "variant_tested_identifier": {
-        "id": "360448",
-        "label": "360448",
-    },
-    "variant_tested_hgvs_name": [
-        "NC_000007.13:g.55086734A>G",
-        "NC_000007.14:g.55019041A>G",
-        "NM_001346897.2:c.-237A>G",
-        "NM_001346898.2:c.-237A>G",
-        "NM_001346899.1:c.-237A>G",
-        "NM_001346941.2:c.-237A>G",
-        "NM_005228.5:c.-237A>G",
-        "NM_201282.2:c.-237A>G",
-        "NM_201283.1:c.-237A>G",
-        "NM_201284.2:c.-237A>G",
-        "LRG_304t1:c.-237A>G",
-        "LRG_304:g.5010A>G",
-        "NG_007726.3:g.5010A>G"
-    ],
-    "variant_tested_description": "single nucleotide variant",
-    "data_value": {
-        "id": "LA6576-8",
-        "label": "Positive",
-    }
-}
-
-INVALID_GENETIC_VARIANT_TESTED = {
-    "id": "variant_tested:02",
-    "method": ["invalid_value"],
-    "variant_tested_identifier": {
-        "id": "360448",
-        "label": "360448",
-    },
-    "variant_tested_hgvs_name": [
-        "NC_000007.13:g.55086734A>G",
-        "NC_000007.14:g.55019041A>G",
-        "NM_001346897.2:c.-237A>G",
-        "NM_001346898.2:c.-237A>G",
-        "NM_001346899.1:c.-237A>G",
-        "NM_001346941.2:c.-237A>G",
-        "NM_005228.5:c.-237A>G",
-        "NM_201282.2:c.-237A>G",
-        "NM_201283.1:c.-237A>G",
-        "NM_201284.2:c.-237A>G",
-        "LRG_304t1:c.-237A>G",
-        "LRG_304:g.5010A>G",
-        "NG_007726.3:g.5010A>G"
-    ],
-    "variant_tested_description": "single nucleotide variant",
-    "data_value": {
-        "id": "LA6576-8",
-        "label": "Positive",
-    }
-}
-
-VALID_GENETIC_VARIANT_FOUND = {
-    "id": "variant_found:01",
-    "method": {
-        "id": "C17003",
-        "label": "Polymerase Chain Reaction"
-    },
-    "variant_found_identifier": {
-        "id": "360448",
-        "label": "360448",
-    },
-    "variant_found_hgvs_name": [
-        "NC_000007.13:g.55086734A>G",
-        "NC_000007.14:g.55019041A>G",
-        "NM_001346897.2:c.-237A>G",
-        "NM_001346898.2:c.-237A>G",
-        "NM_001346899.1:c.-237A>G",
-        "NM_001346941.2:c.-237A>G",
-        "NM_005228.5:c.-237A>G",
-        "NM_201282.2:c.-237A>G",
-        "NM_201283.1:c.-237A>G",
-        "NM_201284.2:c.-237A>G",
-        "LRG_304t1:c.-237A>G",
-        "LRG_304:g.5010A>G",
-        "NG_007726.3:g.5010A>G"
-    ],
-    "variant_found_description": "single nucleotide variant",
-    "genomic_source_class": {
-        "id": "LA6684-0",
-        "label": "Somatic",
-    }
-}
-
 
 def valid_genetic_report():
     return {
         "id": "genomics_report:01",
-        "test_name": {
+        "code": {
             "id": "GTR000567625.2",
             "label": "PREVENTEST",
         },
-        "performing_organization_name": "Test organization",
-        "specimen_type": {
-            "id": "119342007 ",
-            "label": "SAL (Saliva)",
-        }
+        "issued": "2018-11-13T20:20:39+00:00",
+        "performing_organization_name": "Test organization"
     }
 
 
 def valid_labs_vital(individual):
     return {
         "id": "labs_vital:01",
-        "body_height": {
-            "value": 1.70,
-            "unit": "m"
-        },
-        "body_weight": {
-            "value": 60,
-            "unit": "kg"
-        },
-        "cbc_with_auto_differential_panel": ["Test"],
-        "comprehensive_metabolic_2000": ["Test"],
-        "blood_pressure_diastolic": {
-            "value": 80,
-            "unit": "mmHg"
-        },
-        "blood_pressure_systolic": {
-            "value": 120,
-            "unit": "mmHg"
-        },
-        "tumor_marker_test": {
-            "code": {
-                "id": "50610-5",
-                "label": "Alpha-1-Fetoprotein"
-            },
-            "data_value": {
-                "value": 10,
-                "unit": "ng/mL"
-            }
+        "tumor_marker_code": {
+            "id": "50610-5",
+            "label": "Alpha-1-Fetoprotein"
         },
         "individual": individual,
     }
@@ -167,7 +47,7 @@ def valid_cancer_condition():
     return {
         "id": "cancer_condition:01",
         "condition_type": "primary",
-        "body_location_code": [
+        "body_site": [
             {
                 "id": "442083009",
                 "label": "Anatomical or acquired body structure (body structure)"
@@ -177,7 +57,7 @@ def valid_cancer_condition():
             "id": "active",
             "label": "Active"
         },
-        "condition_code": {
+        "code": {
             "id": "404087009",
             "label": "Carcinosarcoma of skin (disorder)"
         },
@@ -248,13 +128,7 @@ def valid_cancer_related_procedure():
             "id": "33356009",
             "label": "Betatron teleradiotherapy (procedure)"
         },
-        "occurence_time_or_period": {
-            "value": {
-                "start": "2018-11-13T20:20:39+00:00",
-                "end": "2019-04-13T20:20:39+00:00"
-            }
-        },
-        "target_body_site": [
+        "body_site": [
             {
                 "id": "74805009",
                 "label": "Mammary gland sinus"
@@ -285,6 +159,5 @@ def valid_medication_statement():
             "label": "Curative - procedure intent"
         },
         "start_date": "2018-11-13T20:20:39+00:00",
-        "end_date": "2019-04-13T20:20:39+00:00",
-        "date_time": "2019-04-13T20:20:39+00:00"
+        "end_date": "2019-04-13T20:20:39+00:00"
     }

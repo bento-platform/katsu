@@ -16,14 +16,19 @@ class McodeModelViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
 
 
-class GeneticVariantTestedViewSet(McodeModelViewSet):
-    queryset = GeneticVariantTested.objects.all()
-    serializer_class = GeneticVariantTestedSerializer
+class GeneticSpecimenViewSet(McodeModelViewSet):
+    queryset = GeneticSpecimen.objects.all()
+    serializer_class = GeneticSpecimenSerializer
 
 
-class GeneticVariantFoundViewSet(McodeModelViewSet):
-    queryset = GeneticVariantFound.objects.all()
-    serializer_class = GeneticVariantFoundSerializer
+class CancerGeneticVariantViewSet(McodeModelViewSet):
+    queryset = CancerGeneticVariant.objects.all()
+    serializer_class = CancerGeneticVariantSerializer
+
+
+class GenomicRegionStudiedViewSet(McodeModelViewSet):
+    queryset = GenomicRegionStudied.objects.all()
+    serializer_class = GenomicRegionStudiedSerializer
 
 
 class GenomicsReportViewSet(McodeModelViewSet):
