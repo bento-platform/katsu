@@ -1,6 +1,6 @@
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.patients.serializers import IndividualSerializer
-from .models import *
+from . import models as m
 
 
 __all__ = [
@@ -20,28 +20,28 @@ __all__ = [
 class GeneticSpecimenSerializer(GenericSerializer):
 
     class Meta:
-        model = GeneticSpecimen
+        model = m.GeneticSpecimen
         fields = '__all__'
 
 
 class CancerGeneticVariantSerializer(GenericSerializer):
 
     class Meta:
-        model = CancerGeneticVariant
+        model = m.CancerGeneticVariant
         fields = '__all__'
 
 
 class GenomicRegionStudiedSerializer(GenericSerializer):
 
     class Meta:
-        model = GenomicRegionStudied
+        model = m.GenomicRegionStudied
         fields = '__all__'
 
 
 class GenomicsReportSerializer(GenericSerializer):
 
     class Meta:
-        model = GenomicsReport
+        model = m.GenomicsReport
         fields = '__all__'
 
     def to_representation(self, instance):
@@ -56,14 +56,14 @@ class GenomicsReportSerializer(GenericSerializer):
 class LabsVitalSerializer(GenericSerializer):
 
     class Meta:
-        model = LabsVital
+        model = m.LabsVital
         fields = '__all__'
 
 
 class TNMStagingSerializer(GenericSerializer):
 
     class Meta:
-        model = TNMStaging
+        model = m.TNMStaging
         fields = '__all__'
 
 
@@ -71,21 +71,21 @@ class CancerConditionSerializer(GenericSerializer):
     tnm_staging = TNMStagingSerializer(source='tnmstaging_set', read_only=True, many=True)
 
     class Meta:
-        model = CancerCondition
+        model = m.CancerCondition
         fields = '__all__'
 
 
 class CancerRelatedProcedureSerializer(GenericSerializer):
 
     class Meta:
-        model = CancerRelatedProcedure
+        model = m.CancerRelatedProcedure
         fields = '__all__'
 
 
 class MedicationStatementSerializer(GenericSerializer):
 
     class Meta:
-        model = MedicationStatement
+        model = m.MedicationStatement
         fields = '__all__'
 
 
@@ -109,5 +109,5 @@ class MCodePacketSerializer(GenericSerializer):
         return response
 
     class Meta:
-        model = MCodePacket
+        model = m.MCodePacket
         fields = '__all__'

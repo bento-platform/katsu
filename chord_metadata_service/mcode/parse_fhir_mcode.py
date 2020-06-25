@@ -131,13 +131,11 @@ def _get_tnm_staging_property(resource: dict, profile_urls: list, category_type=
 
 
 def _get_profiles(resource: dict, profile_urls: list):
-    try:
-        resource_profiles = resource["meta"]["profile"]
-        for p in profile_urls:
-            if p in resource_profiles:
-                return True
-    except KeyError as e:
-        raise e
+    # Can raise a KeyError in some cases
+    resource_profiles = resource["meta"]["profile"]
+    for p_url in profile_urls:
+        if p_url in resource_profiles:
+            return True
 
 
 def condition_to_cancer_condition(resource):
@@ -219,9 +217,9 @@ def parse_bundle(bundle):
                     tnm_stage_group = observation_to_tnm_staging(resource)
                     tnm_staging["cancer_condition"] = tnm_stage_group["cancer_condition"]
                     tnm_staging["stage_group"] = tnm_stage_group["tnm_staging_value"]
-                    for key, value in MCODE_PROFILES_MAPPING["tnm_staging"]["properties_profile"]["stage_group"].items():
-                        if sg == value:
-                            tnm_staging["tnm_type"] = key
+                    for k, v in MCODE_PROFILES_MAPPING["tnm_staging"]["properties_profile"]["stage_group"].items():
+                        if sg == v:
+                            tnm_staging["tnm_type"] = k
                     if "hasMember" in resource:
                         members = [member["reference"].split('/')[-1] for member in resource["hasMember"]]
                         # collect all members of this staging in a dict

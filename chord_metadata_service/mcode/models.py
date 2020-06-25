@@ -135,7 +135,7 @@ class GenomicsReport(models.Model, IndexableMixin):
         return str(self.id)
 
 
-################################# Labs/Vital #################################
+# ================================ Labs/Vital ================================
 
 
 class LabsVital(models.Model, IndexableMixin):
@@ -164,7 +164,7 @@ class LabsVital(models.Model, IndexableMixin):
         return str(self.id)
 
 
-################################# Disease #################################
+# ================================== Disease ==================================
 
 class CancerCondition(models.Model, IndexableMixin):
     """
@@ -236,9 +236,9 @@ class TNMStaging(models.Model, IndexableMixin):
         return str(self.id)
 
 
-################################# Treatment #################################
+# ================================= Treatment =================================
 
-###### Procedure ######
+# ==== Procedure ====
 
 class CancerRelatedProcedure(models.Model, IndexableMixin):
     """
@@ -277,7 +277,7 @@ class CancerRelatedProcedure(models.Model, IndexableMixin):
         return str(self.id)
 
 
-###### Medication Statement ######
+# ==== Medication Statement ====
 
 
 class MedicationStatement(models.Model, IndexableMixin):
