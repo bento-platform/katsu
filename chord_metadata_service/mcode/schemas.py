@@ -4,7 +4,6 @@ from chord_metadata_service.restapi.description_utils import describe_schema
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from .descriptions import *
 
-
 ################################## mCode/FHIR based schemas ##################################
 
 ### FHIR datatypes
@@ -37,7 +36,6 @@ QUANTITY = {
     "additionalProperties": False
 }
 
-
 # FHIR CodeableConcept https://www.hl7.org/fhir/datatypes.html#CodeableConcept
 CODEABLE_CONCEPT = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -66,7 +64,6 @@ CODEABLE_CONCEPT = {
     "additionalProperties": False
 }
 
-
 # FHIR Period https://www.hl7.org/fhir/datatypes.html#Period
 PERIOD = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -87,7 +84,6 @@ PERIOD = {
     "additionalProperties": False
 }
 
-
 # FHIR Ratio https://www.hl7.org/fhir/datatypes.html#Ratio
 RATIO = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -101,7 +97,6 @@ RATIO = {
     },
     "additionalProperties": False
 }
-
 
 ### FHIR based mCode elements
 
@@ -122,6 +117,24 @@ TIME_OR_PERIOD = {
     "additionalProperties": False
 }
 
+TUMOR_MARKER_DATA_VALUE = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "chord_metadata_service:tumor_marker_data_value",
+    "title": "Tumor marker data value",
+    "description": "Tumor marker data value schema.",
+    "type": "object",
+    "properties": {
+        "value": {
+            "anyOf": [
+                ONTOLOGY_CLASS,
+                QUANTITY,
+                RATIO
+            ]
+        }
+    },
+    "additionalProperties": False
+}
+
 # TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
 COMPLEX_ONTOLOGY = customize_schema(
     first_typeof=ONTOLOGY_CLASS,
@@ -134,76 +147,77 @@ COMPLEX_ONTOLOGY = customize_schema(
     required=["data_value"]
 )
 
-# TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
-TUMOR_MARKER_TEST = customize_schema(
-    first_typeof=ONTOLOGY_CLASS,
-    second_typeof={
-       "anyOf": [
-           ONTOLOGY_CLASS,
-           QUANTITY,
-           RATIO
-       ]
-    },
-    first_property="code",
-    second_property="data_value",
-    schema_id="chord_metadata_service:tumor_marker_test",
-    title="Tumor marker test",
-    description="Tumor marker test schema.",
-    required=["code"]
-)
 
 ############################## Metadata service mCode based schemas ##############################
 
 
-MCODE_GENETIC_VARIANT_TESTED_SCHEMA = describe_schema({
+MCODE_GENETIC_SPECIMEN_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": {
             "type": "string"
         },
-        "gene_studied": {
-            "type": "string"
-        },
-        "method": ONTOLOGY_CLASS,
-        "variant_tested_identifier": ONTOLOGY_CLASS,
-        "variant_tested_hgvs_name": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
-        },
-        "variant_tested_description": {
+        "specimen_type": ONTOLOGY_CLASS,
+        "collection_body": ONTOLOGY_CLASS,
+        "laterality": ONTOLOGY_CLASS,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
+    },
+    "required": ["id", "specimen_type"]
+}, GENETIC_SPECIMEN)
+
+
+MCODE_CANCER_GENETIC_VARIANT_SCHEMA = describe_schema({
+    "type": "object",
+    "properties": {
+        "id": {
             "type": "string"
         },
         "data_value": ONTOLOGY_CLASS,
-        "extra_properties": EXTRA_PROPERTIES_SCHEMA
-    },
-    "required": ["id"]
-}, GENETIC_VARIANT_TESTED)
-
-
-MCODE_GENETIC_VARIANT_FOUND_SCHEMA = describe_schema({
-    "type": "object",
-    "properties": {
-        "id": {
-            "type": "string"
-        },
         "method": ONTOLOGY_CLASS,
-        "variant_found_identifier": ONTOLOGY_CLASS,
-        "variant_found_hgvs_name": {
+        "amino_acid_change": ONTOLOGY_CLASS,
+        "amino_acid_change_type": ONTOLOGY_CLASS,
+        "cytogenetic_location": {
+            "type": "object"
+        },
+        "cytogenetic_nomenclature": ONTOLOGY_CLASS,
+        "gene_studied": {
             "type": "array",
             "items": {
                 "type": "string"
             }
         },
-        "variant_found_description": {
-            "type": "string"
-        },
+        "genomic_dna_change": ONTOLOGY_CLASS,
         "genomic_source_class": ONTOLOGY_CLASS,
+        "variation_code": ONTOLOGY_CLASS_LIST,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id"]
-}, GENETIC_VARIANT_FOUND)
+    "required": ["id", "specimen_type"]
+}, CANCER_GENETIC_VARIANT)
+
+
+MCODE_GENOMIC_REGION_STUDIED_SCHEMA = describe_schema({
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "dna_ranges_examined": ONTOLOGY_CLASS_LIST,
+        "dna_region_description": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "gene_mutation": ONTOLOGY_CLASS_LIST,
+        "gene_studied": ONTOLOGY_CLASS_LIST,
+        "genomic_reference_sequence_id": {
+            "type": "object"
+        },
+        "genomic_region_coordinate_system": ONTOLOGY_CLASS,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
+    },
+    "required": ["id", "specimen_type"]
+}, GENOMIC_REGION_STUDIED)
 
 
 MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
@@ -212,26 +226,23 @@ MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
         "id": {
             "type": "string"
         },
-        "test_name": ONTOLOGY_CLASS,
+        "code": ONTOLOGY_CLASS,
         "performing_organization_name": {
             "type": "string"
         },
-        "specimen_type": ONTOLOGY_CLASS,
-        "genetic_variant_tested": {
-            "type": "array",
-            "items": {
-                "string"
-            }
+        "issued": {
+            "type": "string",
+            "format": "date-time"
         },
-        "genetic_variant_found": {
+        "genetic_specimen": {
             "type": "array",
-            "items": {
-                "string"
-            }
+            "items": MCODE_GENETIC_SPECIMEN_SCHEMA
         },
+        "genetic_variant": MCODE_CANCER_GENETIC_VARIANT_SCHEMA,
+        "genomic_region_studied": MCODE_GENOMIC_REGION_STUDIED_SCHEMA,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "test_name"]
+    "required": ["id", "code", "issued"]
 }, GENOMICS_REPORT)
 
 
@@ -241,56 +252,14 @@ MCODE_LABS_VITAL_SCHEMA = describe_schema({
         "id": {
             "type": "string"
         },
-        "subject": {
+        "individual": {
             "type": "string"
         },
-        "body_height": QUANTITY,
-        "body_weight": QUANTITY,
-        "cbc_with_auto_differential_panel": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
-        },
-        "comprehensive_metabolic_2000": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
-        },
-        "blood_pressure_diastolic": QUANTITY,
-        "blood_pressure_systolic": QUANTITY,
-        "tumor_marker_test": TUMOR_MARKER_TEST,
+        "tumor_marker_code": ONTOLOGY_CLASS,
+        "tumor_marker_data_value": TUMOR_MARKER_DATA_VALUE,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "individual", "body_height", "body_weight", "tumor_marker_test"]
-}, LABS_VITAL)
-
-# TODO check required inb data dictionary
-MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
-    "type": "object",
-    "properties": {
-        "id": {
-            "type": "string"
-        },
-        "condition_type": {
-            "type": "string",
-            "enum": [
-                "primary",
-                "secondary"
-            ]
-        },
-        "body_location_code": ONTOLOGY_CLASS_LIST,
-        "clinical_status": ONTOLOGY_CLASS,
-        "condition_code": ONTOLOGY_CLASS,
-        "date_of_diagnosis": {
-            "type": "string",
-            "format": "date-time"
-        },
-        "histology_morphology_behavior": ONTOLOGY_CLASS,
-        "extra_properties": EXTRA_PROPERTIES_SCHEMA
-    },
-    "required": ["id", "condition_type", "condition_code"]
+    "required": ["id", "individual", "tumor_marker_code"]
 }, LABS_VITAL)
 
 
@@ -328,6 +297,37 @@ MCODE_TNM_STAGING_SCHEMA = describe_schema({
 }, TNM_STAGING)
 
 
+MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "condition_type": {
+            "type": "string",
+            "enum": [
+                "primary",
+                "secondary"
+            ]
+        },
+        "body_site": ONTOLOGY_CLASS_LIST,
+        "clinical_status": ONTOLOGY_CLASS,
+        "code": ONTOLOGY_CLASS,
+        "date_of_diagnosis": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "histology_morphology_behavior": ONTOLOGY_CLASS,
+        "tnm_staging": {
+            "type": "array",
+            "items": MCODE_TNM_STAGING_SCHEMA
+        },
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
+    },
+    "required": ["id", "condition_type", "code"]
+}, LABS_VITAL)
+
+
 MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
@@ -342,12 +342,19 @@ MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = describe_schema({
             ]
         },
         "code": ONTOLOGY_CLASS,
-        "occurence_time_or_period": TIME_OR_PERIOD,
-        "target_body_site": ONTOLOGY_CLASS_LIST,
+        "body_site": ONTOLOGY_CLASS_LIST,
+        "laterality": ONTOLOGY_CLASS,
         "treatment_intent": ONTOLOGY_CLASS,
+        "reason_code": ONTOLOGY_CLASS,
+        "reason_reference": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "procedure_type", "code", "occurence_time_or_period"]
+    "required": ["id", "procedure_type", "code"]
 }, CANCER_RELATED_PROCEDURE)
 
 
@@ -368,17 +375,12 @@ MCODE_MEDICATION_STATEMENT_SCHEMA = describe_schema({
             "type": "string",
             "format": "date-time"
         },
-        "date_time": {
-            "type": "string",
-            "format": "date-time"
-        },
-
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "medication_code"]
 }, MEDICATION_STATEMENT)
 
-# TODO add subject fk to individual
+
 MCODE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:mcode_schema",
@@ -393,7 +395,18 @@ MCODE_SCHEMA = describe_schema({
         "genomics_report": MCODE_GENOMICS_REPORT_SCHEMA,
         "cancer_condition": MCODE_CANCER_CONDITION_SCHEMA,
         "cancer_related_procedures": MCODE_CANCER_RELATED_PROCEDURE_SCHEMA,
-        "medication_statement": MCODE_MEDICATION_STATEMENT_SCHEMA,
+        "medication_statement": {
+            "type": "array",
+            "items": MCODE_MEDICATION_STATEMENT_SCHEMA
+        },
+        "date_of_death": {
+            "type": "string"
+        },
+        "tumor_marker": {
+            "type": "array",
+            "items": MCODE_LABS_VITAL_SCHEMA
+        },
+        "cancer_disease_status": ONTOLOGY_CLASS,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     }
 }, MCODEPACKET)
