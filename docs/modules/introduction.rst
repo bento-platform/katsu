@@ -6,7 +6,7 @@ Data model is partly based on `GA4GH Phenopackets schema <https://github.com/phe
 
 The simplified data model of the service is below.
 
-.. image:: ../_static/simple_metadata_service_model_v0.3.0.png
+.. image:: ../_static/simple_metadata_service_model_v1.0.png
 
 
 Technical implementation
