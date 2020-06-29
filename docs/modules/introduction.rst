@@ -96,6 +96,7 @@ Ingest workflows are implemented for different types of data within the service.
 Ingest endpoint is :code:`/private/ingest`.
 
 **1. Phenopackets data ingest**
+
 The data must follow Phenopackets schema in order to be ingested.
 
 Example of Phenopackets POST request body:
