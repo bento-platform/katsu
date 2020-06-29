@@ -51,7 +51,6 @@ Phenopackets model is mapped to [FHIR](https://www.hl7.org/fhir/) using
 To retrieve data in fhir append `?format=fhir` .
 
 * Ingest endpoint: `/private/ingest`.
-Example of POST body is in `chord/views_ingest.py` (`METADATA_WORKFLOWS`).
 
 
 ## Install
