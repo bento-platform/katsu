@@ -30,7 +30,7 @@ Services depend on each other and are separated based on their scope.
 
 - Data model: GA4GH Phenopackets schema. Currently contains only two out of four Phenopackets top elements - Phenopacket and Interpretation.
 
-**3. mCode service** handles oncology related data.
+**3. mCode service** handles patient's oncology related data.
 
 - Data model: mCODE data elements. mCODE data elements grouped in a mCodepacket (like Phenopacket) containing patient's cancer related descriptions including genomics data, medication statements and cancer related procedures.
 
@@ -38,7 +38,7 @@ Services depend on each other and are separated based on their scope.
 
 - Data model: current data model is derived from IHEC metadata `Experiment specification <https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments>`_.
 
-**5. Resources service** handles metadata about ontologies usedf for data annotation.
+**5. Resources service** handles metadata about ontologies used for data annotation.
 
 - Data model: derived from Phenopacket Resource profile.
 
@@ -91,9 +91,12 @@ REST API highlights
 
 **Data ingest**
 
-Currently only the data that follow Phenopackets schema can be ingested.
+Ingest workflows are implemented for different types of data within the service.
 Ingest endpoint is :code:`/private/ingest`.
-Example of POST request body:
+
+- Phenopackets data ingest: the data must follow Phenopackets schema in order to be ingested.
+
+Example of Phenopackets POST request body:
 
 .. code-block::
 
@@ -126,7 +129,50 @@ Example of POST request body:
       }
     }
 
+- mCode data ingest: mCODE data elements are based on FHIR datatypes. It's expected that the data is compliant with FHIR Release 4 and provided in FHIR Bundles.
 
+Only mCode related profiles will be ingested.
+
+Example of mCode FHIR data POST request body:
+
+.. code-block::
+
+    {
+       "table_id":"table_unique_id",
+       "workflow_id":"mcode_fhir_json",
+       "workflow_params":{
+          "mcode_fhir_json.json_document":"/path/to/data.json"
+       },
+       "workflow_outputs":{
+          "json_document":"/path/to/data.json"
+       }
+    }
+
+
+- FHIR data ingest: currently there is no implementation guide from FHIR to Phenopackets.
+
+FHIR data will only be ingested partially.
+The ingestion works for the following FHIR resources: Patient, Observation, Condition, Specimen.
+It's expected that the data is compliant with FHIR Release 4 and provided in FHIR Bundles.
+
+.. code-block::
+
+    {
+      "table_id": "table_unique_id",
+      "workflow_id": "fhir_json",
+      "workflow_params": {
+        "fhir_json.patients": "/path/to/patients.json",
+        "fhir_json.observations": "/path/to/observations.json",
+        "fhir_json.conditions": "/path/to/conditions.json",
+        "fhir_json.specimens": "/path/to/specimens.json"
+      },
+      "workflow_outputs": {
+        "patients": "/path/to/patients.json",
+        "observations": "/path/to/observations.json",
+        "conditions": "/path/to/conditions.json",
+        "specimens": "/path/to/specimens.json"
+      }
+    }
 
 
 Elasticsearch index (optional)

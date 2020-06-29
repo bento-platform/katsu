@@ -23,10 +23,19 @@ CHORD Metadata Service is a service to store epigenomic metadata.
 2. Phenopackets service handles phenotypic and clinical data
     * Data model: [GA4GH Phenopackets schema](https://github.com/phenopackets/phenopacket-schema)
 
-3. CHORD service  handles metadata about dataset, has relation to phenopackets (one dataset can have many phenopackets)
+3. mCode service handles patient's oncology related data.
+    * Data model: [mCODE data elements](https://mcodeinitiative.org/)
+
+4. Experiments service handles experiment related data.
+    * Data model: derived from [IHEC Metadata Experiment](https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments)
+
+5. Resources service handles metadata about ontologies used for data annotation.
+    * Data model: derived from Phenopackets Resource profile
+
+6. CHORD service  handles metadata about dataset, has relation to phenopackets (one dataset can have many phenopackets)
     * Data model: [DATS](https://github.com/datatagsuite)  + [GA4GH DUO](https://github.com/EBISPOT/DUO)
 
-4. Rest api service handles all generic functionality shared among other services
+7. Rest api service handles all generic functionality shared among other services
 
 
 ## REST API highlights
