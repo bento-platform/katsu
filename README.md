@@ -18,7 +18,7 @@ under the BSD 3-clause license.
 CHORD Metadata Service is a service to store epigenomic metadata.
 
 1. Patients service handles anonymized individual’s data (individual id, sex, age or date of birth)
-    * Data model: aggregated profile from GA4GH Phenopackets Individual and FHIR Patient
+    * Data model: aggregated profile from GA4GH Phenopackets Individual, FHIR Patient and mCODE Patient.
 
 2. Phenopackets service handles phenotypic and clinical data
     * Data model: [GA4GH Phenopackets schema](https://github.com/phenopackets/phenopacket-schema)

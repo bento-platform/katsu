@@ -28,7 +28,7 @@ Experiments service
 Resources service
 -------------------
 
-.. automodule:: chord_metadata_service.experiments.models
+.. automodule:: chord_metadata_service.resources.models
     :members:
 
 CHORD service

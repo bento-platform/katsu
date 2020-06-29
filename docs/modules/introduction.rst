@@ -3,6 +3,7 @@ Introduction
 
 Metadata service is a service to store phenotypic and clinical metadata about the patient and/or biosample.
 Data model is partly based on `GA4GH Phenopackets schema <https://github.com/phenopackets/phenopacket-schema>`_.
+The model is extended to support oncology related metadata and experiments metadata.
 
 The simplified data model of the service is below.
 
@@ -24,7 +25,7 @@ Services depend on each other and are separated based on their scope.
 
 **1. Patients service** handles anonymized individual’s data (e.g. individual id, sex, age or date of birth).
 
-- Data model: aggregated profile from GA4GH Phenopackets Individual and FHIR Patient. It contains all fields of Phenopacket Individual and additional fields from FHIR Patient.
+- Data model: aggregated profile from GA4GH Phenopackets Individual, FHIR Patient and mCODE Patient. It contains all fields of Phenopacket Individual and additional fields from FHIR amd mCODE Patient.
 
 **2. Phenopackets service** handles phenotypic and clinical data.
 
@@ -94,7 +95,8 @@ REST API highlights
 Ingest workflows are implemented for different types of data within the service.
 Ingest endpoint is :code:`/private/ingest`.
 
-- Phenopackets data ingest: the data must follow Phenopackets schema in order to be ingested.
+**1. Phenopackets data ingest**
+The data must follow Phenopackets schema in order to be ingested.
 
 Example of Phenopackets POST request body:
 
@@ -129,9 +131,11 @@ Example of Phenopackets POST request body:
       }
     }
 
-- mCode data ingest: mCODE data elements are based on FHIR datatypes. It's expected that the data is compliant with FHIR Release 4 and provided in FHIR Bundles.
+**2. mCode data ingest**
 
+mCODE data elements are based on FHIR datatypes.
 Only mCode related profiles will be ingested.
+It's expected that the data is compliant with FHIR Release 4 and provided in FHIR Bundles.
 
 Example of mCode FHIR data POST request body:
 
@@ -149,8 +153,9 @@ Example of mCode FHIR data POST request body:
     }
 
 
-- FHIR data ingest: currently there is no implementation guide from FHIR to Phenopackets.
+**3. FHIR data ingest**
 
+Currently there is no implementation guide from FHIR to Phenopackets.
 FHIR data will only be ingested partially.
 The ingestion works for the following FHIR resources: Patient, Observation, Condition, Specimen.
 It's expected that the data is compliant with FHIR Release 4 and provided in FHIR Bundles.
