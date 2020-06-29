@@ -2,8 +2,8 @@ Introduction
 ============
 
 Metadata service is a service to store phenotypic and clinical metadata about the patient and/or biosample.
-Data model is partly based on `GA4GH Phenopackets schema <https://github.com/phenopackets/phenopacket-schema>`_.
-The model is extended to support oncology related metadata and experiments metadata.
+The data model is partly based on `GA4GH Phenopackets schema <https://github.com/phenopackets/phenopacket-schema>`_ and
+extended to support oncology-related metadata and experiments metadata.
 
 The simplified data model of the service is below.
 
@@ -14,7 +14,7 @@ Technical implementation
 ------------------------
 
 The service is implemented in Python and Django and uses PostgreSQL database to store the data.
-Besides PostgreSQL the data can be indexed and queried in Elasticsearch.
+Besides PostgreSQL, the data can be indexed and queried in Elasticsearch.
 
 
 Architecture
@@ -23,25 +23,25 @@ Architecture
 The Metadata Service contains several services that share one API.
 Services depend on each other and are separated based on their scope.
 
-**1. Patients service** handles anonymized individual’s data (e.g. individual id, sex, age or date of birth).
+**1. Patients service** handles anonymized individual’s data (e.g. individual id, sex, age, or date of birth).
 
-- Data model: aggregated profile from GA4GH Phenopackets Individual, FHIR Patient and mCODE Patient. It contains all fields of Phenopacket Individual and additional fields from FHIR amd mCODE Patient.
+- Data model: aggregated profile from GA4GH Phenopackets Individual, FHIR Patient, and mCODE Patient. It contains all fields of Phenopacket Individual and additional fields from FHIR and mCODE Patient.
 
 **2. Phenopackets service** handles phenotypic and clinical data.
 
 - Data model: GA4GH Phenopackets schema. Currently contains only two out of four Phenopackets top elements - Phenopacket and Interpretation.
 
-**3. mCode service** handles patient's oncology related data.
+**3. mCode service** handles patient's oncology-related data.
 
-- Data model: mCODE data elements. mCODE data elements grouped in a mCodepacket (like Phenopacket) containing patient's cancer related descriptions including genomics data, medication statements and cancer related procedures.
+- Data model: mCODE data elements. mCODE data elements grouped in a mCodepacket (like Phenopacket) containing patient's cancer-related descriptions including genomics data, medication statements, and cancer-related procedures.
 
 **4. Experiments service** handles experiment related data.
 
-- Data model: current data model is derived from IHEC metadata `Experiment specification <https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments>`_.
+- Data model: derived from IHEC metadata `Experiment specification <https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments>`_.
 
 **5. Resources service** handles metadata about ontologies used for data annotation.
 
-- Data model: derived from Phenopacket Resource profile.
+- Data model: derived from the Phenopackets schema Resource profile.
 
 **6. CHORD service** handles granular metadata about dataset (e.g. description, where the dataset is located, who are the creators of the dataset, licenses applied to the dataset,
 authorization policy, terms of use).
@@ -61,7 +61,7 @@ Metadata standards
 
 `Phenopackets schema <https://github.com/phenopackets/phenopacket-schema>`_ is used for phenotypic description of patient and/or biosample.
 
-`mCODE data elements <https://mcodeinitiative.org/>`_ is used for oncology related description of patient.
+`mCODE data elements <https://mcodeinitiative.org/>`_ are used for oncology-related description of patient.
 
 `DATS standard <https://github.com/datatagsuite>`_ is used for dataset description.
 
@@ -84,7 +84,7 @@ REST API highlights
 
 - Other available renderers:
 
-  - Currently the following classes can be retrieved in FHIR format by appending :code:`?format=fhir`: Phenopacket, Individual, Biosample, PhenotypicFeature, HtsFile, Gene, Variant, Disease, Procedure.
+  - Currently, the following classes can be retrieved in FHIR format by appending :code:`?format=fhir`: Phenopacket, Individual, Biosample, PhenotypicFeature, HtsFile, Gene, Variant, Disease, Procedure.
 
   - JSON-LD context to schema.org provided for the Dataset class in order to allow for a Google dataset search for Open Access Data: append :code:`?format=json-ld` when querying dataset endpoint.
 
@@ -156,8 +156,8 @@ Example of mCode FHIR data POST request body:
 
 **3. FHIR data ingest**
 
-Currently there is no implementation guide from FHIR to Phenopackets.
-FHIR data will only be ingested partially.
+At the moment there is no implementation guide from FHIR to Phenopackets.
+FHIR data will only be ingested partially where it's possible to establish mapping between FHIR resource and Phenopackets element.
 The ingestion works for the following FHIR resources: Patient, Observation, Condition, Specimen.
 It's expected that the data is compliant with FHIR Release 4 and provided in FHIR Bundles.
 
