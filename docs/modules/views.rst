@@ -13,6 +13,24 @@ Patients service
 .. automodule:: chord_metadata_service.patients.api_views
     :members:
 
+Mcode service
+-------------------
+
+.. automodule:: chord_metadata_service.mcode.api_views
+    :members:
+
+Experiments service
+-------------------
+
+.. automodule:: chord_metadata_service.experiments.api_views
+    :members:
+
+Resources service
+-------------------
+
+.. automodule:: chord_metadata_service.resources.api_views
+    :members:
+
 CHORD service
 -------------------
 
