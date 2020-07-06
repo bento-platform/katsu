@@ -27,7 +27,7 @@ from .constants import (
     TEST_FHIR_SEARCH_QUERY,
 )
 from ..models import Project, Dataset, TableOwnership, Table
-from ..data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
+from ..data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
 
 
 class DataTypeTest(APITestCase):
@@ -35,9 +35,10 @@ class DataTypeTest(APITestCase):
         r = self.client.get(reverse("data-type-list"))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
-        self.assertEqual(len(c), 2)
-        ids = (c[0]["id"], c[1]["id"])
+        self.assertEqual(len(c), 3)
+        ids = (c[0]["id"], c[1]["id"], c[2]["id"])
         self.assertIn(DATA_TYPE_EXPERIMENT, ids)
+        self.assertIn(DATA_TYPE_MCODEPACKET, ids)
         self.assertIn(DATA_TYPE_PHENOPACKET, ids)
 
     def test_data_type_detail(self):

@@ -183,7 +183,7 @@ def create_phenotypic_feature(pf):
         negated=pf.get("negated", False),
         severity=pf.get("severity"),
         modifier=pf.get("modifier", []),  # TODO: Validate ontology term in schema...
-        onset=pf.get("onset", None),
+        onset=pf.get("onset"),
         evidence=pf.get("evidence")  # TODO: Separate class?
     )
 
