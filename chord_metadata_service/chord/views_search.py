@@ -16,6 +16,7 @@ from chord_lib.responses import errors
 from chord_lib.search import build_search_response, postgres
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
+from chord_metadata_service.mcode.models import MCodePacket
 from chord_metadata_service.metadata.elastic import es
 from chord_metadata_service.metadata.settings import DEBUG, CHORD_SERVICE_ARTIFACT, CHORD_SERVICE_ID
 from chord_metadata_service.patients.models import Individual
@@ -23,7 +24,7 @@ from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
-from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
+from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset, TableOwnership, Table
 from .permissions import ReadOnly, OverrideOrSuperUserOnly
 
@@ -31,10 +32,10 @@ from .permissions import ReadOnly, OverrideOrSuperUserOnly
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def data_type_list(_request):
-    return Response([
-        {"id": DATA_TYPE_EXPERIMENT, "schema": DATA_TYPES[DATA_TYPE_EXPERIMENT]["schema"]},
-        {"id": DATA_TYPE_PHENOPACKET, "schema": DATA_TYPES[DATA_TYPE_PHENOPACKET]["schema"]},
-    ])
+    return Response(sorted(
+        ({"id": k, "schema": dt["schema"]} for k, dt in DATA_TYPES.items()),
+        key=lambda dt: dt["id"]
+    ))
 
 
 @api_view(["GET"])
@@ -151,6 +152,15 @@ def experiment_table_summary(table):
     })
 
 
+def mcodepacket_table_summary(table):
+    mcodepackets = MCodePacket.objects.filter(table=table)  # TODO
+
+    return Response({
+        "count": mcodepackets.count(),
+        "data_type_specific": {},  # TODO
+    })
+
+
 def phenopacket_table_summary(table):
     phenopackets = Phenopacket.objects.filter(table=table)  # TODO
 
@@ -220,6 +230,7 @@ def phenopacket_table_summary(table):
 
 SUMMARY_HANDLERS: Dict[str, Callable[[Any], Response]] = {
     DATA_TYPE_EXPERIMENT: experiment_table_summary,
+    DATA_TYPE_MCODEPACKET: mcodepacket_table_summary,
     DATA_TYPE_PHENOPACKET: phenopacket_table_summary,
 }
 
