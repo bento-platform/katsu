@@ -87,7 +87,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'chord_lib.auth.django_remote_user.CHORDRemoteUserMiddleware',
+    'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -168,7 +168,7 @@ FHIR_INDEX_NAME = 'fhir_metadata'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'chord_lib.auth.django_remote_user.CHORDRemoteUserAuthentication'
+        'bento_lib.auth.django_remote_user.BentoRemoteUserAuthentication'
     ],
     'DEFAULT_PARSER_CLASSES': (
         # allows serializers to use snake_case field names, but parse incoming data as camelCase
@@ -199,7 +199,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTHENTICATION_BACKENDS = ["chord_lib.auth.django_remote_user.CHORDRemoteUserBackend"] + (
+AUTHENTICATION_BACKENDS = ["bento_lib.auth.django_remote_user.BentoRemoteUserBackend"] + (
     ["django.contrib.auth.backends.ModelBackend"] if DEBUG else [])
 
 

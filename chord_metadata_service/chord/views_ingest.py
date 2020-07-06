@@ -1,22 +1,24 @@
 import json
-import jsonschema
-import jsonschema.exceptions
 import os
 import uuid
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from jsonschema import Draft7Validator
 from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 
-from chord_lib.schemas.chord import CHORD_INGEST_SCHEMA
-from chord_lib.responses import errors
-from chord_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
+from bento_lib.schemas.bento import BENTO_INGEST_SCHEMA
+from bento_lib.responses import errors
+from bento_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
 from .ingest import METADATA_WORKFLOWS, WORKFLOWS_PATH, WORKFLOW_INGEST_FUNCTION_MAP
 from .models import Table
+
+
+BENTO_INGEST_SCHEMA_VALIDATOR = Draft7Validator(BENTO_INGEST_SCHEMA)
 
 
 class WDLRenderer(BaseRenderer):
@@ -65,9 +67,7 @@ def ingest(request):
     # TODO: Use serializers with basic objects and maybe some more complex ones too (but for performance, this might
     #  not be optimal...)
 
-    try:
-        jsonschema.validate(request.data, CHORD_INGEST_SCHEMA)
-    except jsonschema.exceptions.ValidationError:
+    if not BENTO_INGEST_SCHEMA_VALIDATOR.is_valid(request.data):
         return Response(errors.bad_request_error("Invalid ingest request body"), status=400)  # TODO: Validation errors
 
     table_id = request.data["table_id"]
