@@ -16,7 +16,7 @@ setuptools.setup(
 
     python_requires=">=3.6",
     install_requires=[
-        "chord_lib[django]==0.9.0",
+        "bento_lib[django]==0.11.0",
         "Django>=2.2.14,<3.0",
         "django-filter>=2.3,<3.0",
         "django-nose>=1.4,<2.0",
