@@ -53,8 +53,7 @@ def patient_to_individual(resource):
     if "deceasedDateTime" in resource:
         individual["deceased"] = True
     elif "deceasedBoolean" in resource:
-        if resource["deceasedBoolean"]:
-            individual["deceased"] = True
+        individual["deceased"] = resource["deceasedBoolean"]
     else:
         individual["deceased"] = False
     return individual
