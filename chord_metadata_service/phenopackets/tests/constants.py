@@ -31,7 +31,8 @@ VALID_META_DATA_2 = {
     "external_references": [
         {
             "id": "PMID:30808312",
-            "description": "Bao M, et al. COL6A1 mutation leading to Bethlem myopathy with recurrent hematuria: a case report. BMC Neurol. 2019;19(1):32."
+            "description": "Bao M, et al. COL6A1 mutation leading to Bethlem myopathy with recurrent hematuria: a case "
+                           "report. BMC Neurol. 2019;19(1):32."
         },
         {
             "id": "PMID:3080844",
@@ -173,32 +174,6 @@ INVALID_DISEASE_2 = {
     "extra_properties": {
         "comment": "test data"
     }
-}
-
-VALID_RESOURCE_1 = {
-    "id": "so",
-    "name": "Sequence types and features",
-    "url": "http://purl.obolibrary.org/obo/so.owl",
-    "version": "2015-11-24",
-    "namespace_prefix": "SO",
-    "iri_prefix": "http://purl.obolibrary.org/obo/SO_"
-}
-
-VALID_RESOURCE_2 = {
-    "id": "hgnc",
-    "name": "HUGO Gene Nomenclature Committee",
-    "url": "https://www.genenames.org",
-    "version": "2019-08-08",
-    "namespace_prefix": "HGNC",
-    "iri_prefix": "https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/"
-}
-
-DUPLICATE_RESOURCE_3 = {
-    "id": "hgnc",
-    "name": "HUGO Gene Nomenclature Committee",
-    "url": "https://www.genenames.org",
-    "version": "2019-08-08",
-    "namespace_prefix": "HGNC"
 }
 
 

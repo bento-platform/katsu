@@ -1,8 +1,39 @@
 import re
 from rest_framework import serializers
-from .models import *
+from .models import (
+    MetaData,
+    PhenotypicFeature,
+    Procedure,
+    HtsFile,
+    Gene,
+    Variant,
+    Disease,
+    Biosample,
+    Phenopacket,
+    GenomicInterpretation,
+    Diagnosis,
+    Interpretation,
+)
+from chord_metadata_service.resources.serializers import ResourceSerializer
+from chord_metadata_service.restapi import fhir_utils
 from chord_metadata_service.restapi.serializers import GenericSerializer
-from chord_metadata_service.restapi.fhir_utils import *
+
+
+__all__ = [
+    "MetaDataSerializer",
+    "PhenotypicFeatureSerializer",
+    "ProcedureSerializer",
+    "HtsFileSerializer",
+    "GeneSerializer",
+    "VariantSerializer",
+    "DiseaseSerializer",
+    "BiosampleSerializer",
+    "SimplePhenopacketSerializer",
+    "PhenopacketSerializer",
+    "GenomicInterpretationSerializer",
+    "DiagnosisSerializer",
+    "InterpretationSerializer",
+]
 
 
 #############################################################
@@ -10,11 +41,6 @@ from chord_metadata_service.restapi.fhir_utils import *
 #                  Metadata  Serializers                    #
 #                                                           #
 #############################################################
-
-class ResourceSerializer(GenericSerializer):
-    class Meta:
-        model = Resource
-        fields = '__all__'
 
 
 class MetaDataSerializer(GenericSerializer):
@@ -39,7 +65,7 @@ class PhenotypicFeatureSerializer(GenericSerializer):
         exclude = ['pftype']
         # meta info for converting to FHIR
         fhir_datatype_plural = 'observations'
-        class_converter = fhir_observation
+        class_converter = fhir_utils.fhir_observation
 
 
 class ProcedureSerializer(GenericSerializer):
@@ -49,7 +75,7 @@ class ProcedureSerializer(GenericSerializer):
         fields = '__all__'
         # meta info for converting to FHIR
         fhir_datatype_plural = 'specimen.collections'
-        class_converter = fhir_specimen_collection
+        class_converter = fhir_utils.fhir_specimen_collection
 
     def create(self, validated_data):
         if validated_data.get('body_site'):
@@ -67,7 +93,7 @@ class HtsFileSerializer(GenericSerializer):
         fields = '__all__'
         # meta info for converting to FHIR
         fhir_datatype_plural = 'document_references'
-        class_converter = fhir_document_reference
+        class_converter = fhir_utils.fhir_document_reference
 
 
 class GeneSerializer(GenericSerializer):
@@ -80,7 +106,7 @@ class GeneSerializer(GenericSerializer):
         fields = '__all__'
         # meta info for converting to FHIR
         fhir_datatype_plural = 'observations'
-        class_converter = fhir_obs_component_region_studied
+        class_converter = fhir_utils.fhir_obs_component_region_studied
 
 
 class VariantSerializer(GenericSerializer):
@@ -90,7 +116,7 @@ class VariantSerializer(GenericSerializer):
         fields = '__all__'
         # meta info for converting to FHIR
         fhir_datatype_plural = 'observations'
-        class_converter = fhir_obs_component_variant
+        class_converter = fhir_utils.fhir_obs_component_variant
 
     def to_representation(self, obj):
         """ Change 'allele_type' field name to allele type value. """
@@ -103,7 +129,7 @@ class VariantSerializer(GenericSerializer):
         """ When writing back to db change field name back to 'allele'. """
 
         if 'allele' not in data.keys():
-            allele_type = data.get('allele_type') # e.g. spdiAllele
+            allele_type = data.get('allele_type')  # e.g. spdiAllele
             # split by uppercase
             normilize = filter(None, re.split("([A-Z][^A-Z]*)", allele_type))
             normilized_allele_type = '_'.join([i.lower() for i in normilize])
@@ -118,7 +144,7 @@ class DiseaseSerializer(GenericSerializer):
         fields = '__all__'
         # meta info for converting to FHIR
         fhir_datatype_plural = 'conditions'
-        class_converter = fhir_condition
+        class_converter = fhir_utils.fhir_condition
 
 
 class BiosampleSerializer(GenericSerializer):
@@ -131,7 +157,7 @@ class BiosampleSerializer(GenericSerializer):
         fields = '__all__'
         # meta info for converting to FHIR
         fhir_datatype_plural = 'specimens'
-        class_converter = fhir_specimen
+        class_converter = fhir_utils.fhir_specimen
 
     def create(self, validated_data):
         procedure_data = validated_data.pop('procedure')
@@ -163,7 +189,7 @@ class SimplePhenopacketSerializer(GenericSerializer):
         fields = '__all__'
         # meta info for converting to FHIR
         fhir_datatype_plural = 'compositions'
-        class_converter = fhir_composition
+        class_converter = fhir_utils.fhir_composition
 
     def to_representation(self, instance):
         """"

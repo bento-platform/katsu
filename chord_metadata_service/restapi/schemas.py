@@ -1,144 +1,51 @@
+from . import descriptions
+from .description_utils import describe_schema, EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
+
 # Individual schemas for validation of JSONField values
 
-################################ Phenopackets based schemas ################################
+
+__all__ = [
+    "ONTOLOGY_CLASS",
+    "ONTOLOGY_CLASS_LIST",
+    "KEY_VALUE_OBJECT",
+    "AGE_STRING",
+    "AGE",
+    "AGE_RANGE",
+    "AGE_OR_AGE_RANGE",
+    "EXTRA_PROPERTIES_SCHEMA",
+    "FHIR_BUNDLE_SCHEMA",
+]
 
 
-ALLELE_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:allele_schema",
-    "title": "Allele schema",
-    "description": "Variant allele types",
-    "type": "object",
-    "properties": {
-        "id": {"type": "string"},
+# ======================== Phenopackets based schemas =========================
 
-        "hgvs": {"type": "string"},
 
-        "genome_assembly": {"type": "string"},
-        "chr": {"type": "string"},
-        "pos": {"type": "integer"},
-        "re": {"type": "string"},
-        "alt": {"type": "string"},
-        "info": {"type": "string"},
-
-        "seq_id": {"type": "string"},
-        "position": {"type": "integer"},
-        "deleted_sequence": {"type": "string"},
-        "inserted_sequence": {"type": "string"},
-
-        "iscn": {"type": "string"}
-    },
-    "additionalProperties": False,
-    "oneOf": [
-        {
-            "required": ["hgvs"]
-        },
-        {
-            "required": ["genome_assembly"]
-        },
-        {
-            "required": ["seq_id"]
-        },
-        {
-            "required": ["iscn"]
-        }
-
-    ],
-    "dependencies": {
-        "genome_assembly": ["chr", "pos", "re", "alt", "info"],
-        "seq_id": ["position", "deleted_sequence", "inserted_sequence"]
-    }
-}
-
-UPDATE_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:update_schema",
-    "title": "Updates schema",
-    "description": "Schema to check incoming updates format",
-    "type": "object",
-    "properties": {
-        "timestamp": {"type": "string", "format": "date-time",
-                      "description": "ISO8601 UTC timestamp at which this record was updated."},
-        "updated_by": {"type": "string", "description": "Who updated the phenopacket"},
-        "comment": {"type": "string", "description": "Comment about updates or reasons for an update."}
-    },
-    "additionalProperties": False,
-    "required": ["timestamp", "comment"]
-}
-
-ONTOLOGY_CLASS = {
+ONTOLOGY_CLASS = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:ontology_class_schema",
     "title": "Ontology class schema",
-    "description": "todo",
     "type": "object",
     "properties": {
-        "id": {"type": "string", "description": "CURIE style identifier."},
-        "label": {"type": "string", "description": "Human-readable class name."}
+        "id": {"type": "string"},
+        "label": {"type": "string"}
     },
     "additionalProperties": False,
     "required": ["id", "label"]
-}
+}, ONTOLOGY_CLASS_DESC)
 
 ONTOLOGY_CLASS_LIST = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "ONTOLOGY_CLASS_LIST",
+    "$id": "chord_metadata_service:ontology_class_list_schema",
     "title": "Ontology class list",
     "description": "Ontology class list",
     "type": "array",
     "items": ONTOLOGY_CLASS,
 }
 
-EXTERNAL_REFERENCE = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:external_reference_schema",
-    "title": "External reference schema",
-    "description": "The schema encodes information about an external reference.",
-    "type": "object",
-    "properties": {
-        "id": {"type": "string", "description": "An application specific identifier."},
-        "description": {"type": "string", "description": "An application specific description."}
-    },
-    "additionalProperties": False,
-    "required": ["id"]
-}
-
-EVIDENCE = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:evidence_schema",
-    "title": "Evidence schema",
-    "description": "The schema represents the evidence for an assertion such as an observation of a PhenotypicFeature.",
-    "type": "object",
-    "properties": {
-        "evidence_code": {
-            "type": "object",
-            "description": "An ontology class that represents the evidence type.",
-            "properties": {
-                "id": {"type": "string", "description": "CURIE style identifier."},
-                "label": {"type": "string", "description": "Human-readable class name."}
-            },
-            "additionalProperties": False,
-            "required": ["id", "label"]
-        },
-        "reference": {
-            "type": "object",
-            "description": "Representation of the source of the evidence.",
-            "properties": {
-                "id": {"type": "string", "description": "An application specific identifier."},
-                "description": {"type": "string", "description": "An application specific description."}
-            },
-            "additionalProperties": False,
-            "required": ["id"]
-        }
-    },
-    "additionalProperties": False,
-    "required": ["evidence_code"]
-}
-
 
 KEY_VALUE_OBJECT = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "KEY_VALUE_OBJECT",
+    "$id": "chord_metadata_service:key_value_object_schema",
     "title": "Key-value object",
     "description": "The schema represents a key-value object.",
     "type": "object",
@@ -148,35 +55,39 @@ KEY_VALUE_OBJECT = {
     "additionalProperties": False
 }
 
+EXTRA_PROPERTIES_SCHEMA = describe_schema({
+    "type": "object"
+}, EXTRA_PROPERTIES)
 
-AGE_STRING = {"type": "string", "description": "An ISO8601 string represent age."}
 
-AGE = {
+AGE_STRING = describe_schema({"type": "string"}, descriptions.AGE)
+
+AGE = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:age_schema",
     "title": "Age schema",
-    "description": "An age of a subject.",
     "type": "object",
     "properties": {
         "age": AGE_STRING
     },
     "additionalProperties": False,
     "required": ["age"]
-}
+}, descriptions.AGE_NESTED)
 
-AGE_RANGE = {
+
+AGE_RANGE = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "chord_metadata_service:age_range_schema",
     "title": "Age range schema",
-    "description": "An age range of a subject.",
     "type": "object",
     "properties": {
         "start": AGE,
-        "end": AGE
+        "end": AGE,
     },
     "additionalProperties": False,
     "required": ["start", "end"]
-}
+}, descriptions.AGE_RANGE)
+
 
 AGE_OR_AGE_RANGE = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -204,170 +115,34 @@ DISEASE_ONSET = {
     ]
 }
 
-################################## mCode/FHIR based schemas ##################################
 
-### FHIR datatypes
+# ============================ FHIR INGEST SCHEMAS ============================
+# The schema used to validate FHIR data for ingestion
 
-# FHIR Quantity https://www.hl7.org/fhir/datatypes.html#Quantity
-QUANTITY = {
+
+FHIR_BUNDLE_SCHEMA = {
+    "$id": "chord_metadata_service_fhir_bundle_schema",
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:quantity_schema",
-    "title": "Quantity schema",
-    "description": "Schema for the datatype Quantity.",
+    "description": "FHIR Bundle schema",
     "type": "object",
     "properties": {
-        "value": {
-            "type": "number"
-        },
-        "comparator": {
-            "enum": ["<", ">", "<=", ">=", "="]
-        },
-        "unit": {
-            "type": "string"
-        },
-        "system": {
+        "resourceType": {
             "type": "string",
-            "format": "uri"
+            "const": "Bundle",
+            "description": "Collection of resources."
         },
-        "code": {
-            "type": "string"
-        }
-    },
-    "additionalProperties": False
-}
-
-
-# FHIR CodeableConcept https://www.hl7.org/fhir/datatypes.html#CodeableConcept
-CODEABLE_CONCEPT = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:codeable_concept_schema",
-    "title": "Codeable Concept schema",
-    "description": "Schema for the datatype Concept.",
-    "type": "object",
-    "properties": {
-        "coding": {
+        "entry": {
             "type": "array",
             "items": {
                 "type": "object",
                 "properties": {
-                    "system": {"type": "string", "format": "uri"},
-                    "version": {"type": "string"},
-                    "code": {"type": "string"},
-                    "display": {"type": "string"},
-                    "user_selected": {"type": "boolean"}
-                }
+                    "resource": {"type": "object"}
+                },
+                "additionalProperties": True,
+                "required": ["resource"]
             }
-        },
-        "text": {
-            "type": "string"
         }
     },
-    "additionalProperties": False
+    "additionalProperties": True,
+    "required": ["resourceType", "entry"]
 }
-
-
-# FHIR Period https://www.hl7.org/fhir/datatypes.html#Period
-PERIOD = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:period_schema",
-    "title": "Period",
-    "description": "Period schema.",
-    "type": "object",
-    "properties": {
-        "start": {
-            "type": "string",
-            "format": "date-time"
-        },
-        "end": {
-            "type": "string",
-            "format": "date-time"
-        }
-    },
-    "additionalProperties": False
-}
-
-
-# FHIR Ratio https://www.hl7.org/fhir/datatypes.html#Ratio
-RATIO = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:ratio",
-    "title": "Ratio",
-    "description": "Ratio schema.",
-    "type": "object",
-    "properties": {
-        "numerator": QUANTITY,
-        "denominator": QUANTITY
-    },
-    "additionalProperties": False
-}
-
-
-### FHIR based mCode elements
-
-TIME_OR_PERIOD = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:time_or_period",
-    "title": "Time of Period",
-    "description": "Time of Period schema.",
-    "type": "object",
-    "properties": {
-        "value": {
-            "anyOf": [
-                {"type": "string", "format": "date-time"},
-                PERIOD
-            ]
-        }
-    },
-    "additionalProperties": False
-}
-
-
-def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
-                    id: str=None, title: str=None, description: str=None, additionalProperties=False,
-                    required=None) -> dict:
-    if required is None:
-        required = []
-    return {
-            "$schema": "http://json-schema.org/draft-07/schema#",
-            "$id": id,
-            "title": title,
-            "description": description,
-            "type": "object",
-            "properties": {
-                first_property: first_typeof,
-                second_property: second_typeof
-            },
-            "required": required,
-            "additionalProperties": additionalProperties
-            }
-
-
-COMORBID_CONDITION = customize_schema(first_typeof=ONTOLOGY_CLASS, second_typeof=ONTOLOGY_CLASS,
-                                     first_property="clinical_status", second_property="code",
-                                     id="chord_metadata_service:comorbid_condition_schema",
-                                     title="Comorbid Condition schema",
-                                     description="Comorbid condition schema.")
-
-#TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
-COMPLEX_ONTOLOGY = customize_schema(first_typeof=ONTOLOGY_CLASS, second_typeof=ONTOLOGY_CLASS,
-                                   first_property="data_value", second_property="staging_system",
-                                   id="chord_metadata_service:complex_ontology_schema", title="Complex ontology",
-                                   description="Complex object to combine data value and staging system.",
-                                   required=["data_value"])
-
-#TODO this is definitely should be changed, fhir datatypes are too complex use Ontology_ class
-TUMOR_MARKER_TEST = customize_schema(first_typeof=ONTOLOGY_CLASS,
-                                     second_typeof={
-                                        "anyOf": [
-                                            ONTOLOGY_CLASS,
-                                            QUANTITY,
-                                            RATIO
-                                        ]
-                                     },
-                                     first_property="code", second_property="data_value",
-                                     id="chord_metadata_service:tumor_marker_test",
-                                     title="Tumor marker test",
-                                     description="Tumor marker test schema.",
-                                     required=["code"]
-                                     )
-

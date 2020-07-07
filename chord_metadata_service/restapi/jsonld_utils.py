@@ -1,9 +1,9 @@
-from .semantic_mappings.context import *
+from .semantic_mappings.context import CONTEXT_TYPES, CONTEXT
 
 
 # utils to convert dataset json to json-ld
 
-def obj_to_jsonld(obj, mapping) -> dict:
+def obj_to_jsonld(obj: dict, mapping: str) -> dict:
     obj['@type'] = CONTEXT_TYPES[mapping]['type']
     return obj
 
@@ -34,38 +34,35 @@ def extra_properties_to_jsonld(extra_properties) -> list:
     return extra_properties
 
 
+def _obj_identifiers_to_jsonld(obj):
+    if "identifier" in obj:
+        obj_to_jsonld(obj['identifier'], 'identifier')
+    if "alternate_identifiers" in obj:
+        for alt_id in obj["alternate_identifiers"]:
+            obj_to_jsonld(alt_id, "alternate_identifiers")
+    if "related_identifiers" in obj:
+        for rel_id in obj["related_identifiers"]:
+            obj_to_jsonld(rel_id, "related_identifiers")
+
+
 def spatial_coverage_to_jsonld(spatial_coverage) -> list:
     for sc in spatial_coverage:
         obj_to_jsonld(sc, 'spatial_coverage')
-        if 'identifier' in sc.keys():
-            obj_to_jsonld(sc['identifier'], 'identifier')
-        if 'alternate_identifiers' in sc.keys():
-            for alt_id in sc['alternate_identifiers']:
-                obj_to_jsonld(alt_id, 'alternate_identifiers')
-        if 'related_identifiers' in sc.keys():
-            for rel_id in sc['related_identifiers']:
-                obj_to_jsonld(rel_id, 'related_identifiers')
+        _obj_identifiers_to_jsonld(sc)
     return spatial_coverage
 
 
 def distributions_to_jsonld(distributions) -> list:
     for distribution in distributions:
         obj_to_jsonld(distribution, 'distributions')
-        if 'identifier' in distribution.keys():
-            obj_to_jsonld(distribution['identifier'], 'identifier')
-        if 'alternate_identifiers' in distribution.keys():
-            for alt_id in distribution['alternate_identifiers']:
-                obj_to_jsonld(alt_id, 'alternate_identifiers')
-        if 'related_identifiers' in distribution.keys():
-            for rel_id in distribution['related_identifiers']:
-                obj_to_jsonld(rel_id, 'related_identifiers')
-        if 'stored_in' in distribution.keys():
+        _obj_identifiers_to_jsonld(distribution)
+        if 'stored_in' in distribution:
             obj_to_jsonld(distribution['stored_in'], 'stored_in')
         if 'dates' in distribution.keys():
             dates_to_jsonld(distribution['dates'])
-        if 'licenses' in distribution.keys():
-            for license in distribution['liceses']:
-                obj_to_jsonld(license, 'licenses')
+        if 'licenses' in distribution:
+            for license_ in distribution['liceses']:
+                obj_to_jsonld(license_, 'licenses')
         # access
     return distributions
 
@@ -91,8 +88,8 @@ def dataset_to_jsonld(dataset):
             if 'information' in t.keys():
                 obj_to_jsonld(t['information'], 'annotation')
     if 'licenses' in dataset.keys():
-        for license in dataset['licenses']:
-            obj_to_jsonld(license, 'licenses')
+        for license_ in dataset['licenses']:
+            obj_to_jsonld(license_, 'licenses')
     if 'extra_properties' in dataset.keys():
         extra_properties_to_jsonld(dataset['extra_properties'])
     if 'alternate_identifiers' in dataset.keys():

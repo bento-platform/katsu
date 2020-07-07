@@ -1,12 +1,13 @@
-from rest_framework.renderers import JSONRenderer
-from djangorestframework_camel_case.render import CamelCaseJSONRenderer
-from .jsonld_utils import dataset_to_jsonld
-from rdflib import Graph
 import json
+from djangorestframework_camel_case.render import CamelCaseJSONRenderer
+from rdflib import Graph
 from rdflib.plugin import register, Serializer
+from rest_framework.renderers import JSONRenderer
+from uuid import UUID
+
+from .jsonld_utils import dataset_to_jsonld
 
 register('json-ld', Serializer, 'rdflib_jsonld.serializer', 'JsonLDSerializer')
-from uuid import UUID
 
 
 class UUIDEncoder(json.JSONEncoder):
@@ -31,11 +32,7 @@ class FHIRRenderer(JSONRenderer):
             'class_converter', 'objects'
         )
         if 'results' in data:
-            final_data = {}
-            final_data[fhir_datatype_plural] = []
-            for item in data.get('results'):
-                item_data = class_converter(item)
-                final_data[fhir_datatype_plural].append(item_data)
+            final_data = {fhir_datatype_plural: [class_converter(item) for item in data['results']]}
         else:
             final_data = class_converter(data)
         return super(FHIRRenderer, self).render(final_data, media_type, renderer_context)
@@ -55,11 +52,7 @@ class JSONLDDatasetRenderer(PhenopacketsRenderer):
 
     def render(self, data, media_type=None, renderer_context=None):
         if 'results' in data:
-            json_obj = {}
-            json_obj['results'] = []
-            for item in data['results']:
-                dataset_jsonld = dataset_to_jsonld(item)
-                json_obj['results'].append(dataset_jsonld)
+            json_obj = {'results': [dataset_to_jsonld(item) for item in data['results']]}
         else:
             json_obj = dataset_to_jsonld(data)
 

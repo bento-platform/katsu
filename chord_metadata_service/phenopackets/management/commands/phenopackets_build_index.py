@@ -24,9 +24,10 @@ logger.setLevel(logging.INFO)
 
 class Command(BaseCommand):
     help = """
-        Takes every phenopacket-related data in the DB, port them over 
+        Takes every phenopacket-related data in the DB, port them over
         to FHIR-compliant JSON and upload them into elasticsearch
     """
+
     def handle(self, *args, **options):
         # TODO: currently only place we create the index, will have to review
         if es:
@@ -48,18 +49,21 @@ class Command(BaseCommand):
 
             for biosample in biosamples:
                 created_or_updated = build_biosample_index(biosample)
-                logger.info(f"{created_or_updated} index for biosample ID {biosample.id} indexed id {biosample.index_id}")
+                logger.info(f"{created_or_updated} index for biosample ID {biosample.id} indexed id "
+                            f"{biosample.index_id}")
 
             features = PhenotypicFeature.objects.all()
 
             for feature in features:
                 created_or_updated = build_phenotypicfeature_index(feature)
-                logger.info(f"{created_or_updated} index for phenotypic feature ID {feature.index_id} indexed ID {feature.index_id}")
+                logger.info(f"{created_or_updated} index for phenotypic feature ID {feature.index_id} indexed ID "
+                            f"{feature.index_id}")
 
             phenopackets = Phenopacket.objects.all()
 
             for phenopacket in phenopackets:
                 created_or_updated = build_phenopacket_index(phenopacket)
-                logger.info(f"{created_or_updated} index for phenopacket ID {phenopacket.id} indexed ID {phenopacket.index_id}")
+                logger.info(f"{created_or_updated} index for phenopacket ID {phenopacket.id} indexed ID "
+                            f"{phenopacket.index_id}")
         else:
             logger.error("No connection to elasticsearch")

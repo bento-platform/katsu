@@ -1,15 +1,19 @@
-from chord_lib.schemas.chord import CHORD_DATA_USE_SCHEMA
+from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
 from chord_metadata_service.restapi.utils import transform_keys
 
-from .models import *
+from .models import Project, Dataset, TableOwnership, Table
 from .schemas import LINKED_FIELD_SETS_SCHEMA
 
 
-__all__ = ["ProjectSerializer", "DatasetSerializer", "TableOwnershipSerializer"]
+__all__ = ["ProjectSerializer", "DatasetSerializer", "TableOwnershipSerializer", "TableSerializer"]
+
+
+BENTO_DATA_USE_SCHEMA_VALIDATOR = Draft7Validator(BENTO_DATA_USE_SCHEMA)
+LINKED_FIELD_SETS_SCHEMA_VALIDATOR = Draft7Validator(LINKED_FIELD_SETS_SCHEMA)
 
 
 #############################################################
@@ -51,17 +55,17 @@ class DatasetSerializer(GenericSerializer):
 
     # noinspection PyMethodMayBeStatic
     def validate_data_use(self, value):
-        validation = Draft7Validator(CHORD_DATA_USE_SCHEMA).is_valid(value)
+        validation = BENTO_DATA_USE_SCHEMA_VALIDATOR.is_valid(value)
         if not validation:
             raise serializers.ValidationError("Data use is not valid")
         return value
 
     # noinspection PyMethodMayBeStatic
     def validate_linked_field_sets(self, value):
-        v = Draft7Validator(LINKED_FIELD_SETS_SCHEMA)
-        validation = v.is_valid(value)
+        validation = LINKED_FIELD_SETS_SCHEMA_VALIDATOR.is_valid(value)
         if not validation:
-            raise serializers.ValidationError([str(error.message) for error in v.iter_errors(value)])
+            raise serializers.ValidationError([
+                str(error.message) for error in LINKED_FIELD_SETS_SCHEMA_VALIDATOR.iter_errors(value)])
         return value
 
     def validate(self, data):
@@ -149,3 +153,12 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = '__all__'
+
+
+class TableSerializer(GenericSerializer):
+    identifier = serializers.CharField(read_only=True)
+    dataset = DatasetSerializer(read_only=True, exclude_when_nested=["table_ownership"])
+
+    class Meta:
+        model = Table
+        fields = "__all__"

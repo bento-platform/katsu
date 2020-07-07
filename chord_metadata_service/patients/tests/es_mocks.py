@@ -1,5 +1,4 @@
 from unittest.mock import Mock
-from chord_metadata_service.metadata.elastic import es
 
 
 INDEXING_SUCCESS = {

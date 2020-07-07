@@ -1,44 +1,58 @@
 # Most parts of this text are taken from the mCODE:Minimal Common Oncology Data Elements Data Dictionary.
-# The mCODE is made available under the Creative Commons 0 "No Rights Reserved" license https://creativecommons.org/share-your-work/public-domain/cc0/
+# The mCODE is made available under the Creative Commons 0 "No Rights Reserved" license
+# https://creativecommons.org/share-your-work/public-domain/cc0/
 
 # Portions of this text copyright (c) 2019-2020 the Canadian Centre for Computational Genomics; licensed under the
 # GNU Lesser General Public License version 3.
 
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES
 
-GENETIC_VARIANT_TESTED = {
-    "description": "A description of an alteration in the most common DNA nucleotide sequence.",
+GENETIC_SPECIMEN = {
+    "description": "Class to describe a biosample used for genomics testing or analysis.",
     "properties": {
-        "id": "An arbitrary identifier for the genetic variant tested.",
-        "gene_studied": "A gene targeted for mutation analysis, identified in HUGO Gene Nomenclature Committee "
-                        "(HGNC) notation.",
-        "method": "An ontology or controlled vocabulary term to identify the method used to perform the genetic test. "
-                  "Accepted value set: NCIT.",
-        "variant_tested_identifier": "The variation ID assigned by HGVS, for example, 360448 is the identifier for "
-                                     "NM_005228.4(EGFR):c.-237A>G (single nucleotide variant in EGFR).",
-        "variant_tested_hgvs_name": "Symbolic representation of the variant used in HGVS, for example, "
-                                    "NM_005228.4(EGFR):c.-237A>G for HVGS variation ID 360448.",
-        "variant_tested_description": "Description of the variant.",
-        "data_value": "An ontology or controlled vocabulary term to identify positive or negative value for"
-                      "the mutation. Accepted value set: SNOMED CT.",
+        "id": "An arbitrary identifier for the genetic specimen.",
+        "specimen_type": "The kind of material that forms the specimen.",
+        "collection_body": "The anatomical collection site.",
+        "laterality": "Body side of the collection site, if needed to distinguish from a similar "
+                      "location on the other side of the body.",
         **EXTRA_PROPERTIES
     }
 }
 
-GENETIC_VARIANT_FOUND = {
-    "description": "Description of single discrete variant tested.",
+CANCER_GENETIC_VARIANT = {
+    "description": "Class to record an alteration in DNA.",
     "properties": {
-        "id": "An arbitrary identifier for the genetic variant found.",
-        "method": "An ontology or controlled vocabulary term to identify the method used to perform the genetic test. "
-                  "Accepted value set: NCIT.",
-        "variant_found_identifier": "The variation ID assigned by HGVS, for example, 360448 is the identifier for "
-                                    "NM_005228.4(EGFR):c.-237A>G (single nucleotide variant in EGFR). "
-                                    "Accepted value set: ClinVar.",
-        "variant_found_hgvs_name": "Symbolic representation of the variant used in HGVS, for example, "
-                                   "NM_005228.4(EGFR):c.-237A>G for HVGS variation ID 360448.",
-        "variant_found_description": "Description of the variant.",
-        "genomic_source_class": "An ontology or controlled vocabulary term to identify the genomic class of the "
-                                "specimen being analyzed.",
+        "id": "An arbitrary identifier for the cancer genetic variant.",
+        "data_value": "The overall result of the genetic test; specifically, whether a variant is present, "
+                      "absent, no call, or indeterminant.",
+        "method": "The method used to perform the genetic test.",
+        "amino_acid_change": "The symbolic representation of an amino acid variant reported using "
+                             "HGVS nomenclature (pHGVS).",
+        "amino_acid_change_type": "The type of change related to the amino acid variant.",
+        "cytogenetic_location": "The cytogenetic (chromosome) location.",
+        "cytogenetic_nomenclature": "The cytogenetic (chromosome) location, represented using the International "
+                                    "System for Human Cytogenetic Nomenclature (ISCN).",
+        "gene_studied": "A gene targeted for mutation analysis, identified in "
+                        "HUGO Gene Nomenclature Committee (HGNC) notation.",
+        "genomic_dna_change": "The symbolic representation of a genetic structural variant reported "
+                              "using HGVS nomenclature (gHGVS).",
+        "genomic_source_class": "The genomic class of the specimen being analyzed, for example, germline for "
+                                "inherited genome, somatic for cancer genome, and prenatal for fetal genome.",
+        "variation_code": "The variation ID assigned by ClinVar.",
+        **EXTRA_PROPERTIES
+    }
+}
+
+GENOMIC_REGION_STUDIED = {
+    "description": "Class to describe the area of the genome region referenced in testing for variants.",
+    "properties": {
+        "id": "An arbitrary identifier for the genomic region studied.",
+        "dna_ranges_examined": "The range(s) of the DNA sequence examined.",
+        "dna_region_description": "The description for the DNA region studied in the genomics report.",
+        "gene_mutation": "The gene mutations tested for in blood or tissue by molecular genetics methods.",
+        "gene_studied": "The ID for the gene studied.",
+        "genomic_reference_sequence_id": "Range(s) of DNA sequence examined.",
+        "genomic_region_coordinate_system": "The method of counting along the genome.",
         **EXTRA_PROPERTIES
     }
 }
@@ -47,13 +61,13 @@ GENOMICS_REPORT = {
     "description": "Genetic Analysis Summary.",
     "properties": {
         "id": "An arbitrary identifier for the genetics report.",
-        "test_name": "An ontology or controlled vocabulary term to identify the laboratory test. "
-                     "Accepted value sets: LOINC, GTR.",
+        "code": "An ontology or controlled vocabulary term to identify the laboratory test. "
+                "Accepted value sets: LOINC, GTR.",
         "performing_organization_name": "The name of the organization  producing the genomics report.",
-        "specimen_type": "An ontology or controlled vocabulary term to identify the type of material the specimen "
-                         "contains or consists of. Accepted value set: HL7 Version 2 and Specimen Type.",
-        "genetic_variant_tested": "A test for a specific mutation on a particular gene.",
-        "genetic_variant_found": "Records an alteration in the most common DNA nucleotide sequence.",
+        "issued": "The date/time this report was issued.",
+        "genetic_specimen": "List of related genetic specimens.",
+        "genetic_variant": "Related genetic variant.",
+        "genomic_region_studied": "Related genomic region studied.",
         **EXTRA_PROPERTIES
     }
 }
@@ -63,16 +77,8 @@ LABS_VITAL = {
     "properties": {
         "id": "An arbitrary identifier for the labs/vital tests.",
         "individual": "The individual who is the subject of the tests.",
-        "body_height": "The patient\'s height.",
-        "body_weight": "The patient\'s weight.",
-        "cbc_with_auto_differential_panel": "Reference to a laboratory observation in the CBC with Auto Differential"
-                                            "Panel test.",
-        "comprehensive_metabolic_2000": "Reference to a laboratory observation in the CMP 2000 test.",
-        "blood_pressure_diastolic": "The blood pressure after the contraction of the heart while the chambers of "
-                                    "the heart refill with blood, when the pressure is lowest.",
-        "blood_pressure_systolic": "The blood pressure during the contraction of the left ventricle of the heart, "
-                                   "when blood pressure is at its highest.",
-        "tumor_marker_test": "An ontology or controlled vocabulary term to identify tumor marker test.",
+        "tumor_marker_code": "A code identifying the type of tumor marker test.",
+        "tumor_marker_data_value": "The result of a tumor marker test.",
         **EXTRA_PROPERTIES
     }
 }
@@ -82,16 +88,20 @@ CANCER_CONDITION = {
     "properties": {
         "id": "An arbitrary identifier for the cancer condition.",
         "condition_type": "Cancer condition type: primary or secondary.",
-        "body_location_code": "Code for the body location, optionally pre-coordinating laterality or direction. "
-                              "Accepted ontologies: SNOMED CT, ICD-O-3 and others.",
+        "body_site": "Code for the body location, optionally pre-coordinating laterality or direction. "
+                     "Accepted ontologies: SNOMED CT, ICD-O-3 and others.",
+        "laterality": "Body side of the body location, if needed to distinguish from a similar location "
+                      "on the other side of the body.",
         "clinical_status": "A flag indicating whether the condition is active or inactive, recurring, in remission, "
                            "or resolved (as of the last update of the Condition). Accepted code system: "
                            "http://terminology.hl7.org/CodeSystem/condition-clinical",
-        "condition_code": "A code describing the type of primary or secondary malignant neoplastic disease.",
+        "code": "A code describing the type of primary or secondary malignant neoplastic disease.",
         "date_of_diagnosis": "The date the disease was first clinically recognized with sufficient certainty, "
                              "regardless of whether it was fully characterized at that time.",
         "histology_morphology_behavior": "A description of the morphologic and behavioral characteristics of "
                                          "the cancer. Accepted ontologies: SNOMED CT, ICD-O-3 and others.",
+        "verification_status": "A flag indicating whether the condition is unconfirmed, provisional, differential, "
+                               "confirmed, refuted, or entered-in-error.",
         **EXTRA_PROPERTIES
     }
 }
@@ -118,11 +128,14 @@ CANCER_RELATED_PROCEDURE = {
     "description": "Description of radiological treatment or surgical action addressing a cancer condition.",
     "properties": {
         "id": "An arbitrary identifier for the procedure.",
-        "procedure_type": "Type of cancer related procedure: radion or surgical.",
+        "procedure_type": "Type of cancer related procedure: radiation or surgical.",
         "code": "Code for the procedure performed.",
-        "occurence_time_or_period": "The date/time that a procedure was performed.",
-        "target_body_site": "The body location(s) where the procedure was performed.",
+        "body_site": "The body location(s) where the procedure was performed.",
+        "laterality": "Body side of the body location, if needed to distinguish from a similar location "
+                      "on the other side of the body.",
         "treatment_intent": "The purpose of a treatment.",
+        "reason_code": "The explanation or justification for why the surgical procedure was performed.",
+        "reason_reference": "Reference to a primary or secondary cancer condition.",
         **EXTRA_PROPERTIES
     }
 }
@@ -137,7 +150,6 @@ MEDICATION_STATEMENT = {
         "treatment_intent": "The purpose of a treatment. Accepted ontologies: SNOMED CT.",
         "start_date": "The start date/time of the medication.",
         "end_date": "The end date/time of the medication.",
-        "date_time": "The date/time the medication was administered.",
         **EXTRA_PROPERTIES
     }
 }
@@ -151,6 +163,9 @@ MCODEPACKET = {
         "cancer_condition": "An Individual's cancer condition.",
         "cancer_related_procedures": "A radiological or surgical procedures addressing a cancer condition.",
         "medication_statement": "Medication treatment addressed to an Individual.",
+        "date_of_death": "An indication that the patient is no longer living, given by a date of death or boolean.",
+        "cancer_disease_status": "A clinician's qualitative judgment on the current trend of the cancer, e.g., "
+                                 "whether it is stable, worsening (progressing), or improving (responding).",
         **EXTRA_PROPERTIES
     }
 }

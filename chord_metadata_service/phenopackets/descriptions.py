@@ -36,35 +36,12 @@
 
 
 from chord_metadata_service.patients.descriptions import INDIVIDUAL
+from chord_metadata_service.resources.descriptions import RESOURCE
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES, ontology_class
 
 
 # If description and help are specified separately, the Django help text differs from the schema description. Otherwise,
 # the data type is a string which fills both roles.
-
-RESOURCE = {
-    "description": "A description of an external resource used for referencing an object.",
-    "properties": {
-        "id": {
-            "description": "Unique researcher-specified identifier for the resource.",
-            "help": "For OBO ontologies, the value of this string MUST always be the official OBO ID, which is always "
-                    "equivalent to the ID prefix in lower case. For other resources use the prefix in "
-                    "identifiers.org."
-        },
-        "name": {
-            "description": "Human-readable name for the resource.",
-            "help": "The full name of the resource or ontology referred to by the id element."
-        },
-        "namespace_prefix": "Prefix for objects from this resource. In the case of ontology resources, this should be "
-                            "the CURIE prefix.",
-        "url": "Resource URL. In the case of ontologies, this should be an OBO or OWL file. Other resources should "
-               "link to the official or top-level url.",
-        "version": "The version of the resource or ontology used to make the annotation.",
-        "iri_prefix":  "The IRI prefix, when used with the namespace prefix and an object ID, should resolve the term "
-                       "or object from the resource in question.",
-        **EXTRA_PROPERTIES
-    }
-}
 
 EXTERNAL_REFERENCE = {
     "description": "An encoding of information about a reference to an external resource.",
@@ -81,7 +58,7 @@ UPDATE = {
     "description": "An update event for a record (e.g. a phenopacket.)",
     "properties": {
         "timestamp": {
-            "description": "ISO8601 timestamp specifying when when this update occurred.",
+            "description": "ISO8601 UTC timestamp specifying when when this update occurred.",
             "help": "Timestamp specifying when when this update occurred.",
         },
         "updated_by": "Information about the person/organization/network that performed the update.",
@@ -191,6 +168,24 @@ GENE = {
     }
 }
 
+ALLELE = {
+    "properties": {
+        "id": "An arbitrary identifier.",
+        "hgvs": "",
+        "genome_assembly": "The reference genome identifier e.g. GRCh38.",
+        "chr": "A chromosome identifier e.g. chr2 or 2.",
+        "pos": "The 1-based genomic position e.g. 134327882.",
+        "ref": "The reference base(s).",
+        "alt": "The alternate base(s).",
+        "info": "Relevant parts of the INFO field.",
+        "seq_id": "Sequence ID, e.g. Seq1.",
+        "position": "Position , a 0-based coordinate for where the Deleted Sequence starts, e.g. 4.",
+        "deleted_sequence": "Deleted sequence , sequence for the deletion, can be empty, e.g. A",
+        "inserted_sequence": "Inserted sequence , sequence for the insertion, can be empty, e.g. G",
+        "iscn": "E.g. t(8;9;11)(q12;p24;p12)."
+    }
+}
+
 VARIANT = {
     "description": "A representation used to describe candidate or diagnosed causative variants.",  # TODO: GA4GH VR
     "properties": {
@@ -225,20 +220,6 @@ DISEASE = {
     }
 }
 
-AGE = {
-    "description": "An ISO8601 duration string (e.g. P40Y10M05D for 40 years, 10 months, 5 days) representing an age "
-                   "of a subject.",
-    "help": "Age of a subject."
-}
-
-AGE_RANGE = "Age range (e.g. when a subject's age falls into a bin)"  # TODO
-
-AGE_NESTED = {
-    "description": AGE["description"],
-    "properties": {
-        "age": AGE
-    }
-}
 
 BIOSAMPLE = {
     "description": ("A unit of biological material from which the substrate molecules (e.g. genomic DNA, RNA, "
@@ -263,7 +244,7 @@ BIOSAMPLE = {
         "tumor_progression": ontology_class("representing if the specimen is from a primary tumour, a metastasis, or a "
                                             "recurrence. There are multiple ways of representing this using ontology "
                                             "terms, and the terms chosen will have a specific meaning that is "
-                                            "application specific."),
+                                            "application specific"),
         "tumor_grade": ontology_class("representing the tumour grade. This should be a child term of NCIT:C28076 "
                                       "(Disease Grade Qualifier) or equivalent"),
         "diagnostic_markers": {
@@ -271,7 +252,7 @@ BIOSAMPLE = {
             "items": ontology_class("representing a clinically-relevant bio-marker. Most of the assays, such as "
                                     "immunohistochemistry (IHC), are covered by the NCIT ontology under the "
                                     "sub-hierarchy NCIT:C25294 (Laboratory Procedure), e.g. NCIT:C68748 "
-                                    "(HER2/Neu Positive), or NCIT:C131711 Human Papillomavirus-18 Positive).")
+                                    "(HER2/Neu Positive), or NCIT:C131711 Human Papillomavirus-18 Positive)")
         },
         "procedure": PROCEDURE,
         "hts_files": {

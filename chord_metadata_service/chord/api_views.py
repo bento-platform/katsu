@@ -4,12 +4,12 @@ from rest_framework.settings import api_settings
 
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
-from .models import *
+from .models import Project, Dataset, TableOwnership, Table
 from .permissions import OverrideOrSuperUserOnly
-from .serializers import *
+from .serializers import ProjectSerializer, DatasetSerializer, TableOwnershipSerializer, TableSerializer
 
 
-__all__ = ["ProjectViewSet", "DatasetViewSet", "TableOwnershipViewSet"]
+__all__ = ["ProjectViewSet", "DatasetViewSet", "TableOwnershipViewSet", "TableViewSet"]
 
 
 class ReadOnly(BasePermission):
@@ -61,8 +61,23 @@ class TableOwnershipViewSet(CHORDPublicModelViewSet):
 
     post:
     Create a new relationship between a dataset (and optionally a specific biosample) and a table
-    in another service
+    in a data service
     """
 
     queryset = TableOwnership.objects.all().order_by("table_id")
     serializer_class = TableOwnershipSerializer
+
+
+class TableViewSet(CHORDPublicModelViewSet):
+    """
+    get:
+    Return a list of tables
+
+    post:
+    Create a new table
+    """
+
+    # TODO: Create TableOwnership if needed - here or model?
+
+    queryset = Table.objects.all().prefetch_related("ownership_record").order_by("ownership_record_id")
+    serializer_class = TableSerializer

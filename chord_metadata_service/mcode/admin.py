@@ -1,44 +1,52 @@
 from django.contrib import admin
-from .models import *
+from . import models as m
 
 
-@admin.register(GeneticVariantTested)
-class GeneticVariantTestedAdmin(admin.ModelAdmin):
+@admin.register(m.GeneticSpecimen)
+class GeneticSpecimenAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(GeneticVariantFound)
-class GeneticVariantFoundAdmin(admin.ModelAdmin):
+@admin.register(m.CancerGeneticVariant)
+class CancerGeneticVariantAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(GenomicsReport)
+@admin.register(m.GenomicRegionStudied)
+class GenomicRegionStudiedAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.GenomicsReport)
 class GenomicsReportAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(LabsVital)
+@admin.register(m.LabsVital)
 class LabsVitalAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(CancerCondition)
+@admin.register(m.CancerCondition)
 class CancerConditionAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(TNMStaging)
+@admin.register(m.TNMStaging)
 class TNMStagingAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(CancerRelatedProcedure)
+@admin.register(m.CancerRelatedProcedure)
 class CancerRelatedProcedureAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(MedicationStatement)
+@admin.register(m.MedicationStatement)
 class MedicationStatementAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.MCodePacket)
+class MCodePacketAdmin(admin.ModelAdmin):
+    pass
