@@ -16,11 +16,11 @@ from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 from ..parse_fhir_mcode import parse_bundle, patient_to_individual
 
 
-with open(os.path.join(os.path.dirname(__file__), "mcode_fhir_test_example.json"), "r") as pf:
+with open(os.path.join(os.path.dirname(__file__), "example_mcode_fhir.json"), "r") as pf:
     EXAMPLE_INGEST_MCODE_FHIR = json.load(pf)
 
 EXAMPLE_INGEST_OUTPUTS = {
-    "json_document": os.path.join(os.path.dirname(__file__), "mcode_fhir_test_example.json"),
+    "json_document": os.path.join(os.path.dirname(__file__), "example_mcode_fhir.json"),
 }
 
 
