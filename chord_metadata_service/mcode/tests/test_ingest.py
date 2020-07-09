@@ -6,9 +6,17 @@ from django.test import TestCase
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+from chord_metadata_service.patients.models import Individual
+# noinspection PyProtectedMember
+from chord_metadata_service.chord.ingest import (
+    WORKFLOW_INGEST_FUNCTION_MAP,
+    WORKFLOW_MCODE_FHIR_JSON
+)
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 
 from ..parse_fhir_mcode import parse_bundle, patient_to_individual
+from ..models import MCodePacket
+
 
 with open(os.path.join(os.path.dirname(__file__), "example_mcode_fhir.json"), "r") as pf:
     EXAMPLE_INGEST_MCODE_FHIR = json.load(pf)
@@ -56,3 +64,11 @@ class IngestMcodeFhirTest(TestCase):
         to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
                                            dataset=self.d)
         self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
+
+    def test_ingest_mcodepacket(self):
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MCODE_FHIR_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        self.assertEqual(len(MCodePacket.objects.all()), 1)
+        # ingest again
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MCODE_FHIR_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        self.assertEqual(len(MCodePacket.objects.all()), 2)
+        self.assertEqual(len(Individual.objects.all()), 1)
