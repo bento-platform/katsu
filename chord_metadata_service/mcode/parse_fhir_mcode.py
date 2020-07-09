@@ -135,14 +135,6 @@ def _get_tnm_staging_property(resource: dict, profile_urls: list, category_type=
             return property_value
 
 
-def _get_profiles(resource: dict, profile_urls: list):
-    # Can raise a KeyError in some cases
-    resource_profiles = resource["meta"]["profile"]
-    for p_url in profile_urls:
-        if p_url in resource_profiles:
-            return True
-
-
 def condition_to_cancer_condition(resource):
     """ FHIR Condition to Mcode Cancer Condition. """
 
