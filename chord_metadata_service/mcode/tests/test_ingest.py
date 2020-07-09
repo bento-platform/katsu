@@ -6,15 +6,9 @@ from django.test import TestCase
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
-# noinspection PyProtectedMember
-from chord_metadata_service.chord.ingest import (
-    WORKFLOW_INGEST_FUNCTION_MAP,
-    WORKFLOW_MCODE_FHIR_JSON
-)
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 
 from ..parse_fhir_mcode import parse_bundle, patient_to_individual
-
 
 with open(os.path.join(os.path.dirname(__file__), "example_mcode_fhir.json"), "r") as pf:
     EXAMPLE_INGEST_MCODE_FHIR = json.load(pf)
@@ -42,6 +36,14 @@ class ParseMcodeFhirTest(TestCase):
         self.assertEqual(mcodepacket["cancer_condition"][0]["clinical_status"]["label"], "active")
         self.assertEqual(mcodepacket["cancer_condition"][0]["verification_status"]["label"], "confirmed")
         self.assertEqual(mcodepacket["cancer_condition"][0]["code"]["label"], "Malignant neoplasm of breast (disorder)")
+        self.assertIsNotNone(mcodepacket["cancer_condition"][0]["date_of_diagnosis"])
+        self.assertEqual(mcodepacket["cancer_condition"][0]["condition_type"], "primary")
+        self.assertEqual(type(mcodepacket["cancer_condition"][0]["tnm_staging"]), list)
+        tnms_categories = ["primary_tumor_category", "regional_nodes_category", "distant_metastases_category"]
+        for tnms in mcodepacket["cancer_condition"][0]["tnm_staging"]:
+            for category in tnms_categories:
+                self.assertTrue(category in [key for key in tnms.keys()])
+        self.assertEqual(type(mcodepacket["medication_statement"]), list)
 
 
 class IngestMcodeFhirTest(TestCase):
