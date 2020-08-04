@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -88,10 +89,10 @@ def ingest(request):
             # Wrap ingestion in a transaction, so if it fails we don't end up in a partial state in the database.
             WORKFLOW_INGEST_FUNCTION_MAP[workflow_id](workflow_outputs, table_id)
 
-    except KeyError:
+    except KeyError as e:
         # Tried to access a non-existant workflow output
         # TODO: More precise error (which key?)
-        return Response(errors.bad_request_error("Missing workflow output"), status=400)
+        return Response(errors.bad_request_error(f"Missing workflow output (key error: {str(e)})"), status=400)
 
     except json.decoder.JSONDecodeError as e:
         return Response(errors.bad_request_error(f"Invalid JSON provided for ingest document (message: {e})"),
@@ -102,6 +103,12 @@ def ingest(request):
             "Encountered validation errors during ingestion",
             *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
         ))
+
+    except Exception as e:
+        # Encountered some other error from the ingestion attempt, return a somewhat detailed message
+        print(f"Encountered an exception while processing an ingest attempt:\n{traceback.format_exc()}")
+        return Response(errors.internal_server_error(f"Encountered an exception while processing an ingest attempt "
+                                                     f"(error: {repr(e)}"), status=500)
 
     # TODO: Schema validation
     # TODO: Rollback in case of failures
