@@ -15,7 +15,7 @@ from bento_lib.schemas.bento import BENTO_INGEST_SCHEMA
 from bento_lib.responses import errors
 from bento_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
-from .ingest import METADATA_WORKFLOWS, WORKFLOWS_PATH, WORKFLOW_INGEST_FUNCTION_MAP
+from .ingest import METADATA_WORKFLOWS, WORKFLOWS_PATH, WORKFLOW_INGEST_FUNCTION_MAP, IngestError
 from .models import Table
 
 
@@ -89,10 +89,8 @@ def ingest(request):
             # Wrap ingestion in a transaction, so if it fails we don't end up in a partial state in the database.
             WORKFLOW_INGEST_FUNCTION_MAP[workflow_id](workflow_outputs, table_id)
 
-    except KeyError as e:
-        # Tried to access a non-existant workflow output
-        # TODO: More precise error (which key?)
-        return Response(errors.bad_request_error(f"Missing workflow output (key error: {str(e)})"), status=400)
+    except IngestError as e:
+        return Response(errors.bad_request_error(f"Encountered ingest error: {e}"), status=400)
 
     except json.decoder.JSONDecodeError as e:
         return Response(errors.bad_request_error(f"Invalid JSON provided for ingest document (message: {e})"),

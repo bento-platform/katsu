@@ -23,6 +23,7 @@ from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
 __all__ = [
     "METADATA_WORKFLOWS",
     "WORKFLOWS_PATH",
+    "IngestError",
     "ingest_resource",
     "WORKFLOW_INGEST_FUNCTION_MAP",
 ]
@@ -174,6 +175,10 @@ METADATA_WORKFLOWS = {
 }
 
 WORKFLOWS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "workflows")
+
+
+class IngestError(Exception):
+    pass
 
 
 def create_phenotypic_feature(pf):
@@ -369,8 +374,15 @@ def _map_if_list(fn, data, *args):
     return [fn(d, *args) for d in data] if isinstance(data, list) else fn(data, *args)
 
 
+def _get_output_or_raise(workflow_outputs, key):
+    if key not in workflow_outputs:
+        raise IngestError(f"Missing workflow output: {key}")
+
+    return workflow_outputs[key]
+
+
 def ingest_experiments_workflow(workflow_outputs, table_id):
-    with open(workflow_outputs["json_document"], "r") as jf:
+    with open(_get_output_or_raise(workflow_outputs, "json_document"), "r") as jf:
         json_data = json.load(jf)
 
         dataset = TableOwnership.objects.get(table_id=table_id).dataset
@@ -382,13 +394,13 @@ def ingest_experiments_workflow(workflow_outputs, table_id):
 
 
 def ingest_phenopacket_workflow(workflow_outputs, table_id):
-    with open(workflow_outputs["json_document"], "r") as jf:
+    with open(_get_output_or_raise(workflow_outputs, "json_document"), "r") as jf:
         json_data = json.load(jf)
         return _map_if_list(ingest_phenopacket, json_data, table_id)
 
 
 def ingest_fhir_workflow(workflow_outputs, table_id):
-    with open(workflow_outputs["patients"], "r") as pf:
+    with open(_get_output_or_raise(workflow_outputs, "patients"), "r") as pf:
         patients_data = json.load(pf)
         phenopacket_ids = ingest_patients(
             patients_data,
@@ -413,7 +425,7 @@ def ingest_fhir_workflow(workflow_outputs, table_id):
 
 
 def ingest_mcode_fhir_workflow(workflow_outputs, table_id):
-    with open(workflow_outputs["json_document"], "r") as jf:
+    with open(_get_output_or_raise(workflow_outputs, "json_document"), "r") as jf:
         json_data = json.load(jf)
         mcodepacket = parse_bundle(json_data)
         ingest_mcodepacket(mcodepacket, table_id)
