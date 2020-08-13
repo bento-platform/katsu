@@ -65,22 +65,11 @@ The service uses PostgreSQL database for data storage.
 
 * Create and activate virtual environment
 * Run: `pip install -r requirements.txt`
-* Configure database connection in settings.py
+* To configure the application (such as the DB credentials) we are using python-dotenv:
+    - Take a look at the .env-sample file at the root of the project
+    - You can export these in your virtualenv or simply `cp .env-sample .env`
+    - python-dotenv can handle either (a local .env will override env vars though)
 
-e.g. settings if running database on localhost, default port for PostgreSQL is 5432:
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'database_name',
-        'USER': 'user',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-```
 
 * Run:
 
