@@ -28,6 +28,7 @@ setuptools.setup(
         "jsonschema>=3.2,<4.0",
         "psycopg2-binary>=2.8,<3.0",
         "python-dateutil>=2.8,<3.0",
+        "python-dotenv==0.14.0",
         "PyYAML>=5.3,<6.0",
         "strict-rfc3339==0.7",
         "rdflib==4.2.2",
