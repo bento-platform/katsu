@@ -1,4 +1,3 @@
-import json
 from django.conf import settings
 from django.http import HttpResponseForbidden
 import requests
@@ -23,7 +22,7 @@ class CandigAuthzMiddleware:
 
             try:
                 allowed = self.query_opa(request, access_level)
-            except requests.exceptions.RequestException as e:
+            except requests.exceptions.RequestException:
                 return HttpResponseForbidden()
 
             if allowed:
