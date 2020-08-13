@@ -126,6 +126,15 @@ functions as follows:
 This can be turned off with the `CHORD_PERMISSIONS` environment variable and/or
 Django setting, or with the `AUTH_OVERRIDE` Django setting.
 
+### Authorization inside CanDIG
+
+When ran inside the CanDIG context, to properly implement authorization you'll
+have to do the following:
+
+1. Make sure the CHORD_PERMISSIONS is set to "false"
+2. Set INSIDE_CANDIG to "true"
+3. Provide the URL for the OPA instance in CANDIG_OPA_URL
+
 ## Developing
 
 ### Branching
