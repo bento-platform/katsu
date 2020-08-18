@@ -62,8 +62,8 @@ APPEND_SLASH = False
 
 # Candig-specific settings
 
-INSIDE_CANDIG = os.environ.get("INSIDE_CANDIG", False) == "true"
-CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL", None)
+INSIDE_CANDIG = os.environ.get("INSIDE_CANDIG", "false").lower() == "true"
+CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL")
 
 # Application definition
 

@@ -4,11 +4,11 @@ import requests
 
 
 # TODO: replace this hacky stuff with more robust solution
-APPLICABLE_ENDPOINTS = [
+APPLICABLE_ENDPOINTS = frozenset({
     '/api/individuals',
     '/api/diseases',
     '/api/phenotypicfeatures'
-]
+})
 
 
 class CandigAuthzMiddleware:
@@ -25,20 +25,15 @@ class CandigAuthzMiddleware:
             except requests.exceptions.RequestException:
                 return HttpResponseForbidden()
 
-            if allowed:
-                response = self.get_response(request)
-            else:
+            if not allowed:
                 return HttpResponseForbidden()
-        else:
-            response = self.get_response(request)
+
+        response = self.get_response(request)
 
         return response
 
     def is_applicable_endpoint(self, request):
-        if any(request.path == endpoint for endpoint in APPLICABLE_ENDPOINTS):
-            return True
-        else:
-            return False
+        return request.path in APPLICABLE_ENDPOINTS
 
     def query_opa(self, request, access_level):
         if not settings.CANDIG_OPA_URL:
@@ -59,7 +54,4 @@ class CandigAuthzMiddleware:
 
         data = res.json()
 
-        if 'result' in data and 'allow' in data['result']:
-            return data['result']['allow']
-        else:
-            return False
+        return data.get('result', {}).get('allow', False)
