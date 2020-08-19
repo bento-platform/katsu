@@ -15,8 +15,11 @@ import sys
 import logging
 
 from urllib.parse import urlparse
+from dotenv import load_dotenv
 
 from .. import __version__
+
+load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -57,6 +60,10 @@ if DEBUG:
 
 APPEND_SLASH = False
 
+# Candig-specific settings
+
+INSIDE_CANDIG = os.environ.get("INSIDE_CANDIG", "false").lower() == "true"
+CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL")
 
 # Application definition
 
@@ -90,6 +97,7 @@ MIDDLEWARE = [
     'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'chord_metadata_service.restapi.middleware.CandigAuthzMiddleware',
 ]
 
 ROOT_URLCONF = 'chord_metadata_service.metadata.urls'

@@ -65,22 +65,11 @@ The service uses PostgreSQL database for data storage.
 
 * Create and activate virtual environment
 * Run: `pip install -r requirements.txt`
-* Configure database connection in settings.py
+* To configure the application (such as the DB credentials) we are using python-dotenv:
+    - Take a look at the .env-sample file at the root of the project
+    - You can export these in your virtualenv or simply `cp .env-sample .env`
+    - python-dotenv can handle either (a local .env will override env vars though)
 
-e.g. settings if running database on localhost, default port for PostgreSQL is 5432:
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'database_name',
-        'USER': 'user',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-```
 
 * Run:
 
@@ -125,6 +114,15 @@ functions as follows:
 
 This can be turned off with the `CHORD_PERMISSIONS` environment variable and/or
 Django setting, or with the `AUTH_OVERRIDE` Django setting.
+
+### Authorization inside CanDIG
+
+When ran inside the CanDIG context, to properly implement authorization you'll
+have to do the following:
+
+1. Make sure the CHORD_PERMISSIONS is set to "false"
+2. Set INSIDE_CANDIG to "true"
+3. Provide the URL for the OPA instance in CANDIG_OPA_URL
 
 ## Developing
 
