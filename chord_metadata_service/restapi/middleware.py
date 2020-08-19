@@ -28,9 +28,7 @@ class CandigAuthzMiddleware:
             if not allowed:
                 return HttpResponseForbidden()
 
-        response = self.get_response(request)
-
-        return response
+        return self.get_response(request)
 
     def is_applicable_endpoint(self, request):
         return request.path in APPLICABLE_ENDPOINTS
