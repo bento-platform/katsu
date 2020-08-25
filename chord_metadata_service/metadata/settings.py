@@ -103,6 +103,14 @@ MIDDLEWARE = [
     'chord_metadata_service.restapi.middleware.CandigAuthzMiddleware',
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "localhost:8000",
+    "localhost:8080"
+    "127.0.0.1",
+    "127.0.0.1:8000",
+    "127.0.0.1:8080",
+]
+
 ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
