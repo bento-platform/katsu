@@ -83,6 +83,8 @@ INSTALLED_APPS = [
     'chord_metadata_service.resources.apps.ResourcesConfig',
     'chord_metadata_service.restapi.apps.RestapiConfig',
 
+    'corsheaders',
+
     'rest_framework',
     'django_nose',
     'rest_framework_swagger',
@@ -91,6 +93,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
