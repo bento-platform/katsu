@@ -1,5 +1,6 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from rest_framework.settings import api_settings
+from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import IndividualSerializer
 from .models import Individual
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
@@ -23,3 +24,6 @@ class IndividualViewSet(viewsets.ModelViewSet):
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer, PhenopacketsRenderer)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ["id", "sex", "ethnicity"]
+    search_fields = ["sex", "ethnicity"]

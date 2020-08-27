@@ -84,7 +84,7 @@ INSTALLED_APPS = [
     'chord_metadata_service.restapi.apps.RestapiConfig',
 
     'corsheaders',
-
+    'django_filters',
     'rest_framework',
     'django_nose',
     'rest_framework_swagger',
@@ -196,7 +196,8 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
     'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
 # Password validation
