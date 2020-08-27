@@ -1,5 +1,5 @@
 import django_filters
-from .models import *
+from .models import Individual
 
 
 class IndividualFilter(django_filters.rest_framework.FilterSet):
