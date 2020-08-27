@@ -24,6 +24,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer, PhenopacketsRenderer)
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ["id", "sex", "ethnicity"]
+    ordering_fields = ["id"]
     search_fields = ["sex", "ethnicity"]
