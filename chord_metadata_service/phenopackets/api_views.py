@@ -3,11 +3,12 @@ from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, FHIRRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
-from . import models as m, serializers as s
+from . import models as m, serializers as s, filters as f
 
 
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
@@ -30,6 +31,8 @@ class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
     """
     queryset = m.PhenotypicFeature.objects.all().order_by("id")
     serializer_class = s.PhenotypicFeatureSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.PhenotypicFeatureFilter
 
 
 class ProcedureViewSet(ExtendedPhenopacketsModelViewSet):
@@ -43,6 +46,8 @@ class ProcedureViewSet(ExtendedPhenopacketsModelViewSet):
     """
     queryset = m.Procedure.objects.all().order_by("id")
     serializer_class = s.ProcedureSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.ProcedureFilter
 
 
 class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
@@ -56,6 +61,8 @@ class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
     """
     queryset = m.HtsFile.objects.all().order_by("uri")
     serializer_class = s.HtsFileSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.HtsFileFilter
 
 
 class GeneViewSet(ExtendedPhenopacketsModelViewSet):
@@ -69,6 +76,8 @@ class GeneViewSet(ExtendedPhenopacketsModelViewSet):
     """
     queryset = m.Gene.objects.all().order_by("id")
     serializer_class = s.GeneSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.GeneFilter
 
 
 class VariantViewSet(ExtendedPhenopacketsModelViewSet):
@@ -82,6 +91,8 @@ class VariantViewSet(ExtendedPhenopacketsModelViewSet):
     """
     queryset = m.Variant.objects.all().order_by("id")
     serializer_class = s.VariantSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.VariantFilter
 
 
 class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
@@ -95,6 +106,8 @@ class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
     """
     queryset = m.Disease.objects.all().order_by("id")
     serializer_class = s.DiseaseSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.DiseaseFilter
 
 
 META_DATA_PREFETCH = (
@@ -113,6 +126,8 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
     """
     queryset = m.MetaData.objects.all().prefetch_related(*META_DATA_PREFETCH).order_by("id")
     serializer_class = s.MetaDataSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.MetaDataFilter
 
 
 BIOSAMPLE_PREFETCH = (
@@ -133,6 +148,8 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     """
     queryset = m.Biosample.objects.all().prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
     serializer_class = s.BiosampleSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.BiosampleFilter
 
 
 PHENOPACKET_PREFETCH = (
@@ -158,6 +175,8 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     """
     queryset = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")
     serializer_class = s.PhenopacketSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.PhenopacketFilter
 
 
 class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
@@ -171,6 +190,8 @@ class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
     """
     queryset = m.GenomicInterpretation.objects.all().order_by("id")
     serializer_class = s.GenomicInterpretationSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.GenomicInterpretationFilter
 
 
 class DiagnosisViewSet(PhenopacketsModelViewSet):
@@ -184,6 +205,8 @@ class DiagnosisViewSet(PhenopacketsModelViewSet):
     """
     queryset = m.Diagnosis.objects.all().order_by("id")
     serializer_class = s.DiagnosisSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.DiagnosisFilter
 
 
 class InterpretationViewSet(PhenopacketsModelViewSet):
@@ -197,6 +220,8 @@ class InterpretationViewSet(PhenopacketsModelViewSet):
     """
     queryset = m.Interpretation.objects.all().order_by("id")
     serializer_class = s.InterpretationSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_class = f.InterpretationFilter
 
 
 @api_view(["GET"])
