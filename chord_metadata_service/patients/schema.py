@@ -1,5 +1,4 @@
 import django_filters
-from django.contrib.postgres.fields import ArrayField
 from graphene_django_extras.types import DjangoObjectType
 from graphene_django_extras import DjangoFilterListField
 
@@ -28,9 +27,9 @@ class IndividualType(DjangoObjectType):
         model = Individual
         # Avoiding the more "complex" fields for now
         exclude_fields = [
-            'age', 
-            'karnofsky', 
-            'extra_properties', 
+            'age',
+            'karnofsky',
+            'extra_properties',
             'taxonomy',
             'comorbid_condition',
             'ecog_performance_status'
