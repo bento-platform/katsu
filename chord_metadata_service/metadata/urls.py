@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from chord_metadata_service.restapi import api_views, urls as restapi_urls
 from chord_metadata_service.chord import urls as chord_urls
+from graphene_django.views import GraphQLView
 from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.views import get_swagger_view
 
@@ -38,4 +39,7 @@ urlpatterns = [
     path('service-info', api_views.service_info, name="service-info"),
     *chord_urls.urlpatterns,  # TODO: Use include? can we double up?
     *([path('admin/', admin.site.urls)] if DEBUG else []),
+    # TODO: you most likely want to turn off the graphiql option in production
+    path('graphql/', GraphQLView.as_view(graphiql=True)),
+
 ]

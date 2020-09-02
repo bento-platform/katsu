@@ -88,6 +88,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_nose',
     'rest_framework_swagger',
+    'graphene_django',
 ]
 
 MIDDLEWARE = [
@@ -241,3 +242,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Graphene / Graphql conf
+GRAPHENE = {
+    'SCHEMA': 'chord_metadata_service.metadata.schema.schema'
+}
