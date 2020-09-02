@@ -58,6 +58,10 @@ class MetaDataSerializer(GenericSerializer):
 #############################################################
 
 class PhenotypicFeatureSerializer(GenericSerializer):
+    always_include = (
+        "negated",
+    )
+
     type = serializers.JSONField(source='pftype')
 
     class Meta:
