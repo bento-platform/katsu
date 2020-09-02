@@ -72,7 +72,7 @@ class CandigAuthzMiddleware:
             "input": {
                 "path": request.path,
                 "method": request.method,
-                "access_level": access_level
+                "access_level": int(access_level)
             }
         }
 
