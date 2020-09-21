@@ -14,10 +14,20 @@ class MetaDataFilter(django_filters.rest_framework.FilterSet):
 
 class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
     description = django_filters.CharFilter(lookup_expr='icontains')
+    extra_properties_datatype = django_filters.CharFilter(
+        method="filter_extra_properties_datatype", field_name="extra_properties",
+        label="Extra properties datatype"
+    )
 
     class Meta:
         model = m.PhenotypicFeature
-        fields = ["id", "description", "negated", "biosample", "phenopacket"]
+        fields = ["id", "description", "negated", "biosample", "phenopacket", "extra_properties_datatype"]
+
+    def filter_extra_properties_datatype(self, qs, name, value):
+        # if there is "datatype" key in "extra_properties" field the filter will filter by value of this key
+        # if there is no "datatype" key in "extra_properties" returns 0 results
+        qs = m.PhenotypicFeature.objects.filter(extra_properties__datatype=value)
+        return qs
 
 
 class ProcedureFilter(django_filters.rest_framework.FilterSet):
