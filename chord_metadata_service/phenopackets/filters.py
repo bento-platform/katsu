@@ -1,5 +1,7 @@
 import django_filters
 from . import models as m
+from chord_metadata_service.patients.models import Individual
+from django_filters.widgets import CSVWidget
 
 
 class MetaDataFilter(django_filters.rest_framework.FilterSet):
@@ -14,19 +16,35 @@ class MetaDataFilter(django_filters.rest_framework.FilterSet):
 
 class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
     description = django_filters.CharFilter(lookup_expr='icontains')
+    # TODO not all projects will have datatype depending on the requirements
     extra_properties_datatype = django_filters.CharFilter(
         method="filter_extra_properties_datatype", field_name="extra_properties",
         label="Extra properties datatype"
     )
+    individual_id = django_filters.ModelMultipleChoiceFilter(
+        queryset=Individual.objects.all(), widget=CSVWidget,
+        field_name="phenopacket__subject", method="filter_individual_ids",
+        label="Individual ID"
+    )
 
     class Meta:
         model = m.PhenotypicFeature
-        fields = ["id", "description", "negated", "biosample", "phenopacket", "extra_properties_datatype"]
+        fields = ["id", "description", "negated", "biosample", "phenopacket",
+                  "extra_properties_datatype", "individual_id"]
 
     def filter_extra_properties_datatype(self, qs, name, value):
-        # if there is "datatype" key in "extra_properties" field the filter will filter by value of this key
-        # if there is no "datatype" key in "extra_properties" returns 0 results
-        qs = m.PhenotypicFeature.objects.filter(extra_properties__datatype=value)
+        """
+        If there is "datatype" key in "extra_properties" field the filter will filter by value of this key
+        If there is no "datatype" key in "extra_properties" returns 0 results
+        """
+        return qs.filter(extra_properties__contains={'datatype': value})
+
+    def filter_individual_ids(self, qs, name, value):
+        """
+        Returns phenotypic features for a list of specified individual ids
+        """
+        if value:
+            qs = qs.filter(phenopacket__subject__in=value)
         return qs
 
 
