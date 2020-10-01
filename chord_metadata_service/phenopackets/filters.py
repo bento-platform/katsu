@@ -37,45 +37,30 @@ class MetaDataFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.MetaData
-        fields = ["id", "created_by", "submitted_by", "phenopacket_schema_version"]
+        fields = ["id"]
 
 
 class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
     description = django_filters.CharFilter(lookup_expr="icontains")
-    type = django_filters.CharFilter(
-        method=filter_ontology, field_name="pftype",
-        label="Type"
-    )
-    severity = django_filters.CharFilter(
-        method=filter_ontology, field_name="severity",
-        label="Severity"
-    )
+    type = django_filters.CharFilter(method=filter_ontology, field_name="pftype", label="Type")
+    severity = django_filters.CharFilter(method=filter_ontology, field_name="severity", label="Severity")
     # TODO modifier
-    onset = django_filters.CharFilter(
-        method=filter_ontology, field_name="onset",
-        label="Onset"
-    )
-    evidence = django_filters.CharFilter(
-        method="filter_evidence", field_name="evidence",
-        label="Evidence"
-    )
+    onset = django_filters.CharFilter(method=filter_ontology, field_name="onset", label="Onset")
+    evidence = django_filters.CharFilter(method="filter_evidence", field_name="evidence", label="Evidence")
     # TODO not all projects will have datatype depending on the requirements
     extra_properties_datatype = django_filters.CharFilter(
         method="filter_extra_properties_datatype", field_name="extra_properties",
         label="Extra properties datatype"
     )
-    # TODO naming is not consistent individual_id vs phenopacket
-    individual_id = django_filters.ModelMultipleChoiceFilter(
+    individual = django_filters.ModelMultipleChoiceFilter(
         queryset=Individual.objects.all(), widget=CSVWidget,
         field_name="phenopacket__subject", method=filter_related_model_ids,
-        label="Individual ID"
+        label="Individual"
     )
 
     class Meta:
         model = m.PhenotypicFeature
-        fields = ["id", "description", "type", "severity", "onset",
-                  "evidence", "negated", "biosample", "phenopacket",
-                  "extra_properties_datatype", "individual_id"]
+        fields = ["id", "negated", "biosample", "phenopacket"]
 
     def filter_extra_properties_datatype(self, qs, name, value):
         """
@@ -93,34 +78,26 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
 
 
 class ProcedureFilter(django_filters.rest_framework.FilterSet):
-    code = django_filters.CharFilter(
-        method=filter_ontology, field_name="code",
-        label="Code"
-    )
-    body_site = django_filters.CharFilter(
-        method=filter_ontology, field_name="body_site",
-        label="Body site"
-    )
-    biosample_id = django_filters.ModelMultipleChoiceFilter(
-        queryset=m.Biosample.objects.all(), widget=CSVWidget,
-        field_name="biosample", method=filter_related_model_ids,
-        label="Biosample ID"
+    code = django_filters.CharFilter(method=filter_ontology, field_name="code", label="Code")
+    body_site = django_filters.CharFilter(method=filter_ontology, field_name="body_site",label="Body site")
+    biosample = django_filters.ModelMultipleChoiceFilter(
+        queryset=m.Biosample.objects.all(), widget=CSVWidget, field_name="biosample",
+        method=filter_related_model_ids, label="Biosample"
     )
 
     class Meta:
         model = m.Procedure
-        fields = ["id", "code", "body_site", "biosample_id"]
+        fields = ["id"]
 
 
 class HtsFileFilter(django_filters.rest_framework.FilterSet):
-    uri = django_filters.CharFilter(lookup_expr="exact")
     description = django_filters.CharFilter(lookup_expr="icontains")
     hts_format = django_filters.CharFilter(lookup_expr="iexact")
     genome_assembly = django_filters.CharFilter(lookup_expr="iexact")
 
     class Meta:
         model = m.HtsFile
-        fields = ["uri", "description", "hts_format", "genome_assembly"]
+        fields = ["uri"]
 
 
 class GeneFilter(django_filters.rest_framework.FilterSet):
@@ -132,13 +109,17 @@ class GeneFilter(django_filters.rest_framework.FilterSet):
 
 class VariantFilter(django_filters.rest_framework.FilterSet):
     allele_type = django_filters.CharFilter(lookup_expr="iexact")
+    zygosity = django_filters.CharFilter(method=filter_ontology, field_name="zygosity", label="Zygosity")
 
     class Meta:
         model = m.Variant
-        fields = ["id", "allele_type"]
+        fields = ["id"]
 
 
 class DiseaseFilter(django_filters.rest_framework.FilterSet):
+    term = django_filters.CharFilter(method=filter_ontology, field_name="term", label="Term")
+    # TODO extra_properties 1. datatype 2. comorbidities_group
+    # TODO select all patients with disease "Asthma"
 
     class Meta:
         model = m.Disease
@@ -147,13 +128,26 @@ class DiseaseFilter(django_filters.rest_framework.FilterSet):
 
 class BiosampleFilter(django_filters.rest_framework.FilterSet):
     description = django_filters.CharFilter(lookup_expr="icontains")
+    sampled_tissue = django_filters.CharFilter(
+        method=filter_ontology, field_name="sampled_tissue", label="Sampled tissue"
+    )
+    taxonomy = django_filters.CharFilter(
+        method=filter_ontology, field_name="taxonomy", label="Taxonomy"
+    )
+    histological_diagnosis = django_filters.CharFilter(
+        method=filter_ontology, field_name="histological_diagnosis",
+        label="Histological diagnosis"
+    )
+    # TODO procedure is self.id, how to know procedure id ? filter by term or id
+    # TODO rest
 
     class Meta:
         model = m.Biosample
-        fields = ["id", "description", "individual", "procedure", "is_control_sample"]
+        fields = ["id", "individual", "procedure", "is_control_sample"]
 
 
 class PhenopacketFilter(django_filters.rest_framework.FilterSet):
+    # TODO filtering by all related objects
 
     class Meta:
         model = m.Phenopacket
@@ -165,10 +159,11 @@ class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.GenomicInterpretation
-        fields = ["id", "status", "gene", "variant"]
+        fields = ["id", "gene", "variant"]
 
 
 class DiagnosisFilter(django_filters.rest_framework.FilterSet):
+    # TODO filtering by disease ontology id or label
 
     class Meta:
         model = m.Diagnosis
@@ -180,4 +175,4 @@ class InterpretationFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.Interpretation
-        fields = ["id", "resolution_status", "phenopacket"]
+        fields = ["id", "phenopacket"]
