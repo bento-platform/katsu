@@ -92,7 +92,6 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
                          Q(evidence__evidence_code__label__icontains=value))
 
 
-
 class ProcedureFilter(django_filters.rest_framework.FilterSet):
     code = django_filters.CharFilter(
         method=filter_ontology, field_name="code",
