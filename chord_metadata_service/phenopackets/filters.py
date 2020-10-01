@@ -79,7 +79,7 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
 
 class ProcedureFilter(django_filters.rest_framework.FilterSet):
     code = django_filters.CharFilter(method=filter_ontology, field_name="code", label="Code")
-    body_site = django_filters.CharFilter(method=filter_ontology, field_name="body_site",label="Body site")
+    body_site = django_filters.CharFilter(method=filter_ontology, field_name="body_site", label="Body site")
     biosample = django_filters.ModelMultipleChoiceFilter(
         queryset=m.Biosample.objects.all(), widget=CSVWidget, field_name="biosample",
         method=filter_related_model_ids, label="Biosample"
