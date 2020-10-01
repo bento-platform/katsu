@@ -108,7 +108,7 @@ class ProcedureFilter(django_filters.rest_framework.FilterSet):
         method=filter_ontology_label, field_name="body_site",
         label="Body site label"
     )
-    biosample_id=django_filters.ModelMultipleChoiceFilter(
+    biosample_id = django_filters.ModelMultipleChoiceFilter(
         queryset=m.Biosample.objects.all(), widget=CSVWidget,
         field_name="biosample", method=filter_related_model_ids,
         label="Biosample ID"
