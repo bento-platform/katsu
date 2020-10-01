@@ -4,10 +4,41 @@ from chord_metadata_service.patients.models import Individual
 from django_filters.widgets import CSVWidget
 
 
+# HELPERS
+
+def filter_ontology_id(qs, name, value):
+    """
+    Filters Ontology class JSONField by ontology term id
+    """
+    lookup = "__".join([name, "contains"])
+    return qs.filter(**{lookup: {"id": value}})
+
+
+def filter_ontology_label(qs, name, value):
+    """
+    Filters Ontology class JSONField by ontology label
+    """
+    lookup = "__".join([name, "contains"])
+    return qs.filter(**{lookup: {"label": value}})
+
+
+def filter_related_model_ids(qs, name, value):
+    """
+    Returns objects for a list of specified related model ids
+    """
+    if value:
+        lookup = "__".join([name, "in"])
+        qs = qs.filter(**{lookup: value})
+    return qs
+
+
+# FILTERS
+
+
 class MetaDataFilter(django_filters.rest_framework.FilterSet):
-    created_by = django_filters.CharFilter(lookup_expr='icontains')
-    submitted_by = django_filters.CharFilter(lookup_expr='icontains')
-    phenopacket_schema_version = django_filters.CharFilter(lookup_expr='iexact')
+    created_by = django_filters.CharFilter(lookup_expr="icontains")
+    submitted_by = django_filters.CharFilter(lookup_expr="icontains")
+    phenopacket_schema_version = django_filters.CharFilter(lookup_expr="iexact")
 
     class Meta:
         model = m.MetaData
@@ -15,7 +46,15 @@ class MetaDataFilter(django_filters.rest_framework.FilterSet):
 
 
 class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
-    description = django_filters.CharFilter(lookup_expr='icontains')
+    description = django_filters.CharFilter(lookup_expr="icontains")
+    type_id = django_filters.CharFilter(
+        method=filter_ontology_id, field_name="pftype",
+        label="Type ID"
+    )
+    type_label = django_filters.CharFilter(
+        method=filter_ontology_label, field_name="pftype",
+        label="Type label"
+    )
     # TODO not all projects will have datatype depending on the requirements
     extra_properties_datatype = django_filters.CharFilter(
         method="filter_extra_properties_datatype", field_name="extra_properties",
@@ -23,7 +62,7 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
     )
     individual_id = django_filters.ModelMultipleChoiceFilter(
         queryset=Individual.objects.all(), widget=CSVWidget,
-        field_name="phenopacket__subject", method="filter_individual_ids",
+        field_name="phenopacket__subject", method=filter_related_model_ids,
         label="Individual ID"
     )
 
@@ -37,29 +76,42 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
         If there is "datatype" key in "extra_properties" field the filter will filter by value of this key
         If there is no "datatype" key in "extra_properties" returns 0 results
         """
-        return qs.filter(extra_properties__contains={'datatype': value})
-
-    def filter_individual_ids(self, qs, name, value):
-        """
-        Returns phenotypic features for a list of specified individual ids
-        """
-        if value:
-            qs = qs.filter(phenopacket__subject__in=value)
-        return qs
+        return qs.filter(extra_properties__contains={"datatype": value})
 
 
 class ProcedureFilter(django_filters.rest_framework.FilterSet):
+    code_id = django_filters.CharFilter(
+        method=filter_ontology_id, field_name="code",
+        label="Code ID"
+    )
+    code_label = django_filters.CharFilter(
+        method=filter_ontology_label, field_name="code",
+        label="Code label"
+    )
+    body_site_id = django_filters.CharFilter(
+        method=filter_ontology_id, field_name="body_site",
+        label="Body site ID"
+    )
+    body_site_label = django_filters.CharFilter(
+        method=filter_ontology_label, field_name="body_site",
+        label="Body site label"
+    )
+    biosample_id=django_filters.ModelMultipleChoiceFilter(
+        queryset=m.Biosample.objects.all(), widget=CSVWidget,
+        field_name="biosample", method=filter_related_model_ids,
+        label="Biosample ID"
+    )
 
     class Meta:
         model = m.Procedure
-        fields = ["id"]
+        fields = ["id", "code_id", "code_label", "body_site_id", "body_site_label", "biosample_id"]
 
 
 class HtsFileFilter(django_filters.rest_framework.FilterSet):
-    uri = django_filters.CharFilter(lookup_expr='exact')
-    description = django_filters.CharFilter(lookup_expr='icontains')
-    hts_format = django_filters.CharFilter(lookup_expr='iexact')
-    genome_assembly = django_filters.CharFilter(lookup_expr='iexact')
+    uri = django_filters.CharFilter(lookup_expr="exact")
+    description = django_filters.CharFilter(lookup_expr="icontains")
+    hts_format = django_filters.CharFilter(lookup_expr="iexact")
+    genome_assembly = django_filters.CharFilter(lookup_expr="iexact")
 
     class Meta:
         model = m.HtsFile
@@ -74,7 +126,7 @@ class GeneFilter(django_filters.rest_framework.FilterSet):
 
 
 class VariantFilter(django_filters.rest_framework.FilterSet):
-    allele_type = django_filters.CharFilter(lookup_expr='iexact')
+    allele_type = django_filters.CharFilter(lookup_expr="iexact")
 
     class Meta:
         model = m.Variant
@@ -89,7 +141,7 @@ class DiseaseFilter(django_filters.rest_framework.FilterSet):
 
 
 class BiosampleFilter(django_filters.rest_framework.FilterSet):
-    description = django_filters.CharFilter(lookup_expr='icontains')
+    description = django_filters.CharFilter(lookup_expr="icontains")
 
     class Meta:
         model = m.Biosample
@@ -104,7 +156,7 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
 
 
 class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
-    status = django_filters.CharFilter(lookup_expr='iexact')
+    status = django_filters.CharFilter(lookup_expr="iexact")
 
     class Meta:
         model = m.GenomicInterpretation
