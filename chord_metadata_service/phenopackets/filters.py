@@ -55,11 +55,23 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
         method=filter_ontology_label, field_name="pftype",
         label="Type label"
     )
+    severity_id = django_filters.CharFilter(
+        method=filter_ontology_id, field_name="severity",
+        label="Severity ID"
+    )
+    severity_label = django_filters.CharFilter(
+        method=filter_ontology_label, field_name="severity",
+        label="Severity label"
+    )
+    # TODO modifier
+    # TODO onset
+    # TODO evidence
     # TODO not all projects will have datatype depending on the requirements
     extra_properties_datatype = django_filters.CharFilter(
         method="filter_extra_properties_datatype", field_name="extra_properties",
         label="Extra properties datatype"
     )
+    # TODO naming is not consistent individual_id vs phenopacket
     individual_id = django_filters.ModelMultipleChoiceFilter(
         queryset=Individual.objects.all(), widget=CSVWidget,
         field_name="phenopacket__subject", method=filter_related_model_ids,
