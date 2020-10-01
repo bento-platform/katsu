@@ -2,24 +2,19 @@ import django_filters
 from . import models as m
 from chord_metadata_service.patients.models import Individual
 from django_filters.widgets import CSVWidget
+from django.db.models import Q
 
 
 # HELPERS
 
-def filter_ontology_id(qs, name, value):
+def filter_ontology(qs, name, value):
     """
-    Filters Ontology class JSONField by ontology term id
+    Filters Ontology by id or label
     """
-    lookup = "__".join([name, "contains"])
-    return qs.filter(**{lookup: {"id": value}})
-
-
-def filter_ontology_label(qs, name, value):
-    """
-    Filters Ontology class JSONField by ontology label
-    """
-    lookup = "__".join([name, "contains"])
-    return qs.filter(**{lookup: {"label": value}})
+    lookup_id = "__".join([name, "id", "icontains"])
+    lookup_label = "__".join([name, "label", "icontains"])
+    return qs.filter(Q(**{lookup_id: value}) |
+                     Q(**{lookup_label: value}))
 
 
 def filter_related_model_ids(qs, name, value):
@@ -47,25 +42,23 @@ class MetaDataFilter(django_filters.rest_framework.FilterSet):
 
 class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
     description = django_filters.CharFilter(lookup_expr="icontains")
-    type_id = django_filters.CharFilter(
-        method=filter_ontology_id, field_name="pftype",
-        label="Type ID"
+    type = django_filters.CharFilter(
+        method=filter_ontology, field_name="pftype",
+        label="Type"
     )
-    type_label = django_filters.CharFilter(
-        method=filter_ontology_label, field_name="pftype",
-        label="Type label"
-    )
-    severity_id = django_filters.CharFilter(
-        method=filter_ontology_id, field_name="severity",
-        label="Severity ID"
-    )
-    severity_label = django_filters.CharFilter(
-        method=filter_ontology_label, field_name="severity",
-        label="Severity label"
+    severity = django_filters.CharFilter(
+        method=filter_ontology, field_name="severity",
+        label="Severity"
     )
     # TODO modifier
-    # TODO onset
-    # TODO evidence
+    onset = django_filters.CharFilter(
+        method=filter_ontology, field_name="onset",
+        label="Onset"
+    )
+    evidence = django_filters.CharFilter(
+        method="filter_evidence", field_name="evidence",
+        label="Evidence"
+    )
     # TODO not all projects will have datatype depending on the requirements
     extra_properties_datatype = django_filters.CharFilter(
         method="filter_extra_properties_datatype", field_name="extra_properties",
@@ -80,7 +73,8 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.PhenotypicFeature
-        fields = ["id", "description", "negated", "biosample", "phenopacket",
+        fields = ["id", "description", "type", "severity", "onset",
+                  "evidence", "negated", "biosample", "phenopacket",
                   "extra_properties_datatype", "individual_id"]
 
     def filter_extra_properties_datatype(self, qs, name, value):
@@ -90,23 +84,23 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
         """
         return qs.filter(extra_properties__contains={"datatype": value})
 
+    def filter_evidence(self, qs, name, value):
+        """
+        Filters Evidence code by both id or label
+        """
+        return qs.filter(Q(evidence__evidence_code__id__icontains=value) |
+                         Q(evidence__evidence_code__label__icontains=value))
+
+
 
 class ProcedureFilter(django_filters.rest_framework.FilterSet):
-    code_id = django_filters.CharFilter(
-        method=filter_ontology_id, field_name="code",
-        label="Code ID"
+    code = django_filters.CharFilter(
+        method=filter_ontology, field_name="code",
+        label="Code"
     )
-    code_label = django_filters.CharFilter(
-        method=filter_ontology_label, field_name="code",
-        label="Code label"
-    )
-    body_site_id = django_filters.CharFilter(
-        method=filter_ontology_id, field_name="body_site",
-        label="Body site ID"
-    )
-    body_site_label = django_filters.CharFilter(
-        method=filter_ontology_label, field_name="body_site",
-        label="Body site label"
+    body_site = django_filters.CharFilter(
+        method=filter_ontology, field_name="body_site",
+        label="Body site"
     )
     biosample_id = django_filters.ModelMultipleChoiceFilter(
         queryset=m.Biosample.objects.all(), widget=CSVWidget,
@@ -116,7 +110,7 @@ class ProcedureFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.Procedure
-        fields = ["id", "code_id", "code_label", "body_site_id", "body_site_label", "biosample_id"]
+        fields = ["id", "code", "body_site", "biosample_id"]
 
 
 class HtsFileFilter(django_filters.rest_framework.FilterSet):
