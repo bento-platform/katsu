@@ -1,8 +1,9 @@
 import django_filters
-from . import models as m
-from chord_metadata_service.patients.models import Individual
 from django_filters.widgets import CSVWidget
 from django.db.models import Q
+
+from chord_metadata_service.patients.models import Individual
+from . import models as m
 
 
 # HELPERS
@@ -27,6 +28,15 @@ def filter_related_model_ids(qs, name, value):
     return qs
 
 
+def filter_extra_properties_datatype(qs, name, value):
+    """
+    If there is "datatype" key in "extra_properties" field the filter will filter by value of this key
+    If there is no "datatype" key in "extra_properties" returns 0 results
+    """
+    lookup = "__".join([name, "datatype", "icontains"])
+    return qs.filter(**{lookup: value})
+
+
 # FILTERS
 
 
@@ -49,7 +59,7 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
     evidence = django_filters.CharFilter(method="filter_evidence", field_name="evidence", label="Evidence")
     # TODO not all projects will have datatype depending on the requirements
     extra_properties_datatype = django_filters.CharFilter(
-        method="filter_extra_properties_datatype", field_name="extra_properties",
+        method=filter_extra_properties_datatype, field_name="extra_properties",
         label="Extra properties datatype"
     )
     individual = django_filters.ModelMultipleChoiceFilter(
@@ -61,13 +71,6 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
     class Meta:
         model = m.PhenotypicFeature
         fields = ["id", "negated", "biosample", "phenopacket"]
-
-    def filter_extra_properties_datatype(self, qs, name, value):
-        """
-        If there is "datatype" key in "extra_properties" field the filter will filter by value of this key
-        If there is no "datatype" key in "extra_properties" returns 0 results
-        """
-        return qs.filter(extra_properties__contains={"datatype": value})
 
     def filter_evidence(self, qs, name, value):
         """
@@ -118,12 +121,25 @@ class VariantFilter(django_filters.rest_framework.FilterSet):
 
 class DiseaseFilter(django_filters.rest_framework.FilterSet):
     term = django_filters.CharFilter(method=filter_ontology, field_name="term", label="Term")
-    # TODO extra_properties 1. datatype 2. comorbidities_group
-    # TODO select all patients with disease "Asthma"
+    extra_properties_datatype = django_filters.CharFilter(
+        method=filter_extra_properties_datatype, field_name="extra_properties",
+        label="Extra properties datatype"
+    )
+    extra_properties_comorbidities_group = django_filters.CharFilter(
+        method="filter_extra_properties_cg", field_name="extra_properties",
+        label="Extra properties comorbidities group"
+    )
+    individual = django_filters.ModelChoiceFilter(
+        queryset=Individual.objects.all(), field_name="phenopacket__subject",
+        label="Individual"
+    )
 
     class Meta:
         model = m.Disease
         fields = ["id"]
+
+    def filter_extra_properties_cg(self, qs, name, value):
+        return qs.filter(extra_properties__comorbidities_group__icontains=value)
 
 
 class BiosampleFilter(django_filters.rest_framework.FilterSet):
@@ -138,8 +154,14 @@ class BiosampleFilter(django_filters.rest_framework.FilterSet):
         method=filter_ontology, field_name="histological_diagnosis",
         label="Histological diagnosis"
     )
-    # TODO procedure is self.id, how to know procedure id ? filter by term or id
-    # TODO rest
+    tumor_progression = django_filters.CharFilter(
+        method=filter_ontology, field_name="tumor_progression",
+        label="Tumor progression"
+    )
+    tumor_grade = django_filters.CharFilter(
+        method=filter_ontology, field_name="tumor_grade",
+        label="Tumor grade"
+    )
 
     class Meta:
         model = m.Biosample
@@ -151,7 +173,8 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.Phenopacket
-        fields = ["id", "subject"]
+        fields = ["id", "subject", "biosamples",
+                  "genes", "variants", "hts_files", "diseases"]
 
 
 class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
