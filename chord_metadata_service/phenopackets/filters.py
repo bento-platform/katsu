@@ -148,20 +148,13 @@ class BiosampleFilter(django_filters.rest_framework.FilterSet):
         method=filter_ontology, field_name="sampled_tissue", label="Sampled tissue"
     )
     taxonomy = django_filters.CharFilter(
-        method=filter_ontology, field_name="taxonomy", label="Taxonomy"
-    )
+        method=filter_ontology, field_name="taxonomy", label="Taxonomy")
     histological_diagnosis = django_filters.CharFilter(
-        method=filter_ontology, field_name="histological_diagnosis",
-        label="Histological diagnosis"
-    )
+        method=filter_ontology, field_name="histological_diagnosis", label="Histological diagnosis")
     tumor_progression = django_filters.CharFilter(
-        method=filter_ontology, field_name="tumor_progression",
-        label="Tumor progression"
-    )
+        method=filter_ontology, field_name="tumor_progression", label="Tumor progression")
     tumor_grade = django_filters.CharFilter(
-        method=filter_ontology, field_name="tumor_grade",
-        label="Tumor grade"
-    )
+        method=filter_ontology, field_name="tumor_grade", label="Tumor grade")
 
     class Meta:
         model = m.Biosample
@@ -169,12 +162,28 @@ class BiosampleFilter(django_filters.rest_framework.FilterSet):
 
 
 class PhenopacketFilter(django_filters.rest_framework.FilterSet):
-    # TODO filtering by all related objects
+    disease_type = django_filters.CharFilter(
+        method=filter_ontology, field_name="diseases__term", label="Disease type"
+    )
+    found_phenotypic_feature = django_filters.CharFilter(
+        method="filter_found_phenotypic_feature", field_name="phenotypic_features",
+        label="Found phenotypic feature"
+    )
 
     class Meta:
         model = m.Phenopacket
-        fields = ["id", "subject", "biosamples",
-                  "genes", "variants", "hts_files", "diseases"]
+        fields = ["id", "subject", "biosamples", "genes", "variants", "hts_files"]
+
+    def filter_found_phenotypic_feature(self, qs, name, value):
+        """
+        Filters only found (present in a patient) Phenotypic features by id or label
+        """
+        qs = qs.filter(
+            Q(phenotypic_features__pftype__id__icontains=value) |
+            Q(phenotypic_features__pftype__label__icontains=value),
+            phenotypic_features__negated=False
+        ).distinct()
+        return qs
 
 
 class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
@@ -186,11 +195,13 @@ class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
 
 
 class DiagnosisFilter(django_filters.rest_framework.FilterSet):
-    # TODO filtering by disease ontology id or label
+    disease_type = django_filters.CharFilter(
+        method=filter_ontology, field_name="disease__term", label="Disease type"
+    )
 
     class Meta:
         model = m.Diagnosis
-        fields = ["id", "disease"]
+        fields = ["id"]
 
 
 class InterpretationFilter(django_filters.rest_framework.FilterSet):
