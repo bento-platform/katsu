@@ -318,7 +318,8 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
             }
         },
         extra_properties={
-            "comment": "test data"
+            "comment": "test data",
+            "datatype": "symptom"
         },
         biosample=biosample,
         phenopacket=phenopacket
