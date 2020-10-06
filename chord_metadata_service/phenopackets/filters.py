@@ -24,7 +24,7 @@ def filter_related_model_ids(qs, name, value):
     """
     if value:
         lookup = "__".join([name, "in"])
-        qs = qs.filter(**{lookup: value})
+        qs = qs.filter(**{lookup: value}).distinct()
     return qs
 
 
