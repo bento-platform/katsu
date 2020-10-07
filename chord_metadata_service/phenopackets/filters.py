@@ -57,7 +57,6 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
     # TODO modifier
     onset = django_filters.CharFilter(method=filter_ontology, field_name="onset", label="Onset")
     evidence = django_filters.CharFilter(method="filter_evidence", field_name="evidence", label="Evidence")
-    # TODO not all projects will have datatype depending on the requirements
     extra_properties_datatype = django_filters.CharFilter(
         method=filter_extra_properties_datatype, field_name="extra_properties",
         label="Extra properties datatype"
@@ -162,8 +161,8 @@ class BiosampleFilter(django_filters.rest_framework.FilterSet):
 
 
 class PhenopacketFilter(django_filters.rest_framework.FilterSet):
-    disease_type = django_filters.CharFilter(
-        method=filter_ontology, field_name="diseases__term", label="Disease type"
+    disease = django_filters.CharFilter(
+        method=filter_ontology, field_name="diseases__term", label="Disease"
     )
     found_phenotypic_feature = django_filters.CharFilter(
         method="filter_found_phenotypic_feature", field_name="phenotypic_features",

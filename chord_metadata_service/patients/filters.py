@@ -12,7 +12,6 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
     race = django_filters.CharFilter(lookup_expr='icontains')
     # e.g. date_of_birth_after=1987-01-01&date_of_birth_before=1990-12-31
     date_of_birth = django_filters.DateFromToRangeFilter()
-    # e.g. select all patients with disease "Asthma"
     disease = django_filters.CharFilter(
         method="filter_disease", field_name="phenopackets__diseases",
         label="Disease"

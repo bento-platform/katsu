@@ -41,13 +41,9 @@ class IndividualTest(TestCase):
     def test_filtering(self):
         f = IndividualFilter()
         # all phenotypic feature constants have negated=True
-        result = f.filter_found_phenotypic_feature(Individual.objects.all(),
-                                                   "phenopackets",
-                                                   "proptosis")
+        result = f.filter_found_phenotypic_feature(Individual.objects.all(), "phenopackets", "proptosis")
         self.assertEqual(len(result), 0)
-        result = f.filter_found_phenotypic_feature(Individual.objects.all(),
-                                                   "phenopackets",
-                                                   "HP:0000520")
+        result = f.filter_found_phenotypic_feature(Individual.objects.all(), "phenopackets", "HP:0000520")
         self.assertEqual(len(result), 0)
         result = f.filter_disease(Individual.objects.all(), "phenopackets", "OMIM:164400")
         self.assertEqual(len(result), 1)
