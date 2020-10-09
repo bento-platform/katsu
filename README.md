@@ -1,7 +1,6 @@
 # Katsu Metadata Service
 
 ![Build Status](https://travis-ci.com/bento-platform/katsu.svg?branch=master)
-
 [![codecov](https://codecov.io/gh/bento-platform/katsu/branch/master/graph/badge.svg)](https://codecov.io/gh/bento-platform/katsu)
 
 ## License
@@ -105,7 +104,7 @@ for a standalone instance of this server, so it can be swapped out.
 
 ### Note On Permissions
 
-By default, `chord_metadata_service` uses the CHORD permission system, which
+By default, `katsu` uses the CHORD permission system, which
 functions as follows:
 
   * URLs under the `/private` namespace are assumed to be protected by an
