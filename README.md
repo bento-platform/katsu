@@ -1,21 +1,23 @@
-# CHORD Metadata Service
+# Katsu Metadata Service
 
-![Build Status](https://api.travis-ci.com/c3g/chord_metadata_service.svg?branch=master)
-[![codecov](https://codecov.io/gh/c3g/chord_metadata_service/branch/master/graph/badge.svg)](https://codecov.io/gh/c3g/chord_metadata_service)
-
+![Build Status](https://travis-ci.com/bento-platform/katsu.svg?branch=master)
+[![codecov](https://codecov.io/gh/bento-platform/katsu/branch/master/graph/badge.svg)](https://codecov.io/gh/bento-platform/katsu)
 
 ## License
 
-The majority of the CHORD Metadata Service is licensed under the LGPLv3 license; copyright (c) 2019-2020 the Canadian
+The majority of the Katsu Metadata Service is licensed under the LGPLv3 license; copyright (c) 2019-2020 the Canadian
 Centre for Computational Genomics.
 
 Portions are copyright (c) 2019 Julius OB Jacobsen, Peter N Robinson, Christopher J Mungall (Phenopackets); licensed
 under the BSD 3-clause license.
 
+## Funding
+
+Katsu Metadata service development is funded by CANARIE under the CHORD project.
 
 ## Architecture
 
-CHORD Metadata Service is a service to store epigenomic metadata.
+Katsu Metadata Service is a service to store epigenomic metadata.
 
 1. Patients service handles anonymized individual’s data (individual id, sex, age or date of birth)
     * Data model: aggregated profile from GA4GH Phenopackets Individual, FHIR Patient and mCODE Patient.
@@ -102,7 +104,7 @@ for a standalone instance of this server, so it can be swapped out.
 
 ### Note On Permissions
 
-By default, `chord_metadata_service` uses the CHORD permission system, which
+By default, `katsu` uses the CHORD permission system, which
 functions as follows:
 
   * URLs under the `/private` namespace are assumed to be protected by an
@@ -165,7 +167,7 @@ coverage html
 ### Accessing the Django Shell from inside a CHORD Container
 
 Assuming `chord_singularity` is being used, the following commands can be used
-to bootstrap your way to a `chord_metadata_service` environment within a CHORD
+to bootstrap your way to a `katsu` environment within a CHORD
 container:
 
 ```bash
