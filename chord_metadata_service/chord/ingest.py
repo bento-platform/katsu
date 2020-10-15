@@ -23,6 +23,7 @@ from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
 __all__ = [
     "METADATA_WORKFLOWS",
     "WORKFLOWS_PATH",
+    "IngestError",
     "ingest_resource",
     "WORKFLOW_INGEST_FUNCTION_MAP",
 ]
@@ -176,6 +177,10 @@ METADATA_WORKFLOWS = {
 WORKFLOWS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "workflows")
 
 
+class IngestError(Exception):
+    pass
+
+
 def create_phenotypic_feature(pf):
     pf_obj = pm.PhenotypicFeature(
         description=pf.get("description", ""),
@@ -184,7 +189,8 @@ def create_phenotypic_feature(pf):
         severity=pf.get("severity"),
         modifier=pf.get("modifier", []),  # TODO: Validate ontology term in schema...
         onset=pf.get("onset"),
-        evidence=pf.get("evidence")  # TODO: Separate class?
+        evidence=pf.get("evidence"),  # TODO: Separate class?
+        extra_properties=pf.get("extra_properties", {})
     )
 
     pf_obj.save()
@@ -208,7 +214,9 @@ def ingest_resource(resource: dict) -> rm.Resource:
         namespace_prefix=namespace_prefix,
         url=resource["url"],
         version=version,
-        iri_prefix=resource["iri_prefix"]
+        iri_prefix=resource["iri_prefix"],
+        extra_properties=resource.get("extra_properties", {})
+        # TODO extra_properties
     )
 
     return rs_obj
@@ -268,7 +276,11 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
         subject_query = _query_and_check_nulls(subject, "date_of_birth", transform=isoparse)
         for k in ("alternate_ids", "age", "sex", "karyotypic_sex", "taxonomy"):
             subject_query.update(_query_and_check_nulls(subject, k))
-        subject, _ = pm.Individual.objects.get_or_create(id=subject["id"], **subject_query)
+        subject, _ = pm.Individual.objects.get_or_create(id=subject["id"],
+                                                         race=subject.get("race", ""),
+                                                         ethnicity=subject.get("ethnicity", ""),
+                                                         extra_properties=subject.get("extra_properties", {}),
+                                                         **subject_query)
 
     phenotypic_features_db = [create_phenotypic_feature(pf) for pf in phenotypic_features]
 
@@ -288,6 +300,7 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
             procedure=procedure,
             is_control_sample=bs.get("is_control_sample", False),
             diagnostic_markers=bs.get("diagnostic_markers", []),
+            extra_properties=bs.get("extra_properties", {}),
             **bs_query
         )
 
@@ -307,7 +320,8 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
         g_obj, _ = pm.Gene.objects.get_or_create(
             id=g["id"],
             alternate_ids=g.get("alternate_ids", []),
-            symbol=g["symbol"]
+            symbol=g["symbol"],
+            extra_properties=g.get("extra_properties", {})
         )
         genes_db.append(g_obj)
 
@@ -318,6 +332,7 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
             term=disease["term"],
             disease_stage=disease.get("disease_stage", []),
             tnm_finding=disease.get("tnm_finding", []),
+            extra_properties=disease.get("extra_properties", {}),
             **_query_and_check_nulls(disease, "onset")
         )
         diseases_db.append(d_obj.id)
@@ -330,7 +345,7 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
             hts_format=htsfile["hts_format"],
             genome_assembly=htsfile["genome_assembly"],
             individual_to_sample_identifiers=htsfile.get("individual_to_sample_identifiers", None),
-            extra_properties=htsfile.get("extra_properties", None)
+            extra_properties=htsfile.get("extra_properties", {})
         )
         hts_files_db.append(htsf_obj)
 
@@ -340,7 +355,8 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
         created_by=meta_data["created_by"],
         submitted_by=meta_data.get("submitted_by"),
         phenopacket_schema_version="1.0.0-RC3",
-        external_references=meta_data.get("external_references", [])
+        external_references=meta_data.get("external_references", []),
+        extra_properties=meta_data.get("extra_properties", {})
     )
     meta_data_obj.save()
 
@@ -369,8 +385,15 @@ def _map_if_list(fn, data, *args):
     return [fn(d, *args) for d in data] if isinstance(data, list) else fn(data, *args)
 
 
+def _get_output_or_raise(workflow_outputs, key):
+    if key not in workflow_outputs:
+        raise IngestError(f"Missing workflow output: {key}")
+
+    return workflow_outputs[key]
+
+
 def ingest_experiments_workflow(workflow_outputs, table_id):
-    with open(workflow_outputs["json_document"], "r") as jf:
+    with open(_get_output_or_raise(workflow_outputs, "json_document"), "r") as jf:
         json_data = json.load(jf)
 
         dataset = TableOwnership.objects.get(table_id=table_id).dataset
@@ -382,13 +405,13 @@ def ingest_experiments_workflow(workflow_outputs, table_id):
 
 
 def ingest_phenopacket_workflow(workflow_outputs, table_id):
-    with open(workflow_outputs["json_document"], "r") as jf:
+    with open(_get_output_or_raise(workflow_outputs, "json_document"), "r") as jf:
         json_data = json.load(jf)
         return _map_if_list(ingest_phenopacket, json_data, table_id)
 
 
 def ingest_fhir_workflow(workflow_outputs, table_id):
-    with open(workflow_outputs["patients"], "r") as pf:
+    with open(_get_output_or_raise(workflow_outputs, "patients"), "r") as pf:
         patients_data = json.load(pf)
         phenopacket_ids = ingest_patients(
             patients_data,
@@ -413,7 +436,7 @@ def ingest_fhir_workflow(workflow_outputs, table_id):
 
 
 def ingest_mcode_fhir_workflow(workflow_outputs, table_id):
-    with open(workflow_outputs["json_document"], "r") as jf:
+    with open(_get_output_or_raise(workflow_outputs, "json_document"), "r") as jf:
         json_data = json.load(jf)
         mcodepacket = parse_bundle(json_data)
         ingest_mcodepacket(mcodepacket, table_id)

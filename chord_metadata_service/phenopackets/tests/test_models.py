@@ -3,6 +3,14 @@ from django.db.utils import IntegrityError
 from django.test import TestCase
 
 from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
+from chord_metadata_service.phenopackets.filters import (
+    filter_ontology,
+    filter_extra_properties_datatype,
+    PhenotypicFeatureFilter,
+    DiseaseFilter,
+    PhenopacketFilter
+)
+
 from . import constants as c
 from .. import models as m
 
@@ -77,8 +85,27 @@ class PhenotypicFeatureTest(TestCase):
     def test_phenotypic_feature_str(self):
         self.assertEqual(str(self.phenotypic_feature_1), str(self.phenotypic_feature_1.id))
 
+    def test_filtering(self):
+        result = filter_ontology(m.PhenotypicFeature.objects.all(), "severity", "mild")
+        self.assertEqual(len(result), 2)
+        result = filter_ontology(m.PhenotypicFeature.objects.all(), "pftype", "HP:0000520")
+        self.assertEqual(len(result), 2)
+        f = PhenotypicFeatureFilter()
+        result = f.filter_evidence(m.PhenotypicFeature.objects.all(), "evidence__evidence_code", "ECO:0006017")
+        self.assertEqual(len(result), 2)
+        result = filter_extra_properties_datatype(m.PhenotypicFeature.objects.all(), "extra_properties", "complication")
+        self.assertEqual(len(result), 0)
+        result = filter_extra_properties_datatype(m.PhenotypicFeature.objects.all(), "extra_properties", "symptom")
+        self.assertEqual(len(result), 2)
+        f = PhenotypicFeatureFilter(queryset=m.PhenotypicFeature.objects.all(),
+                                    data={"individual": "patient:2,patient:1"})
+        result = f.qs
+        self.assertEqual(len(result), 1)
+
 
 class ProcedureTest(TestCase):
+    """ Test module for Procedure model. """
+
     def setUp(self):
         self.procedure_1 = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
         self.procedure_2 = m.Procedure.objects.create(**c.VALID_PROCEDURE_2)
@@ -93,6 +120,8 @@ class ProcedureTest(TestCase):
 
 
 class HtsFileTest(TestCase):
+    """ Test module for HtsFile model. """
+
     def setUp(self):
         self.hts_file = m.HtsFile.objects.create(**c.VALID_HTS_FILE)
 
@@ -105,6 +134,8 @@ class HtsFileTest(TestCase):
 
 
 class GeneTest(TestCase):
+    """ Test module for Gene model. """
+
     def setUp(self):
         self.gene_1 = m.Gene.objects.create(**c.VALID_GENE_1)
 
@@ -119,6 +150,8 @@ class GeneTest(TestCase):
 
 
 class VariantTest(TestCase):
+    """ Test module for Variant model. """
+
     def setUp(self):
         self.variant = m.Variant.objects.create(**c.VALID_VARIANT_1)
 
@@ -131,6 +164,8 @@ class VariantTest(TestCase):
 
 
 class DiseaseTest(TestCase):
+    """ Test module for Disease model. """
+
     def setUp(self):
         self.disease_1 = m.Disease.objects.create(**c.VALID_DISEASE_1)
 
@@ -141,8 +176,16 @@ class DiseaseTest(TestCase):
     def test_disease_str(self):
         self.assertEqual(str(self.disease_1), str(self.disease_1.id))
 
+    def test_filtering(self):
+        f = DiseaseFilter()
+        result = f.filter_extra_properties_cg(m.Disease.objects.all(),
+                                              "extra_properties__comorbidities_group", "immune")
+        self.assertEqual(len(result), 0)
+
 
 class GenomicInterpretationTest(TestCase):
+    """ Test module for GenomicInterpretation model. """
+
     def setUp(self):
         self.gene = m.Gene.objects.create(**c.VALID_GENE_1)
         self.variant = m.Variant.objects.create(**c.VALID_VARIANT_1)
@@ -165,6 +208,8 @@ class GenomicInterpretationTest(TestCase):
 
 
 class DiagnosisTest(TestCase):
+    """ Test module for Diagnosis model. """
+
     def setUp(self):
         self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
 
@@ -192,6 +237,8 @@ class DiagnosisTest(TestCase):
 
 
 class InterpretationTest(TestCase):
+    """ Test module for Interpretation model. """
+
     def setUp(self):
         self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
         self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(
@@ -222,6 +269,8 @@ class InterpretationTest(TestCase):
 
 
 class MetaDataTest(TestCase):
+    """ Test module for MetaData model. """
+
     def setUp(self):
         self.resource_1 = m.Resource.objects.create(**VALID_RESOURCE_1)
         self.resource_2 = m.Resource.objects.create(**VALID_RESOURCE_2)
@@ -235,3 +284,44 @@ class MetaDataTest(TestCase):
 
     def test_metadata_str(self):
         self.assertEqual(str(self.metadata), str(self.metadata.id))
+
+
+class PhenopacketTest(TestCase):
+    """ Test module for Phenopacket model """
+
+    def setUp(self):
+        self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
+        self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
+        self.phenopacket = m.Phenopacket.objects.create(
+            id="phenopacket_id:1",
+            subject=self.individual,
+            meta_data=self.meta_data,
+        )
+        self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
+            **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
+        )
+        self.phenotypic_feature_2 = m.PhenotypicFeature.objects.create(
+            **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
+        )
+        self.disease_1 = m.Disease.objects.create(**c.VALID_DISEASE_1)
+        self.phenopacket.diseases.set([self.disease_1])
+
+    def test_phenopacket(self):
+        phenopacket = m.Phenopacket.objects.filter(id="phenopacket_id:1")
+        self.assertEqual(len(phenopacket), 1)
+        self.assertEqual(len(phenopacket.values("phenotypic_features")), 2)
+        self.assertEqual(len(phenopacket.values("diseases")), 1)
+
+    def test_filtering(self):
+        f = PhenopacketFilter()
+        number_of_found_pf = len(m.Phenopacket.objects.filter(phenotypic_features__negated=False))
+        # all phenotypic feature constants have negated=True
+        result = f.filter_found_phenotypic_feature(m.Phenopacket.objects.all(), "phenotypic_features", "proptosis")
+        self.assertEqual(len(result), 0)
+        result = f.filter_found_phenotypic_feature(m.Phenopacket.objects.all(), "phenotypic_features", "HP:0000520")
+        self.assertEqual(len(result), 0)
+        self.assertEqual(len(result), number_of_found_pf)
+        result_label = filter_ontology(m.Phenopacket.objects.all(), "diseases__term", "Spinocerebellar ataxia 1")
+        self.assertEqual(len(result_label), 1)
+        result_id = filter_ontology(m.Phenopacket.objects.all(), "diseases__term", "OMIM:164400")
+        self.assertEqual(len(result_label), len(result_id))

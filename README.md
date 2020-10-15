@@ -1,21 +1,23 @@
-# CHORD Metadata Service
+# Katsu Metadata Service
 
-![Build Status](https://api.travis-ci.com/c3g/chord_metadata_service.svg?branch=master)
-[![codecov](https://codecov.io/gh/c3g/chord_metadata_service/branch/master/graph/badge.svg)](https://codecov.io/gh/c3g/chord_metadata_service)
-
+![Build Status](https://travis-ci.com/bento-platform/katsu.svg?branch=master)
+[![codecov](https://codecov.io/gh/bento-platform/katsu/branch/master/graph/badge.svg)](https://codecov.io/gh/bento-platform/katsu)
 
 ## License
 
-The majority of the CHORD Metadata Service is licensed under the LGPLv3 license; copyright (c) 2019-2020 the Canadian
+The majority of the Katsu Metadata Service is licensed under the LGPLv3 license; copyright (c) 2019-2020 the Canadian
 Centre for Computational Genomics.
 
 Portions are copyright (c) 2019 Julius OB Jacobsen, Peter N Robinson, Christopher J Mungall (Phenopackets); licensed
 under the BSD 3-clause license.
 
+## Funding
+
+Katsu Metadata service development is funded by CANARIE under the CHORD project.
 
 ## Architecture
 
-CHORD Metadata Service is a service to store epigenomic metadata.
+Katsu Metadata Service is a service to store epigenomic metadata.
 
 1. Patients service handles anonymized individual’s data (individual id, sex, age or date of birth)
     * Data model: aggregated profile from GA4GH Phenopackets Individual, FHIR Patient and mCODE Patient.
@@ -65,22 +67,11 @@ The service uses PostgreSQL database for data storage.
 
 * Create and activate virtual environment
 * Run: `pip install -r requirements.txt`
-* Configure database connection in settings.py
+* To configure the application (such as the DB credentials) we are using python-dotenv:
+    - Take a look at the .env-sample file at the root of the project
+    - You can export these in your virtualenv or simply `cp .env-sample .env`
+    - python-dotenv can handle either (a local .env will override env vars though)
 
-e.g. settings if running database on localhost, default port for PostgreSQL is 5432:
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'database_name',
-        'USER': 'user',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-```
 
 * Run:
 
@@ -113,7 +104,7 @@ for a standalone instance of this server, so it can be swapped out.
 
 ### Note On Permissions
 
-By default, `chord_metadata_service` uses the CHORD permission system, which
+By default, `katsu` uses the CHORD permission system, which
 functions as follows:
 
   * URLs under the `/private` namespace are assumed to be protected by an
@@ -125,6 +116,15 @@ functions as follows:
 
 This can be turned off with the `CHORD_PERMISSIONS` environment variable and/or
 Django setting, or with the `AUTH_OVERRIDE` Django setting.
+
+### Authorization inside CanDIG
+
+When ran inside the CanDIG context, to properly implement authorization you'll
+have to do the following:
+
+1. Make sure the CHORD_PERMISSIONS is set to "false"
+2. Set INSIDE_CANDIG to "true"
+3. Provide the URL for the OPA instance in CANDIG_OPA_URL
 
 ## Developing
 
@@ -167,7 +167,7 @@ coverage html
 ### Accessing the Django Shell from inside a CHORD Container
 
 Assuming `chord_singularity` is being used, the following commands can be used
-to bootstrap your way to a `chord_metadata_service` environment within a CHORD
+to bootstrap your way to a `katsu` environment within a CHORD
 container:
 
 ```bash

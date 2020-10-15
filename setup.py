@@ -18,6 +18,7 @@ setuptools.setup(
     install_requires=[
         "bento_lib[django]==0.11.0",
         "Django>=2.2.14,<3.0",
+        "django-cors-headers==3.5.0",
         "django-filter>=2.3,<3.0",
         "django-nose>=1.4,<2.0",
         "djangorestframework>=3.11,<3.12",
@@ -28,6 +29,7 @@ setuptools.setup(
         "jsonschema>=3.2,<4.0",
         "psycopg2-binary>=2.8,<3.0",
         "python-dateutil>=2.8,<3.0",
+        "python-dotenv==0.14.0",
         "PyYAML>=5.3,<6.0",
         "strict-rfc3339==0.7",
         "rdflib==4.2.2",
@@ -39,14 +41,14 @@ setuptools.setup(
 
     author=config["package"]["authors"],
 
-    description="An implementation of a variant store for the CHORD project.",
+    description="An implementation of a clin/pheno metadata store for the Bento platform.",
     long_description=long_description,
     long_description_content_type="text/markdown",
 
     packages=setuptools.find_packages(),
     include_package_data=True,
 
-    url="https://github.com/c3g/chord_metadata_service",
+    url="https://github.com/bento-platform/katsu",
     license="LGPLv3",
     classifiers=[
         "Programming Language :: Python :: 3",
