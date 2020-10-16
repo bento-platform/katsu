@@ -5,10 +5,10 @@ Installation
 
 .. code-block::
 
-    git clone https://github.com/c3g/chord_metadata_service.git
+    git clone https://github.com/bento-platform/katsu.git
 
 
-2. Install the git submodule for DATS JSON schemas (if you did not clone recursively):
+2. Install the git submodule for DATS JSON schemas (if did not clone recursively):
 
 .. code-block::
 
