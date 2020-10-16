@@ -12,6 +12,7 @@ Welcome to Metadata service's documentation!
 
    modules/introduction
    modules/installation
+   modules/ingestion_workflow_example
    modules/models
    modules/views
 

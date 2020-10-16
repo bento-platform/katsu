@@ -98,37 +98,20 @@ Ingest endpoint is :code:`/private/ingest`.
 **1. Phenopackets data ingest**
 
 The data must follow Phenopackets schema in order to be ingested.
+See full :ref:`ingestion-workflow-example`.
 
 Example of Phenopackets POST request body:
 
 .. code-block::
 
     {
-      "table_id": "table_unique_id",
+      "table_id": "table_unique_uuid",
       "workflow_id": "phenopackets_json",
-      "workflow_metadata": {
-        "inputs": [
-          {
-            "id": "json_document",
-            "type": "file",
-            "extensions": [
-              ".json"
-            ]
-          }
-        ],
-        "outputs": [
-          {
-            "id": "json_document",
-            "type": "file",
-            "value": "{json_document}"
-          }
-        ]
-      },
       "workflow_params": {
-        "phenopackets_json.json_document": "/path/to/data.json"
+        "phenopackets_json.json_document": "path/to/data.json"
       },
       "workflow_outputs": {
-        "json_document": "/path/to/data.json"
+        "json_document": "path/to/data.json"
       }
     }
 
