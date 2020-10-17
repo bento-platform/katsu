@@ -412,3 +412,85 @@ class Interpretation(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+
+# TODO No migrations made
+class Cohort(models.Model):
+    """
+    Class to represent a group of individuals related by some phenotypic aspect.
+    """
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.COHORT, "id"))
+    description = models.CharField(max_length=500, blank=True, help_text=rec_help(d.COHORT, "description"))
+    members = models.ManyToManyField(Phenopacket, blank=True, help_text=rec_help(d.COHORT, "members"))
+    hts_files = models.ManyToManyField(HtsFile, blank=True, help_text=rec_help(d.COHORT, "hts_files"))
+    meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.COHORT, "meta_data"))
+    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.COHORT, "extra_properties"))
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.id)
+
+
+#############################################################
+#                                                           #
+#                    Version 2.0                            #
+#                                                           #
+#############################################################
+
+
+class Quantity(models.Model):
+    pass
+
+
+class Interval(models.Model):
+    pass
+
+
+class TimeElement(models.Model):
+    pass
+
+
+class DoseInterval(models.Model):
+    """
+    Class to represent a block of time in which the dosage of a medication was constant.
+    """
+    quantity = models.ForeignKey(Quantity, on_delete=models.CASCADE)
+    interval = models.ForeignKey(Interval, on_delete=models.CASCADE)
+    extra_properties = JSONField(blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.id)
+
+
+class DrugType(models.Model):
+    """
+
+    """
+    # TODO a list of choices
+    pass
+
+
+class Exposure(models.Model):
+    """
+    Class to represent a list of environmental exposures.
+    """
+    description = models.CharField(max_length=500, blank=True, help_text=rec_help(d.EXPOSURE, "description"))
+    type = JSONField(validators=[ontology_validator], help_text=rec_help(d.EXPOSURE, "type"))
+    negated = models.BooleanField(default=False, help_text=rec_help(d.EXPOSURE, "negated"))
+    route = JSONField(validators=[ontology_validator], help_text=rec_help(d.EXPOSURE, "route"))
+    modifiers = JSONField(blank=True, null=True, validators=[ontology_list_validator],
+                          help_text=rec_help(d.EXPOSURE, "modifiers"))
+    occurrence = models.ForeignKey(TimeElement, on_delete=models.SET_NULL, blank=True, null=True,
+                                   help_text=rec_help(d.EXPOSURE, "occurrence"))
+    # TODO make repeated
+    evidence = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_EVIDENCE_SCHEMA)],
+                         help_text=rec_help(d.PHENOTYPIC_FEATURE, "evidence"))
+    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.EXPOSURE, "extra_properties"))
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.id)

@@ -304,6 +304,36 @@ PHENOPACKET = {
     }
 }
 
+
+COHORT = {
+    "description": "An element to represent a group of individuals related in some phenotypic or genotypic aspect.",
+    "properties": {
+        "id": "An arbitrary identifier specific for this cohort.",
+        "description": "Any information relevant to the study can be added here as free text.",
+        "members": "A list of related Phenopackets.",
+        "hts_files": "A list of pointers to the relevant HTS file(s) for the cohort.",
+        "meta_data": "Metadata related to the ontologies and references used in this message.",
+        **EXTRA_PROPERTIES
+    }
+}
+
+
+EXPOSURE = {
+    "description": "An element to represent a list of environmental exposures",
+    "properties": {
+        "id": "An arbitrary identifier.",
+        "description": "Free-text description of the exposure.",
+        "type": "An ontology class which describes the exposure.",
+        "negated": "Flag to indicate whether the exposure occurred or not. Defaults to False.",
+        "route": "An ontology class which indicates the mechanism of the exposure.",
+        "modifiers": "An Ontology class describing the characteristics of the exposure.",
+        "occurrence": "When the exposure occurred.",
+        "evidence": "Evidences for how the exposure was determined.",
+        **EXTRA_PROPERTIES
+    }
+}
+
+
 # TODO: Mutually recursive, use functions
 # DIAGNOSIS
 # GENOMIC_INTERPRETATION
