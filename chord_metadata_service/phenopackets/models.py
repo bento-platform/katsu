@@ -439,6 +439,22 @@ class Cohort(models.Model):
 #############################################################
 
 
+STOP_REASON = (
+    ('UNKNOWN_STOP_REASON', 'UNKNOWN_STOP_REASON'),
+    ('REGIMEN_COMPLETED', 'REGIMEN_COMPLETED'),
+    ('REGIMEN_CHANGED', 'REGIMEN_CHANGED'),
+    ('REMOVED', 'REMOVED')
+)
+
+
+DRUG_TYPE = (
+    ('UNKNOWN_DRUG_TYPE', 'UNKNOWN_DRUG_TYPE'),
+    ('PRESCRIPTION', 'PRESCRIPTION'),
+    ('EHR_MEDICATION_LIST', 'EHR_MEDICATION_LIST'),
+    ('ADMINISTRATION_RELATED_TO_PROCEDURE', 'ADMINISTRATION_RELATED_TO_PROCEDURE')
+)
+
+
 class Quantity(models.Model):
     pass
 
@@ -465,14 +481,6 @@ class DoseInterval(models.Model):
         return str(self.id)
 
 
-class DrugType(models.Model):
-    """
-
-    """
-    # TODO a list of choices
-    pass
-
-
 class Exposure(models.Model):
     """
     Class to represent a list of environmental exposures.
@@ -494,3 +502,36 @@ class Exposure(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+
+class PharmaceuticalTreatment(models.Model):
+    """
+    Class to represent treatment with a pharmaceutical agent.
+    """
+    drug = JSONField(validators=[ontology_validator])
+    route_of_administration = JSONField(validators=[ontology_validator], blank=True, null=True)
+    dose_intervals = models.ManyToManyField(DoseInterval, blank=True)
+    drug_type = models.CharField(max_length=200, choices=DRUG_TYPE, blank=True)
+    # TODO add stop reason choices
+    stop_reason_id = models.CharField(max_length=200, choices=STOP_REASON, blank=True)
+
+    def __str__(self):
+        return str(self.id)
+
+
+class MedicalAction(models.Model):
+    """
+    Class to describe medications, procedures, other actions taken for clinical management.
+    """
+    treatment = models.CharField(max_length=200, blank=True)
+    pharmaceutical_treatment = models.ForeignKey(PharmaceuticalTreatment, on_delete=models.SET_NULL,
+                                                 blank=True, null=True)
+    radiotherapy_treatment = models.CharField(max_length=200, blank=True)
+    procedure = models.ForeignKey(Procedure, on_delete=models.SET_NULL,
+                                  blank=True, null=True)
+
+    def __str__(self):
+        return str(self.id)
+
+
+# TODO VitalStatus under discussion
