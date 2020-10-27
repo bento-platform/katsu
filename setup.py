@@ -28,6 +28,7 @@ setuptools.setup(
         "fhirclient>=3.2,<4.0",
         "jsonschema>=3.2,<4.0",
         "psycopg2-binary>=2.8,<3.0",
+        "PyJWT[crypto]==1.7.1",
         "python-dateutil>=2.8,<3.0",
         "python-dotenv==0.14.0",
         "PyYAML>=5.3,<6.0",
