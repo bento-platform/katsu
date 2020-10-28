@@ -30,7 +30,7 @@ config.read(os.path.join(Path(os.path.dirname(os.path.realpath(__file__))).paren
 
 # -- Project information -----------------------------------------------------
 
-project = 'Metadata service'
+project = 'Katsu Metadata service'
 author = config["package"]["authors"]
 # noinspection PyShadowingBuiltins
 copyright = f"{datetime.datetime.now().year} {author}"

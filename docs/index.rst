@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Metadata service's documentation!
+Welcome to Katsu Metadata service's documentation!
 ============================================
 
 .. toctree::
@@ -12,6 +12,7 @@ Welcome to Metadata service's documentation!
 
    modules/introduction
    modules/installation
+   modules/ingestion_workflow_example
    modules/models
    modules/views
 

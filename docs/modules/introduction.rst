@@ -1,7 +1,7 @@
 Introduction
 ============
 
-Metadata service is a service to store phenotypic and clinical metadata about the patient and/or biosample.
+Katsu Metadata service is a service to store phenotypic and clinical metadata about the patient and/or biosample.
 The data model is partly based on `GA4GH Phenopackets schema <https://github.com/phenopackets/phenopacket-schema>`_ and
 extended to support oncology-related metadata and experiments metadata.
 
@@ -20,7 +20,7 @@ Besides PostgreSQL, the data can be indexed and queried in Elasticsearch.
 Architecture
 ------------
 
-The Metadata Service contains several services that share one API.
+The Katsu Metadata Service contains several services that share one API.
 Services depend on each other and are separated based on their scope.
 
 **1. Patients service** handles anonymized individual’s data (e.g. individual id, sex, age, or date of birth).
@@ -98,37 +98,20 @@ Ingest endpoint is :code:`/private/ingest`.
 **1. Phenopackets data ingest**
 
 The data must follow Phenopackets schema in order to be ingested.
+See full :ref:`ingestion-workflow-example`.
 
 Example of Phenopackets POST request body:
 
 .. code-block::
 
     {
-      "table_id": "table_unique_id",
+      "table_id": "table_unique_uuid",
       "workflow_id": "phenopackets_json",
-      "workflow_metadata": {
-        "inputs": [
-          {
-            "id": "json_document",
-            "type": "file",
-            "extensions": [
-              ".json"
-            ]
-          }
-        ],
-        "outputs": [
-          {
-            "id": "json_document",
-            "type": "file",
-            "value": "{json_document}"
-          }
-        ]
-      },
       "workflow_params": {
-        "phenopackets_json.json_document": "/path/to/data.json"
+        "phenopackets_json.json_document": "path/to/data.json"
       },
       "workflow_outputs": {
-        "json_document": "/path/to/data.json"
+        "json_document": "path/to/data.json"
       }
     }
 
@@ -143,7 +126,7 @@ Example of mCode FHIR data POST request body:
 .. code-block::
 
     {
-       "table_id":"table_unique_id",
+       "table_id":"table_unique_uuid",
        "workflow_id":"mcode_fhir_json",
        "workflow_params":{
           "mcode_fhir_json.json_document":"/path/to/data.json"
@@ -164,7 +147,7 @@ It's expected that the data is compliant with FHIR Release 4 and provided in FHI
 .. code-block::
 
     {
-      "table_id": "table_unique_id",
+      "table_id": "table_unique_uuid",
       "workflow_id": "fhir_json",
       "workflow_params": {
         "fhir_json.patients": "/path/to/patients.json",
