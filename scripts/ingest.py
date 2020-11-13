@@ -7,6 +7,16 @@ An ingest script that automates the initial data ingest for katsu service.
 
 Make sure you have a config file named ingest.conf.json in the same dir as this script.
 
+A sample ingest.conf.json is given below.
+
+{
+    "project_title": "project_1",
+    "dataset_title": "dataset_1",
+    "table_name": "table_1",
+    "katsu_server_url": "http://example.com:4000",
+    "phenopackets_json_location": "/home/user/v2/CanCOGen_synthetic_data/cancogen_phenopackets.json"
+}
+
 Usage (under active katsu virtualenv):
 python ingest.py
 """
