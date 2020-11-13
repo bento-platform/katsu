@@ -7,7 +7,7 @@ An ingest script that automates the initial data ingest for katsu service.
 
 Make sure you have a config file named ingest.conf.json in the same dir as this script.
 
-Usage:
+Usage (under active katsu virtualenv):
 python ingest.py
 """
 
