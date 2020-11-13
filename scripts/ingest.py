@@ -2,11 +2,32 @@ import sys
 import json
 import requests
 
-project_title = "project_1"
-dataset_title = "dataset_1"
-table_name = "table_1"
-katsu_server_url = "http://example.com:4000"
-phenopackets_json_location = "/home/user/v2/CanCOGen_synthetic_data/cancogen_phenopackets.json"
+"""
+An ingest script that automates the initial data ingest for katsu service.
+
+Make sure you have a config file named ingest.conf.json in the same dir as this script.
+
+Usage:
+python ingest.py
+"""
+
+try:
+	with open('ingest.conf.json') as f:
+		config = json.load(f)
+except FileNotFoundError:
+	print("The config file ingest.conf.json is missing. You must have it in the same dir as this script.")
+	sys.exit()
+
+try:
+	project_title = config["project_title"]
+	dataset_title = config["dataset_title"]
+	table_name = config["table_name"]
+	katsu_server_url = config["katsu_server_url"]
+	phenopackets_json_location = config["phenopackets_json_location"]
+except KeyError as e:
+	print("Config file corrupted: missing key {}".format(str(e)))
+	sys.exit()
+
 
 print("Initializing...")
 print("Warning: this script is only designed to handle the initial data ingestion of katsu service.")
@@ -16,13 +37,17 @@ print("Warning: this script is only designed to handle the initial data ingestio
 project_request = {"title": "", "description": "A new project."}
 project_request["title"] = project_title
 
-r = requests.post(katsu_server_url + "/api/projects", json=project_request)
+try:
+	r = requests.post(katsu_server_url + "/api/projects", json=project_request)
+except requests.exceptions.ConnectionError:
+	print("Connection to the API server {} cannot be established.".format(katsu_server_url))
+	sys.exit()
 
 if r.status_code == 201:
 	project_uuid = r.json()["identifier"]
 	print("Project {} with uuid {} has been created!".format(project_title, project_uuid))
 elif r.status_code == 400:
-	print("A project of this title exists, please choose a different title, or delete this project.")
+	print("A project of title '{}' exists, please choose a different title, or delete this project.".format(project_title))
 	sys.exit()
 else:
 	print(r.json())
@@ -65,7 +90,7 @@ if r2.status_code == 201:
 	dataset_uuid = r2.json()["identifier"]
 	print("Dataset {} with uuid {} has been created!".format(dataset_title, dataset_uuid))
 elif r2.status_code == 400:
-	print("A dataset of this title exists, please choose a different title, or delete this project.")
+	print("A dataset of title '{}' exists, please choose a different title, or delete this dataset.".format(dataset_title))
 	sys.exit()
 else:
 	print(r2.json())
@@ -116,11 +141,11 @@ print("Ingesting phenopackets, this may take a while...")
 r4 = requests.post(katsu_server_url + "/private/ingest", json=private_ingest_request)
 
 if r4.status_code == 200 or r4.status_code == 201 or r4.status_code == 204:
-	print("Phenopackets has been ingested from source at {}".format(phenopackets_json_location))
+	print("Phenopackets have been ingested from source at {}".format(phenopackets_json_location))
 elif r4.status_code == 400:
 	print(r4.text)
 	sys.exit()
 else:
 	print("Something else went wrong when ingesting phenopackets, possibly due to duplications.")
-	print("Please remove existing individuals from the database and try again.")
+	print("Double check phenopackets_json_location config, or remove duplicated individuals from the database and try again.")
 	sys.exit()
