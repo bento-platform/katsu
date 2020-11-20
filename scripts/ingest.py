@@ -44,8 +44,10 @@ def create_project(katsu_server_url, project_title):
     Return the uuid of the newly-created project.
     """
 
-    project_request = {"title": "", "description": "A new project."}
-    project_request["title"] = project_title
+    project_request = {
+        "title": project_title,
+        "description": "A new project."
+    }
 
     try:
         r = requests.post(katsu_server_url + "/api/projects", json=project_request)
@@ -84,8 +86,8 @@ def create_dataset(katsu_server_url, project_uuid, dataset_title):
     Return the uuid of newly-created dataset.
     """
     dataset_request = {
-        "project": "",
-        "title": "",
+        "project": project_uuid,
+        "title": dataset_title,
         "data_use": {
             "consent_code": {
                 "primary_category": {"code": "GRU"},
@@ -94,9 +96,6 @@ def create_dataset(katsu_server_url, project_uuid, dataset_title):
             "data_use_requirements": [{"code": "COL"}, {"code": "PUB"}],
         },
     }
-
-    dataset_request["project"] = project_uuid
-    dataset_request["title"] = dataset_title
 
     r2 = requests.post(katsu_server_url + "/api/datasets", json=dataset_request)
 
@@ -127,10 +126,11 @@ def create_table(katsu_server_url, dataset_uuid, table_name):
     Return the uuid of the newly-created table.
     """
 
-    table_request = {"name": "table1", "data_type": "phenopacket", "dataset": ""}
-
-    table_request["name"] = table_name
-    table_request["dataset"] = dataset_uuid
+    table_request = {
+        "name": table_name,
+        "data_type": "phenopacket",
+        "dataset": dataset_uuid
+    }
 
     r3 = requests.post(katsu_server_url + "/tables", json=table_request)
 
@@ -149,19 +149,11 @@ def ingest_phenopackets(katsu_server_url, table_id, phenopackets_json_location):
     """
 
     private_ingest_request = {
-        "table_id": "",
+        "table_id": table_id,
         "workflow_id": "phenopackets_json",
-        "workflow_params": {"phenopackets_json.json_document": ""},
-        "workflow_outputs": {"json_document": ""},
+        "workflow_params": {"phenopackets_json.json_document": phenopackets_json_location},
+        "workflow_outputs": {"json_document": phenopackets_json_location},
     }
-
-    private_ingest_request["table_id"] = table_id
-    private_ingest_request["workflow_params"][
-        "phenopackets_json.json_document"
-    ] = phenopackets_json_location
-    private_ingest_request["workflow_outputs"][
-        "json_document"
-    ] = phenopackets_json_location
 
     print("Ingesting phenopackets, this may take a while...")
 
