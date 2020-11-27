@@ -101,7 +101,7 @@ class IndividualCSVRenderer(JSONRenderer):
                     "ethnicity": individual.get("ethnicity", None),
                     "age": None
                 }
-                if "taxonomy"in individual:
+                if "taxonomy" in individual:
                     ind_obj["taxonomy"] = individual["taxonomy"].get("label", None)
                 if "age" in individual:
                     if "age" in individual["age"]:
