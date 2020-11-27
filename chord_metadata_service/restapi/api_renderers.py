@@ -1,8 +1,11 @@
 import json
+import csv
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
+from rest_framework.renderers import JSONRenderer
 from rdflib import Graph
 from rdflib.plugin import register, Serializer
-from rest_framework.renderers import JSONRenderer
+from django.http import HttpResponse
+
 from uuid import UUID
 
 from .jsonld_utils import dataset_to_jsonld
@@ -79,3 +82,48 @@ class RDFDatasetRenderer(PhenopacketsRenderer):
             g = Graph().parse(data=json.dumps(ld_context_data, cls=UUIDEncoder), format='json-ld')
         rdf_data = g.serialize(format='pretty-xml')
         return rdf_data
+
+
+class IndividualCSVRenderer(JSONRenderer):
+    media_type = 'text/csv'
+    format = 'csv'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        if "results" in data:
+            individuals = []
+            for individual in data["results"]:
+                ind_obj = {
+                    "id": individual["id"],
+                    "sex": individual["sex"],
+                    "date_of_birth": individual.get("date_of_birth", None),
+                    "karyotypic_sex": individual["karyotypic_sex"],
+                    "race": individual.get("race", None),
+                    "ethnicity": individual.get("ethnicity", None),
+                    "age": None
+                }
+                if "taxonomy"in individual:
+                    ind_obj["taxonomy"] = individual["taxonomy"].get("label", None)
+                if "age" in individual:
+                    if "age" in individual["age"]:
+                        ind_obj["age"] = individual["age"].get("age", None)
+                    # todo fix age
+                    elif "start" in individual["age"]:
+                        ind_obj["age"] = individual["age"]["start"].get("age", "NA")
+
+                    else:
+                        ind_obj["age"] = None
+                if 'phenopackets' in individual:
+                    for phenopacket in individual['phenopackets']:
+                        if 'diseases' in phenopacket:
+                            ind_obj['diseases'] = ', '.join(
+                                [d['term']['label'] for d in phenopacket['diseases']]
+                            )
+                individuals.append(ind_obj)
+
+            columns = individuals[0].keys()
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="export.csv"'
+            dict_writer = csv.DictWriter(response, columns)
+            dict_writer.writeheader()
+            dict_writer.writerows(individuals)
+            return response
