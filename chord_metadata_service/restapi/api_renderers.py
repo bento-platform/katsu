@@ -106,18 +106,25 @@ class IndividualCSVRenderer(JSONRenderer):
                 if "age" in individual:
                     if "age" in individual["age"]:
                         ind_obj["age"] = individual["age"].get("age", None)
-                    # todo fix age
-                    elif "start" in individual["age"]:
-                        ind_obj["age"] = individual["age"]["start"].get("age", "NA")
-
+                    elif "start" and "end" in individual["age"]:
+                        ind_obj["age"] = str(
+                            individual["age"]["start"].get("age", "NA")
+                            + ' - ' +
+                            individual["age"]["end"].get("age", "NA")
+                        )
                     else:
                         ind_obj["age"] = None
                 if 'phenopackets' in individual:
+                    all_diseases = []
                     for phenopacket in individual['phenopackets']:
                         if 'diseases' in phenopacket:
-                            ind_obj['diseases'] = ', '.join(
+                            # use ; because some disease terms might contain , in their label
+                            single_phenopacket_diseases = '; '.join(
                                 [d['term']['label'] for d in phenopacket['diseases']]
                             )
+                            all_diseases.append(single_phenopacket_diseases)
+                    if all_diseases:
+                        ind_obj['diseases'] = '; '.join(all_diseases)
                 individuals.append(ind_obj)
 
             columns = individuals[0].keys()
