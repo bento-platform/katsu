@@ -94,12 +94,14 @@ class IndividualCSVRenderer(JSONRenderer):
             for individual in data['results']:
                 ind_obj = {
                     'id': individual['id'],
-                    'sex': individual['sex'],
+                    'sex': individual.get('sex', None),
                     'date_of_birth': individual.get('date_of_birth', None),
+                    'taxonomy': None,
                     'karyotypic_sex': individual['karyotypic_sex'],
                     'race': individual.get('race', None),
                     'ethnicity': individual.get('ethnicity', None),
                     'age': None,
+                    'diseases': None,
                     'created': individual['created'],
                     'updated': individual['updated']
                 }
@@ -128,11 +130,12 @@ class IndividualCSVRenderer(JSONRenderer):
                     if all_diseases:
                         ind_obj['diseases'] = '; '.join(all_diseases)
                 individuals.append(ind_obj)
-
             columns = individuals[0].keys()
+            # remove underscore and capitalize column names
+            headers = {key: key.replace('_', ' ').capitalize() for key in individuals[0].keys()}
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = "attachment; filename='export.csv'"
-            dict_writer = csv.DictWriter(response, columns)
-            dict_writer.writeheader()
+            dict_writer = csv.DictWriter(response, fieldnames=columns)
+            dict_writer.writerow(headers)
             dict_writer.writerows(individuals)
             return response
