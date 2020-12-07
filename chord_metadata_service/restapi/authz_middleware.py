@@ -19,19 +19,20 @@ class AuthzMiddleware:
                 "method": request.method
             }
 
-            try:
-                response = requests.post(settings.CANDIG_OPA_URL + "/v1/data/permissions", json=request_body)
-                response.raise_for_status()
-            except requests.exceptions.RequestException:
-                error_response = {
-                    "error": "error getting response from authorization service"
-                }
-                response = HttpResponseServerError(json.dumps(error_response))
-                response["Content-Type"] = "application/json"
-                return response
+            if settings.CANDIG_OPA_URL:
+                try:
+                    response = requests.post(settings.CANDIG_OPA_URL + "/v1/data/permissions", json=request_body)
+                    response.raise_for_status()
+                except requests.exceptions.RequestException:
+                    error_response = {
+                        "error": "error getting response from authorization service"
+                    }
+                    response = HttpResponseServerError(json.dumps(error_response))
+                    response["Content-Type"] = "application/json"
+                    return response
 
-            allowed_datasets = response.json()["datasets"]
-            request.allowed_datasets = allowed_datasets
+                allowed_datasets = response.json()["datasets"]
+                request.allowed_datasets = allowed_datasets
 
         response = self.get_response(request)
         return response
