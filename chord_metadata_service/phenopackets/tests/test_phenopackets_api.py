@@ -1,5 +1,8 @@
 import uuid
+import responses
+import requests
 from django.test import TestCase, Client, modify_settings
+from django.conf import settings
 from ..models import Phenopacket, MetaData
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
@@ -14,13 +17,13 @@ class PhenopacketsAPITest(TestCase):
 
         project = Project.objects.create(title="project1")
 
-        dataset1 = Dataset.objects.create(title="dataset1", project=project, data_use={})
-        dataset2 = Dataset.objects.create(title="dataset2", project=project, data_use={})
+        self.dataset1 = Dataset.objects.create(title="dataset1", project=project, data_use={})
+        self.dataset2 = Dataset.objects.create(title="dataset2", project=project, data_use={})
 
         table_ownership1 = TableOwnership.objects.create(table_id=uuid.UUID("1f65dce9-c602-4035-b69f-1e9a97b49e3e"),
-                                                         service_id="table1", dataset=dataset1)
+                                                         service_id="table1", dataset=self.dataset1)
         table_ownership2 = TableOwnership.objects.create(table_id=uuid.UUID("206e1edf-e2a0-4625-848d-e4d1ccd1c203"),
-                                                         service_id="table2", dataset=dataset2)
+                                                         service_id="table2", dataset=self.dataset2)
 
         table1 = Table.objects.create(ownership_record=table_ownership1, name="table1", data_type="phenopackets")
         table2 = Table.objects.create(ownership_record=table_ownership2, name="table2", data_type="phenopackets")
@@ -56,10 +59,20 @@ class PhenopacketsAPITest(TestCase):
             self.assertTrue(uuid.UUID(phenopacket["id"]) in correct_phenopackets_response)
             correct_phenopackets_response.remove(uuid.UUID(phenopacket["id"]))
 
+    @responses.activate
     def test_with_middleware_filter_one_dataset(self):
         """
         Tests the endpoint when OPA returns one dataset. Endpoint should return all phenopackets in this dataset.
         """
+        responses.add(
+            responses.POST,
+            url=settings.CANDIG_OPA_URL + "/v1/data/permissions",
+            json={
+                "datasets": [str(self.dataset2.identifier)]
+            },
+            status=200
+        )
+
         response = self.client.get("/api/phenopackets")
         response_body = response.json()
         self.assertEqual(response.status_code, 200)
@@ -67,19 +80,39 @@ class PhenopacketsAPITest(TestCase):
         phenopacket = response_body["results"][0]
         self.assertTrue(uuid.UUID(phenopacket["id"]) == self.phenopacket3.id)
 
+    @responses.activate
     def test_with_middleware_filter_no_datasets(self):
         """
         Tests the endpoint when OPA does not return any datasets. Endpoint should not return any phenopackets.
         """
+        responses.add(
+            responses.POST,
+            url=settings.CANDIG_OPA_URL + "/v1/data/permissions",
+            json={
+                "datasets": []
+            },
+            status=200
+        )
+
         response = self.client.get("/api/phenopackets")
         response_body = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response_body["count"], 0)
 
+    @responses.activate
     def test_with_middleware_filter_all_datasets(self):
         """
         Tests the endpoint when OPA returns all datasets. Endpoint should return all phenopackets.
         """
+        responses.add(
+            responses.POST,
+            url=settings.CANDIG_OPA_URL + "/v1/data/permissions",
+            json={
+                "datasets": [str(self.dataset1.identifier), str(self.dataset2.identifier)]
+            },
+            status=200
+        )
+
         response = self.client.get("/api/phenopackets")
         response_body = response.json()
         self.assertEqual(response.status_code, 200)
@@ -89,9 +122,16 @@ class PhenopacketsAPITest(TestCase):
             self.assertTrue(uuid.UUID(phenopacket["id"]) in correct_phenopackets_response)
             correct_phenopackets_response.remove(uuid.UUID(phenopacket["id"]))
 
+    @responses.activate
     def test_with_middleware_opa_is_down(self):
         """
         Tests the endpoint when OPA is down. Endpoint should return status code 500.
         """
+        responses.add(
+            responses.POST,
+            url=settings.CANDIG_OPA_URL + "/v1/data/permissions",
+            body=requests.exceptions.RequestException()
+        )
+
         response = self.client.get("/api/phenopackets")
         self.assertEqual(response.status_code, 500)
