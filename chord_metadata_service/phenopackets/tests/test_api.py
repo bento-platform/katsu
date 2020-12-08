@@ -216,7 +216,7 @@ class CreatePhenopacketTest(APITestCase):
             meta_data=self.metadata)
 
     def test_phenopacket(self):
-        response = get_response('phenopacket-list', self.phenopacket)
+        response = get_response('phenopackets', self.phenopacket)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.Phenopacket.objects.count(), 1)
 
