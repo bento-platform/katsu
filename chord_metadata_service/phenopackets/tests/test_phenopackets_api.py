@@ -1,7 +1,7 @@
 import uuid
 import responses
 import requests
-from django.test import TestCase, Client, modify_settings
+from django.test import TestCase, Client, modify_settings, override_settings
 from django.conf import settings
 from ..models import Phenopacket, MetaData
 from chord_metadata_service.patients.models import Individual
@@ -59,6 +59,7 @@ class PhenopacketsAPITest(TestCase):
             self.assertTrue(uuid.UUID(phenopacket["id"]) in correct_phenopackets_response)
             correct_phenopackets_response.remove(uuid.UUID(phenopacket["id"]))
 
+    @override_settings(CANDIG_OPA_URL="http://127.0.0.1:8180")
     @responses.activate
     def test_with_middleware_filter_one_dataset(self):
         """
@@ -80,6 +81,7 @@ class PhenopacketsAPITest(TestCase):
         phenopacket = response_body["results"][0]
         self.assertTrue(uuid.UUID(phenopacket["id"]) == self.phenopacket3.id)
 
+    @override_settings(CANDIG_OPA_URL="http://127.0.0.1:8180")
     @responses.activate
     def test_with_middleware_filter_no_datasets(self):
         """
@@ -99,6 +101,7 @@ class PhenopacketsAPITest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response_body["count"], 0)
 
+    @override_settings(CANDIG_OPA_URL="http://127.0.0.1:8180")
     @responses.activate
     def test_with_middleware_filter_all_datasets(self):
         """
@@ -122,6 +125,7 @@ class PhenopacketsAPITest(TestCase):
             self.assertTrue(uuid.UUID(phenopacket["id"]) in correct_phenopackets_response)
             correct_phenopackets_response.remove(uuid.UUID(phenopacket["id"]))
 
+    @override_settings(CANDIG_OPA_URL="http://127.0.0.1:8180")
     @responses.activate
     def test_with_middleware_opa_is_down(self):
         """
