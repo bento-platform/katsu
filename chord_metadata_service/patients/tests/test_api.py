@@ -123,13 +123,13 @@ class DeleteIndividualTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class IndividualCSVRRendererTest(APITestCase):
+class IndividualCSVRendererTest(APITestCase):
     """ Test csv export for Individuals. """
 
     def setUp(self):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
 
-    def test_jsonld(self):
+    def test_csv_export(self):
         get_resp = self.client.get('/api/individuals?format=csv')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         content = get_resp.content.decode('utf-8')
