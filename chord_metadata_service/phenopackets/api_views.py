@@ -173,10 +173,18 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     Create a new phenopacket
 
     """
-    queryset = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")
     serializer_class = s.PhenopacketSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.PhenopacketFilter
+
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.Phenopacket.objects.filter(table__ownership_record__dataset__in=allowed_datasets).\
+                prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")
+        else:
+            queryset = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")
+        return queryset
 
 
 class GenomicInterpretationViewSet(PhenopacketsModelViewSet):

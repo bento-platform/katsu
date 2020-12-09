@@ -101,6 +101,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'chord_metadata_service.restapi.middleware.CandigAuthzMiddleware',
+    'chord_metadata_service.restapi.authz_middleware.AuthzMiddleware'
 ]
 
 CORS_ALLOWED_ORIGINS = []
