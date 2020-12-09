@@ -23,3 +23,20 @@ def transform_keys(obj):
         }
 
     return obj
+
+
+def parse_onset(onset):
+    """ Fuction to parse different age schemas in disease onset. """
+
+    # age string
+    if 'age' in onset:
+        return onset['age']
+    # age ontology
+    elif 'id' and 'label' in onset:
+        return f"{onset['label']} {onset['id']}"
+    # age range
+    elif 'start' and 'end' in onset:
+        if 'age' in onset['start'] and 'age' in onset['end']:
+            return f"{onset['start']['age']} - {onset['end']['age']}"
+    else:
+        return None
