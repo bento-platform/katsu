@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from uuid import UUID
 
 from .jsonld_utils import dataset_to_jsonld
+from .utils import parse_onset
 
 register('json-ld', Serializer, 'rdflib_jsonld.serializer', 'JsonLDSerializer')
 
@@ -124,7 +125,10 @@ class IndividualCSVRenderer(JSONRenderer):
                         if 'diseases' in phenopacket:
                             # use ; because some disease terms might contain , in their label
                             single_phenopacket_diseases = '; '.join(
-                                [d['term']['label'] for d in phenopacket['diseases']]
+                                [
+                                    f"{d['term']['label']} ({parse_onset(d['onset'])})"
+                                    if 'onset' in d else d['term']['label'] for d in phenopacket['diseases']
+                                ]
                             )
                             all_diseases.append(single_phenopacket_diseases)
                     if all_diseases:
