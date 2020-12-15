@@ -155,6 +155,7 @@ class BiosampleSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
     procedure = ProcedureSerializer(exclude_when_nested=['id'])
+    variants = VariantSerializer(read_only=True, many=True)
 
     class Meta:
         model = Biosample
@@ -171,6 +172,8 @@ class BiosampleSerializer(GenericSerializer):
 
     def update(self, instance, validated_data):
         instance.sampled_tissue = validated_data.get('sampled_tissue', instance.sampled_tissue)
+        instance.individual_age_at_collection = validated_data.get('individual_age_at_collection',
+                                                                   instance.individual_age_at_collection)
         instance.taxonomy = validated_data.get('taxonomy', instance.taxonomy)
         instance.histological_diagnosis = validated_data.get('histological_diagnosis', instance.histological_diagnosis)
         instance.tumor_progression = validated_data.get('tumor_progression', instance.tumor_progression)

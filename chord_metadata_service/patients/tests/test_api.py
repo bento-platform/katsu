@@ -1,4 +1,6 @@
 import json
+import csv
+import io
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -119,3 +121,22 @@ class DeleteIndividualTest(APITestCase):
                 )
             )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class IndividualCSVRendererTest(APITestCase):
+    """ Test csv export for Individuals. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+
+    def test_csv_export(self):
+        get_resp = self.client.get('/api/individuals?format=csv')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        content = get_resp.content.decode('utf-8')
+        cvs_reader = csv.reader(io.StringIO(content))
+        body = list(cvs_reader)
+        self.assertEqual(body[1][1], c.VALID_INDIVIDUAL['sex'])
+        headers = body.pop(0)
+        for column in ['id', 'sex', 'date of birth', 'taxonomy', 'karyotypic sex',
+                       'race', 'ethnicity', 'age', 'diseases', 'created', 'updated']:
+            self.assertIn(column, [column_name.lower() for column_name in headers])
