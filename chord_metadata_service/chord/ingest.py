@@ -304,9 +304,23 @@ def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
             **bs_query
         )
 
+        variants_db = []
+        if "variants" in bs:
+            for variant in bs["variants"]:
+                variant_obj, _ = pm.Variant.objects.get_or_create(
+                    allele_type=variant["allele_type"],
+                    allele=variant["allele"],
+                    zygosity=variant.get("zygosity", {}),
+                    extra_properties=variant.get("extra_properties", {})
+                )
+                variants_db.append(variant_obj)
+
         if bs_created:
             bs_pfs = [create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
             bs_obj.phenotypic_features.set(bs_pfs)
+
+            if variants_db:
+                bs_obj.variants.set(variants_db)
 
         # TODO: Update phenotypic features otherwise?
 
