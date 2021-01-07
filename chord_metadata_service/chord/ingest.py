@@ -25,6 +25,8 @@ __all__ = [
     "WORKFLOWS_PATH",
     "IngestError",
     "ingest_resource",
+    "ingest_experiments_workflow",
+    "ingest_phenopacket_workflow",
     "WORKFLOW_INGEST_FUNCTION_MAP",
 ]
 

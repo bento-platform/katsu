@@ -17,8 +17,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("name", action="store", type=str, help="The name for the new table")
         parser.add_argument("data_type", action="store", choices=[DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET],
-                            type=str, help="The description for the new dataset")
-        parser.add_argument("dataset", action="store", type=str, help="Parent project identifier for the new dataset")
+                            type=str, help="The data type of this new table (experiment|phenopacket)")
+        parser.add_argument("dataset", action="store", type=str, help="Parent dataset identifier for the new table")
 
     def handle(self, *args, **options):
         with transaction.atomic():

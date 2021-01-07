@@ -15,7 +15,7 @@ class Command(BaseCommand):
         parser.add_argument("description", action="store", type=str, help="The description for the new dataset")
         parser.add_argument("contact_info", action="store", type=str, help="Contact information for the new dataset")
         parser.add_argument("project", action="store", type=str, help="Parent project identifier for the new dataset")
-        parser.add_argument("data_use", action="store", type=str, help="Parent project identifier for the new dataset")
+        parser.add_argument("data_use", action="store", type=str, help="Path to a data use JSON file for the dataset")
 
     def handle(self, *args, **options):
         data_use = None
