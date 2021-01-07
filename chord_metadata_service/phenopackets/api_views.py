@@ -281,12 +281,14 @@ def phenopackets_overview(_request):
             if b.taxonomy is not None:
                 biosamples_taxonomy.update((b.taxonomy["label"],))
 
-            if b.individual is not None:
-                count_individual(b.individual)
+            # if b.individual is not None:
+            #     count_individual(b.individual)
 
-            for pf in b.phenotypic_features.all():
-                phenotypic_features_counter.update((pf.pftype["label"],))
-
+            # for pf in b.phenotypic_features.all():
+            #     phenotypic_features_counter.update((pf.pftype["label"],))
+        # according to Phenopackets standard
+        # phenotypic features also can be linked to a Biosample
+        # but we count them here because all our use cases current have them linked to Phenopacket not biosample
         for d in p.diseases.all():
             diseases_counter.update((d.term["label"],))
 
