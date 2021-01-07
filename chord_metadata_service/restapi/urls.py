@@ -2,7 +2,6 @@ from django.urls import path, include
 from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
-from chord_metadata_service.chord import views_overview
 from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.mcode import api_views as mcode_views
 from chord_metadata_service.patients import api_views as individual_views
@@ -64,6 +63,6 @@ urlpatterns = [
     path('mcode_schema', mcode_views.get_mcode_schema,
          name="mcode-schema"),
     # overview
-    path('overview', views_overview.phenopackets_overview,
+    path('overview', phenopacket_views.phenopackets_overview,
          name="overview"),
 ]
