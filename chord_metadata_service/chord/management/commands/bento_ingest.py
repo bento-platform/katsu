@@ -9,7 +9,7 @@ from chord_metadata_service.chord.models import Table
 class Command(BaseCommand):
     help = """
         Ingests a JSON file into a Bento table.
-        Arguments: "table" ./path/to/data_use.json
+        Arguments: "table" ./path/to/data.json
     """
 
     def add_arguments(self, parser):

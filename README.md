@@ -3,6 +3,25 @@
 ![Build Status](https://travis-ci.com/bento-platform/katsu.svg?branch=master)
 [![codecov](https://codecov.io/gh/bento-platform/katsu/branch/master/graph/badge.svg)](https://codecov.io/gh/bento-platform/katsu)
 
+## Table of Contents
+
+  * [License](#license)
+  * [Funding](#funding)
+  * [Architecture](#architecture)
+  * [REST API Highlights](#rest-api-highlights)
+  * [Install](#install)
+  * [Authentication](#authentication)
+     * [Note on Permissions](#note-on-permissions)
+     * [Authorization inside CanDIG](#authorization-inside-candig)
+  * [Developing](#developing)
+     * [Branching](#branching)
+     * [Tests](#tests)
+     * [Terminal Commands](#terminal-commands)
+        * [Bento Commands](#bento-commands)
+        * [Patient Commands](#patient-commands)
+        * [Phenopacket Commands](#phenopacket-commands)
+     * [Accessing the Django Shell from inside a Bento Container](#accessing-the-django-shell-from-inside-a-bento-container)
+
 ## License
 
 The majority of the Katsu Metadata Service is licensed under the LGPLv3 license; copyright (c) 2019-2020 the Canadian
@@ -83,6 +102,7 @@ python manage.py runserver
 
 * Development server runs at `localhost:8000`
 
+
 ## Authentication
 
 Default authentication can be set globally in `settings.py`
@@ -102,7 +122,7 @@ By default, the service ships with a custom remote user middleware and backend
 compatible with the CHORD project. This middleware isn't particularly useful
 for a standalone instance of this server, so it can be swapped out.
 
-### Note On Permissions
+### Note on Permissions
 
 By default, `katsu` uses the CHORD permission system, which
 functions as follows:
@@ -125,6 +145,7 @@ have to do the following:
 1. Make sure the CHORD_PERMISSIONS is set to "false"
 2. Set INSIDE_CANDIG to "true"
 3. Provide the URL for the OPA instance in CANDIG_OPA_URL
+
 
 ## Developing
 
@@ -164,10 +185,92 @@ tox
 coverage html
 ```
 
-### Accessing the Django Shell from inside a CHORD Container
+### Terminal Commands
+
+Katsu ships with a variety of command-line helpers to facilitate common actions
+that one might perform. 
+
+To run them, the Django `manage.py` script is used.
+
+#### Bento Commands
+
+```
+$ ./manage.py bento_create_project "project title" "project description"
+Project created: test (ID: 756a4530-59b7-4d47-a04a-c6ee5aa52565)
+```
+
+Creates a new project with the specified title and description text. Returns
+output including the new ID for the project, which is needed when creating
+datasets under the project.
+
+```
+$ ./manage.py bento_create_dataset \
+  "dataset title" \
+  "dataset description" \
+  "David Lougheed <david.lougheed@example.org>" \
+  "756a4530-59b7-4d47-a04a-c6ee5aa52565"  \
+  ./examples/data_use.json
+Dataset created: dataset title (ID: 2a8f8e68-a34f-4d31-952a-22f362ebee9e)
+```
+
+* `David Lougheed <david.lougheed@example.org>`: Dataset use contact information
+* `756a4530-59b7-4d47-a04a-c6ee5aa52565`: Project ID to put the dataset under
+* `./examples/data_use.json`: Path to data use JSON
+
+Creates a new dataset under the project specified (with its ID), with 
+corresponding title, description, contact information, and data use conditions.
+
+```
+$ ./manage.py bento_create_table \
+  "table name" \
+  phenopacket \
+  "2a8f8e68-a34f-4d31-952a-22f362ebee9e"
+Table ownership created: dataset title (ID: 2a8f8e68-a34f-4d31-952a-22f362ebee9e) -> 0d63bafe-5d76-46be-82e6-3a07994bac2e
+Table created: table name (ID: 0d63bafe-5d76-46be-82e6-3a07994bac2e, Type: phenopacket)
+```
+
+* `table name`: Name of the new table created
+* `phenopacket`: Table data type (either `phenopacket` or `experiment`)
+* `2a8f8e68-a34f-4d31-952a-22f362ebee9e`: Dataset ID to put the table under
+
+Creates a new data table under the dataset specified (with its ID), with a 
+corresponding name and data type (either `phenopacket` or `experiment`.)
+
+```"
+$ ./manage.py bento_ingest \
+  "0d63bafe-5d76-46be-82e6-3a07994bac2e" \
+  ./examples/1000g_phenopackets_1_of_3.json
+...
+Ingested data successfully.
+```
+
+* `0d63bafe-5d76-46be-82e6-3a07994bac2e`: ID of table to ingest into
+* `./examples/1000g_phenopackets_1_of_3.json`: Data to ingest (in the format 
+  accepted by the Phenopackets workflow or the Experiments workflow, depending
+  on the data type of the table)
+  
+#### Patient Commands
+
+```
+$ ./manage.py patients_build_index
+...
+```
+
+Builds an ElasticSearch index for patients in the database.
+  
+#### Phenopacket Commands
+
+```
+$ ./manage.py phenopackets_build_index
+...
+```
+
+Builds an ElasticSearch index for Phenopackets in the database.
+
+### Accessing the Django Shell from inside a Bento Container
 
 Assuming `chord_singularity` is being used, the following commands can be used
-to bootstrap your way to a `katsu` environment within a CHORD
+to bootstrap your way to a `katsu` environment within a Bento
 container:
 
 ```bash
