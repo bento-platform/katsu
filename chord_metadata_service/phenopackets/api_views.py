@@ -8,6 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, FHIRRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
+from chord_metadata_service.restapi.utils import parse_individual_age
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from . import models as m, serializers as s, filters as f
@@ -257,11 +258,14 @@ def phenopackets_overview(_request):
     individuals_sex = Counter()
     individuals_k_sex = Counter()
     individuals_taxonomy = Counter()
+    individuals_age = Counter()
 
     def count_individual(ind):
         individuals_set.add(ind.id)
         individuals_sex.update((ind.sex,))
         individuals_k_sex.update((ind.karyotypic_sex,))
+        if ind.age is not None:
+            individuals_age.update((parse_individual_age(ind.age),))
         if ind.taxonomy is not None:
             individuals_taxonomy.update((ind.taxonomy["label"],))
 
@@ -273,11 +277,11 @@ def phenopackets_overview(_request):
             if b.taxonomy is not None:
                 biosamples_taxonomy.update((b.taxonomy["label"],))
 
-            # if b.individual is not None:
-            #     count_individual(b.individual)
-
+            # TODO decide what to do with nested Phenotypic features and Subject in Biosample
+            # This might serve future use cases that Biosample as a have main focus of study
             # for pf in b.phenotypic_features.all():
             #     phenotypic_features_counter.update((pf.pftype["label"],))
+
         # according to Phenopackets standard
         # phenotypic features also can be linked to a Biosample
         # but we count them here because all our use cases current have them linked to Phenopacket not biosample
@@ -308,6 +312,7 @@ def phenopackets_overview(_request):
                 "sex": {k: individuals_sex[k] for k in (s[0] for s in m.Individual.SEX)},
                 "karyotypic_sex": {k: individuals_k_sex[k] for k in (s[0] for s in m.Individual.KARYOTYPIC_SEX)},
                 "taxonomy": dict(individuals_taxonomy),
+                "age": dict(individuals_age),
                 # TODO: how to count age: it can be represented by three different schemas
             },
             "phenotypic_features": {
