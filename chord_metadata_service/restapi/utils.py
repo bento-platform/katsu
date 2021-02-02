@@ -40,3 +40,23 @@ def parse_onset(onset):
             return f"{onset['start']['age']} - {onset['end']['age']}"
     else:
         return None
+
+
+def parse_duration(string):
+    """ Returns years integer. """
+    string = string.split('P')[-1]
+    return int(float(string.split('Y')[0]))
+
+
+def parse_individual_age(age_obj):
+    """ Parses two possible age representations and returns average age or age as integer. """
+    if 'start' in age_obj:
+        start_age = parse_duration(age_obj['start']['age'])
+        end_age = parse_duration(age_obj['end']['age'])
+        # for the duration calculate the average age
+        age = (start_age + end_age) // 2
+    elif isinstance(age_obj, str):
+        age = parse_duration(age_obj)
+    else:
+        raise ValueError(f"Error: {age_obj} format not supported")
+    return age
