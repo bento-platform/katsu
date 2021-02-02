@@ -315,7 +315,7 @@ class OverviewTest(APITestCase):
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj['count'], 2)
+        self.assertEqual(response_obj['phenopackets'], 2)
         self.assertEqual(response_obj['data_type_specific']['individuals']['count'], 2)
         self.assertEqual(response_obj['data_type_specific']['biosamples']['count'], 2)
         self.assertEqual(response_obj['data_type_specific']['phenotypic_features']['count'], 1)
