@@ -303,7 +303,7 @@ def phenopackets_overview(_request):
         count_individual(p.subject)
 
     return Response({
-        "count": phenopackets.count(),
+        "phenopackets": phenopackets.count(),
         "data_type_specific": {
             "biosamples": {
                 "count": len(biosamples_set),
