@@ -165,7 +165,18 @@ PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
         "description": {
             "search": search_optional_str(0, multiple=True),  # TODO: Searchable? may leak
         },
-        "type": ONTOLOGY_SEARCH_SCHEMA,
+        "type": {
+            **ONTOLOGY_SEARCH_SCHEMA,
+            "search": {
+                "database": {
+                    **ONTOLOGY_SEARCH_SCHEMA["search"]["database"],
+
+                    # Due to conflict with a Python top-level function,
+                    # type is pftype in the database and is overridden here.
+                    "field": "pftype"
+                }
+            }
+        },
         "negated": {
             "search": search_optional_eq(1),
         },
