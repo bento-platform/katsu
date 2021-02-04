@@ -1,12 +1,25 @@
 from typing import List, Optional
 
 __all__ = [
+    "merge_schema_dictionaries",
     "search_optional_eq",
     "search_optional_str",
     "tag_schema_with_search_properties",
     "customize_schema",
     "schema_list",
 ]
+
+
+def merge_schema_dictionaries(dict1: dict, dict2: dict):
+    """
+    Merges two dictionaries with the ~same structure (in this case, keys that
+    are dictionaries in one should be dictionaries in the other.) Replaces any
+    conflicts with the second dictionary's value.
+    """
+    res_dict = {**dict1}
+    for k2, v2 in dict2.items():
+        res_dict[k2] = merge_schema_dictionaries(dict1.get(k2, {}), v2) if isinstance(v2, dict) else v2
+    return res_dict
 
 
 def _searchable_field(operations: List[str], order: int, queryable: str = "all", multiple: bool = False):
