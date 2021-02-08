@@ -345,7 +345,7 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                 {"search": {"database": {
                     "relationship": {
                         "type": "MANY_TO_ONE",
-                        "foreign_key": "phenotypicfeature_id"  # TODO: No hard-code, from M2M
+                        "foreign_key": models.PhenotypicFeature._meta.get_field("id").column
                     }
                 }}}),
             "search": merge_schema_dictionaries(
