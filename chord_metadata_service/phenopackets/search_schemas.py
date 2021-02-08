@@ -9,7 +9,6 @@ from chord_metadata_service.restapi.schema_utils import (
 )
 from chord_metadata_service.restapi.search_schemas import ONTOLOGY_SEARCH_SCHEMA
 
-
 __all__ = [
     "EXTERNAL_REFERENCE_SEARCH_SCHEMA",
     "PHENOPACKET_SEARCH_SCHEMA",
@@ -208,6 +207,12 @@ GENE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENE_
             "search": search_optional_str(2),
         }
     },
+    "search": {
+        "database": {
+            "relation": models.Gene._meta.db_table,
+            "primary_key": models.Gene._meta.pk.column
+        }
+    }
 })
 
 # TODO: Search? Probably not
@@ -345,7 +350,7 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                 {"search": {"database": {
                     "relationship": {
                         "type": "MANY_TO_ONE",
-                        "foreign_key": models.PhenotypicFeature._meta.get_field("id").column
+                        "foreign_key": models.PhenotypicFeature._meta.pk.column
                     }
                 }}}),
             "search": merge_schema_dictionaries(
@@ -378,8 +383,24 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                 }
             }
         },
-        "genes": {
-            "items": GENE_SEARCH_SCHEMA
+        "genes": {  # TODO: Too sensitive for search?
+            "items": merge_schema_dictionaries(
+                GENE_SEARCH_SCHEMA,
+                {"search": {"database": {
+                    "relationship": {
+                        "type": "MANY_TO_ONE",
+                        "foreign_key": "gene_id"
+                    }}}}),
+            "search": {
+                "database": {
+                    "relation": models.Phenopacket._meta.get_field("genes").remote_field.through._meta.db_table,
+                    "relationship": {
+                        "type": "ONE_TO_MANY",
+                        "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
+                        "parent_primary_key": models.Phenopacket._meta.pk.column  # TODO: Redundant?
+                    }
+                }
+            }
         },
         "variants": {
             "items": VARIANT_SEARCH_SCHEMA
