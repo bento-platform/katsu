@@ -244,7 +244,8 @@ def phenopackets_overview(_request):
     get:
     Overview of all Phenopackets in the database
     """
-    phenopackets = m.Phenopacket.objects.all()
+    phenopackets = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).select_related(
+        "subject", "meta_data")
 
     diseases_counter = Counter()
     phenotypic_features_counter = Counter()
@@ -269,7 +270,7 @@ def phenopackets_overview(_request):
         if ind.taxonomy is not None:
             individuals_taxonomy.update((ind.taxonomy["label"],))
 
-    for p in phenopackets.prefetch_related("biosamples"):
+    for p in phenopackets:
         for b in p.biosamples.all():
             biosamples_set.add(b.id)
             biosamples_sampled_tissue.update((b.sampled_tissue["label"],))
