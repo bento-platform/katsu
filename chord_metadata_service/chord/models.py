@@ -198,3 +198,6 @@ class Table(models.Model):
     @property
     def dataset(self):
         return self.ownership_record.dataset
+
+    def __str__(self):
+        return f"{self.name} (ID: {self.ownership_record.table_id}, Type: {self.data_type})"
