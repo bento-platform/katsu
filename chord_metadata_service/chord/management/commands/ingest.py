@@ -6,7 +6,7 @@ from chord_metadata_service.chord.models import Table
 
 class Command(BaseCommand):
     help = """
-        Ingests a JSON file into a Bento table.
+        Ingests a JSON file into a Katsu/Bento table.
         Arguments: "table" ./path/to/data.json
     """
 

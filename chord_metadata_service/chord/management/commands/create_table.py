@@ -10,7 +10,7 @@ from chord_metadata_service.chord.models import Dataset, TableOwnership, Table
 
 class Command(BaseCommand):
     help = """
-        Creates a Bento Katsu table in the database.
+        Creates a Katsu/Bento table in the database.
         Arguments: "name" (experiment|phenopacket) "dataset"
     """
 

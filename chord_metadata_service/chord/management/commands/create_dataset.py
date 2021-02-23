@@ -6,7 +6,7 @@ from chord_metadata_service.chord.models import Project, Dataset
 
 class Command(BaseCommand):
     help = """
-        Creates a Bento dataset in the database.
+        Creates a Katsu/Bento dataset in the database.
         Arguments: "title" "description" "contact_info" "project" ./path/to/data_use.json
     """
 

@@ -4,7 +4,7 @@ from chord_metadata_service.chord.models import Project
 
 class Command(BaseCommand):
     help = """
-        Creates a Bento project in the database.
+        Creates a Katsu/Bento project in the database.
         Arguments: "title" "description"
     """
 
