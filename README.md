@@ -192,10 +192,10 @@ that one might perform.
 
 To run them, the Django `manage.py` script is used.
 
-#### Bento Commands
+#### Project/Dataset/Table/Ingestion Commands
 
 ```
-$ ./manage.py bento_create_project "project title" "project description"
+$ ./manage.py create_project "project title" "project description"
 Project created: test (ID: 756a4530-59b7-4d47-a04a-c6ee5aa52565)
 ```
 
@@ -204,7 +204,7 @@ output including the new ID for the project, which is needed when creating
 datasets under the project.
 
 ```
-$ ./manage.py bento_create_dataset \
+$ ./manage.py create_dataset \
   "dataset title" \
   "dataset description" \
   "David Lougheed <david.lougheed@example.org>" \
@@ -221,7 +221,7 @@ Creates a new dataset under the project specified (with its ID), with
 corresponding title, description, contact information, and data use conditions.
 
 ```
-$ ./manage.py bento_create_table \
+$ ./manage.py create_table \
   "table name" \
   phenopacket \
   "2a8f8e68-a34f-4d31-952a-22f362ebee9e"
@@ -237,7 +237,7 @@ Creates a new data table under the dataset specified (with its ID), with a
 corresponding name and data type (either `phenopacket` or `experiment`.)
 
 ```"
-$ ./manage.py bento_ingest \
+$ ./manage.py ingest \
   "0d63bafe-5d76-46be-82e6-3a07994bac2e" \
   ./examples/1000g_phenopackets_1_of_3.json
 ...
