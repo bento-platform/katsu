@@ -18,7 +18,7 @@ setuptools.setup(
     install_requires=[
         "bento_lib[django]==0.11.0",
         "Django>=2.2.17,<3.0",
-        "django-cors-headers==3.6.0",
+        "django-cors-headers>=3.7,<3.8",
         "django-filter>=2.4,<3.0",
         "django-nose>=1.4,<2.0",
         "djangorestframework>=3.11,<3.12",

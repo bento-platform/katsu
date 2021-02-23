@@ -8,9 +8,7 @@ from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
 from chord_metadata_service.resources import api_views as resources_views
 
-
 __all__ = ["router", "urlpatterns"]
-
 
 router = routers.DefaultRouter(trailing_slash=False)
 
@@ -64,4 +62,7 @@ urlpatterns = [
          name="experiment-schema"),
     path('mcode_schema', mcode_views.get_mcode_schema,
          name="mcode-schema"),
+    # overview
+    path('overview', phenopacket_views.phenopackets_overview,
+         name="overview"),
 ]

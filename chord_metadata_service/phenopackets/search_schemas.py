@@ -2,12 +2,12 @@ from . import models, schemas
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.search_schemas import RESOURCE_SEARCH_SCHEMA
 from chord_metadata_service.restapi.schema_utils import (
+    merge_schema_dictionaries,
     search_optional_eq,
     search_optional_str,
     tag_schema_with_search_properties,
 )
 from chord_metadata_service.restapi.search_schemas import ONTOLOGY_SEARCH_SCHEMA
-
 
 __all__ = [
     "EXTERNAL_REFERENCE_SEARCH_SCHEMA",
@@ -165,7 +165,15 @@ PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
         "description": {
             "search": search_optional_str(0, multiple=True),  # TODO: Searchable? may leak
         },
-        "type": ONTOLOGY_SEARCH_SCHEMA,
+        "type": merge_schema_dictionaries(ONTOLOGY_SEARCH_SCHEMA, {
+            "search": {
+                "database": {
+                    # Due to conflict with a Python top-level function,
+                    # type is pftype in the database and is overridden here.
+                    "field": "pftype"
+                }
+            }
+        }),
         "negated": {
             "search": search_optional_eq(1),
         },
@@ -199,6 +207,12 @@ GENE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENE_
             "search": search_optional_str(2),
         }
     },
+    "search": {
+        "database": {
+            "relation": models.Gene._meta.db_table,
+            "primary_key": models.Gene._meta.pk.column
+        }
+    }
 })
 
 # TODO: Search? Probably not
@@ -215,10 +229,10 @@ VARIANT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_VA
 BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_BIOSAMPLE_SCHEMA, {
     "properties": {
         "id": {
-            "search": {
-                **search_optional_eq(0, queryable="internal"),
-                "database": {"field": models.Biosample._meta.pk.column}
-            }
+            "search": merge_schema_dictionaries(
+                search_optional_eq(0, queryable="internal"),
+                {"database": {"field": models.Biosample._meta.pk.column}}
+            )
         },
         "individual_id": {  # TODO: Does this work?
             "search": search_optional_eq(1, queryable="internal"),
@@ -228,17 +242,25 @@ BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
         },
         "sampled_tissue": ONTOLOGY_SEARCH_SCHEMA,
         "phenotypic_features": {
-            "items": PHENOTYPIC_FEATURE_SEARCH_SCHEMA,
-            "search": {
-                "database": {
-                    **PHENOTYPIC_FEATURE_SEARCH_SCHEMA["search"]["database"],
+            "items": merge_schema_dictionaries(
+                PHENOTYPIC_FEATURE_SEARCH_SCHEMA,
+                {"search": {"database": {
+                    "relationship": {
+                        "type": "MANY_TO_ONE",
+                        "foreign_key": "phenotypicfeature_id"  # TODO: No hard-code, from M2M
+                    }
+                }}}
+            ),
+            "search": merge_schema_dictionaries(
+                PHENOTYPIC_FEATURE_SEARCH_SCHEMA["search"],
+                {"database": {
                     "relationship": {
                         "type": "ONE_TO_MANY",
                         "parent_foreign_key": models.PhenotypicFeature._meta.get_field("biosample").column,
                         "parent_primary_key": models.Biosample._meta.pk.column  # TODO: Redundant
                     }
-                }
-            }
+                }}
+            )
         },
         "taxonomy": ONTOLOGY_SEARCH_SCHEMA,
         # TODO: Front end will need to deal with this:
@@ -314,45 +336,42 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
         "id": {
             "search": {"database": {"field": models.Phenopacket._meta.pk.column}}
         },
-        "subject": {
-            **INDIVIDUAL_SEARCH_SCHEMA,
-            "search": {
-                **INDIVIDUAL_SEARCH_SCHEMA["search"],
-                "database": {
-                    **INDIVIDUAL_SEARCH_SCHEMA["search"]["database"],
+        "subject": merge_schema_dictionaries(
+            INDIVIDUAL_SEARCH_SCHEMA,
+            {"search": {"database": {
+                "relationship": {
+                    "type": "MANY_TO_ONE",
+                    "foreign_key": models.Phenopacket._meta.get_field("subject").column
+                }
+            }}}),
+        "phenotypic_features": {
+            "items": merge_schema_dictionaries(
+                PHENOTYPIC_FEATURE_SEARCH_SCHEMA,
+                {"search": {"database": {
                     "relationship": {
                         "type": "MANY_TO_ONE",
-                        "foreign_key": models.Phenopacket._meta.get_field("subject").column
+                        "foreign_key": models.PhenotypicFeature._meta.pk.column
                     }
-                }
-            }
-        },
-        "phenotypic_features": {
-            "items": PHENOTYPIC_FEATURE_SEARCH_SCHEMA,
-            "search": {
-                "database": {
-                    **PHENOTYPIC_FEATURE_SEARCH_SCHEMA["search"]["database"],
+                }}}),
+            "search": merge_schema_dictionaries(
+                PHENOTYPIC_FEATURE_SEARCH_SCHEMA["search"],
+                {"database": {
                     "relationship": {
                         "type": "ONE_TO_MANY",
                         "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
                         "parent_primary_key": models.Phenopacket._meta.pk.column  # TODO: Redundant?
                     }
-                }
-            }
+                }})
         },
         "biosamples": {
-            "items": {
-                **BIOSAMPLE_SEARCH_SCHEMA,
-                "search": {
-                    "database": {
-                        **BIOSAMPLE_SEARCH_SCHEMA["search"]["database"],
-                        "relationship": {
-                            "type": "MANY_TO_ONE",
-                            "foreign_key": "biosample_id"  # TODO: No hard-code, from M2M
-                        }
+            "items": merge_schema_dictionaries(
+                BIOSAMPLE_SEARCH_SCHEMA,
+                {"search": {"database": {
+                    "relationship": {
+                        "type": "MANY_TO_ONE",
+                        "foreign_key": "biosample_id"  # TODO: No hard-code, from M2M
                     }
-                }
-            },
+                }}}),
             "search": {
                 "database": {
                     "relation": models.Phenopacket._meta.get_field("biosamples").remote_field.through._meta.db_table,
@@ -364,26 +383,36 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                 }
             }
         },
-        "genes": {
-            "items": GENE_SEARCH_SCHEMA
+        "genes": {  # TODO: Too sensitive for search?
+            "items": merge_schema_dictionaries(
+                GENE_SEARCH_SCHEMA,
+                {"search": {"database": {
+                    "relationship": {
+                        "type": "MANY_TO_ONE",
+                        "foreign_key": "gene_id"
+                    }}}}),
+            "search": {
+                "database": {
+                    "relation": models.Phenopacket._meta.get_field("genes").remote_field.through._meta.db_table,
+                    "relationship": {
+                        "type": "ONE_TO_MANY",
+                        "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
+                        "parent_primary_key": models.Phenopacket._meta.pk.column  # TODO: Redundant?
+                    }
+                }
+            }
         },
         "variants": {
             "items": VARIANT_SEARCH_SCHEMA
         },
         "diseases": {  # TODO: Too sensitive for search?
-            "items": {
-                **DISEASE_SEARCH_SCHEMA,
-                "search": {
-                    **DISEASE_SEARCH_SCHEMA["search"],
-                    "database": {
-                        **DISEASE_SEARCH_SCHEMA["search"]["database"],
-                        "relationship": {
-                            "type": "MANY_TO_ONE",
-                            "foreign_key": "disease_id"  # TODO: No hard-code, from M2M
-                        }
-                    }
-                }
-            },
+            "items": merge_schema_dictionaries(
+                DISEASE_SEARCH_SCHEMA,
+                {"search": {"database": {
+                    "relationship": {
+                        "type": "MANY_TO_ONE",
+                        "foreign_key": "disease_id"  # TODO: No hard-code, from M2M
+                    }}}}),
             "search": {
                 "database": {
                     "relation": models.Phenopacket._meta.get_field("diseases").remote_field.through._meta.db_table,
