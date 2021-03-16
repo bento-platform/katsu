@@ -32,18 +32,24 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
             "search": {"order": 4, "database": {"type": "jsonb"}}
         },
         "molecule": {
-            "search": search_optional_eq(5),
+            "search": search_optional_str(5),
         },
         "molecule_ontology": {
             "items": ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
             "search": {"order": 6, "database": {"type": "jsonb"}}
         },
         "library_strategy": {
-            "search": search_optional_eq(7),
+            "search": search_optional_str(7),
         },
         # TODO: other_fields: ?
         "biosample": {
             "search": search_optional_eq(8, queryable="internal"),
+        },
+        "extraction_protocol": {
+            "search": search_optional_str(9),
+        },
+        "file_location": {
+            "search": search_optional_str(10),
         },
     },
     "search": {
