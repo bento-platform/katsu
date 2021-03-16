@@ -1,3 +1,6 @@
+# Portions of this text (c) International Human Epigenome Consortium (https://github.com/IHEC)
+# Licensed under the Apache License 2.0
+
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES, ontology_class
 
 
@@ -28,9 +31,8 @@ EXPERIMENT = {
         "library_strategy": "(Controlled Vocabulary) The assay used. These are defined within the SRA metadata "
                             "specifications with a controlled vocabulary (e.g. ‘Bisulfite-Seq’, ‘RNA-Seq’, ‘ChIP-Seq’)."
                             " For a complete list, see https://www.ebi.ac.uk/ena/submit/reads-library-strategy.",
-
-        "other_fields": "The other fields for the experiment.",
-
+        "extraction_protocol": "The protocol used to isolate the extract material.",
+        "file_location": "The location of the file that contains the analysis of sequencing data.",
         "biosample": "Biosample on which this experiment was done.",
 
         **EXTRA_PROPERTIES

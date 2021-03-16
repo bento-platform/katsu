@@ -25,6 +25,8 @@ __all__ = [
     "WORKFLOWS_PATH",
     "IngestError",
     "ingest_resource",
+    "ingest_experiments_workflow",
+    "ingest_phenopacket_workflow",
     "WORKFLOW_INGEST_FUNCTION_MAP",
 ]
 
@@ -233,8 +235,10 @@ def ingest_experiment(experiment_data, table_id) -> em.Experiment:
     experiment_ontology = experiment_data.get("experiment_ontology", [])
     molecule_ontology = experiment_data.get("molecule_ontology", [])
     molecule = experiment_data.get("molecule")
-    library_strategy = experiment_data["library_strategy"]
-    other_fields = experiment_data.get("other_fields", {})
+    library_strategy = experiment_data.get("library_strategy")
+    extraction_protocol = experiment_data.get("extraction_protocol")
+    file_location = experiment_data.get("file_location")
+    extra_properties = experiment_data.get("extra_properties", {})
     biosample = experiment_data.get("biosample")
 
     if biosample is not None:
@@ -249,7 +253,9 @@ def ingest_experiment(experiment_data, table_id) -> em.Experiment:
         molecule_ontology=molecule_ontology,
         molecule=molecule,
         library_strategy=library_strategy,
-        other_fields=other_fields,
+        extraction_protocol=extraction_protocol,
+        file_location=file_location,
+        extra_properties=extra_properties,
         biosample=biosample,
         table=Table.objects.get(ownership_record_id=table_id, data_type=DATA_TYPE_EXPERIMENT)
     )
