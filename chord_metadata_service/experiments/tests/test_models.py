@@ -23,7 +23,9 @@ class ExperimentTest(TestCase):
             molecule_ontology=[{"id": "ontology:1", "label": "Ontology term 1"}],
             molecule='total RNA',
             library_strategy='Bisulfite-Seq',
-            other_fields={"some_field": "value"},
+            extraction_protocol='NGS',
+            file_location='files/test.bam',
+            extra_properties={"some_field": "value"},
             biosample=self.biosample
         )
 
@@ -59,7 +61,7 @@ class ExperimentTest(TestCase):
             self.create,
             library_strategy='Bisulfite-Seq',
             experiment_type='Chromatin Accessibility',
-            other_fields={"some_field": "value", "invalid_value": 42},
+            extra_properties={"some_field": "value", "invalid_value": 42},
             biosample=self.biosample
         )
 
