@@ -30,35 +30,19 @@ EXPERIMENT_SCHEMA = describe_schema({
         },
         "experiment_ontology": ONTOLOGY_CLASS_LIST,
         "molecule": {
-            "type": "string",
-            "enum": [
-                "total RNA",
-                "polyA RNA",
-                "cytoplasmic RNA",
-                "nuclear RNA",
-                "small RNA",
-                "genomic DNA",
-                "protein",
-                "other",
-            ]
+            "type": "string"
         },
         "molecule_ontology": ONTOLOGY_CLASS_LIST,
         "library_strategy": {
-            "type": "string",
-            "enum": [
-                "DNase-Hypersensitivity",
-                "ATAC-seq",
-                "NOME-Seq",
-                "Bisulfite-Seq",
-                "MeDIP-Seq",
-                "MRE-Seq",
-                "ChIP-Seq",
-                "RNA-Seq",
-                "miRNA-Seq",
-                "WGS",
-            ]
+            "type": "string"
         },
-        "other_fields": KEY_VALUE_OBJECT,
+        "extraction_protocol": {
+            "type": "string"
+        },
+        "file_location": {
+            "type": "string"
+        },
+        "extra_properties": KEY_VALUE_OBJECT,
         "biosample": {
             "type": "string"
         },
