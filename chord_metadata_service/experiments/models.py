@@ -37,8 +37,7 @@ class Experiment(models.Model, IndexableMixin):
     qc_flags = ArrayField(CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, 'qc_flags')),
                           blank=True, default=list)
     extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
-                             help_text=rec_help(d.EXPERIMENT, 'extra_properties'))
-
+                                 help_text=rec_help(d.EXPERIMENT, 'extra_properties'))
     biosample = models.ForeignKey(Biosample, on_delete=models.CASCADE, help_text=rec_help(d.EXPERIMENT, 'biosample'))
     table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
 
