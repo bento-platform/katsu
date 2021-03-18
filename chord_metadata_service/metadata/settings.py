@@ -60,6 +60,10 @@ if DEBUG:
 
 APPEND_SLASH = False
 
+# Bento filesystem settings
+
+SERVICE_TEMP = os.environ.get("SERVICE_TEMP")
+
 # Candig-specific settings
 
 INSIDE_CANDIG = os.environ.get("INSIDE_CANDIG", "false").lower() == "true"
