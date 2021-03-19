@@ -36,6 +36,7 @@ setuptools.setup(
         "rdflib==4.2.2",
         "rdflib-jsonld==0.4.0",
         "requests>=2.25.1,<3.0",
+        "requests-unixsocket>=0.2.0,<0.3.0",
         "rfc3987==1.3.8",
         "uritemplate>=3.0,<4.0",
     ],

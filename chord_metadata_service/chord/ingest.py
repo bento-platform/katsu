@@ -2,6 +2,7 @@ import contextlib
 import json
 import os
 import requests
+import requests_unixsocket
 import shutil
 import tempfile
 import uuid
@@ -27,6 +28,8 @@ from chord_metadata_service.restapi.fhir_ingest import (
 )
 from chord_metadata_service.mcode.parse_fhir_mcode import parse_bundle
 from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
+
+requests_unixsocket.monkeypatch()
 
 
 __all__ = [
@@ -476,18 +479,19 @@ def _workflow_file_output_to_path(file_uri: str):
         tmp_dir = tmp_dir.rstrip("/") + "/"
 
         if parsed_file_uri.scheme == DRS_URI_SCHEME:  # DRS object URI
-            # TODO: Decide between HTTP and file?????
             drs_obj = fetch_drs_record_by_uri(file_uri, settings.DRS_URL)
 
             file_access = get_access_method_of_type(drs_obj, "file")
             if file_access:
-                yield urlparse(file_access["access_url"]).path
+                yield urlparse(file_access["access_url"]["url"]).path
                 return
 
             # TODO: Some mechanism to do this with auth
             http_access = get_access_method_of_type(drs_obj, "http")
             if http_access:
-                yield _workflow_http_download(tmp_dir, http_access["access_url"])
+                # TODO: Handle DRS headers field if available - how to do this with grace and compatibility with
+                #  Bento's auth system?
+                yield _workflow_http_download(tmp_dir, http_access["access_url"]["url"])
                 return
 
             # If we get here, we have a DRS object we cannot handle; raise an error.

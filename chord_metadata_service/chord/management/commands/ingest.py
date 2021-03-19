@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("table", action="store", type=str, help="The table ID to ingest into")
-        parser.add_argument("data", action="store", type=str, help="JSON data file to ingest")
+        parser.add_argument("data", action="store", type=str, help="JSON data file or DRS URI to ingest")
 
     def handle(self, *args, **options):
         t = Table.objects.get(ownership_record_id=options["table"])
