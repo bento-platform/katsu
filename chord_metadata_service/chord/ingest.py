@@ -7,7 +7,7 @@ import tempfile
 import uuid
 
 from dateutil.parser import isoparse
-from typing import Callable, Optional, Tuple
+from typing import Callable
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -450,11 +450,11 @@ def _workflow_file_output_to_path(file_uri: str):
     parsed_file_uri = urlparse(file_uri)
 
     if parsed_file_uri.scheme == FILE_URI_SCHEME:  # File URI
-        yield parsed_file_uri.path, None
+        yield parsed_file_uri.path
         return
 
     if parsed_file_uri.scheme == "":  # File path with no URI scheme
-        yield parsed_file_uri.path, None
+        yield parsed_file_uri.path
         return
 
     # From here on out, we're dealing with downloads - check to make sure we
@@ -474,11 +474,11 @@ def _workflow_file_output_to_path(file_uri: str):
         tmp_dir = tmp_dir.rstrip("/") + "/"
 
         if parsed_file_uri.scheme == DRS_URI_SCHEME:  # DRS object URI
-            # TODO
-            pass
+            # TODO: Decide between HTTP and file?????
+            return
 
         elif parsed_file_uri.scheme in (HTTP_URI_SCHEME, HTTPS_URI_SCHEME):
-            yield _workflow_http_download(tmp_dir, file_uri), tmp_dir
+            yield _workflow_http_download(tmp_dir, file_uri)
 
         else:
             # If we get here, we have a scheme we cannot handle; raise an error.
