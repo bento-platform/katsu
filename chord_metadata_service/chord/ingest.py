@@ -477,7 +477,7 @@ def _workflow_file_output_to_path(file_uri: str):
 
         if parsed_file_uri.scheme == DRS_URI_SCHEME:  # DRS object URI
             # TODO: Decide between HTTP and file?????
-            drs_obj = fetch_drs_record_by_uri(file_uri, "TODO")  # TODO: DRS URI!!!
+            drs_obj = fetch_drs_record_by_uri(file_uri, settings.DRS_URL)
 
             file_access = get_access_method_of_type(drs_obj, "file")
             if file_access:
