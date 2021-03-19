@@ -12,6 +12,8 @@ from urllib.parse import urlparse
 
 from django.conf import settings
 
+from bento_lib.drs.utils import get_access_method_of_type, fetch_drs_record_by_uri
+
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
 from chord_metadata_service.chord.models import Table, TableOwnership
 from chord_metadata_service.experiments import models as em
@@ -475,7 +477,21 @@ def _workflow_file_output_to_path(file_uri: str):
 
         if parsed_file_uri.scheme == DRS_URI_SCHEME:  # DRS object URI
             # TODO: Decide between HTTP and file?????
-            return
+            drs_obj = fetch_drs_record_by_uri(file_uri, "TODO")  # TODO: DRS URI!!!
+
+            file_access = get_access_method_of_type(drs_obj, "file")
+            if file_access:
+                yield urlparse(file_access["access_url"]).path
+                return
+
+            # TODO: Some mechanism to do this with auth
+            http_access = get_access_method_of_type(drs_obj, "http")
+            if http_access:
+                yield _workflow_http_download(tmp_dir, http_access["access_url"])
+                return
+
+            # If we get here, we have a DRS object we cannot handle; raise an error.
+            raise IngestError(f"Cannot handle DRS object {file_uri}: No file or http access methods")
 
         elif parsed_file_uri.scheme in (HTTP_URI_SCHEME, HTTPS_URI_SCHEME):
             yield _workflow_http_download(tmp_dir, file_uri)
