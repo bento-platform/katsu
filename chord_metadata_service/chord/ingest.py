@@ -1,5 +1,6 @@
 import contextlib
 import json
+import logging
 import os
 import requests
 import requests_unixsocket
@@ -41,6 +42,8 @@ __all__ = [
     "ingest_phenopacket_workflow",
     "WORKFLOW_INGEST_FUNCTION_MAP",
 ]
+
+logger = logging.getLogger(__name__)
 
 WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
@@ -512,6 +515,7 @@ def _workflow_file_output_to_path(file_uri: str):
 
 def ingest_experiments_workflow(workflow_outputs, table_id):
     with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
+        logger.info(f"Attempting ingestion of experiments from path: {json_doc_path}")
         with open(json_doc_path, "r") as jf:
             json_data = json.load(jf)
 
@@ -525,6 +529,7 @@ def ingest_experiments_workflow(workflow_outputs, table_id):
 
 def ingest_phenopacket_workflow(workflow_outputs, table_id):
     with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
+        logger.info(f"Attempting ingestion of phenopackets from path: {json_doc_path}")
         with open(json_doc_path, "r") as jf:
             json_data = json.load(jf)
             return _map_if_list(ingest_phenopacket, json_data, table_id)
@@ -532,6 +537,7 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id):
 
 def ingest_fhir_workflow(workflow_outputs, table_id):
     with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "patients")) as patients_path:
+        logger.info(f"Attempting ingestion of patients from path: {patients_path}")
         with open(patients_path, "r") as pf:
             patients_data = json.load(pf)
             phenopacket_ids = ingest_patients(
@@ -542,18 +548,21 @@ def ingest_fhir_workflow(workflow_outputs, table_id):
 
     if "observations" in workflow_outputs:
         with _workflow_file_output_to_path(workflow_outputs["observations"]) as observations_path:
+            logger.info(f"Attempting ingestion of observations from path: {observations_path}")
             with open(observations_path, "r") as of:
                 observations_data = json.load(of)
                 ingest_observations(phenopacket_ids, observations_data)
 
     if "conditions" in workflow_outputs:
         with _workflow_file_output_to_path(workflow_outputs["conditions"]) as conditions_path:
+            logger.info(f"Attempting ingestion of conditions from path: {conditions_path}")
             with open(conditions_path, "r") as cf:
                 conditions_data = json.load(cf)
                 ingest_conditions(phenopacket_ids, conditions_data)
 
     if "specimens" in workflow_outputs:
         with _workflow_file_output_to_path(workflow_outputs["specimens"]) as specimens_path:
+            logger.info(f"Attempting ingestion of specimens from path: {specimens_path}")
             with open(specimens_path, "r") as sf:
                 specimens_data = json.load(sf)
                 ingest_specimens(phenopacket_ids, specimens_data)
@@ -561,6 +570,7 @@ def ingest_fhir_workflow(workflow_outputs, table_id):
 
 def ingest_mcode_fhir_workflow(workflow_outputs, table_id):
     with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
+        logger.info(f"Attempting ingestion of MCODE FIHR from path: {json_doc_path}")
         with open(json_doc_path, "r") as jf:
             json_data = json.load(jf)
             mcodepacket = parse_bundle(json_data)
