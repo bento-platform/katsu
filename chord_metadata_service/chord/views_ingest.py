@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import traceback
 import uuid
@@ -20,6 +21,8 @@ from .models import Table
 
 
 BENTO_INGEST_SCHEMA_VALIDATOR = Draft7Validator(BENTO_INGEST_SCHEMA)
+
+logger = logging.getLogger(__name__)
 
 
 class WDLRenderer(BaseRenderer):
@@ -104,7 +107,7 @@ def ingest(request):
 
     except Exception as e:
         # Encountered some other error from the ingestion attempt, return a somewhat detailed message
-        print(f"Encountered an exception while processing an ingest attempt:\n{traceback.format_exc()}")
+        logger.error(f"Encountered an exception while processing an ingest attempt:\n{traceback.format_exc()}")
         return Response(errors.internal_server_error(f"Encountered an exception while processing an ingest attempt "
                                                      f"(error: {repr(e)}"), status=500)
 
