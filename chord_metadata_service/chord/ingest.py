@@ -452,16 +452,13 @@ def _workflow_http_download(tmp_dir: str, http_uri: str) -> str:
 
 
 @contextlib.contextmanager
-def _workflow_file_output_to_path(file_uri: str):
+def _workflow_file_output_to_path(file_uri_or_path: str):
     # TODO: Should be able to download from DRS instead of using file URIs directly
 
-    parsed_file_uri = urlparse(file_uri)
+    parsed_file_uri = urlparse(file_uri_or_path)
 
-    if parsed_file_uri.scheme == FILE_URI_SCHEME:  # File URI
-        yield parsed_file_uri.path
-        return
-
-    if parsed_file_uri.scheme == "":  # File path with no URI scheme
+    if parsed_file_uri.scheme in (FILE_URI_SCHEME, ""):
+        # File URI, or file path with no URI scheme (in which case implicitly assume a 'file://' in front)
         yield parsed_file_uri.path
         return
 
@@ -482,7 +479,7 @@ def _workflow_file_output_to_path(file_uri: str):
         tmp_dir = tmp_dir.rstrip("/") + "/"
 
         if parsed_file_uri.scheme == DRS_URI_SCHEME:  # DRS object URI
-            drs_obj = fetch_drs_record_by_uri(file_uri, settings.DRS_URL)
+            drs_obj = fetch_drs_record_by_uri(file_uri_or_path, settings.DRS_URL)
 
             file_access = get_access_method_of_type(drs_obj, "file")
             if file_access:
@@ -498,10 +495,10 @@ def _workflow_file_output_to_path(file_uri: str):
                 return
 
             # If we get here, we have a DRS object we cannot handle; raise an error.
-            raise IngestError(f"Cannot handle DRS object {file_uri}: No file or http access methods")
+            raise IngestError(f"Cannot handle DRS object {file_uri_or_path}: No file or http access methods")
 
         elif parsed_file_uri.scheme in (HTTP_URI_SCHEME, HTTPS_URI_SCHEME):
-            yield _workflow_http_download(tmp_dir, file_uri)
+            yield _workflow_http_download(tmp_dir, file_uri_or_path)
 
         else:
             # If we get here, we have a scheme we cannot handle; raise an error.
