@@ -2,6 +2,7 @@ import contextlib
 import json
 import logging
 import os
+import re
 import requests
 import requests_unixsocket
 import shutil
@@ -432,6 +433,8 @@ FILE_URI_SCHEME = "file"
 HTTP_URI_SCHEME = "http"
 HTTPS_URI_SCHEME = "https"
 
+WINDOWS_DRIVE_SCHEME = re.compile(r"^[a-zA-Z]$")
+
 
 def _workflow_http_download(tmp_dir: str, http_uri: str) -> str:
     # TODO: Sanity check: no external insecure HTTP calls
@@ -456,6 +459,12 @@ def _workflow_file_output_to_path(file_uri_or_path: str):
     # TODO: Should be able to download from DRS instead of using file URIs directly
 
     parsed_file_uri = urlparse(file_uri_or_path)
+
+    if WINDOWS_DRIVE_SCHEME.match(parsed_file_uri.scheme):
+        # In Windows, file paths can start with c:/ or similar (which is the drive letter.) This will get handled
+        # as a 'scheme' by urlparse, so we use a regex to detect Windows-style drive 'schemes'.
+        yield file_uri_or_path
+        return
 
     if parsed_file_uri.scheme in (FILE_URI_SCHEME, ""):
         # File URI, or file path with no URI scheme (in which case implicitly assume a 'file://' in front)
