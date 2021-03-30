@@ -34,11 +34,11 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: python -m pip install -r requirements.txt
     - name: Create database
       run: |
         sudo -u postgres psql -U postgres -p 5433 -d postgres -c "alter user postgres with password 'postgres';"
+    - name: Install dependencies
+        run: python -m pip install -r requirements.txt
     - name: Test
       run: |
         export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5433
