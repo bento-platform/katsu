@@ -41,8 +41,3 @@ jobs:
       run: |
         export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5433
         python ./manage.py test   
-    
-    
-    
-    
-		python3 -m coverage run ./manage.py test chord_metadata_service
