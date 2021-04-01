@@ -183,7 +183,7 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = m.Phenopacket.objects.filter(table__ownership_record__dataset__in=allowed_datasets).\
+            queryset = m.Phenopacket.objects.filter(table__ownership_record__dataset__title__in=allowed_datasets).\
                 prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")
         else:
             queryset = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")

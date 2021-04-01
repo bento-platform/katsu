@@ -67,9 +67,9 @@ class PhenopacketsAPITest(TestCase):
         """
         responses.add(
             responses.POST,
-            url=settings.CANDIG_OPA_URL + "/v1/data/permissions",
+            url=settings.CANDIG_OPA_URL + "/v1/data/ga4ghPassport/tokenControlledAccessREMS",
             json={
-                "datasets": [str(self.dataset2.identifier)]
+                "result": [str(self.dataset2.title)]
             },
             status=200
         )
@@ -89,9 +89,9 @@ class PhenopacketsAPITest(TestCase):
         """
         responses.add(
             responses.POST,
-            url=settings.CANDIG_OPA_URL + "/v1/data/permissions",
+            url=settings.CANDIG_OPA_URL + "/v1/data/ga4ghPassport/tokenControlledAccessREMS",
             json={
-                "datasets": []
+                "result": []
             },
             status=200
         )
@@ -109,9 +109,9 @@ class PhenopacketsAPITest(TestCase):
         """
         responses.add(
             responses.POST,
-            url=settings.CANDIG_OPA_URL + "/v1/data/permissions",
+            url=settings.CANDIG_OPA_URL + "/v1/data/ga4ghPassport/tokenControlledAccessREMS",
             json={
-                "datasets": [str(self.dataset1.identifier), str(self.dataset2.identifier)]
+                "result": [str(self.dataset1.title), str(self.dataset2.title)]
             },
             status=200
         )
@@ -133,7 +133,7 @@ class PhenopacketsAPITest(TestCase):
         """
         responses.add(
             responses.POST,
-            url=settings.CANDIG_OPA_URL + "/v1/data/permissions",
+            url=settings.CANDIG_OPA_URL + "/v1/data/ga4ghPassport/tokenControlledAccessREMS",
             body=requests.exceptions.RequestException()
         )
 

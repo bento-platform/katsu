@@ -22,7 +22,7 @@ router.register(r'tables', chord_views.TableViewSet)
 router.register(r'experiments', experiment_views.ExperimentViewSet)
 
 # Patients app urls
-router.register(r'individuals', individual_views.IndividualViewSet)
+router.register(r'individuals', individual_views.IndividualViewSet, basename="individuals")
 
 # Phenopackets app urls
 router.register(r'phenotypicfeatures', phenopacket_views.PhenotypicFeatureViewSet)

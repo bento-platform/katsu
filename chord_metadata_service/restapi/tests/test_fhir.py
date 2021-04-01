@@ -1,5 +1,6 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
+from django.test import override_settings
 
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.patients.tests.constants import VALID_INDIVIDUAL, VALID_INDIVIDUAL_2
@@ -43,6 +44,7 @@ class FHIRPhenopacketTest(APITestCase):
         )
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
+    @override_settings(CANDIG_OPA_URL=None)
     def test_get_fhir(self):
         get_resp = self.client.get('/api/phenopackets?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)

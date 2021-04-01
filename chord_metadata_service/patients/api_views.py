@@ -18,10 +18,6 @@ class IndividualViewSet(viewsets.ModelViewSet):
     Create a new individual
 
     """
-    queryset = Individual.objects.all().prefetch_related(
-        *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-        *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
-    ).order_by("id")
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
@@ -30,3 +26,17 @@ class IndividualViewSet(viewsets.ModelViewSet):
     filter_class = IndividualFilter
     ordering_fields = ["id"]
     search_fields = ["sex", "ethnicity"]
+
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = Individual.objects.filter(phenopackets__table__ownership_record__dataset__title__in=allowed_datasets).prefetch_related(
+                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
+            ).order_by("id")
+        else:
+            queryset = Individual.objects.all().prefetch_related(
+                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
+            ).order_by("id")
+        return queryset

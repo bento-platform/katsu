@@ -1,6 +1,7 @@
 import json
 import csv
 import io
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -129,6 +130,7 @@ class IndividualCSVRendererTest(APITestCase):
     def setUp(self):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
 
+    @override_settings(CANDIG_OPA_URL=None)
     def test_csv_export(self):
         get_resp = self.client.get('/api/individuals?format=csv')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
