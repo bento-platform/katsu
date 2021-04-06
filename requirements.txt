@@ -77,7 +77,7 @@ strict-rfc3339==0.7
 toml==0.10.2
 tox==3.22.0
 uritemplate==3.0.1
-urllib3==1.26.3
+urllib3==1.26.4
 virtualenv==20.4.2
 Werkzeug==1.0.1
 wincertstore==0.2
