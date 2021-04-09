@@ -8,7 +8,7 @@ from django.utils import timezone
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.resources.models import Resource
 
-from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET
+from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
 
 
 __all__ = ["Project", "Dataset", "TableOwnership", "Table"]
@@ -182,6 +182,7 @@ class Table(models.Model):
     TABLE_DATA_TYPE_CHOICES = (
         (DATA_TYPE_EXPERIMENT, DATA_TYPE_EXPERIMENT),
         (DATA_TYPE_PHENOPACKET, DATA_TYPE_PHENOPACKET),
+        (DATA_TYPE_MCODEPACKET, DATA_TYPE_MCODEPACKET),
     )
 
     ownership_record = models.OneToOneField(TableOwnership, on_delete=models.CASCADE, primary_key=True)
