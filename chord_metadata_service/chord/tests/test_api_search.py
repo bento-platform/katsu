@@ -27,6 +27,8 @@ from .constants import (
     TEST_SEARCH_QUERY_2,
     TEST_SEARCH_QUERY_3,
     TEST_SEARCH_QUERY_4,
+    TEST_SEARCH_QUERY_5,
+    TEST_SEARCH_QUERY_6,
     TEST_FHIR_SEARCH_QUERY,
 )
 from ..models import Project, Dataset, TableOwnership, Table
@@ -305,6 +307,28 @@ class SearchTest(APITestCase):
         self.assertEqual(len(c["results"]), 1)
         self.assertEqual(len(c["results"][0]["biosamples"]), 2)
         self.assertIn("bladder", c["results"][0]["biosamples"][0]["sampled_tissue"]["label"])
+
+    def test_private_table_search_8(self):
+        # Valid query to search for phenotypic feature type, case-insensitive
+
+        r = self.client.post(reverse("private-table-search", args=[str(self.table.identifier)]), data=json.dumps({
+            "query": TEST_SEARCH_QUERY_5
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertEqual(len(c["results"]), 1)
+        self.assertEqual(len(c["results"][0]["phenotypic_features"]), 1)
+
+    def test_private_table_search_9(self):
+        # Valid query to search for biosample sample tissue label, case-insensitive
+
+        r = self.client.post(reverse("private-table-search", args=[str(self.table.identifier)]), data=json.dumps({
+            "query": TEST_SEARCH_QUERY_6
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertEqual(len(c["results"]), 1)
+        self.assertEqual(len(c["results"][0]["biosamples"]), 2)
 
     @patch('chord_metadata_service.chord.views_search.es')
     def test_fhir_search(self, mocked_es):

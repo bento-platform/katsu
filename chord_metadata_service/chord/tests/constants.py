@@ -15,6 +15,8 @@ __all__ = [
     "TEST_SEARCH_QUERY_2",
     "TEST_SEARCH_QUERY_3",
     "TEST_SEARCH_QUERY_4",
+    "TEST_SEARCH_QUERY_5",
+    "TEST_SEARCH_QUERY_6",
     "TEST_FHIR_SEARCH_QUERY",
 ]
 
@@ -238,4 +240,7 @@ TEST_SEARCH_QUERY_2 = ["#eq", ["#resolve", "subject", "sex"], "MALE"]
 TEST_SEARCH_QUERY_3 = ["#eq", ["#resolve", "phenotypic_features", "[item]", "type", "label"], "Proptosis"]
 TEST_SEARCH_QUERY_4 = ["#eq", ["#resolve", "biosamples", "[item]", "sampled_tissue", "label"],
                        "wall of urinary bladder"]
+TEST_SEARCH_QUERY_5 = ["#ico", ["#resolve", "phenotypic_features", "[item]", "type", "label"], "proptosis"]
+TEST_SEARCH_QUERY_6 = ["#ico", ["#resolve", "biosamples", "[item]", "sampled_tissue", "label"],
+                       "URINARY BLADDER"]
 TEST_FHIR_SEARCH_QUERY = {"query": {"match": {"gender": "FEMALE"}}}
