@@ -37,6 +37,13 @@ def filter_extra_properties_datatype(qs, name, value):
     return qs.filter(**{lookup: value})
 
 
+def filter_extra_properties(qs, name, value):
+    """
+    Filters by a value in extra_properties object; looks for a match in keys and values
+    """
+    return qs.filter(extra_properties__icontains=value)
+
+
 # FILTERS
 
 
@@ -44,6 +51,7 @@ class MetaDataFilter(django_filters.rest_framework.FilterSet):
     created_by = django_filters.CharFilter(lookup_expr="icontains")
     submitted_by = django_filters.CharFilter(lookup_expr="icontains")
     phenopacket_schema_version = django_filters.CharFilter(lookup_expr="iexact")
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
     class Meta:
         model = m.MetaData
@@ -57,6 +65,7 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
     # TODO modifier
     onset = django_filters.CharFilter(method=filter_ontology, field_name="onset", label="Onset")
     evidence = django_filters.CharFilter(method="filter_evidence", field_name="evidence", label="Evidence")
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     extra_properties_datatype = django_filters.CharFilter(
         method=filter_extra_properties_datatype, field_name="extra_properties",
         label="Extra properties datatype"
@@ -86,6 +95,7 @@ class ProcedureFilter(django_filters.rest_framework.FilterSet):
         queryset=m.Biosample.objects.all(), widget=CSVWidget, field_name="biosample",
         method=filter_related_model_ids, label="Biosample"
     )
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
     class Meta:
         model = m.Procedure
@@ -96,6 +106,7 @@ class HtsFileFilter(django_filters.rest_framework.FilterSet):
     description = django_filters.CharFilter(lookup_expr="icontains")
     hts_format = django_filters.CharFilter(lookup_expr="iexact")
     genome_assembly = django_filters.CharFilter(lookup_expr="iexact")
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
     class Meta:
         model = m.HtsFile
@@ -103,6 +114,7 @@ class HtsFileFilter(django_filters.rest_framework.FilterSet):
 
 
 class GeneFilter(django_filters.rest_framework.FilterSet):
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
     class Meta:
         model = m.Gene
@@ -112,6 +124,7 @@ class GeneFilter(django_filters.rest_framework.FilterSet):
 class VariantFilter(django_filters.rest_framework.FilterSet):
     allele_type = django_filters.CharFilter(lookup_expr="iexact")
     zygosity = django_filters.CharFilter(method=filter_ontology, field_name="zygosity", label="Zygosity")
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
     class Meta:
         model = m.Variant
@@ -120,6 +133,7 @@ class VariantFilter(django_filters.rest_framework.FilterSet):
 
 class DiseaseFilter(django_filters.rest_framework.FilterSet):
     term = django_filters.CharFilter(method=filter_ontology, field_name="term", label="Term")
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     extra_properties_datatype = django_filters.CharFilter(
         method=filter_extra_properties_datatype, field_name="extra_properties",
         label="Extra properties datatype"
@@ -154,6 +168,7 @@ class BiosampleFilter(django_filters.rest_framework.FilterSet):
         method=filter_ontology, field_name="tumor_progression", label="Tumor progression")
     tumor_grade = django_filters.CharFilter(
         method=filter_ontology, field_name="tumor_grade", label="Tumor grade")
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
     class Meta:
         model = m.Biosample
@@ -168,6 +183,7 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
         method="filter_found_phenotypic_feature", field_name="phenotypic_features",
         label="Found phenotypic feature"
     )
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
     class Meta:
         model = m.Phenopacket
@@ -187,6 +203,7 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
 
 class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
     status = django_filters.CharFilter(lookup_expr="iexact")
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
     class Meta:
         model = m.GenomicInterpretation
@@ -197,6 +214,7 @@ class DiagnosisFilter(django_filters.rest_framework.FilterSet):
     disease_type = django_filters.CharFilter(
         method=filter_ontology, field_name="disease__term", label="Disease type"
     )
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
     class Meta:
         model = m.Diagnosis
@@ -205,6 +223,7 @@ class DiagnosisFilter(django_filters.rest_framework.FilterSet):
 
 class InterpretationFilter(django_filters.rest_framework.FilterSet):
     resolution_status = django_filters.CharFilter(lookup_expr="iexact")
+    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
     class Meta:
         model = m.Interpretation
