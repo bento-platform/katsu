@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
 
     'chord_metadata_service.chord.apps.ChordConfig',
     'chord_metadata_service.experiments.apps.ExperimentsConfig',

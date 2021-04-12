@@ -21,6 +21,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         method="filter_found_phenotypic_feature", field_name="phenopackets__phenotypic_features",
         label="Found phenotypic feature"
     )
+    extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
 
     class Meta:
         model = Individual
@@ -43,3 +44,6 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
             Q(phenopackets__diseases__term__label__icontains=value)
         ).distinct()
         return qs
+
+    def filter_extra_properties(self, qs, name, value):
+        return qs.filter(extra_properties__icontains=value)
