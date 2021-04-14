@@ -21,7 +21,7 @@ class CreateIndividualTest(APITestCase):
         """ POST a new individual. """
 
         response = self.client.post(
-            reverse('individual-list'),
+            reverse('individuals-list'),
             data=json.dumps(self.valid_payload),
             content_type='application/json'
         )
@@ -33,7 +33,7 @@ class CreateIndividualTest(APITestCase):
         """ POST a new individual with invalid data. """
 
         invalid_response = self.client.post(
-            reverse('individual-list'),
+            reverse('individuals-list'),
             data=json.dumps(self.invalid_payload),
             content_type='application/json'
         )
@@ -73,7 +73,7 @@ class UpdateIndividualTest(APITestCase):
 
         response = self.client.put(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
                 ),
             data=json.dumps(self.put_valid_payload),
@@ -86,7 +86,7 @@ class UpdateIndividualTest(APITestCase):
 
         response = self.client.put(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
                 ),
             data=json.dumps(self.invalid_payload),
@@ -106,7 +106,7 @@ class DeleteIndividualTest(APITestCase):
 
         response = self.client.delete(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
                 )
             )
@@ -117,7 +117,7 @@ class DeleteIndividualTest(APITestCase):
 
         response = self.client.delete(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': 'patient:what'}
                 )
             )
