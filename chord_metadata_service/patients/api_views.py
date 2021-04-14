@@ -26,7 +26,6 @@ class IndividualViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
                         PhenopacketsRenderer, IndividualCSVRenderer)
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filter_class = IndividualFilter
     ordering_fields = ["id"]
-    search_fields = ["sex", "ethnicity"]
