@@ -26,7 +26,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         label="Found phenotypic feature"
     )
     extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
-    # full-text search at api/search
+    # full-text search at api/individuals?search=
     search = django_filters.CharFilter(method="filter_search", label="Search")
 
     class Meta:
