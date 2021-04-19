@@ -20,7 +20,7 @@ jobs:
         uses: docker/build-push-action@v1
         with:
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_PAT }}
+          password: ${{ github.token }}
           registry: ghcr.io
           repository: candig/candig-katsu
           tag_with_ref: true
