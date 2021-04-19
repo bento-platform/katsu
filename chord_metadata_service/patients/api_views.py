@@ -30,10 +30,11 @@ class IndividualViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = Individual.objects.filter(phenopackets__table__ownership_record__dataset__title__in=allowed_datasets).prefetch_related(
-                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
-            ).order_by("id")
+            queryset = Individual.objects.\
+                filter(phenopackets__table__ownership_record__dataset__title__in=allowed_datasets).\
+                prefetch_related(*(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+                                 *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject")).\
+                order_by("id")
         else:
             queryset = Individual.objects.all().prefetch_related(
                 *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),

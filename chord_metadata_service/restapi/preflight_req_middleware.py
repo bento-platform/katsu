@@ -16,7 +16,8 @@ class PreflightRequestMiddleware:
 
         # Checks that the request is a valid CORS preflight request
         if request.method == 'OPTIONS' and 'HTTP_ACCESS_CONTROL_REQUEST_METHOD' in request.META and \
-            'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' in request.META and response.has_header('ACCESS-CONTROL-ALLOW-HEADERS'):
+            'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' in request.META and \
+                response.has_header('ACCESS-CONTROL-ALLOW-HEADERS'):
             access_control_request_headers = request.headers['ACCESS-CONTROL-REQUEST-HEADERS'].split(',')
             headers_to_add = []
             for header in access_control_request_headers:
@@ -28,6 +29,7 @@ class PreflightRequestMiddleware:
             if len(access_control_allow_headers) == 0:
                 response['ACCESS-CONTROL-ALLOW-HEADERS'] = ', '.join(headers_to_add)
             else:
-                response['ACCESS-CONTROL-ALLOW-HEADERS'] = access_control_allow_headers + ', ' + ', '.join(headers_to_add)
+                response['ACCESS-CONTROL-ALLOW-HEADERS'] = \
+                    access_control_allow_headers + ', ' + ', '.join(headers_to_add)
 
         return response

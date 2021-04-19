@@ -34,7 +34,8 @@ class AuthzMiddleware:
 
             if settings.CANDIG_OPA_URL:
                 try:
-                    response = requests.post(settings.CANDIG_OPA_URL + "/v1/data/ga4ghPassport/tokenControlledAccessREMS",
+                    response = requests.post(settings.CANDIG_OPA_URL +
+                                             "/v1/data/ga4ghPassport/tokenControlledAccessREMS",
                                              json=request_body)
                     response.raise_for_status()
                 except requests.exceptions.RequestException:
