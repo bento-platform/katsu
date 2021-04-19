@@ -1,0 +1,27 @@
+name: Docker
+
+on:
+  push:
+    branches:
+      - master
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to GitHub Container Registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_PAT }}
+          registry: ghcr.io
+          repository: candig/candig-katsu
+          tag_with_ref: true
+          dockerfile: Dockerfile
