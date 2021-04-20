@@ -1,7 +1,7 @@
 # Katsu Metadata Service
 
 [![Build Status](https://travis-ci.com/CanDIG/katsu.svg?branch=develop)](https://travis-ci.com/CanDIG/katsu)
-[![codecov](https://codecov.io/gh/bento-platform/katsu/branch/master/graph/badge.svg)](https://codecov.io/gh/bento-platform/katsu)
+[![codecov](https://codecov.io/gh/CanDIG/katsu/branch/master/graph/badge.svg)](https://codecov.io/gh/CanDIG/katsu)
 
 ## License
 
