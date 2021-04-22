@@ -14,7 +14,7 @@ import os
 import sys
 import logging
 
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
 from .. import __version__
@@ -60,6 +60,14 @@ if DEBUG:
 
 APPEND_SLASH = False
 
+# Bento misc. settings
+
+SERVICE_TEMP = os.environ.get("SERVICE_TEMP")
+
+#  - DRS URL - by default in Bento Singularity context, use internal NGINX DRS (to avoid auth hassles)
+NGINX_INTERNAL_SOCKET = quote(os.environ.get("NGINX_INTERNAL_SOCKET", "/chord/tmp/nginx_internal.sock"), safe="")
+DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/drs").strip().rstrip("/")
+
 # Candig-specific settings
 
 INSIDE_CANDIG = os.environ.get("INSIDE_CANDIG", "false").lower() == "true"
@@ -74,6 +82,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
 
     'chord_metadata_service.chord.apps.ChordConfig',
     'chord_metadata_service.experiments.apps.ExperimentsConfig',
@@ -178,6 +187,9 @@ DATABASES = {
 }
 
 FHIR_INDEX_NAME = 'fhir_metadata'
+
+# Set to True to run ES for FHIR index
+ELASTICSEARCH = False
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

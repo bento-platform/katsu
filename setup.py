@@ -16,12 +16,12 @@ setuptools.setup(
 
     python_requires=">=3.6",
     install_requires=[
-        "bento_lib[django]==0.11.0",
-        "Django>=2.2.17,<3.0",
+        "bento_lib[django]==2.1.0",
+        "Django>=2.2.20,<3.0",
         "django-cors-headers>=3.7,<3.8",
         "django-filter>=2.4,<3.0",
         "django-nose>=1.4,<2.0",
-        "djangorestframework>=3.11,<3.12",
+        "djangorestframework>=3.11.2,<3.12",
         "djangorestframework-camel-case>=1.2.0,<2.0",
         "django-rest-swagger==2.2.0",
         "elasticsearch==7.8.0",
@@ -36,6 +36,7 @@ setuptools.setup(
         "rdflib==4.2.2",
         "rdflib-jsonld==0.4.0",
         "requests>=2.25.1,<3.0",
+        "requests-unixsocket>=0.2.0,<0.3.0",
         "rfc3987==1.3.8",
         "uritemplate>=3.0,<4.0",
     ],
