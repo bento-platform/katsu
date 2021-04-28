@@ -27,4 +27,5 @@ jobs:
           registry: ghcr.io
           repository: candig/candig-katsu
           tag_with_ref: true
+          tags: latest
           dockerfile: Dockerfile
