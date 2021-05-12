@@ -40,6 +40,45 @@ class Experiment(models.Model, IndexableMixin):
                                  help_text=rec_help(d.EXPERIMENT, 'extra_properties'))
     biosample = models.ForeignKey(Biosample, on_delete=models.CASCADE, help_text=rec_help(d.EXPERIMENT, 'biosample'))
     table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+    # TODO
+    # experiment_results = models.ManyToManyField("ExperimentResult", blank=True)
+    #created = models.DateTimeField(auto_now=True)
+    #updated = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.id)
+
+
+class ExperimentResult(models.Model, IndexableMixin):
+    """ Class to represent information about analysis of sequencing data in a file format. """
+
+    FILE_FORMAT = (
+        ('UNKNOWN', 'UNKNOWN'),
+        ('SAM', 'SAM'),
+        ('BAM', 'BAM'),
+        ('CRAM', 'CRAM'),
+        ('VCF', 'VCF'),
+        ('BCF', 'BCF'),
+        ('GVCF', 'GVCF'),
+        ('BigWig', 'BigWig'),
+        ('BigBed', 'BigBed'),
+    )
+
+    # identifier assigned by lab (?)
+    identifier = CharField(max_length=200, blank=True, null=True,
+                           help_text=rec_help(d.EXPERIMENT_RESULT, 'identifier'))
+    description = CharField(max_length=500, blank=True, null=True,
+                            help_text=rec_help(d.EXPERIMENT_RESULT, 'description'))
+    filename = CharField(max_length=500, blank=True, null=True,
+                         help_text=rec_help(d.EXPERIMENT_RESULT, 'filename'))
+    file_format = CharField(max_length=50, choices=FILE_FORMAT, blank=True, null=True,
+                            help_text=rec_help(d.EXPERIMENT_RESULT, 'file_format'))
+    creation_date = CharField(max_length=500, blank=True, null=True,
+                              help_text=rec_help(d.EXPERIMENT_RESULT, 'creation_date'))
+    extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
+                                 help_text=rec_help(d.EXPERIMENT_RESULT, 'extra_properties'))
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.identifier)

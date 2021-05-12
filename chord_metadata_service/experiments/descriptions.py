@@ -38,3 +38,15 @@ EXPERIMENT = {
         **EXTRA_PROPERTIES
     }
 }
+
+EXPERIMENT_RESULT = {
+    "description": "Experiment result metadata.",
+    "properties": {
+        "identifier": "An arbitrary identifier for an experiment result.",
+        "description": "Description of an experiment result.",
+        "filename": "The name of the file containing the result.",
+        "file_format": "(Controlled Vocabulary) File format.",
+        "creation_date": "The date when the experiment result file was created.",
+        **EXTRA_PROPERTIES
+    }
+}
