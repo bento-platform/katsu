@@ -287,13 +287,14 @@ def phenopackets_overview(_request):
         individuals_ethnicity.update((ind.ethnicity,))
 
         # Generic Counter on all available extra properties
-        for key in ind.extra_properties:
-            # Declare new Counter() if it's not delcared
-            if key not in extra_prop_counter_dict:
-                extra_prop_counter_dict[key] = Counter()
+        if ind.extra_properties:
+            for key in ind.extra_properties:
+                # Declare new Counter() if it's not delcared
+                if key not in extra_prop_counter_dict:
+                    extra_prop_counter_dict[key] = Counter()
 
-            extra_prop_counter_dict[key].update((ind.extra_properties[key],))
-            individuals_extra_prop[key] = dict(extra_prop_counter_dict[key])
+                extra_prop_counter_dict[key].update((ind.extra_properties[key],))
+                individuals_extra_prop[key] = dict(extra_prop_counter_dict[key])
 
         if ind.age is not None:
             individuals_age.update((parse_individual_age(ind.age),))
