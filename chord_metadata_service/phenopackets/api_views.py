@@ -252,7 +252,7 @@ def phenopackets_overview(_request):
     get:
     Overview of all Phenopackets in the database
     """
-    phenopackets = m.Phenopacket.objects.all()
+    phenopackets = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH)
 
     diseases_counter = Counter()
     phenotypic_features_counter = Counter()
@@ -267,17 +267,33 @@ def phenopackets_overview(_request):
     individuals_k_sex = Counter()
     individuals_taxonomy = Counter()
     individuals_age = Counter()
+    individuals_ethnicity = Counter()
+    individuals_extra_prop = {}
+    extra_prop_counter_dict = {}
 
     def count_individual(ind):
+
         individuals_set.add(ind.id)
         individuals_sex.update((ind.sex,))
         individuals_k_sex.update((ind.karyotypic_sex,))
+        individuals_ethnicity.update((ind.ethnicity,))
+
+        # Generic Counter on all available extra properties
+        if ind.extra_properties:
+            for key in ind.extra_properties:
+                # Declare new Counter() if it's not delcared
+                if key not in extra_prop_counter_dict:
+                    extra_prop_counter_dict[key] = Counter()
+
+                extra_prop_counter_dict[key].update((ind.extra_properties[key],))
+                individuals_extra_prop[key] = dict(extra_prop_counter_dict[key])
+
         if ind.age is not None:
             individuals_age.update((parse_individual_age(ind.age),))
         if ind.taxonomy is not None:
             individuals_taxonomy.update((ind.taxonomy["label"],))
 
-    for p in phenopackets.prefetch_related("biosamples"):
+    for p in phenopackets:
         for b in p.biosamples.all():
             biosamples_set.add(b.id)
             biosamples_sampled_tissue.update((b.sampled_tissue["label"],))
@@ -321,6 +337,8 @@ def phenopackets_overview(_request):
                 "karyotypic_sex": {k: individuals_k_sex[k] for k in (s[0] for s in m.Individual.KARYOTYPIC_SEX)},
                 "taxonomy": dict(individuals_taxonomy),
                 "age": dict(individuals_age),
+                "ethnicity": dict(individuals_ethnicity),
+                "extra_properties": dict(individuals_extra_prop),
                 # TODO: how to count age: it can be represented by three different schemas
             },
             "phenotypic_features": {
