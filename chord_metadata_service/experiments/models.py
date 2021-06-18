@@ -7,7 +7,6 @@ from chord_metadata_service.restapi.validators import ontology_list_validator, k
 from chord_metadata_service.phenopackets.models import Biosample
 import chord_metadata_service.experiments.descriptions as d
 
-
 __all__ = ["Experiment"]
 
 
@@ -20,25 +19,46 @@ class Experiment(models.Model, IndexableMixin):
     """ Class to store Experiment information """
 
     id = CharField(primary_key=True, max_length=200, help_text=rec_help(d.EXPERIMENT, "id"))
+    # TYPE
     experiment_type = CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "experiment_type"))
     experiment_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
                                     help_text=rec_help(d.EXPERIMENT, "experiment_ontology"))
+    # STUDY TYPE
+    # ["Whole Genome Sequencing","Metagenomics","Transcriptome Analysis","Resequencing","Epigenetics",
+    # "Synthetic Genomics","Forensic or Paleo-genomics","Gene Regulation Study","Cancer Genomics",
+    # "Population Genomics","RNASeq","Pooled Clone Sequencing","Transcriptome Sequencing","Other"]
+    study_type = CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "study_type"))
+    # MOLECULE
     molecule = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.EXPERIMENT, "molecule"))
     molecule_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
                                   help_text=rec_help(d.EXPERIMENT, "molecule_ontology"))
+    # LIBRARY
     library_strategy = CharField(max_length=200, blank=True, null=True,
                                  help_text=rec_help(d.EXPERIMENT, "library_strategy"))
+    library_source = CharField(max_length=200, blank=True, null=True,
+                               help_text=rec_help(d.EXPERIMENT, "library_source"))
+    library_selection = CharField(max_length=200, blank=True, null=True,
+                                  help_text=rec_help(d.EXPERIMENT, "library_selection"))
+    # ????????? REMOVE OR NOT
+    library_layout = CharField(max_length=200, blank=True, null=True,
+                               help_text=rec_help(d.EXPERIMENT, "library_layout"))
     extraction_protocol = CharField(max_length=200, blank=True, null=True,
                                     help_text=rec_help(d.EXPERIMENT, "extraction_protocol"))
     reference_registry_id = CharField(max_length=200, blank=True, null=True,
                                       help_text=rec_help(d.EXPERIMENT, "reference_registry_id"))
     qc_flags = ArrayField(CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "qc_flags")),
                           blank=True, default=list)
+    # SAMPLE
+    biosample = models.ForeignKey(Biosample, on_delete=models.CASCADE, help_text=rec_help(d.EXPERIMENT, "biosample"))
+    table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+    # EXPERIMENT RESULT
+    experiment_results = models.ManyToManyField("ExperimentResult", blank=True)
+    # INTSRUMENT
+    instrument = models.ForeignKey("Instrument", on_delete=models.CASCADE,
+                                   help_text=rec_help(d.EXPERIMENT, "instrument"))
+    # EXTRA
     extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
                                  help_text=rec_help(d.EXPERIMENT, "extra_properties"))
-    biosample = models.ForeignKey(Biosample, on_delete=models.CASCADE, help_text=rec_help(d.EXPERIMENT, 'biosample'))
-    table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
-    experiment_results = models.ManyToManyField("ExperimentResult", blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -60,6 +80,11 @@ class ExperimentResult(models.Model, IndexableMixin):
         ('BigWig', 'BigWig'),
         ('BigBed', 'BigBed'),
     )
+    # TODO or Processed/Sequenced vs. Raw/Derived
+    DATA_OUTPUT_TYPE = (
+        ('Raw data', 'Raw data'),
+        ('Derived data', 'Derived data'),
+    )
 
     # identifier assigned by lab (?)
     identifier = CharField(max_length=200, blank=True, null=True,
@@ -70,6 +95,8 @@ class ExperimentResult(models.Model, IndexableMixin):
                          help_text=rec_help(d.EXPERIMENT_RESULT, "filename"))
     file_format = CharField(max_length=50, choices=FILE_FORMAT, blank=True, null=True,
                             help_text=rec_help(d.EXPERIMENT_RESULT, "file_format"))
+    data_output_type = CharField(max_length=50, choices=DATA_OUTPUT_TYPE, blank=True, null=True,
+                                 help_text=rec_help(d.EXPERIMENT_RESULT, "data_output_type"))
     creation_date = CharField(max_length=500, blank=True, null=True,
                               help_text=rec_help(d.EXPERIMENT_RESULT, "creation_date"))
     created_by = CharField(max_length=200, blank=True, null=True,
@@ -81,3 +108,21 @@ class ExperimentResult(models.Model, IndexableMixin):
 
     def __str__(self):
         return str(self.identifier)
+
+
+class Instrument(models.Model, IndexableMixin):
+    """ Class to represent information about analysis of sequencing data in a file format. """
+
+    platform = CharField(max_length=200, blank=True, null=True,
+                         help_text=rec_help(d.INSTRUMENT, "platform"))
+    description = CharField(max_length=500, blank=True, null=True,
+                            help_text=rec_help(d.INSTRUMENT, "description"))
+    model = CharField(max_length=500, blank=True, null=True,
+                      help_text=rec_help(d.INSTRUMENT, "model"))
+    extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
+                                 help_text=rec_help(d.INSTRUMENT, "extra_properties"))
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.id)
