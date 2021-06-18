@@ -19,15 +19,15 @@ class Experiment(models.Model, IndexableMixin):
     """ Class to store Experiment information """
 
     id = CharField(primary_key=True, max_length=200, help_text=rec_help(d.EXPERIMENT, "id"))
-    # TYPE
-    experiment_type = CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "experiment_type"))
-    experiment_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
-                                    help_text=rec_help(d.EXPERIMENT, "experiment_ontology"))
     # STUDY TYPE
     # ["Whole Genome Sequencing","Metagenomics","Transcriptome Analysis","Resequencing","Epigenetics",
     # "Synthetic Genomics","Forensic or Paleo-genomics","Gene Regulation Study","Cancer Genomics",
     # "Population Genomics","RNASeq","Pooled Clone Sequencing","Transcriptome Sequencing","Other"]
     study_type = CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "study_type"))
+    # TYPE
+    experiment_type = CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "experiment_type"))
+    experiment_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
+                                    help_text=rec_help(d.EXPERIMENT, "experiment_ontology"))
     # MOLECULE
     molecule = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.EXPERIMENT, "molecule"))
     molecule_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
