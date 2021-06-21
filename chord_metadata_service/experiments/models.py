@@ -52,7 +52,8 @@ class Experiment(models.Model, IndexableMixin):
     biosample = models.ForeignKey(Biosample, on_delete=models.CASCADE, help_text=rec_help(d.EXPERIMENT, "biosample"))
     table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
     # EXPERIMENT RESULT
-    experiment_results = models.ManyToManyField("ExperimentResult", blank=True)
+    experiment_results = models.ManyToManyField("ExperimentResult", blank=True,
+                                                help_text=rec_help(d.EXPERIMENT, "experiment_results"))
     # INTSRUMENT
     instrument = models.ForeignKey("Instrument", on_delete=models.CASCADE,
                                    help_text=rec_help(d.EXPERIMENT, "instrument"))

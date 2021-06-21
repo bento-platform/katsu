@@ -1,5 +1,7 @@
 # Portions of this text (c) International Human Epigenome Consortium (https://github.com/IHEC)
 # Licensed under the Apache License 2.0
+# Portions of this text (c) Machine-Actionable Metadata Models for MIRcat (https://github.com/FAIRsharing/mircat)
+# Licensed under the BSD 3-Clause License
 
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES, ontology_class
 
@@ -25,9 +27,12 @@ EXPERIMENT = {
         "library_strategy": "(Controlled Vocabulary) The assay used. These are defined within the SRA metadata "
                             "specifications with a controlled vocabulary (e.g. ‘Bisulfite-Seq’, ‘RNA-Seq’, ‘ChIP-Seq’)."
                             " For a complete list, see https://www.ebi.ac.uk/ena/submit/reads-library-strategy.",
-        "library_source": "",
-        "library_selection": "",
-        "library_layout": "",
+        "library_source": "The type of source material that is being sequenced. E.g. Genomic, Genomic Single Cell,"
+                          "Transcriptomic, Transcriptomic Single Cell, Metagenomic, Metatranscriptomic, Synthetic,"
+                          "Viral RNA, Other.",
+        "library_selection": "Method used to enrich the target in the sequence library preparatio. "
+                             "E.g. Random, PCR, Random PCR, RT-PCR, MF and other.",
+        "library_layout": "The library layout. E.g. Single, Paired.",
         "extraction_protocol": "The protocol used to isolate the extract material.",
 
         "reference_registry_id": "The IHEC EpiRR ID for this dataset, only for IHEC Reference Epigenome datasets. "
@@ -36,7 +41,7 @@ EXPERIMENT = {
             "description": "Any quality control observations can be noted here. This field can be omitted if empty",
             "items": "A quality control observation.",
         },
-        "experiment_results": "Related experiments files containing the analysis of sequencing data.",
+        "experiment_results": "Related files containing the analysis of sequencing data.",
         "instrument": "The instrument used to sequence the biological specimens.",
         "biosample": "Biosample on which this experiment was done.",
         **EXTRA_PROPERTIES
