@@ -15,16 +15,15 @@ class ExperimentTest(TestCase):
         p = Procedure.objects.create(**VALID_PROCEDURE_1)
         self.biosample = Biosample.objects.create(**valid_biosample_1(i, p))
         Experiment.objects.create(
-            id='experiment:1',
-            reference_registry_id='some_id',
-            qc_flags=['flag 1', 'flag 2'],
-            experiment_type='Chromatin Accessibility',
+            id="experiment:1",
+            reference_registry_id="some_id",
+            qc_flags=["flag 1", "flag 2"],
+            experiment_type="Chromatin Accessibility",
             experiment_ontology=[{"id": "ontology:1", "label": "Ontology term 1"}],
             molecule_ontology=[{"id": "ontology:1", "label": "Ontology term 1"}],
-            molecule='total RNA',
-            library_strategy='Bisulfite-Seq',
-            extraction_protocol='NGS',
-            file_location='files/test.bam',
+            molecule="total RNA",
+            library_strategy="Bisulfite-Seq",
+            extraction_protocol="NGS",
             extra_properties={"some_field": "value"},
             biosample=self.biosample
         )
@@ -39,8 +38,8 @@ class ExperimentTest(TestCase):
         self.assertRaises(
             serializers.ValidationError,
             self.create,
-            library_strategy='Bisulfite-Seq',
-            experiment_type='Chromatin Accessibility',
+            library_strategy="Bisulfite-Seq",
+            experiment_type="Chromatin Accessibility",
             experiment_ontology=["invalid_value"],
             biosample=self.biosample
         )
@@ -49,8 +48,8 @@ class ExperimentTest(TestCase):
         self.assertRaises(
             serializers.ValidationError,
             self.create,
-            library_strategy='Bisulfite-Seq',
-            experiment_type='Chromatin Accessibility',
+            library_strategy="Bisulfite-Seq",
+            experiment_type="Chromatin Accessibility",
             molecule_ontology=[{"id": "some_id"}],
             biosample=self.biosample
         )
@@ -59,8 +58,8 @@ class ExperimentTest(TestCase):
         self.assertRaises(
             serializers.ValidationError,
             self.create,
-            library_strategy='Bisulfite-Seq',
-            experiment_type='Chromatin Accessibility',
+            library_strategy="Bisulfite-Seq",
+            experiment_type="Chromatin Accessibility",
             extra_properties={"some_field": "value", "invalid_value": 42},
             biosample=self.biosample
         )
@@ -69,6 +68,6 @@ class ExperimentTest(TestCase):
         self.assertRaises(
             ValidationError,
             self.create,
-            library_strategy='Bisulfite-Seq',
-            experiment_type='Chromatin Accessibility'
+            library_strategy="Bisulfite-Seq",
+            experiment_type="Chromatin Accessibility"
         )
