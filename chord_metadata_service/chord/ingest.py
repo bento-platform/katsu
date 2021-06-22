@@ -215,6 +215,33 @@ def create_phenotypic_feature(pf):
     return pf_obj
 
 
+def create_experiment_result(er):
+    er_obj = em.ExperimentResult(
+        identifier=er.get("identifier"),
+        description=er.get("description"),
+        filename=er.get("filename"),
+        file_format=er.get("file_format"),
+        data_output_type=er.get("data_output_type"),
+        usage=er.get("usage"),
+        creation_date=er.get("creation_date"),
+        created_by=er.get("created_by"),
+        extra_properties=er.get("extra_properties", {})
+    )
+    er_obj.save()
+    return er_obj
+
+
+def create_instrument(instrument):
+    instrument_obj = em.Instrument(
+        platform=instrument.get("platform"),
+        description=instrument.get("description"),
+        model=instrument.get("model"),
+        extra_properties=instrument.get("extra_properties", {})
+    )
+    instrument_obj.save()
+    return instrument_obj
+
+
 def _query_and_check_nulls(obj: dict, key: str, transform: Callable = lambda x: x):
     value = obj.get(key)
     return {f"{key}__isnull": True} if value is None else {key: transform(value)}
@@ -244,37 +271,51 @@ def ingest_experiment(experiment_data, table_id) -> em.Experiment:
     """Ingests a single experiment."""
 
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
-
-    reference_registry_id = experiment_data.get("reference_registry_id")
-    qc_flags = experiment_data.get("qc_flags", [])
+    study_type = experiment_data.get("study_type")
     experiment_type = experiment_data["experiment_type"]
     experiment_ontology = experiment_data.get("experiment_ontology", [])
-    molecule_ontology = experiment_data.get("molecule_ontology", [])
     molecule = experiment_data.get("molecule")
+    molecule_ontology = experiment_data.get("molecule_ontology", [])
     library_strategy = experiment_data.get("library_strategy")
+    library_source = experiment_data.get("library_source")
+    library_selection = experiment_data.get("library_selection")
+    library_layout = experiment_data.get("library_selection")
     extraction_protocol = experiment_data.get("extraction_protocol")
-    file_location = experiment_data.get("file_location")
-    extra_properties = experiment_data.get("extra_properties", {})
+    reference_registry_id = experiment_data.get("reference_registry_id")
+    qc_flags = experiment_data.get("qc_flags", [])
     biosample = experiment_data.get("biosample")
-
+    experiment_results = experiment_data.get("experiment_results", [])
+    instrument = experiment_data.get("instrument", {})
+    extra_properties = experiment_data.get("extra_properties", {})
+    # get existing biosample id
     if biosample is not None:
         biosample = pm.Biosample.objects.get(id=biosample)  # TODO: Handle error nicer
-
+    # create related experiment results
+    experiment_results_db = [create_experiment_result(er) for er in experiment_results]
+    # create related instrument
+    instrument_db = create_instrument(instrument)
+    # create new experiment
     new_experiment = em.Experiment.objects.create(
         id=new_experiment_id,
-        reference_registry_id=reference_registry_id,
-        qc_flags=qc_flags,
+        study_type=study_type,
         experiment_type=experiment_type,
         experiment_ontology=experiment_ontology,
-        molecule_ontology=molecule_ontology,
         molecule=molecule,
+        molecule_ontology=molecule_ontology,
         library_strategy=library_strategy,
+        library_source=library_source,
+        library_selection=library_selection,
+        library_layout=library_layout,
         extraction_protocol=extraction_protocol,
-        file_location=file_location,
-        extra_properties=extra_properties,
+        reference_registry_id=reference_registry_id,
+        qc_flags=qc_flags,
         biosample=biosample,
+        instrument=instrument_db,
+        extra_properties=extra_properties,
         table=Table.objects.get(ownership_record_id=table_id, data_type=DATA_TYPE_EXPERIMENT)
     )
+    # create m2m relationships
+    new_experiment.experiment_results.set(experiment_results_db)
 
     return new_experiment
 
