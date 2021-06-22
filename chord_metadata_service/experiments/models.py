@@ -7,7 +7,7 @@ from chord_metadata_service.restapi.validators import ontology_list_validator, k
 from chord_metadata_service.phenopackets.models import Biosample
 import chord_metadata_service.experiments.descriptions as d
 
-__all__ = ["Experiment"]
+__all__ = ["Experiment", "ExperimentResult", "Instrument"]
 
 
 # The experiment class here is primarily designed for *genomic* experiments - thus the need for a biosample ID. If, in
@@ -23,7 +23,7 @@ class Experiment(models.Model, IndexableMixin):
     # ["Whole Genome Sequencing","Metagenomics","Transcriptome Analysis","Resequencing","Epigenetics",
     # "Synthetic Genomics","Forensic or Paleo-genomics","Gene Regulation Study","Cancer Genomics",
     # "Population Genomics","RNASeq","Pooled Clone Sequencing","Transcriptome Sequencing","Other"]
-    study_type = CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "study_type"))
+    study_type = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.EXPERIMENT, "study_type"))
     # TYPE
     experiment_type = CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "experiment_type"))
     experiment_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
@@ -55,7 +55,7 @@ class Experiment(models.Model, IndexableMixin):
     experiment_results = models.ManyToManyField("ExperimentResult", blank=True,
                                                 help_text=rec_help(d.EXPERIMENT, "experiment_results"))
     # INTSRUMENT
-    instrument = models.ForeignKey("Instrument", on_delete=models.CASCADE,
+    instrument = models.ForeignKey("Instrument", blank=True, null=True, on_delete=models.CASCADE,
                                    help_text=rec_help(d.EXPERIMENT, "instrument"))
     # EXTRA
     extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
