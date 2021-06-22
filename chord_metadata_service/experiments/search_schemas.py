@@ -48,9 +48,6 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
         "extraction_protocol": {
             "search": search_optional_str(9),
         },
-        "file_location": {
-            "search": search_optional_str(10),
-        },
     },
     "search": {
         "database": {
