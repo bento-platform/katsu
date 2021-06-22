@@ -71,21 +71,37 @@ class ExperimentResult(models.Model, IndexableMixin):
     """ Class to represent information about analysis of sequencing data in a file format. """
 
     FILE_FORMAT = (
-        ('UNKNOWN', 'UNKNOWN'),
-        ('SAM', 'SAM'),
-        ('BAM', 'BAM'),
-        ('CRAM', 'CRAM'),
-        ('VCF', 'VCF'),
-        ('BCF', 'BCF'),
-        ('GVCF', 'GVCF'),
-        ('BigWig', 'BigWig'),
-        ('BigBed', 'BigBed'),
+        ("SAM", "SAM"),
+        ("BAM", "BAM"),
+        ("CRAM", "CRAM"),
+        ("BAI", "BAI"),
+        ("CRAI", "CRAI"),
+        ("VCF", "VCF"),
+        ("BCF", "BCF"),
+        ("GVCF", "GVCF"),
+        ("BigWig", "BigWig"),
+        ("BigBed", "BigBed"),
+        ("FASTA", "FASTA"),
+        ("FASTQ", "FASTQ"),
+        ("TAB", "TAB"),
+        ("SRA", "SRA"),
+        ("SRF", "SRF"),
+        ("SFF", "SFF"),
+        ("GFF", "GFF"),
+        ("TABIX", "TABIX"),
+        ("UNKNOWN", "UNKNOWN"),
+        ("OTHER", "OTHER"),
     )
     # TODO or Processed/Sequenced vs. Raw/Derived
     DATA_OUTPUT_TYPE = (
-        ('Raw data', 'Raw data'),
-        ('Derived data', 'Derived data'),
+        ("Raw data", "Raw data"),
+        ("Derived data", "Derived data"),
     )
+    # Data usage
+    # USAGE = (
+    #     ("Visualize", "Visualize"),
+    #     ("Download", "Download"),
+    # )
 
     # identifier assigned by lab (?)
     identifier = CharField(max_length=200, blank=True, null=True,
@@ -98,6 +114,8 @@ class ExperimentResult(models.Model, IndexableMixin):
                             help_text=rec_help(d.EXPERIMENT_RESULT, "file_format"))
     data_output_type = CharField(max_length=50, choices=DATA_OUTPUT_TYPE, blank=True, null=True,
                                  help_text=rec_help(d.EXPERIMENT_RESULT, "data_output_type"))
+    usage = CharField(max_length=200, blank=True, null=True,
+                      help_text=rec_help(d.EXPERIMENT_RESULT, "usage"))
     creation_date = CharField(max_length=500, blank=True, null=True,
                               help_text=rec_help(d.EXPERIMENT_RESULT, "creation_date"))
     created_by = CharField(max_length=200, blank=True, null=True,
@@ -112,14 +130,11 @@ class ExperimentResult(models.Model, IndexableMixin):
 
 
 class Instrument(models.Model, IndexableMixin):
-    """ Class to represent information about analysis of sequencing data in a file format. """
+    """ Class to represent information about instrument used to perform a sequencing experiment. """
 
-    platform = CharField(max_length=200, blank=True, null=True,
-                         help_text=rec_help(d.INSTRUMENT, "platform"))
-    description = CharField(max_length=500, blank=True, null=True,
-                            help_text=rec_help(d.INSTRUMENT, "description"))
-    model = CharField(max_length=500, blank=True, null=True,
-                      help_text=rec_help(d.INSTRUMENT, "model"))
+    platform = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "platform"))
+    description = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "description"))
+    model = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "model"))
     extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
                                  help_text=rec_help(d.INSTRUMENT, "extra_properties"))
     created = models.DateTimeField(auto_now_add=True)
