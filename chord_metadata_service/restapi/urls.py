@@ -34,7 +34,8 @@ router.register(r'diseases', phenopacket_views.DiseaseViewSet, basename="disease
 router.register(r'metadata', phenopacket_views.MetaDataViewSet, basename="metadata")
 router.register(r'biosamples', phenopacket_views.BiosampleViewSet, basename="biosamples")
 router.register(r'phenopackets', phenopacket_views.PhenopacketViewSet, basename="phenopackets")
-router.register(r'genomicinterpretations', phenopacket_views.GenomicInterpretationViewSet, basename="genomicinterpretations")
+router.register(r'genomicinterpretations', phenopacket_views.GenomicInterpretationViewSet,
+                basename="genomicinterpretations")
 router.register(r'diagnoses', phenopacket_views.DiagnosisViewSet, basename="diagnoses")
 router.register(r'interpretations', phenopacket_views.InterpretationViewSet, basename="interpretations")
 
