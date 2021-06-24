@@ -83,9 +83,9 @@ class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
             queryset = m.HtsFile.objects.filter(phenopacket__table__ownership_record__dataset__title=allowed_datasets)\
-                .order_by("id")
+                .order_by("uri")
         else:
-            queryset = m.HtsFile.objects.all().order_by("id")
+            queryset = m.HtsFile.objects.all().order_by("uri")
         return queryset
 
 
