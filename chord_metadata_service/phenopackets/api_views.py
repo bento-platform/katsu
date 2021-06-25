@@ -40,7 +40,7 @@ class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
             queryset = m.PhenotypicFeature.objects.filter(
-                phenopacket__table__ownership_record__dataset__title=allowed_datasets)\
+                phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("id")
         else:
             queryset = m.PhenotypicFeature.objects.all().order_by("id")
@@ -64,7 +64,7 @@ class ProcedureViewSet(ExtendedPhenopacketsModelViewSet):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
             queryset = m.Procedure.objects.filter(
-                biosample__phenopacket__table__ownership_record__dataset__title=allowed_datasets)\
+                biosample__phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("id")
         else:
             queryset = m.Procedure.objects.all().order_by("id")
@@ -86,7 +86,7 @@ class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = m.HtsFile.objects.filter(phenopacket__table__ownership_record__dataset__title=allowed_datasets)\
+            queryset = m.HtsFile.objects.filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("uri")
         else:
             queryset = m.HtsFile.objects.all().order_by("uri")
@@ -109,7 +109,7 @@ class GeneViewSet(ExtendedPhenopacketsModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = m.Gene.objects.filter(phenopacket__table__ownership_record__dataset__title=allowed_datasets)\
+            queryset = m.Gene.objects.filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("id")
         else:
             queryset = m.Gene.objects.all().order_by("id")
@@ -132,7 +132,7 @@ class VariantViewSet(ExtendedPhenopacketsModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = m.Variant.objects.filter(phenopacket__table__ownership_record__dataset__title=allowed_datasets)\
+            queryset = m.Variant.objects.filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("id")
         else:
             queryset = m.Variant.objects.all().order_by("id")
@@ -155,7 +155,7 @@ class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = m.Disease.objects.filter(phenopacket__table__ownership_record__dataset__title=allowed_datasets)\
+            queryset = m.Disease.objects.filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("id")
         else:
             queryset = m.Disease.objects.all().order_by("id")
@@ -183,7 +183,7 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = m.MetaData.objects.filter(phenopacket__table__ownership_record__dataset__title=allowed_datasets)\
+            queryset = m.MetaData.objects.filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .prefetch_related(*META_DATA_PREFETCH).order_by("id")
         else:
             queryset = m.MetaData.objects.all().prefetch_related(*META_DATA_PREFETCH).order_by("id")
@@ -214,7 +214,7 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
             queryset = m.Biosample.objects.filter(
-                phenopacket__table__ownership_record__dataset__title=allowed_datasets).\
+                phenopacket__table__ownership_record__dataset__title__in=allowed_datasets).\
                 prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
         else:
             queryset = m.Biosample.objects.all().prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
@@ -273,7 +273,7 @@ class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
             queryset = m.GenomicInterpretation.objects.filter(
-                gene__phenopacket__table__ownership_record__dataset__title=allowed_datasets)\
+                gene__phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("id")
         else:
             queryset = m.GenomicInterpretation.objects.all().order_by("id")
@@ -297,7 +297,7 @@ class DiagnosisViewSet(PhenopacketsModelViewSet):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
             queryset = m.Diagnosis.objects.filter(
-                disease__phenopacket__table__ownership_record__dataset__title=allowed_datasets)\
+                disease__phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("id")
         else:
             queryset = m.Diagnosis.objects.all().order_by("id")
@@ -321,7 +321,7 @@ class InterpretationViewSet(PhenopacketsModelViewSet):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
             queryset = m.Interpretation.objects.filter(
-                phenopacket__table__ownership_record__dataset__title=allowed_datasets)\
+                phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("id")
         else:
             queryset = m.Interpretation.objects.all().order_by("id")
@@ -345,7 +345,13 @@ def phenopackets_overview(_request):
     get:
     Overview of all Phenopackets in the database
     """
-    phenopackets = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH)
+    if hasattr(self.request, "allowed_datasets_for_counts"):
+        allowed_datasets_for_counts = self.request.allowed_datasets_for_counts
+        phenopackets = m.Phenopacket.objects.filter(
+                table__ownership_record__dataset__title__in=allowed_datasets)\
+                .prefetch_related(*PHENOPACKET_PREFETCH)
+    else:
+        phenopackets = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH)
 
     diseases_counter = Counter()
     phenotypic_features_counter = Counter()
