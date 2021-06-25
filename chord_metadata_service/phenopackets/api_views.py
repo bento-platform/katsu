@@ -86,7 +86,8 @@ class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = m.HtsFile.objects.filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
+            queryset = m.HtsFile.objects\
+                .filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("uri")
         else:
             queryset = m.HtsFile.objects.all().order_by("uri")
@@ -132,7 +133,8 @@ class VariantViewSet(ExtendedPhenopacketsModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = m.Variant.objects.filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
+            queryset = m.Variant.objects\
+                .filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("id")
         else:
             queryset = m.Variant.objects.all().order_by("id")
@@ -155,7 +157,8 @@ class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = m.Disease.objects.filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
+            queryset = m.Disease.objects\
+                .filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("id")
         else:
             queryset = m.Disease.objects.all().order_by("id")
@@ -183,7 +186,8 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = m.MetaData.objects.filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
+            queryset = m.MetaData.objects\
+                .filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .prefetch_related(*META_DATA_PREFETCH).order_by("id")
         else:
             queryset = m.MetaData.objects.all().prefetch_related(*META_DATA_PREFETCH).order_by("id")
@@ -347,9 +351,9 @@ def phenopackets_overview(_request):
     """
     if hasattr(_request, "allowed_datasets_for_counts"):
         allowed_datasets_for_counts = _request.allowed_datasets_for_counts
-        phenopackets = m.Phenopacket.objects.filter(
-                table__ownership_record__dataset__title__in=allowed_datasets)\
-                .prefetch_related(*PHENOPACKET_PREFETCH)
+        phenopackets = m.Phenopacket.objects\
+            .filter(table__ownership_record__dataset__title__in=allowed_datasets_for_counts)\
+            .prefetch_related(*PHENOPACKET_PREFETCH)
     else:
         phenopackets = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH)
 
