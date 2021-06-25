@@ -345,8 +345,8 @@ def phenopackets_overview(_request):
     get:
     Overview of all Phenopackets in the database
     """
-    if hasattr(self.request, "allowed_datasets_for_counts"):
-        allowed_datasets_for_counts = self.request.allowed_datasets_for_counts
+    if hasattr(_request, "allowed_datasets_for_counts"):
+        allowed_datasets_for_counts = _request.allowed_datasets_for_counts
         phenopackets = m.Phenopacket.objects.filter(
                 table__ownership_record__dataset__title__in=allowed_datasets)\
                 .prefetch_related(*PHENOPACKET_PREFETCH)
