@@ -168,4 +168,3 @@ class InstrumentTest(TestCase):
             model="Illumina HiScanSQ",
             extra_properties={"date": 2021}
         )
-
