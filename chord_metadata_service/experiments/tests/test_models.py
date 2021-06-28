@@ -138,3 +138,34 @@ class ExperimentResultTest(TestCase):
             extra_properties={"target": "None"}
         )
 
+
+class InstrumentTest(TestCase):
+    """ Test module for ExperimentResult model """
+
+    def setUp(self):
+        Instrument.objects.create(
+            platform="Illumina",
+            description="Test description 1",
+            model="Illumina HiSeq 4000",
+            extra_properties={"date": "2021-06-21"}
+        )
+
+    @staticmethod
+    def create(**kwargs):
+        e = Instrument(**kwargs)
+        e.full_clean()
+        e.save()
+
+    def test_validation(self):
+        self.assertEqual(Instrument.objects.count(), 1)
+        # Invalid CV for extra_properties
+        # serializers.ValidationError("Not valid JSON schema for this field.")
+        self.assertRaises(
+            serializers.ValidationError,
+            self.create,
+            platform="Illumina",
+            description="Test description 2",
+            model="Illumina HiScanSQ",
+            extra_properties={"date": 2021}
+        )
+
