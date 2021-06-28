@@ -52,7 +52,10 @@ VALID_META_DATA_2 = {
 VALID_INDIVIDUAL_1 = {
     "id": "patient:1",
     "date_of_birth": "1967-01-01",
-    "sex": "MALE"
+    "sex": "MALE",
+    "extra_properties": {
+        "education": "Bachelor's Degree"
+    }
 }
 
 VALID_INDIVIDUAL_2 = {
