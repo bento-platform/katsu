@@ -50,6 +50,7 @@ WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
+WORKFLOW_MCODE_JSON = "mcode_json"
 
 METADATA_WORKFLOWS = {
     "ingestion": {
@@ -187,7 +188,29 @@ METADATA_WORKFLOWS = {
                     "value": "{json_document}"
                 }
             ]
-        }
+        },
+        WORKFLOW_MCODE_JSON: {
+            "name": "MCODE Resources JSON",
+            "description": "This ingestion workflow will validate and import the Bento metadata service's "
+                           "internal mCODE-based JSON document",
+            "data_type": DATA_TYPE_MCODEPACKET,
+            "file": "mcode_json.wdl",
+            "inputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "required": True,
+                    "extensions": [".json"]
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "value": "{json_document}"
+                }
+            ]
+        },
     },
     "analysis": {}
 }
@@ -213,6 +236,34 @@ def create_phenotypic_feature(pf):
 
     pf_obj.save()
     return pf_obj
+
+
+def create_experiment_result(er):
+    er_obj = em.ExperimentResult(
+        identifier=er.get("identifier"),
+        description=er.get("description"),
+        filename=er.get("filename"),
+        file_format=er.get("file_format"),
+        data_output_type=er.get("data_output_type"),
+        usage=er.get("usage"),
+        creation_date=er.get("creation_date"),
+        created_by=er.get("created_by"),
+        extra_properties=er.get("extra_properties", {})
+    )
+    er_obj.save()
+    return er_obj
+
+
+def create_instrument(instrument):
+    instrument_obj, _ = em.Instrument.objects.get_or_create(
+        identifier=instrument.get("identifier", str(uuid.uuid4()))
+    )
+    instrument_obj.platform = instrument.get("platform")
+    instrument_obj.description = instrument.get("description")
+    instrument_obj.model = instrument.get("model")
+    instrument_obj.extra_properties = instrument.get("extra_properties", {})
+    instrument_obj.save()
+    return instrument_obj
 
 
 def _query_and_check_nulls(obj: dict, key: str, transform: Callable = lambda x: x):
@@ -244,37 +295,51 @@ def ingest_experiment(experiment_data, table_id) -> em.Experiment:
     """Ingests a single experiment."""
 
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
-
-    reference_registry_id = experiment_data.get("reference_registry_id")
-    qc_flags = experiment_data.get("qc_flags", [])
+    study_type = experiment_data.get("study_type")
     experiment_type = experiment_data["experiment_type"]
     experiment_ontology = experiment_data.get("experiment_ontology", [])
-    molecule_ontology = experiment_data.get("molecule_ontology", [])
     molecule = experiment_data.get("molecule")
+    molecule_ontology = experiment_data.get("molecule_ontology", [])
     library_strategy = experiment_data.get("library_strategy")
+    library_source = experiment_data.get("library_source")
+    library_selection = experiment_data.get("library_selection")
+    library_layout = experiment_data.get("library_selection")
     extraction_protocol = experiment_data.get("extraction_protocol")
-    file_location = experiment_data.get("file_location")
-    extra_properties = experiment_data.get("extra_properties", {})
+    reference_registry_id = experiment_data.get("reference_registry_id")
+    qc_flags = experiment_data.get("qc_flags", [])
     biosample = experiment_data.get("biosample")
-
+    experiment_results = experiment_data.get("experiment_results", [])
+    instrument = experiment_data.get("instrument", {})
+    extra_properties = experiment_data.get("extra_properties", {})
+    # get existing biosample id
     if biosample is not None:
         biosample = pm.Biosample.objects.get(id=biosample)  # TODO: Handle error nicer
-
+    # create related experiment results
+    experiment_results_db = [create_experiment_result(er) for er in experiment_results]
+    # create related instrument
+    instrument_db = create_instrument(instrument)
+    # create new experiment
     new_experiment = em.Experiment.objects.create(
         id=new_experiment_id,
-        reference_registry_id=reference_registry_id,
-        qc_flags=qc_flags,
+        study_type=study_type,
         experiment_type=experiment_type,
         experiment_ontology=experiment_ontology,
-        molecule_ontology=molecule_ontology,
         molecule=molecule,
+        molecule_ontology=molecule_ontology,
         library_strategy=library_strategy,
+        library_source=library_source,
+        library_selection=library_selection,
+        library_layout=library_layout,
         extraction_protocol=extraction_protocol,
-        file_location=file_location,
-        extra_properties=extra_properties,
+        reference_registry_id=reference_registry_id,
+        qc_flags=qc_flags,
         biosample=biosample,
+        instrument=instrument_db,
+        extra_properties=extra_properties,
         table=Table.objects.get(ownership_record_id=table_id, data_type=DATA_TYPE_EXPERIMENT)
     )
+    # create m2m relationships
+    new_experiment.experiment_results.set(experiment_results_db)
 
     return new_experiment
 
@@ -583,9 +648,22 @@ def ingest_mcode_fhir_workflow(workflow_outputs, table_id):
             ingest_mcodepacket(mcodepacket, table_id)
 
 
+def ingest_mcode_workflow(workflow_outputs, table_id):
+    with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
+        logger.info(f"Attempting ingestion of MCODE from path: {json_doc_path}")
+        with open(json_doc_path, "r") as jf:
+            json_data = json.load(jf)
+            if isinstance(json_data, list):
+                for mcodepacket in json_data:
+                    ingest_mcodepacket(mcodepacket, table_id)
+            else:
+                ingest_mcodepacket(json_data, table_id)
+
+
 WORKFLOW_INGEST_FUNCTION_MAP = {
     WORKFLOW_EXPERIMENTS_JSON: ingest_experiments_workflow,
     WORKFLOW_PHENOPACKETS_JSON: ingest_phenopacket_workflow,
     WORKFLOW_FHIR_JSON: ingest_fhir_workflow,
     WORKFLOW_MCODE_FHIR_JSON: ingest_mcode_fhir_workflow,
+    WORKFLOW_MCODE_JSON: ingest_mcode_workflow,
 }

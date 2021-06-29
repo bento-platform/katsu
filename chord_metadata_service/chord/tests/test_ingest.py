@@ -3,18 +3,26 @@ import uuid
 from django.test import TestCase
 from dateutil.parser import isoparse
 
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 # noinspection PyProtectedMember
 from chord_metadata_service.chord.ingest import (
     WORKFLOW_PHENOPACKETS_JSON,
     create_phenotypic_feature,
     WORKFLOW_INGEST_FUNCTION_MAP,
+    WORKFLOW_EXPERIMENTS_JSON
 )
 from chord_metadata_service.phenopackets.models import PhenotypicFeature, Phenopacket
+from chord_metadata_service.resources.models import Resource
+from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
 
 from .constants import VALID_DATA_USE_1
-from .example_ingest import EXAMPLE_INGEST_PHENOPACKET, EXAMPLE_INGEST_OUTPUTS
+from .example_ingest import (
+    EXAMPLE_INGEST_PHENOPACKET,
+    EXAMPLE_INGEST_OUTPUTS,
+    EXAMPLE_INGEST_EXPERIMENT,
+    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT
+)
 
 
 class IngestTest(TestCase):
@@ -23,9 +31,15 @@ class IngestTest(TestCase):
         self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
                                         project=p)
         # TODO: Real service ID
+        # table for phenopackets
         to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
                                            dataset=self.d)
         self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
+
+        # table for experiments metadata
+        to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
+                                               service_artifact="experiments", dataset=self.d)
+        self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
 
     def test_create_pf(self):
         p1 = create_phenotypic_feature({
@@ -75,3 +89,24 @@ class IngestTest(TestCase):
         p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
         self.assertNotEqual(p.id, p2.id)
         # TODO: More
+
+    def test_ingesting_experiments_json(self):
+        # ingest phenopackets data in order to match to biosample ids
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
+        # ingest list of experiments
+        experiments = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.t_exp.identifier
+        )
+        # experiments
+        self.assertEqual(len(experiments), Experiment.objects.all().count())
+        self.assertEqual(experiments[0].id, EXAMPLE_INGEST_EXPERIMENT["experiments"][0]["id"])
+        self.assertEqual(experiments[0].biosample.id, EXAMPLE_INGEST_EXPERIMENT["experiments"][0]["biosample"])
+        self.assertEqual(experiments[0].experiment_type, EXAMPLE_INGEST_EXPERIMENT["experiments"][0]["experiment_type"])
+        # experiment results
+        self.assertEqual(experiments[0].experiment_results.count(), ExperimentResult.objects.all().count())
+        # instrument
+        self.assertEqual(Instrument.objects.all().count(), 1)
+        # resources for experiments
+        # check that experiments resource is in database
+        self.assertIn(EXAMPLE_INGEST_EXPERIMENT["resources"][0]["id"], [v["id"] for v in Resource.objects.values("id")])
