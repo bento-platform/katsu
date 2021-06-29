@@ -50,6 +50,7 @@ WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
+WORKFLOW_MCODE_JSON = "mcode_json"
 
 METADATA_WORKFLOWS = {
     "ingestion": {
@@ -187,7 +188,29 @@ METADATA_WORKFLOWS = {
                     "value": "{json_document}"
                 }
             ]
-        }
+        },
+        WORKFLOW_MCODE_JSON: {
+            "name": "MCODE Resources JSON",
+            "description": "This ingestion workflow will validate and import the Bento metadata service's "
+                           "internal mCODE-based JSON document",
+            "data_type": DATA_TYPE_MCODEPACKET,
+            "file": "mcode_json.wdl",
+            "inputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "required": True,
+                    "extensions": [".json"]
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "value": "{json_document}"
+                }
+            ]
+        },
     },
     "analysis": {}
 }
@@ -625,9 +648,22 @@ def ingest_mcode_fhir_workflow(workflow_outputs, table_id):
             ingest_mcodepacket(mcodepacket, table_id)
 
 
+def ingest_mcode_workflow(workflow_outputs, table_id):
+    with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
+        logger.info(f"Attempting ingestion of MCODE from path: {json_doc_path}")
+        with open(json_doc_path, "r") as jf:
+            json_data = json.load(jf)
+            if isinstance(json_data, list):
+                for mcodepacket in json_data:
+                    ingest_mcodepacket(mcodepacket, table_id)
+            else:
+                ingest_mcodepacket(json_data, table_id)
+
+
 WORKFLOW_INGEST_FUNCTION_MAP = {
     WORKFLOW_EXPERIMENTS_JSON: ingest_experiments_workflow,
     WORKFLOW_PHENOPACKETS_JSON: ingest_phenopacket_workflow,
     WORKFLOW_FHIR_JSON: ingest_fhir_workflow,
     WORKFLOW_MCODE_FHIR_JSON: ingest_mcode_fhir_workflow,
+    WORKFLOW_MCODE_JSON: ingest_mcode_workflow,
 }
