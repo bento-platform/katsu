@@ -144,6 +144,7 @@ class InstrumentTest(TestCase):
 
     def setUp(self):
         Instrument.objects.create(
+            identifier="instrument:01",
             platform="Illumina",
             description="Test description 1",
             model="Illumina HiSeq 4000",

@@ -232,12 +232,13 @@ def create_experiment_result(er):
 
 
 def create_instrument(instrument):
-    instrument_obj = em.Instrument(
-        platform=instrument.get("platform"),
-        description=instrument.get("description"),
-        model=instrument.get("model"),
-        extra_properties=instrument.get("extra_properties", {})
+    instrument_obj, _ = em.Instrument.objects.get_or_create(
+        identifier=instrument.get("identifier", str(uuid.uuid4()))
     )
+    instrument_obj.platform = instrument.get("platform")
+    instrument_obj.description = instrument.get("description")
+    instrument_obj.model = instrument.get("model")
+    instrument_obj.extra_properties = instrument.get("extra_properties", {})
     instrument_obj.save()
     return instrument_obj
 
