@@ -65,6 +65,9 @@ INSTRUMENT_SCHEMA = describe_schema({
     "description": "Schema for describing an instrument used for a sequencing experiment.",
     "type": "object",
     "properties": {
+        "identifier": {
+            "type": "string"
+        },
         "platform": {
             "type": "string"
         },

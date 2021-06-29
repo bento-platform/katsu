@@ -69,6 +69,7 @@ EXPERIMENT_RESULT = {
 INSTRUMENT = {
     "description": "Metadata about the instrument used to sequence the biological specimens.",
     "properties": {
+        "identifier": "An arbitrary identifier for an instrument.",
         "platform": "The instrument name. E.g. Illumina, Oxford Nanopore.",
         "description": "Description of the instrument.",
         "model": "The specific model of the instrument.",
