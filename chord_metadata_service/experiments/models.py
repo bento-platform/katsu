@@ -39,7 +39,6 @@ class Experiment(models.Model, IndexableMixin):
                                help_text=rec_help(d.EXPERIMENT, "library_source"))
     library_selection = CharField(max_length=200, blank=True, null=True,
                                   help_text=rec_help(d.EXPERIMENT, "library_selection"))
-    # ????????? REMOVE OR NOT
     library_layout = CharField(max_length=200, blank=True, null=True,
                                help_text=rec_help(d.EXPERIMENT, "library_layout"))
     extraction_protocol = CharField(max_length=200, blank=True, null=True,
@@ -103,7 +102,7 @@ class ExperimentResult(models.Model, IndexableMixin):
     #     ("Download", "Download"),
     # )
 
-    # identifier assigned by lab (?)
+    # TODO identifier assigned by lab (?)
     identifier = CharField(max_length=200, blank=True, null=True,
                            help_text=rec_help(d.EXPERIMENT_RESULT, "identifier"))
     description = CharField(max_length=500, blank=True, null=True,
@@ -132,6 +131,9 @@ class ExperimentResult(models.Model, IndexableMixin):
 class Instrument(models.Model, IndexableMixin):
     """ Class to represent information about instrument used to perform a sequencing experiment. """
 
+    # TODO identifier assigned by lab (?)
+    identifier = CharField(max_length=200, blank=True, null=True,
+                           help_text=rec_help(d.EXPERIMENT_RESULT, "identifier"))
     platform = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "platform"))
     description = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "description"))
     model = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "model"))
