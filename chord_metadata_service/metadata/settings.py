@@ -63,6 +63,10 @@ APPEND_SLASH = False
 # Candig-specific settings
 
 CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL")
+ROOT_CA = os.getenv("ROOT_CA", None)
+CANDIG_OPA_VERSION = os.getenv("CANDIG_OPA_VERSION", "dycons")
+PERMISSIONS_SECRET = os.getenv("PERMISSIONS_SECRET",
+                               "my-secret-beacon-token")
 
 # Application definition
 
