@@ -11,7 +11,8 @@ REQUEST_PATHS_TO_AUTHZ_PATHS = {"/api/phenopackets": "api/phenopackets",
 AUTHZ_PATHS = ["^/api/phenopackets/?.*", "^/api/datasets/?.*", "^/api/diagnoses/?.*", "^/api/diseases/?.*",
                "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/htsfiles/?.*", "^/api/individuals/?.*",
                "^/api/interpretations/?.*", "^/api/metadata/?.*", "^/api/phenopackets/?.*",
-               "^/api/phenotypicfeatures/?.*", "^/api/procedures/?.*", "^/api/variants/?.*"]
+               "^/api/phenotypicfeatures/?.*", "^/api/procedures/?.*", "^/api/variants/?.*",
+               "^/api/biosamples/?.*", "/api/overview"]
 rootCA = os.getenv("ROOT_CA", None)
 CANDIG_OPA_VERSION = os.getenv("CANDIG_OPA_VERSION", "dycons")
 permissions_secret = os.getenv("PERMISSIONS_SECRET",

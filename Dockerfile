@@ -1,6 +1,6 @@
 ARG venv_python=3.7
 
-FROM python:${venv_python}-alpine3.13
+FROM python:${venv_python}-alpine
 
 LABEL Maintainer="CanDIG Project"
 
