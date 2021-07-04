@@ -293,7 +293,9 @@ def phenopackets_overview(_request):
         individuals_set.add(ind.id)
         individuals_sex.update((ind.sex,))
         individuals_k_sex.update((ind.karyotypic_sex,))
-        individuals_ethnicity.update((ind.ethnicity,))
+        # ethnicity is char field, check it's not empty
+        if ind.ethnicity != "":
+            individuals_ethnicity.update((ind.ethnicity,))
 
         # Generic Counter on all available extra properties
         if ind.extra_properties:
@@ -356,7 +358,6 @@ def phenopackets_overview(_request):
                 "age": dict(individuals_age),
                 "ethnicity": dict(individuals_ethnicity),
                 "extra_properties": dict(individuals_extra_prop),
-                # TODO: how to count age: it can be represented by three different schemas
             },
             "phenotypic_features": {
                 # count is a number of unique phenotypic feature types (not all pfs in the database)
