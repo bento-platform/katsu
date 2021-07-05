@@ -41,6 +41,7 @@ class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
             allowed_datasets = self.request.allowed_datasets
             queryset = m.PhenotypicFeature.objects.filter(
                 phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
+                .filter(biosample__phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
                 .order_by("id")
         else:
             queryset = m.PhenotypicFeature.objects.all().order_by("id")
@@ -269,19 +270,10 @@ class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
     Create a new genomic interpretation
 
     """
+    queryset = m.GenomicInterpretation.objects.all().order_by("id")
     serializer_class = s.GenomicInterpretationSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.GenomicInterpretationFilter
-
-    def get_queryset(self):
-        if hasattr(self.request, "allowed_datasets"):
-            allowed_datasets = self.request.allowed_datasets
-            queryset = m.GenomicInterpretation.objects.filter(
-                gene__phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
-                .order_by("id")
-        else:
-            queryset = m.GenomicInterpretation.objects.all().order_by("id")
-        return queryset
 
 
 class DiagnosisViewSet(PhenopacketsModelViewSet):
