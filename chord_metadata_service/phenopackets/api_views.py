@@ -145,6 +145,7 @@ BIOSAMPLE_PREFETCH = (
     "phenotypic_features",
     "procedure",
     "variants",
+    "experiment_set",
 )
 
 BIOSAMPLE_SELECT_REL = (
@@ -280,6 +281,21 @@ def phenopackets_overview(_request):
     biosamples_taxonomy = Counter()
     biosamples_sampled_tissue = Counter()
 
+    experiments_set = set()
+    experiments_study_type = Counter()
+    experiments_experiment_type = Counter()
+    experiments_molecule = Counter()
+    experiments_library_strategy = Counter()
+    experiments_library_source = Counter()
+    experiments_library_selection = Counter()
+    experiments_library_layout = Counter()
+    experiments_extraction_protocol = Counter()
+    experiments_experiment_results_file_format = Counter()
+    experiments_experiment_results_data_output_type = Counter()
+    experiments_experiment_results_usage = Counter()
+    experiments_instrument_platform = Counter()
+    experiments_instrument_model = Counter()
+
     individuals_sex = Counter()
     individuals_k_sex = Counter()
     individuals_taxonomy = Counter()
@@ -319,6 +335,33 @@ def phenopackets_overview(_request):
 
             if b.taxonomy is not None:
                 biosamples_taxonomy.update((b.taxonomy["label"],))
+
+            for exp in b.experiment_set.all():
+                experiments_set.add(exp.id)
+
+                if exp.study_type is not None:
+                    experiments_study_type.update((exp.study_type,))
+
+                if exp.experiment_type is not None:
+                    experiments_experiment_type.update((exp.experiment_type,))
+
+                if exp.molecule is not None:
+                    experiments_molecule.update((exp.molecule,))
+
+                if exp.library_strategy is not None:
+                    experiments_library_strategy.update((exp.library_strategy,))
+
+                if exp.library_source is not None:
+                    experiments_library_source.update((exp.library_source,))
+
+                if exp.library_selection is not None:
+                    experiments_library_selection.update((exp.library_selection,))
+
+                if exp.library_layout is not None:
+                    experiments_library_layout.update((exp.library_layout,))
+
+                if exp.extraction_protocol is not None:
+                    experiments_extraction_protocol.update((exp.extraction_protocol,))
 
             # TODO decide what to do with nested Phenotypic features and Subject in Biosample
             # This might serve future use cases that Biosample as a have main focus of study
@@ -363,6 +406,19 @@ def phenopackets_overview(_request):
                 # count is a number of unique phenotypic feature types (not all pfs in the database)
                 "count": len(phenotypic_features_counter.keys()),
                 "type": dict(phenotypic_features_counter)
+            },
+            "experiments": {
+                "count": len(experiments_set),
+                "study_type": dict(experiments_study_type),
+                "experiment_type": dict(experiments_experiment_type),
+                "molecule": dict(experiments_molecule),
+                "library_strategy": dict(experiments_library_strategy),
+                "library_source": dict(experiments_library_source),
+                "library_selection": dict(experiments_library_selection),
+                "library_layout": dict(experiments_library_layout),
+                "extraction_protocol": dict(experiments_extraction_protocol),
+                #"library_strategy": dict(experiments_library_strategy),
+
             },
         }
     })
