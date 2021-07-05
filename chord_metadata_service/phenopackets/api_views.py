@@ -4,6 +4,8 @@ from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, FHIRRenderer
@@ -17,6 +19,11 @@ from . import models as m, serializers as s, filters as f
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
     pagination_class = LargeResultsSetPagination
+
+    # Cache page for the requested url for 2 hours
+    @method_decorator(cache_page(60 * 60 * 2))
+    def dispatch(self, *args, **kwargs):
+        return super(PhenopacketsModelViewSet, self).dispatch(*args, **kwargs)
 
 
 class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):
@@ -252,6 +259,8 @@ def get_chord_phenopacket_schema(_request):
     return Response(PHENOPACKET_SCHEMA)
 
 
+# Cache page for the requested url for 2 hours
+@cache_page(60 * 60 * 2)
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly])
 def phenopackets_overview(_request):
@@ -284,7 +293,9 @@ def phenopackets_overview(_request):
         individuals_set.add(ind.id)
         individuals_sex.update((ind.sex,))
         individuals_k_sex.update((ind.karyotypic_sex,))
-        individuals_ethnicity.update((ind.ethnicity,))
+        # ethnicity is char field, check it's not empty
+        if ind.ethnicity != "":
+            individuals_ethnicity.update((ind.ethnicity,))
 
         # Generic Counter on all available extra properties
         if ind.extra_properties:
@@ -347,7 +358,6 @@ def phenopackets_overview(_request):
                 "age": dict(individuals_age),
                 "ethnicity": dict(individuals_ethnicity),
                 "extra_properties": dict(individuals_extra_prop),
-                # TODO: how to count age: it can be represented by three different schemas
             },
             "phenotypic_features": {
                 # count is a number of unique phenotypic feature types (not all pfs in the database)
