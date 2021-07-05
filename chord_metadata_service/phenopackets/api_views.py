@@ -290,9 +290,13 @@ def phenopackets_overview(_request):
     experiments_library_selection = Counter()
     experiments_library_layout = Counter()
     experiments_extraction_protocol = Counter()
+
+    experiments_experiment_results_set = set()
     experiments_experiment_results_file_format = Counter()
     experiments_experiment_results_data_output_type = Counter()
     experiments_experiment_results_usage = Counter()
+
+    experiments_instrument_set = set()
     experiments_instrument_platform = Counter()
     experiments_instrument_model = Counter()
 
@@ -363,6 +367,20 @@ def phenopackets_overview(_request):
                 if exp.extraction_protocol is not None:
                     experiments_extraction_protocol.update((exp.extraction_protocol,))
 
+                # query_set.many_to_many.all()
+                if exp.experiment_results.all() is not None:
+                    for result in exp.experiment_results.all():
+                        experiments_experiment_results_set.add(result.id)
+                        experiments_experiment_results_file_format.update((result.file_format,))
+                        experiments_experiment_results_data_output_type.update((result.data_output_type,))
+                        experiments_experiment_results_usage.update((result.usage,))
+
+                if exp.instrument is not None:
+                    experiments_instrument_set.add(exp.instrument.id)
+                    experiments_instrument_platform.update((exp.instrument.platform,))
+                    experiments_instrument_model.update((exp.instrument.model,))
+
+
             # TODO decide what to do with nested Phenotypic features and Subject in Biosample
             # This might serve future use cases that Biosample as a have main focus of study
             # for pf in b.phenotypic_features.all():
@@ -417,8 +435,17 @@ def phenopackets_overview(_request):
                 "library_selection": dict(experiments_library_selection),
                 "library_layout": dict(experiments_library_layout),
                 "extraction_protocol": dict(experiments_extraction_protocol),
-                #"library_strategy": dict(experiments_library_strategy),
-
+            },
+            "experiment_results": {
+                "count": len(experiments_experiment_results_set),
+                "file_format": dict(experiments_experiment_results_file_format),
+                "data_output_type": dict(experiments_experiment_results_data_output_type),
+                "usage": dict(experiments_experiment_results_usage)
+            },
+            "instruments": {
+                "count": len(experiments_instrument_set),
+                "platform": dict(experiments_instrument_platform),
+                "model": dict(experiments_instrument_model)
             },
         }
     })
