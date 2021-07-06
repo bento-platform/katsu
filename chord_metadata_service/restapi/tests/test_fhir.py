@@ -140,7 +140,7 @@ class FHIRProcedureTest(APITestCase):
         self.valid_procedure = VALID_PROCEDURE_1
 
     def test_get_fhir(self):
-        get_response('procedure-list', self.valid_procedure)
+        get_response('procedures-list', self.valid_procedure)
         get_resp = self.client.get('/api/procedures?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -160,7 +160,7 @@ class FHIRBiosampleTest(APITestCase):
     def test_get_fhir(self):
         """ POST a new biosample. """
 
-        get_response('biosample-list', self.valid_payload)
+        get_response('biosamples-list', self.valid_payload)
         get_resp = self.client.get('/api/biosamples?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -181,7 +181,7 @@ class FHIRHtsFileTest(APITestCase):
         self.hts_file = VALID_HTS_FILE
 
     def test_get_fhir(self):
-        get_response('htsfile-list', self.hts_file)
+        get_response('htsfiles-list', self.hts_file)
         get_resp = self.client.get('/api/htsfiles?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -201,7 +201,7 @@ class FHIRGeneTest(APITestCase):
         self.gene = VALID_GENE_1
 
     def test_get_fhir(self):
-        get_response('gene-list', self.gene)
+        get_response('genes-list', self.gene)
         get_resp = self.client.get('/api/genes?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -221,7 +221,7 @@ class FHIRVariantTest(APITestCase):
         self.variant = VALID_VARIANT_1
 
     def test_get_fhir(self):
-        get_response('variant-list', self.variant)
+        get_response('variants-list', self.variant)
         get_resp = self.client.get('/api/variants?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -240,7 +240,7 @@ class FHIRDiseaseTest(APITestCase):
         self.disease = VALID_DISEASE_1
 
     def test_get_fhir(self):
-        get_response('disease-list', self.disease)
+        get_response('diseases-list', self.disease)
         get_resp = self.client.get('/api/diseases?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
