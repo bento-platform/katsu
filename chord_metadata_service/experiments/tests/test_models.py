@@ -9,6 +9,7 @@ from chord_metadata_service.phenopackets.tests.constants import (
     VALID_INDIVIDUAL_1,
     valid_biosample_1
 )
+from .constants import valid_experiment, valid_experiment_result, valid_instrument
 
 
 class ExperimentTest(TestCase):
@@ -18,23 +19,7 @@ class ExperimentTest(TestCase):
         i = Individual.objects.create(**VALID_INDIVIDUAL_1)
         p = Procedure.objects.create(**VALID_PROCEDURE_1)
         self.biosample = Biosample.objects.create(**valid_biosample_1(i, p))
-        Experiment.objects.create(
-            id="experiment:1",
-            study_type="Whole genome Sequencing",
-            experiment_type="Chromatin Accessibility",
-            experiment_ontology=[{"id": "ontology:1", "label": "Ontology term 1"}],
-            molecule="total RNA",
-            molecule_ontology=[{"id": "ontology:1", "label": "Ontology term 1"}],
-            library_strategy="Bisulfite-Seq",
-            library_source="Genomic",
-            library_selection="PCR",
-            library_layout="Single",
-            extraction_protocol="NGS",
-            reference_registry_id="some_id",
-            qc_flags=["flag 1", "flag 2"],
-            extra_properties={"some_field": "value"},
-            biosample=self.biosample
-        )
+        Experiment.objects.create(**valid_experiment(self.biosample))
 
     @staticmethod
     def create(**kwargs):
@@ -86,17 +71,7 @@ class ExperimentResultTest(TestCase):
     """ Test module for ExperimentResult model """
 
     def setUp(self):
-        ExperimentResult.objects.create(
-            identifier="experiment_result:1",
-            description="Test Experiment result 1",
-            filename="01.vcf.gz",
-            file_format="VCF",
-            data_output_type="Derived data",
-            usage="download",
-            creation_date="2021-06-28",
-            created_by="admin",
-            extra_properties={"target": "None"}
-        )
+        ExperimentResult.objects.create(**valid_experiment_result())
 
     @staticmethod
     def create(**kwargs):
@@ -143,13 +118,7 @@ class InstrumentTest(TestCase):
     """ Test module for ExperimentResult model """
 
     def setUp(self):
-        Instrument.objects.create(
-            identifier="instrument:01",
-            platform="Illumina",
-            description="Test description 1",
-            model="Illumina HiSeq 4000",
-            extra_properties={"date": "2021-06-21"}
-        )
+        Instrument.objects.create(**valid_instrument())
 
     @staticmethod
     def create(**kwargs):
