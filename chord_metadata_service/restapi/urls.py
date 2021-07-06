@@ -7,6 +7,7 @@ from chord_metadata_service.mcode import api_views as mcode_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
 from chord_metadata_service.resources import api_views as resources_views
+from .api_views import overview
 
 __all__ = ["router", "urlpatterns"]
 
@@ -63,6 +64,5 @@ urlpatterns = [
     path('mcode_schema', mcode_views.get_mcode_schema,
          name="mcode-schema"),
     # overview
-    path('overview', phenopacket_views.phenopackets_overview,
-         name="overview"),
+    path('overview', overview, name="overview"),
 ]
