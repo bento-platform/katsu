@@ -282,23 +282,27 @@ def phenopackets_overview(_request):
     biosamples_sampled_tissue = Counter()
 
     experiments_set = set()
-    experiments_study_type = Counter()
-    experiments_experiment_type = Counter()
-    experiments_molecule = Counter()
-    experiments_library_strategy = Counter()
-    experiments_library_source = Counter()
-    experiments_library_selection = Counter()
-    experiments_library_layout = Counter()
-    experiments_extraction_protocol = Counter()
-
-    experiments_experiment_results_set = set()
-    experiments_experiment_results_file_format = Counter()
-    experiments_experiment_results_data_output_type = Counter()
-    experiments_experiment_results_usage = Counter()
-
-    experiments_instrument_set = set()
-    experiments_instrument_platform = Counter()
-    experiments_instrument_model = Counter()
+    experiments = {
+        "study_type": Counter(),
+        "experiment_type": Counter(),
+        "molecule": Counter(),
+        "library_strategy": Counter(),
+        "library_source": Counter(),
+        "library_selection": Counter(),
+        "library_layout": Counter(),
+        "extraction_protocol": Counter()
+    }
+    experiment_results_set = set()
+    experiment_results = {
+        "file_format": Counter(),
+        "data_output_type": Counter(),
+        "usage": Counter(),
+    }
+    instrument_set = set()
+    instruments = {
+        "platform": Counter(),
+        "model": Counter(),
+    }
 
     individuals_sex = Counter()
     individuals_k_sex = Counter()
@@ -343,43 +347,23 @@ def phenopackets_overview(_request):
             for exp in b.experiment_set.all():
                 experiments_set.add(exp.id)
 
-                if exp.study_type is not None:
-                    experiments_study_type.update((exp.study_type,))
+                # local function to perform count across all fields in a given object
+                def count_object_fields(obj, container: dict):
+                    for field, value in container.items():
+                        if getattr(obj, field) is not None:
+                            container[field].update((getattr(obj, field),))
 
-                if exp.experiment_type is not None:
-                    experiments_experiment_type.update((exp.experiment_type,))
-
-                if exp.molecule is not None:
-                    experiments_molecule.update((exp.molecule,))
-
-                if exp.library_strategy is not None:
-                    experiments_library_strategy.update((exp.library_strategy,))
-
-                if exp.library_source is not None:
-                    experiments_library_source.update((exp.library_source,))
-
-                if exp.library_selection is not None:
-                    experiments_library_selection.update((exp.library_selection,))
-
-                if exp.library_layout is not None:
-                    experiments_library_layout.update((exp.library_layout,))
-
-                if exp.extraction_protocol is not None:
-                    experiments_extraction_protocol.update((exp.extraction_protocol,))
+                count_object_fields(exp, experiments)
 
                 # query_set.many_to_many.all()
                 if exp.experiment_results.all() is not None:
                     for result in exp.experiment_results.all():
-                        experiments_experiment_results_set.add(result.id)
-                        experiments_experiment_results_file_format.update((result.file_format,))
-                        experiments_experiment_results_data_output_type.update((result.data_output_type,))
-                        experiments_experiment_results_usage.update((result.usage,))
+                        experiment_results_set.add(result.id)
+                        count_object_fields(result, experiment_results)
 
                 if exp.instrument is not None:
-                    experiments_instrument_set.add(exp.instrument.id)
-                    experiments_instrument_platform.update((exp.instrument.platform,))
-                    experiments_instrument_model.update((exp.instrument.model,))
-
+                    instrument_set.add(exp.instrument.id)
+                    count_object_fields(exp.instrument, instruments)
 
             # TODO decide what to do with nested Phenotypic features and Subject in Biosample
             # This might serve future use cases that Biosample as a have main focus of study
@@ -427,25 +411,25 @@ def phenopackets_overview(_request):
             },
             "experiments": {
                 "count": len(experiments_set),
-                "study_type": dict(experiments_study_type),
-                "experiment_type": dict(experiments_experiment_type),
-                "molecule": dict(experiments_molecule),
-                "library_strategy": dict(experiments_library_strategy),
-                "library_source": dict(experiments_library_source),
-                "library_selection": dict(experiments_library_selection),
-                "library_layout": dict(experiments_library_layout),
-                "extraction_protocol": dict(experiments_extraction_protocol),
+                "study_type": dict(experiments["study_type"]),
+                "experiment_type": dict(experiments["experiment_type"]),
+                "molecule": dict(experiments["molecule"]),
+                "library_strategy": dict(experiments["library_strategy"]),
+                "library_source": dict(experiments["library_source"]),
+                "library_selection": dict(experiments["library_selection"]),
+                "library_layout": dict(experiments["library_layout"]),
+                "extraction_protocol": dict(experiments["extraction_protocol"]),
             },
             "experiment_results": {
-                "count": len(experiments_experiment_results_set),
-                "file_format": dict(experiments_experiment_results_file_format),
-                "data_output_type": dict(experiments_experiment_results_data_output_type),
-                "usage": dict(experiments_experiment_results_usage)
+                "count": len(experiment_results_set),
+                "file_format": dict(experiment_results["file_format"]),
+                "data_output_type": dict(experiment_results["data_output_type"]),
+                "usage": dict(experiment_results["usage"])
             },
             "instruments": {
-                "count": len(experiments_instrument_set),
-                "platform": dict(experiments_instrument_platform),
-                "model": dict(experiments_instrument_model)
+                "count": len(instrument_set),
+                "platform": dict(instruments["platform"]),
+                "model": dict(instruments["model"])
             },
         }
     })
