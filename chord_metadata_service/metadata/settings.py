@@ -186,6 +186,15 @@ DATABASES = {
     }
 }
 
+# Memcached with python-memcached backend
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': os.environ.get("MEMCACHED_PORT_OR_SOCKET_FILE", '127.0.0.1:11211'),
+    }
+}
+
+
 FHIR_INDEX_NAME = 'fhir_metadata'
 
 # Set to True to run ES for FHIR index
