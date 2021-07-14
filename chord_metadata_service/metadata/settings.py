@@ -187,6 +187,13 @@ DATABASES = {
     }
 }
 
+# Django default cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
 FHIR_INDEX_NAME = 'fhir_metadata'
 
 # Set to True to run ES for FHIR index
