@@ -3,12 +3,12 @@ from chord_metadata_service.restapi.schema_utils import (
     search_optional_eq,
     search_optional_str,
     tag_schema_with_search_properties,
+    merge_schema_dictionaries
 )
 from chord_metadata_service.restapi.search_schemas import ONTOLOGY_SEARCH_SCHEMA
 
 
 __all__ = ["EXPERIMENT_SEARCH_SCHEMA"]
-
 
 EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_SCHEMA, {
     "properties": {
@@ -41,9 +41,11 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
         "library_strategy": {
             "search": search_optional_str(7),
         },
-        # TODO: other_fields: ?
         "biosample": {
-            "search": search_optional_eq(8, queryable="internal"),
+            "search": merge_schema_dictionaries(
+                search_optional_eq(8),
+                {"database": {"field": models.Experiment._meta.get_field("biosample").column}}
+            )
         },
         "extraction_protocol": {
             "search": search_optional_str(9),
