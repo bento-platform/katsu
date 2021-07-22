@@ -9,13 +9,17 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, Procedure, PhenotypicFeature
+from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
 from chord_metadata_service.phenopackets.tests.constants import (
     VALID_PROCEDURE_1,
     valid_biosample_1,
     valid_biosample_2,
     VALID_META_DATA_1,
 )
-from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, Procedure, PhenotypicFeature
+from chord_metadata_service.experiments.tests.constants import (
+    valid_experiment, valid_experiment_result, valid_instrument
+)
 
 from chord_metadata_service.chord.tests.es_mocks import SEARCH_SUCCESS
 from .constants import (
@@ -29,6 +33,8 @@ from .constants import (
     TEST_SEARCH_QUERY_4,
     TEST_SEARCH_QUERY_5,
     TEST_SEARCH_QUERY_6,
+    TEST_SEARCH_QUERY_7,
+    TEST_SEARCH_QUERY_8,
     TEST_FHIR_SEARCH_QUERY,
 )
 from ..models import Project, Dataset, TableOwnership, Table
@@ -152,6 +158,18 @@ class SearchTest(APITestCase):
         self.phenotypic_feature = PhenotypicFeature.objects.create(
             **valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
+
+        # table for experiments metadata
+        to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
+                                               service_artifact="experiments", dataset=self.dataset)
+        self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
+
+        # add Experiments metadata and link to self.biosample_1
+        self.instrument = Instrument.objects.create(**valid_instrument())
+        self.experiment_result = ExperimentResult.objects.create(**valid_experiment_result())
+        self.experiment = Experiment.objects.create(**valid_experiment(
+            biosample=self.biosample_1, instrument=self.instrument, table=self.t_exp))
+        self.experiment.experiment_results.set([self.experiment_result])
 
     def test_common_search_1(self):
         # No body
@@ -329,6 +347,50 @@ class SearchTest(APITestCase):
         c = r.json()
         self.assertEqual(len(c["results"]), 1)
         self.assertEqual(len(c["results"][0]["biosamples"]), 2)
+
+    def test_private_search_10_experiment(self):
+        # Valid search with result
+        r = self.client.post(reverse("private-search"), data=json.dumps({
+            "data_type": DATA_TYPE_EXPERIMENT,
+            "query": TEST_SEARCH_QUERY_7
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertIn(str(self.t_exp.identifier), c["results"])
+        self.assertEqual(c["results"][str(self.t_exp.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
+        self.assertEqual(self.experiment.id, c["results"][str(self.t_exp.identifier)]["matches"][0]["id"])
+        self.assertEqual(len(c["results"][str(self.t_exp.identifier)]["matches"]), 1)
+        self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["id"], "experiment:1")
+        self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["study_type"],
+                         "Whole genome Sequencing")
+        self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["molecule"], "total RNA")
+        self.assertEqual(len(c["results"][str(self.t_exp.identifier)]["matches"][0]["experiment_results"]), 1)
+        self.assertEqual(
+            c["results"][str(self.t_exp.identifier)]["matches"][0]["experiment_results"][0]["file_format"], "VCF"
+        )
+        self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["instrument"]["identifier"],
+                         "instrument:01")
+        self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["instrument"]["platform"],
+                         "Illumina")
+        self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["instrument"]["model"],
+                         "Illumina HiSeq 4000")
+        self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["instrument"]["extra_properties"],
+                         {"date": "2021-06-21"})
+
+    def test_private_search_11_experiment(self):
+        # Valid search with result, case-insensitive search for experiment_type
+        r = self.client.post(reverse("private-search"), data=json.dumps({
+            "data_type": DATA_TYPE_EXPERIMENT,
+            "query": TEST_SEARCH_QUERY_8
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertIn(str(self.t_exp.identifier), c["results"])
+        self.assertEqual(c["results"][str(self.t_exp.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
+        self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["experiment_type"],
+                         "Chromatin Accessibility")
+
+    # TODO table search fr experiments
 
     @patch('chord_metadata_service.chord.views_search.es')
     def test_fhir_search(self, mocked_es):

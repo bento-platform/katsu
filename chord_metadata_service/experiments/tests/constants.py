@@ -1,4 +1,4 @@
-def valid_experiment(biosample, instrument=None):
+def valid_experiment(biosample, instrument=None, table=None):
     return {
         "id": "experiment:1",
         "study_type": "Whole genome Sequencing",
@@ -15,7 +15,8 @@ def valid_experiment(biosample, instrument=None):
         "qc_flags": ["flag 1", "flag 2"],
         "extra_properties": {"some_field": "value"},
         "biosample": biosample,
-        "instrument": instrument
+        "instrument": instrument,
+        "table": table
     }
 
 
