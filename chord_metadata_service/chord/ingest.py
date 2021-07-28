@@ -8,6 +8,7 @@ import requests_unixsocket
 import shutil
 import tempfile
 import uuid
+import jsonschema
 
 from dateutil.parser import isoparse
 from typing import Callable
@@ -30,6 +31,7 @@ from chord_metadata_service.restapi.fhir_ingest import (
 )
 from chord_metadata_service.mcode.parse_fhir_mcode import parse_bundle
 from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 
 requests_unixsocket.monkeypatch()
 
@@ -344,8 +346,26 @@ def ingest_experiment(experiment_data, table_id) -> em.Experiment:
     return new_experiment
 
 
-def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
+def ingest_phenopacket(phenopacket_data, table_id):
     """Ingests a single phenopacket."""
+
+    v = jsonschema.Draft7Validator(PHENOPACKET_SCHEMA, format_checker=jsonschema.FormatChecker())
+    try:
+        jsonschema.validate(
+            phenopacket_data,
+            PHENOPACKET_SCHEMA,
+            format_checker=jsonschema.FormatChecker(),
+        )
+        logger.info("JSON schema validation passed.")
+
+    except jsonschema.exceptions.ValidationError:
+        errors = [e for e in v.iter_errors(phenopacket_data)]
+        logger.info(f"JSON schema validation failed. Errors: {errors}")
+        for i, error in enumerate(errors, 1):
+            logger.error(
+                f"{i} Validation error in {'.'.join(str(v) for v in error.path)}: {error.message}",
+            )
+        return
 
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
 

@@ -360,5 +360,5 @@ PHENOPACKET_SCHEMA = describe_schema({
         "meta_data": PHENOPACKET_META_DATA_SCHEMA,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "meta_data"],
+    "required": ["meta_data"],
 }, descriptions.PHENOPACKET)
