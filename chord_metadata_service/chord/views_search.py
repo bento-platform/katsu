@@ -15,12 +15,18 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from typing import Any, Callable, Dict
 
+from chord_metadata_service.experiments.api_views import EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
+
 from chord_metadata_service.mcode.models import MCodePacket
+from chord_metadata_service.mcode.serializers import MCodePacketSerializer
+
 from chord_metadata_service.metadata.elastic import es
 from chord_metadata_service.metadata.settings import DEBUG, CHORD_SERVICE_ARTIFACT, CHORD_SERVICE_ID
+
 from chord_metadata_service.patients.models import Individual
+
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
@@ -264,7 +270,21 @@ def data_type_results(query, params, key="id"):
 def experiment_query_results(query, params):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: Prefetch related biosample or no?
-    return Experiment.objects.filter(id__in=data_type_results(query, params, "id"))
+    return Experiment.objects.filter(
+        id__in=data_type_results(query, params, "id")
+    ).select_related(
+        'instrument',
+    ).prefetch_related(
+        *EXPERIMENT_PREFETCH
+    )
+
+
+def mcodepacket_query_results(query, params):
+    # TODO: possibly a quite inefficient way of doing things...
+    # TODO: select_related / prefetch_related for instant performance boost!
+    return MCodePacket.objects.filter(
+        id__in=data_type_results(query, params, "id")
+    )
 
 
 def phenopacket_query_results(query, params):
@@ -282,6 +302,19 @@ def phenopacket_query_results(query, params):
     ).prefetch_related(
         *PHENOPACKET_PREFETCH
     )
+
+
+QUERY_RESULTS_FN: Dict[str, Callable] = {
+    DATA_TYPE_EXPERIMENT: experiment_query_results,
+    DATA_TYPE_MCODEPACKET: mcodepacket_query_results,
+    DATA_TYPE_PHENOPACKET: phenopacket_query_results,
+}
+
+QUERY_RESULT_SERIALIZERS = {
+    DATA_TYPE_EXPERIMENT: ExperimentSerializer,
+    DATA_TYPE_MCODEPACKET: MCodePacketSerializer,
+    DATA_TYPE_PHENOPACKET: PhenopacketSerializer,
+}
 
 
 def search(request, internal_data=False):
@@ -316,9 +349,8 @@ def search(request, internal_data=False):
         return Response(build_search_response([{"id": t.identifier, "data_type": DATA_TYPE_PHENOPACKET}
                                                for t in tables], start))
 
-    # TODO: Dict-ify
-    serializer_class = PhenopacketSerializer if data_type == DATA_TYPE_PHENOPACKET else ExperimentSerializer
-    query_function = phenopacket_query_results if data_type == DATA_TYPE_PHENOPACKET else experiment_query_results
+    serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
+    query_function = QUERY_RESULTS_FN[data_type]
 
     return Response(build_search_response({
         table_id: {
