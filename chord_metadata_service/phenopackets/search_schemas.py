@@ -49,7 +49,7 @@ INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, 
     "properties": {
         "id": {
             "search": {
-                **search_optional_eq(0, queryable="internal"),
+                **search_optional_eq(0),
                 "database": {
                     "field": models.Individual._meta.pk.column
                 }
@@ -57,7 +57,7 @@ INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, 
         },
         "alternate_ids": {
             "items": {
-                "search": search_optional_str(0, queryable="internal", multiple=True)
+                "search": search_optional_str(1, queryable="internal", multiple=True)
             },
             "search": {
                 "database": {
@@ -68,14 +68,14 @@ INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, 
         "date_of_birth": {
             # TODO: Internal?
             # TODO: Allow lt / gt
-            "search": search_optional_eq(1, queryable="internal")
+            "search": search_optional_eq(2, queryable="internal")
         },
         # TODO: Age
         "sex": {
-            "search": search_optional_eq(2)
+            "search": search_optional_eq(3)
         },
         "karyotypic_sex": {
-            "search": search_optional_eq(3)
+            "search": search_optional_eq(4)
         },
         "taxonomy": ONTOLOGY_SEARCH_SCHEMA,
     },
@@ -230,7 +230,7 @@ BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
     "properties": {
         "id": {
             "search": merge_schema_dictionaries(
-                search_optional_eq(0, queryable="internal"),
+                search_optional_eq(0),
                 {"database": {"field": models.Biosample._meta.pk.column}}
             )
         },
@@ -334,7 +334,12 @@ DISEASE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DI
 PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_SCHEMA, {
     "properties": {
         "id": {
-            "search": {"database": {"field": models.Phenopacket._meta.pk.column}}
+            "search": {
+                **search_optional_eq(0),
+                "database": {
+                    "field": models.Phenopacket._meta.pk.column
+                }
+            }
         },
         "subject": merge_schema_dictionaries(
             INDIVIDUAL_SEARCH_SCHEMA,

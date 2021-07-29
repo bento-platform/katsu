@@ -50,13 +50,26 @@ def parse_duration(string):
 
 def parse_individual_age(age_obj):
     """ Parses two possible age representations and returns average age or age as integer. """
+    # AGE OPTIONS
+    # "age": {
+    #     "age": "P96Y"
+    # }
+    # AND
+    # "age": {
+    #     "start": {
+    #         "age": "P45Y"
+    #     },
+    #     "end": {
+    #         "age": "P49Y"
+    #     }
+    # }
     if 'start' in age_obj:
         start_age = parse_duration(age_obj['start']['age'])
         end_age = parse_duration(age_obj['end']['age'])
         # for the duration calculate the average age
         age = (start_age + end_age) // 2
-    elif isinstance(age_obj, str):
-        age = parse_duration(age_obj)
+    elif 'age' in age_obj:
+        age = parse_duration(age_obj['age'])
     else:
         raise ValueError(f"Error: {age_obj} format not supported")
     return age
