@@ -35,6 +35,7 @@ from .constants import (
     TEST_SEARCH_QUERY_6,
     TEST_SEARCH_QUERY_7,
     TEST_SEARCH_QUERY_8,
+    TEST_SEARCH_QUERY_9,
     TEST_FHIR_SEARCH_QUERY,
 )
 from ..models import Project, Dataset, TableOwnership, Table
@@ -391,6 +392,17 @@ class SearchTest(APITestCase):
                          "Chromatin Accessibility")
 
     # TODO table search fr experiments
+
+    def test_private_table_search_12(self):
+        # Valid query to search for subject id
+
+        r = self.client.post(reverse("private-table-search", args=[str(self.table.identifier)]), data=json.dumps({
+            "query": TEST_SEARCH_QUERY_9
+        }), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        c = r.json()
+        self.assertEqual(len(c["results"]), 1)
+        self.assertIn("patient:1", [phenopacket["subject"]["id"] for phenopacket in c["results"]])
 
     @patch('chord_metadata_service.chord.views_search.es')
     def test_fhir_search(self, mocked_es):
