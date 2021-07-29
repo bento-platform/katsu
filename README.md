@@ -284,10 +284,14 @@ DJANGO_SETTINGS_MODULE=chord_metadata_service.metadata.settings django-admin she
 
 When running katsu within bentoV2:
 
+- enter katsu container
 ```
-docker exec -it bentov2-katsu sh # enter katsu container
+docker exec -it bentov2-katsu sh
+```
 
-python manage.py shell # activate django shell
+- activate django shell
+```
+python manage.py shell
 ```
 
 From there, you can import models and query the database from the REPL.
