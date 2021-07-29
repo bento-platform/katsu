@@ -8,6 +8,7 @@ from collections import Counter
 from datetime import datetime
 from django.db import connection
 from django.conf import settings
+from django.views.decorators.cache import cache_page
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -234,7 +235,8 @@ SUMMARY_HANDLERS: Dict[str, Callable[[Any], Response]] = {
     DATA_TYPE_PHENOPACKET: phenopacket_table_summary,
 }
 
-
+# Cache page for the requested url
+@cache_page(60 * 60 * 2)
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly])
 def chord_table_summary(_request, table_id):
@@ -328,6 +330,8 @@ def search(request, internal_data=False):
     }, start))
 
 
+# Cache page for the requested url
+@cache_page(60 * 60 * 2)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def chord_search(request):
@@ -336,6 +340,8 @@ def chord_search(request):
 
 # Mounted on /private/, so will get protected anyway; this allows for access from federation service
 # TODO: Ugly and misleading permissions
+# Cache page for the requested url
+@cache_page(60 * 60 * 2)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def chord_private_search(request):
@@ -473,6 +479,8 @@ def chord_table_search(request, table_id, internal=False):
     return Response(len(query_results) > 0)
 
 
+# Cache page for the requested url
+@cache_page(60 * 60 * 2)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def chord_public_table_search(request, table_id):
@@ -482,6 +490,8 @@ def chord_public_table_search(request, table_id):
 
 # Mounted on /private/, so will get protected anyway; this allows for access from federation service
 # TODO: Ugly and misleading permissions
+# Cache page for the requested url
+@cache_page(60 * 60 * 2)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def chord_private_table_search(request, table_id):
