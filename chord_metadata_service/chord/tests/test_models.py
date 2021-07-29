@@ -82,6 +82,9 @@ class TableTest(TestCase):
 
     def test_table(self):
         t = Table.objects.get(ownership_record_id=TABLE_ID)
+
         self.assertEqual(t.data_type, DATA_TYPE_PHENOPACKET)
         self.assertEqual(t.identifier, TABLE_ID)
         self.assertEqual(t.dataset, self.d)
+
+        self.assertEqual(str(t), f"{t.name} (ID: {TABLE_ID}, Type: {DATA_TYPE_PHENOPACKET})")

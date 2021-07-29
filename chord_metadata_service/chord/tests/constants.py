@@ -9,9 +9,16 @@ __all__ = [
     "INVALID_DATS_CREATORS",
     "valid_dataset_1",
     "valid_table_1",
+    "valid_phenotypic_feature",
     "dats_dataset",
     "TEST_SEARCH_QUERY_1",
     "TEST_SEARCH_QUERY_2",
+    "TEST_SEARCH_QUERY_3",
+    "TEST_SEARCH_QUERY_4",
+    "TEST_SEARCH_QUERY_5",
+    "TEST_SEARCH_QUERY_6",
+    "TEST_SEARCH_QUERY_7",
+    "TEST_SEARCH_QUERY_8",
     "TEST_FHIR_SEARCH_QUERY",
 ]
 
@@ -218,6 +225,26 @@ def dats_dataset(project_id, creators):
     }
 
 
+def valid_phenotypic_feature(biosample=None, phenopacket=None):
+    return dict(
+        description='This is a test phenotypic feature',
+        pftype={
+            "id": "HP:0000520",
+            "label": "Proptosis"
+        },
+        biosample=biosample,
+        phenopacket=phenopacket
+    )
+
+
 TEST_SEARCH_QUERY_1 = ["#eq", ["#resolve", "subject", "sex"], "FEMALE"]
 TEST_SEARCH_QUERY_2 = ["#eq", ["#resolve", "subject", "sex"], "MALE"]
+TEST_SEARCH_QUERY_3 = ["#eq", ["#resolve", "phenotypic_features", "[item]", "type", "label"], "Proptosis"]
+TEST_SEARCH_QUERY_4 = ["#eq", ["#resolve", "biosamples", "[item]", "sampled_tissue", "label"],
+                       "wall of urinary bladder"]
+TEST_SEARCH_QUERY_5 = ["#ico", ["#resolve", "phenotypic_features", "[item]", "type", "label"], "proptosis"]
+TEST_SEARCH_QUERY_6 = ["#ico", ["#resolve", "biosamples", "[item]", "sampled_tissue", "label"],
+                       "URINARY BLADDER"]
+TEST_SEARCH_QUERY_7 = ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
+TEST_SEARCH_QUERY_8 = ["#ico", ["#resolve", "experiment_type"], "chromatin"]
 TEST_FHIR_SEARCH_QUERY = {"query": {"match": {"gender": "FEMALE"}}}

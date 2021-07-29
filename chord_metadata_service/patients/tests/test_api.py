@@ -142,3 +142,22 @@ class IndividualCSVRendererTest(APITestCase):
         for column in ['id', 'sex', 'date of birth', 'taxonomy', 'karyotypic sex',
                        'race', 'ethnicity', 'age', 'diseases', 'created', 'updated']:
             self.assertIn(column, [column_name.lower() for column_name in headers])
+
+
+class IndividualFullTextSearchTest(APITestCase):
+    """ Test for api/individuals?search= """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_search(self):
+        get_resp_1 = self.client.get('/api/individuals?search=P49Y')
+        self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
+        response_obj_1 = get_resp_1.json()
+        self.assertEqual(len(response_obj_1['results']), 1)
+
+        get_resp_2 = self.client.get('/api/individuals?search=NCBITaxon:9606')
+        self.assertEqual(get_resp_2.status_code, status.HTTP_200_OK)
+        response_obj_2 = get_resp_2.json()
+        self.assertEqual(len(response_obj_2['results']), 2)

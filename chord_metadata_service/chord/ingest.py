@@ -1,9 +1,21 @@
+import contextlib
 import json
+import logging
 import os
+import re
+import requests
+import requests_unixsocket
+import shutil
+import tempfile
 import uuid
 
 from dateutil.parser import isoparse
 from typing import Callable
+from urllib.parse import urlparse
+
+from django.conf import settings
+
+from bento_lib.drs.utils import get_access_method_of_type, fetch_drs_record_by_uri
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
 from chord_metadata_service.chord.models import Table, TableOwnership
@@ -19,19 +31,26 @@ from chord_metadata_service.restapi.fhir_ingest import (
 from chord_metadata_service.mcode.parse_fhir_mcode import parse_bundle
 from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
 
+requests_unixsocket.monkeypatch()
+
 
 __all__ = [
     "METADATA_WORKFLOWS",
     "WORKFLOWS_PATH",
     "IngestError",
     "ingest_resource",
+    "ingest_experiments_workflow",
+    "ingest_phenopacket_workflow",
     "WORKFLOW_INGEST_FUNCTION_MAP",
 ]
+
+logger = logging.getLogger(__name__)
 
 WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
+WORKFLOW_MCODE_JSON = "mcode_json"
 
 METADATA_WORKFLOWS = {
     "ingestion": {
@@ -169,7 +188,29 @@ METADATA_WORKFLOWS = {
                     "value": "{json_document}"
                 }
             ]
-        }
+        },
+        WORKFLOW_MCODE_JSON: {
+            "name": "MCODE Resources JSON",
+            "description": "This ingestion workflow will validate and import the Bento metadata service's "
+                           "internal mCODE-based JSON document",
+            "data_type": DATA_TYPE_MCODEPACKET,
+            "file": "mcode_json.wdl",
+            "inputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "required": True,
+                    "extensions": [".json"]
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "value": "{json_document}"
+                }
+            ]
+        },
     },
     "analysis": {}
 }
@@ -195,6 +236,34 @@ def create_phenotypic_feature(pf):
 
     pf_obj.save()
     return pf_obj
+
+
+def create_experiment_result(er):
+    er_obj = em.ExperimentResult(
+        identifier=er.get("identifier"),
+        description=er.get("description"),
+        filename=er.get("filename"),
+        file_format=er.get("file_format"),
+        data_output_type=er.get("data_output_type"),
+        usage=er.get("usage"),
+        creation_date=er.get("creation_date"),
+        created_by=er.get("created_by"),
+        extra_properties=er.get("extra_properties", {})
+    )
+    er_obj.save()
+    return er_obj
+
+
+def create_instrument(instrument):
+    instrument_obj, _ = em.Instrument.objects.get_or_create(
+        identifier=instrument.get("identifier", str(uuid.uuid4()))
+    )
+    instrument_obj.platform = instrument.get("platform")
+    instrument_obj.description = instrument.get("description")
+    instrument_obj.model = instrument.get("model")
+    instrument_obj.extra_properties = instrument.get("extra_properties", {})
+    instrument_obj.save()
+    return instrument_obj
 
 
 def _query_and_check_nulls(obj: dict, key: str, transform: Callable = lambda x: x):
@@ -226,33 +295,51 @@ def ingest_experiment(experiment_data, table_id) -> em.Experiment:
     """Ingests a single experiment."""
 
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
-
-    reference_registry_id = experiment_data.get("reference_registry_id")
-    qc_flags = experiment_data.get("qc_flags", [])
+    study_type = experiment_data.get("study_type")
     experiment_type = experiment_data["experiment_type"]
     experiment_ontology = experiment_data.get("experiment_ontology", [])
-    molecule_ontology = experiment_data.get("molecule_ontology", [])
     molecule = experiment_data.get("molecule")
-    library_strategy = experiment_data["library_strategy"]
-    other_fields = experiment_data.get("other_fields", {})
+    molecule_ontology = experiment_data.get("molecule_ontology", [])
+    library_strategy = experiment_data.get("library_strategy")
+    library_source = experiment_data.get("library_source")
+    library_selection = experiment_data.get("library_selection")
+    library_layout = experiment_data.get("library_selection")
+    extraction_protocol = experiment_data.get("extraction_protocol")
+    reference_registry_id = experiment_data.get("reference_registry_id")
+    qc_flags = experiment_data.get("qc_flags", [])
     biosample = experiment_data.get("biosample")
-
+    experiment_results = experiment_data.get("experiment_results", [])
+    instrument = experiment_data.get("instrument", {})
+    extra_properties = experiment_data.get("extra_properties", {})
+    # get existing biosample id
     if biosample is not None:
         biosample = pm.Biosample.objects.get(id=biosample)  # TODO: Handle error nicer
-
+    # create related experiment results
+    experiment_results_db = [create_experiment_result(er) for er in experiment_results]
+    # create related instrument
+    instrument_db = create_instrument(instrument)
+    # create new experiment
     new_experiment = em.Experiment.objects.create(
         id=new_experiment_id,
-        reference_registry_id=reference_registry_id,
-        qc_flags=qc_flags,
+        study_type=study_type,
         experiment_type=experiment_type,
         experiment_ontology=experiment_ontology,
-        molecule_ontology=molecule_ontology,
         molecule=molecule,
+        molecule_ontology=molecule_ontology,
         library_strategy=library_strategy,
-        other_fields=other_fields,
+        library_source=library_source,
+        library_selection=library_selection,
+        library_layout=library_layout,
+        extraction_protocol=extraction_protocol,
+        reference_registry_id=reference_registry_id,
+        qc_flags=qc_flags,
         biosample=biosample,
+        instrument=instrument_db,
+        extra_properties=extra_properties,
         table=Table.objects.get(ownership_record_id=table_id, data_type=DATA_TYPE_EXPERIMENT)
     )
+    # create m2m relationships
+    new_experiment.experiment_results.set(experiment_results_db)
 
     return new_experiment
 
@@ -406,54 +493,171 @@ def _get_output_or_raise(workflow_outputs, key):
     return workflow_outputs[key]
 
 
+DRS_URI_SCHEME = "drs"
+FILE_URI_SCHEME = "file"
+HTTP_URI_SCHEME = "http"
+HTTPS_URI_SCHEME = "https"
+
+WINDOWS_DRIVE_SCHEME = re.compile(r"^[a-zA-Z]$")
+
+
+def _workflow_http_download(tmp_dir: str, http_uri: str) -> str:
+    # TODO: Sanity check: no external insecure HTTP calls
+    # TODO: Disable HTTPS cert check in debug mode
+    # TODO: Handle response exceptions
+
+    r = requests.get(http_uri)
+
+    if not r.ok:
+        raise IngestError(f"HTTP error encountered while downloading ingestion URI: {http_uri}")
+
+    data_path = f"{tmp_dir}ingest_download_data"
+
+    with open(data_path, "wb") as df:
+        df.write(r.content)
+
+    return data_path
+
+
+@contextlib.contextmanager
+def _workflow_file_output_to_path(file_uri_or_path: str):
+    # TODO: Should be able to download from DRS instead of using file URIs directly
+
+    parsed_file_uri = urlparse(file_uri_or_path)
+
+    if WINDOWS_DRIVE_SCHEME.match(parsed_file_uri.scheme):
+        # In Windows, file paths can start with c:/ or similar (which is the drive letter.) This will get handled
+        # as a 'scheme' by urlparse, so we use a regex to detect Windows-style drive 'schemes'.
+        yield file_uri_or_path
+        return
+
+    if parsed_file_uri.scheme in (FILE_URI_SCHEME, ""):
+        # File URI, or file path with no URI scheme (in which case implicitly assume a 'file://' in front)
+        yield parsed_file_uri.path
+        return
+
+    # From here on out, we're dealing with downloads - check to make sure we
+    # have somewhere to put the temporary files.
+
+    should_del = False
+    tmp_dir = settings.SERVICE_TEMP
+
+    if tmp_dir is None:
+        tmp_dir = tempfile.mkdtemp()
+        should_del = True
+
+    if not os.access(tmp_dir, os.W_OK):
+        raise IngestError(f"Directory does not exist or is not writable: {tmp_dir}")
+
+    try:
+        tmp_dir = tmp_dir.rstrip("/") + "/"
+
+        if parsed_file_uri.scheme == DRS_URI_SCHEME:  # DRS object URI
+            drs_obj = fetch_drs_record_by_uri(file_uri_or_path, settings.DRS_URL)
+
+            file_access = get_access_method_of_type(drs_obj, "file")
+            if file_access:
+                yield urlparse(file_access["access_url"]["url"]).path
+                return
+
+            # TODO: Some mechanism to do this with auth
+            http_access = get_access_method_of_type(drs_obj, "http")
+            if http_access:
+                # TODO: Handle DRS headers field if available - how to do this with grace and compatibility with
+                #  Bento's auth system?
+                yield _workflow_http_download(tmp_dir, http_access["access_url"]["url"])
+                return
+
+            # If we get here, we have a DRS object we cannot handle; raise an error.
+            raise IngestError(f"Cannot handle DRS object {file_uri_or_path}: No file or http access methods")
+
+        elif parsed_file_uri.scheme in (HTTP_URI_SCHEME, HTTPS_URI_SCHEME):
+            yield _workflow_http_download(tmp_dir, file_uri_or_path)
+
+        else:
+            # If we get here, we have a scheme we cannot handle; raise an error.
+            raise IngestError(f"Cannot handle workflow output URI scheme: {parsed_file_uri.scheme}")
+
+    finally:
+        # Clean up the temporary directory if necessary
+        if should_del and tmp_dir:
+            shutil.rmtree(tmp_dir)
+
+
 def ingest_experiments_workflow(workflow_outputs, table_id):
-    with open(_get_output_or_raise(workflow_outputs, "json_document"), "r") as jf:
-        json_data = json.load(jf)
+    with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
+        logger.info(f"Attempting ingestion of experiments from path: {json_doc_path}")
+        with open(json_doc_path, "r") as jf:
+            json_data = json.load(jf)
 
-        dataset = TableOwnership.objects.get(table_id=table_id).dataset
+            dataset = TableOwnership.objects.get(table_id=table_id).dataset
 
-        for rs in json_data.get("resources", []):
-            dataset.additional_resources.add(ingest_resource(rs))
+            for rs in json_data.get("resources", []):
+                dataset.additional_resources.add(ingest_resource(rs))
 
-        return [ingest_experiment(exp, table_id) for exp in json_data.get("experiments", [])]
+            return [ingest_experiment(exp, table_id) for exp in json_data.get("experiments", [])]
 
 
 def ingest_phenopacket_workflow(workflow_outputs, table_id):
-    with open(_get_output_or_raise(workflow_outputs, "json_document"), "r") as jf:
-        json_data = json.load(jf)
-        return _map_if_list(ingest_phenopacket, json_data, table_id)
+    with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
+        logger.info(f"Attempting ingestion of phenopackets from path: {json_doc_path}")
+        with open(json_doc_path, "r") as jf:
+            json_data = json.load(jf)
+            return _map_if_list(ingest_phenopacket, json_data, table_id)
 
 
 def ingest_fhir_workflow(workflow_outputs, table_id):
-    with open(_get_output_or_raise(workflow_outputs, "patients"), "r") as pf:
-        patients_data = json.load(pf)
-        phenopacket_ids = ingest_patients(
-            patients_data,
-            table_id,
-            workflow_outputs.get("created_by") or "Imported from file.",
-        )
+    with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "patients")) as patients_path:
+        logger.info(f"Attempting ingestion of patients from path: {patients_path}")
+        with open(patients_path, "r") as pf:
+            patients_data = json.load(pf)
+            phenopacket_ids = ingest_patients(
+                patients_data,
+                table_id,
+                workflow_outputs.get("created_by") or "Imported from file.",
+            )
 
     if "observations" in workflow_outputs:
-        with open(workflow_outputs["observations"], "r") as of:
-            observations_data = json.load(of)
-            ingest_observations(phenopacket_ids, observations_data)
+        with _workflow_file_output_to_path(workflow_outputs["observations"]) as observations_path:
+            logger.info(f"Attempting ingestion of observations from path: {observations_path}")
+            with open(observations_path, "r") as of:
+                observations_data = json.load(of)
+                ingest_observations(phenopacket_ids, observations_data)
 
     if "conditions" in workflow_outputs:
-        with open(workflow_outputs["conditions"], "r") as cf:
-            conditions_data = json.load(cf)
-            ingest_conditions(phenopacket_ids, conditions_data)
+        with _workflow_file_output_to_path(workflow_outputs["conditions"]) as conditions_path:
+            logger.info(f"Attempting ingestion of conditions from path: {conditions_path}")
+            with open(conditions_path, "r") as cf:
+                conditions_data = json.load(cf)
+                ingest_conditions(phenopacket_ids, conditions_data)
 
     if "specimens" in workflow_outputs:
-        with open(workflow_outputs["specimens"], "r") as sf:
-            specimens_data = json.load(sf)
-            ingest_specimens(phenopacket_ids, specimens_data)
+        with _workflow_file_output_to_path(workflow_outputs["specimens"]) as specimens_path:
+            logger.info(f"Attempting ingestion of specimens from path: {specimens_path}")
+            with open(specimens_path, "r") as sf:
+                specimens_data = json.load(sf)
+                ingest_specimens(phenopacket_ids, specimens_data)
 
 
 def ingest_mcode_fhir_workflow(workflow_outputs, table_id):
-    with open(_get_output_or_raise(workflow_outputs, "json_document"), "r") as jf:
-        json_data = json.load(jf)
-        mcodepacket = parse_bundle(json_data)
-        ingest_mcodepacket(mcodepacket, table_id)
+    with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
+        logger.info(f"Attempting ingestion of MCODE FIHR from path: {json_doc_path}")
+        with open(json_doc_path, "r") as jf:
+            json_data = json.load(jf)
+            mcodepacket = parse_bundle(json_data)
+            ingest_mcodepacket(mcodepacket, table_id)
+
+
+def ingest_mcode_workflow(workflow_outputs, table_id):
+    with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
+        logger.info(f"Attempting ingestion of MCODE from path: {json_doc_path}")
+        with open(json_doc_path, "r") as jf:
+            json_data = json.load(jf)
+            if isinstance(json_data, list):
+                for mcodepacket in json_data:
+                    ingest_mcodepacket(mcodepacket, table_id)
+            else:
+                ingest_mcodepacket(json_data, table_id)
 
 
 WORKFLOW_INGEST_FUNCTION_MAP = {
@@ -461,4 +665,5 @@ WORKFLOW_INGEST_FUNCTION_MAP = {
     WORKFLOW_PHENOPACKETS_JSON: ingest_phenopacket_workflow,
     WORKFLOW_FHIR_JSON: ingest_fhir_workflow,
     WORKFLOW_MCODE_FHIR_JSON: ingest_mcode_fhir_workflow,
+    WORKFLOW_MCODE_JSON: ingest_mcode_workflow,
 }
