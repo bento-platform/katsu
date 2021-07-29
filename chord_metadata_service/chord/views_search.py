@@ -235,6 +235,7 @@ SUMMARY_HANDLERS: Dict[str, Callable[[Any], Response]] = {
     DATA_TYPE_PHENOPACKET: phenopacket_table_summary,
 }
 
+
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
 @api_view(["GET"])
