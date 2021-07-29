@@ -346,7 +346,7 @@ def search(request, internal_data=False):
             params=params,
             key="table_id"
         ))  # TODO: Maybe can avoid hitting DB here
-        return Response(build_search_response([{"id": t.identifier, "data_type": DATA_TYPE_PHENOPACKET}
+        return Response(build_search_response([{"id": t.identifier, "data_type": data_type}
                                                for t in tables], start))
 
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
@@ -491,12 +491,12 @@ def chord_table_search(request, table_id, internal=False):
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"],
                                                                        DATA_TYPES[table.data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
-        print("[CHORD Metadata] Error encountered compiling query {}:\n    {}".format(request.data["query"], str(e)))
+        print(f"[CHORD Metadata] Error encountered compiling query {request.data['query']}:\n    {str(e)}")
         return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
     debug_log(f"Finished compiling query in {datetime.now() - start}")
 
-    query_results = phenopacket_query_results(  # TODO: Generic
+    query_results = QUERY_RESULTS_FN[table.data_type](
         query=sql.SQL("{} AND table_id = {}").format(compiled_query, sql.Placeholder()),
         params=params + (table.identifier,)
     )
@@ -504,7 +504,7 @@ def chord_table_search(request, table_id, internal=False):
     debug_log(f"Finished running query in {datetime.now() - start}")
 
     if internal:
-        serialized_data = PhenopacketSerializer(query_results, many=True).data
+        serialized_data = QUERY_RESULT_SERIALIZERS[table.data_type](query_results, many=True).data
         debug_log(f"Finished running query and serializing in {datetime.now() - start}")
 
         return Response(build_search_response(serialized_data, start))
