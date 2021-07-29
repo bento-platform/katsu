@@ -282,4 +282,25 @@ export $(cut -d= -f1 /chord/data/metadata/.environment)
 DJANGO_SETTINGS_MODULE=chord_metadata_service.metadata.settings django-admin shell
 ```
 
+When running katsu within bentoV2:
+
+```
+docker exec -it bentov2-katsu sh # enter katsu container
+
+python manage.py shell # activate django shell
+```
+
 From there, you can import models and query the database from the REPL.
+
+```
+from chord_metadata_service.patients.models import *
+from chord_metadata_service.phenopackets.models import *
+from chord_metadata_service.resources.models import *
+from chord_metadata_service.experiments.models import *
+
+# e.g.
+Individual.objects.all().count()
+Phenopacket.objects.all().count()
+Resource.objects.all().count()
+Experiment.objects.all().count()
+```
