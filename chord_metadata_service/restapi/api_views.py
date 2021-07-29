@@ -71,8 +71,8 @@ def overview(_request):
     individuals_taxonomy = Counter()
     individuals_age = Counter()
     individuals_ethnicity = Counter()
-    individuals_extra_prop = {}
-    extra_prop_counter_dict = {}
+    # individuals_extra_prop = {}
+    # extra_prop_counter_dict = {}
 
     def count_individual(ind):
 
@@ -84,14 +84,15 @@ def overview(_request):
             individuals_ethnicity.update((ind.ethnicity,))
 
         # Generic Counter on all available extra properties
-        if ind.extra_properties:
-            for key in ind.extra_properties:
-                # Declare new Counter() if it's not delcared
-                if key not in extra_prop_counter_dict:
-                    extra_prop_counter_dict[key] = Counter()
-
-                extra_prop_counter_dict[key].update((ind.extra_properties[key],))
-                individuals_extra_prop[key] = dict(extra_prop_counter_dict[key])
+        # Comment out this count for now since it explodes the response
+        # if ind.extra_properties:
+        #     for key in ind.extra_properties:
+        #         # Declare new Counter() if it's not delcared
+        #         if key not in extra_prop_counter_dict:
+        #             extra_prop_counter_dict[key] = Counter()
+        #
+        #         extra_prop_counter_dict[key].update((ind.extra_properties[key],))
+        #         individuals_extra_prop[key] = dict(extra_prop_counter_dict[key])
 
         if ind.age is not None:
             individuals_age.update((parse_individual_age(ind.age),))
@@ -164,7 +165,7 @@ def overview(_request):
                 "taxonomy": dict(individuals_taxonomy),
                 "age": dict(individuals_age),
                 "ethnicity": dict(individuals_ethnicity),
-                "extra_properties": dict(individuals_extra_prop),
+                # "extra_properties": dict(individuals_extra_prop),
             },
             "phenotypic_features": {
                 # count is a number of unique phenotypic feature types (not all pfs in the database)
