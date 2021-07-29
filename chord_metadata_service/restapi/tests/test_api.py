@@ -58,6 +58,7 @@ class OverviewTest(APITestCase):
         # phenopackets
         self.assertEqual(response_obj['phenopackets'], 2)
         self.assertEqual(response_obj['data_type_specific']['individuals']['count'], 2)
+        self.assertIsInstance(response_obj['data_type_specific']['individuals']['age'], dict)
         self.assertEqual(response_obj['data_type_specific']['biosamples']['count'], 2)
         self.assertEqual(response_obj['data_type_specific']['phenotypic_features']['count'], 1)
         self.assertEqual(response_obj['data_type_specific']['diseases']['count'], 1)
