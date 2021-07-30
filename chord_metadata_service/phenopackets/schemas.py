@@ -33,7 +33,7 @@ __all__ = [
 
 ALLELE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:allele_schema",
+    "$id": "katsu:phenopackets:allele",
     "title": "Allele schema",
     "description": "Variant allele types",
     "type": "object",
@@ -72,7 +72,7 @@ ALLELE_SCHEMA = describe_schema({
 
 PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:external_reference_schema",
+    "$id": "katsu:phenopackets:external_reference",
     "title": "External reference schema",
     "type": "object",
     "properties": {
@@ -89,7 +89,7 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
 
 PHENOPACKET_UPDATE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:update_schema",
+    "$id": "katsu:phenopackets:update",
     "title": "Updates schema",
     "type": "object",
     "properties": {
@@ -110,8 +110,10 @@ PHENOPACKET_UPDATE_SCHEMA = describe_schema({
 
 
 # noinspection PyProtectedMember
+PHENOPACKET_META_DATA_SCHEMA_ID = "katsu:phenopackets:meta_data"
 PHENOPACKET_META_DATA_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": PHENOPACKET_META_DATA_SCHEMA_ID,
     "type": "object",
     "properties": {
         "created": {
@@ -125,10 +127,12 @@ PHENOPACKET_META_DATA_SCHEMA = describe_schema({
             "type": "string",
         },
         "resources": {
+            "$id": f"{PHENOPACKET_META_DATA_SCHEMA_ID}:resources",
             "type": "array",
             "items": RESOURCE_SCHEMA,
         },
         "updates": {
+            "$id": f"{PHENOPACKET_META_DATA_SCHEMA_ID}:updates",
             "type": "array",
             "items": PHENOPACKET_UPDATE_SCHEMA,
         },
@@ -136,6 +140,7 @@ PHENOPACKET_META_DATA_SCHEMA = describe_schema({
             "type": "string",
         },
         "external_references": {
+            "$id": f"{PHENOPACKET_META_DATA_SCHEMA_ID}:external_references",
             "type": "array",
             "items": PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
         },
@@ -145,7 +150,7 @@ PHENOPACKET_META_DATA_SCHEMA = describe_schema({
 
 PHENOPACKET_EVIDENCE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:evidence_schema",
+    "$id": "katsu:phenopackets:evidence",
     "title": "Evidence schema",
     "type": "object",
     "properties": {
@@ -157,6 +162,8 @@ PHENOPACKET_EVIDENCE_SCHEMA = describe_schema({
 }, descriptions.EVIDENCE)
 
 PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:phenotypic_feature",
     "type": "object",
     "properties": {
         "description": {
@@ -180,6 +187,8 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
 
 # TODO: search
 PHENOPACKET_GENE_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:gene",
     "type": "object",
     "properties": {
         "id": {
@@ -201,6 +210,8 @@ PHENOPACKET_GENE_SCHEMA = describe_schema({
 
 
 PHENOPACKET_HTS_FILE_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:hts_file",
     "type": "object",
     "properties": {
         "uri": {
@@ -226,6 +237,8 @@ PHENOPACKET_HTS_FILE_SCHEMA = describe_schema({
 
 # TODO: search??
 PHENOPACKET_VARIANT_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:variant",
     "type": "object",  # TODO
     "properties": {
         "allele": ALLELE_SCHEMA,  # TODO
@@ -235,7 +248,10 @@ PHENOPACKET_VARIANT_SCHEMA = describe_schema({
 }, descriptions.VARIANT)
 
 # noinspection PyProtectedMember
+PHENOPACKET_BIOSAMPLE_SCHEMA_ID = "katsu:phenopackets:biosample"
 PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:biosample",
     "type": "object",
     "properties": {
         "id": {
@@ -249,6 +265,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
         },
         "sampled_tissue": ONTOLOGY_CLASS,
         "phenotypic_features": {
+            "$id": f"{PHENOPACKET_BIOSAMPLE_SCHEMA_ID}:phenotypic_features",
             "type": "array",
             "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA,
         },
@@ -258,10 +275,12 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
         "tumor_progression": ONTOLOGY_CLASS,
         "tumor_grade": ONTOLOGY_CLASS,  # TODO: Is this a list?
         "diagnostic_markers": {
+            "$id": f"{PHENOPACKET_BIOSAMPLE_SCHEMA_ID}:diagnostic_markers",
             "type": "array",
             "items": ONTOLOGY_CLASS,
         },
         "procedure": {
+            "$id": f"{PHENOPACKET_BIOSAMPLE_SCHEMA_ID}:procedure",
             "type": "object",
             "properties": {
                 "code": ONTOLOGY_CLASS,
@@ -270,10 +289,12 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
             "required": ["code"],
         },
         "hts_files": {
+            "$id": f"{PHENOPACKET_BIOSAMPLE_SCHEMA_ID}:hts_files",
             "type": "array",
             "items": PHENOPACKET_HTS_FILE_SCHEMA
         },
         "variants": {
+            "$id": f"{PHENOPACKET_BIOSAMPLE_SCHEMA_ID}:variants",
             "type": "array",
             "items": PHENOPACKET_VARIANT_SCHEMA
         },
@@ -288,7 +309,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
 
 PHENOPACKET_DISEASE_ONSET_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:disease_onset_schema",
+    "$id": "katsu:phenopackets:disease_onset",
     "title": "Onset age",
     "description": "Schema for the age of the onset of the disease.",
     "type": "object",
@@ -299,19 +320,22 @@ PHENOPACKET_DISEASE_ONSET_SCHEMA = {
     ]
 }
 
+PHENOPACKET_DISEASE_SCHEMA_ID = "katsu:phenopackets:disease"
 PHENOPACKET_DISEASE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:disease_schema",
+    "$id": PHENOPACKET_DISEASE_SCHEMA_ID,
     "title": "Disease schema",
     "type": "object",
     "properties": {
         "term": ONTOLOGY_CLASS,
         "onset": PHENOPACKET_DISEASE_ONSET_SCHEMA,
         "disease_stage": {
+            "$id": f"{PHENOPACKET_DISEASE_SCHEMA_ID}:disease_stage",
             "type": "array",
             "items": ONTOLOGY_CLASS,
         },
         "tnm_finding": {
+            "$id": f"{PHENOPACKET_DISEASE_SCHEMA_ID}:tnm_finding",
             "type": "array",
             "items": ONTOLOGY_CLASS,
         },
@@ -322,9 +346,10 @@ PHENOPACKET_DISEASE_SCHEMA = describe_schema({
 
 # Deduplicate with other phenopacket representations
 # noinspection PyProtectedMember
+PHENOPACKET_SCHEMA_ID = "katsu:phenopackets:phenopacket"
 PHENOPACKET_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:phenopacket_schema",
+    "$id": PHENOPACKET_SCHEMA_ID,
     "title": "Phenopacket schema",
     "description": "Schema for metadata service datasets",
     "type": "object",
@@ -334,26 +359,32 @@ PHENOPACKET_SCHEMA = describe_schema({
         },
         "subject": INDIVIDUAL_SCHEMA,
         "phenotypic_features": {
+            "$id": f"{PHENOPACKET_SCHEMA_ID}:phenotypic_features",
             "type": "array",
             "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA
         },
         "biosamples": {
+            "$id": f"{PHENOPACKET_SCHEMA_ID}:biosamples",
             "type": "array",
             "items": PHENOPACKET_BIOSAMPLE_SCHEMA
         },
         "genes": {
+            "$id": f"{PHENOPACKET_SCHEMA_ID}:genes",
             "type": "array",
             "items": PHENOPACKET_GENE_SCHEMA
         },
         "variants": {
+            "$id": f"{PHENOPACKET_SCHEMA_ID}:variants",
             "type": "array",
             "items": PHENOPACKET_VARIANT_SCHEMA
         },
         "diseases": {  # TODO: Too sensitive for search?
+            "$id": f"{PHENOPACKET_SCHEMA_ID}:diseases",
             "type": "array",
             "items": PHENOPACKET_DISEASE_SCHEMA,
         },  # TODO
         "hts_files": {
+            "$id": f"{PHENOPACKET_SCHEMA_ID}:hts_files",
             "type": "array",
             "items": PHENOPACKET_HTS_FILE_SCHEMA  # TODO
         },

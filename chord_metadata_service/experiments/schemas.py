@@ -8,7 +8,7 @@ __all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
 
 EXPERIMENT_RESULT_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:experiment_result_schema",
+    "$id": "katsu:experiments:experiment_result",
     "title": "Experiment result schema",
     "description": "Schema for describing information about analysis of sequencing data in a file format.",
     "type": "object",
@@ -60,7 +60,7 @@ EXPERIMENT_RESULT_SCHEMA = describe_schema({
 
 INSTRUMENT_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:instrument_schema",
+    "$id": "katsu:experiments:instrument",
     "title": "Instrument schema",
     "description": "Schema for describing an instrument used for a sequencing experiment.",
     "type": "object",
@@ -84,7 +84,7 @@ INSTRUMENT_SCHEMA = describe_schema({
 
 EXPERIMENT_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:experiment_schema",
+    "$id": "katsu:experiments:experiment",
     "title": "Experiment schema",
     "description": "Schema for describing an experiment.",
     "type": "object",

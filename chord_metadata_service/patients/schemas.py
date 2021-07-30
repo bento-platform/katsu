@@ -16,8 +16,10 @@ COMORBID_CONDITION = customize_schema(
 )
 
 
+INDIVIDUAL_SCHEMA_ID = "katsu:patients:individual"
 INDIVIDUAL_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": INDIVIDUAL_SCHEMA_ID,
     "type": "object",
     "properties": {
         "id": {
@@ -25,6 +27,7 @@ INDIVIDUAL_SCHEMA = describe_schema({
             "description": "Unique researcher-specified identifier for the individual.",
         },
         "alternate_ids": {
+            "$id": f"{INDIVIDUAL_SCHEMA_ID}:alternate_ids",
             "type": "array",
             "items": {
                 "type": "string",
@@ -37,11 +40,13 @@ INDIVIDUAL_SCHEMA = describe_schema({
         },
         "age": AGE_OR_AGE_RANGE,
         "sex": {
+            "$id": f"{INDIVIDUAL_SCHEMA_ID}:sex",
             "type": "string",
             "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
             "description": "An individual's phenotypic sex.",
         },
         "karyotypic_sex": {
+            "$id": f"{INDIVIDUAL_SCHEMA_ID}:karyotypic_sex",
             "type": "string",
             "enum": [
                 "UNKNOWN_KARYOTYPE",

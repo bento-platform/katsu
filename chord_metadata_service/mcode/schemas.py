@@ -11,7 +11,7 @@ from . import descriptions as d
 # FHIR Quantity https://www.hl7.org/fhir/datatypes.html#Quantity
 QUANTITY = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:quantity_schema",
+    "$id": "katsu:mcode:quantity",
     "title": "Quantity schema",
     "description": "Schema for the datatype Quantity.",
     "type": "object",
@@ -39,7 +39,7 @@ QUANTITY = {
 # FHIR CodeableConcept https://www.hl7.org/fhir/datatypes.html#CodeableConcept
 CODEABLE_CONCEPT = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:codeable_concept_schema",
+    "$id": "katsu:mcode:codeable_concept",
     "title": "Codeable Concept schema",
     "description": "Schema for the datatype Concept.",
     "type": "object",
@@ -67,7 +67,7 @@ CODEABLE_CONCEPT = {
 # FHIR Period https://www.hl7.org/fhir/datatypes.html#Period
 PERIOD = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:period_schema",
+    "$id": "katsu:mcode:period",
     "title": "Period",
     "description": "Period schema.",
     "type": "object",
@@ -87,7 +87,7 @@ PERIOD = {
 # FHIR Ratio https://www.hl7.org/fhir/datatypes.html#Ratio
 RATIO = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:ratio",
+    "$id": "katsu:mcode:ratio",
     "title": "Ratio",
     "description": "Ratio schema.",
     "type": "object",
@@ -102,7 +102,7 @@ RATIO = {
 
 TIME_OR_PERIOD = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:time_or_period",
+    "$id": "katsu:mcode:time_or_period",
     "title": "Time of Period",
     "description": "Time of Period schema.",
     "type": "object",
@@ -119,7 +119,7 @@ TIME_OR_PERIOD = {
 
 TUMOR_MARKER_DATA_VALUE = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:tumor_marker_data_value",
+    "$id": "katsu:mcode:tumor_marker_data_value",
     "title": "Tumor marker data value",
     "description": "Tumor marker data value schema.",
     "type": "object",
@@ -141,7 +141,7 @@ COMPLEX_ONTOLOGY = customize_schema(
     second_typeof=ONTOLOGY_CLASS,
     first_property="data_value",
     second_property="staging_system",
-    schema_id="chord_metadata_service:complex_ontology_schema",
+    schema_id="katsu:mcode:complex_ontology",
     title="Complex ontology",
     description="Complex object to combine data value and staging system.",
     required=["data_value"]
@@ -152,6 +152,8 @@ COMPLEX_ONTOLOGY = customize_schema(
 
 
 MCODE_GENETIC_SPECIMEN_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:mcode:genetic_specimen",
     "type": "object",
     "properties": {
         "id": {
@@ -167,6 +169,8 @@ MCODE_GENETIC_SPECIMEN_SCHEMA = describe_schema({
 
 
 MCODE_CANCER_GENETIC_VARIANT_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:mcode:cancer_genetic_variant",
     "type": "object",
     "properties": {
         "id": {
@@ -196,6 +200,8 @@ MCODE_CANCER_GENETIC_VARIANT_SCHEMA = describe_schema({
 
 
 MCODE_GENOMIC_REGION_STUDIED_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:mcode:genomic_region_studied",
     "type": "object",
     "properties": {
         "id": {
@@ -221,6 +227,8 @@ MCODE_GENOMIC_REGION_STUDIED_SCHEMA = describe_schema({
 
 
 MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:mcode:genomics_report",
     "type": "object",
     "properties": {
         "id": {
@@ -247,6 +255,8 @@ MCODE_GENOMICS_REPORT_SCHEMA = describe_schema({
 
 
 MCODE_LABS_VITAL_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:mcode:labs_vital",
     "type": "object",
     "properties": {
         "id": {
@@ -264,6 +274,8 @@ MCODE_LABS_VITAL_SCHEMA = describe_schema({
 
 
 MCODE_TNM_STAGING_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:mcode:tnm_staging",
     "type": "object",
     "properties": {
         "id": {
@@ -298,6 +310,8 @@ MCODE_TNM_STAGING_SCHEMA = describe_schema({
 
 
 MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:mcode:cancer_condition",
     "type": "object",
     "properties": {
         "id": {
@@ -329,6 +343,8 @@ MCODE_CANCER_CONDITION_SCHEMA = describe_schema({
 
 
 MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:mcode:cancer_related_procedure",
     "type": "object",
     "properties": {
         "id": {
@@ -359,6 +375,8 @@ MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = describe_schema({
 
 
 MCODE_MEDICATION_STATEMENT_SCHEMA = describe_schema({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:mcode:medication",
     "type": "object",
     "properties": {
         "id": {
@@ -383,7 +401,7 @@ MCODE_MEDICATION_STATEMENT_SCHEMA = describe_schema({
 
 MCODE_SCHEMA = describe_schema({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:mcode_schema",
+    "$id": "katsu:mcode:mcode",
     "title": "Metadata service customized mcode schema",
     "description": "Schema for describe mcode data elements in metadata service.",
     "type": "object",
