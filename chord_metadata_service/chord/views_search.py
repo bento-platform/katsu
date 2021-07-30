@@ -15,13 +15,19 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from typing import Any, Callable, Dict
 
+from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
+
 from chord_metadata_service.mcode.models import MCodePacket
+from chord_metadata_service.mcode.serializers import MCodePacketSerializer
+
 from chord_metadata_service.metadata.elastic import es
 from chord_metadata_service.metadata.settings import DEBUG, CHORD_SERVICE_ARTIFACT, CHORD_SERVICE_ID
+
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
+
+from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
@@ -264,7 +270,18 @@ def data_type_results(query, params, key="id"):
 def experiment_query_results(query, params):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: Prefetch related biosample or no?
-    return Experiment.objects.filter(id__in=data_type_results(query, params, "id"))
+    return Experiment.objects \
+        .filter(id__in=data_type_results(query, params, "id")) \
+        .select_related(*EXPERIMENT_SELECT_REL) \
+        .prefetch_related(*EXPERIMENT_PREFETCH)
+
+
+def mcodepacket_query_results(query, params):
+    # TODO: possibly a quite inefficient way of doing things...
+    # TODO: select_related / prefetch_related for instant performance boost!
+    return MCodePacket.objects.filter(
+        id__in=data_type_results(query, params, "id")
+    )
 
 
 def phenopacket_query_results(query, params):
@@ -274,14 +291,23 @@ def phenopacket_query_results(query, params):
     # to the DB. prefetch_related works on M2M relationships and makes
     # sure that, for instance, when querying diseases, we won't make multiple call
     # for the same set of data
-    return Phenopacket.objects.filter(
-        id__in=data_type_results(query, params, "id")
-    ).select_related(
-        'subject',
-        'meta_data'
-    ).prefetch_related(
-        *PHENOPACKET_PREFETCH
-    )
+    return Phenopacket.objects \
+        .filter(id__in=data_type_results(query, params, "id")) \
+        .select_related(*PHENOPACKET_SELECT_REL) \
+        .prefetch_related(*PHENOPACKET_PREFETCH)
+
+
+QUERY_RESULTS_FN: Dict[str, Callable] = {
+    DATA_TYPE_EXPERIMENT: experiment_query_results,
+    DATA_TYPE_MCODEPACKET: mcodepacket_query_results,
+    DATA_TYPE_PHENOPACKET: phenopacket_query_results,
+}
+
+QUERY_RESULT_SERIALIZERS = {
+    DATA_TYPE_EXPERIMENT: ExperimentSerializer,
+    DATA_TYPE_MCODEPACKET: MCodePacketSerializer,
+    DATA_TYPE_PHENOPACKET: PhenopacketSerializer,
+}
 
 
 def search(request, internal_data=False):
@@ -313,12 +339,11 @@ def search(request, internal_data=False):
             params=params,
             key="table_id"
         ))  # TODO: Maybe can avoid hitting DB here
-        return Response(build_search_response([{"id": t.identifier, "data_type": DATA_TYPE_PHENOPACKET}
+        return Response(build_search_response([{"id": t.identifier, "data_type": data_type}
                                                for t in tables], start))
 
-    # TODO: Dict-ify
-    serializer_class = PhenopacketSerializer if data_type == DATA_TYPE_PHENOPACKET else ExperimentSerializer
-    query_function = phenopacket_query_results if data_type == DATA_TYPE_PHENOPACKET else experiment_query_results
+    serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
+    query_function = QUERY_RESULTS_FN[data_type]
 
     return Response(build_search_response({
         table_id: {
@@ -459,12 +484,12 @@ def chord_table_search(request, table_id, internal=False):
         compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"],
                                                                        DATA_TYPES[table.data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
-        print("[CHORD Metadata] Error encountered compiling query {}:\n    {}".format(request.data["query"], str(e)))
+        print(f"[CHORD Metadata] Error encountered compiling query {request.data['query']}:\n    {str(e)}")
         return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
     debug_log(f"Finished compiling query in {datetime.now() - start}")
 
-    query_results = phenopacket_query_results(  # TODO: Generic
+    query_results = QUERY_RESULTS_FN[table.data_type](
         query=sql.SQL("{} AND table_id = {}").format(compiled_query, sql.Placeholder()),
         params=params + (table.identifier,)
     )
@@ -472,7 +497,7 @@ def chord_table_search(request, table_id, internal=False):
     debug_log(f"Finished running query in {datetime.now() - start}")
 
     if internal:
-        serialized_data = PhenopacketSerializer(query_results, many=True).data
+        serialized_data = QUERY_RESULT_SERIALIZERS[table.data_type](query_results, many=True).data
         debug_log(f"Finished running query and serializing in {datetime.now() - start}")
 
         return Response(build_search_response(serialized_data, start))
