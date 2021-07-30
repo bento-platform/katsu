@@ -41,19 +41,6 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
             "type": "string"
         },
         "extra_properties": KEY_VALUE_OBJECT,
-    },
-    "if": {
-        "properties": {"data_output_type": {"const": ["Raw data"]}}
-    },
-    "then": {
-        "properties": {"file_format": {"enum": ["SAM", "BAM", "CRAM", "BAI", "CRAI", "VCF", "BCF", "GVCF",
-                                                "BigWig", "BigBed", "FASTA", "FASTQ", "TAB", "SRA", "SRF",
-                                                "SFF", "GFF", "TABIX", "UNKNOWN", "OTHER"]}}
-    },
-    "else": {
-        "properties": {"file_format": {"enum": ["SAM", "BAM", "CRAM", "BAI", "CRAI", "BCF", "GVCF",
-                                                "BigWig", "BigBed", "FASTA", "FASTQ", "TAB", "SRA", "SRF",
-                                                "SFF", "GFF", "TABIX", "UNKNOWN", "OTHER"]}}
     }
 }, EXPERIMENT_RESULT)
 
