@@ -32,6 +32,7 @@ from chord_metadata_service.restapi.fhir_ingest import (
 from chord_metadata_service.mcode.parse_fhir_mcode import parse_bundle
 from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
+from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
 
 requests_unixsocket.monkeypatch()
 
@@ -224,6 +225,20 @@ class IngestError(Exception):
     pass
 
 
+def schema_validation(obj, schema):
+    v = jsonschema.Draft7Validator(schema, format_checker=jsonschema.FormatChecker())
+    try:
+        jsonschema.validate(obj, schema, format_checker=jsonschema.FormatChecker())
+        logger.info("JSON schema validation passed.")
+        return True
+    except jsonschema.exceptions.ValidationError:
+        errors = [e for e in v.iter_errors(obj)]
+        logger.info("JSON schema validation failed.")
+        for i, error in enumerate(errors, 1):
+            logger.error(f"{i} Validation error in {'.'.join(str(v) for v in error.path)}: {error.message}")
+        return False
+
+
 def create_phenotypic_feature(pf):
     pf_obj = pm.PhenotypicFeature(
         description=pf.get("description", ""),
@@ -293,8 +308,13 @@ def ingest_resource(resource: dict) -> rm.Resource:
     return rs_obj
 
 
-def ingest_experiment(experiment_data, table_id) -> em.Experiment:
+def ingest_experiment(experiment_data, table_id):
     """Ingests a single experiment."""
+
+    # validate experiment data against experiments schema
+    validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA)
+    if not validation:
+        return
 
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
     study_type = experiment_data.get("study_type")
@@ -349,22 +369,9 @@ def ingest_experiment(experiment_data, table_id) -> em.Experiment:
 def ingest_phenopacket(phenopacket_data, table_id):
     """Ingests a single phenopacket."""
 
-    v = jsonschema.Draft7Validator(PHENOPACKET_SCHEMA, format_checker=jsonschema.FormatChecker())
-    try:
-        jsonschema.validate(
-            phenopacket_data,
-            PHENOPACKET_SCHEMA,
-            format_checker=jsonschema.FormatChecker(),
-        )
-        logger.info("JSON schema validation passed.")
-
-    except jsonschema.exceptions.ValidationError:
-        errors = [e for e in v.iter_errors(phenopacket_data)]
-        logger.info(f"JSON schema validation failed. Errors: {errors}")
-        for i, error in enumerate(errors, 1):
-            logger.error(
-                f"{i} Validation error in {'.'.join(str(v) for v in error.path)}: {error.message}",
-            )
+    # validate phenopackets data against phenopacket schema
+    validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
+    if not validation:
         return
 
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))

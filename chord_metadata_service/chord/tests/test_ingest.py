@@ -10,18 +10,23 @@ from chord_metadata_service.chord.ingest import (
     WORKFLOW_PHENOPACKETS_JSON,
     create_phenotypic_feature,
     WORKFLOW_INGEST_FUNCTION_MAP,
-    WORKFLOW_EXPERIMENTS_JSON
+    WORKFLOW_EXPERIMENTS_JSON,
+    schema_validation
 )
 from chord_metadata_service.phenopackets.models import PhenotypicFeature, Phenopacket
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
+from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
+
 
 from .constants import VALID_DATA_USE_1
 from .example_ingest import (
     EXAMPLE_INGEST_PHENOPACKET,
     EXAMPLE_INGEST_OUTPUTS,
     EXAMPLE_INGEST_EXPERIMENT,
-    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT
+    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
+    EXAMPLE_INGEST_INVALID_PHENOPACKET,
 )
 
 
@@ -89,6 +94,18 @@ class IngestTest(TestCase):
         p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
         self.assertNotEqual(p.id, p2.id)
         # TODO: More
+
+    def test_ingesting_invalid_phenopackets_json(self):
+        # check invalid phenopacket, must fail validation
+        validation = schema_validation(EXAMPLE_INGEST_INVALID_PHENOPACKET, PHENOPACKET_SCHEMA)
+        self.assertEqual(validation, False)
+        # valid phenopacket passes validation
+        validation_2 = schema_validation(EXAMPLE_INGEST_PHENOPACKET, PHENOPACKET_SCHEMA)
+        self.assertEqual(validation_2, True)
+        # valid experiments pass validation
+        for exp in EXAMPLE_INGEST_EXPERIMENT["experiments"]:
+            validation_3 = schema_validation(exp, EXPERIMENT_SCHEMA)
+            self.assertEqual(validation_3, True)
 
     def test_ingesting_experiments_json(self):
         # ingest phenopackets data in order to match to biosample ids
