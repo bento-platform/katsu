@@ -1,5 +1,4 @@
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
-from chord_metadata_service.restapi.description_utils import describe_schema
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe
 

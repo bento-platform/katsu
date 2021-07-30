@@ -4,7 +4,6 @@ from chord_metadata_service.restapi.schema_utils import (
     tag_ids_and_describe,
 )
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ONTOLOGY_CLASS_LIST, EXTRA_PROPERTIES_SCHEMA
-from chord_metadata_service.restapi.description_utils import describe_schema
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from . import descriptions as d
 
