@@ -49,3 +49,7 @@ class TestSchemaMerge(TestCase):
         self.assertEqual(tagged["properties"]["key1"]["items"]["$id"], "schema1:key1:item")
         self.assertEqual(tagged["properties"]["key2"]["$id"], "schema1:key2")
         self.assertEqual(tagged["properties"]["key2"]["properties"]["key1"]["$id"], "schema1:key2:key1")
+
+    def test_id_raises(self):
+        with self.assertRaises(ValueError):
+            tag_schema_with_nested_ids({"type": "object", "properties": {"a": {"type": "string"}}})
