@@ -38,9 +38,9 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     Create a new experiment
     """
 
-    queryset = Experiment.objects.all()\
-        .select_related(*EXPERIMENT_SELECT_REL)\
-        .prefetch_related(*EXPERIMENT_PREFETCH)\
+    queryset = Experiment.objects.all() \
+        .select_related(*EXPERIMENT_SELECT_REL) \
+        .prefetch_related(*EXPERIMENT_PREFETCH) \
         .order_by("id")
     serializer_class = ExperimentSerializer
     pagination_class = LargeResultsSetPagination
