@@ -15,7 +15,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from typing import Any, Callable, Dict
 
-from chord_metadata_service.experiments.api_views import EXPERIMENT_PREFETCH
+from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
 
@@ -27,7 +27,7 @@ from chord_metadata_service.metadata.settings import DEBUG, CHORD_SERVICE_ARTIFA
 
 from chord_metadata_service.patients.models import Individual
 
-from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH
+from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
@@ -270,13 +270,10 @@ def data_type_results(query, params, key="id"):
 def experiment_query_results(query, params):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: Prefetch related biosample or no?
-    return Experiment.objects.filter(
-        id__in=data_type_results(query, params, "id")
-    ).select_related(
-        'instrument',
-    ).prefetch_related(
-        *EXPERIMENT_PREFETCH
-    )
+    return Experiment.objects \
+        .filter(id__in=data_type_results(query, params, "id")) \
+        .select_related(*EXPERIMENT_SELECT_REL) \
+        .prefetch_related(*EXPERIMENT_PREFETCH)
 
 
 def mcodepacket_query_results(query, params):
@@ -294,14 +291,10 @@ def phenopacket_query_results(query, params):
     # to the DB. prefetch_related works on M2M relationships and makes
     # sure that, for instance, when querying diseases, we won't make multiple call
     # for the same set of data
-    return Phenopacket.objects.filter(
-        id__in=data_type_results(query, params, "id")
-    ).select_related(
-        'subject',
-        'meta_data'
-    ).prefetch_related(
-        *PHENOPACKET_PREFETCH
-    )
+    return Phenopacket.objects \
+        .filter(id__in=data_type_results(query, params, "id")) \
+        .select_related(*PHENOPACKET_SELECT_REL) \
+        .prefetch_related(*PHENOPACKET_PREFETCH)
 
 
 QUERY_RESULTS_FN: Dict[str, Callable] = {

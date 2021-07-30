@@ -14,10 +14,15 @@ from .filters import ExperimentFilter
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 __all__ = [
+    "EXPERIMENT_SELECT_REL",
     "EXPERIMENT_PREFETCH",
     "ExperimentViewSet",
     "get_experiment_schema",
 ]
+
+EXPERIMENT_SELECT_REL = (
+    "instrument",
+)
 
 EXPERIMENT_PREFETCH = (
     "experiment_results",
@@ -33,7 +38,10 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     Create a new experiment
     """
 
-    queryset = Experiment.objects.all().prefetch_related(*EXPERIMENT_PREFETCH).order_by("id")
+    queryset = Experiment.objects.all()\
+        .select_related(*EXPERIMENT_SELECT_REL)\
+        .prefetch_related(*EXPERIMENT_PREFETCH)\
+        .order_by("id")
     serializer_class = ExperimentSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)

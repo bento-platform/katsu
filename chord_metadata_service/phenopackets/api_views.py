@@ -158,9 +158,9 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     post:
     Create a new biosample
     """
-    queryset = m.Biosample.objects.all()\
-        .prefetch_related(*BIOSAMPLE_PREFETCH)\
-        .select_related(*BIOSAMPLE_SELECT_REL)\
+    queryset = m.Biosample.objects.all() \
+        .prefetch_related(*BIOSAMPLE_PREFETCH) \
+        .select_related(*BIOSAMPLE_SELECT_REL) \
         .order_by("id")
     serializer_class = s.BiosampleSerializer
     filter_backends = [DjangoFilterBackend]
