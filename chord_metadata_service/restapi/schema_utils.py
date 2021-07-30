@@ -1,10 +1,14 @@
 from typing import List, Optional
 
+from .description_utils import describe_schema
+
 __all__ = [
     "merge_schema_dictionaries",
     "search_optional_eq",
     "search_optional_str",
     "tag_schema_with_search_properties",
+    "tag_schema_with_nested_ids",
+    "tag_ids_and_describe",
     "customize_schema",
     "schema_list",
 ]
@@ -73,6 +77,39 @@ def tag_schema_with_search_properties(schema, search_descriptions: Optional[dict
         }
 
     return schema_with_search
+
+
+def tag_schema_with_nested_ids(schema: dict):
+    if "$id" not in schema:
+        raise ValueError("Schema to tag with nested IDs must have $id")
+
+    schema_id = schema["$id"]
+    schema_type = schema.get("type")
+
+    if schema_type == "object":
+        return {
+            **schema,
+            "properties": {
+                k: tag_schema_with_nested_ids({**v, "$id": f"{schema_id}:{k}"} if "$id" not in v else v)
+                for k, v in schema["properties"].items()
+            },
+        } if "properties" in schema else schema
+
+    if schema_type == "array":
+        return {
+            **schema,
+            "items": tag_schema_with_nested_ids({
+                **schema["items"],
+                "$id": f"{schema_id}:item",
+            } if "$id" not in schema["items"] else schema["items"]),
+        } if "items" in schema else schema
+
+    # If nothing to tag, return itself (base case)
+    return schema
+
+
+def tag_ids_and_describe(schema: dict, descriptions: dict):
+    return tag_schema_with_nested_ids(describe_schema(schema, descriptions))
 
 
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,

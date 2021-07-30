@@ -1,5 +1,6 @@
 from . import descriptions
-from .description_utils import describe_schema, EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
+from .description_utils import EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
+from .schema_utils import tag_ids_and_describe, tag_schema_with_nested_ids
 
 # Individual schemas for validation of JSONField values
 
@@ -20,7 +21,7 @@ __all__ = [
 # ======================== Phenopackets based schemas =========================
 
 
-ONTOLOGY_CLASS = describe_schema({
+ONTOLOGY_CLASS = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:common:ontology_class",
     "title": "Ontology class schema",
@@ -55,20 +56,20 @@ KEY_VALUE_OBJECT = {
     "additionalProperties": False
 }
 
-EXTRA_PROPERTIES_SCHEMA = describe_schema({
+EXTRA_PROPERTIES_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:common:extra_properties",
     "type": "object"
 }, EXTRA_PROPERTIES)
 
 
-AGE_STRING = describe_schema({
+AGE_STRING = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:common:age_string",
     "type": "string"
 }, descriptions.AGE)
 
-AGE = describe_schema({
+AGE = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:common:age",
     "title": "Age schema",
@@ -81,7 +82,7 @@ AGE = describe_schema({
 }, descriptions.AGE_NESTED)
 
 
-AGE_RANGE = describe_schema({
+AGE_RANGE = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:common:age_range",
     "title": "Age range schema",
@@ -126,7 +127,7 @@ DISEASE_ONSET = {
 # The schema used to validate FHIR data for ingestion
 
 
-FHIR_BUNDLE_SCHEMA = {
+FHIR_BUNDLE_SCHEMA = tag_schema_with_nested_ids({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:common:fhir_bundle",
     "description": "FHIR Bundle schema",
@@ -151,4 +152,4 @@ FHIR_BUNDLE_SCHEMA = {
     },
     "additionalProperties": True,
     "required": ["resourceType", "entry"]
-}
+})

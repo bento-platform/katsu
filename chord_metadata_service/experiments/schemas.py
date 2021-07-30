@@ -1,12 +1,13 @@
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.description_utils import describe_schema
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
+from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe
 
 
 __all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
 
 
-EXPERIMENT_RESULT_SCHEMA = describe_schema({
+EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:experiments:experiment_result",
     "title": "Experiment result schema",
@@ -58,7 +59,7 @@ EXPERIMENT_RESULT_SCHEMA = describe_schema({
 }, EXPERIMENT_RESULT)
 
 
-INSTRUMENT_SCHEMA = describe_schema({
+INSTRUMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:experiments:instrument",
     "title": "Instrument schema",
@@ -82,7 +83,7 @@ INSTRUMENT_SCHEMA = describe_schema({
 }, INSTRUMENT)
 
 
-EXPERIMENT_SCHEMA = describe_schema({
+EXPERIMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:experiments:experiment",
     "title": "Experiment schema",
