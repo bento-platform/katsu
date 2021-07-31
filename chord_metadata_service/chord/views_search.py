@@ -13,7 +13,7 @@ from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
@@ -469,23 +469,15 @@ def fhir_private_search(request):
     return fhir_search(request, internal_data=True)
 
 
-def chord_table_search(request, table_id, internal=False):
-    start = datetime.now()
-    debug_log(f"Started {'private' if internal else 'public'} table search")
-
-    if request.data is None or "query" not in request.data:
-        # TODO: Better error
-        return Response(errors.bad_request_error("Missing query in request body"), status=400)
-
+def chord_table_search(query, table_id, start, internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
     # Check that dataset exists
     table = Table.objects.get(ownership_record_id=table_id)
 
     try:
-        compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"],
-                                                                       DATA_TYPES[table.data_type]["schema"])
+        compiled_query, params = postgres.search_query_to_psycopg2_sql(query, DATA_TYPES[table.data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
-        print(f"[CHORD Metadata] Error encountered compiling query {request.data['query']}:\n    {str(e)}")
-        return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
+        print(f"[CHORD Metadata] Error encountered compiling query {query}:\n    {str(e)}")
+        return None, f"Error compiling query (message: {str(e)})"
 
     debug_log(f"Finished compiling query in {datetime.now() - start}")
 
@@ -494,15 +486,33 @@ def chord_table_search(request, table_id, internal=False):
         params=params + (table.identifier,)
     )
 
-    debug_log(f"Finished running query in {datetime.now() - start}")
-
     if internal:
+        debug_log(f"Started fetching from queryset and serializing data at {datetime.now() - start}")
         serialized_data = QUERY_RESULT_SERIALIZERS[table.data_type](query_results, many=True).data
         debug_log(f"Finished running query and serializing in {datetime.now() - start}")
 
-        return Response(build_search_response(serialized_data, start))
+        return serialized_data, None
 
-    return Response(len(query_results) > 0)
+    return len(query_results) > 0, None
+
+
+def chord_table_search_response(request, table_id, internal=False):
+    start = datetime.now()
+    debug_log(f"Started {'private' if internal else 'public'} table search")
+
+    if request.data is None or "query" not in request.data:
+        # TODO: Better error
+        return Response(errors.bad_request_error("Missing query in request body"), status=400)
+
+    data, err = chord_table_search(request.data["query"], table_id, start, internal=internal)
+
+    if err:
+        return Response(errors.bad_request_error(err), status=400)
+
+    if internal:
+        return Response(build_search_response(data, start))
+
+    return Response(data)
 
 
 # Cache page for the requested url
@@ -511,7 +521,7 @@ def chord_table_search(request, table_id, internal=False):
 @permission_classes([AllowAny])
 def chord_public_table_search(request, table_id):
     # Search data types in specific tables without leaking internal data
-    return chord_table_search(request, table_id, internal=False)
+    return chord_table_search_response(request, table_id, internal=False)
 
 
 # Mounted on /private/, so will get protected anyway; this allows for access from federation service
@@ -523,4 +533,4 @@ def chord_public_table_search(request, table_id):
 def chord_private_table_search(request, table_id):
     # Search data types in specific tables
     # Private search endpoints are protected by URL namespace, not by Django permissions.
-    return chord_table_search(request, table_id, internal=True)
+    return chord_table_search_response(request, table_id, internal=True)
