@@ -312,7 +312,7 @@ QUERY_RESULT_SERIALIZERS = {
 
 def search(request, internal_data=False):
     if request.method == "POST":
-    data_type = request.data.get("data_type")
+        data_type = request.data.get("data_type")
     else:
         data_type = request.query_params.get("data_type")
 
@@ -343,8 +343,7 @@ def search(request, internal_data=False):
             params=params,
             key="table_id"
         ))  # TODO: Maybe can avoid hitting DB here
-        return Response(build_search_response([{"id": t.identifier, "data_type": data_type}
-                                               for t in tables], start))
+        return Response(build_search_response([{"id": t.identifier, "data_type": data_type} for t in tables], start))
 
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
     query_function = QUERY_RESULTS_FN[data_type]
