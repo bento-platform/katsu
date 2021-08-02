@@ -311,25 +311,29 @@ QUERY_RESULT_SERIALIZERS = {
 
 
 def search(request, internal_data=False):
+    if request.method == "POST":
     data_type = request.data.get("data_type")
+    else:
+        data_type = request.query_params.get("data_type")
 
     if not data_type:
         return Response(errors.bad_request_error("Missing data_type in request body"), status=400)
 
-    if "query" not in request.data:
+    if request.method == "POST":
+        query = request.data.get("query")
+    else:
+        query = request.query_params.get("query")
+
+    if query is None:
         return Response(errors.bad_request_error("Missing query in request body"), status=400)
 
     start = datetime.now()
 
     if data_type not in DATA_TYPES:
-        return Response(
-            errors.bad_request_error(f"Missing or invalid data type (Specified: {request.data['data_type']})"),
-            status=400
-        )
+        return Response(errors.bad_request_error(f"Missing or invalid data type (Specified: {data_type})"), status=400)
 
     try:
-        compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"],
-                                                                       DATA_TYPES[data_type]["schema"])
+        compiled_query, params = postgres.search_query_to_psycopg2_sql(query, DATA_TYPES[data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
         return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
@@ -358,7 +362,7 @@ def search(request, internal_data=False):
 
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_search(request):
     return search(request, internal_data=False)
@@ -368,7 +372,7 @@ def chord_search(request):
 # TODO: Ugly and misleading permissions
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_private_search(request):
     # Private search endpoints are protected by URL namespace, not by Django permissions.
@@ -500,7 +504,14 @@ def chord_table_search_response(request, table_id, internal=False):
     start = datetime.now()
     debug_log(f"Started {'private' if internal else 'public'} table search")
 
-    if request.data is None or "query" not in request.data:
+    # We let people either use GET or POST. Get stuff from params if GET, or data if POST.
+
+    if request.method == "POST":
+        query = (request.data or {}).get("query")
+    else:
+        query = request.query_params.get("query")
+
+    if query is None:
         # TODO: Better error
         return Response(errors.bad_request_error("Missing query in request body"), status=400)
 
@@ -517,7 +528,7 @@ def chord_table_search_response(request, table_id, internal=False):
 
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_public_table_search(request, table_id):
     # Search data types in specific tables without leaking internal data
@@ -528,7 +539,7 @@ def chord_public_table_search(request, table_id):
 # TODO: Ugly and misleading permissions
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_private_table_search(request, table_id):
     # Search data types in specific tables
