@@ -322,7 +322,12 @@ def search(request, internal_data=False):
     if request.method == "POST":
         query = request.data.get("query")
     else:
-        query = request.query_params.get("query")
+        query = request.query_params.get("query", "null")  # This'll get decoded to None as a fallback case
+
+        try:
+            query = json.loads(query)
+        except json.decoder.JSONDecodeError:
+            return Response(errors.bad_request_error("Invalid query JSON"), status=400)
 
     if query is None:
         return Response(errors.bad_request_error("Missing query in request body"), status=400)
@@ -507,8 +512,14 @@ def chord_table_search_response(request, table_id, internal=False):
 
     if request.method == "POST":
         query = (request.data or {}).get("query")
+
     else:
-        query = request.query_params.get("query")
+        query = request.query_params.get("query", "null")  # This will get decoded to None as a fallback case
+
+        try:
+            query = json.loads(query)
+        except json.decoder.JSONDecodeError:
+            return Response(errors.bad_request_error("Invalid query JSON"), status=400)
 
     if query is None:
         # TODO: Better error
