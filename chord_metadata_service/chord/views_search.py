@@ -312,7 +312,7 @@ QUERY_RESULT_SERIALIZERS = {
 
 def search(request, internal_data=False):
     if request.method == "POST":
-        data_type = request.data.get("data_type")
+        data_type = (request.data or {}).get("data_type")
     else:
         data_type = request.query_params.get("data_type")
 
@@ -320,14 +320,15 @@ def search(request, internal_data=False):
         return Response(errors.bad_request_error("Missing data_type in request body"), status=400)
 
     if request.method == "POST":
-        query = request.data.get("query")
+        query = (request.data or {}).get("query")
     else:
+        print(request.query_params)
         query = request.query_params.get("query", "null")  # This'll get decoded to None as a fallback case
 
         try:
             query = json.loads(query)
         except json.decoder.JSONDecodeError:
-            return Response(errors.bad_request_error("Invalid query JSON"), status=400)
+            return Response(errors.bad_request_error(f"Invalid query JSON: {query}"), status=400)
 
     if query is None:
         return Response(errors.bad_request_error("Missing query in request body"), status=400)
@@ -385,7 +386,6 @@ def chord_private_search(request):
 
 def phenopacket_filter_results(subject_ids, htsfile_ids, disease_ids, biosample_ids,
                                phenotypicfeature_ids, phenopacket_ids):
-
     query = Phenopacket.objects.get_queryset()
 
     if subject_ids:
@@ -525,7 +525,7 @@ def chord_table_search_response(request, table_id, internal=False):
         # TODO: Better error
         return Response(errors.bad_request_error("Missing query in request body"), status=400)
 
-    data, err = chord_table_search(request.data["query"], table_id, start, internal=internal)
+    data, err = chord_table_search(query, table_id, start, internal=internal)
 
     if err:
         return Response(errors.bad_request_error(err), status=400)
