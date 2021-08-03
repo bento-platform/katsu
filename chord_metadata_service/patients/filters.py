@@ -131,6 +131,40 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 "phenopackets__hts_files__genome_assembly",
                                 Cast("phenopackets__hts_files__individual_to_sample_identifiers", TextField()),
                                 Cast("phenopackets__hts_files__extra_properties", TextField()),
+
+                                # Experiment fields
+                                "phenopackets__biosamples__experiment__study_type",
+                                "phenopackets__biosamples__experiment__experiment_type",
+                                Cast("phenopackets__biosamples__experiment__experiment_ontology", TextField()),
+                                "phenopackets__biosamples__experiment__molecule",
+                                Cast("phenopackets__biosamples__experiment__molecule_ontology", TextField()),
+                                "phenopackets__biosamples__experiment__library_strategy",
+                                "phenopackets__biosamples__experiment__library_source",
+                                "phenopackets__biosamples__experiment__library_selection",
+                                "phenopackets__biosamples__experiment__library_layout",
+                                "phenopackets__biosamples__experiment__extraction_protocol",
+                                "phenopackets__biosamples__experiment__reference_registry_id",
+                                Cast("phenopackets__biosamples__experiment__extra_properties", TextField()),
+                                # Experiments: Experiment Results fields
+                                "phenopackets__biosamples__experiment__experiment_results__description",
+                                "phenopackets__biosamples__experiment__experiment_results__filename",
+                                "phenopackets__biosamples__experiment__experiment_results__file_format",
+                                "phenopackets__biosamples__experiment__experiment_results__data_output_type",
+                                "phenopackets__biosamples__experiment__experiment_results__usage",
+                                "phenopackets__biosamples__experiment__experiment_results__creation_date",
+                                "phenopackets__biosamples__experiment__experiment_results__created_by",
+                                Cast(
+                                    "phenopackets__biosamples__experiment__experiment_results__extra_properties",
+                                    TextField()
+                                ),
+                                # Experiments: Instrument fields
+                                "phenopackets__biosamples__experiment__instrument__platform",
+                                "phenopackets__biosamples__experiment__instrument__description",
+                                "phenopackets__biosamples__experiment__instrument__model",
+                                Cast(
+                                    "phenopackets__biosamples__experiment__instrument__extra_properties",
+                                    TextField()
+                                ),
                                 )
         ).filter(search=value).distinct("id")
         return qs
