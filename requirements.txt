@@ -74,6 +74,7 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
 sqlparse==0.3.1
 strict-rfc3339==0.7
+tabulate==0.8.9
 toml==0.10.2
 tox==3.22.0
 uritemplate==3.0.1
