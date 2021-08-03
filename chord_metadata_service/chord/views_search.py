@@ -411,14 +411,18 @@ def phenopacket_filter_results(subject_ids, htsfile_ids, disease_ids, biosample_
     return res
 
 
-# TODO: unsure why we chose POST for this endpoint? Should be GET me thinks
 def fhir_search(request, internal_data=False):
     # TODO: not all that sure about the query format we'll want
     # keep it simple for now
-    if "query" not in request.data:
+
+    if request.method == "POST":
+        query = (request.data or {}).get("query")
+    else:
+        query = request.query_params.get("query")
+
+    if query is None:
         return Response(errors.bad_request_error("Missing query in request body"), status=400)
 
-    query = request.data["query"]
     start = datetime.now()
 
     if not es:
@@ -463,7 +467,7 @@ def fhir_search(request, internal_data=False):
     }, start))
 
 
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def fhir_public_search(request):
     return fhir_search(request)
@@ -471,7 +475,7 @@ def fhir_public_search(request):
 
 # Mounted on /private/, so will get protected anyway
 # TODO: Ugly and misleading permissions
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def fhir_private_search(request):
     return fhir_search(request, internal_data=True)

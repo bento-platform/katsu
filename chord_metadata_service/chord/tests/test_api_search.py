@@ -451,32 +451,32 @@ class SearchTest(APITestCase):
     def test_fhir_search(self, mocked_es):
         mocked_es.search.return_value = SEARCH_SUCCESS
         # Valid search with result
-        r = self.client.post(reverse("fhir-search"), data=json.dumps({
-            "data_type": DATA_TYPE_PHENOPACKET,
-            "query": TEST_FHIR_SEARCH_QUERY
-        }), content_type="application/json")
+        for method in POST_GET:
+            r = self._search_call("fhir-search", data={
+                "query": TEST_FHIR_SEARCH_QUERY
+            }, method=method)
 
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        c = r.json()
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
 
-        self.assertEqual(len(c["results"]), 1)
-        self.assertDictEqual(c["results"][0], {
-            "id": str(self.table.identifier),
-            "data_type": DATA_TYPE_PHENOPACKET
-        })
+            self.assertEqual(len(c["results"]), 1)
+            self.assertDictEqual(c["results"][0], {
+                "id": str(self.table.identifier),
+                "data_type": DATA_TYPE_PHENOPACKET
+            })
 
     @patch('chord_metadata_service.chord.views_search.es')
     def test_private_fhir_search(self, mocked_es):
         mocked_es.search.return_value = SEARCH_SUCCESS
         # Valid search with result
-        r = self.client.post(reverse("fhir-private-search"), data=json.dumps({
-            "data_type": DATA_TYPE_PHENOPACKET,
-            "query": TEST_FHIR_SEARCH_QUERY
-        }), content_type="application/json")
+        for method in POST_GET:
+            r = self._search_call("fhir-private-search", data={
+                "query": TEST_FHIR_SEARCH_QUERY
+            }, method=method)
 
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        c = r.json()
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
 
-        self.assertIn(str(self.table.identifier), c["results"])
-        self.assertEqual(c["results"][str(self.table.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
-        self.assertEqual(self.phenopacket.id, c["results"][str(self.table.identifier)]["matches"][0]["id"])
+            self.assertIn(str(self.table.identifier), c["results"])
+            self.assertEqual(c["results"][str(self.table.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
+            self.assertEqual(self.phenopacket.id, c["results"][str(self.table.identifier)]["matches"][0]["id"])
