@@ -13,7 +13,7 @@ from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
@@ -311,25 +311,35 @@ QUERY_RESULT_SERIALIZERS = {
 
 
 def search(request, internal_data=False):
-    data_type = request.data.get("data_type")
+    if request.method == "POST":
+        data_type = (request.data or {}).get("data_type")
+    else:
+        data_type = request.query_params.get("data_type")
 
     if not data_type:
         return Response(errors.bad_request_error("Missing data_type in request body"), status=400)
 
-    if "query" not in request.data:
+    if request.method == "POST":
+        query = (request.data or {}).get("query")
+    else:
+        print(request.query_params)
+        query = request.query_params.get("query", "null")  # This'll get decoded to None as a fallback case
+
+        try:
+            query = json.loads(query)
+        except json.decoder.JSONDecodeError:
+            return Response(errors.bad_request_error(f"Invalid query JSON: {query}"), status=400)
+
+    if query is None:
         return Response(errors.bad_request_error("Missing query in request body"), status=400)
 
     start = datetime.now()
 
     if data_type not in DATA_TYPES:
-        return Response(
-            errors.bad_request_error(f"Missing or invalid data type (Specified: {request.data['data_type']})"),
-            status=400
-        )
+        return Response(errors.bad_request_error(f"Missing or invalid data type (Specified: {data_type})"), status=400)
 
     try:
-        compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"],
-                                                                       DATA_TYPES[data_type]["schema"])
+        compiled_query, params = postgres.search_query_to_psycopg2_sql(query, DATA_TYPES[data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
         return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
 
@@ -339,8 +349,7 @@ def search(request, internal_data=False):
             params=params,
             key="table_id"
         ))  # TODO: Maybe can avoid hitting DB here
-        return Response(build_search_response([{"id": t.identifier, "data_type": data_type}
-                                               for t in tables], start))
+        return Response(build_search_response([{"id": t.identifier, "data_type": data_type} for t in tables], start))
 
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
     query_function = QUERY_RESULTS_FN[data_type]
@@ -358,7 +367,7 @@ def search(request, internal_data=False):
 
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_search(request):
     return search(request, internal_data=False)
@@ -368,7 +377,7 @@ def chord_search(request):
 # TODO: Ugly and misleading permissions
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_private_search(request):
     # Private search endpoints are protected by URL namespace, not by Django permissions.
@@ -377,7 +386,6 @@ def chord_private_search(request):
 
 def phenopacket_filter_results(subject_ids, htsfile_ids, disease_ids, biosample_ids,
                                phenotypicfeature_ids, phenopacket_ids):
-
     query = Phenopacket.objects.get_queryset()
 
     if subject_ids:
@@ -403,14 +411,18 @@ def phenopacket_filter_results(subject_ids, htsfile_ids, disease_ids, biosample_
     return res
 
 
-# TODO: unsure why we chose POST for this endpoint? Should be GET me thinks
 def fhir_search(request, internal_data=False):
     # TODO: not all that sure about the query format we'll want
     # keep it simple for now
-    if "query" not in request.data:
+
+    if request.method == "POST":
+        query = (request.data or {}).get("query")
+    else:
+        query = request.query_params.get("query")
+
+    if query is None:
         return Response(errors.bad_request_error("Missing query in request body"), status=400)
 
-    query = request.data["query"]
     start = datetime.now()
 
     if not es:
@@ -455,7 +467,7 @@ def fhir_search(request, internal_data=False):
     }, start))
 
 
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def fhir_public_search(request):
     return fhir_search(request)
@@ -463,29 +475,21 @@ def fhir_public_search(request):
 
 # Mounted on /private/, so will get protected anyway
 # TODO: Ugly and misleading permissions
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def fhir_private_search(request):
     return fhir_search(request, internal_data=True)
 
 
-def chord_table_search(request, table_id, internal=False):
-    start = datetime.now()
-    debug_log(f"Started {'private' if internal else 'public'} table search")
-
-    if request.data is None or "query" not in request.data:
-        # TODO: Better error
-        return Response(errors.bad_request_error("Missing query in request body"), status=400)
-
+def chord_table_search(query, table_id, start, internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
     # Check that dataset exists
     table = Table.objects.get(ownership_record_id=table_id)
 
     try:
-        compiled_query, params = postgres.search_query_to_psycopg2_sql(request.data["query"],
-                                                                       DATA_TYPES[table.data_type]["schema"])
+        compiled_query, params = postgres.search_query_to_psycopg2_sql(query, DATA_TYPES[table.data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
-        print(f"[CHORD Metadata] Error encountered compiling query {request.data['query']}:\n    {str(e)}")
-        return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
+        print(f"[CHORD Metadata] Error encountered compiling query {query}:\n    {str(e)}")
+        return None, f"Error compiling query (message: {str(e)})"
 
     debug_log(f"Finished compiling query in {datetime.now() - start}")
 
@@ -494,33 +498,64 @@ def chord_table_search(request, table_id, internal=False):
         params=params + (table.identifier,)
     )
 
-    debug_log(f"Finished running query in {datetime.now() - start}")
-
     if internal:
+        debug_log(f"Started fetching from queryset and serializing data at {datetime.now() - start}")
         serialized_data = QUERY_RESULT_SERIALIZERS[table.data_type](query_results, many=True).data
         debug_log(f"Finished running query and serializing in {datetime.now() - start}")
 
-        return Response(build_search_response(serialized_data, start))
+        return serialized_data, None
 
-    return Response(len(query_results) > 0)
+    return len(query_results) > 0, None
+
+
+def chord_table_search_response(request, table_id, internal=False):
+    start = datetime.now()
+    debug_log(f"Started {'private' if internal else 'public'} table search")
+
+    # We let people either use GET or POST. Get stuff from params if GET, or data if POST.
+
+    if request.method == "POST":
+        query = (request.data or {}).get("query")
+
+    else:
+        query = request.query_params.get("query", "null")  # This will get decoded to None as a fallback case
+
+        try:
+            query = json.loads(query)
+        except json.decoder.JSONDecodeError:
+            return Response(errors.bad_request_error("Invalid query JSON"), status=400)
+
+    if query is None:
+        # TODO: Better error
+        return Response(errors.bad_request_error("Missing query in request body"), status=400)
+
+    data, err = chord_table_search(query, table_id, start, internal=internal)
+
+    if err:
+        return Response(errors.bad_request_error(err), status=400)
+
+    if internal:
+        return Response(build_search_response(data, start))
+
+    return Response(data)
 
 
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_public_table_search(request, table_id):
     # Search data types in specific tables without leaking internal data
-    return chord_table_search(request, table_id, internal=False)
+    return chord_table_search_response(request, table_id, internal=False)
 
 
 # Mounted on /private/, so will get protected anyway; this allows for access from federation service
 # TODO: Ugly and misleading permissions
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_private_table_search(request, table_id):
     # Search data types in specific tables
     # Private search endpoints are protected by URL namespace, not by Django permissions.
-    return chord_table_search(request, table_id, internal=True)
+    return chord_table_search_response(request, table_id, internal=True)

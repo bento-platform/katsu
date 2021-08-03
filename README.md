@@ -18,7 +18,7 @@
      * [Branching](#branching)
      * [Tests](#tests)
      * [Terminal Commands](#terminal-commands)
-        * [Bento Commands](#bento-commands)
+        * [Project/Dataset/Table/Ingestion Commands](#projectdatasettableingestion-commands)
         * [Patient Commands](#patient-commands)
         * [Phenopacket Commands](#phenopacket-commands)
      * [Accessing the Django Shell from inside a Bento Container](#accessing-the-django-shell-from-inside-a-bento-container)
@@ -33,7 +33,7 @@ under the BSD 3-clause license.
 
 ## Funding
 
-Katsu Metadata service development is funded by CANARIE under the CHORD project.
+CANARIE funded initial development of the Katsu Metadata service under the CHORD project.
 
 ## Architecture
 
@@ -128,8 +128,9 @@ for a standalone instance of this server, so it can be swapped out.
 By default, `katsu` uses the CHORD permission system, which
 functions as follows:
 
-  * URLs under the `/private` namespace are assumed to be protected by an
-    **out-of-band** mechanism such as a properly-configured reverse proxy.
+  * The service assumes that an **out-of-band** mechanism (such as a 
+    properly-configured reverse proxy) protects URLs under the `/private` 
+    namespace.
   * Requests with the headers `X-User` and `X-User-Role` can be authenticated
     via a Django Remote User-type system, with `X-User-Role: owner` giving
     access to restricted endpoints and `X-User-Role: user` giving less trusted,
@@ -159,7 +160,8 @@ out and tagged from the tagged major/minor release in `master`.
 
 ### Tests
 
-Tests are located in tests directory in an individual app folder.
+Each individual Django app folder within the project contains relevant tests
+(if applicable) in the `tests` directory.
 
 Run all tests and linting checks for the whole project:
 
@@ -205,6 +207,15 @@ output including the new ID for the project, which is needed when creating
 datasets under the project.
 
 ```
+$ ./manage.py list_projects
+identifier         title  description       created                           updated
+-----------------  -----  ----------------  --------------------------------  --------------------------------
+756a4530-59b7-...  test   test description  2021-01-07 22:36:05.460537+00:00  2021-01-07 22:36:05.460570+00:00
+```
+
+Lists all projects currently in the system.
+
+```
 $ ./manage.py create_dataset \
   "dataset title" \
   "dataset description" \
@@ -222,6 +233,15 @@ Creates a new dataset under the project specified (with its ID), with
 corresponding title, description, contact information, and data use conditions.
 
 ```
+$ ./manage.py list_project_datasets 756a4530-59b7-4d47-a04a-c6ee5aa52565
+identifier                            title          description
+------------------------------------  -------------  -------------------
+2a8f8e68-a34f-4d31-952a-22f362ebee9e  dataset title  dataset description
+```
+
+Lists all datasets under a specified project.
+
+```
 $ ./manage.py create_table \
   "table name" \
   phenopacket \
@@ -236,6 +256,15 @@ Table created: table name (ID: 0d63bafe-5d76-46be-82e6-3a07994bac2e, Type: pheno
 
 Creates a new data table under the dataset specified (with its ID), with a 
 corresponding name and data type (either `phenopacket` or `experiment`.)
+
+```
+$ ./manage.py list_dataset_tables 2a8f8e68-a34f-4d31-952a-22f362ebee9e
+ownership_record__table_id  name        data_type    created                           updated
+--------------------------  ----------  -----------  --------------------------------  --------------------------------
+0d63bafe-5d76-46be-82e6...  table name  phenopacket  2021-01-08 15:09:52.346934+00:00  2021-01-08 15:09:52.346966+00:00
+```
+
+Lists all tables under a specified dataset.
 
 ```"
 $ ./manage.py ingest \
