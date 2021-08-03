@@ -15,6 +15,7 @@ from .models import (
     Interpretation,
 )
 from chord_metadata_service.resources.serializers import ResourceSerializer
+from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.restapi import fhir_utils
 from chord_metadata_service.restapi.serializers import GenericSerializer
 
@@ -156,6 +157,7 @@ class BiosampleSerializer(GenericSerializer):
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
     procedure = ProcedureSerializer(exclude_when_nested=['id'])
     variants = VariantSerializer(read_only=True, many=True)
+    experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
 
     class Meta:
         model = Biosample
