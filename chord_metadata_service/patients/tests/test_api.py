@@ -151,6 +151,7 @@ class IndividualFullTextSearchTest(APITestCase):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
+    @override_settings(CANDIG_OPA_URL=None)
     def test_search(self):
         get_resp_1 = self.client.get('/api/individuals?search=P49Y')
         self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
