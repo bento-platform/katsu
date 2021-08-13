@@ -3,8 +3,6 @@ from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .serializers import ExperimentSerializer
@@ -30,8 +28,6 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filter_class = ExperimentFilter
 
-    # Cache page for the requested url for 2 hours
-    @method_decorator(cache_page(60 * 60 * 2))
     def dispatch(self, *args, **kwargs):
         return super(ExperimentViewSet, self).dispatch(*args, **kwargs)
 

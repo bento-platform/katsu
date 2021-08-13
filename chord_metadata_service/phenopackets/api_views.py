@@ -1,17 +1,12 @@
-from collections import Counter
 from rest_framework import viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, FHIRRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
-from chord_metadata_service.restapi.utils import parse_individual_age
-from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from . import models as m, serializers as s, filters as f
 
@@ -344,4 +339,3 @@ def get_chord_phenopacket_schema(_request):
     Chord phenopacket schema that can be shared with data providers.
     """
     return Response(PHENOPACKET_SCHEMA)
-

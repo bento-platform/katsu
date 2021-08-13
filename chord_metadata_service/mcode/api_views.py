@@ -3,8 +3,6 @@ from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from .schemas import MCODE_SCHEMA
 from . import models as m, serializers as s
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
@@ -15,8 +13,6 @@ class McodeModelViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
 
-    # Cache page for the requested url for 2 hours
-    @method_decorator(cache_page(60 * 60 * 2))
     def dispatch(self, *args, **kwargs):
         return super(McodeModelViewSet, self).dispatch(*args, **kwargs)
 
