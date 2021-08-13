@@ -14,7 +14,7 @@ import os
 import sys
 import logging
 
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
 from .. import __version__
@@ -44,8 +44,9 @@ CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for runn
 CHORD_PERMISSIONS = os.environ.get("CHORD_PERMISSIONS", str(not DEBUG)).lower() == "true"
 
 CHORD_SERVICE_ARTIFACT = "metadata"
-CHORD_SERVICE_TYPE = f"ca.c3g.chord:{CHORD_SERVICE_ARTIFACT}:{__version__}"
-CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE)
+CHORD_SERVICE_TYPE_NO_VER = f"ca.c3g.chord:{CHORD_SERVICE_ARTIFACT}"
+CHORD_SERVICE_TYPE = f"{CHORD_SERVICE_TYPE_NO_VER}:{__version__}"
+CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE_NO_VER)
 
 # SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
 AUTH_OVERRIDE = not CHORD_PERMISSIONS
@@ -59,6 +60,14 @@ if DEBUG:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
 
 APPEND_SLASH = False
+
+# Bento misc. settings
+
+SERVICE_TEMP = os.environ.get("SERVICE_TEMP")
+
+#  - DRS URL - by default in Bento Singularity context, use internal NGINX DRS (to avoid auth hassles)
+NGINX_INTERNAL_SOCKET = quote(os.environ.get("NGINX_INTERNAL_SOCKET", "/chord/tmp/nginx_internal.sock"), safe="")
+DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/drs").strip().rstrip("/")
 
 # Candig-specific settings
 
@@ -77,6 +86,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
 
     'chord_metadata_service.chord.apps.ChordConfig',
     'chord_metadata_service.experiments.apps.ExperimentsConfig',
@@ -183,7 +193,17 @@ DATABASES = {
     }
 }
 
+# Django default cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
 FHIR_INDEX_NAME = 'fhir_metadata'
+
+# Set to True to run ES for FHIR index
+ELASTICSEARCH = False
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

@@ -76,6 +76,7 @@ class FHIRIndividualTest(APITestCase):
         self.individual = VALID_INDIVIDUAL
         self.individual_second = VALID_INDIVIDUAL_2
 
+    @override_settings(CANDIG_OPA_URL=None)
     def test_get_fhir(self):
         response_1 = get_response('individuals-list', self.individual)
         response_2 = get_response('individuals-list', self.individual_second)
