@@ -16,7 +16,7 @@ from chord_metadata_service.chord.ingest import (
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 
 from ..parse_fhir_mcode import parse_bundle, patient_to_individual
-from ..models import MCodePacket
+from ..models import MCodePacket, CancerCondition, MedicationStatement, CancerRelatedProcedure
 
 
 with open(os.path.join(os.path.dirname(__file__), "example_mcode_fhir.json"), "r") as pf:
@@ -115,3 +115,15 @@ class IngestMcodeJsonTest(TestCase):
         self.assertEqual(individual.karnofsky["id"], "100")
         self.assertEqual(individual.race, "Unknown")
         self.assertEqual(individual.ethnicity, "Unknown")
+        # cancer condition
+        self.assertEqual(len(CancerCondition.objects.all()), 1)
+        cancer_condition = CancerCondition.objects.filter(condition_type="primary")[0]
+        self.assertEqual("active", cancer_condition.clinical_status["label"])
+        # mcodepacket
+        self.assertEqual(len(MCodePacket.objects.all()), 1)
+        mcodepacket =  MCodePacket.objects.all()[0]
+        self.assertEqual(mcodepacket.cancer_disease_status["label"], "Patient's condition improved")
+        # medication statement
+        self.assertEqual(len(MedicationStatement.objects.all()), 1)
+        # tumor marker
+        self.assertEqual(len(CancerRelatedProcedure.objects.all()), 1)
