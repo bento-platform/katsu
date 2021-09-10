@@ -33,10 +33,19 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
             id=subject["id"],
             defaults={
                 "alternate_ids": subject.get("alternate_ids", None),
-                "sex": subject.get("sex", ""),
                 "date_of_birth": subject.get("date_of_birth", None),
+                "age": subject.get("age", None),
+                "sex": subject.get("sex", None),
+                "karyotypic_sex": subject.get("karyotypic_sex", ""),
+                "taxonomy": subject.get("taxonomy", None),
                 "active": subject.get("active", False),
-                "deceased": subject.get("deceased", False)
+                "deceased": subject.get("deceased", False),
+                "comorbid_condition": subject.get("comorbid_condition", None),
+                "ecog_performance_status": subject.get("ecog_performance_status", None),
+                "karnofsky": subject.get("karnofsky", None),
+                "race": subject.get("race", ""),
+                "ethnicity": subject.get("ethnicity", ""),
+                "extra_properties": subject.get("extra_properties", None),
             }
         )
         _logger_message(s_created, subject)
