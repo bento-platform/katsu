@@ -121,7 +121,7 @@ class IngestMcodeJsonTest(TestCase):
         self.assertEqual("active", cancer_condition.clinical_status["label"])
         # mcodepacket
         self.assertEqual(len(MCodePacket.objects.all()), 1)
-        mcodepacket =  MCodePacket.objects.all()[0]
+        mcodepacket = MCodePacket.objects.all()[0]
         self.assertEqual(mcodepacket.cancer_disease_status["label"], "Patient's condition improved")
         # medication statement
         self.assertEqual(len(MedicationStatement.objects.all()), 1)
