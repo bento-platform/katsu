@@ -49,7 +49,7 @@ class DataTypeTest(APITestCase):
         r = self.client.get(reverse("data-type-list"))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
-        self.assertEqual(len(c), 4)
+        self.assertEqual(len(c), 3)
         ids = (c[0]["id"], c[1]["id"], c[2]["id"])
         self.assertIn(DATA_TYPE_EXPERIMENT, ids)
         self.assertIn(DATA_TYPE_MCODEPACKET, ids)
