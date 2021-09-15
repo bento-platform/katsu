@@ -234,7 +234,7 @@ METADATA_WORKFLOWS = {
                     "id": "readset_files",
                     "type": "file",
                     "map_from_input": "readset_files",
-                    "value": "{}"
+                    "value": "{readset_files}"
                 }
             ]
 
