@@ -225,7 +225,8 @@ METADATA_WORKFLOWS = {
                 {
                     "id": "readset_files",
                     "type": "file[]",
-                    "required": True
+                    "required": True,
+                    "extensions": [".cram", ".bam", ".bigwig"]
                 }
             ],
             "outputs": [
