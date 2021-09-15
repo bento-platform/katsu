@@ -35,7 +35,9 @@ DATA_TYPES = {
         }
     },
     DATA_TYPE_READSET: {
-        "schema": EXPERIMENT_RESULT_SEARCH_SCHEMA["properties"]["file_format"],
+        "schema": {
+            "file_format": EXPERIMENT_RESULT_SEARCH_SCHEMA["properties"]["file_format"]
+        },
         "metadata_schema": {
             "type": "object"
         }
