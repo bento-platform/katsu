@@ -1,4 +1,4 @@
-workflow experiments_json {
+workflow readset {
     File readset_files
 
     call identity_task {
