@@ -711,7 +711,10 @@ def ingest_mcode_workflow(workflow_outputs, table_id):
                 ingest_mcodepacket(json_data, table_id)
 
 
-def ingest_readset_workflow(workflow_outputs):
+# the table_id is required to fit the bento_ingest.schema.json in bento_lib
+# it can be any existing table_id which can be validated
+# the workflow only performs copying files over to the DRS
+def ingest_readset_workflow(workflow_outputs, table_id):
     with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "readset_files")) as readset_file_path:
         logger.info(f"Attempting ingestion of Readset file from path: {readset_file_path}")
 
