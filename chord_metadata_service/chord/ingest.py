@@ -19,7 +19,7 @@ from django.conf import settings
 from bento_lib.drs.utils import get_access_method_of_type, fetch_drs_record_by_uri
 
 from chord_metadata_service.chord.data_types import (
-    DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
+    DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET, DATA_TYPE_READSET
 )
 from chord_metadata_service.chord.models import Table, TableOwnership
 from chord_metadata_service.experiments import models as em
@@ -219,7 +219,7 @@ METADATA_WORKFLOWS = {
         WORKFLOW_READSET: {
             "name": "Readset",
             "description": "This workflow will copy readset files over to DRS.",
-            "data_type": "readset",
+            "data_type": DATA_TYPE_READSET,
             "file": "readset.wdl",
             "inputs": [
                 {
