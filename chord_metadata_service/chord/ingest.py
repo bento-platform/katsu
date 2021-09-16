@@ -18,7 +18,9 @@ from django.conf import settings
 
 from bento_lib.drs.utils import get_access_method_of_type, fetch_drs_record_by_uri
 
-from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
+from chord_metadata_service.chord.data_types import (
+    DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET, DATA_TYPE_READSET
+)
 from chord_metadata_service.chord.models import Table, TableOwnership
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.phenopackets import models as pm
@@ -35,7 +37,6 @@ from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
 
 requests_unixsocket.monkeypatch()
-
 
 __all__ = [
     "METADATA_WORKFLOWS",
@@ -54,6 +55,7 @@ WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
 WORKFLOW_MCODE_JSON = "mcode_json"
+WORKFLOW_READSET = "readset"
 
 METADATA_WORKFLOWS = {
     "ingestion": {
@@ -211,6 +213,28 @@ METADATA_WORKFLOWS = {
                     "id": "json_document",
                     "type": "file",
                     "value": "{json_document}"
+                }
+            ]
+        },
+        WORKFLOW_READSET: {
+            "name": "Readset",
+            "description": "This workflow will copy readset files over to DRS.",
+            "data_type": DATA_TYPE_READSET,
+            "file": "readset.wdl",
+            "inputs": [
+                {
+                    "id": "readset_files",
+                    "type": "file[]",
+                    "required": True,
+                    "extensions": [".cram", ".bam", ".bigWig"]
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "readset_files",
+                    "type": "file[]",
+                    "map_from_input": "readset_files",
+                    "value": "{}"
                 }
             ]
         },
@@ -687,10 +711,21 @@ def ingest_mcode_workflow(workflow_outputs, table_id):
                 ingest_mcodepacket(json_data, table_id)
 
 
+# the table_id is required to fit the bento_ingest.schema.json in bento_lib
+# it can be any existing table_id which can be validated
+# the workflow only performs copying files over to the DRS
+def ingest_readset_workflow(workflow_outputs, table_id):
+    logger.info(f"Current workflow outputs : {workflow_outputs}")
+    for readset_file in _get_output_or_raise(workflow_outputs, "readset_files"):
+        with _workflow_file_output_to_path(readset_file) as readset_file_path:
+            logger.info(f"Attempting ingestion of Readset file from path: {readset_file_path}")
+
+
 WORKFLOW_INGEST_FUNCTION_MAP = {
     WORKFLOW_EXPERIMENTS_JSON: ingest_experiments_workflow,
     WORKFLOW_PHENOPACKETS_JSON: ingest_phenopacket_workflow,
     WORKFLOW_FHIR_JSON: ingest_fhir_workflow,
     WORKFLOW_MCODE_FHIR_JSON: ingest_mcode_fhir_workflow,
     WORKFLOW_MCODE_JSON: ingest_mcode_workflow,
+    WORKFLOW_READSET: ingest_readset_workflow,
 }

@@ -71,7 +71,7 @@ def ingest(request):
     # TODO: Use serializers with basic objects and maybe some more complex ones too (but for performance, this might
     #  not be optimal...)
 
-    logger.info(f"Recieved ingest request: {json.dumps(request.data)}")
+    logger.info(f"Received ingest request: {json.dumps(request.data)}")
 
     if not BENTO_INGEST_SCHEMA_VALIDATOR.is_valid(request.data):
         return Response(errors.bad_request_error("Invalid ingest request body"), status=400)  # TODO: Validation errors
