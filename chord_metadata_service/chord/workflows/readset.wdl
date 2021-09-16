@@ -1,17 +1,19 @@
 workflow readset {
-    File readset_files
+    Array[File] readset_files
 
-    call identity_task {
-        input: readset_files_in = readset_files
+    scatter(file in readset_files) {
+        call identity_task {
+            input: readset_file_in = file
+        }
     }
 }
 
 task identity_task {
-    File readset_files_in
+    File readset_file_in
     command {
         true
     }
     output {
-        File readset_files = "${readset_files_in}"
+        File readset_file = "${readset_file_in}"
     }
 }

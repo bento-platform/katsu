@@ -224,7 +224,7 @@ METADATA_WORKFLOWS = {
             "inputs": [
                 {
                     "id": "readset_files",
-                    "type": "file",
+                    "type": "file[]",
                     "required": True,
                     "extensions": [".cram", ".bam", ".bigwig"]
                 }
@@ -232,7 +232,7 @@ METADATA_WORKFLOWS = {
             "outputs": [
                 {
                     "id": "readset_files",
-                    "type": "file",
+                    "type": "file[]",
                     "map_from_input": "readset_files",
                     "value": "{readset_files}"
                 }
@@ -717,10 +717,9 @@ def ingest_mcode_workflow(workflow_outputs, table_id):
 # the workflow only performs copying files over to the DRS
 def ingest_readset_workflow(workflow_outputs, table_id):
     logger.info(f"Debugging : {workflow_outputs}")
-    print(_workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "readset_files")))
-    test = _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "readset_files"))
-    with test as readset_file_path:
-        logger.info(f"Attempting ingestion of Readset file from path: {readset_file_path}")
+    for readset_file in _get_output_or_raise(workflow_outputs, "readset_files"):
+        with _workflow_file_output_to_path(readset_file) as readset_file_path:
+            logger.info(f"Attempting ingestion of Readset file from path: {readset_file_path}")
 
 
 WORKFLOW_INGEST_FUNCTION_MAP = {
