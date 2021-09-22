@@ -349,7 +349,7 @@ def ingest_experiment(experiment_data, table_id):
     library_strategy = experiment_data.get("library_strategy")
     library_source = experiment_data.get("library_source")
     library_selection = experiment_data.get("library_selection")
-    library_layout = experiment_data.get("library_selection")
+    library_layout = experiment_data.get("library_layout")
     extraction_protocol = experiment_data.get("extraction_protocol")
     reference_registry_id = experiment_data.get("reference_registry_id")
     qc_flags = experiment_data.get("qc_flags", [])
