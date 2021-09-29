@@ -20,7 +20,7 @@ router.register(r'table_ownership', chord_views.TableOwnershipViewSet)
 router.register(r'tables', chord_views.TableViewSet)
 
 # Experiments app urls
-router.register(r'experiments', experiment_views.ExperimentViewSet)
+router.register(r'experiments', experiment_views.ExperimentViewSet, basename='experiment')
 
 # Patients app urls
 router.register(r'individuals', individual_views.IndividualViewSet)
@@ -65,4 +65,5 @@ urlpatterns = [
          name="mcode-schema"),
     # overview
     path('overview', overview, name="overview"),
+    path('listexperiments', experiment_views.list_experiments, name="listexperiments")
 ]
