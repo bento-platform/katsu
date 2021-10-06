@@ -393,7 +393,7 @@ def fhir_composition(obj):
     composition.section = []
     sections = ['biosamples', 'variants', 'diseases', 'hts_files']
     for section in sections:
-        if obj[section]:
+        if section in obj and obj[section]:
             section_content = _get_section_object(obj.get(section, None), section)
             composition.section.append(section_content)
 
