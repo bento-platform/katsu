@@ -15,7 +15,7 @@ from .models import (
     Interpretation,
 )
 from chord_metadata_service.resources.serializers import ResourceSerializer
-from chord_metadata_service.experiments.serializers import ExperimentSerializer
+from chord_metadata_service.experiments.serializers import ExperimentSerializer, ListExperimentSerializer
 from chord_metadata_service.restapi import fhir_utils
 from chord_metadata_service.restapi.serializers import GenericSerializer
 
@@ -34,6 +34,9 @@ __all__ = [
     "GenomicInterpretationSerializer",
     "DiagnosisSerializer",
     "InterpretationSerializer",
+
+    "SimpleBiosampleSerializer",
+    "ListPhenopacketSerializer",
 ]
 
 
@@ -152,11 +155,26 @@ class DiseaseSerializer(GenericSerializer):
         class_converter = fhir_utils.fhir_condition
 
 
+class SimpleBiosampleSerializer(GenericSerializer):
+    experiments_count = serializers.SerializerMethodField(source='experiment_set')
+
+    class Meta:
+        model = Biosample
+        fields = ['id', 'sampled_tissue', 'taxonomy', 'individual_age_at_collection', 'experiments_count']
+        # meta info for converting to FHIR
+        fhir_datatype_plural = 'specimens'
+        class_converter = fhir_utils.fhir_specimen
+
+    def get_experiments_count(self, obj):
+        return len(obj.experiment_set.all())
+
+
 class BiosampleSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
     procedure = ProcedureSerializer(exclude_when_nested=['id'])
     variants = VariantSerializer(read_only=True, many=True)
+    # has to be changed to simple ListSerializer
     experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
 
     class Meta:
@@ -228,6 +246,29 @@ class PhenopacketSerializer(SimplePhenopacketSerializer):
             instance.subject,
             exclude_when_nested=["phenopackets", "biosamples"]
             ).data
+        return response
+
+
+class ListPhenopacketSerializer(GenericSerializer):
+    phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True, fields=["type"])
+    diseases = DiseaseSerializer(read_only=True, many=True, fields=["term"])
+    biosamples = SimpleBiosampleSerializer(read_only=True, many=True)
+    meta_data = MetaDataSerializer(read_only=True, fields=["created", "created_by", "submitted_by",
+                                                           "phenopacket_schema_version", "updated"])
+
+    class Meta:
+        model = Phenopacket
+        fields = ['id', 'subject', 'phenotypic_features', 'diseases', 'meta_data', 'biosamples']
+        # meta info for converting to FHIR
+        fhir_datatype_plural = 'compositions'
+        class_converter = fhir_utils.fhir_composition
+
+    def to_representation(self, instance):
+        # Phenopacket serializer for nested individuals - need to import here to
+        # prevent circular import issues.
+        from chord_metadata_service.patients.serializers import ListIndividualSerializer
+        response = super().to_representation(instance)
+        response['subject'] = ListIndividualSerializer(instance.subject, exclude_when_nested=["biosamples"]).data
         return response
 
 
