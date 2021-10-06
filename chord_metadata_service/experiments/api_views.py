@@ -51,14 +51,14 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     filter_class = ExperimentFilter
 
     # a simple not nested serializer for list view
-    # def list(self, request):
-    #     queryset = Experiment.objects.all()
-    #     # apply filtering
-    #     filtered_queryset = self.filter_queryset(queryset)
-    #     # paginate
-    #     paginated_queryset = self.paginate_queryset(filtered_queryset)
-    #     serializer = ListExperimentSerializer(paginated_queryset, many=True)
-    #     return self.get_paginated_response(serializer.data)
+    def list(self, request):
+        queryset = Experiment.objects.all()
+        # apply filtering
+        filtered_queryset = self.filter_queryset(queryset)
+        # paginate
+        paginated_queryset = self.paginate_queryset(filtered_queryset)
+        serializer = ListExperimentSerializer(paginated_queryset, many=True)
+        return self.get_paginated_response(serializer.data)
 
     # Cache page for the requested url for 2 hours
     @method_decorator(cache_page(60 * 60 * 2))
@@ -106,7 +106,6 @@ def get_experiment_schema(_request):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def list_experiments(_request):
-    #experiments = [serialize_experiment(experiment) for experiment in Experiment.objects.all()]
     # call values() and annotate with experiment results count
     experiments = Experiment.objects.all().values(
         "id", "study_type", "experiment_type", "experiment_ontology", "molecule",
