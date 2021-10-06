@@ -17,7 +17,7 @@ from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
-from chord_metadata_service.experiments.serializers import ExperimentSerializer
+from chord_metadata_service.experiments.serializers import ExperimentSerializer, ListExperimentSerializer
 
 from chord_metadata_service.mcode.models import MCodePacket
 from chord_metadata_service.mcode.serializers import MCodePacketSerializer
@@ -29,7 +29,7 @@ from chord_metadata_service.patients.models import Individual
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
-from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
+from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer, ListPhenopacketSerializer
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset, TableOwnership, Table
@@ -306,7 +306,7 @@ QUERY_RESULTS_FN: Dict[str, Callable] = {
 QUERY_RESULT_SERIALIZERS = {
     DATA_TYPE_EXPERIMENT: ExperimentSerializer,
     DATA_TYPE_MCODEPACKET: MCodePacketSerializer,
-    DATA_TYPE_PHENOPACKET: PhenopacketSerializer,
+    DATA_TYPE_PHENOPACKET: ListPhenopacketSerializer,
 }
 
 
