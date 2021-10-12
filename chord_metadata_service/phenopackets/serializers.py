@@ -268,7 +268,7 @@ class ListPhenopacketSerializer(GenericSerializer):
         # prevent circular import issues.
         from chord_metadata_service.patients.serializers import ListIndividualSerializer
         response = super().to_representation(instance)
-        response['subject'] = ListIndividualSerializer(instance.subject, exclude_when_nested=["biosamples"]).data
+        response['subject'] = ListIndividualSerializer(instance.subject, exclude_when_nested=["phenopackets"]).data
         return response
 
 

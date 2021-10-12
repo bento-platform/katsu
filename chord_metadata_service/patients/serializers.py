@@ -1,5 +1,5 @@
 from chord_metadata_service.phenopackets.serializers import (
-    BiosampleSerializer, SimplePhenopacketSerializer, SimpleBiosampleSerializer
+    BiosampleSerializer, SimplePhenopacketSerializer, ListPhenopacketSerializer
 )
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.restapi.fhir_utils import fhir_patient
@@ -19,13 +19,13 @@ class IndividualSerializer(GenericSerializer):
 
 
 class ListIndividualSerializer(GenericSerializer):
-    biosamples = SimpleBiosampleSerializer(read_only=True, many=True)
+    phenopackets = ListPhenopacketSerializer(read_only=True, many=True, fields=["biosamples", "diseases"])
 
     class Meta:
         model = Individual
         fields = ["id", "alternate_ids", "date_of_birth", "age", "sex", "karyotypic_sex", "taxonomy",
                   "active", "deceased", "comorbid_condition", "ecog_performance_status", "karnofsky",
-                  "race", "ethnicity", "extra_properties", "created", "updated", "biosamples"]
+                  "race", "ethnicity", "extra_properties", "created", "updated", "phenopackets"]
         # meta info for converting to FHIR
         fhir_datatype_plural = 'patients'
         class_converter = fhir_patient

@@ -304,7 +304,7 @@ QUERY_RESULTS_FN: Dict[str, Callable] = {
 }
 
 QUERY_RESULT_SERIALIZERS = {
-    DATA_TYPE_EXPERIMENT: ExperimentSerializer,
+    DATA_TYPE_EXPERIMENT: ListExperimentSerializer,
     DATA_TYPE_MCODEPACKET: MCodePacketSerializer,
     DATA_TYPE_PHENOPACKET: ListPhenopacketSerializer,
 }
