@@ -226,7 +226,7 @@ class SimplePhenopacketSerializer(GenericSerializer):
         """
         response = super().to_representation(instance)
         response['biosamples'] = BiosampleSerializer(instance.biosamples, many=True, required=False,
-                                                     exclude_when_nested=["individual"]).data
+                                                     exclude_when_nested=['individual']).data
         response['genes'] = GeneSerializer(instance.genes, many=True, required=False).data
         response['variants'] = VariantSerializer(instance.variants, many=True, required=False).data
         response['diseases'] = DiseaseSerializer(instance.diseases, many=True, required=False).data
@@ -244,17 +244,17 @@ class PhenopacketSerializer(SimplePhenopacketSerializer):
         response = super().to_representation(instance)
         response['subject'] = IndividualSerializer(
             instance.subject,
-            exclude_when_nested=["phenopackets", "biosamples"]
+            exclude_when_nested=['phenopackets', 'biosamples']
             ).data
         return response
 
 
 class ListPhenopacketSerializer(GenericSerializer):
-    phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True, fields=["type"])
-    diseases = DiseaseSerializer(read_only=True, many=True, fields=["term"])
+    phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True, fields=['id', 'type'])
+    diseases = DiseaseSerializer(read_only=True, many=True, fields=['id', 'term'])
     biosamples = SimpleBiosampleSerializer(read_only=True, many=True)
-    meta_data = MetaDataSerializer(read_only=True, fields=["created", "created_by", "submitted_by",
-                                                           "phenopacket_schema_version", "updated"])
+    meta_data = MetaDataSerializer(read_only=True, fields=['created', 'created_by', 'submitted_by',
+                                                           'phenopacket_schema_version', 'updated'])
 
     class Meta:
         model = Phenopacket
@@ -268,7 +268,8 @@ class ListPhenopacketSerializer(GenericSerializer):
         # prevent circular import issues.
         from chord_metadata_service.patients.serializers import ListIndividualSerializer
         response = super().to_representation(instance)
-        response['subject'] = ListIndividualSerializer(instance.subject, exclude_when_nested=["phenopackets"]).data
+        response['subject'] = ListIndividualSerializer(instance.subject,
+                                                       exclude_when_nested=['biosamples', 'experiments']).data
         return response
 
 

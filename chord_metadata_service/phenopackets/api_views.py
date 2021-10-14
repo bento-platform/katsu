@@ -202,7 +202,8 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     filter_class = f.PhenopacketFilter
 
     def list(self, request):
-        queryset = self.get_queryset()
+        queryset = m.Phenopacket.objects.all().prefetch_related("diseases", "biosamples")\
+            .select_related("subject", "meta_data").order_by("id")
         # apply filtering
         filtered_queryset = self.filter_queryset(queryset)
         # paginate
