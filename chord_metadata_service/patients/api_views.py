@@ -33,7 +33,9 @@ class IndividualViewSet(viewsets.ModelViewSet):
     ordering_fields = ["id"]
 
     def list(self, request):
-        queryset = Individual.objects.all()
+        queryset = Individual.objects.all().prefetch_related(
+            "phenopackets__biosamples", "phenopackets__biosamples__experiment_set"
+        ).order_by("id")
         # apply filtering
         filtered_queryset = self.filter_queryset(queryset)
         # paginate
