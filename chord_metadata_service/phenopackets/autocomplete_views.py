@@ -22,3 +22,33 @@ class DiseaseTermAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(term__label__icontains=self.q)
 
         return qs
+
+
+class PhenotypicFeatureTypeAutocomplete(autocomplete.Select2QuerySetView):
+    paginate_by = 50
+
+    def get_result_label(self, item):
+        return item.pftype["label"]
+
+    def get_queryset(self):
+        qs = PhenotypicFeature.objects.all().distinct("pftype__label")
+        if self.q:
+            # looks for a matching string everywhere in pf type label field
+            qs = qs.filter(pftype__label__icontains=self.q)
+
+        return qs
+
+
+class BiosampleSampledTissueAutocomplete(autocomplete.Select2QuerySetView):
+    paginate_by = 50
+
+    def get_result_label(self, item):
+        return item.sampled_tissue["label"]
+
+    def get_queryset(self):
+        qs = Biosample.objects.all().distinct("sampled_tissue__label")
+        if self.q:
+            # looks for a matching string everywhere in sampled_tissue label field
+            qs = qs.filter(sampled_tissue__label__icontains=self.q)
+
+        return qs
