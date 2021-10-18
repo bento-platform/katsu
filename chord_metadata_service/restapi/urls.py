@@ -6,6 +6,9 @@ from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.mcode import api_views as mcode_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
+from chord_metadata_service.phenopackets.autocomplete_views import (
+    DiseaseTermAutocomplete,
+)
 from chord_metadata_service.resources import api_views as resources_views
 from .api_views import overview
 
@@ -65,4 +68,6 @@ urlpatterns = [
          name="mcode-schema"),
     # overview
     path('overview', overview, name="overview"),
+    # autocomplete URLs
+    path('disease-term-autocomplete', DiseaseTermAutocomplete.as_view(), name='disease-term-autocomplete',),
 ]
