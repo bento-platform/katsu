@@ -197,9 +197,24 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
         .prefetch_related(*PHENOPACKET_PREFETCH)\
         .select_related(*PHENOPACKET_SELECT_REL)\
         .order_by("id")
+    # retrieve method uses this serializer because it allows to update/delete an instance
     serializer_class = s.PhenopacketSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.PhenopacketFilter
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        # paginate
+        paginated_queryset = self.paginate_queryset(queryset)
+
+        if "fields" in request.query_params and request.query_params["fields"]:
+            # e.g. &fields=id,subject,biosamples
+            fields_include = [field.strip() for field in request.query_params["fields"].split(",")]
+            # list method uses read-only serializer
+            serializer = s.ReadOnlyPhenopacketSerializer(paginated_queryset, many=True, fields=fields_include)
+        else:
+            serializer = s.ReadOnlyPhenopacketSerializer(paginated_queryset, many=True)
+        return self.get_paginated_response(serializer.data)
 
 
 class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
