@@ -14,6 +14,7 @@ from .models import (
     Diagnosis,
     Interpretation,
 )
+from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.restapi import fhir_utils
@@ -208,7 +209,7 @@ class SimplePhenopacketSerializer(GenericSerializer):
         """
         response = super().to_representation(instance)
         response['biosamples'] = BiosampleSerializer(instance.biosamples, many=True, required=False,
-                                                     exclude_when_nested=["individual"]).data
+                                                     exclude_when_nested=['individual']).data
         response['genes'] = GeneSerializer(instance.genes, many=True, required=False).data
         response['variants'] = VariantSerializer(instance.variants, many=True, required=False).data
         response['diseases'] = DiseaseSerializer(instance.diseases, many=True, required=False).data
@@ -226,9 +227,39 @@ class PhenopacketSerializer(SimplePhenopacketSerializer):
         response = super().to_representation(instance)
         response['subject'] = IndividualSerializer(
             instance.subject,
-            exclude_when_nested=["phenopackets", "biosamples"]
+            exclude_when_nested=['phenopackets', 'biosamples']
             ).data
         return response
+
+
+# Declaring here a read-only Individual serializer to avoid circular imports
+class ReadOnlyIndividualSerializer(GenericSerializer):
+
+    class Meta:
+        model = Individual
+        fields = "__all__"
+        # meta info for converting to FHIR
+        fhir_datatype_plural = 'patients'
+        class_converter = fhir_utils.fhir_patient
+
+
+class ReadOnlyPhenopacketSerializer(GenericSerializer):
+    phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True,
+                                                      exclude_when_nested=['id', 'biosample'])
+    biosamples = BiosampleSerializer(read_only=True, many=True, exclude_when_nested=['individual'])
+    genes = GeneSerializer(read_only=True, many=True)
+    variants = VariantSerializer(read_only=True, many=True)
+    diseases = DiseaseSerializer(read_only=True, many=True)
+    hts_files = HtsFileSerializer(read_only=True, many=True)
+    meta_data = MetaDataSerializer(read_only=True)
+    subject = ReadOnlyIndividualSerializer(read_only=True)
+
+    class Meta:
+        model = Phenopacket
+        fields = '__all__'
+        # meta info for converting to FHIR
+        fhir_datatype_plural = 'compositions'
+        class_converter = fhir_utils.fhir_composition
 
 
 #############################################################
