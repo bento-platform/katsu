@@ -29,7 +29,7 @@ from chord_metadata_service.patients.models import Individual
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
-from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
+from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer, ReadOnlyPhenopacketSerializer
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset, TableOwnership, Table
@@ -306,7 +306,7 @@ QUERY_RESULTS_FN: Dict[str, Callable] = {
 QUERY_RESULT_SERIALIZERS = {
     DATA_TYPE_EXPERIMENT: ExperimentSerializer,
     DATA_TYPE_MCODEPACKET: MCodePacketSerializer,
-    DATA_TYPE_PHENOPACKET: PhenopacketSerializer,
+    DATA_TYPE_PHENOPACKET: ReadOnlyPhenopacketSerializer,
 }
 
 
@@ -315,6 +315,11 @@ def search(request, internal_data=False):
         data_type = (request.data or {}).get("data_type")
     else:
         data_type = request.query_params.get("data_type")
+
+    if request.method == "POST":
+        fields = (request.data or {}).get("fields")
+    else:
+        fields = request.query_params.get("fields")
 
     if not data_type:
         return Response(errors.bad_request_error("Missing data_type in request body"), status=400)
@@ -357,7 +362,7 @@ def search(request, internal_data=False):
     return Response(build_search_response({
         table_id: {
             "data_type": data_type,
-            "matches": list(serializer_class(p).data for p in table_objects)
+            "matches": list(serializer_class(p, fields=fields).data for p in table_objects)
         } for table_id, table_objects in itertools.groupby(
             query_function(compiled_query, params),
             key=lambda o: str(o.table_id)
