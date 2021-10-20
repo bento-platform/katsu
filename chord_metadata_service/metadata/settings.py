@@ -194,6 +194,13 @@ CACHES = {
     }
 }
 
+# Dummy cache for development
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+#     }
+# }
+
 FHIR_INDEX_NAME = 'fhir_metadata'
 
 # Set to True to run ES for FHIR index
