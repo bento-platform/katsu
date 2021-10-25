@@ -71,9 +71,9 @@ urlpatterns = [
     # overview
     path('overview', overview, name="overview"),
     # autocomplete URLs
-    path('disease-term-autocomplete', DiseaseTermAutocomplete.as_view(), name='disease-term-autocomplete',),
-    path('phenotypic-feature-type-autocomplete', PhenotypicFeatureTypeAutocomplete.as_view(),
+    path('disease_term_autocomplete', DiseaseTermAutocomplete.as_view(), name='disease-term-autocomplete',),
+    path('phenotypic_feature_type_autocomplete', PhenotypicFeatureTypeAutocomplete.as_view(),
          name='phenotypic-feature-type-autocomplete',),
-    path('biosample-sampled-tissue-autocomplete', BiosampleSampledTissueAutocomplete.as_view(),
+    path('biosample_sampled_tissue_autocomplete', BiosampleSampledTissueAutocomplete.as_view(),
          name='biosample-sampled-tissue-autocomplete',),
 ]
