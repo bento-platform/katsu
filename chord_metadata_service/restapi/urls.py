@@ -65,4 +65,6 @@ urlpatterns = [
          name="mcode-schema"),
     # overview
     path('overview', overview, name="overview"),
+    # proposed ui names
+    path('proposed_ui_names', phenopacket_views.get_proposed_ui_names, name="proposed-ui-names"),
 ]

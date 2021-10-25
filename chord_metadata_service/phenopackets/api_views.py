@@ -11,6 +11,7 @@ from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, F
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from . import models as m, serializers as s, filters as f
+from .proposed_ui_names import PROPOSED_UI_NAMES_MAPPING
 
 
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
@@ -255,3 +256,13 @@ def get_chord_phenopacket_schema(_request):
     Chord phenopacket schema that can be shared with data providers.
     """
     return Response(PHENOPACKET_SCHEMA)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_proposed_ui_names(_request):
+    """
+    get:
+    Mappings containing UI names for phenopackets schema fields
+    """
+    return Response(PROPOSED_UI_NAMES_MAPPING)
