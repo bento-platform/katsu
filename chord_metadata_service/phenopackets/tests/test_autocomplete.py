@@ -14,7 +14,6 @@ class DiseaseTermAutocompleteTest(APITestCase):
         response = self.client.get('/api/disease_term_autocomplete', {'q': 'ataxia'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
-        print(response_data)
         self.assertEqual(len(response_data["results"]), 1)
 
 
@@ -46,7 +45,6 @@ class PhenotypicFeatureTypemAutocompleteTest(APITestCase):
         response = self.client.get('/api/phenotypic_feature_type_autocomplete', {'q': 'proptosis'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
-        print(response_data)
         self.assertEqual(len(response_data["results"]), 1)
 
 
