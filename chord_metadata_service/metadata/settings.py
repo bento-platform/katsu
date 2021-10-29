@@ -23,7 +23,8 @@ load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if os.environ.get('POSTGRES_PASSWORD_FILE') is not None:
+POSTGRES_PASSWORD_FILE = os.environ.get('POSTGRES_PASSWORD_FILE')
+if POSTGRES_PASSWORD_FILE is not None:
     with open(os.environ.get('POSTGRES_PASSWORD_FILE'), "r") as f:
         POSTGRES_PASSWORD_FILE = f.read()
 
