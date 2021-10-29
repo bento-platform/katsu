@@ -60,7 +60,7 @@ AUTH_OVERRIDE = not CHORD_PERMISSIONS
 CHORD_HOST = urlparse(CHORD_URL or "").netloc
 ALLOWED_HOSTS = [CHORD_HOST or "localhost"]
 if DEBUG:
-    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
+    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]", "10.10.11.54"]))
 
 APPEND_SLASH = False
 
