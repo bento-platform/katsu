@@ -23,7 +23,9 @@ load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+if os.environ.get('POSTGRES_PASSWORD_FILE') is not None:
+    with open(os.environ.get('POSTGRES_PASSWORD_FILE'), "r") as f:
+        POSTGRES_PASSWORD_FILE = f.read()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -185,7 +187,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get("POSTGRES_DATABASE", 'metadata'),
         'USER': os.environ.get("POSTGRES_USER", 'admin'),
-        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'admin'),
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", POSTGRES_PASSWORD_FILE),
 
         # Use sockets if we're inside a CHORD container / as a priority
         'HOST': os.environ.get("POSTGRES_SOCKET_DIR", os.environ.get("POSTGRES_HOST", "localhost")),
