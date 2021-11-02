@@ -58,9 +58,9 @@ AUTH_OVERRIDE = not CHORD_PERMISSIONS
 # Allowed hosts - TODO: Derive from CHORD_URL
 
 CHORD_HOST = urlparse(CHORD_URL or "").netloc
-ALLOWED_HOSTS = [CHORD_HOST or "localhost"]
+ALLOWED_HOSTS = ["*"]  # we'll determine access via middleware before we get here
 if DEBUG:
-    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]", "10.10.11.54"]))
+    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
 
 APPEND_SLASH = False
 
