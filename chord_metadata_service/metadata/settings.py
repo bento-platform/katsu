@@ -171,7 +171,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
 def get_secret(path):
     try:
         with open(path) as f:
-            return f.readline()
+            return f.readline().strip()
     except BaseException as err:
         print(f"Unexpected {err}, {type(err)}")
         raise
