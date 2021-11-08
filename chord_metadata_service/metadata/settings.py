@@ -166,6 +166,17 @@ LOGGING = {
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
     logging.disable(logging.CRITICAL)
 
+
+# function to read postgres password file
+def get_secret(path):
+    try:
+        with open(path) as f:
+            return f.readline()
+    except BaseException as err:
+        print(f"Unexpected {err}, {type(err)}")
+        raise
+
+
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -182,9 +193,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get("POSTGRES_DATABASE", 'metadata'),
         'USER': os.environ.get("POSTGRES_USER", 'admin'),
-        'PASSWORD': os.environ.get(
-            "POSTGRES_PASSWORD_FILE" if "POSTGRES_PASSWORD_FILE" in os.environ else "POSTGRES_PASSWORD", 'admin'
-        ),
+        'PASSWORD': get_secret(
+            os.environ["POSTGRES_PASSWORD_FILE"]
+        ) if "POSTGRES_PASSWORD_FILE" in os.environ else os.environ.get("POSTGRES_PASSWORD", "admin"),
 
         # Use sockets if we're inside a CHORD container / as a priority
         'HOST': os.environ.get("POSTGRES_SOCKET_DIR", os.environ.get("POSTGRES_HOST", "localhost")),
