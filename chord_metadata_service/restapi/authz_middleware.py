@@ -12,9 +12,9 @@ AUTHZ_PATHS = ["^/api/phenopackets/?.*", "^/api/datasets/?.*", "^/api/diagnoses/
                "^/api/interpretations/?.*", "^/api/metadata/?.*", "^/api/phenopackets/?.*",
                "^/api/phenotypicfeatures/?.*", "^/api/procedures/?.*", "^/api/variants/?.*",
                "^/api/biosamples/?.*", "/api/overview",
-               #mcode data models input paths
+               # mcode data models input paths
                "^/api/mcodepackets/?.*", "^/api/medicationstatements/?.*", "^/api/cancerrelatedprocedures/?.*",
-               "^/api/tnmstaging/?.*", "^/api/cancerconditions/?.*", "^/api/labsvital/?.*", 
+               "^/api/tnmstaging/?.*", "^/api/cancerconditions/?.*", "^/api/labsvital/?.*",
                "^/api/genomicsreports/?.*", "^/api/genomicregionsstudied/?.*", "^/api/cancergeneticvariants/?.*",
                "^/api/geneticspecimens/?.*"]
 

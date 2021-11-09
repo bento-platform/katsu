@@ -49,7 +49,7 @@ router.register(r'genomicsreports', mcode_views.GenomicsReportViewSet, basename=
 router.register(r'labsvital', mcode_views.LabsVitalViewSet, basename="labsvital")
 router.register(r'cancerconditions', mcode_views.CancerConditionViewSet, basename="cancerconditions")
 router.register(r'tnmstaging', mcode_views.TNMStagingViewSet, basename="tnmstaging")
-router.register(r'cancerrelatedprocedures', mcode_views.CancerRelatedProcedureViewSet, 
+router.register(r'cancerrelatedprocedures', mcode_views.CancerRelatedProcedureViewSet,
                 basename="cancerrelatedprocedures")
 router.register(r'medicationstatements', mcode_views.MedicationStatementViewSet, basename="medicationstatements")
 router.register(r'mcodepackets', mcode_views.MCodePacketViewSet, basename="mcodepackets")
