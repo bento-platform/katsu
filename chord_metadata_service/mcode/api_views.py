@@ -29,6 +29,7 @@ class GeneticSpecimenViewSet(McodeModelViewSet):
             queryset = m.GeneticSpecimen.objects.all()
         return queryset
 
+
 class CancerGeneticVariantViewSet(McodeModelViewSet):
     serializer_class = s.CancerGeneticVariantSerializer
 
@@ -40,6 +41,7 @@ class CancerGeneticVariantViewSet(McodeModelViewSet):
         else:
             queryset = m.CancerGeneticVariant.objects.all()
         return queryset
+
 
 class GenomicRegionStudiedViewSet(McodeModelViewSet):
     serializer_class = s.GenomicRegionStudiedSerializer
@@ -53,6 +55,7 @@ class GenomicRegionStudiedViewSet(McodeModelViewSet):
             queryset = m.GenomicRegionStudied.objects.all()
         return queryset
 
+
 class GenomicsReportViewSet(McodeModelViewSet):
     serializer_class = s.GenomicsReportSerializer
 
@@ -64,6 +67,7 @@ class GenomicsReportViewSet(McodeModelViewSet):
         else:
             queryset = m.GenomicsReport.objects.all()
         return queryset
+
 
 class LabsVitalViewSet(McodeModelViewSet):
     serializer_class = s.LabsVitalSerializer
@@ -90,6 +94,7 @@ class CancerConditionViewSet(McodeModelViewSet):
             queryset = m.CancerCondition.objects.all()
         return queryset
 
+
 class TNMStagingViewSet(McodeModelViewSet):
     serializer_class = s.TNMStagingSerializer
 
@@ -103,7 +108,6 @@ class TNMStagingViewSet(McodeModelViewSet):
         return queryset
 
 
-
 class CancerRelatedProcedureViewSet(McodeModelViewSet):
     serializer_class = s.CancerRelatedProcedureSerializer
 
@@ -115,6 +119,7 @@ class CancerRelatedProcedureViewSet(McodeModelViewSet):
         else:
             queryset = m.CancerRelatedProcedure.objects.all()
         return queryset
+
 
 class MedicationStatementViewSet(McodeModelViewSet):
     serializer_class = s.MedicationStatementSerializer
