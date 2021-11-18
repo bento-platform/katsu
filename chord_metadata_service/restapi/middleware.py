@@ -2,85 +2,43 @@ from django.conf import settings
 from django.http import HttpResponseForbidden
 import jwt
 import requests
-
-
-# TODO: replace this hacky stuff with more robust solution
-APPLICABLE_ENDPOINTS = frozenset({
-    '/api/individuals',
-    '/api/diseases',
-    '/api/phenotypicfeatures'
-})
+import re
 
 
 class CandigAuthzMiddleware:
+    """
+    A generic middleware for dataset-level authorization.
+    """
     def __init__(self, get_response):
         self.get_response = get_response
+        self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
+        self.authorized_paths = [
+            "^/api/phenopackets/?.*", "^/api/datasets/?.*", "^/api/diagnoses/?.*", "^/api/diseases/?.*",
+            "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/htsfiles/?.*", "^/api/individuals/?.*",
+            "^/api/interpretations/?.*", "^/api/metadata/?.*", "^/api/phenopackets/?.*", "^/api/phenotypicfeatures/?.*", 
+            "^/api/procedures/?.*", "^/api/variants/?.*", "^/api/biosamples/?.*"]
 
     def __call__(self, request):
-        if settings.INSIDE_CANDIG and self.is_applicable_endpoint(request):
-            # TODO: So currently I'm assuming the frontend will query the
-            # dataset info beforehand so as to be able to include it here
-            # so we know which authz rule to apply
-            # Bit clumsy, consider this a stop-gap measure
-            access_level = self.decode_permissions(request)
+        """
+        You may incorporate any data source for dataset authorization.
 
-            if not access_level:
-                return HttpResponseForbidden()
+        Note, if no datasets are authorized, you MUST set it to 'NO_DATASETS_AUTHORIZED'.
 
-            try:
-                allowed = self.query_opa(request, access_level)
-            except requests.exceptions.RequestException:
-                return HttpResponseForbidden()
+        If authorized datasets exist, set it to a comma-separated string with titles of authorized datasets.
 
-            if not allowed:
-                return HttpResponseForbidden()
+        For example, if datasets d100 and d200 are authorized, you should set
+        self.authorize_datasets = 'd100,d200'
+        """
+        # TODO: Get authorized datasets from a data source.
+        
+        if settings.CANDIG_AUTHORIZATION == 'something':
+            # Do something
+        
+            self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
+            
+            request.GET = request.GET.copy() # Make request.GET mutable
+            request.GET.update({'authorized_datasets': self.authorize_datasets})
+            response = self.get_response(request)
+            return response
 
-        return self.get_response(request)
 
-    def is_applicable_endpoint(self, request):
-        return request.path in APPLICABLE_ENDPOINTS
-
-    def decode_permissions(self, request):
-        if 'X-CanDIG-Dataset' not in request.headers:
-            return
-        else:
-            dataset = request.headers.get('X-CanDIG-Dataset')
-
-        if 'X-CanDIG-Authz' in request.headers:
-            authz_jwt = request.headers.get("X-CanDIG-Authz").split(' ')[1]
-            # TODO: yes it is a terrible idea to decode without checking the
-            # the signature, gotta find a proper way to transmit vault's public key
-            decoded_jwt = jwt.decode(authz_jwt, verify=False)
-
-            if 'permissions' in decoded_jwt:
-                permissions = decoded_jwt.get('permissions')
-
-                # TODO: I am assuming the permission object is a simple dict such as
-                # {"DATASET_NAME": 4}
-                # TODO: would make sense to package this feature, the reading of the
-                # permission object in a lib, since we'll repeat that stuff over many services
-                if dataset in permissions:
-                    return permissions[dataset]
-                else:
-                    return
-
-    def query_opa(self, request, access_level):
-        if not settings.CANDIG_OPA_URL:
-            return False
-
-        params = {
-            "input": {
-                "path": request.path,
-                "method": request.method,
-                "access_level": int(access_level)
-            }
-        }
-
-        url = f"{settings.CANDIG_OPA_URL}/v1/data/metadata"
-
-        res = requests.post(url, json=params)
-        res.raise_for_status()
-
-        data = res.json()
-
-        return data.get('result', {}).get('allow', False)

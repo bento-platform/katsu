@@ -71,8 +71,10 @@ DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/dr
 
 # Candig-specific settings
 
-INSIDE_CANDIG = os.environ.get("INSIDE_CANDIG", "false").lower() == "true"
+CANDIG_AUTHORIZATION = os.environ.get("CANDIG_AUTHORIZATION")
 CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL")
+ROOT_CA = os.getenv("ROOT_CA", None)
+PERMISSIONS_SECRET = os.getenv("PERMISSIONS_SECRET", "my-secret-beacon-token")
 
 # Application definition
 
