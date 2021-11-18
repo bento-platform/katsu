@@ -6,6 +6,11 @@ from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.mcode import api_views as mcode_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
+from chord_metadata_service.phenopackets.autocomplete_views import (
+    DiseaseTermAutocomplete,
+    PhenotypicFeatureTypeAutocomplete,
+    BiosampleSampledTissueAutocomplete
+)
 from chord_metadata_service.resources import api_views as resources_views
 
 from .api_views import overview
@@ -66,5 +71,11 @@ urlpatterns = [
     path('mcode_schema', mcode_views.get_mcode_schema,
          name="mcode-schema"),
     # overview
-    path('overview', overview, name="overview")
+    path('overview', overview, name="overview"),
+    # autocomplete URLs
+    path('disease_term_autocomplete', DiseaseTermAutocomplete.as_view(), name='disease-term-autocomplete',),
+    path('phenotypic_feature_type_autocomplete', PhenotypicFeatureTypeAutocomplete.as_view(),
+         name='phenotypic-feature-type-autocomplete',),
+    path('biosample_sampled_tissue_autocomplete', BiosampleSampledTissueAutocomplete.as_view(),
+         name='biosample-sampled-tissue-autocomplete',)
 ]

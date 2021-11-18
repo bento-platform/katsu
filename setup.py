@@ -18,6 +18,7 @@ setuptools.setup(
     install_requires=[
         "bento_lib[django]==2.1.0",
         "Django>=2.2.20,<3.0",
+        "django-autocomplete-light==3.8.2",
         "django-cors-headers>=3.7,<3.8",
         "django-filter>=2.4,<3.0",
         "django-nose>=1.4,<2.0",
@@ -38,6 +39,7 @@ setuptools.setup(
         "requests>=2.25.1,<3.0",
         "requests-unixsocket>=0.2.0,<0.3.0",
         "rfc3987==1.3.8",
+        "tabulate>=0.8.9,<0.9",
         "uritemplate>=3.0,<4.0",
     ],
 

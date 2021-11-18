@@ -1,14 +1,14 @@
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
-from chord_metadata_service.restapi.description_utils import describe_schema
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
+from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe
 
 
 __all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
 
 
-EXPERIMENT_RESULT_SCHEMA = describe_schema({
+EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:experiment_result_schema",
+    "$id": "katsu:experiments:experiment_result",
     "title": "Experiment result schema",
     "description": "Schema for describing information about analysis of sequencing data in a file format.",
     "type": "object",
@@ -41,26 +41,13 @@ EXPERIMENT_RESULT_SCHEMA = describe_schema({
             "type": "string"
         },
         "extra_properties": KEY_VALUE_OBJECT,
-    },
-    "if": {
-        "properties": {"data_output_type": {"const": ["Raw data"]}}
-    },
-    "then": {
-        "properties": {"file_format": {"enum": ["SAM", "BAM", "CRAM", "BAI", "CRAI", "VCF", "BCF", "GVCF",
-                                                "BigWig", "BigBed", "FASTA", "FASTQ", "TAB", "SRA", "SRF",
-                                                "SFF", "GFF", "TABIX", "UNKNOWN", "OTHER"]}}
-    },
-    "else": {
-        "properties": {"file_format": {"enum": ["SAM", "BAM", "CRAM", "BAI", "CRAI", "BCF", "GVCF",
-                                                "BigWig", "BigBed", "FASTA", "FASTQ", "TAB", "SRA", "SRF",
-                                                "SFF", "GFF", "TABIX", "UNKNOWN", "OTHER"]}}
     }
 }, EXPERIMENT_RESULT)
 
 
-INSTRUMENT_SCHEMA = describe_schema({
+INSTRUMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:instrument_schema",
+    "$id": "katsu:experiments:instrument",
     "title": "Instrument schema",
     "description": "Schema for describing an instrument used for a sequencing experiment.",
     "type": "object",
@@ -82,9 +69,9 @@ INSTRUMENT_SCHEMA = describe_schema({
 }, INSTRUMENT)
 
 
-EXPERIMENT_SCHEMA = describe_schema({
+EXPERIMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:experiment_schema",
+    "$id": "katsu:experiments:experiment",
     "title": "Experiment schema",
     "description": "Schema for describing an experiment.",
     "type": "object",
