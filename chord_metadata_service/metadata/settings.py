@@ -73,9 +73,9 @@ DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/dr
 
 CANDIG_AUTHORIZATION = os.environ.get("CANDIG_AUTHORIZATION")
 CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL")
-ROOT_CA = os.getenv("ROOT_CA", None)
-PERMISSIONS_SECRET = os.getenv("PERMISSIONS_SECRET", "my-secret-beacon-token")
-CACHE_TIME = int(os.getenv("CACHE_TIME"))
+CANDIG_ROOT_CA = os.getenv("ROOT_CA", None)
+CANDIG_PERMISSIONS_SECRET = os.getenv("PERMISSIONS_SECRET", "my-secret-beacon-token")
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -273,3 +273,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Cache time constant
+CACHE_TIME = int(os.getenv("CACHE_TIME"))

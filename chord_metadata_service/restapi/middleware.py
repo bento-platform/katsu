@@ -33,7 +33,6 @@ class CandigAuthzMiddleware:
         """
         
         if settings.CANDIG_AUTHORIZATION == 'OPA':
-            print(settings.CACHE_TIME, flush=True)
             if settings.CACHE_TIME != 0:
                 error_response = {
                     "error": "cache time needs to be zero to be secure"
@@ -45,7 +44,6 @@ class CandigAuthzMiddleware:
             opa_res_datasets = self.get_opa_res(token, request.path, request.method)
             if len(opa_res_datasets) == 0:
                 self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
-                print("NO_DATASETS_AUTHORIZED", flush=True)
             else:
                 self.authorize_datasets = ",".join(opa_res_datasets)
             request.GET = request.GET.copy() # Make request.GET mutable
@@ -85,9 +83,9 @@ class CandigAuthzMiddleware:
         try:
             response = requests.post(settings.CANDIG_OPA_URL +
                                          "/v1/data/permissions/datasets",
-                                         headers={"Authorization": f"Bearer {settings.PERMISSIONS_SECRET}"},
+                                         headers={"Authorization": f"Bearer {settings.CANDIG_PERMISSIONS_SECRET}"},
                                          json=self.get_request_body(token, path, method),
-                                         verify=settings.ROOT_CA)
+                                         verify=settings.CANDIG_ROOT_CA)
             response.raise_for_status()
         except requests.exceptions.RequestException:
             error_response = {
