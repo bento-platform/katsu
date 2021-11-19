@@ -75,7 +75,7 @@ CANDIG_AUTHORIZATION = os.environ.get("CANDIG_AUTHORIZATION")
 CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL")
 ROOT_CA = os.getenv("ROOT_CA", None)
 PERMISSIONS_SECRET = os.getenv("PERMISSIONS_SECRET", "my-secret-beacon-token")
-
+CACHE_TIME = int(os.getenv("CACHE_TIME"))
 # Application definition
 
 INSTALLED_APPS = [

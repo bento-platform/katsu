@@ -33,6 +33,14 @@ class CandigAuthzMiddleware:
         """
         
         if settings.CANDIG_AUTHORIZATION == 'OPA':
+            print(settings.CACHE_TIME, flush=True)
+            if settings.CACHE_TIME != 0:
+                error_response = {
+                    "error": "cache time needs to be zero to be secure"
+                }
+                response = HttpResponseServerError(json.dumps(error_response))
+                response["Content-Type"] = "application/json"
+                return response
             token = self.get_opa_token_from_request(request.headers)
             opa_res_datasets = self.get_opa_res(token, request.path, request.method)
             if len(opa_res_datasets) == 0:
@@ -48,12 +56,18 @@ class CandigAuthzMiddleware:
         return response
 
     def get_opa_token_from_request(self, headers):
+        """
+        Extracts token from request's header X-CANDIG-LOCAL-OIDC
+        """
         token = headers.get("X-CANDIG-LOCAL-OIDC")
         if token == None:
             return ""
         return token.strip('"')
 
     def get_request_body(self, token, path, method):
+        """
+        Returns request body required to query OPA
+        """
         return {
                 "input": {
                     "token": token,
@@ -65,6 +79,9 @@ class CandigAuthzMiddleware:
             }
 
     def get_opa_res(self, token, path, method):
+        """
+        Get allowed dataset result from OPA
+        """
         try:
             response = requests.post(settings.CANDIG_OPA_URL +
                                          "/v1/data/permissions/datasets",
