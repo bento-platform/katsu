@@ -275,4 +275,4 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Cache time constant
-CACHE_TIME = int(os.getenv("CACHE_TIME"))
+CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
