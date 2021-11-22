@@ -86,7 +86,7 @@ class CandigAuthzMiddleware:
         try:
             response = requests.post(settings.CANDIG_OPA_URL +
                                          "/v1/data/permissions/datasets",
-                                         headers={"Authorization": f"Bearer {settings.CANDIG_PERMISSIONS_SECRET}"},
+                                         headers={"Authorization": f"Bearer {settings.CANDIG_OPA_SECRET}"},
                                          json=self.get_request_body(token, path, method),
                                          verify=settings.CANDIG_ROOT_CA)
             response.raise_for_status()
