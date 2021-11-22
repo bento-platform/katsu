@@ -44,7 +44,7 @@ class CandigAuthzMiddleware:
             opa_res_datasets = self.get_opa_res(token, request.path, request.method)
             if len(opa_res_datasets) == 0:
                 self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
-            elif type(opa_res_datasets) == tuple and opa_res_datasets[0] == "error": #error response
+            elif type(opa_res_datasets) == tuple and opa_res_datasets[0] == "error": # error response
                 return opa_res_datasets[1]
             else:
                 self.authorize_datasets = ",".join(opa_res_datasets)
