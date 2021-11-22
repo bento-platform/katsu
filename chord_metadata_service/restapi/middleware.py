@@ -32,7 +32,8 @@ class CandigAuthzMiddleware:
         self.authorize_datasets = 'd100,d200'
         """
         
-        if settings.CANDIG_AUTHORIZATION == 'OPA' and request.method == 'GET':
+        if settings.CANDIG_AUTHORIZATION == 'OPA' and request.method == 'GET'\
+            and any(re.match(path_re, request.path) for path_re in self.authorized_paths):
             if settings.CACHE_TIME != 0:
                 error_response = {
                     "error": "cache time needs to be zero to be secure"
