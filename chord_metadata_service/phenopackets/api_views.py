@@ -18,7 +18,7 @@ class PhenopacketsModelViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
     pagination_class = LargeResultsSetPagination
 
-    # Cache page for the requested url for 2 hours
+    # Cache response to the requested URL, default to 2 hours.
     @method_decorator(cache_page(settings.CACHE_TIME))
     def dispatch(self, *args, **kwargs):
         return super(PhenopacketsModelViewSet, self).dispatch(*args, **kwargs)

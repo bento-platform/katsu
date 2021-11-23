@@ -36,9 +36,11 @@ class CandigAuthzMiddleware:
             and any(re.match(path_re, request.path) for path_re in self.authorized_paths):
             if settings.CACHE_TIME != 0:
                 error_response = {
-                    "error": "cache time needs to be zero to be secure"
+                    "error": "This request failed because we are unable to retrieve necessary info \
+                                related to your account. Please contact your system administrator \
+                                for assistance."
                 }
-                response = HttpResponseServerError(json.dumps(error_response))
+                response = HttpResponseForbidden(json.dumps(error_response))
                 response["Content-Type"] = "application/json"
                 return response
             token = self.get_opa_token_from_request(request.headers)
