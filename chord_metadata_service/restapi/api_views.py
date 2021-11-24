@@ -215,13 +215,10 @@ def mcode_overview(_request):
 
     # cancer condition code
     cancer_condition_counter = Counter()
-
     # cancer related procedure type - radiation vs. surgical
     cancer_related_procedure_type_counter = Counter()
-
     # cancer related procedure code
     cancer_related_procedure_counter = Counter()
-
     # cancer disease status
     cancer_disease_status_counter = Counter()
 
