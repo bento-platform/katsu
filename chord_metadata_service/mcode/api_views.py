@@ -36,6 +36,16 @@ class GenomicRegionStudiedViewSet(McodeModelViewSet):
     serializer_class = s.GenomicRegionStudiedSerializer
 
 
+GENOMIC_REPORT_PREFETCH = (
+    "genetic_specimen",
+    "genomic_region_studied",
+)
+
+GENOMIC_REPORT_SELECT = (
+    "genetic_variant",
+)
+
+
 class GenomicsReportViewSet(McodeModelViewSet):
     queryset = m.GenomicsReport.objects.all()
     serializer_class = s.GenomicsReportSerializer
@@ -44,6 +54,11 @@ class GenomicsReportViewSet(McodeModelViewSet):
 class LabsVitalViewSet(McodeModelViewSet):
     queryset = m.LabsVital.objects.all()
     serializer_class = s.LabsVitalSerializer
+
+
+CANCER_CONDITION_PREFETCH = (
+    "tnmstaging_set",
+)
 
 
 class CancerConditionViewSet(McodeModelViewSet):
@@ -56,6 +71,11 @@ class TNMStagingViewSet(McodeModelViewSet):
     serializer_class = s.TNMStagingSerializer
 
 
+CANCER_RELATED_PROCEDURE = (
+    "reason_reference",
+)
+
+
 class CancerRelatedProcedureViewSet(McodeModelViewSet):
     queryset = m.CancerRelatedProcedure.objects.all()
     serializer_class = s.CancerRelatedProcedureSerializer
@@ -66,8 +86,23 @@ class MedicationStatementViewSet(McodeModelViewSet):
     serializer_class = s.MedicationStatementSerializer
 
 
+MCODEPACKET_PREFETCH = (
+    "cancer_condition",
+    "cancer_related_procedures",
+    "medication_statement",
+)
+
+MCODEPACKET_SELECT = (
+    "subject",
+    "genomics_report",
+)
+
+
 class MCodePacketViewSet(McodeModelViewSet):
-    queryset = m.MCodePacket.objects.all()
+    queryset = m.MCodePacket.objects.all()\
+        .prefetch_related(*MCODEPACKET_PREFETCH)\
+        .select_related(*MCODEPACKET_SELECT)\
+        .order_by("id")
     serializer_class = s.MCodePacketSerializer
 
 

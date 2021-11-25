@@ -9,6 +9,8 @@ from chord_metadata_service.restapi.utils import parse_individual_age
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
 from chord_metadata_service.phenopackets import models as m
+from chord_metadata_service.mcode import models as mcode_models
+from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
 
 
 @api_view()
@@ -193,6 +195,86 @@ def overview(_request):
                 "count": len(instrument_set),
                 "platform": dict(instruments["platform"]),
                 "model": dict(instruments["model"])
+            },
+        }
+    })
+
+
+# Cache page for the requested url for 2 hours
+@cache_page(60 * 60 * 2)
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly])
+def mcode_overview(_request):
+    """
+    get:
+    Overview of all mCode data in the database
+    """
+    mcodepackets = mcode_models.MCodePacket.objects.all()\
+        .prefetch_related(*MCODEPACKET_PREFETCH)\
+        .select_related(*MCODEPACKET_SELECT)
+
+    # cancer condition code
+    cancer_condition_counter = Counter()
+    # cancer related procedure type - radiation vs. surgical
+    cancer_related_procedure_type_counter = Counter()
+    # cancer related procedure code
+    cancer_related_procedure_counter = Counter()
+    # cancer disease status
+    cancer_disease_status_counter = Counter()
+
+    individuals_set = set()
+    individuals_sex = Counter()
+    individuals_k_sex = Counter()
+    individuals_taxonomy = Counter()
+    individuals_age = Counter()
+    individuals_ethnicity = Counter()
+
+    for mcodepacket in mcodepackets:
+        # subject/individual
+        individual = mcodepacket.subject
+        individuals_set.add(individual.id)
+        individuals_sex.update((individual.sex,))
+        individuals_k_sex.update((individual.karyotypic_sex,))
+        if individual.ethnicity != "":
+            individuals_ethnicity.update((individual.ethnicity,))
+        if individual.age is not None:
+            individuals_age.update((parse_individual_age(individual.age),))
+        if individual.taxonomy is not None:
+            individuals_taxonomy.update((individual.taxonomy["label"],))
+        for cancer_condition in mcodepacket.cancer_condition.all():
+            cancer_condition_counter.update((cancer_condition.code["label"],))
+        for cancer_related_procedure in mcodepacket.cancer_related_procedures.all():
+            cancer_related_procedure_type_counter.update((cancer_related_procedure.procedure_type,))
+            cancer_related_procedure_counter.update((cancer_related_procedure.code["label"],))
+        if mcodepacket.cancer_disease_status is not None:
+            cancer_disease_status_counter.update((mcodepacket.cancer_disease_status["label"],))
+
+    return Response({
+        "mcodepackets": mcodepackets.count(),
+        "data_type_specific": {
+            "cancer_conditions": {
+                "count": len(cancer_condition_counter.keys()),
+                "term": dict(cancer_condition_counter)
+            },
+            "cancer_related_procedure_types": {
+                "count": len(cancer_related_procedure_type_counter.keys()),
+                "term": dict(cancer_related_procedure_type_counter)
+            },
+            "cancer_related_procedures": {
+                "count": len(cancer_related_procedure_counter.keys()),
+                "term": dict(cancer_related_procedure_counter)
+            },
+            "cancer_disease_status": {
+                "count": len(cancer_disease_status_counter.keys()),
+                "term": dict(cancer_disease_status_counter)
+            },
+            "individuals": {
+                "count": len(individuals_set),
+                "sex": {k: individuals_sex[k] for k in (s[0] for s in m.Individual.SEX)},
+                "karyotypic_sex": {k: individuals_k_sex[k] for k in (s[0] for s in m.Individual.KARYOTYPIC_SEX)},
+                "taxonomy": dict(individuals_taxonomy),
+                "age": dict(individuals_age),
+                "ethnicity": dict(individuals_ethnicity)
             },
         }
     })
