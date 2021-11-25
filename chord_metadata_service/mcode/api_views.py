@@ -45,6 +45,16 @@ class GenomicRegionStudiedViewSet(McodeModelViewSet):
     filter_class = f.GenomicRegionStudiedFilter
 
 
+GENOMIC_REPORT_PREFETCH = (
+    "genetic_specimen",
+    "genomic_region_studied",
+)
+
+GENOMIC_REPORT_SELECT = (
+    "genetic_variant",
+)
+
+
 class GenomicsReportViewSet(McodeModelViewSet):
     queryset = m.GenomicsReport.objects.all()
     serializer_class = s.GenomicsReportSerializer
@@ -57,6 +67,11 @@ class LabsVitalViewSet(McodeModelViewSet):
     serializer_class = s.LabsVitalSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.LabsVitalFilter
+
+
+CANCER_CONDITION_PREFETCH = (
+    "tnmstaging_set",
+)
 
 
 class CancerConditionViewSet(McodeModelViewSet):
@@ -73,6 +88,11 @@ class TNMStagingViewSet(McodeModelViewSet):
     filter_class = f.TNMStagingFilter
 
 
+CANCER_RELATED_PROCEDURE = (
+    "reason_reference",
+)
+
+
 class CancerRelatedProcedureViewSet(McodeModelViewSet):
     queryset = m.CancerRelatedProcedure.objects.all()
     serializer_class = s.CancerRelatedProcedureSerializer
@@ -87,8 +107,23 @@ class MedicationStatementViewSet(McodeModelViewSet):
     filter_class = f.MedicationStatementFilter
 
 
+MCODEPACKET_PREFETCH = (
+    "cancer_condition",
+    "cancer_related_procedures",
+    "medication_statement",
+)
+
+MCODEPACKET_SELECT = (
+    "subject",
+    "genomics_report",
+)
+
+
 class MCodePacketViewSet(McodeModelViewSet):
-    queryset = m.MCodePacket.objects.all()
+    queryset = m.MCodePacket.objects.all()\
+        .prefetch_related(*MCODEPACKET_PREFETCH)\
+        .select_related(*MCODEPACKET_SELECT)\
+        .order_by("id")
     serializer_class = s.MCodePacketSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.MCodePacketFilter
