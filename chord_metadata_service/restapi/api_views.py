@@ -229,30 +229,26 @@ def mcode_overview(_request):
     individuals_age = Counter()
     individuals_ethnicity = Counter()
 
-    def count_individual(ind):
-
-        individuals_set.add(ind.id)
-        individuals_sex.update((ind.sex,))
-        individuals_k_sex.update((ind.karyotypic_sex,))
-        # ethnicity is char field, check it's not empty
-        if ind.ethnicity != "":
-            individuals_ethnicity.update((ind.ethnicity,))
-        if ind.age is not None:
-            individuals_age.update((parse_individual_age(ind.age),))
-        if ind.taxonomy is not None:
-            individuals_taxonomy.update((ind.taxonomy["label"],))
-
     for mcodepacket in mcodepackets:
+        # subject/individual
+        individual = mcodepacket.subject
+        individuals_set.add(individual.id)
+        individuals_sex.update((individual.sex,))
+        individuals_k_sex.update((individual.karyotypic_sex,))
+        if individual.ethnicity != "":
+            individuals_ethnicity.update((individual.ethnicity,))
+        if individual.age is not None:
+            individuals_age.update((parse_individual_age(individual.age),))
+        if individual.taxonomy is not None:
+            individuals_taxonomy.update((individual.taxonomy["label"],))
         for cancer_condition in mcodepacket.cancer_condition.all():
             cancer_condition_counter.update((cancer_condition.code["label"],))
-
         for cancer_related_procedure in mcodepacket.cancer_related_procedures.all():
             cancer_related_procedure_type_counter.update((cancer_related_procedure.procedure_type,))
             cancer_related_procedure_counter.update((cancer_related_procedure.code["label"],))
+        if mcodepacket.cancer_disease_status is not None:
+            cancer_disease_status_counter.update((mcodepacket.cancer_disease_status["label"],))
 
-        cancer_disease_status_counter.update((mcodepacket.cancer_disease_status["label"],))
-        # subject/individual
-        count_individual(mcodepacket.subject)
     return Response({
         "mcodepackets": mcodepackets.count(),
         "data_type_specific": {
