@@ -2,7 +2,7 @@ ARG venv_python=3.7
 
 FROM python:${venv_python}-alpine3.13
 
-LABEL Maintainer="CanDIG Project"
+LABEL Maintainer="CanDIG Team"
 
 USER root
 
