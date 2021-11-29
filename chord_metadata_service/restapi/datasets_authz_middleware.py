@@ -9,6 +9,7 @@ class DatasetsAuthzMiddleware:
     """
     A generic middleware for dataset-level authorization.
     """
+
     def __init__(self, get_response):
         self.get_response = get_response
         self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
@@ -17,9 +18,9 @@ class DatasetsAuthzMiddleware:
             "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/htsfiles/?.*", "^/api/individuals/?.*",
             "^/api/interpretations/?.*", "^/api/metadata/?.*", "^/api/phenopackets/?.*", "^/api/phenotypicfeatures/?.*",
             "^/api/procedures/?.*", "^/api/variants/?.*", "^/api/biosamples/?.*",
-            "^/api/mcodepackets/?.*", "^/api/medicationstatements/?.*",  "^/api/geneticspecimens/?.*" ,
-            "^/api/cancergeneticvariants/?.*" ,"^/api/genomicregionsstudied/?.*" ,"^/api/genomicsreports/?.*" ,"^/api/labsvital/?.*" ,
-            "^/api/cancerconditions/?.*" ,"^/api/tnmstaging/?.*" ,"^/api/cancerrelatedprocedures/?.*"]
+            "^/api/mcodepackets/?.*", "^/api/medicationstatements/?.*",  "^/api/geneticspecimens/?.*",
+            "^/api/cancergeneticvariants/?.*", "^/api/genomicregionsstudied/?.*", "^/api/genomicsreports/?.*", "^/api/labsvital/?.*",
+            "^/api/cancerconditions/?.*", "^/api/tnmstaging/?.*", "^/api/cancerrelatedprocedures/?.*"]
 
     def __call__(self, request):
         """
@@ -34,7 +35,7 @@ class DatasetsAuthzMiddleware:
         """
 
         if settings.CANDIG_AUTHORIZATION == 'OPA' and request.method == 'GET'\
-            and any(re.match(path_re, request.path) for path_re in self.authorized_paths):
+                and any(re.match(path_re, request.path) for path_re in self.authorized_paths):
             if settings.CACHE_TIME != 0:
                 error_response = {
                     "error": "This request failed because caching is not disabled. \
@@ -47,11 +48,11 @@ class DatasetsAuthzMiddleware:
             opa_res_datasets = self.get_opa_res(token, request.path, request.method)
             if len(opa_res_datasets) == 0:
                 self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
-            elif type(opa_res_datasets) == tuple and opa_res_datasets[0] == "error": #  error response
+            elif type(opa_res_datasets) == tuple and opa_res_datasets[0] == "error":  # error response
                 return opa_res_datasets[1]
             else:
                 self.authorize_datasets = ",".join(opa_res_datasets)
-            request.GET = request.GET.copy() #  Make request.GET mutable
+            request.GET = request.GET.copy()  # Make request.GET mutable
             request.GET.update({'authorized_datasets': self.authorize_datasets})
             response = self.get_response(request)
             return response
@@ -72,14 +73,14 @@ class DatasetsAuthzMiddleware:
         Returns request body required to query OPA
         """
         return {
-                "input": {
-                    "token": token,
-                    "body": {
-                        "path": path,
-                        "method": method
-                    }
+            "input": {
+                "token": token,
+                "body": {
+                    "path": path,
+                    "method": method
                 }
             }
+        }
 
     def get_opa_res(self, token, path, method):
         """

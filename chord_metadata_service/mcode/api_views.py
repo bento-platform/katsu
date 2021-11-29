@@ -137,4 +137,3 @@ def get_mcode_schema(_request):
     Mcodepacket schema
     """
     return Response(MCODE_SCHEMA)
-    
