@@ -17,9 +17,9 @@ class DatasetsAuthzMiddleware:
             "^/api/phenopackets/?.*", "^/api/diagnoses/?.*", "^/api/diseases/?.*",
             "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/htsfiles/?.*", "^/api/individuals/?.*",
             "^/api/interpretations/?.*", "^/api/metadata/?.*", "^/api/phenopackets/?.*", "^/api/phenotypicfeatures/?.*",
-            "^/api/procedures/?.*", "^/api/variants/?.*", "^/api/biosamples/?.*",
+            "^/api/procedures/?.*", "^/api/variants/?.*", "^/api/biosamples/?.*", "^/api/labsvital/?.*",
             "^/api/mcodepackets/?.*", "^/api/medicationstatements/?.*",  "^/api/geneticspecimens/?.*",
-            "^/api/cancergeneticvariants/?.*", "^/api/genomicregionsstudied/?.*", "^/api/genomicsreports/?.*", "^/api/labsvital/?.*",
+            "^/api/cancergeneticvariants/?.*", "^/api/genomicregionsstudied/?.*", "^/api/genomicsreports/?.*",
             "^/api/cancerconditions/?.*", "^/api/tnmstaging/?.*", "^/api/cancerrelatedprocedures/?.*"]
 
     def __call__(self, request):
