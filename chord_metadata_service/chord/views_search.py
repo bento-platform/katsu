@@ -318,8 +318,10 @@ def search(request, internal_data=False):
 
     if request.method == "POST":
         fields = (request.data or {}).get("fields")
+        print(request.data)
     else:
         fields = request.query_params.get("fields")
+        print(request.query_params)
 
     if not data_type:
         return Response(errors.bad_request_error("Missing data_type in request body"), status=400)

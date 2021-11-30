@@ -35,6 +35,7 @@ __all__ = [
     "GenomicInterpretationSerializer",
     "DiagnosisSerializer",
     "InterpretationSerializer",
+    "ReadOnlyPhenopacketSerializer",
 ]
 
 
