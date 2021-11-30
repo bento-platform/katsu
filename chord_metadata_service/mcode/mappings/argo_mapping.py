@@ -1,3 +1,5 @@
+# title is ARGO collection of data elements
+# keys are mCODE fiels, values are ARGO fields
 ARGO_MAPPING = {
     "individual": {
         "title": "Donor",
@@ -17,9 +19,9 @@ ARGO_MAPPING = {
     },
     "cancer_condition": {
         "title": "PrimaryDiagnosis",
-        "id": "program_id",
+        "id": "submitter_primary_diagnosis_id",
         "condition_type": "primary",
-        "body_site": "specimen_type",
+        "body_site": "",
         "laterality": "laterality",
         "clinical_status": "",
         "code": "cancer_type_code",
@@ -30,4 +32,17 @@ ARGO_MAPPING = {
             "cancer_type_additional_information",
         ]
     },
+    "tnm_staging": {
+        "title": "PrimaryDiagnosis",
+        "id": "",
+        "tnm_type": "clinical",
+        "stage_group": "clinical_tumour_staging_system",
+        "primary_tumor_category": "clinical_t_category",
+        "regional_nodes_category": "clinical_n_category",
+        "distant_metastases_category": "clinical_m_category",
+        "cancer_condition": "submitter_primary_diagnosis_id",
+        "extra_properties": [
+            "clinical_stage_group",
+        ]
+    }
 }
