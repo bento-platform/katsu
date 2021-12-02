@@ -104,6 +104,12 @@ python manage.py runserver
 * Development server runs at `localhost:8000`
 
 
+### Install via Docker
+
+Optionally, you may also install standalone Katsu with the Dockerfile provided. If you develop or
+deploy Katsu as part of the Bento platform, you should use Bento's Docker image instead.
+
+
 ## Authentication
 
 Default authentication can be set globally in `settings.py`
