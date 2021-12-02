@@ -1,0 +1,18 @@
+{
+    "id": "8670db4d-77ad-4bee-b38c-599453510c6a",
+    "subject": {
+        "id": "patient:1",
+        "date_of_birth": "1967-01-01",
+        "sex": "MALE",
+        "age": {
+            "age": "P45Y"
+        },
+        "extra_properties": {
+            "education": "Bachelor's Degree"
+        }
+    },
+    "meta_data": {
+        "created_by": "David Lougheed",
+        "submitted_by": "David Lougheed"
+    }
+}

@@ -63,10 +63,11 @@ class DatasetsAuthzMiddleware:
         """
         Extracts token from request's header Authorization
         """
-        token = headers.get('Authorization').split()[1]
+        token = headers.get('Authorization')
         if token is None:
             return ""
-        return token
+        else:
+            return token.split()[1]
 
     def get_request_body(self, token, path, method):
         """
