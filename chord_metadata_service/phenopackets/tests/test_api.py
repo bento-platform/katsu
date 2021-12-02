@@ -382,3 +382,48 @@ class GetPhenopacketsApiTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 0)
+
+    def test_get_phenopackets_with_authz_dataset_1(self):
+        """
+        Test that we cannot get phenopackets with no authorized datasets.
+        """
+        response = self.client.get('/api/phenopackets?datasets=dataset_1&authorized_datasets=dataset2')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 0)
+
+    def test_get_phenopackets_with_authz_dataset_2(self):
+        """
+        Test that we can get 1 phenopacket with 1 authorized datasets.
+        """
+        response = self.client.get('/api/phenopackets?authorized_datasets=dataset_1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 1)
+
+    def test_get_phenopackets_with_authz_dataset_3(self):
+        """
+        Test that we can get 2 phenopackets with 2 authorized datasets.
+        """
+        response = self.client.get('/api/phenopackets?authorized_datasets=dataset_1,dataset_2')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 2)
+
+    def test_get_phenopackets_with_authz_dataset_4(self):
+        """
+        Test that we can get 1 phenopackets with 1 authorized datasets.
+        """
+        response = self.client.get('/api/phenopackets?datasets=dataset_1&authorized_datasets=dataset_1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 1)
+
+    def test_get_phenopackets_with_authz_dataset_5(self):
+        """
+        Test that we can get 0 phenopackets with 0 authorized datasets.
+        """
+        response = self.client.get('/api/phenopackets?authorized_datasets=NO_DATASETS_AUTHORIZED')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 0)

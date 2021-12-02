@@ -63,3 +63,30 @@ class GetMcodeApiTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 0)
+
+    def test_get_mcodepackets_with_authz_dataset_1(self):
+        """
+        Test that we can get 1 mcodepacket with 1 authorized dataset.
+        """
+        response = self.client.get('/api/mcodepackets?authorized_datasets=Dataset+1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 1)
+
+    def test_get_mcodepackets_with_authz_dataset_2(self):
+        """
+        Test that we can get 0 mcodepacket with 0 authorized dataset.
+        """
+        response = self.client.get('/api/mcodepackets?authorized_datasets=NO_DATASETS_AUTHORIZED')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 0)
+
+    def test_get_mcodepackets_with_authz_dataset_3(self):
+        """
+        Test that we can get 0 phenopackets with 0 authorized datasets.
+        """
+        response = self.client.get('/api/mcodepackets?authorized_datasets=fakeDataset')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 0)
