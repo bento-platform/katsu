@@ -39,6 +39,9 @@ class GenomicRegionStudiedSerializer(GenericSerializer):
 
 
 class GenomicsReportSerializer(GenericSerializer):
+    genetic_specimen = GeneticSpecimenSerializer(many=True, read_only=True)
+    genetic_variant = CancerGeneticVariantSerializer()
+    genomic_region_studied = GenomicRegionStudiedSerializer()
 
     class Meta:
         model = m.GenomicsReport
