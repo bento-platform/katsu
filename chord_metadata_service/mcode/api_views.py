@@ -65,6 +65,7 @@ CANCER_CONDITION_PREFETCH = (
 class CancerConditionViewSet(McodeModelViewSet):
     queryset = m.CancerCondition.objects.all()
     serializer_class = s.CancerConditionSerializer
+    renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
 
 
 class TNMStagingViewSet(McodeModelViewSet):

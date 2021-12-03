@@ -6,7 +6,7 @@
 def argo_donor(obj):
     """
     Convert Individual to ARGO Donor.
-    Takes Katsu patient object and converts its fields to ARGO aoccrding to the mapping.
+    Takes Katsu patient object and converts its fields to ARGO according to the mapping.
     """
 
     donor = {
@@ -25,8 +25,8 @@ def argo_donor(obj):
 
 def argo_specimen(obj):
     """
-    Convert GeneticSpecimen to ARGO Specimen.
-    Takes Katsu genetic specimen object and converts its fields to ARGO aoccrding to the mapping.
+    Convert Genetic Specimen to ARGO Specimen.
+    Takes Katsu genetic specimen object and converts its fields to ARGO according to the mapping.
     """
     specimen = {
         "submitter_specimen_id": obj["id"],
@@ -39,3 +39,15 @@ def argo_specimen(obj):
         if mcode_field in obj:
             specimen[argo_field] = obj[mcode_field]
     return specimen
+
+
+def argo_primary_diagnosis(obj):
+    """
+    Convert Cancer Condition to ARGO Primary Diagnosis.
+    Takes Katsu cancer condition object and converts its fields to ARGO according to the mapping.
+    """
+    primary_diagnosis = {
+        "submitter_primary_diagnosis_id": obj["id"],
+        "cancer_type_code": obj["code"]
+    }
+    return primary_diagnosis

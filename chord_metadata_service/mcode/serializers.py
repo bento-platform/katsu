@@ -1,4 +1,4 @@
-from chord_metadata_service.restapi.argo_utils import argo_specimen
+from chord_metadata_service.restapi.argo_utils import argo_specimen, argo_primary_diagnosis
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.patients.serializers import IndividualSerializer
 from . import models as m
@@ -24,7 +24,7 @@ class GeneticSpecimenSerializer(GenericSerializer):
         model = m.GeneticSpecimen
         fields = '__all__'
         # meta info for converting to ARGO
-        argo_profile_plural = 'genetic_specimens'
+        argo_profile_plural = 'specimens'
         argo_converter = argo_specimen
 
 
@@ -80,6 +80,9 @@ class CancerConditionSerializer(GenericSerializer):
     class Meta:
         model = m.CancerCondition
         fields = '__all__'
+        # meta info for converting to ARGO
+        argo_profile_plural = 'primary_diagnosis'
+        argo_converter = argo_primary_diagnosis
 
 
 class CancerRelatedProcedureSerializer(GenericSerializer):
