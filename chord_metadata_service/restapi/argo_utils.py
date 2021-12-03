@@ -17,11 +17,25 @@ def argo_donor(obj):
     }
     # check for not mapped fields in extra_properties
     if "extra_properties" in obj and obj["extra_properties"]:
-        if "cause_of_death" in obj["extra_properties"]:
-            donor["cause_of_death"] = obj["extra_properties"]["cause_of_death"]
-        if "survival_time" in obj["extra_properties"]:
-            donor["survival_time"] = obj["extra_properties"]["survival_time"]
-        if "primary_site" in obj["extra_properties"]:
-            donor["primary_site"] = obj["extra_properties"]["primary_site"]
-
+        for i in ["cause_of_death", "survival_time", "primary_site"]:
+            if i in obj["extra_properties"]:
+                donor[i] = obj["extra_properties"][i]
     return donor
+
+
+def argo_specimen(obj):
+    """
+    Convert GeneticSpecimen to ARGO Specimen.
+    Takes Katsu genetic specimen object and converts its fields to ARGO aoccrding to the mapping.
+    """
+    specimen = {
+        "submitter_specimen_id": obj["id"],
+        "specimen_type": obj["specimen_type"]
+    }
+    for argo_field, mcode_field in zip(
+            ("specimen_tissue_source", "specimen_laterality"),
+            ("collection_body", "laterality")
+    ):
+        if mcode_field in obj:
+            specimen[argo_field] = obj[mcode_field]
+    return specimen
