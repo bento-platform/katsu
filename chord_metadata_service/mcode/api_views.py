@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from .schemas import MCODE_SCHEMA
 from . import models as m, serializers as s
-from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
+from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, ARGORenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 
@@ -24,6 +24,7 @@ class McodeModelViewSet(viewsets.ModelViewSet):
 class GeneticSpecimenViewSet(McodeModelViewSet):
     queryset = m.GeneticSpecimen.objects.all()
     serializer_class = s.GeneticSpecimenSerializer
+    renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
 
 
 class CancerGeneticVariantViewSet(McodeModelViewSet):
