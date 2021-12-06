@@ -82,9 +82,11 @@ class MetaDataFilter(django_filters.rest_framework.FilterSet):
     phenopacket_schema_version = django_filters.CharFilter(lookup_expr="iexact")
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
-        method=filter_datasets, field_name="phenopacket__table__ownership_record__dataset__title")
+        method=filter_datasets, field_name="phenopacket__table__ownership_record__dataset__title", label="Datasets")
     authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets, field_name="phenopacket__table__ownership_record__dataset__title")
+        method=authorize_datasets, field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Authorized datasets"
+    )
 
     class Meta:
         model = m.MetaData
@@ -110,11 +112,13 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
     )
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Authorized datasets"
     )
 
     class Meta:
@@ -139,11 +143,13 @@ class ProcedureFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="biosample__phenopacket__table__ownership_record__dataset__title"
+        field_name="biosample__phenopacket__table__ownership_record__dataset__title",
+        label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="biosample__phenopacket__table__ownership_record__dataset__title"
+        field_name="biosample__phenopacket__table__ownership_record__dataset__title",
+        label="Authorized datasets"
     )
 
     class Meta:
@@ -158,11 +164,13 @@ class HtsFileFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Authorized datasets"
     )
 
     class Meta:
@@ -174,11 +182,13 @@ class GeneFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Authorized datasets"
     )
 
     class Meta:
@@ -192,11 +202,13 @@ class VariantFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Authorized datasets"
     )
 
     class Meta:
@@ -221,11 +233,13 @@ class DiseaseFilter(django_filters.rest_framework.FilterSet):
     )
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Authorized datasets"
     )
 
     class Meta:
@@ -252,11 +266,13 @@ class BiosampleFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Authorized datasets"
     )
 
     class Meta:
@@ -275,11 +291,13 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="table__ownership_record__dataset__title"
+        field_name="table__ownership_record__dataset__title",
+        label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="table__ownership_record__dataset__title"
+        field_name="table__ownership_record__dataset__title",
+        label="Authorized datasets"
     )
 
     class Meta:
@@ -314,11 +332,13 @@ class DiagnosisFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="disease__phenopacket__table__ownership_record__dataset__title"
+        field_name="disease__phenopacket__table__ownership_record__dataset__title",
+        label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="disease__phenopacket__table__ownership_record__dataset__title"
+        field_name="disease__phenopacket__table__ownership_record__dataset__title",
+        label="Authorized datasets"
     )
 
     class Meta:
@@ -331,11 +351,13 @@ class InterpretationFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title"
+        field_name="phenopacket__table__ownership_record__dataset__title",
+        label="Authorized datasets"
     )
 
     class Meta:
