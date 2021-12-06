@@ -1,5 +1,6 @@
 from rest_framework import viewsets, filters
 from rest_framework.settings import api_settings
+from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
@@ -32,7 +33,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
     filter_class = IndividualFilter
     ordering_fields = ["id"]
 
-    # Cache page for the requested url for 2 hours
-    @method_decorator(cache_page(60*60*2))
+    # Cache page for the requested url, default to 2 hours.
+    @method_decorator(cache_page(settings.CACHE_TIME))
     def dispatch(self, *args, **kwargs):
         return super(IndividualViewSet, self).dispatch(*args, **kwargs)
