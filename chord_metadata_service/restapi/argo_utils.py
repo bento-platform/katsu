@@ -3,6 +3,16 @@
 # the mappings is an internal document in CanDIG
 
 
+def argo_administrative_gender(value):
+    """ Converts Phenopackets sex values to mCODE administrative gender values. """
+    if value in ["MALE", "FEMALE"]:
+        return value.title()
+    elif value in ["OTHER_SEX", "UNKNOWN_SEX"]:
+        return value.split("_")[0].title()
+    else:
+        raise ValueError("The value is not supported.")
+
+
 def argo_donor(obj):
     """
     Convert Individual to ARGO Donor.
@@ -12,8 +22,7 @@ def argo_donor(obj):
     donor = {
         "submitter_donor_id": obj["id"],
         "vital_status": obj.get("deceased", False),
-        # TODO add mapping between sex and gender
-        "gender": obj.get("sex", "UNKNOWN_SEX")
+        "gender": argo_administrative_gender(obj.get("sex", "UNKNOWN_SEX"))
     }
     # check for not mapped fields in extra_properties
     if "extra_properties" in obj and obj["extra_properties"]:
@@ -50,4 +59,42 @@ def argo_primary_diagnosis(obj):
         "submitter_primary_diagnosis_id": obj["id"],
         "cancer_type_code": obj["code"]
     }
+    if "tnm_staging" in obj and obj["tnm_staging"]:
+        for item in obj["tnm_staging"]:
+            # tnm_staging clinical is mapped to PrimaryDiagnosis fields
+            if item["tnm_type"] == "clinical":
+                for mcode_field, argo_field in zip(
+                        ["stage_group", "primary_tumor_category",
+                         "regional_nodes_category", "distant_metastases_category"],
+                        ["clinical_stage_group", "clinical_t_category",
+                         "clinical_n_category", "clinical_m_category"]
+                ):
+                    if mcode_field in item and item[mcode_field]:
+                        if argo_field in primary_diagnosis and primary_diagnosis[argo_field]:
+                            primary_diagnosis[argo_field].append(item[mcode_field]["data_value"])
+                        else:
+                            primary_diagnosis[argo_field] = [item[mcode_field]["data_value"]]
+
+            # tnm_staging pathologic is mapped to Specimen fields
+            elif item["tnm_type"] == "pathologic":
+                # need to instanciate a local specimen object here
+                primary_diagnosis["specimen"] = {}
+                for mcode_field, argo_field in zip(
+                        ["stage_group", "primary_tumor_category",
+                         "regional_nodes_category", "distant_metastases_category"],
+                        ["pathological_stage_group", "pathological_t_category",
+                         "pathological_n_category", "clinical_m_category"]
+                ):
+                    if argo_field in primary_diagnosis["specimen"] and primary_diagnosis["specimen"][argo_field]:
+                        primary_diagnosis["specimen"][argo_field].append(item[mcode_field]["data_value"])
+                    else:
+                        primary_diagnosis["specimen"][argo_field] = [item[mcode_field]["data_value"]]
+
+    # check for not mapped fields in extra_properties
+    if "extra_properties" in obj and obj["extra_properties"]:
+        for i in ["age_at_diagnosis", "lymph_nodes_examined_status",
+                  "number_lymph_nodes_positive", "clinical_tumour_staging_system"]:
+            if i in obj["extra_properties"]:
+                primary_diagnosis[i] = obj["extra_properties"][i]
+
     return primary_diagnosis
