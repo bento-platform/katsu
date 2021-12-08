@@ -21,13 +21,9 @@ ARGO_MAPPING = {
         "title": "PrimaryDiagnosis",
         "id": "submitter_primary_diagnosis_id",
         "condition_type": "primary",
-        "body_site": "",
         "laterality": "laterality",
-        "clinical_status": "",
         "code": "cancer_type_code",
-        "date_of_diagnosis": "age_at_diagnosis",
-        "histology_morphology_behavior": "",
-        "verification_status": ""
+        "date_of_diagnosis": "age_at_diagnosis"
     },
     "tnm_staging": [
         {
@@ -48,5 +44,19 @@ ARGO_MAPPING = {
             "distant_metastases_category": "pathological_m_category",
             "cancer_condition": "submitter_primary_diagnosis_id"
         }
-    ]
+    ],
+    "cancer_related_procedure": {
+        "title": "Treatment",
+        "id": "submitter_treatment_id",
+        "procedure_type": "treatment_type",
+        "treatment_intent": "treatment_intent",
+        # fields for radiation only
+        "code": "radiation_therapy_modality",
+        "body_site": "anatomical_site_irradiated"
+    },
+    "medication_statement": {
+        "title": "Immunotherapy, Chemotherapy, Hormone Therapy",
+        "id": "submitter_treatment_id",
+        "medication_code": "drug_rxnormcui"
+    }
 }
