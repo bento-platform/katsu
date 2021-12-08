@@ -98,3 +98,32 @@ def argo_primary_diagnosis(obj):
                 primary_diagnosis[i] = obj["extra_properties"][i]
 
     return primary_diagnosis
+
+
+# a dict to map mCODE procedure type to ARGO treatment types
+PROCEDUR_TYPE_TO_TREATMENT_TYPE = {
+    "radiation": "Radiation therapy",
+    "surgical": "Surgery"
+}
+
+
+def argo_treatment(obj):
+    """
+    Convert Cancer Related Procedure to ARGO Treatment.
+    Takes Katsu cancer related procedure object and converts its fields to ARGO according to the mapping.
+    """
+    treatment = {
+        "submitter_treatment_id": obj["id"],
+        "treatment_type": PROCEDUR_TYPE_TO_TREATMENT_TYPE[obj["procedure_type"]]
+    }
+    if "treatment_intent" in obj and obj["treatment_intent"]:
+        treatment["treatment_intent"] = obj["treatment_intent"]
+    # only radiation treatment fields
+    if obj["procedure_type"] == "radiation":
+        for mcode_field, argo_field in zip(
+                ["code", "body_site"],
+                ["radiation_therapy_modality", "anatomical_site_irradiated"]
+        ):
+            if mcode_field in obj and obj[mcode_field]:
+                treatment[argo_field] = obj[mcode_field]
+    return treatment
