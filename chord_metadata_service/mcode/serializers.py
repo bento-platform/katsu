@@ -2,7 +2,8 @@ from chord_metadata_service.restapi.argo_utils import (
     argo_specimen,
     argo_primary_diagnosis,
     argo_treatment,
-    argo_therapy
+    argo_therapy,
+    argo_composition_object
 )
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.patients.serializers import IndividualSerializer
@@ -132,3 +133,6 @@ class MCodePacketSerializer(GenericSerializer):
     class Meta:
         model = m.MCodePacket
         fields = '__all__'
+        # meta info for converting to ARGO
+        argo_profile_plural = 'composition_objects'
+        argo_converter = argo_composition_object

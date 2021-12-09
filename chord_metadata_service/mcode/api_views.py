@@ -108,6 +108,7 @@ class MCodePacketViewSet(McodeModelViewSet):
         .select_related(*MCODEPACKET_SELECT)\
         .order_by("id")
     serializer_class = s.MCodePacketSerializer
+    renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
 
 
 @api_view(["GET"])
