@@ -127,3 +127,15 @@ def argo_treatment(obj):
             if mcode_field in obj and obj[mcode_field]:
                 treatment[argo_field] = obj[mcode_field]
     return treatment
+
+
+def argo_therapy(obj):
+    """
+    Convert Medication statement to ARGO Immunotherapy, Chemotherapy, Hormone Therapy.
+    Takes Katsu medication statement object and converts its fields to ARGO according to the mapping.
+    """
+    therapy = {
+        "submitter_treatment_id": obj["id"],
+        "drug_rxnormcui": obj["medication_code"]
+    }
+    return therapy

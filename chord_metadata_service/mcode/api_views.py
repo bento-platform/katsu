@@ -87,6 +87,7 @@ class CancerRelatedProcedureViewSet(McodeModelViewSet):
 class MedicationStatementViewSet(McodeModelViewSet):
     queryset = m.MedicationStatement.objects.all()
     serializer_class = s.MedicationStatementSerializer
+    renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
 
 
 MCODEPACKET_PREFETCH = (
