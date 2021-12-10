@@ -117,7 +117,7 @@ class ARGODonorTest(APITestCase):
     def setUp(self):
         self.donor = VALID_INDIVIDUAL
 
-    def test_get_fhir(self):
+    def test_get_argo(self):
         get_response("individual-list", self.donor)
         get_resp = self.client.get("/api/individuals?format=argo")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
@@ -133,7 +133,7 @@ class ARGOSpecimenTest(APITestCase):
     def setUp(self):
         self.specimen = valid_genetic_specimen("specimen:01")
 
-    def test_get_fhir(self):
+    def test_get_argo(self):
         get_response("geneticspecimen-list", self.specimen)
         get_resp = self.client.get("/api/geneticspecimens?format=argo")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
