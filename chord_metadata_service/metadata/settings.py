@@ -71,8 +71,9 @@ DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/dr
 
 # Candig-specific settings
 
-INSIDE_CANDIG = os.environ.get("INSIDE_CANDIG", "false").lower() == "true"
+CANDIG_AUTHORIZATION = os.environ.get("CANDIG_AUTHORIZATION")
 CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL")
+CANDIG_OPA_SECRET = os.getenv("CANDIG_OPA_SECRET", "my-secret-beacon-token")
 
 # Application definition
 
@@ -113,7 +114,7 @@ MIDDLEWARE = [
     'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'chord_metadata_service.restapi.middleware.CandigAuthzMiddleware',
+    'chord_metadata_service.restapi.datasets_authz_middleware.DatasetsAuthzMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = []
@@ -271,3 +272,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Cache time constant
+CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
