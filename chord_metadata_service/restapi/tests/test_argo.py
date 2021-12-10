@@ -16,8 +16,10 @@ from chord_metadata_service.mcode.tests.constants import (
     valid_cancer_condition,
     invalid_tnm_staging,
     valid_cancer_related_procedure,
-    valid_medication_statement
+    valid_medication_statement,
+    valid_genetic_specimen,
 )
+from chord_metadata_service.restapi.tests.utils import get_response
 
 
 class ARGOMcodepacketTest(APITestCase):
@@ -107,3 +109,40 @@ class ARGOMcodepacketTest(APITestCase):
             get_resp_obj["composition_objects"][0]["immunotherapies_chemotherapies_hormone_therapies"][0]
             ["drug_rxnormcui"]["label"]
         )
+
+
+class ARGODonorTest(APITestCase):
+    """ Test module for testing conversion of individual to argo donor."""
+
+    def setUp(self):
+        self.donor = VALID_INDIVIDUAL
+
+    def test_get_fhir(self):
+        get_response("individual-list", self.donor)
+        get_resp = self.client.get("/api/individuals?format=argo")
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        get_resp_obj = get_resp.json()
+        self.assertIsNotNone(get_resp_obj["donors"][0]["gender"])
+        self.assertIsNotNone(get_resp_obj["donors"][0]["submitter_donor_id"])
+        self.assertIsNotNone(get_resp_obj["donors"][0]["vital_status"])
+
+
+class ARGOSpecimenTest(APITestCase):
+    """ Test module for testing conversion of genetic specimen to argo specimen."""
+
+    def setUp(self):
+        self.specimen = valid_genetic_specimen("specimen:01")
+
+    def test_get_fhir(self):
+        get_response("geneticspecimen-list", self.specimen)
+        get_resp = self.client.get("/api/geneticspecimens?format=argo")
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        get_resp_obj = get_resp.json()
+        self.assertIsNotNone(get_resp_obj["specimens"][0]["submitter_specimen_id"])
+        self.assertIsInstance(get_resp_obj["specimens"][0]["submitter_specimen_id"], str)
+        self.assertIsNotNone(get_resp_obj["specimens"][0]["specimen_type"])
+        self.assertIsInstance(get_resp_obj["specimens"][0]["specimen_type"], dict)
+        self.assertIsNotNone(get_resp_obj["specimens"][0]["specimen_tissue_source"])
+        self.assertIsInstance(get_resp_obj["specimens"][0]["specimen_tissue_source"], dict)
+        self.assertIsNotNone(get_resp_obj["specimens"][0]["specimen_laterality"])
+        self.assertIsInstance(get_resp_obj["specimens"][0]["specimen_laterality"], dict)
