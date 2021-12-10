@@ -107,7 +107,7 @@ class MedicationStatementSerializer(GenericSerializer):
         model = m.MedicationStatement
         fields = '__all__'
         # meta info for converting to ARGO
-        argo_profile_plural = 'immunotherapies, chemotherapies, hormone therapies'
+        argo_profile_plural = 'immunotherapies_chemotherapies_hormone_therapies'
         argo_converter = argo_therapy
 
 

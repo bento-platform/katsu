@@ -146,3 +146,63 @@ class ARGOSpecimenTest(APITestCase):
         self.assertIsInstance(get_resp_obj["specimens"][0]["specimen_tissue_source"], dict)
         self.assertIsNotNone(get_resp_obj["specimens"][0]["specimen_laterality"])
         self.assertIsInstance(get_resp_obj["specimens"][0]["specimen_laterality"], dict)
+
+
+class ARGOPrimaryDiagnosisTest(APITestCase):
+    """ Test module for testing conversion of cancer condition to argo primary diagnosis."""
+
+    def setUp(self):
+        self.primary_diagnosis = valid_cancer_condition()
+
+    def test_get_argo(self):
+        get_response("cancercondition-list", self.primary_diagnosis)
+        get_resp = self.client.get("/api/cancerconditions?format=argo")
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        get_resp_obj = get_resp.json()
+        self.assertIsNotNone(get_resp_obj["primary_diagnoses"][0]["submitter_primary_diagnosis_id"])
+        self.assertIsInstance(get_resp_obj["primary_diagnoses"][0]["submitter_primary_diagnosis_id"], str)
+        self.assertIsNotNone(get_resp_obj["primary_diagnoses"][0]["cancer_type_code"])
+        self.assertIsInstance(get_resp_obj["primary_diagnoses"][0]["cancer_type_code"], dict)
+
+
+class ARGOTreatmentTest(APITestCase):
+    """ Test module for testing conversion of cancer related procedure to argo treatment."""
+
+    def setUp(self):
+        self.treatment = valid_cancer_related_procedure()
+
+    def test_get_argo(self):
+        get_response("cancerrelatedprocedure-list", self.treatment)
+        get_resp = self.client.get("/api/cancerrelatedprocedures?format=argo")
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        get_resp_obj = get_resp.json()
+        self.assertIsNotNone(get_resp_obj["treatments"][0]["submitter_treatment_id"])
+        self.assertIsInstance(get_resp_obj["treatments"][0]["submitter_treatment_id"], str)
+        self.assertIsNotNone(get_resp_obj["treatments"][0]["treatment_type"])
+        self.assertIsInstance(get_resp_obj["treatments"][0]["treatment_type"], str)
+        # radiation procedure only
+        self.assertEqual(get_resp_obj["treatments"][0]["treatment_type"], "Radiation therapy")
+        self.assertIsNotNone(get_resp_obj["treatments"][0]["radiation_therapy_modality"])
+        self.assertIsInstance(get_resp_obj["treatments"][0]["radiation_therapy_modality"], dict)
+        self.assertIsNotNone(get_resp_obj["treatments"][0]["anatomical_site_irradiated"])
+        # TODO run schema validation on ingest and check type
+        # self.assertIsInstance(get_resp_obj["treatments"][0]["anatomical_site_irradiated"], dict)
+
+
+class ARGOTherapyTest(APITestCase):
+    """ Test module for testing conversion of medication statement to argo -therapy."""
+
+    def setUp(self):
+        self.therapy = valid_medication_statement()
+
+    def test_get_argo(self):
+        get_response("medicationstatement-list", self.therapy)
+        get_resp = self.client.get("/api/medicationstatements?format=argo")
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        results = get_resp.json()["immunotherapies_chemotherapies_hormone_therapies"]
+        self.assertIsNotNone(results[0]["submitter_treatment_id"])
+        self.assertIsInstance(results[0]["submitter_treatment_id"], str)
+        self.assertIsNotNone(results[0]["drug_rxnormcui"])
+        self.assertIsInstance(results[0]["drug_rxnormcui"], dict)
+        self.assertIn("label", results[0]["drug_rxnormcui"])
+        self.assertIn("id", results[0]["drug_rxnormcui"])
