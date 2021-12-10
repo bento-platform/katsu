@@ -83,7 +83,7 @@ def argo_primary_diagnosis(obj):
                         ["stage_group", "primary_tumor_category",
                          "regional_nodes_category", "distant_metastases_category"],
                         ["pathological_stage_group", "pathological_t_category",
-                         "pathological_n_category", "clinical_m_category"]
+                         "pathological_n_category", "pathological_m_category"]
                 ):
                     if argo_field in primary_diagnosis["specimen"] and primary_diagnosis["specimen"][argo_field]:
                         primary_diagnosis["specimen"][argo_field].append(item[mcode_field]["data_value"])

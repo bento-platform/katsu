@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -11,13 +13,11 @@ from chord_metadata_service.mcode.models import (
     MCodePacket
 )
 from chord_metadata_service.mcode.tests.constants import (
-    valid_genetic_report,
     valid_cancer_condition,
     invalid_tnm_staging,
     valid_cancer_related_procedure,
     valid_medication_statement
 )
-from chord_metadata_service.restapi.tests.utils import get_response
 
 
 class ARGOMcodepacketTest(APITestCase):
@@ -34,6 +34,7 @@ class ARGOMcodepacketTest(APITestCase):
         }
         self.cancer_condition_2 = CancerCondition.objects.create(**cancer_condition_2)
         # make tnm staging valid
+        # tnm staging 1
         tnm_staging = invalid_tnm_staging(self.cancer_condition_2)
         for item in ["stage_group", "primary_tumor_category", "regional_nodes_category", "distant_metastases_category"]:
             tnm_staging[item] = {
@@ -43,6 +44,12 @@ class ARGOMcodepacketTest(APITestCase):
                 }
             }
         self.tnm_staging = TNMStaging.objects.create(**tnm_staging)
+        # tnm staging 2
+        tnm_staging_2 = deepcopy(tnm_staging)
+        tnm_staging_2["id"] = "tnm_staging:02"
+        tnm_staging_2["tnm_type"] = "pathologic"
+        self.tnm_staging_2 = TNMStaging.objects.create(**tnm_staging_2)
+
         self.cancer_related_procedure = CancerRelatedProcedure.objects.create(**valid_cancer_related_procedure())
         self.medication_statement = MedicationStatement.objects.create(**valid_medication_statement())
         self.mcodepacket = MCodePacket.objects.create(
@@ -68,14 +75,16 @@ class ARGOMcodepacketTest(APITestCase):
         # primary_diagnoses
         self.assertIn("Carcinosarcoma",
                       get_resp_obj["composition_objects"][0]["primary_diagnoses"][0]["cancer_type_code"]["label"])
-        self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["clinical_stage_group"],
-                              list)
-        self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["clinical_t_category"],
-                              list)
-        self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["clinical_n_category"],
-                              list)
-        self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["clinical_m_category"],
-                              list)
+        # tnm staging clinical
+        for field in ["clinical_stage_group", "clinical_t_category",
+                      "clinical_n_category", "clinical_m_category"]:
+            self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1][field],
+                                  list)
+        # tnm staging pathlogical
+        for field in ["pathological_stage_group", "pathological_t_category",
+                      "pathological_n_category", "pathological_m_category"]:
+            self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["specimen"][field],
+                                  list)
         # treatments
         self.assertEqual("Radiation therapy",
                          get_resp_obj["composition_objects"][0]["treatments"][0]["treatment_type"])
@@ -86,3 +95,15 @@ class ARGOMcodepacketTest(APITestCase):
                          ["anatomical_site_irradiated"][0]["label"])
         self.assertIn("Curative",
                       get_resp_obj["composition_objects"][0]["treatments"][0]["treatment_intent"]["label"])
+        self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["specimen"],
+                              dict)
+        # therapies
+        self.assertIsInstance(
+            get_resp_obj["composition_objects"][0]["immunotherapies_chemotherapies_hormone_therapies"],
+            list
+        )
+        self.assertIn(
+            "Verapamil",
+            get_resp_obj["composition_objects"][0]["immunotherapies_chemotherapies_hormone_therapies"][0]
+            ["drug_rxnormcui"]["label"]
+        )
