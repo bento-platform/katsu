@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from .schemas import MCODE_SCHEMA
 
-from . import models as m, serializers as s
+from . import models as m, serializers as s, filters as f
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, ARGORenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
