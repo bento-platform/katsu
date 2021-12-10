@@ -84,7 +84,6 @@ class CancerConditionViewSet(McodeModelViewSet):
     filter_class = f.CancerConditionFilter
 
 
-
 class TNMStagingViewSet(McodeModelViewSet):
     queryset = m.TNMStaging.objects.all()
     serializer_class = s.TNMStagingSerializer
