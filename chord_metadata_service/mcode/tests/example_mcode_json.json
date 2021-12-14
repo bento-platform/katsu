@@ -35,6 +35,78 @@
       "race": "Unknown",
       "ethnicity": "Unknown"
     },
+    "genomics_report": {
+      "id": "3000",
+      "code": {
+        "id": "LOINC:11013-0",
+        "label": "DNA double strand Ab [Titer] in Serum"
+      },
+      "performing_organization_name": "Cancer Centre",
+      "issued": "2018-02-27",
+      "genetic_specimen": [
+        {
+          "id": "3000-0",
+          "collection_body": {
+            "id": "SNOMED:2855004",
+            "label": "Structure of accessory cephalic vein"
+          },
+          "specimen_type": {
+            "id": "BLD",
+            "label": "Whole blood"
+          }
+        },
+        {
+          "id": "3000-1",
+          "collection_body": {
+            "id": "SNOMED:9568000",
+            "label": "Subcutaneous tissue of areola"
+          },
+          "specimen_type": {
+            "id": "TUMOR",
+            "label": "Tumor"
+          }
+        },
+        {
+          "id": "3000-2",
+          "collection_body": {
+            "id": "SNOMED:9568000",
+            "label": "Subcutaneous tissue of areola"
+          },
+          "specimen_type": {
+            "id": "TISS",
+            "label": "Tissue"
+          }
+        }
+      ],
+      "genetic_variant": {
+        "id": "3000",
+        "data_value": {
+          "id": "LOINC:LA4489-6",
+          "label": "Unknown"
+        },
+        "gene_studied": [
+          {
+            "id": "HGNC:7989",
+            "symbol": "NRAS"
+          }
+        ]
+      },
+      "genomic_region_studied": {
+        "id": "3000",
+        "gene_mutation": [
+          {
+            "id": "HGVS:40488",
+            "label": "NM_002834.5(PTPN11):c.174C>A (p.Asn58Lys)"
+          }
+        ],
+        "gene_studied": [
+          {
+            "id": "HGNC:7989",
+            "label": "NRAS"
+          }
+        ]
+      }
+    },
     "cancer_condition": [
       {
         "id": "5f2395f3-3271-441d-841a-af276c238eb2",
