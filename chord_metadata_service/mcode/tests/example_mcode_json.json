@@ -53,6 +53,10 @@
           "specimen_type": {
             "id": "BLD",
             "label": "Whole blood"
+          },
+          "laterality": {
+            "id": "SNOMED:24028007",
+            "label": "Right (qualifier value)"
           }
         },
         {

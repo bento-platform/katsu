@@ -146,6 +146,8 @@ class IngestMcodeJsonTest(TestCase):
         self.assertIn("cephalic vein", genetic_specimen_1.collection_body["label"])
         self.assertEqual("BLD", genetic_specimen_1.specimen_type["id"])
         self.assertIn("blood", genetic_specimen_1.specimen_type["label"])
+        self.assertEqual("SNOMED:24028007", genetic_specimen_1.laterality["id"])
+        self.assertEqual("Right (qualifier value)", genetic_specimen_1.laterality["label"])
         # 2
         genetic_specimen_2 = GeneticSpecimen.objects.get(id="3000-1")
         self.assertEqual("SNOMED:9568000", genetic_specimen_2.collection_body["id"])
