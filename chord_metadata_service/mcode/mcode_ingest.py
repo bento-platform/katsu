@@ -58,19 +58,20 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
             # Create or get Gene
             genes_studied = []
             if "gene_studied" in genomics_report_data["genetic_variant"]:
-                gene, g_created = Gene.objects.get_or_create(
-                    id=genomics_report_data["genetic_variant"]["gene_studied"]["id"],
-                    defaults={
-                        "alternate_ids": genomics_report_data["genetic_variant"]["gene_studied"].get(
-                            "alternate_ids", []
-                        ),
-                        "symbol": genomics_report_data["genetic_variant"]["gene_studied"].get("symbol", None),
-                        "extra_properties": genomics_report_data["genetic_variant"]["gene_studied"].get(
-                            "extra_properties", None
-                        )
-                    }
-                )
-                genes_studied.append(gene)
+                for gene_item in genomics_report_data["genetic_variant"]["gene_studied"]:
+                    gene, g_created = Gene.objects.get_or_create(
+                        id=gene_item["id"],
+                        defaults={
+                            "alternate_ids": gene_item.get(
+                                "alternate_ids", []
+                            ),
+                            "symbol": gene_item["symbol"],
+                            "extra_properties": gene_item.get(
+                                "extra_properties", None
+                            )
+                        }
+                    )
+                    genes_studied.append(gene)
             # Create or get Genetic variant
             genetic_variant, gv_created = m.CancerGeneticVariant.objects.get_or_create(
                 id=genomics_report_data["genetic_variant"]["id"],
