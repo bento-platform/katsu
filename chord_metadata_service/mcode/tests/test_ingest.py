@@ -159,12 +159,16 @@ class IngestMcodeJsonTest(TestCase):
         self.assertEqual("TISS", genetic_specimen_3.specimen_type["id"])
         self.assertIn("Tissue", genetic_specimen_3.specimen_type["label"])
         # genetic variant
-        # TODO add Gene instance
         self.assertEqual(len(CancerGeneticVariant.objects.all()), 1)
         genetic_variant = CancerGeneticVariant.objects.get(id="3000")
         self.assertIsInstance(genetic_variant.data_value, dict)
         self.assertEqual("LOINC:LA4489-6", genetic_variant.data_value["id"])
         self.assertEqual("Unknown", genetic_variant.data_value["label"])
+        for field in ["method", "amino_acid_change", "amino_acid_change_type", "cytogenetic_location",
+                      "cytogenetic_nomenclature", "genomic_dna_change", "genomic_source_class"]:
+            self.assertEqual("SNOMED:261665006", genetic_variant.__dict__[field]["id"])
+            self.assertEqual("Unknown", genetic_variant.__dict__[field]["label"])
+        self.assertIsNotNone(genetic_variant.extra_properties)
         # gene studied in genetic variant
         self.assertEqual(len(Gene.objects.all()), 1)
         gene = Gene.objects.get(id="HGNC:7989")

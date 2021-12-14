@@ -84,12 +84,49 @@
           "id": "LOINC:LA4489-6",
           "label": "Unknown"
         },
+        "method": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "amino_acid_change": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "amino_acid_change_type": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "cytogenetic_location": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "cytogenetic_nomenclature": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "genomic_dna_change": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "genomic_source_class": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "variation_code": [
+          {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+          }
+        ],
         "gene_studied": [
           {
             "id": "HGNC:7989",
             "symbol": "NRAS"
           }
-        ]
+        ],
+        "extra_properties": {
+          "comment": "Test data"
+        }
       },
       "genomic_region_studied": {
         "id": "3000",
@@ -105,6 +142,9 @@
             "label": "NRAS"
           }
         ]
+      },
+      "extra_properties": {
+        "comment": "Test data"
       }
     },
     "cancer_condition": [
