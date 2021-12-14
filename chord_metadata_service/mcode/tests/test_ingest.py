@@ -20,7 +20,7 @@ from ..parse_fhir_mcode import parse_bundle, patient_to_individual
 from ..models import (
     MCodePacket, CancerCondition, MedicationStatement,
     CancerRelatedProcedure, GenomicsReport, GeneticSpecimen,
-    CancerGeneticVariant, GenomicRegionStudied,
+    CancerGeneticVariant, GenomicRegionStudied, TNMStaging,
 )
 
 
@@ -124,6 +124,18 @@ class IngestMcodeJsonTest(TestCase):
         self.assertEqual(len(CancerCondition.objects.all()), 1)
         cancer_condition = CancerCondition.objects.filter(condition_type="primary")[0]
         self.assertEqual("active", cancer_condition.clinical_status["label"])
+        self.assertEqual("SNOMED:24028007", cancer_condition.laterality["id"])
+        self.assertIsInstance(cancer_condition.body_site, list)
+        self.assertEqual("SNOMED:253035009", cancer_condition.histology_morphology_behavior["id"])
+        # cancer condition tnm staging
+        self.assertEqual(len(TNMStaging.objects.all()), 2)
+        for tnm_staging in TNMStaging.objects.all():
+            self.assertIsNotNone(tnm_staging.tnm_type)
+            for field in ["stage_group", "primary_tumor_category",
+                          "regional_nodes_category", "distant_metastases_category"]:
+                self.assertIsNotNone(tnm_staging.__dict__[field])
+                self.assertIsInstance(tnm_staging.__dict__[field], dict)
+
         # mcodepacket
         self.assertEqual(len(MCodePacket.objects.all()), 1)
         mcodepacket = MCodePacket.objects.all()[0]

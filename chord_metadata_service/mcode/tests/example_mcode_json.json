@@ -221,31 +221,45 @@
             "cancer_condition": "5f2395f3-3271-441d-841a-af276c238eb2",
             "stage_group": {
               "data_value": {
-                "id": "http://snomed.info/sct:258219007",
+                "id": "SNOMED:258219007",
                 "label": "Stage 2 (qualifier value)"
               }
             },
             "tnm_type": "clinical",
             "primary_tumor_category": {
               "data_value": {
-                "id": "http://snomed.info/sct:67673008",
+                "id": "SNOMED:67673008",
                 "label": "T2 category (finding)"
               }
             },
             "regional_nodes_category": {
               "data_value": {
-                "id": "http://snomed.info/sct:62455006",
+                "id": "SNOMED:62455006",
                 "label": "N0 category (finding)"
               }
             },
             "distant_metastases_category": {
               "data_value": {
-                "id": "http://snomed.info/sct:62455006",
+                "id": "SNOMED:62455006",
                 "label": "N0 category (finding)"
               }
             }
           }
-        ]
+        ],
+        "laterality": {
+            "id": "SNOMED:24028007",
+            "label": "Right (qualifier value)"
+        },
+        "body_site": [
+          {
+            "id": "SNOMED:22201000087104",
+            "label": "Affected area"
+          }
+        ],
+        "histology_morphology_behavior": {
+            "id": "SNOMED:253035009",
+            "label": "In situ melanocytic morphology"
+          }
       }
     ],
     "cancer_disease_status": {
