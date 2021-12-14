@@ -7,6 +7,7 @@ from django.test import TestCase
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.phenopackets.models import Gene
 # noinspection PyProtectedMember
 from chord_metadata_service.chord.ingest import (
     WORKFLOW_INGEST_FUNCTION_MAP,
@@ -16,7 +17,11 @@ from chord_metadata_service.chord.ingest import (
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 
 from ..parse_fhir_mcode import parse_bundle, patient_to_individual
-from ..models import MCodePacket, CancerCondition, MedicationStatement, CancerRelatedProcedure
+from ..models import (
+    MCodePacket, CancerCondition, MedicationStatement,
+    CancerRelatedProcedure, GenomicsReport, GeneticSpecimen,
+    CancerGeneticVariant, GenomicRegionStudied,
+)
 
 
 with open(os.path.join(os.path.dirname(__file__), "example_mcode_fhir.json"), "r") as pf:
@@ -127,3 +132,53 @@ class IngestMcodeJsonTest(TestCase):
         self.assertEqual(len(MedicationStatement.objects.all()), 1)
         # tumor marker
         self.assertEqual(len(CancerRelatedProcedure.objects.all()), 1)
+        # genomics report
+        self.assertEqual(len(GenomicsReport.objects.all()), 1)
+        genomics_report = GenomicsReport.objects.get(id="3000")
+        self.assertIn("DNA double strand", genomics_report.code["label"])
+        self.assertIn("Cancer Centre", genomics_report.performing_organization_name)
+        self.assertIsNotNone(genomics_report.issued)
+        # genetic specimen
+        self.assertEqual(len(GeneticSpecimen.objects.all()), 3)
+        # 1
+        genetic_specimen_1 = GeneticSpecimen.objects.get(id="3000-0")
+        self.assertEqual("SNOMED:2855004", genetic_specimen_1.collection_body["id"])
+        self.assertIn("cephalic vein", genetic_specimen_1.collection_body["label"])
+        self.assertEqual("BLD", genetic_specimen_1.specimen_type["id"])
+        self.assertIn("blood", genetic_specimen_1.specimen_type["label"])
+        # 2
+        genetic_specimen_2 = GeneticSpecimen.objects.get(id="3000-1")
+        self.assertEqual("SNOMED:9568000", genetic_specimen_2.collection_body["id"])
+        self.assertIn("areola", genetic_specimen_2.collection_body["label"])
+        self.assertEqual("TUMOR", genetic_specimen_2.specimen_type["id"])
+        self.assertIn("Tumor", genetic_specimen_2.specimen_type["label"])
+        # 3
+        genetic_specimen_3 = GeneticSpecimen.objects.get(id="3000-2")
+        self.assertEqual("SNOMED:9568000", genetic_specimen_3.collection_body["id"])
+        self.assertIn("areola", genetic_specimen_3.collection_body["label"])
+        self.assertEqual("TISS", genetic_specimen_3.specimen_type["id"])
+        self.assertIn("Tissue", genetic_specimen_3.specimen_type["label"])
+        # genetic variant
+        # TODO add Gene instance
+        self.assertEqual(len(CancerGeneticVariant.objects.all()), 1)
+        genetic_variant = CancerGeneticVariant.objects.get(id="3000")
+        self.assertIsInstance(genetic_variant.data_value, dict)
+        self.assertEqual("LOINC:LA4489-6", genetic_variant.data_value["id"])
+        self.assertEqual("Unknown", genetic_variant.data_value["label"])
+        # gene studied in genetic variant
+        self.assertEqual(len(Gene.objects.all()), 1)
+        gene = Gene.objects.get(id="HGNC:7989")
+        self.assertEqual(gene.symbol, "NRAS")
+        # genomic region studied
+        self.assertEqual(len(GenomicRegionStudied.objects.all()), 1)
+        genomic_region_studied = GenomicRegionStudied.objects.get(id="3000")
+        # gene mutation in genomic region studied
+        self.assertIsInstance(genomic_region_studied.gene_mutation, list)
+        self.assertEqual(len(genomic_region_studied.gene_mutation), 1)
+        self.assertEqual(genomic_region_studied.gene_mutation[0]["id"], "HGVS:40488")
+        self.assertIn("NM_002834.5", genomic_region_studied.gene_mutation[0]["label"])
+        # gene studied in genomic region studied
+        self.assertIsInstance(genomic_region_studied.gene_studied, list)
+        self.assertEqual(len(genomic_region_studied.gene_studied), 1)
+        self.assertEqual(genomic_region_studied.gene_studied[0]["id"], "HGNC:7989")
+        self.assertEqual("NRAS", genomic_region_studied.gene_studied[0]["label"])
