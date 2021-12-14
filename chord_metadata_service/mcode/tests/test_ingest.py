@@ -176,6 +176,12 @@ class IngestMcodeJsonTest(TestCase):
         # genomic region studied
         self.assertEqual(len(GenomicRegionStudied.objects.all()), 1)
         genomic_region_studied = GenomicRegionStudied.objects.get(id="3000")
+        for field in ["genomic_reference_sequence_id", "genomic_region_coordinate_system"]:
+            self.assertEqual("SNOMED:261665006", genomic_region_studied.__dict__[field]["id"])
+            self.assertEqual("Unknown", genomic_region_studied.__dict__[field]["label"])
+        self.assertIsNotNone(genomic_region_studied.extra_properties)
+        self.assertIsInstance(genomic_region_studied.dna_region_description, list)
+        self.assertEqual(len(genomic_region_studied.dna_ranges_examined), 1)
         # gene mutation in genomic region studied
         self.assertIsInstance(genomic_region_studied.gene_mutation, list)
         self.assertEqual(len(genomic_region_studied.gene_mutation), 1)

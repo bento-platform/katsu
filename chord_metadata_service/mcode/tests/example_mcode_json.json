@@ -130,6 +130,21 @@
       },
       "genomic_region_studied": {
         "id": "3000",
+        "dna_ranges_examined": [
+          {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+          }
+        ],
+        "dna_region_description": ["Test description"],
+        "genomic_reference_sequence_id": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+          },
+        "genomic_region_coordinate_system": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+          },
         "gene_mutation": [
           {
             "id": "HGVS:40488",
@@ -141,8 +156,11 @@
             "id": "HGNC:7989",
             "label": "NRAS"
           }
-        ]
-      },
+        ],
+        "extra_properties": {
+          "comment": "Test data"
+        }
+    },
       "extra_properties": {
         "comment": "Test data"
       }
