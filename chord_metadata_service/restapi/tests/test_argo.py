@@ -19,6 +19,7 @@ from chord_metadata_service.mcode.tests.constants import (
     valid_medication_statement,
     valid_genetic_specimen,
 )
+from chord_metadata_service.restapi.argo_utils import argo_administrative_gender
 from chord_metadata_service.restapi.tests.utils import get_response
 
 
@@ -116,15 +117,41 @@ class ARGODonorTest(APITestCase):
 
     def setUp(self):
         self.donor = VALID_INDIVIDUAL
+        valid_individual_2 = deepcopy(VALID_INDIVIDUAL)
+        valid_individual_2["id"] = "patient:2"
+        valid_individual_2["sex"] = "OTHER_SEX"
+        self.donor_2 = valid_individual_2
+        invalid_individual_3 = deepcopy(VALID_INDIVIDUAL)
+        invalid_individual_3["id"] = "patient:3"
+        invalid_individual_3["sex"] = "No value"
+        self.donor_3 = invalid_individual_3
 
     def test_get_argo(self):
         get_response("individual-list", self.donor)
         get_resp = self.client.get("/api/individuals?format=argo")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
-        self.assertIsNotNone(get_resp_obj["donors"][0]["gender"])
-        self.assertIsNotNone(get_resp_obj["donors"][0]["submitter_donor_id"])
-        self.assertIsNotNone(get_resp_obj["donors"][0]["vital_status"])
+        for donor in get_resp_obj["donors"]:
+            self.assertIsNotNone(donor["gender"])
+            self.assertIsNotNone(donor["submitter_donor_id"])
+            self.assertIsNotNone(donor["vital_status"])
+
+    def test_gender_condition_1(self):
+        get_response("individual-list", self.donor_2)
+        get_resp = self.client.get("/api/individuals/patient:2?format=argo")
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        get_resp_obj = get_resp.json()
+        self.assertIsNotNone(get_resp_obj["gender"])
+        self.assertEqual(get_resp_obj["gender"], "Other")
+        self.assertEqual(get_resp_obj["submitter_donor_id"], "patient:2")
+
+    def test_gender_condition_2(self):
+        response = get_response("individual-list", self.donor_3)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_value_error(self):
+        with self.assertRaises(ValueError):
+            argo_administrative_gender(self.donor_3["sex"])
 
 
 class ARGOSpecimenTest(APITestCase):
