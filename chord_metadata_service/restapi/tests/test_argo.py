@@ -37,7 +37,7 @@ class ARGOMcodepacketTest(APITestCase):
         }
         self.cancer_condition_2 = CancerCondition.objects.create(**cancer_condition_2)
         # make tnm staging valid
-        # tnm staging 1
+        # tnm staging 1 clinical
         tnm_staging = invalid_tnm_staging(self.cancer_condition_2)
         for item in ["stage_group", "primary_tumor_category", "regional_nodes_category", "distant_metastases_category"]:
             tnm_staging[item] = {
@@ -47,11 +47,15 @@ class ARGOMcodepacketTest(APITestCase):
                 }
             }
         self.tnm_staging = TNMStaging.objects.create(**tnm_staging)
-        # tnm staging 2
+        # tnm staging 2 pathologic
         tnm_staging_2 = deepcopy(tnm_staging)
         tnm_staging_2["id"] = "tnm_staging:02"
         tnm_staging_2["tnm_type"] = "pathologic"
         self.tnm_staging_2 = TNMStaging.objects.create(**tnm_staging_2)
+        # tnm staging 3 clinical
+        tnm_staging_3 = deepcopy(tnm_staging)
+        tnm_staging_3["id"] = "tnm_staging:03"
+        self.tnm_staging_3 = TNMStaging.objects.create(**tnm_staging_3)
 
         self.cancer_related_procedure = CancerRelatedProcedure.objects.create(**valid_cancer_related_procedure())
         self.medication_statement = MedicationStatement.objects.create(**valid_medication_statement())
@@ -71,7 +75,6 @@ class ARGOMcodepacketTest(APITestCase):
         get_resp = self.client.get("/api/mcodepackets?format=argo")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
-        print(get_resp_obj)
         # donor
         self.assertEqual(get_resp_obj["composition_objects"][0]["donor"]["submitter_donor_id"], "patient:1")
         self.assertEqual(get_resp_obj["composition_objects"][0]["donor"]["gender"], "Female")
@@ -79,10 +82,12 @@ class ARGOMcodepacketTest(APITestCase):
         self.assertIn("Carcinosarcoma",
                       get_resp_obj["composition_objects"][0]["primary_diagnoses"][0]["cancer_type_code"]["label"])
         # tnm staging clinical
+        # second primary diagnosis (cancer condition 2) has two clinical tnm stagings
         for field in ["clinical_stage_group", "clinical_t_category",
                       "clinical_n_category", "clinical_m_category"]:
             self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1][field],
                                   list)
+            self.assertEqual(len(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1][field]), 2)
         # tnm staging pathlogical
         for field in ["pathological_stage_group", "pathological_t_category",
                       "pathological_n_category", "pathological_m_category"]:
