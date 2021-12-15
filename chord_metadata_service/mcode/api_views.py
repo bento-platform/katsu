@@ -9,8 +9,9 @@ from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .schemas import MCODE_SCHEMA
+
 from . import models as m, serializers as s, filters as f
-from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
+from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, ARGORenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 
@@ -27,6 +28,7 @@ class McodeModelViewSet(viewsets.ModelViewSet):
 class GeneticSpecimenViewSet(McodeModelViewSet):
     queryset = m.GeneticSpecimen.objects.all()
     serializer_class = s.GeneticSpecimenSerializer
+    renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
     filter_class = f.GeneticSpecimenFilter
 
@@ -77,6 +79,7 @@ CANCER_CONDITION_PREFETCH = (
 class CancerConditionViewSet(McodeModelViewSet):
     queryset = m.CancerCondition.objects.all()
     serializer_class = s.CancerConditionSerializer
+    renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
     filter_class = f.CancerConditionFilter
 
@@ -96,6 +99,7 @@ CANCER_RELATED_PROCEDURE = (
 class CancerRelatedProcedureViewSet(McodeModelViewSet):
     queryset = m.CancerRelatedProcedure.objects.all()
     serializer_class = s.CancerRelatedProcedureSerializer
+    renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
     filter_class = f.CancerRelatedProcedureFilter
 
@@ -103,6 +107,7 @@ class CancerRelatedProcedureViewSet(McodeModelViewSet):
 class MedicationStatementViewSet(McodeModelViewSet):
     queryset = m.MedicationStatement.objects.all()
     serializer_class = s.MedicationStatementSerializer
+    renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
     filter_class = f.MedicationStatementFilter
 
@@ -125,6 +130,7 @@ class MCodePacketViewSet(McodeModelViewSet):
         .select_related(*MCODEPACKET_SELECT)\
         .order_by("id")
     serializer_class = s.MCodePacketSerializer
+    renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
     filter_class = f.MCodePacketFilter
 

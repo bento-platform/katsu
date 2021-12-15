@@ -35,6 +35,140 @@
       "race": "Unknown",
       "ethnicity": "Unknown"
     },
+    "genomics_report": {
+      "id": "3000",
+      "code": {
+        "id": "LOINC:11013-0",
+        "label": "DNA double strand Ab [Titer] in Serum"
+      },
+      "performing_organization_name": "Cancer Centre",
+      "issued": "2018-02-27",
+      "genetic_specimen": [
+        {
+          "id": "3000-0",
+          "collection_body": {
+            "id": "SNOMED:2855004",
+            "label": "Structure of accessory cephalic vein"
+          },
+          "specimen_type": {
+            "id": "BLD",
+            "label": "Whole blood"
+          },
+          "laterality": {
+            "id": "SNOMED:24028007",
+            "label": "Right (qualifier value)"
+          }
+        },
+        {
+          "id": "3000-1",
+          "collection_body": {
+            "id": "SNOMED:9568000",
+            "label": "Subcutaneous tissue of areola"
+          },
+          "specimen_type": {
+            "id": "TUMOR",
+            "label": "Tumor"
+          }
+        },
+        {
+          "id": "3000-2",
+          "collection_body": {
+            "id": "SNOMED:9568000",
+            "label": "Subcutaneous tissue of areola"
+          },
+          "specimen_type": {
+            "id": "TISS",
+            "label": "Tissue"
+          }
+        }
+      ],
+      "genetic_variant": {
+        "id": "3000",
+        "data_value": {
+          "id": "LOINC:LA4489-6",
+          "label": "Unknown"
+        },
+        "method": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "amino_acid_change": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "amino_acid_change_type": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "cytogenetic_location": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "cytogenetic_nomenclature": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "genomic_dna_change": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "genomic_source_class": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+        },
+        "variation_code": [
+          {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+          }
+        ],
+        "gene_studied": [
+          {
+            "id": "HGNC:7989",
+            "symbol": "NRAS"
+          }
+        ],
+        "extra_properties": {
+          "comment": "Test data"
+        }
+      },
+      "genomic_region_studied": {
+        "id": "3000",
+        "dna_ranges_examined": [
+          {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+          }
+        ],
+        "dna_region_description": ["Test description"],
+        "genomic_reference_sequence_id": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+          },
+        "genomic_region_coordinate_system": {
+          "id": "SNOMED:261665006",
+          "label": "Unknown"
+          },
+        "gene_mutation": [
+          {
+            "id": "HGVS:40488",
+            "label": "NM_002834.5(PTPN11):c.174C>A (p.Asn58Lys)"
+          }
+        ],
+        "gene_studied": [
+          {
+            "id": "HGNC:7989",
+            "label": "NRAS"
+          }
+        ],
+        "extra_properties": {
+          "comment": "Test data"
+        }
+    },
+      "extra_properties": {
+        "comment": "Test data"
+      }
+    },
     "cancer_condition": [
       {
         "id": "5f2395f3-3271-441d-841a-af276c238eb2",
@@ -87,31 +221,45 @@
             "cancer_condition": "5f2395f3-3271-441d-841a-af276c238eb2",
             "stage_group": {
               "data_value": {
-                "id": "http://snomed.info/sct:258219007",
+                "id": "SNOMED:258219007",
                 "label": "Stage 2 (qualifier value)"
               }
             },
             "tnm_type": "clinical",
             "primary_tumor_category": {
               "data_value": {
-                "id": "http://snomed.info/sct:67673008",
+                "id": "SNOMED:67673008",
                 "label": "T2 category (finding)"
               }
             },
             "regional_nodes_category": {
               "data_value": {
-                "id": "http://snomed.info/sct:62455006",
+                "id": "SNOMED:62455006",
                 "label": "N0 category (finding)"
               }
             },
             "distant_metastases_category": {
               "data_value": {
-                "id": "http://snomed.info/sct:62455006",
+                "id": "SNOMED:62455006",
                 "label": "N0 category (finding)"
               }
             }
           }
-        ]
+        ],
+        "laterality": {
+            "id": "SNOMED:24028007",
+            "label": "Right (qualifier value)"
+        },
+        "body_site": [
+          {
+            "id": "SNOMED:22201000087104",
+            "label": "Affected area"
+          }
+        ],
+        "histology_morphology_behavior": {
+            "id": "SNOMED:253035009",
+            "label": "In situ melanocytic morphology"
+          }
       }
     ],
     "cancer_disease_status": {

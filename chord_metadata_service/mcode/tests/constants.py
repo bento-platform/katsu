@@ -17,30 +17,29 @@ VALID_INDIVIDUAL = {
     "active": True
 }
 
-
 VALID_CANCER_CONDITION = {
-        "id": "cancer_condition:02",
-        "condition_type": "secondary",
-        "body_site": [
-            {
-                "id": "442083009",
-                "label": "Anatomical or acquired body structure (body structure)"
-            }
-        ],
-        "clinical_status": {
-            "id": "active",
-            "label": "Active"
-        },
-        "code": {
-            "id": "SNOMED:63634009",
-            "label": "Glioblastoma"
-        },
-        "date_of_diagnosis": "2018-11-13T20:20:39+00:00",
-        "histology_morphology_behavior": {
-            "id": "372147008",
-            "label": "Kaposi's sarcoma - category (morphologic abnormality)"
+    "id": "cancer_condition:02",
+    "condition_type": "secondary",
+    "body_site": [
+        {
+            "id": "442083009",
+            "label": "Anatomical or acquired body structure (body structure)"
         }
+    ],
+    "clinical_status": {
+        "id": "active",
+        "label": "Active"
+    },
+    "code": {
+        "id": "SNOMED:63634009",
+        "label": "Glioblastoma"
+    },
+    "date_of_diagnosis": "2018-11-13T20:20:39+00:00",
+    "histology_morphology_behavior": {
+        "id": "372147008",
+        "label": "Kaposi's sarcoma - category (morphologic abnormality)"
     }
+}
 
 
 def valid_genetic_report():
@@ -183,4 +182,22 @@ def valid_medication_statement():
         },
         "start_date": "2018-11-13T20:20:39+00:00",
         "end_date": "2019-04-13T20:20:39+00:00"
+    }
+
+
+def valid_genetic_specimen(identifier: str):
+    return {
+        "id": identifier,
+        "specimen_type": {
+            "id": "BLD",
+            "label": "Whole blood"
+        },
+        "collection_body": {
+            "id": "SNOMED:9018004",
+            "label": "Middle colic vein"
+        },
+        "laterality": {
+            "id": "SNOMED:51440002",
+            "label": "Right and left (qualifier value)"
+        }
     }
