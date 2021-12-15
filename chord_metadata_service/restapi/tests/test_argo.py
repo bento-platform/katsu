@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -56,6 +57,18 @@ class ARGOMcodepacketTest(APITestCase):
         tnm_staging_3 = deepcopy(tnm_staging)
         tnm_staging_3["id"] = "tnm_staging:03"
         self.tnm_staging_3 = TNMStaging.objects.create(**tnm_staging_3)
+        # tnm staging 4 pathologic
+        tnm_staging_4 = deepcopy(tnm_staging)
+        tnm_staging_4["id"] = "tnm_staging:04"
+        tnm_staging_4["tnm_type"] = "pathologic"
+        for item in ["stage_group", "primary_tumor_category", "regional_nodes_category", "distant_metastases_category"]:
+            tnm_staging_4[item] = {
+                "data_value": {
+                    "id": "002",
+                    "label": "test stage group 002"
+                }
+            }
+        self.tnm_staging_4 = TNMStaging.objects.create(**tnm_staging_4)
 
         self.cancer_related_procedure = CancerRelatedProcedure.objects.create(**valid_cancer_related_procedure())
         self.medication_statement = MedicationStatement.objects.create(**valid_medication_statement())
@@ -89,10 +102,18 @@ class ARGOMcodepacketTest(APITestCase):
                                   list)
             self.assertEqual(len(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1][field]), 2)
         # tnm staging pathlogical
+        self.assertEqual(len(TNMStaging.objects.all()), 4)
+        self.assertEqual(TNMStaging.objects.filter(tnm_type="pathologic").count(), 2)
+        self.assertEqual(TNMStaging.objects.filter(cancer_condition__id="cancer_condition:02").count(), 4)
+        self.assertEqual(TNMStaging.objects.filter
+                         (Q(cancer_condition__id="cancer_condition:02") & Q(tnm_type="pathologic")).count(), 2)
         for field in ["pathological_stage_group", "pathological_t_category",
                       "pathological_n_category", "pathological_m_category"]:
             self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["specimen"][field],
                                   list)
+            self.assertEqual(
+                len(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["specimen"][field]), 2
+            )
         # treatments
         self.assertEqual("Radiation therapy",
                          get_resp_obj["composition_objects"][0]["treatments"][0]["treatment_type"])

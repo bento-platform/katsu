@@ -60,6 +60,7 @@ def argo_primary_diagnosis(obj):
         "cancer_type_code": obj["code"]
     }
     if "tnm_staging" in obj and obj["tnm_staging"]:
+        primary_diagnosis["specimen"] = {}
         for item in obj["tnm_staging"]:
             # tnm_staging clinical is mapped to PrimaryDiagnosis fields
             if item["tnm_type"] == "clinical":
@@ -76,19 +77,22 @@ def argo_primary_diagnosis(obj):
                             primary_diagnosis[argo_field] = [item[mcode_field]["data_value"]]
 
             # tnm_staging pathologic is mapped to Specimen fields
-            elif item["tnm_type"] == "pathologic":
+            else:
                 # need to instanciate a local specimen object here
-                primary_diagnosis["specimen"] = {}
                 for mcode_field, argo_field in zip(
                         ["stage_group", "primary_tumor_category",
                          "regional_nodes_category", "distant_metastases_category"],
                         ["pathological_stage_group", "pathological_t_category",
                          "pathological_n_category", "pathological_m_category"]
                 ):
-                    if argo_field in primary_diagnosis["specimen"] and primary_diagnosis["specimen"][argo_field]:
-                        primary_diagnosis["specimen"][argo_field].append(item[mcode_field]["data_value"])
-                    else:
-                        primary_diagnosis["specimen"][argo_field] = [item[mcode_field]["data_value"]]
+                    if mcode_field in item and item[mcode_field]:
+                        if argo_field in primary_diagnosis["specimen"] and primary_diagnosis["specimen"][argo_field]:
+                            primary_diagnosis["specimen"][argo_field].append(item[mcode_field]["data_value"])
+                        else:
+                            primary_diagnosis["specimen"][argo_field] = [item[mcode_field]["data_value"]]
+        # if no pathologic tnm staging delete specimen
+        if not primary_diagnosis["specimen"]:
+            del primary_diagnosis["specimen"]
 
     # check for not mapped fields in extra_properties
     if "extra_properties" in obj and obj["extra_properties"]:
