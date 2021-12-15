@@ -120,6 +120,12 @@ class ARGODonorTest(APITestCase):
         valid_individual_2 = deepcopy(VALID_INDIVIDUAL)
         valid_individual_2["id"] = "patient:2"
         valid_individual_2["sex"] = "OTHER_SEX"
+        # test if argo fields were saved to extra_properties
+        valid_individual_2["extra_properties"] = {
+            "cause_of_death": "Unknown",
+            "survival_time": 2,
+            "primary_site": "Breast"
+        }
         self.donor_2 = valid_individual_2
         invalid_individual_3 = deepcopy(VALID_INDIVIDUAL)
         invalid_individual_3["id"] = "patient:3"
@@ -127,7 +133,8 @@ class ARGODonorTest(APITestCase):
         self.donor_3 = invalid_individual_3
 
     def test_get_argo(self):
-        get_response("individual-list", self.donor)
+        create_object_response = get_response("individual-list", self.donor)
+        self.assertEqual(create_object_response.status_code, status.HTTP_201_CREATED)
         get_resp = self.client.get("/api/individuals?format=argo")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -137,17 +144,21 @@ class ARGODonorTest(APITestCase):
             self.assertIsNotNone(donor["vital_status"])
 
     def test_gender_condition_1(self):
-        get_response("individual-list", self.donor_2)
+        create_object_response = get_response("individual-list", self.donor_2)
+        self.assertEqual(create_object_response.status_code, status.HTTP_201_CREATED)
         get_resp = self.client.get("/api/individuals/patient:2?format=argo")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
         self.assertIsNotNone(get_resp_obj["gender"])
         self.assertEqual(get_resp_obj["gender"], "Other")
         self.assertEqual(get_resp_obj["submitter_donor_id"], "patient:2")
+        self.assertEqual(get_resp_obj["cause_of_death"], "Unknown")
+        self.assertEqual(get_resp_obj["survival_time"], 2)
+        self.assertEqual(get_resp_obj["primary_site"], "Breast")
 
     def test_gender_condition_2(self):
-        response = get_response("individual-list", self.donor_3)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        create_object_response = get_response("individual-list", self.donor_3)
+        self.assertEqual(create_object_response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_value_error(self):
         with self.assertRaises(ValueError):
@@ -161,7 +172,8 @@ class ARGOSpecimenTest(APITestCase):
         self.specimen = valid_genetic_specimen("specimen:01")
 
     def test_get_argo(self):
-        get_response("geneticspecimen-list", self.specimen)
+        create_object_response = get_response("geneticspecimen-list", self.specimen)
+        self.assertEqual(create_object_response.status_code, status.HTTP_201_CREATED)
         get_resp = self.client.get("/api/geneticspecimens?format=argo")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -182,7 +194,8 @@ class ARGOPrimaryDiagnosisTest(APITestCase):
         self.primary_diagnosis = valid_cancer_condition()
 
     def test_get_argo(self):
-        get_response("cancercondition-list", self.primary_diagnosis)
+        create_object_response = get_response("cancercondition-list", self.primary_diagnosis)
+        self.assertEqual(create_object_response.status_code, status.HTTP_201_CREATED)
         get_resp = self.client.get("/api/cancerconditions?format=argo")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -199,7 +212,8 @@ class ARGOTreatmentTest(APITestCase):
         self.treatment = valid_cancer_related_procedure()
 
     def test_get_argo(self):
-        get_response("cancerrelatedprocedure-list", self.treatment)
+        create_object_response = get_response("cancerrelatedprocedure-list", self.treatment)
+        self.assertEqual(create_object_response.status_code, status.HTTP_201_CREATED)
         get_resp = self.client.get("/api/cancerrelatedprocedures?format=argo")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -223,7 +237,8 @@ class ARGOTherapyTest(APITestCase):
         self.therapy = valid_medication_statement()
 
     def test_get_argo(self):
-        get_response("medicationstatement-list", self.therapy)
+        create_object_response = get_response("medicationstatement-list", self.therapy)
+        self.assertEqual(create_object_response.status_code, status.HTTP_201_CREATED)
         get_resp = self.client.get("/api/medicationstatements?format=argo")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         results = get_resp.json()["immunotherapies_chemotherapies_hormone_therapies"]
