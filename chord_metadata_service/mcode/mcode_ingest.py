@@ -1,7 +1,7 @@
 import logging
 from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.phenopackets.models import Gene
 from . import models as m
-
 
 logger = logging.getLogger("mcode_ingest")
 logger.setLevel(logging.INFO)
@@ -33,17 +33,128 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
             id=subject["id"],
             defaults={
                 "alternate_ids": subject.get("alternate_ids", None),
-                "sex": subject.get("sex", ""),
                 "date_of_birth": subject.get("date_of_birth", None),
+                "age": subject.get("age", None),
+                "sex": subject.get("sex", None),
+                "karyotypic_sex": subject.get("karyotypic_sex", ""),
+                "taxonomy": subject.get("taxonomy", None),
                 "active": subject.get("active", False),
-                "deceased": subject.get("deceased", False)
+                "deceased": subject.get("deceased", False),
+                "comorbid_condition": subject.get("comorbid_condition", None),
+                "ecog_performance_status": subject.get("ecog_performance_status", None),
+                "karnofsky": subject.get("karnofsky", None),
+                "race": subject.get("race", ""),
+                "ethnicity": subject.get("ethnicity", ""),
+                "extra_properties": subject.get("extra_properties", None),
             }
         )
         _logger_message(s_created, subject)
         new_mcodepacket["subject"] = subject.id
 
     if genomics_report_data:
-        # don't have data for genomics report yet
+        new_genomics_report = {}
+        # Genetic Variant
+        if "genetic_variant" in genomics_report_data and genomics_report_data["genetic_variant"]:
+            # Create or get Gene
+            genes_studied = []
+            if "gene_studied" in genomics_report_data["genetic_variant"]:
+                for gene_item in genomics_report_data["genetic_variant"]["gene_studied"]:
+                    gene, g_created = Gene.objects.get_or_create(
+                        id=gene_item["id"],
+                        defaults={
+                            "alternate_ids": gene_item.get(
+                                "alternate_ids", []
+                            ),
+                            "symbol": gene_item["symbol"],
+                            "extra_properties": gene_item.get(
+                                "extra_properties", None
+                            )
+                        }
+                    )
+                    genes_studied.append(gene)
+            # Create or get Genetic variant
+            genetic_variant, gv_created = m.CancerGeneticVariant.objects.get_or_create(
+                id=genomics_report_data["genetic_variant"]["id"],
+                defaults={
+                    "data_value": genomics_report_data["genetic_variant"].get("data_value", None),
+                    "method": genomics_report_data["genetic_variant"].get("method", None),
+                    "amino_acid_change": genomics_report_data["genetic_variant"].get("amino_acid_change", None),
+                    "amino_acid_change_type": genomics_report_data["genetic_variant"].get(
+                        "amino_acid_change_type", None
+                    ),
+                    "cytogenetic_location": genomics_report_data["genetic_variant"].get("cytogenetic_location", None),
+                    "cytogenetic_nomenclature": genomics_report_data["genetic_variant"].get(
+                        "cytogenetic_nomenclature", None
+                    ),
+                    "genomic_dna_change": genomics_report_data["genetic_variant"].get("genomic_dna_change", None),
+                    "genomic_source_class": genomics_report_data["genetic_variant"].get("genomic_source_class", None),
+                    "variation_code": genomics_report_data["genetic_variant"].get("variation_code", None),
+                    "extra_properties": genomics_report_data["genetic_variant"].get("extra_properties", None)
+                }
+            )
+            if genes_studied:
+                genetic_variant.gene_studied.set(genes_studied)
+
+            new_genomics_report["genetic_variant"] = genetic_variant
+
+        # Genomic Region Studied
+        if "genomic_region_studied" in genomics_report_data and genomics_report_data["genomic_region_studied"]:
+            genomic_region_studied, grs_created = m.GenomicRegionStudied.objects.get_or_create(
+                id=genomics_report_data["genomic_region_studied"]["id"],
+                defaults={
+                    "dna_ranges_examined": genomics_report_data["genomic_region_studied"].get(
+                        "dna_ranges_examined", None
+                    ),
+                    "dna_region_description": genomics_report_data["genomic_region_studied"].get(
+                        "dna_region_description", []
+                    ),
+                    "gene_mutation": genomics_report_data["genomic_region_studied"].get("gene_mutation", None),
+                    "gene_studied": genomics_report_data["genomic_region_studied"].get("gene_studied", None),
+                    "genomic_reference_sequence_id": genomics_report_data["genomic_region_studied"].get(
+                        "genomic_reference_sequence_id", None
+                    ),
+                    "genomic_region_coordinate_system": genomics_report_data["genomic_region_studied"].get(
+                        "genomic_region_coordinate_system", None
+                    ),
+                    "extra_properties": genomics_report_data["genomic_region_studied"].get(
+                        "extra_properties", None
+                    )
+                }
+            )
+            new_genomics_report["genomic_region_studied"] = genomic_region_studied
+
+        # Genetic Specimen
+        genetic_specimens = []
+        if "genetic_specimen" in genomics_report_data and genomics_report_data["genetic_specimen"]:
+            for specimen in genomics_report_data["genetic_specimen"]:
+                genetic_specimen, gs_created = m.GeneticSpecimen.objects.get_or_create(
+                    id=specimen["id"],
+                    defaults={
+                        "specimen_type": specimen["specimen_type"],
+                        "collection_body": specimen.get("collection_body", None),
+                        "laterality": specimen.get("laterality", None),
+                        "extra_properties": specimen.get("extra_properties", None),
+                    }
+                )
+                genetic_specimens.append(genetic_specimen)
+
+        genomics_report, gr_created = m.GenomicsReport.objects.get_or_create(
+            id=genomics_report_data["id"],
+            defaults={
+                "code": genomics_report_data["code"],
+                "performing_organization_name": genomics_report_data.get("performing_organization_name", None),
+                "issued": genomics_report_data.get("issued", None),
+                "genetic_variant": new_genomics_report.get("genetic_variant", None),
+                "genomic_region_studied": new_genomics_report.get("genomic_region_studied", None),
+                "extra_properties": genomics_report_data.get("extra_properties", None),
+            }
+        )
+        if genetic_specimens:
+            genomics_report.genetic_specimen.set(genetic_specimens)
+
+        new_mcodepacket["genomics_report"] = genomics_report
+
+    else:
         pass
 
     # get and create CancerCondition

@@ -8,6 +8,7 @@ import requests_unixsocket
 import shutil
 import tempfile
 import uuid
+import jsonschema
 
 from dateutil.parser import isoparse
 from typing import Callable
@@ -17,7 +18,9 @@ from django.conf import settings
 
 from bento_lib.drs.utils import get_access_method_of_type, fetch_drs_record_by_uri
 
-from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
+from chord_metadata_service.chord.data_types import (
+    DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET, DATA_TYPE_READSET
+)
 from chord_metadata_service.chord.models import Table, TableOwnership
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.phenopackets import models as pm
@@ -30,9 +33,10 @@ from chord_metadata_service.restapi.fhir_ingest import (
 )
 from chord_metadata_service.mcode.parse_fhir_mcode import parse_bundle
 from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
+from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
 
 requests_unixsocket.monkeypatch()
-
 
 __all__ = [
     "METADATA_WORKFLOWS",
@@ -51,6 +55,7 @@ WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
 WORKFLOW_MCODE_JSON = "mcode_json"
+WORKFLOW_READSET = "readset"
 
 METADATA_WORKFLOWS = {
     "ingestion": {
@@ -211,6 +216,28 @@ METADATA_WORKFLOWS = {
                 }
             ]
         },
+        WORKFLOW_READSET: {
+            "name": "Readset",
+            "description": "This workflow will copy readset files over to DRS.",
+            "data_type": DATA_TYPE_READSET,
+            "file": "readset.wdl",
+            "inputs": [
+                {
+                    "id": "readset_files",
+                    "type": "file[]",
+                    "required": True,
+                    "extensions": [".cram", ".bam", ".bigWig", ".bigBed"]
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "readset_files",
+                    "type": "file[]",
+                    "map_from_input": "readset_files",
+                    "value": "{}"
+                }
+            ]
+        },
     },
     "analysis": {}
 }
@@ -220,6 +247,20 @@ WORKFLOWS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "work
 
 class IngestError(Exception):
     pass
+
+
+def schema_validation(obj, schema):
+    v = jsonschema.Draft7Validator(schema, format_checker=jsonschema.FormatChecker())
+    try:
+        jsonschema.validate(obj, schema, format_checker=jsonschema.FormatChecker())
+        logger.info("JSON schema validation passed.")
+        return True
+    except jsonschema.exceptions.ValidationError:
+        errors = [e for e in v.iter_errors(obj)]
+        logger.info("JSON schema validation failed.")
+        for i, error in enumerate(errors, 1):
+            logger.error(f"{i} Validation error in {'.'.join(str(v) for v in error.path)}: {error.message}")
+        return False
 
 
 def create_phenotypic_feature(pf):
@@ -291,8 +332,13 @@ def ingest_resource(resource: dict) -> rm.Resource:
     return rs_obj
 
 
-def ingest_experiment(experiment_data, table_id) -> em.Experiment:
+def ingest_experiment(experiment_data, table_id):
     """Ingests a single experiment."""
+
+    # validate experiment data against experiments schema
+    validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA)
+    if not validation:
+        return
 
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
     study_type = experiment_data.get("study_type")
@@ -303,7 +349,7 @@ def ingest_experiment(experiment_data, table_id) -> em.Experiment:
     library_strategy = experiment_data.get("library_strategy")
     library_source = experiment_data.get("library_source")
     library_selection = experiment_data.get("library_selection")
-    library_layout = experiment_data.get("library_selection")
+    library_layout = experiment_data.get("library_layout")
     extraction_protocol = experiment_data.get("extraction_protocol")
     reference_registry_id = experiment_data.get("reference_registry_id")
     qc_flags = experiment_data.get("qc_flags", [])
@@ -344,8 +390,13 @@ def ingest_experiment(experiment_data, table_id) -> em.Experiment:
     return new_experiment
 
 
-def ingest_phenopacket(phenopacket_data, table_id) -> pm.Phenopacket:
+def ingest_phenopacket(phenopacket_data, table_id):
     """Ingests a single phenopacket."""
+
+    # validate phenopackets data against phenopacket schema
+    validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
+    if not validation:
+        return
 
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
 
@@ -660,10 +711,21 @@ def ingest_mcode_workflow(workflow_outputs, table_id):
                 ingest_mcodepacket(json_data, table_id)
 
 
+# the table_id is required to fit the bento_ingest.schema.json in bento_lib
+# it can be any existing table_id which can be validated
+# the workflow only performs copying files over to the DRS
+def ingest_readset_workflow(workflow_outputs, table_id):
+    logger.info(f"Current workflow outputs : {workflow_outputs}")
+    for readset_file in _get_output_or_raise(workflow_outputs, "readset_files"):
+        with _workflow_file_output_to_path(readset_file) as readset_file_path:
+            logger.info(f"Attempting ingestion of Readset file from path: {readset_file_path}")
+
+
 WORKFLOW_INGEST_FUNCTION_MAP = {
     WORKFLOW_EXPERIMENTS_JSON: ingest_experiments_workflow,
     WORKFLOW_PHENOPACKETS_JSON: ingest_phenopacket_workflow,
     WORKFLOW_FHIR_JSON: ingest_fhir_workflow,
     WORKFLOW_MCODE_FHIR_JSON: ingest_mcode_fhir_workflow,
     WORKFLOW_MCODE_JSON: ingest_mcode_workflow,
+    WORKFLOW_READSET: ingest_readset_workflow,
 }

@@ -3,7 +3,8 @@ import os
 
 
 __all__ = ["EXAMPLE_INGEST_PHENOPACKET", "EXAMPLE_INGEST_OUTPUTS",
-           "EXAMPLE_INGEST_EXPERIMENT", "EXAMPLE_INGEST_OUTPUTS_EXPERIMENT"]
+           "EXAMPLE_INGEST_EXPERIMENT", "EXAMPLE_INGEST_OUTPUTS_EXPERIMENT",
+           "EXAMPLE_INGEST_INVALID_PHENOPACKET"]
 
 with open(os.path.join(os.path.dirname(__file__), "example_phenopacket.json"), "r") as pf:
     EXAMPLE_INGEST_PHENOPACKET = json.load(pf)
@@ -19,3 +20,7 @@ with open(os.path.join(os.path.dirname(__file__), "example_experiment.json"), "r
 EXAMPLE_INGEST_OUTPUTS_EXPERIMENT = {
     "json_document": os.path.join(os.path.dirname(__file__), "example_experiment.json"),
 }
+
+
+with open(os.path.join(os.path.dirname(__file__), "example_invalid_phenopacket.json"), "r") as pf:
+    EXAMPLE_INGEST_INVALID_PHENOPACKET = json.load(pf)

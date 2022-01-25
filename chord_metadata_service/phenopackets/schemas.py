@@ -2,7 +2,6 @@
 
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.schemas import RESOURCE_SCHEMA
-from chord_metadata_service.restapi.description_utils import describe_schema
 from chord_metadata_service.restapi.schemas import (
     AGE,
     AGE_RANGE,
@@ -10,6 +9,7 @@ from chord_metadata_service.restapi.schemas import (
     EXTRA_PROPERTIES_SCHEMA,
     ONTOLOGY_CLASS,
 )
+from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe
 
 from . import descriptions
 
@@ -31,9 +31,9 @@ __all__ = [
 ]
 
 
-ALLELE_SCHEMA = describe_schema({
+ALLELE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:allele_schema",
+    "$id": "katsu:phenopackets:allele",
     "title": "Allele schema",
     "description": "Variant allele types",
     "type": "object",
@@ -70,9 +70,9 @@ ALLELE_SCHEMA = describe_schema({
 }, descriptions.ALLELE)
 
 
-PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
+PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:external_reference_schema",
+    "$id": "katsu:phenopackets:external_reference",
     "title": "External reference schema",
     "type": "object",
     "properties": {
@@ -87,9 +87,9 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
 }, descriptions.EXTERNAL_REFERENCE)
 
 
-PHENOPACKET_UPDATE_SCHEMA = describe_schema({
+PHENOPACKET_UPDATE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:update_schema",
+    "$id": "katsu:phenopackets:update",
     "title": "Updates schema",
     "type": "object",
     "properties": {
@@ -110,8 +110,9 @@ PHENOPACKET_UPDATE_SCHEMA = describe_schema({
 
 
 # noinspection PyProtectedMember
-PHENOPACKET_META_DATA_SCHEMA = describe_schema({
+PHENOPACKET_META_DATA_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:meta_data",
     "type": "object",
     "properties": {
         "created": {
@@ -143,9 +144,9 @@ PHENOPACKET_META_DATA_SCHEMA = describe_schema({
     },
 }, descriptions.META_DATA)
 
-PHENOPACKET_EVIDENCE_SCHEMA = describe_schema({
+PHENOPACKET_EVIDENCE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:evidence_schema",
+    "$id": "katsu:phenopackets:evidence",
     "title": "Evidence schema",
     "type": "object",
     "properties": {
@@ -156,7 +157,9 @@ PHENOPACKET_EVIDENCE_SCHEMA = describe_schema({
     "required": ["evidence_code"],
 }, descriptions.EVIDENCE)
 
-PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
+PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:phenotypic_feature",
     "type": "object",
     "properties": {
         "description": {
@@ -179,7 +182,9 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
 
 
 # TODO: search
-PHENOPACKET_GENE_SCHEMA = describe_schema({
+PHENOPACKET_GENE_SCHEMA = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:gene",
     "type": "object",
     "properties": {
         "id": {
@@ -200,7 +205,9 @@ PHENOPACKET_GENE_SCHEMA = describe_schema({
 }, descriptions.GENE)
 
 
-PHENOPACKET_HTS_FILE_SCHEMA = describe_schema({
+PHENOPACKET_HTS_FILE_SCHEMA = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:hts_file",
     "type": "object",
     "properties": {
         "uri": {
@@ -225,7 +232,9 @@ PHENOPACKET_HTS_FILE_SCHEMA = describe_schema({
 
 
 # TODO: search??
-PHENOPACKET_VARIANT_SCHEMA = describe_schema({
+PHENOPACKET_VARIANT_SCHEMA = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:variant",
     "type": "object",  # TODO
     "properties": {
         "allele": ALLELE_SCHEMA,  # TODO
@@ -235,7 +244,9 @@ PHENOPACKET_VARIANT_SCHEMA = describe_schema({
 }, descriptions.VARIANT)
 
 # noinspection PyProtectedMember
-PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
+PHENOPACKET_BIOSAMPLE_SCHEMA = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:biosample",
     "type": "object",
     "properties": {
         "id": {
@@ -288,7 +299,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
 
 PHENOPACKET_DISEASE_ONSET_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:disease_onset_schema",
+    "$id": "katsu:phenopackets:disease_onset",
     "title": "Onset age",
     "description": "Schema for the age of the onset of the disease.",
     "type": "object",
@@ -299,9 +310,9 @@ PHENOPACKET_DISEASE_ONSET_SCHEMA = {
     ]
 }
 
-PHENOPACKET_DISEASE_SCHEMA = describe_schema({
+PHENOPACKET_DISEASE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:disease_schema",
+    "$id": "katsu:phenopackets:disease",
     "title": "Disease schema",
     "type": "object",
     "properties": {
@@ -322,9 +333,9 @@ PHENOPACKET_DISEASE_SCHEMA = describe_schema({
 
 # Deduplicate with other phenopacket representations
 # noinspection PyProtectedMember
-PHENOPACKET_SCHEMA = describe_schema({
+PHENOPACKET_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "chord_metadata_service:phenopacket_schema",
+    "$id": "katsu:phenopackets:phenopacket",
     "title": "Phenopacket schema",
     "description": "Schema for metadata service datasets",
     "type": "object",
@@ -360,5 +371,5 @@ PHENOPACKET_SCHEMA = describe_schema({
         "meta_data": PHENOPACKET_META_DATA_SCHEMA,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "meta_data"],
+    "required": ["meta_data"],
 }, descriptions.PHENOPACKET)

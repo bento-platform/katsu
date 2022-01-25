@@ -1,6 +1,5 @@
-from chord_metadata_service.restapi.schema_utils import customize_schema
+from chord_metadata_service.restapi.schema_utils import customize_schema, tag_ids_and_describe
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, AGE_OR_AGE_RANGE, EXTRA_PROPERTIES_SCHEMA
-from chord_metadata_service.restapi.description_utils import describe_schema
 
 from .descriptions import INDIVIDUAL
 
@@ -16,8 +15,9 @@ COMORBID_CONDITION = customize_schema(
 )
 
 
-INDIVIDUAL_SCHEMA = describe_schema({
+INDIVIDUAL_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:patients:individual",
     "type": "object",
     "properties": {
         "id": {

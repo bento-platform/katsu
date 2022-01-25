@@ -1,3 +1,10 @@
+from chord_metadata_service.restapi.argo_utils import (
+    argo_specimen,
+    argo_primary_diagnosis,
+    argo_treatment,
+    argo_therapy,
+    argo_composition_object
+)
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.patients.serializers import IndividualSerializer
 from . import models as m
@@ -22,6 +29,9 @@ class GeneticSpecimenSerializer(GenericSerializer):
     class Meta:
         model = m.GeneticSpecimen
         fields = '__all__'
+        # meta info for converting to ARGO
+        argo_profile_plural = 'specimens'
+        argo_converter = argo_specimen
 
 
 class CancerGeneticVariantSerializer(GenericSerializer):
@@ -39,6 +49,9 @@ class GenomicRegionStudiedSerializer(GenericSerializer):
 
 
 class GenomicsReportSerializer(GenericSerializer):
+    genetic_specimen = GeneticSpecimenSerializer(many=True, read_only=True)
+    genetic_variant = CancerGeneticVariantSerializer()
+    genomic_region_studied = GenomicRegionStudiedSerializer()
 
     class Meta:
         model = m.GenomicsReport
@@ -73,6 +86,9 @@ class CancerConditionSerializer(GenericSerializer):
     class Meta:
         model = m.CancerCondition
         fields = '__all__'
+        # meta info for converting to ARGO
+        argo_profile_plural = 'primary_diagnoses'
+        argo_converter = argo_primary_diagnosis
 
 
 class CancerRelatedProcedureSerializer(GenericSerializer):
@@ -80,6 +96,9 @@ class CancerRelatedProcedureSerializer(GenericSerializer):
     class Meta:
         model = m.CancerRelatedProcedure
         fields = '__all__'
+        # meta info for converting to ARGO
+        argo_profile_plural = 'treatments'
+        argo_converter = argo_treatment
 
 
 class MedicationStatementSerializer(GenericSerializer):
@@ -87,6 +106,9 @@ class MedicationStatementSerializer(GenericSerializer):
     class Meta:
         model = m.MedicationStatement
         fields = '__all__'
+        # meta info for converting to ARGO
+        argo_profile_plural = 'immunotherapies_chemotherapies_hormone_therapies'
+        argo_converter = argo_therapy
 
 
 class MCodePacketSerializer(GenericSerializer):
@@ -111,3 +133,6 @@ class MCodePacketSerializer(GenericSerializer):
     class Meta:
         model = m.MCodePacket
         fields = '__all__'
+        # meta info for converting to ARGO
+        argo_profile_plural = 'composition_objects'
+        argo_converter = argo_composition_object
