@@ -26,22 +26,37 @@ class McodeModelViewSet(viewsets.ModelViewSet):
 
 
 class GeneticSpecimenViewSet(McodeModelViewSet):
-    queryset = m.GeneticSpecimen.objects.all()
     serializer_class = s.GeneticSpecimenSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
     filter_class = f.GeneticSpecimenFilter
 
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.GeneticSpecimen.objects\
+                .filter(genomicsreport__mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.GeneticSpecimen.objects.all()
+        return queryset
+
 
 class CancerGeneticVariantViewSet(McodeModelViewSet):
-    queryset = m.CancerGeneticVariant.objects.all()
     serializer_class = s.CancerGeneticVariantSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.CancerGeneticVariantFilter
 
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.CancerGeneticVariant.objects\
+                .filter(genomicsreport__mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.CancerGeneticVariant.objects.all()
+        return queryset
+
 
 class GenomicRegionStudiedViewSet(McodeModelViewSet):
-    queryset = m.GenomicRegionStudied.objects.all()
     serializer_class = s.GenomicRegionStudiedSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.GenomicRegionStudiedFilter
@@ -56,16 +71,32 @@ GENOMIC_REPORT_SELECT = (
     "genetic_variant",
 )
 
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.GenomicRegionStudied.objects\
+                .filter(genomicsreport__mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.GenomicRegionStudied.objects.all()
+        return queryset
+
 
 class GenomicsReportViewSet(McodeModelViewSet):
-    queryset = m.GenomicsReport.objects.all()
     serializer_class = s.GenomicsReportSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.GenomicsReportFilter
 
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.GenomicsReport.objects\
+                .filter(mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.GenomicsReport.objects.all()
+        return queryset
+
 
 class LabsVitalViewSet(McodeModelViewSet):
-    queryset = m.LabsVital.objects.all()
     serializer_class = s.LabsVitalSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.LabsVitalFilter
@@ -75,17 +106,33 @@ CANCER_CONDITION_PREFETCH = (
     "tnmstaging_set",
 )
 
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.LabsVital.objects\
+                .filter(individual__mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.LabsVital.objects.all()
+        return queryset
+
 
 class CancerConditionViewSet(McodeModelViewSet):
-    queryset = m.CancerCondition.objects.all()
     serializer_class = s.CancerConditionSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
     filter_class = f.CancerConditionFilter
 
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.CancerCondition.objects\
+                .filter(mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.CancerCondition.objects.all()
+        return queryset
+
 
 class TNMStagingViewSet(McodeModelViewSet):
-    queryset = m.TNMStaging.objects.all()
     serializer_class = s.TNMStagingSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.TNMStagingFilter
@@ -95,17 +142,33 @@ CANCER_RELATED_PROCEDURE = (
     "reason_reference",
 )
 
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.TNMStaging.objects\
+                .filter(cancer_condition__mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.TNMStaging.objects.all()
+        return queryset
+
 
 class CancerRelatedProcedureViewSet(McodeModelViewSet):
-    queryset = m.CancerRelatedProcedure.objects.all()
     serializer_class = s.CancerRelatedProcedureSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
     filter_class = f.CancerRelatedProcedureFilter
 
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.CancerRelatedProcedure.objects\
+                .filter(mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.CancerRelatedProcedure.objects.all()
+        return queryset
+
 
 class MedicationStatementViewSet(McodeModelViewSet):
-    queryset = m.MedicationStatement.objects.all()
     serializer_class = s.MedicationStatementSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
@@ -123,16 +186,30 @@ MCODEPACKET_SELECT = (
     "genomics_report",
 )
 
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.MedicationStatement.objects\
+                .filter(mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.MedicationStatement.objects.all()
+        return queryset
+
 
 class MCodePacketViewSet(McodeModelViewSet):
-    queryset = m.MCodePacket.objects.all()\
-        .prefetch_related(*MCODEPACKET_PREFETCH)\
-        .select_related(*MCODEPACKET_SELECT)\
-        .order_by("id")
     serializer_class = s.MCodePacketSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
     filter_class = f.MCodePacketFilter
+
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.MCodePacket.objects\
+                .filter(table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.MCodePacket.objects.all()
+        return queryset
 
 
 @api_view(["GET"])

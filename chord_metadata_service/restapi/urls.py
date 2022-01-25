@@ -46,16 +46,17 @@ router.register(r'diagnoses', phenopacket_views.DiagnosisViewSet, basename="diag
 router.register(r'interpretations', phenopacket_views.InterpretationViewSet, basename="interpretations")
 
 # mCode app urls
-router.register(r'geneticspecimens', mcode_views.GeneticSpecimenViewSet)
-router.register(r'cancergeneticvariants', mcode_views.CancerGeneticVariantViewSet)
-router.register(r'genomicregionsstudied', mcode_views.GenomicRegionStudiedViewSet)
-router.register(r'genomicsreports', mcode_views.GenomicsReportViewSet)
-router.register(r'labsvital', mcode_views.LabsVitalViewSet)
-router.register(r'cancerconditions', mcode_views.CancerConditionViewSet)
-router.register(r'tnmstaging', mcode_views.TNMStagingViewSet)
-router.register(r'cancerrelatedprocedures', mcode_views.CancerRelatedProcedureViewSet)
-router.register(r'medicationstatements', mcode_views.MedicationStatementViewSet)
-router.register(r'mcodepackets', mcode_views.MCodePacketViewSet)
+router.register(r'geneticspecimens', mcode_views.GeneticSpecimenViewSet, basename="geneticspecimens")
+router.register(r'cancergeneticvariants', mcode_views.CancerGeneticVariantViewSet, basename="cancergeneticvariants")
+router.register(r'genomicregionsstudied', mcode_views.GenomicRegionStudiedViewSet, basename="genomicregionsstudied")
+router.register(r'genomicsreports', mcode_views.GenomicsReportViewSet, basename="genomicsreports")
+router.register(r'labsvital', mcode_views.LabsVitalViewSet, basename="labsvital")
+router.register(r'cancerconditions', mcode_views.CancerConditionViewSet, basename="cancerconditions")
+router.register(r'tnmstaging', mcode_views.TNMStagingViewSet, basename="tnmstaging")
+router.register(r'cancerrelatedprocedures', mcode_views.CancerRelatedProcedureViewSet,
+                basename="cancerrelatedprocedures")
+router.register(r'medicationstatements', mcode_views.MedicationStatementViewSet, basename="medicationstatements")
+router.register(r'mcodepackets', mcode_views.MCodePacketViewSet, basename="mcodepackets")
 
 # Resources app urls
 router.register(r'resources', resources_views.ResourceViewSet)

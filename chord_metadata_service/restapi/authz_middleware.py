@@ -11,7 +11,12 @@ AUTHZ_PATHS = ["^/api/phenopackets/?.*", "^/api/datasets/?.*", "^/api/diagnoses/
                "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/htsfiles/?.*", "^/api/individuals/?.*",
                "^/api/interpretations/?.*", "^/api/metadata/?.*", "^/api/phenopackets/?.*",
                "^/api/phenotypicfeatures/?.*", "^/api/procedures/?.*", "^/api/variants/?.*",
-               "^/api/biosamples/?.*", "/api/overview"]
+               "^/api/biosamples/?.*", "/api/overview",
+               # mcode data models input paths
+               "^/api/mcodepackets/?.*", "^/api/medicationstatements/?.*", "^/api/cancerrelatedprocedures/?.*",
+               "^/api/tnmstaging/?.*", "^/api/cancerconditions/?.*", "^/api/labsvital/?.*",
+               "^/api/genomicsreports/?.*", "^/api/genomicregionsstudied/?.*", "^/api/cancergeneticvariants/?.*",
+               "^/api/geneticspecimens/?.*"]
 
 
 class AuthzMiddleware:
