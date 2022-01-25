@@ -7,6 +7,8 @@ from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
 from chord_metadata_service.experiments.tests import constants as exp_c
+from chord_metadata_service.mcode import models as mcode_m
+from chord_metadata_service.mcode.tests import constants as mcode_c
 
 
 class ServiceInfoTest(APITestCase):
@@ -83,3 +85,53 @@ class OverviewTest(APITestCase):
         self.assertEqual(response_obj['data_type_specific']['instruments']['count'], 1)
         self.assertEqual(response_obj['data_type_specific']['instruments']['platform']['Illumina'], 1)
         self.assertEqual(response_obj['data_type_specific']['instruments']['model']['Illumina HiSeq 4000'], 1)
+
+
+class McodeOverviewTest(APITestCase):
+    # create 2 mcodepackets for 2 individuals
+    def setUp(self) -> None:
+        self.individual = ph_m.Individual.objects.create(**mcode_c.VALID_INDIVIDUAL)
+        self.individual_2 = ph_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_2)
+        self.labs_vital = mcode_m.LabsVital.objects.create(**mcode_c.valid_labs_vital(self.individual))
+        self.genomics_report = mcode_m.GenomicsReport.objects.create(**mcode_c.valid_genetic_report())
+        self.cancer_condition = mcode_m.CancerCondition.objects.create(**mcode_c.valid_cancer_condition())
+        self.cancer_condition_2 = mcode_m.CancerCondition.objects.create(**mcode_c.VALID_CANCER_CONDITION)
+        self.tnm_staging = mcode_m.TNMStaging.objects.create(**mcode_c.invalid_tnm_staging(self.cancer_condition))
+        self.cancer_related_procedure = mcode_m.CancerRelatedProcedure.objects.create(
+            **mcode_c.valid_cancer_related_procedure()
+        )
+        self.medication_statement = mcode_m.MedicationStatement.objects.create(**mcode_c.valid_medication_statement())
+        self.mcodepacket_1 = mcode_m.MCodePacket.objects.create(
+            id="mcodepacket:01",
+            subject=self.individual,
+            genomics_report=self.genomics_report,
+            cancer_disease_status={
+                "id": "SNOMED:268910001",
+                "label": "Patient's condition improved"
+            }
+        )
+        self.mcodepacket_1.cancer_condition.set([self.cancer_condition])
+        self.mcodepacket_1.cancer_related_procedures.set([self.cancer_related_procedure])
+        self.mcodepacket_1.medication_statement.set([self.medication_statement])
+        self.mcodepacket_2 = mcode_m.MCodePacket.objects.create(
+            id="mcodepacket:02",
+            subject=self.individual_2,
+            cancer_disease_status={
+                "id": "SNOMED:359746009",
+                "label": "Patient's condition stable"
+            }
+        )
+        self.mcodepacket_2.cancer_condition.set([self.cancer_condition_2])
+
+    def test_mcode_overview(self):
+        response = self.client.get("/api/mcode_overview")
+        response_obj = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response_obj, dict)
+        # mcodepackets
+        self.assertEqual(response_obj["mcodepackets"], 2)
+        self.assertEqual(response_obj["data_type_specific"]["cancer_conditions"]["count"], 2)
+        self.assertEqual(response_obj["data_type_specific"]["cancer_related_procedure_types"]["count"], 1)
+        self.assertEqual(response_obj["data_type_specific"]["cancer_related_procedures"]["count"], 1)
+        self.assertEqual(response_obj["data_type_specific"]["cancer_disease_status"]["count"], 2)
+        self.assertEqual(response_obj["data_type_specific"]["individuals"]["count"], 2)

@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
@@ -14,6 +15,11 @@ from . import models as m, serializers as s, filters as f
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
     pagination_class = LargeResultsSetPagination
+
+    # Cache response to the requested URL, default to 2 hours.
+    @method_decorator(cache_page(settings.CACHE_TIME))
+    def dispatch(self, *args, **kwargs):
+        return super(PhenopacketsModelViewSet, self).dispatch(*args, **kwargs)
 
 
 class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):

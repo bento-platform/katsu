@@ -1,8 +1,27 @@
+import uuid
+import os
 from rest_framework import status
 from rest_framework.test import APITestCase
 from . import constants as c
 from .. import models as m, serializers as s
+
 from chord_metadata_service.restapi.tests.utils import get_response
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
+from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+# noinspection PyProtectedMember
+from chord_metadata_service.chord.ingest import (
+    WORKFLOW_INGEST_FUNCTION_MAP,
+    WORKFLOW_PHENOPACKETS_JSON
+)
+from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+
+EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_1 = {
+    "json_document": os.path.join(os.path.dirname(__file__), "phenopackets_example_1.json"),
+}
+
+EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_2 = {
+    "json_document": os.path.join(os.path.dirname(__file__), "phenopackets_example_2.json"),
+}
 
 
 class CreateBiosampleTest(APITestCase):
@@ -268,7 +287,7 @@ class CreateInterpretationTest(APITestCase):
         self.phenopacket = m.Phenopacket.objects.create(**c.valid_phenopacket(
             subject=self.individual,
             meta_data=self.metadata)
-            ).id
+        ).id
         self.metadata_interpretation = m.MetaData.objects.create(**c.VALID_META_DATA_2).id
         self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
         self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(self.disease)).id
@@ -284,39 +303,127 @@ class CreateInterpretationTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
-class OverviewTest(APITestCase):
+class GetPhenopacketsApiTest(APITestCase):
+    """
+    Test that we can retrieve phenopackets with valid dataset titles or without dataset title.
+    """
 
     def setUp(self) -> None:
-        # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
-        # one of phenopackets has 1 phenotypic feature and 1 disease
-        self.individual_1 = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
-        self.individual_2 = m.Individual.objects.create(**c.VALID_INDIVIDUAL_2)
-        self.metadata_1 = m.MetaData.objects.create(**c.VALID_META_DATA_1)
-        self.metadata_2 = m.MetaData.objects.create(**c.VALID_META_DATA_2)
-        self.phenopacket_1 = m.Phenopacket.objects.create(
-            **c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1)
-        )
-        self.phenopacket_2 = m.Phenopacket.objects.create(
-            id='phenopacket:2', subject=self.individual_2, meta_data=self.metadata_2
-        )
-        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.procedure = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
-        self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual_1, self.procedure))
-        self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(self.individual_2, self.procedure))
-        self.phenotypic_feature = m.PhenotypicFeature.objects.create(
-            **c.valid_phenotypic_feature(self.biosample_1, self.phenopacket_1)
-        )
-        self.phenopacket_1.biosamples.set([self.biosample_1])
-        self.phenopacket_2.biosamples.set([self.biosample_2])
-        self.phenopacket_1.diseases.set([self.disease])
+        """
+        Create two datasets and ingest 1 phenopacket into each.
+        """
+        p = Project.objects.create(title="Project 1", description="")
+        self.d = Dataset.objects.create(title="dataset_1", description="Some dataset", data_use=VALID_DATA_USE_1,
+                                        project=p)
+        self.d2 = Dataset.objects.create(title="dataset_2", description="Some dataset", data_use=VALID_DATA_USE_1,
+                                         project=p)
+        to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
+                                           dataset=self.d)
+        to2 = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
+                                            dataset=self.d2)
+        self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
+        self.t2 = Table.objects.create(ownership_record=to2, name="Table 2", data_type=DATA_TYPE_PHENOPACKET)
 
-    def test_overview(self):
-        response = self.client.get('/api/overview')
-        response_obj = response.json()
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_1, self.t.identifier)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_2, self.t2.identifier)
+
+    def test_get_phenopackets(self):
+        """
+        Test that we can get 2 phenopackets without a dataset title.
+        """
+        response = self.client.get('/api/phenopackets')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj['phenopackets'], 2)
-        self.assertEqual(response_obj['data_type_specific']['individuals']['count'], 2)
-        self.assertEqual(response_obj['data_type_specific']['biosamples']['count'], 2)
-        self.assertEqual(response_obj['data_type_specific']['phenotypic_features']['count'], 1)
-        self.assertEqual(response_obj['data_type_specific']['diseases']['count'], 1)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 2)
+
+    def test_get_phenopackets_with_valid_dataset(self):
+        """
+        Test that we can get 1 phenopacket under dataset_1.
+        """
+        response = self.client.get('/api/phenopackets?datasets=dataset_1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 1)
+
+    def test_get_phenopackets_with_valid_dataset_2(self):
+        """
+        Test that we can get 1 phenopacket under dataset_2.
+        """
+        response = self.client.get('/api/phenopackets?datasets=dataset_2')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 1)
+
+    def test_get_phenopackets_with_valid_dataset_3(self):
+        """
+        Test that we can get 2 phenopackets under both dataset_1 and dataset_2.
+        """
+        response = self.client.get('/api/phenopackets?datasets=dataset_1,dataset_2')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 2)
+
+    def test_get_phenopackets_with_valid_dataset_4(self):
+        """
+        Test that we can get 1 phenopacket under dataset_1 and an invalid dataset.
+        """
+        response = self.client.get('/api/phenopackets?datasets=dataset_1,noSuchDataset')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 1)
+
+    def test_get_phenopackets_with_invalid_dataset(self):
+        """
+        Test that we cannot get phenopackets with invalid dataset titles.
+        """
+        response = self.client.get('/api/phenopackets?datasets=notADataset')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 0)
+
+    def test_get_phenopackets_with_authz_dataset_1(self):
+        """
+        Test that we cannot get phenopackets with no authorized datasets.
+        """
+        response = self.client.get('/api/phenopackets?datasets=dataset_1&authorized_datasets=dataset2')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 0)
+
+    def test_get_phenopackets_with_authz_dataset_2(self):
+        """
+        Test that we can get 1 phenopacket with 1 authorized datasets.
+        """
+        response = self.client.get('/api/phenopackets?authorized_datasets=dataset_1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 1)
+
+    def test_get_phenopackets_with_authz_dataset_3(self):
+        """
+        Test that we can get 2 phenopackets with 2 authorized datasets.
+        """
+        response = self.client.get('/api/phenopackets?authorized_datasets=dataset_1,dataset_2')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 2)
+
+    def test_get_phenopackets_with_authz_dataset_4(self):
+        """
+        Test that we can get 1 phenopackets with 1 authorized datasets.
+        """
+        response = self.client.get('/api/phenopackets?datasets=dataset_1&authorized_datasets=dataset_1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 1)
+
+    def test_get_phenopackets_with_authz_dataset_5(self):
+        """
+        Test that we can get 0 phenopackets with 0 authorized datasets.
+        """
+        response = self.client.get('/api/phenopackets?authorized_datasets=NO_DATASETS_AUTHORIZED')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 0)
