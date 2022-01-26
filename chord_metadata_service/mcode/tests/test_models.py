@@ -105,7 +105,7 @@ class MedicationStatementTest(TestCase):
     """ Test module for MedicationStatement model """
 
     def setUp(self):
-        self.cancer_related_procedure = m.MedicationStatement.objects.create(
+        self.medication_statement = m.MedicationStatement.objects.create(
             **c.valid_medication_statement()
         )
 
@@ -116,3 +116,40 @@ class MedicationStatementTest(TestCase):
         self.assertEqual(medication_statement.treatment_intent['label'], 'Curative - procedure intent')
         for date in [medication_statement.start_date, medication_statement.end_date]:
             self.assertIsInstance(date, datetime.datetime)
+
+
+class McodePacketTest(TestCase):
+    """ Test module for MCodePacket model """
+
+    def setUp(self):
+        self.individual = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.labs_vital = m.LabsVital.objects.create(**c.valid_labs_vital(self.individual))
+        self.genomics_report = m.GenomicsReport.objects.create(**c.valid_genetic_report())
+        self.cancer_condition = m.CancerCondition.objects.create(**c.valid_cancer_condition())
+        self.tnm_staging = m.TNMStaging.objects.create(**c.invalid_tnm_staging(self.cancer_condition))
+        self.cancer_related_procedure = m.CancerRelatedProcedure.objects.create(
+            **c.valid_cancer_related_procedure()
+        )
+        self.medication_statement = m.MedicationStatement.objects.create(**c.valid_medication_statement())
+        self.mcodepacket = m.MCodePacket.objects.create(
+            id="mcodepacket:01",
+            subject=self.individual,
+            genomics_report=self.genomics_report,
+            cancer_disease_status={
+                "id": "TEST:01",
+                "label": "Patient's condition improved"
+            }
+        )
+        self.mcodepacket.cancer_condition.set([self.cancer_condition])
+        self.mcodepacket.cancer_related_procedures.set([self.cancer_related_procedure])
+        self.mcodepacket.medication_statement.set([self.medication_statement])
+
+    def test_mcodepacket(self):
+        mcodepacket = m.MCodePacket.objects.get(id="mcodepacket:01")
+        self.assertEqual(mcodepacket.subject.id, "patient:1")
+        self.assertIsInstance(mcodepacket.cancer_disease_status, dict)
+        self.assertEqual(mcodepacket.cancer_disease_status["label"], "Patient's condition improved")
+        self.assertEqual(len(mcodepacket.cancer_condition.all()), 1)
+        self.assertEqual(len(mcodepacket.cancer_related_procedures.all()), 1)
+        self.assertEqual(mcodepacket.genomics_report.id, "genomics_report:01")
+        self.assertEqual(len(mcodepacket.medication_statement.all()), 1)

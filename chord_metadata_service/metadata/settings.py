@@ -71,12 +71,16 @@ DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/dr
 
 # Candig-specific settings
 
-INSIDE_CANDIG = os.environ.get("INSIDE_CANDIG", "false").lower() == "true"
+CANDIG_AUTHORIZATION = os.environ.get("CANDIG_AUTHORIZATION")
 CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL")
+CANDIG_OPA_SECRET = os.getenv("CANDIG_OPA_SECRET", "my-secret-beacon-token")
 
 # Application definition
 
 INSTALLED_APPS = [
+    'dal',
+    'dal_select2',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -110,7 +114,7 @@ MIDDLEWARE = [
     'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'chord_metadata_service.restapi.middleware.CandigAuthzMiddleware',
+    'chord_metadata_service.restapi.datasets_authz_middleware.DatasetsAuthzMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = []
@@ -163,6 +167,17 @@ LOGGING = {
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
     logging.disable(logging.CRITICAL)
 
+
+# function to read postgres password file
+def get_secret(path):
+    try:
+        with open(path) as f:
+            return f.readline().strip()
+    except BaseException as err:
+        print(f"Unexpected {err}, {type(err)}")
+        raise
+
+
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -179,7 +194,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get("POSTGRES_DATABASE", 'metadata'),
         'USER': os.environ.get("POSTGRES_USER", 'admin'),
-        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'admin'),
+        'PASSWORD': get_secret(
+            os.environ["POSTGRES_PASSWORD_FILE"]
+        ) if "POSTGRES_PASSWORD_FILE" in os.environ else os.environ.get("POSTGRES_PASSWORD", "admin"),
 
         # Use sockets if we're inside a CHORD container / as a priority
         'HOST': os.environ.get("POSTGRES_SOCKET_DIR", os.environ.get("POSTGRES_HOST", "localhost")),
@@ -262,3 +279,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Cache time constant
+CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
