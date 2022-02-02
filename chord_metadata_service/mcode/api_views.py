@@ -55,11 +55,19 @@ class CancerGeneticVariantViewSet(McodeModelViewSet):
             queryset = m.CancerGeneticVariant.objects.all()
         return queryset
 
-
 class GenomicRegionStudiedViewSet(McodeModelViewSet):
     serializer_class = s.GenomicRegionStudiedSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.GenomicRegionStudiedFilter
+
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.GenomicRegionStudied.objects\
+                .filter(genomicsreport__mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.GenomicRegionStudied.objects.all()
+        return queryset
 
 
 GENOMIC_REPORT_PREFETCH = (
@@ -70,15 +78,6 @@ GENOMIC_REPORT_PREFETCH = (
 GENOMIC_REPORT_SELECT = (
     "genetic_variant",
 )
-
-    def get_queryset(self):
-        if hasattr(self.request, "allowed_datasets"):
-            allowed_datasets = self.request.allowed_datasets
-            queryset = m.GenomicRegionStudied.objects\
-                .filter(genomicsreport__mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
-        else:
-            queryset = m.GenomicRegionStudied.objects.all()
-        return queryset
 
 
 class GenomicsReportViewSet(McodeModelViewSet):
@@ -101,11 +100,6 @@ class LabsVitalViewSet(McodeModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filter_class = f.LabsVitalFilter
 
-
-CANCER_CONDITION_PREFETCH = (
-    "tnmstaging_set",
-)
-
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
@@ -114,6 +108,11 @@ CANCER_CONDITION_PREFETCH = (
         else:
             queryset = m.LabsVital.objects.all()
         return queryset
+
+
+CANCER_CONDITION_PREFETCH = (
+    "tnmstaging_set",
+)
 
 
 class CancerConditionViewSet(McodeModelViewSet):
@@ -137,11 +136,6 @@ class TNMStagingViewSet(McodeModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filter_class = f.TNMStagingFilter
 
-
-CANCER_RELATED_PROCEDURE = (
-    "reason_reference",
-)
-
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
@@ -150,6 +144,11 @@ CANCER_RELATED_PROCEDURE = (
         else:
             queryset = m.TNMStaging.objects.all()
         return queryset
+
+
+CANCER_RELATED_PROCEDURE = (
+    "reason_reference",
+)
 
 
 class CancerRelatedProcedureViewSet(McodeModelViewSet):
@@ -174,6 +173,15 @@ class MedicationStatementViewSet(McodeModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filter_class = f.MedicationStatementFilter
 
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.MedicationStatement.objects\
+                .filter(mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
+        else:
+            queryset = m.MedicationStatement.objects.all()
+        return queryset
+
 
 MCODEPACKET_PREFETCH = (
     "cancer_condition",
@@ -185,15 +193,6 @@ MCODEPACKET_SELECT = (
     "subject",
     "genomics_report",
 )
-
-    def get_queryset(self):
-        if hasattr(self.request, "allowed_datasets"):
-            allowed_datasets = self.request.allowed_datasets
-            queryset = m.MedicationStatement.objects\
-                .filter(mcodepacket__table__ownership_record__dataset__title__in=allowed_datasets)
-        else:
-            queryset = m.MedicationStatement.objects.all()
-        return queryset
 
 
 class MCodePacketViewSet(McodeModelViewSet):
