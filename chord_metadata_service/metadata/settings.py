@@ -110,7 +110,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'chord_metadata_service.restapi.preflight_req_middleware.PreflightRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -122,8 +121,6 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = []
-
-CORS_PREFLIGHT_MAX_AGE = 0
 
 ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
 
