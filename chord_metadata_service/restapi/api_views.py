@@ -1,4 +1,7 @@
 from collections import Counter
+
+from django.views.decorators.cache import cache_page
+
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
