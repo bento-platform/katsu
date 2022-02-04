@@ -175,9 +175,9 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
 
     # returns all of those that have both values:
-    # e.g. extra_properties="age_group": "adult", "smoking": "non-smoker"
+    # e.g. extra_properties="age_group":"adult","smoking":"non-smoker"
 
     # returns all of those who fit at least one of the conditions:
-    # extra_properties="age_group": "adult"&extra_properties="smoking": "non-smoker"
+    # extra_properties="age_group":"adult"&extra_properties="smoking":"non-smoker"
     def filter_extra_properties(self, qs, name, value):
         return qs.filter(extra_properties__icontains=value)
