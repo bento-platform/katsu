@@ -61,5 +61,4 @@ class PublicListIndividuals(APIView):
     def get(self, request, *args, **kwargs):
         base_qs = Individual.objects.all()
         filtered_qs = self.filter_queryset(base_qs)
-        individuals = len([ind.id for ind in filtered_qs])
-        return Response({"count": individuals})
+        return Response({"count": filtered_qs.count()})
