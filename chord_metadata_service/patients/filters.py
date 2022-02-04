@@ -168,3 +168,11 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 )
         ).filter(search=value).distinct("id")
         return qs
+
+
+class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
+    sex = django_filters.CharFilter(lookup_expr="iexact")
+    extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
+
+    def filter_extra_properties(self, qs, name, value):
+        return qs.filter(extra_properties__icontains=value)

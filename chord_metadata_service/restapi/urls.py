@@ -78,4 +78,8 @@ urlpatterns = [
          name='phenotypic-feature-type-autocomplete',),
     path('biosample_sampled_tissue_autocomplete', BiosampleSampledTissueAutocomplete.as_view(),
          name='biosample-sampled-tissue-autocomplete',),
+    # public
+    path('public', individual_views.PublicListIndividuals.as_view(),
+         name='public',),
+
 ]
