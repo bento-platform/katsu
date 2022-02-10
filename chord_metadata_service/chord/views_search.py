@@ -488,7 +488,8 @@ def fhir_private_search(request):
     return fhir_search(request, internal_data=True)
 
 
-def chord_table_search(query, table_id, start, internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
+def chord_table_search(query, table_id, start, internal=False, fields=None) -> Tuple[Union[None, bool, list],
+                                                                                     Optional[str]]:
     # Check that dataset exists
     table = Table.objects.get(ownership_record_id=table_id)
 
@@ -507,7 +508,7 @@ def chord_table_search(query, table_id, start, internal=False) -> Tuple[Union[No
 
     if internal:
         debug_log(f"Started fetching from queryset and serializing data at {datetime.now() - start}")
-        serialized_data = QUERY_RESULT_SERIALIZERS[table.data_type](query_results, many=True).data
+        serialized_data = QUERY_RESULT_SERIALIZERS[table.data_type](query_results, fields=fields, many=True).data
         debug_log(f"Finished running query and serializing in {datetime.now() - start}")
 
         return serialized_data, None
@@ -520,6 +521,11 @@ def chord_table_search_response(request, table_id, internal=False):
     debug_log(f"Started {'private' if internal else 'public'} table search")
 
     # We let people either use GET or POST. Get stuff from params if GET, or data if POST.
+
+    if request.method == "POST":
+        fields = (request.data or {}).get("fields")
+    else:
+        fields = request.query_params.get("fields")
 
     if request.method == "POST":
         query = (request.data or {}).get("query")
@@ -536,7 +542,7 @@ def chord_table_search_response(request, table_id, internal=False):
         # TODO: Better error
         return Response(errors.bad_request_error("Missing query in request body"), status=400)
 
-    data, err = chord_table_search(query, table_id, start, internal=internal)
+    data, err = chord_table_search(query, table_id, start, internal=internal, fields=fields)
 
     if err:
         return Response(errors.bad_request_error(err), status=400)
