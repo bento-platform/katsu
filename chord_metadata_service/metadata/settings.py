@@ -53,11 +53,17 @@ AUTH_OVERRIDE = not CHORD_PERMISSIONS
 
 
 # Allowed hosts - TODO: Derive from CHORD_URL
+HOST_CONTAINER_NAME =  os.environ.get("HOST_CONTAINER_NAME", "")
 
 CHORD_HOST = urlparse(CHORD_URL or "").netloc
+print(f"Chord debug: {DEBUG}")
+print(f"Chord host: {CHORD_HOST}")
 ALLOWED_HOSTS = [CHORD_HOST or "localhost"]
 if DEBUG:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
+if HOST_CONTAINER_NAME != "":
+    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + [HOST_CONTAINER_NAME]))
+print(f"Allowed hosts: {ALLOWED_HOSTS}")
 
 APPEND_SLASH = False
 
