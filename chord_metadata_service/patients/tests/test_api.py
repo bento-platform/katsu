@@ -159,3 +159,30 @@ class IndividualFullTextSearchTest(APITestCase):
         self.assertEqual(get_resp_2.status_code, status.HTTP_200_OK)
         response_obj_2 = get_resp_2.json()
         self.assertEqual(len(response_obj_2['results']), 2)
+
+
+class PublicListIndividualsTest(APITestCase):
+    """ Test for api/public """
+
+    def setUp(self):
+        individuals = [c.generate_valid_individual() for i in range(137)]
+        for individual in individuals:
+            Individual.objects.create(**individual)
+
+    def test_search(self):
+        get_resp_1 = self.client.get('/api/public')
+        self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
+        response_obj_1 = get_resp_1.json()
+        self.assertEqual(response_obj_1['count'], Individual.objects.all().count())
+
+        get_resp_2 = self.client.get('/api/public?sex=female')
+        self.assertEqual(get_resp_2.status_code, status.HTTP_200_OK)
+        response_obj_2 = get_resp_2.json()
+        self.assertEqual(response_obj_2['count'], Individual.objects.filter(sex__iexact='female').count())
+
+        get_resp_3 = self.client.get('/api/public?sex=female&extra_properties="smoking": "Non-smoker"')
+        self.assertEqual(get_resp_3.status_code, status.HTTP_200_OK)
+        response_obj_3 = get_resp_3.json()
+        count = Individual.objects.filter(sex__iexact='female')\
+            .filter(extra_properties__contains={"smoking": "Non-smoker"}).count()
+        self.assertEqual(response_obj_3['count'], count)
