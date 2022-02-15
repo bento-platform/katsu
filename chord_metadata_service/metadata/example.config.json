@@ -1,0 +1,31 @@
+{
+  "sex": {
+    "type": "string",
+    "enum": [
+        "male",
+        "female"
+      ],
+    "title": "Sex"
+  },
+  "extra_properties": {
+    "smoking": {
+      "type": "string",
+      "enum": [
+          "Non-smoker",
+          "Smoker",
+          "Former smoker",
+          "Passive smoker",
+          "Not specified"
+        ],
+      "title": "Smoking"
+    },
+    "death": {
+      "type": "string",
+      "enum": [
+          "Alive",
+          "Deceased"
+        ],
+      "title": "Death"
+    }
+  }
+}
