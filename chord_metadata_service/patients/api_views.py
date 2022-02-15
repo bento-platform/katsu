@@ -61,4 +61,8 @@ class PublicListIndividuals(APIView):
     def get(self, request, *args, **kwargs):
         base_qs = Individual.objects.all()
         filtered_qs = self.filter_queryset(base_qs)
-        return Response({"count": filtered_qs.count()})
+        # the threshold for the count response is set to 5
+        if filtered_qs.count() > 5:
+            return Response({"count": filtered_qs.count()})
+        else:
+            return Response("Not enough data.")
