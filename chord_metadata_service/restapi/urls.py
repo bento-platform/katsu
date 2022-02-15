@@ -12,7 +12,7 @@ from chord_metadata_service.phenopackets.autocomplete_views import (
     BiosampleSampledTissueAutocomplete
 )
 from chord_metadata_service.resources import api_views as resources_views
-from .api_views import overview, mcode_overview
+from .api_views import overview, mcode_overview, public_search_fields
 
 __all__ = ["router", "urlpatterns"]
 
@@ -81,5 +81,6 @@ urlpatterns = [
     # public
     path('public', individual_views.PublicListIndividuals.as_view(),
          name='public',),
-
+    # public search fields schema
+    path('public_search_fields', public_search_fields, name='public-search-fields',),
 ]

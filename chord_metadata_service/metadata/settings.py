@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 import sys
 import logging
+import json
 
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
@@ -281,3 +282,10 @@ STATIC_URL = '/static/'
 
 # Cache time constant
 CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
+
+# read project specific config.json that contains custom search fields
+if os.path.isfile(os.path.join(BASE_DIR, 'metadata', 'config.json')):
+    with open(os.path.join(BASE_DIR, 'metadata', 'config.json')) as config_file:
+        SEARCH_FIELDS = json.load(config_file)
+else:
+    SEARCH_FIELDS = {}
