@@ -181,8 +181,8 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
     # extra_properties="age_group":"adult"&extra_properties="smoking":"non-smoker"
 
     def filter_extra_properties(self, qs, name, value):
-        split_value = [v.strip() for v in value.split(",")]
-        # filter by first value
-        qs = qs.filter(extra_properties__icontains=split_value[0])
-        # filter the filtered queryset by second value
-        return qs.filter(extra_properties__icontains=split_value[1])
+        values = [v.strip() for v in value.split(",")]
+        # filter by all values
+        for val in values:
+            qs = qs.filter(extra_properties__icontains=val)
+        return qs
