@@ -164,25 +164,89 @@ class IndividualFullTextSearchTest(APITestCase):
 class PublicListIndividualsTest(APITestCase):
     """ Test for api/public """
 
+    response_threshold = 5
+
+    @staticmethod
+    def response_threshold_check(response):
+        return response['count'] if "count" in response else "Not enough data."
+
     def setUp(self):
-        individuals = [c.generate_valid_individual() for i in range(137)]
+        individuals = [c.generate_valid_individual() for _ in range(27)]  # random range
         for individual in individuals:
             Individual.objects.create(**individual)
 
-    def test_search(self):
-        get_resp_1 = self.client.get('/api/public')
-        self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
-        response_obj_1 = get_resp_1.json()
-        self.assertEqual(response_obj_1['count'], Individual.objects.all().count())
+    def test_public_get(self):
+        response = self.client.get('/api/public')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertIn(
+            self.response_threshold_check(response_obj),
+            [Individual.objects.all().count(), "Not enough data."]
+        )
+        if Individual.objects.all().count() < self.response_threshold:
+            self.assertEqual(response_obj, "Not enough data.")
 
-        get_resp_2 = self.client.get('/api/public?sex=female')
-        self.assertEqual(get_resp_2.status_code, status.HTTP_200_OK)
-        response_obj_2 = get_resp_2.json()
-        self.assertEqual(response_obj_2['count'], Individual.objects.filter(sex__iexact='female').count())
+    def test_public_filtering_sex(self):
+        response = self.client.get('/api/public?sex=female')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertIn(
+            self.response_threshold_check(response_obj),
+            [Individual.objects.filter(sex__iexact='female').count(), "Not enough data."]
+        )
+        if Individual.objects.filter(sex__iexact='female').count() < self.response_threshold:
+            self.assertEqual(response_obj, "Not enough data.")
 
-        get_resp_3 = self.client.get('/api/public?sex=female&extra_properties="smoking": "Non-smoker"')
-        self.assertEqual(get_resp_3.status_code, status.HTTP_200_OK)
-        response_obj_3 = get_resp_3.json()
-        count = Individual.objects.filter(sex__iexact='female')\
+    def test_public_filtering_2_fields(self):
+
+        # test GET query string search for extra_properties field
+        response = self.client.get('/api/public?sex=female&extra_properties="smoking": "Non-smoker"')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_count = Individual.objects.filter(sex__iexact='female')\
             .filter(extra_properties__contains={"smoking": "Non-smoker"}).count()
-        self.assertEqual(response_obj_3['count'], count)
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, "Not enough data."])
+        if db_count < self.response_threshold:
+            self.assertEqual(response_obj, "Not enough data.")
+
+    def test_public_filtering_extra_properties_1(self):
+        # whitespaces
+        response_1 = self.client.get('/api/public?extra_properties="smoking": "Non-smoker", "death": "deceased"')
+        self.assertEqual(response_1.status_code, status.HTTP_200_OK)
+        response_obj_1 = response_1.json()
+        db_count_1 = Individual.objects\
+            .filter(extra_properties__contains={"smoking": "Non-smoker"})\
+            .filter(extra_properties__contains={"death": "Deceased"})\
+            .count()
+        self.assertIn(self.response_threshold_check(response_obj_1), [db_count_1, "Not enough data."])
+        if db_count_1 < self.response_threshold:
+            self.assertEqual(response_obj_1, "Not enough data.")
+
+        # no whitespaces
+        response_2 = self.client.get('/api/public?extra_properties="smoking":"Non-smoker","death":"deceased"')
+        response_obj_2 = response_2.json()
+        self.assertIn(self.response_threshold_check(response_obj_2), [db_count_1, "Not enough data."])
+        if db_count_1 < self.response_threshold:
+            self.assertEqual(response_obj_2, "Not enough data.")
+
+        # random whitespaces
+        response_3 = self.client.get('/api/public?extra_properties="smoking": "Non-smoker", "death":"deceased"')
+        response_obj_3 = response_3.json()
+        self.assertIn(self.response_threshold_check(response_obj_3), [db_count_1, "Not enough data."])
+        if db_count_1 < self.response_threshold:
+            self.assertEqual(response_obj_3, "Not enough data.")
+
+    def test_public_filtering_extra_properties_2(self):
+
+        # add more values
+        response = self.client.get(
+            '/api/public?extra_properties="smoking": "Non-smoker", "death": "deceased","test_result": "positive"'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_count = Individual.objects.filter(
+            extra_properties__contains={"smoking": "Non-smoker", "death": "Deceased", "test_result": "Positive"}
+        ).count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, "Not enough data."])
+        if db_count < self.response_threshold:
+            self.assertEqual(response_obj, "Not enough data.")
