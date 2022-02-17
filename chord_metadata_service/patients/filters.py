@@ -1,3 +1,5 @@
+import json
+
 import django_filters
 from django.db.models import Q
 from django.db.models import TextField
@@ -172,19 +174,19 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
 
 class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
     sex = django_filters.CharFilter(lookup_expr="iexact")
-    extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
+    extra_properties = django_filters.CharFilter(method="filter_extra_properties_list", label="Extra properties")
 
-    # returns all of those that have both values:
-    # e.g. extra_properties="age_group":"adult", "smoking":"non-smoker"
-
-    # returns all of those who fit at least one of the conditions:
-    # extra_properties="age_group":"adult"&extra_properties="smoking":"non-smoker"
-
-    def filter_extra_properties(self, qs, name, value):
-        values = []
-        for val in value.split(","):
-            normalized_val = ': '.join([v.strip() for v in val.strip().split(":")])
-            values.append(normalized_val)
-        for val in values:
-            qs = qs.filter(extra_properties__icontains=val)
+    def filter_extra_properties_list(self, qs, name, value):
+        # e.g. extra_properties=[{"smoking":"non-smoker"}, {"covidstatus":"Positive"}]
+        if value.startswith("[") and value.endswith("]"):
+            value_to_list = list(eval(value))
+            if False not in [isinstance(v, dict) for v in value_to_list]:
+                for item in value_to_list:
+                    item_to_string = json.dumps(item).strip('{}')
+                    qs = qs.filter(extra_properties__icontains=item_to_string)
+            else:
+                return qs.none()
+        else:
+            # return empty queryset if the request is not an array
+            return qs.none()
         return qs
