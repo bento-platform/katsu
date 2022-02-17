@@ -1,5 +1,6 @@
 from rest_framework import viewsets, filters
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.settings import api_settings
 from django.conf import settings
@@ -61,8 +62,12 @@ class PublicListIndividuals(APIView):
     def get(self, request, *args, **kwargs):
         base_qs = Individual.objects.all()
         filtered_qs = self.filter_queryset(base_qs)
+
+        # return not enough data, maybe?
+        if not filtered_qs:
+            return Response("Invalid query string", status=status.HTTP_400_BAD_REQUEST)
         # the threshold for the count response is set to 5
-        if filtered_qs.count() > 5:
+        elif filtered_qs.count() > 5:
             return Response({"count": filtered_qs.count()})
         else:
             return Response("Not enough data.")
