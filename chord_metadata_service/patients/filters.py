@@ -179,7 +179,12 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
     def filter_extra_properties_list(self, qs, name, value):
         # e.g. extra_properties=[{"smoking":"non-smoker"}, {"covidstatus":"Positive"}]
         if value.startswith("[") and value.endswith("]"):
-            value_to_list = list(eval(value))
+            try:
+                value_to_list = list(eval(value))
+            # catch if list contains non-existent/random strings (types)
+            except SyntaxError:
+                return qs.none()
+
             if False not in [isinstance(v, dict) for v in value_to_list]:
                 for item in value_to_list:
                     item_to_string = json.dumps(item).strip('{}')

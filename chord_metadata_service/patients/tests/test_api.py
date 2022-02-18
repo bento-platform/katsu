@@ -250,3 +250,9 @@ class PublicListIndividualsTest(APITestCase):
         # if GET query string doesn't have a list return 400
         response = self.client.get('/api/public?extra_properties="smoking": "Non-smoker","death": "deceased"')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_public_filtering_extra_properties_list(self):
+        # if GET query string doesn't have a list return 400
+        # random stuff in query string
+        response = self.client.get('/api/public?extra_properties=["smoking": "Non-smoker", "5", "Test"]')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
