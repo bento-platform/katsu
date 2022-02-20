@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
+from chord_metadata_service.metadata.settings import SEARCH_FIELDS
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
@@ -135,3 +136,13 @@ class McodeOverviewTest(APITestCase):
         self.assertEqual(response_obj["data_type_specific"]["cancer_related_procedures"]["count"], 1)
         self.assertEqual(response_obj["data_type_specific"]["cancer_disease_status"]["count"], 2)
         self.assertEqual(response_obj["data_type_specific"]["individuals"]["count"], 2)
+
+
+class PublicSearchFieldsTest(APITestCase):
+    def test_public_search_fields(self):
+        r = self.client.get(reverse("public-search-fields"), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        if SEARCH_FIELDS:
+            self.assertDictEqual(r.json(), SEARCH_FIELDS)
+        else:
+            self.assertIsInstance(r.json(), str)
