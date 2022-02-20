@@ -8,8 +8,10 @@ from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH, 
 from chord_metadata_service.restapi.utils import parse_individual_age
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
-from chord_metadata_service.phenopackets import models as m
+from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.mcode import models as mcode_models
+from chord_metadata_service.patients import models as patients_models
+from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
 from chord_metadata_service.metadata.settings import SEARCH_FIELDS
 
@@ -34,7 +36,7 @@ def overview(_request):
     get:
     Overview of all Phenopackets in the database
     """
-    phenopackets = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).select_related(
+    phenopackets = pheno_models.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).select_related(
         *PHENOPACKET_SELECT_REL)
 
     diseases_counter = Counter()
@@ -163,8 +165,10 @@ def overview(_request):
             },
             "individuals": {
                 "count": len(individuals_set),
-                "sex": {k: individuals_sex[k] for k in (s[0] for s in m.Individual.SEX)},
-                "karyotypic_sex": {k: individuals_k_sex[k] for k in (s[0] for s in m.Individual.KARYOTYPIC_SEX)},
+                "sex": {k: individuals_sex[k] for k in (s[0] for s in pheno_models.Individual.SEX)},
+                "karyotypic_sex": {
+                    k: individuals_k_sex[k] for k in (s[0] for s in pheno_models.Individual.KARYOTYPIC_SEX)
+                },
                 "taxonomy": dict(individuals_taxonomy),
                 "age": dict(individuals_age),
                 "ethnicity": dict(individuals_ethnicity),
@@ -271,8 +275,10 @@ def mcode_overview(_request):
             },
             "individuals": {
                 "count": len(individuals_set),
-                "sex": {k: individuals_sex[k] for k in (s[0] for s in m.Individual.SEX)},
-                "karyotypic_sex": {k: individuals_k_sex[k] for k in (s[0] for s in m.Individual.KARYOTYPIC_SEX)},
+                "sex": {k: individuals_sex[k] for k in (s[0] for s in pheno_models.Individual.SEX)},
+                "karyotypic_sex": {
+                    k: individuals_k_sex[k] for k in (s[0] for s in pheno_models.Individual.KARYOTYPIC_SEX)
+                },
                 "taxonomy": dict(individuals_taxonomy),
                 "age": dict(individuals_age),
                 "ethnicity": dict(individuals_ethnicity)
@@ -292,3 +298,44 @@ def public_search_fields(_request):
         return Response(SEARCH_FIELDS)
     else:
         return Response("No public search fields configured.")
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def public_overview(_request):
+    """
+    get:
+    Overview of all public data in the database
+    """
+    individuals = patients_models.Individual.objects.all()
+
+    individuals_set = set()
+    individuals_sex = Counter()
+    individuals_age = Counter()
+
+    individuals_extra_properties = {}
+    extra_properties = {}
+
+    for individual in individuals:
+        # subject/individual
+        individuals_set.add(individual.id)
+        individuals_sex.update((individual.sex,))
+
+        if individual.age is not None:
+            individuals_age.update((parse_individual_age(individual.age),))
+
+        if individual.extra_properties and "extra_properties" in SEARCH_FIELDS:
+            for key in individual.extra_properties:
+                if key in SEARCH_FIELDS["extra_properties"]:
+                    # add new Counter()
+                    if key not in extra_properties:
+                        extra_properties[key] = Counter()
+                    extra_properties[key].update((individual.extra_properties[key],))
+                    individuals_extra_properties[key] = dict(extra_properties[key])
+
+    return Response({
+        "individuals": len(individuals_set),
+        "sex": dict(individuals_sex),
+        "age": dict(individuals_age),
+        "extra_properties": dict(individuals_extra_properties)
+    })
