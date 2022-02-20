@@ -63,11 +63,9 @@ class PublicListIndividuals(APIView):
         base_qs = Individual.objects.all()
         filtered_qs = self.filter_queryset(base_qs)
 
-        # return not enough data, maybe?
-        if not filtered_qs:
-            return Response("Invalid query string", status=status.HTTP_400_BAD_REQUEST)
         # the threshold for the count response is set to 5
-        elif filtered_qs.count() > 5:
+        if filtered_qs.count() > 5:
             return Response({"count": filtered_qs.count()})
         else:
+            # the count < 5, when there is no match in db the queryset is empty, count = 0
             return Response("Not enough data.")

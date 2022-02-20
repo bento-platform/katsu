@@ -171,7 +171,7 @@ class PublicListIndividualsTest(APITestCase):
         return response['count'] if 'count' in response else self.not_enough_data
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(500)]  # random range
+        individuals = [c.generate_valid_individual() for _ in range(137)]  # random range
         for individual in individuals:
             Individual.objects.create(**individual)
 
@@ -183,7 +183,7 @@ class PublicListIndividualsTest(APITestCase):
             self.response_threshold_check(response_obj),
             [Individual.objects.all().count(), self.not_enough_data]
         )
-        if Individual.objects.all().count() < self.response_threshold:
+        if Individual.objects.all().count() <= self.response_threshold:
             self.assertEqual(response_obj, self.not_enough_data)
         else:
             self.assertEqual(Individual.objects.all().count(), response_obj['count'])
@@ -196,13 +196,12 @@ class PublicListIndividualsTest(APITestCase):
             self.response_threshold_check(response_obj),
             [Individual.objects.filter(sex__iexact='female').count(), self.not_enough_data]
         )
-        if Individual.objects.filter(sex__iexact='female').count() < self.response_threshold:
+        if Individual.objects.filter(sex__iexact='female').count() <= self.response_threshold:
             self.assertEqual(response_obj, self.not_enough_data)
         else:
             self.assertEqual(Individual.objects.filter(sex__iexact='female').count(), response_obj['count'])
 
     def test_public_filtering_2_fields(self):
-
         # test GET query string search for extra_properties field
         response = self.client.get('/api/public?sex=female&extra_properties=[{"smoking": "Non-smoker"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -210,7 +209,7 @@ class PublicListIndividualsTest(APITestCase):
         db_count = Individual.objects.filter(sex__iexact='female')\
             .filter(extra_properties__contains={"smoking": "Non-smoker"}).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data])
-        if db_count < self.response_threshold:
+        if db_count <= self.response_threshold:
             self.assertEqual(response_obj, self.not_enough_data)
         else:
             self.assertEqual(db_count, response_obj['count'])
@@ -224,7 +223,7 @@ class PublicListIndividualsTest(APITestCase):
             .filter(extra_properties__contains={"death": "Deceased"})\
             .count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data])
-        if db_count < self.response_threshold:
+        if db_count <= self.response_threshold:
             self.assertEqual(response_obj, self.not_enough_data)
         else:
             self.assertEqual(db_count, response_obj['count'])
@@ -232,8 +231,7 @@ class PublicListIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_2(self):
         # add more values
         response = self.client.get(
-            '/api/public?extra_properties=[{"smoking": "Non-smoker"},'
-            '{"death": "deceased"},{"test_result": "positive"}]'
+            '/api/public?extra_properties=[{"smoking": "Non-smoker"},{"death": "deceased"},{"test_result": "positive"}]'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -241,18 +239,25 @@ class PublicListIndividualsTest(APITestCase):
             extra_properties__contains={"smoking": "Non-smoker", "death": "Deceased", "test_result": "Positive"}
         ).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data])
-        if db_count < self.response_threshold:
+        if db_count <= self.response_threshold:
             self.assertEqual(response_obj, self.not_enough_data)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
     def test_public_filtering_extra_properties_not_list(self):
-        # if GET query string doesn't have a list return 400
+        # if GET query string doesn't have a list return Not enough data
         response = self.client.get('/api/public?extra_properties="smoking": "Non-smoker","death": "deceased"')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), self.not_enough_data)
 
-    def test_public_filtering_extra_properties_list(self):
-        # if GET query string doesn't have a list return 400
-        # random stuff in query string
+    def test_public_filtering_extra_properties_list_1(self):
+        # if GET query string has a random stuff return Not enough data
         response = self.client.get('/api/public?extra_properties=["smoking": "Non-smoker", "5", "Test"]')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), self.not_enough_data)
+
+    def test_public_filtering_extra_properties_list_2(self):
+        # if GET query string list has various data types Not enough data
+        response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), self.not_enough_data)
