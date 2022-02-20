@@ -316,6 +316,10 @@ def public_overview(_request):
     individuals_extra_properties = {}
     extra_properties = {}
 
+    experiments = experiments_models.Experiment.objects.all()
+    experiments_set = set()
+    experiments_type = Counter()
+
     for individual in individuals:
         # subject/individual
         individuals_set.add(individual.id)
@@ -333,9 +337,15 @@ def public_overview(_request):
                     extra_properties[key].update((individual.extra_properties[key],))
                     individuals_extra_properties[key] = dict(extra_properties[key])
 
+    for experiment in experiments:
+        experiments_set.add(experiment.id)
+        experiments_type.update((experiment.experiment_type,))
+
     return Response({
         "individuals": len(individuals_set),
         "sex": dict(individuals_sex),
         "age": dict(individuals_age),
-        "extra_properties": dict(individuals_extra_properties)
+        "extra_properties": dict(individuals_extra_properties),
+        "experiments": len(experiments_set),
+        "experiment_type": dict(experiments_type)
     })
