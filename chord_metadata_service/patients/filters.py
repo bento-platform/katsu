@@ -1,3 +1,5 @@
+import json
+
 import django_filters
 from django.db.models import Q
 from django.db.models import TextField
@@ -167,4 +169,29 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 ),
                                 )
         ).filter(search=value).distinct("id")
+        return qs
+
+
+class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
+    sex = django_filters.CharFilter(lookup_expr="iexact")
+    extra_properties = django_filters.CharFilter(method="filter_extra_properties_list", label="Extra properties")
+
+    def filter_extra_properties_list(self, qs, name, value):
+        # e.g. extra_properties=[{"smoking":"non-smoker"}, {"covidstatus":"Positive"}]
+        if value.startswith("[") and value.endswith("]"):
+            try:
+                value_to_list = list(eval(value))
+            # catch if list contains non-existent/random strings (types)
+            except SyntaxError:
+                return qs.none()
+
+            if False not in [isinstance(v, dict) for v in value_to_list]:
+                for item in value_to_list:
+                    item_to_string = json.dumps(item).strip('{}')
+                    qs = qs.filter(extra_properties__icontains=item_to_string)
+            else:
+                return qs.none()
+        else:
+            # return empty queryset if the request is not an array
+            return qs.none()
         return qs

@@ -11,6 +11,7 @@ from chord_metadata_service.metadata.service_info import SERVICE_INFO
 from chord_metadata_service.phenopackets import models as m
 from chord_metadata_service.mcode import models as mcode_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
+from chord_metadata_service.metadata.settings import SEARCH_FIELDS
 
 
 @api_view()
@@ -278,3 +279,16 @@ def mcode_overview(_request):
             },
         }
     })
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def public_search_fields(_request):
+    """
+    get:
+    Return public search fields
+    """
+    if SEARCH_FIELDS:
+        return Response(SEARCH_FIELDS)
+    else:
+        return Response("No public search fields configured.")

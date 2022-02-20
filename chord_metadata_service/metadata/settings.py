@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 import sys
 import logging
+import json
 
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
@@ -20,6 +21,8 @@ from dotenv import load_dotenv
 from .. import __version__
 
 load_dotenv()
+
+logging.getLogger().setLevel(logging.INFO)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -53,11 +56,17 @@ AUTH_OVERRIDE = not CHORD_PERMISSIONS
 
 
 # Allowed hosts - TODO: Derive from CHORD_URL
+HOST_CONTAINER_NAME = os.environ.get("HOST_CONTAINER_NAME", "")
 
 CHORD_HOST = urlparse(CHORD_URL or "").netloc
+logging.info(f"Chord debug: {DEBUG}")
+logging.info(f"Chord host: {CHORD_HOST}")
 ALLOWED_HOSTS = [CHORD_HOST or "localhost"]
 if DEBUG:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
+if HOST_CONTAINER_NAME != "":
+    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + [HOST_CONTAINER_NAME]))
+logging.info(f"Allowed hosts: {ALLOWED_HOSTS}")
 
 APPEND_SLASH = False
 
@@ -174,7 +183,7 @@ def get_secret(path):
         with open(path) as f:
             return f.readline().strip()
     except BaseException as err:
-        print(f"Unexpected {err}, {type(err)}")
+        logging.error(f"Unexpected {err}, {type(err)}")
         raise
 
 
@@ -275,3 +284,10 @@ STATIC_URL = '/static/'
 
 # Cache time constant
 CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
+
+# read project specific config.json that contains custom search fields
+if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
+    with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
+        SEARCH_FIELDS = json.load(config_file)
+else:
+    SEARCH_FIELDS = {}

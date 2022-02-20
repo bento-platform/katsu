@@ -1,3 +1,6 @@
+import uuid
+import random
+
 VALID_INDIVIDUAL = {
     "id": "patient:1",
     "taxonomy": {
@@ -48,3 +51,22 @@ VALID_INDIVIDUAL_2 = {
     "sex": "MALE",
     "active": True
 }
+
+
+def generate_valid_individual():
+    return {
+        "id": str(uuid.uuid4()),
+        "taxonomy": {
+            "id": "NCBITaxon:9606",
+            "label": "human"
+        },
+        "age": {
+            "age": f"P{str(random.randrange(16, 89))}Y"
+        },
+        "sex": random.choice(["MALE", "FEMALE", "UNKNOWN_SEX", "OTHER_SEX"]),
+        "extra_properties": {
+            "smoking": random.choice(["Non-smoker", "Smoker", "Former smoker", "Passive smoker", "Not specified"]),
+            "death": random.choice(["Alive", "Deceased"]),
+            "test_result": random.choice(["Positive", "Negative"])
+        }
+    }
