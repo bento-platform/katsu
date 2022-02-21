@@ -1,3 +1,4 @@
+import math
 from collections import Counter
 from django.views.decorators.cache import cache_page
 from rest_framework.permissions import AllowAny
@@ -341,10 +342,29 @@ def public_overview(_request):
         experiments_set.add(experiment.id)
         experiments_type.update((experiment.experiment_type,))
 
+    # Put age in bins
+    bin_size = SEARCH_FIELDS["age"]["bin_size"] if "age" in SEARCH_FIELDS and "bin_size" in SEARCH_FIELDS["age"] else 10
+    individuals_age_dict = dict(individuals_age)
+    individuals_age_bins = {}
+    # convert keys to int
+    int_individuals_age_dict = {int(k): v for k, v in individuals_age_dict.items()}
+    # find the max age and define the  range
+    for j in range(math.ceil(max(int_individuals_age_dict.keys()) / bin_size)):
+        bin_key = j * bin_size
+        keys = [a for a in int_individuals_age_dict.keys() if j * bin_size <= a < (j + 1) * bin_size]
+        keys_sum = 0
+        for k, v in int_individuals_age_dict.items():
+            if k in keys:
+                keys_sum += v
+        individuals_age_bins[f"{bin_key}"] = keys_sum
+    # remove data if count < 5
+    # TODO don't hardcode the threshold here
+    individuals_age_bins = {k: v for k, v in individuals_age_bins.items() if v > 5}
+
     return Response({
         "individuals": len(individuals_set),
         "sex": dict(individuals_sex),
-        "age": dict(individuals_age),
+        "age": individuals_age_bins,
         "extra_properties": dict(individuals_extra_properties),
         "experiments": len(experiments_set),
         "experiment_type": dict(experiments_type)
