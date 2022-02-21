@@ -343,23 +343,9 @@ def public_overview(_request):
         experiments_type.update((experiment.experiment_type,))
 
     # Put age in bins
-    bin_size = SEARCH_FIELDS["age"]["bin_size"] if "age" in SEARCH_FIELDS and "bin_size" in SEARCH_FIELDS["age"] else 10
-    individuals_age_dict = dict(individuals_age)
-    individuals_age_bins = {}
-    # convert keys to int
-    int_individuals_age_dict = {int(k): v for k, v in individuals_age_dict.items()}
-    # find the max age and define the  range
-    for j in range(math.ceil(max(int_individuals_age_dict.keys()) / bin_size)):
-        bin_key = j * bin_size
-        keys = [a for a in int_individuals_age_dict.keys() if j * bin_size <= a < (j + 1) * bin_size]
-        keys_sum = 0
-        for k, v in int_individuals_age_dict.items():
-            if k in keys:
-                keys_sum += v
-        individuals_age_bins[f"{bin_key}"] = keys_sum
-    # remove data if count < 5
-    # TODO don't hardcode the threshold here
-    individuals_age_bins = {k: v for k, v in individuals_age_bins.items() if v > 5}
+    age_bin_size = SEARCH_FIELDS["age"]["bin_size"] \
+        if "age" in SEARCH_FIELDS and "bin_size" in SEARCH_FIELDS["age"] else 10
+    individuals_age_bins = sort_numeric_values_in_bins(values=dict(individuals_age), bin_size=age_bin_size)
 
     return Response({
         "individuals": len(individuals_set),
@@ -369,3 +355,20 @@ def public_overview(_request):
         "experiments": len(experiments_set),
         "experiment_type": dict(experiments_type)
     })
+
+
+def sort_numeric_values_in_bins(values: dict, bin_size: int = 10, threshold: int = 5):
+    values_in_bins = {}
+    # convert keys to int
+    keys_to_int_values = {int(k): v for k, v in values.items()}
+    # find the max value and define the  range
+    for j in range(math.ceil(max(keys_to_int_values.keys()) / bin_size)):
+        bin_key = j * bin_size
+        keys = [a for a in keys_to_int_values.keys() if j * bin_size <= a < (j + 1) * bin_size]
+        keys_sum = 0
+        for k, v in keys_to_int_values.items():
+            if k in keys:
+                keys_sum += v
+        values_in_bins[f"{bin_key}"] = keys_sum
+    # remove data if count < 5
+    return {k: v for k, v in values_in_bins.items() if v > threshold}
