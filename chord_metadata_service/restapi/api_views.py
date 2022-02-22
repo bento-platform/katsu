@@ -348,7 +348,7 @@ def public_overview(_request):
     age_kwargs = dict(values=dict(individuals_age), bin_size=age_bin_size)
     individuals_age_bins = sort_numeric_values_in_bins(**{k: v for k, v in age_kwargs.items() if v is not None})
 
-    # Put in bins all other numeric values coming from extra_properties
+    # Put all other numeric values coming from extra_properties in bins
     if "extra_properties" in SEARCH_FIELDS:
         for search_field_key, search_field_val in SEARCH_FIELDS["extra_properties"].items():
             if search_field_val["type"] == "number":
