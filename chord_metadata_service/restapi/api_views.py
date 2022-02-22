@@ -344,8 +344,23 @@ def public_overview(_request):
 
     # Put age in bins
     age_bin_size = SEARCH_FIELDS["age"]["bin_size"] \
-        if "age" in SEARCH_FIELDS and "bin_size" in SEARCH_FIELDS["age"] else 10
-    individuals_age_bins = sort_numeric_values_in_bins(values=dict(individuals_age), bin_size=age_bin_size)
+        if "age" in SEARCH_FIELDS and "bin_size" in SEARCH_FIELDS["age"] else None
+    age_kwargs = dict(values=dict(individuals_age), bin_size=age_bin_size)
+    individuals_age_bins = sort_numeric_values_in_bins(**{k: v for k, v in age_kwargs.items() if v is not None})
+
+    # Put in bins all other numeric values coming from extra_properties
+    if "extra_properties" in SEARCH_FIELDS:
+        for search_field_key, search_field_val in SEARCH_FIELDS["extra_properties"].items():
+            if search_field_val["type"] == "number":
+                # retrieve bin_size if available
+                field_bin_size = search_field_val["bin_size"] if "bin_size" in search_field_val else None
+                # retrieve the values from extra_properties counter
+                values = individuals_extra_properties[search_field_key]
+                kwargs = dict(values=values, bin_size=field_bin_size)
+                extra_prop_values_in_bins = sort_numeric_values_in_bins(
+                    **{k: v for k, v in kwargs.items() if v is not None}
+                )
+                individuals_extra_properties[search_field_key] = extra_prop_values_in_bins
 
     return Response({
         "individuals": len(individuals_set),
