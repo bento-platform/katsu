@@ -308,6 +308,8 @@ def public_overview(_request):
     get:
     Overview of all public data in the database
     """
+    threshold = 5
+
     individuals = patients_models.Individual.objects.all()
 
     individuals_set = set()
@@ -337,6 +339,9 @@ def public_overview(_request):
                         extra_properties[key] = Counter()
                     extra_properties[key].update((individual.extra_properties[key],))
                     individuals_extra_properties[key] = dict(extra_properties[key])
+                    # individuals_extra_properties[key] = {
+                    #     k: v for k, v in dict(extra_properties[key]).items() if v > threshold
+                    # }
 
     for experiment in experiments:
         experiments_set.add(experiment.id)
@@ -364,9 +369,10 @@ def public_overview(_request):
 
     return Response({
         "individuals": len(individuals_set),
-        "sex": dict(individuals_sex),
+        "sex": {k: v for k, v in dict(individuals_sex).items() if v > threshold},
         "age": individuals_age_bins,
         "extra_properties": dict(individuals_extra_properties),
+        # ?? same for experiments ??
         "experiments": len(experiments_set),
         "experiment_type": dict(experiments_type)
     })
