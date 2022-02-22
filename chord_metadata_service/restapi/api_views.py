@@ -367,12 +367,22 @@ def public_overview(_request):
                 )
                 individuals_extra_properties[search_field_key] = extra_prop_values_in_bins
 
+    # remove values where count < threshold
+    # TODO refactor: bins count validated in sort_numeric_values_in_bins
+    valid_count_extra_properties = {}
+    for key, value in individuals_extra_properties.items():
+        for k, v in value.items():
+            if v > threshold:
+                if key not in valid_count_extra_properties:
+                    valid_count_extra_properties[key] = {k: v}
+                valid_count_extra_properties[key].update({k: v})
+
     return Response({
         "individuals": len(individuals_set),
         "sex": {k: v for k, v in dict(individuals_sex).items() if v > threshold},
         "age": individuals_age_bins,
-        "extra_properties": dict(individuals_extra_properties),
-        # ?? same for experiments ??
+        "extra_properties": valid_count_extra_properties,
+        # TODO ?? same for experiments ??
         "experiments": len(experiments_set),
         "experiment_type": dict(experiments_type)
     })

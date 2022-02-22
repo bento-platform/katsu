@@ -12,7 +12,11 @@ from chord_metadata_service.experiments.tests import constants as exp_c
 from chord_metadata_service.mcode import models as mcode_m
 from chord_metadata_service.mcode.tests import constants as mcode_c
 
-from .constants import VALID_INDIVIDUAL_1, VALID_INDIVIDUAL_2, VALID_INDIVIDUAL_3, VALID_INDIVIDUAL_4
+from .constants import (
+    VALID_INDIVIDUAL_1, VALID_INDIVIDUAL_2, VALID_INDIVIDUAL_3,
+    VALID_INDIVIDUAL_4, VALID_INDIVIDUAL_5, VALID_INDIVIDUAL_6,
+    VALID_INDIVIDUAL_7, VALID_INDIVIDUAL_8
+)
 
 
 class ServiceInfoTest(APITestCase):
@@ -159,6 +163,10 @@ class PublicOverviewTest(APITestCase):
         self.individual_2 = ph_m.Individual.objects.create(**VALID_INDIVIDUAL_2)
         self.individual_3 = ph_m.Individual.objects.create(**VALID_INDIVIDUAL_3)
         self.individual_4 = ph_m.Individual.objects.create(**VALID_INDIVIDUAL_4)
+        self.individual_5 = ph_m.Individual.objects.create(**VALID_INDIVIDUAL_5)
+        self.individual_6 = ph_m.Individual.objects.create(**VALID_INDIVIDUAL_6)
+        self.individual_7 = ph_m.Individual.objects.create(**VALID_INDIVIDUAL_7)
+        self.individual_8 = ph_m.Individual.objects.create(**VALID_INDIVIDUAL_8)
 
         # biosamples
         self.procedure = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
@@ -181,3 +189,4 @@ class PublicOverviewTest(APITestCase):
         print(response_obj)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
+        # TODO add more test
