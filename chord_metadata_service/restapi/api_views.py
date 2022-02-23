@@ -309,6 +309,7 @@ def public_overview(_request):
     Overview of all public data in the database
     """
     threshold = 5
+    not_enough_data = "Not enough data."
 
     individuals = patients_models.Individual.objects.all()
 
@@ -339,9 +340,6 @@ def public_overview(_request):
                         extra_properties[key] = Counter()
                     extra_properties[key].update((individual.extra_properties[key],))
                     individuals_extra_properties[key] = dict(extra_properties[key])
-                    # individuals_extra_properties[key] = {
-                    #     k: v for k, v in dict(extra_properties[key]).items() if v > threshold
-                    # }
 
     for experiment in experiments:
         experiments_set.add(experiment.id)
@@ -377,15 +375,21 @@ def public_overview(_request):
                     valid_count_extra_properties[key] = {k: v}
                 valid_count_extra_properties[key].update({k: v})
 
-    return Response({
-        "individuals": len(individuals_set),
-        "sex": {k: v for k, v in dict(individuals_sex).items() if v > threshold},
-        "age": individuals_age_bins,
-        "extra_properties": valid_count_extra_properties,
-        # TODO ?? same for experiments ??
-        "experiments": len(experiments_set),
-        "experiment_type": dict(experiments_type)
-    })
+    # Response content
+    if len(individuals_set) < threshold:
+        content = not_enough_data
+    else:
+        content = {
+            "individuals": len(individuals_set),
+            "sex": {k: v for k, v in dict(individuals_sex).items() if v > threshold},
+            "age": individuals_age_bins,
+            "extra_properties": valid_count_extra_properties,
+            # TODO ?? same for experiments ??
+            "experiments": len(experiments_set),
+            "experiment_type": dict(experiments_type)
+        }
+
+    return Response(content)
 
 
 def sort_numeric_values_in_bins(values: dict, bin_size: int = 10, threshold: int = 5):
