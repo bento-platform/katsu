@@ -350,7 +350,7 @@ def public_overview(_request):
         age_bin_size = CONFIG_FIELDS["age"]["bin_size"] \
             if "age" in CONFIG_FIELDS and "bin_size" in CONFIG_FIELDS["age"] else None
         age_kwargs = dict(values=dict(individuals_age), bin_size=age_bin_size)
-        individuals_age_bins = sort_numeric_values_in_bins(**{k: v for k, v in age_kwargs.items() if v is not None})
+        individuals_age_bins = sort_numeric_values_into_bins(**{k: v for k, v in age_kwargs.items() if v is not None})
     else:
         individuals_age_bins = {}
 
@@ -366,7 +366,7 @@ def public_overview(_request):
                 values = individuals_extra_properties[key]
                 kwargs = dict(values=values, bin_size=field_bin_size)
                 # sort into bins and remove numeric values where count <= threshold
-                extra_prop_values_in_bins = sort_numeric_values_in_bins(
+                extra_prop_values_in_bins = sort_numeric_values_into_bins(
                     **{k: v for k, v in kwargs.items() if v is not None}
                 )
                 # rewrite with sorted values
@@ -393,7 +393,7 @@ def public_overview(_request):
     return Response(content)
 
 
-def sort_numeric_values_in_bins(values: dict, bin_size: int = 10, threshold: int = 5):
+def sort_numeric_values_into_bins(values: dict, bin_size: int = 10, threshold: int = 5):
     values_in_bins = {}
     # convert keys to int
     keys_to_int_values = {int(k): v for k, v in values.items()}
