@@ -14,7 +14,7 @@ from chord_metadata_service.mcode import models as mcode_models
 from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
-from chord_metadata_service.metadata.settings import SEARCH_FIELDS
+from chord_metadata_service.metadata.settings import CONFIG_FIELDS
 
 
 @api_view()
@@ -295,8 +295,8 @@ def public_search_fields(_request):
     get:
     Return public search fields
     """
-    if SEARCH_FIELDS:
-        return Response(SEARCH_FIELDS)
+    if CONFIG_FIELDS:
+        return Response(CONFIG_FIELDS)
     else:
         return Response("No public search fields configured.")
 
@@ -332,9 +332,9 @@ def public_overview(_request):
         if individual.age is not None:
             individuals_age.update((parse_individual_age(individual.age),))
         # collect extra_properties defined in config
-        if individual.extra_properties and "extra_properties" in SEARCH_FIELDS:
+        if individual.extra_properties and "extra_properties" in CONFIG_FIELDS:
             for key in individual.extra_properties:
-                if key in SEARCH_FIELDS["extra_properties"]:
+                if key in CONFIG_FIELDS["extra_properties"]:
                     # add new Counter()
                     if key not in extra_properties:
                         extra_properties[key] = Counter()
@@ -346,14 +346,14 @@ def public_overview(_request):
         experiments_type.update((experiment.experiment_type,))
 
     # Put age in bins
-    age_bin_size = SEARCH_FIELDS["age"]["bin_size"] \
-        if "age" in SEARCH_FIELDS and "bin_size" in SEARCH_FIELDS["age"] else None
+    age_bin_size = CONFIG_FIELDS["age"]["bin_size"] \
+        if "age" in CONFIG_FIELDS and "bin_size" in CONFIG_FIELDS["age"] else None
     age_kwargs = dict(values=dict(individuals_age), bin_size=age_bin_size)
     individuals_age_bins = sort_numeric_values_in_bins(**{k: v for k, v in age_kwargs.items() if v is not None})
 
     # Put all other numeric values coming from extra_properties in bins
-    if "extra_properties" in SEARCH_FIELDS:
-        for search_field_key, search_field_val in SEARCH_FIELDS["extra_properties"].items():
+    if "extra_properties" in CONFIG_FIELDS:
+        for search_field_key, search_field_val in CONFIG_FIELDS["extra_properties"].items():
             if search_field_val["type"] == "number":
                 # retrieve bin_size if available
                 field_bin_size = search_field_val["bin_size"] if "bin_size" in search_field_val else None
