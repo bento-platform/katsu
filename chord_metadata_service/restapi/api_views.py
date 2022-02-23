@@ -346,36 +346,36 @@ def public_overview(_request):
         experiments_type.update((experiment.experiment_type,))
 
     # Put age in bins
-    age_bin_size = CONFIG_FIELDS["age"]["bin_size"] \
-        if "age" in CONFIG_FIELDS and "bin_size" in CONFIG_FIELDS["age"] else None
-    age_kwargs = dict(values=dict(individuals_age), bin_size=age_bin_size)
-    individuals_age_bins = sort_numeric_values_in_bins(**{k: v for k, v in age_kwargs.items() if v is not None})
+    if individuals_age:
+        age_bin_size = CONFIG_FIELDS["age"]["bin_size"] \
+            if "age" in CONFIG_FIELDS and "bin_size" in CONFIG_FIELDS["age"] else None
+        age_kwargs = dict(values=dict(individuals_age), bin_size=age_bin_size)
+        individuals_age_bins = sort_numeric_values_in_bins(**{k: v for k, v in age_kwargs.items() if v is not None})
+    else:
+        individuals_age_bins = {}
 
-    # Put all other numeric values coming from extra_properties in bins
-    if "extra_properties" in CONFIG_FIELDS:
-        for search_field_key, search_field_val in CONFIG_FIELDS["extra_properties"].items():
-            if search_field_val["type"] == "number":
+    # Put all other numeric values coming from extra_properties in bins and remove values where count <= threshold
+    if individuals_extra_properties:
+        for key, value in list(individuals_extra_properties.items()):
+            # extra_properties contains only the fields specified in config
+            if CONFIG_FIELDS["extra_properties"][key]["type"] == "number":
                 # retrieve bin_size if available
-                field_bin_size = search_field_val["bin_size"] if "bin_size" in search_field_val else None
+                field_bin_size = CONFIG_FIELDS["extra_properties"][key]["bin_size"] \
+                    if "bin_size" in CONFIG_FIELDS["extra_properties"][key] else None
                 # retrieve the values from extra_properties counter
-                values = individuals_extra_properties[search_field_key]
+                values = individuals_extra_properties[key]
                 kwargs = dict(values=values, bin_size=field_bin_size)
-                # sort into bins
+                # sort into bins and remove numeric values where count <= threshold
                 extra_prop_values_in_bins = sort_numeric_values_in_bins(
                     **{k: v for k, v in kwargs.items() if v is not None}
                 )
                 # rewrite with sorted values
-                individuals_extra_properties[search_field_key] = extra_prop_values_in_bins
-
-    # remove values where count < threshold
-    # TODO refactor: bins count validated in sort_numeric_values_in_bins
-    valid_count_extra_properties = {}
-    for key, value in individuals_extra_properties.items():
-        for k, v in value.items():
-            if v > threshold:
-                if key not in valid_count_extra_properties:
-                    valid_count_extra_properties[key] = {k: v}
-                valid_count_extra_properties[key].update({k: v})
+                individuals_extra_properties[key] = extra_prop_values_in_bins
+            # remove string values where count <= threshold
+            else:
+                for k, v in list(value.items()):
+                    if v <= 5:
+                        individuals_extra_properties[key].pop(k)
 
     # Response content
     if len(individuals_set) < threshold:
@@ -385,12 +385,11 @@ def public_overview(_request):
             "individuals": len(individuals_set),
             "sex": {k: v for k, v in dict(individuals_sex).items() if v > threshold},
             "age": individuals_age_bins,
-            "extra_properties": valid_count_extra_properties,
+            "extra_properties": individuals_extra_properties,
             # TODO ?? same for experiments ??
             "experiments": len(experiments_set),
             "experiment_type": dict(experiments_type)
         }
-
     return Response(content)
 
 
