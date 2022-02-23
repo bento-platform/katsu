@@ -308,15 +308,15 @@ def public_overview(_request):
     get:
     Overview of all public data in the database
     """
+
+    # TODO should this be added to the project config.json file ?
     threshold = 5
     not_enough_data = "Not enough data."
 
     individuals = patients_models.Individual.objects.all()
-
     individuals_set = set()
     individuals_sex = Counter()
     individuals_age = Counter()
-
     individuals_extra_properties = {}
     extra_properties = {}
 
@@ -328,10 +328,10 @@ def public_overview(_request):
         # subject/individual
         individuals_set.add(individual.id)
         individuals_sex.update((individual.sex,))
-
+        # age
         if individual.age is not None:
             individuals_age.update((parse_individual_age(individual.age),))
-
+        # collect extra_properties defined in config
         if individual.extra_properties and "extra_properties" in SEARCH_FIELDS:
             for key in individual.extra_properties:
                 if key in SEARCH_FIELDS["extra_properties"]:
@@ -340,7 +340,7 @@ def public_overview(_request):
                         extra_properties[key] = Counter()
                     extra_properties[key].update((individual.extra_properties[key],))
                     individuals_extra_properties[key] = dict(extra_properties[key])
-
+    # experiments
     for experiment in experiments:
         experiments_set.add(experiment.id)
         experiments_type.update((experiment.experiment_type,))
@@ -360,9 +360,11 @@ def public_overview(_request):
                 # retrieve the values from extra_properties counter
                 values = individuals_extra_properties[search_field_key]
                 kwargs = dict(values=values, bin_size=field_bin_size)
+                # sort into bins
                 extra_prop_values_in_bins = sort_numeric_values_in_bins(
                     **{k: v for k, v in kwargs.items() if v is not None}
                 )
+                # rewrite with sorted values
                 individuals_extra_properties[search_field_key] = extra_prop_values_in_bins
 
     # remove values where count < threshold
