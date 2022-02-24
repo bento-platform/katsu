@@ -10,6 +10,7 @@ from uuid import UUID
 
 from .jsonld_utils import dataset_to_jsonld
 from .utils import parse_onset
+from .cbioportal_export_mapping import individual_to_patient_header
 
 register('json-ld', Serializer, 'rdflib_jsonld.serializer', 'JsonLDSerializer')
 
@@ -161,5 +162,82 @@ class IndividualCSVRenderer(JSONRenderer):
             response['Content-Disposition'] = "attachment; filename='export.csv'"
             dict_writer = csv.DictWriter(response, fieldnames=columns)
             dict_writer.writerow(headers)
+            dict_writer.writerows(individuals)
+            return response
+
+class IndividualCBioPortalPatientRenderer(JSONRenderer):
+    """
+    Renders Individuals as a clinical_patient text file suitable for
+    import by cBioPortal.
+
+    cBioPortal Patients fields specs:
+    ---------------------------------
+    Required:
+    - PATIENT_ID
+    Special columns:
+    - OS_STATUS, OS_MONTHS overall survivall. Status can be 1:DECEASED, 0:LIVING
+    - DFS_STATUS, DFS_MONTHS disease free
+    - PATIENT_DISPLAY_NAME
+    - GENDER or SEX
+    - AGE
+    - TUMOR_SITE
+    """
+
+    media_type = 'text/plain'
+    format = 'cbioportal_export'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        if 'results' in data:
+            individuals = []
+            for individual in data['results']:
+                ind_obj = {
+                    'id': individual['id'],
+                    'sex': individual.get('sex', None),
+                    # 'date_of_birth': individual.get('date_of_birth', None),
+                    # 'taxonomy': None,
+                    # 'karyotypic_sex': individual['karyotypic_sex'],
+                    # 'race': individual.get('race', None),
+                    # 'ethnicity': individual.get('ethnicity', None),
+                    # 'age': None,
+                    # 'diseases': None,
+                    # 'created': individual['created'],
+                    # 'updated': individual['updated']
+                }
+                # if 'taxonomy' in individual:
+                #     ind_obj['taxonomy'] = individual['taxonomy'].get('label', None)
+                # if 'age' in individual:
+                #     if 'age' in individual['age']:
+                #         ind_obj['age'] = individual['age'].get('age', None)
+                #     elif 'start' and 'end' in individual['age']:
+                #         ind_obj['age'] = str(
+                #             individual['age']['start'].get('age', "NA")
+                #             + ' - ' +
+                #             individual['age']['end'].get('age', "NA")
+                #         )
+                #     else:
+                #         ind_obj['age'] = None
+                # if 'phenopackets' in individual:
+                #     all_diseases = []
+                #     for phenopacket in individual['phenopackets']:
+                #         if 'diseases' in phenopacket:
+                #             # use ; because some disease terms might contain , in their label
+                #             single_phenopacket_diseases = '; '.join(
+                #                 [
+                #                     f"{d['term']['label']} ({parse_onset(d['onset'])})"
+                #                     if 'onset' in d else d['term']['label'] for d in phenopacket['diseases']
+                #                 ]
+                #             )
+                #             all_diseases.append(single_phenopacket_diseases)
+                #     if all_diseases:
+                #         ind_obj['diseases'] = '; '.join(all_diseases)
+                individuals.append(ind_obj)
+            columns = individuals[0].keys()
+            headers = individual_to_patient_header(columns)
+
+            response = HttpResponse(content_type=self.media_type)
+            response['Content-Disposition'] = "attachment; filename='data_clinical_patient.txt'"
+
+            response.writelines([line + '\n' for line in headers])
+            dict_writer = csv.DictWriter(response, fieldnames=columns, delimiter='\t')
             dict_writer.writerows(individuals)
             return response

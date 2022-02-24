@@ -15,6 +15,7 @@ from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
     IndividualCSVRenderer,
     ARGORenderer,
+    IndividualCBioPortalPatientRenderer,
 )
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
@@ -35,7 +36,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
-                        PhenopacketsRenderer, IndividualCSVRenderer, ARGORenderer)
+                        PhenopacketsRenderer, IndividualCSVRenderer, ARGORenderer, IndividualCBioPortalPatientRenderer)
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filter_class = IndividualFilter
     ordering_fields = ["id"]
