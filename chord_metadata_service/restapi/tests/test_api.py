@@ -1,15 +1,18 @@
+from copy import deepcopy
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
-from chord_metadata_service.metadata.settings import SEARCH_FIELDS
+from chord_metadata_service.metadata.settings import CONFIG_FIELDS
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
 from chord_metadata_service.experiments.tests import constants as exp_c
 from chord_metadata_service.mcode import models as mcode_m
 from chord_metadata_service.mcode.tests import constants as mcode_c
+
+from .constants import VALID_INDIVIDUALS
 
 
 class ServiceInfoTest(APITestCase):
@@ -142,7 +145,57 @@ class PublicSearchFieldsTest(APITestCase):
     def test_public_search_fields(self):
         r = self.client.get(reverse("public-search-fields"), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        if SEARCH_FIELDS:
-            self.assertDictEqual(r.json(), SEARCH_FIELDS)
+        if CONFIG_FIELDS:
+            self.assertDictEqual(r.json(), CONFIG_FIELDS)
         else:
             self.assertIsInstance(r.json(), str)
+
+
+class PublicOverviewTest(APITestCase):
+
+    def setUp(self) -> None:
+        # individuals
+        individuals = {
+            f"individual_{i}": ph_m.Individual.objects.create(**ind) for i, ind in enumerate(VALID_INDIVIDUALS, start=1)
+        }
+        # biosamples
+        self.procedure = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
+        self.biosample_1 = ph_m.Biosample.objects.create(
+            **ph_c.valid_biosample_1(individuals["individual_1"], self.procedure)
+        )
+        self.biosample_2 = ph_m.Biosample.objects.create(
+            **ph_c.valid_biosample_2(individuals["individual_2"], self.procedure)
+        )
+        # experiments
+        self.instrument = exp_m.Instrument.objects.create(**exp_c.valid_instrument())
+        self.experiment = exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_1, self.instrument))
+        self.experiment_result = exp_m.ExperimentResult.objects.create(**exp_c.valid_experiment_result())
+        self.experiment.experiment_results.set([self.experiment_result])
+        # make a copy and create experiment 2
+        experiment_2 = deepcopy(exp_c.valid_experiment(self.biosample_2, self.instrument))
+        experiment_2["id"] = "experiment:2"
+        self.experiment = exp_m.Experiment.objects.create(**experiment_2)
+
+    def test_overview(self):
+        response = self.client.get('/api/public_overview')
+        response_obj = response.json()
+        db_count = ph_m.Individual.objects.all().count()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj["individuals"], db_count)
+
+
+class PublicOverviewTest2(APITestCase):
+
+    def setUp(self) -> None:
+        # create only 2 individuals
+        for ind in VALID_INDIVIDUALS[:2]:
+            ph_m.Individual.objects.create(**ind)
+
+    def test_overview_response(self):
+        # test overview response when individuals count < threshold
+        response = self.client.get('/api/public_overview')
+        response_obj = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response_obj, str)
+        self.assertNotIn("individuals", response_obj)
