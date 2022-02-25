@@ -10,7 +10,7 @@ from uuid import UUID
 
 from .jsonld_utils import dataset_to_jsonld
 from .utils import parse_onset
-from .cbioportal_export_mapping import individual_to_patient_header
+from .cbioportal_export_mapping import individual_to_patient_header, biosample_to_sample_header
 
 register('json-ld', Serializer, 'rdflib_jsonld.serializer', 'JsonLDSerializer')
 
@@ -168,7 +168,7 @@ class IndividualCSVRenderer(JSONRenderer):
 class IndividualCBioPortalPatientRenderer(JSONRenderer):
     """
     Renders Individuals as a clinical_patient text file suitable for
-    import by cBioPortal.
+    importing by cBioPortal.
 
     cBioPortal Patients fields specs:
     ---------------------------------
@@ -240,4 +240,64 @@ class IndividualCBioPortalPatientRenderer(JSONRenderer):
             response.writelines([line + '\n' for line in headers])
             dict_writer = csv.DictWriter(response, fieldnames=columns, delimiter='\t')
             dict_writer.writerows(individuals)
+            return response
+
+class BiosampleCBioPortalSampleRenderer(JSONRenderer):
+    """
+    Renders Biosamples as a clinical_sample text file suitable for
+    importing by cBioPortal.
+
+    cBioPortal Sample fields specs:
+    ---------------------------------
+    Required:
+    - PATIENT_ID
+    - SAMPLE_ID
+    Special columns:
+    - For pan-cancer summary statistics tab:
+        - CANCER_TYPE as an Oncotree code
+        - CANCER_TYPE_DETAILED
+    - SAMPLE_DISPLAY_NAME
+    - SAMPLE_CLASS
+    - METASTATIC_SITE / PRIMARY_SITE overrides the patients level attribute TUMOR_SITE
+    - SAMPLE_TYPE, TUMOR_TISSUE_SITE, TUMOR_TYPE can have the following values (are displayed with a distinct color in the timelines):
+        - "recurrence", "recurred", "progression"
+        - "metastatic", "metastasis"
+        - "primary" or any other value
+    - KNOWN_MOLECULAR_CLASSIFIER
+    - GLEASON_SCORE (prostate cancer)
+    - HISTOLOGY
+    - TUMOR_STAGE_2009
+    - TUMOR_GRADE
+    - ETS_RAF_SPINK1_STATUS
+    - TMPRSS2_ERG_FUSION_STATUS
+    - ERG_FUSION_ACGH
+    - SERUM_PSA
+    - DRIVER_MUTATIONS
+    """
+
+    media_type = 'text/plain'
+    format = 'cbioportal_export'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        if 'results' in data:
+            samples = []
+            for sample in data['results']:
+                sample_obj = {
+                    'individual_id': sample['individual'],
+                    'id': sample['id']
+                }
+                if 'sampled_tissue' in sample:
+                    sample_obj['tissue_label'] = sample['sampled_tissue'].get('label', '')
+            
+                samples.append(sample_obj)
+
+            columns = samples[0].keys()
+            headers = biosample_to_sample_header(columns)
+
+            response = HttpResponse(content_type=self.media_type)
+            response['Content-Disposition'] = "attachment; filename='data_clinical_sample.txt'"
+
+            response.writelines([line + '\n' for line in headers])
+            dict_writer = csv.DictWriter(response, fieldnames=columns, delimiter='\t')
+            dict_writer.writerows(samples)
             return response
