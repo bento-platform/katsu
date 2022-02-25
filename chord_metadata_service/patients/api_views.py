@@ -36,7 +36,8 @@ class IndividualViewSet(viewsets.ModelViewSet):
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
-                        PhenopacketsRenderer, IndividualCSVRenderer, ARGORenderer, IndividualCBioPortalPatientRenderer)
+                        PhenopacketsRenderer, IndividualCSVRenderer, ARGORenderer, 
+                        IndividualCBioPortalPatientRenderer)
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filter_class = IndividualFilter
     ordering_fields = ["id"]
