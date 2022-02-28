@@ -215,9 +215,9 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
                                     if query_key == search_field_key:
                                         range_parameters = {
                                             f"extra_properties__{search_field_key}__gte":
-                                                query_value["min"] if "min" in query_value else None,
+                                                query_value["rangeMin"] if "rangeMin" in query_value else None,
                                             f"extra_properties__{search_field_key}__lte":
-                                                query_value["max"] if "max" in query_value else None
+                                                query_value["rangeMax"] if "rangeMax" in query_value else None
                                         }
                                         for range_key, range_value in range_parameters.items():
                                             if range_value is not None:
