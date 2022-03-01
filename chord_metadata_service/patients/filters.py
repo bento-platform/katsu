@@ -174,7 +174,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
 
 class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
     sex = django_filters.CharFilter(lookup_expr="iexact")
-    extra_properties = django_filters.CharFilter(method="filter_extra_properties_list", label="Extra properties")
+    extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
     extra_properties_range = django_filters.CharFilter(method="filter_extra_properties_range", label="Extra properties")
 
     def filter_extra_properties_list(self, qs, name, value):
@@ -226,6 +226,43 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
                 return qs.none()
         else:
             # return empty queryset if the request is not an array
+            return qs.none()
+
+        return qs
+
+    def filter_extra_properties(self, qs, name, value):
+        if value.startswith("[") and value.endswith("]"):
+            # convert query string value to list
+            try:
+                value_to_list = list(eval(value))
+            # catch if list contains non-existent/random strings (types)
+            except SyntaxError:
+                return qs.none()
+            # check if it's an array of dicts
+            if False not in [isinstance(v, dict) for v in value_to_list]:
+                for dict_item in value_to_list:
+                    if "extra_properties" in CONFIG_FIELDS:
+                        for search_field_key, search_field_val in CONFIG_FIELDS["extra_properties"].items():
+                            if search_field_val["type"] == "number":
+                                for query_key, query_value in dict_item.items():
+                                    if query_key == search_field_key:
+                                        range_parameters = {
+                                            f"extra_properties__{search_field_key}__gte":
+                                                query_value["rangeMin"] if "rangeMin" in query_value else None,
+                                            f"extra_properties__{search_field_key}__lte":
+                                                query_value["rangeMax"] if "rangeMax" in query_value else None
+                                        }
+                                        for range_key, range_value in range_parameters.items():
+                                            if range_value is not None:
+                                                qs = qs.filter(**{range_key: range_value})
+                            if search_field_val["type"] == "string":
+                                for query_key, query_value in dict_item.items():
+                                    if query_key == search_field_key:
+                                        qs = qs.filter(extra_properties__icontains=query_value)
+            else:
+                return qs.none()
+        # bad query string return empty queryset
+        else:
             return qs.none()
 
         return qs
