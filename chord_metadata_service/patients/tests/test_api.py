@@ -4,7 +4,9 @@ import io
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from ..models import Individual
+from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.metadata.settings import CONFIG_FIELDS
+
 from . import constants as c
 
 
@@ -208,45 +210,48 @@ class PublicListIndividualsTest(APITestCase):
         response_obj = response.json()
         db_count = Individual.objects.filter(sex__iexact='female')\
             .filter(extra_properties__contains={"smoking": "Non-smoker"}).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        if CONFIG_FIELDS:
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data])
+            if db_count <= self.response_threshold:
+                self.assertEqual(response_obj, self.not_enough_data)
+            else:
+                self.assertEqual(db_count, response_obj['count'])
 
     def test_public_filtering_extra_properties_1(self):
-        response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, {"death": "deceased"}]')
+        response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, {"death_dc": "Deceased"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        db_count = Individual.objects\
-            .filter(extra_properties__contains={"smoking": "Non-smoker"})\
-            .filter(extra_properties__contains={"death": "Deceased"})\
-            .count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        db_count = Individual.objects.filter(
+            extra_properties__contains={"smoking": "Non-smoker", "death_dc": "Deceased"}
+        ).count()
+        if CONFIG_FIELDS:
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data])
+            if db_count <= self.response_threshold:
+                self.assertEqual(response_obj, self.not_enough_data)
+            else:
+                self.assertEqual(db_count, response_obj['count'])
 
     def test_public_filtering_extra_properties_2(self):
         # add more values
         response = self.client.get(
-            '/api/public?extra_properties=[{"smoking": "Non-smoker"},{"death": "deceased"},{"test_result": "positive"}]'
+            '/api/public?extra_properties=[{"smoking": "Non-smoker"},'
+            '{"death_dc": "deceased"},{"covidstatus": "positive"}]'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.filter(
-            extra_properties__contains={"smoking": "Non-smoker", "death": "Deceased", "test_result": "Positive"}
+            extra_properties__contains={"smoking": "Non-smoker", "death_dc": "Deceased", "covidstatus": "Positive"}
         ).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        if CONFIG_FIELDS:
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data])
+            if db_count <= self.response_threshold:
+                self.assertEqual(response_obj, self.not_enough_data)
+            else:
+                self.assertEqual(db_count, response_obj['count'])
 
     def test_public_filtering_extra_properties_not_list(self):
         # if GET query string doesn't have a list return Not enough data
-        response = self.client.get('/api/public?extra_properties="smoking": "Non-smoker","death": "deceased"')
+        response = self.client.get('/api/public?extra_properties="smoking": "Non-smoker","death_dc": "deceased"')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), self.not_enough_data)
 
