@@ -351,7 +351,7 @@ class PublicListIndividualsTest(APITestCase):
                 self.assertEqual(db_count, response_obj['count'])
 
     def test_public_filtering_extra_properties_range_string_2(self):
-        # sex string search and extra_properties range search (both min and max ranges, single value)
+        # extra_properties range search (both min and max ranges) and extra_properties string search (single value)
         response = self.client.get(
             '/api/public?extra_properties=[{"lab_test_result_value": {"rangeMin": 5, "rangeMax": 900}}, '
             '{"covidstatus": "positive"}]'
@@ -363,6 +363,28 @@ class PublicListIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__gte": 5,
             "extra_properties__lab_test_result_value__lte": 900,
             "extra_properties__covidstatus__icontains": "positive",
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        if CONFIG_FIELDS:
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+            if db_count <= self.response_threshold:
+                self.assertEqual(response_obj, self.not_enough_data_response)
+            else:
+                self.assertEqual(db_count, response_obj['count'])
+
+    def test_public_filtering_extra_properties_range_string_3(self):
+        # extra_properties range search (only max range) and extra_properties string search (multiple values)
+        response = self.client.get(
+            '/api/public?extra_properties=[{"lab_test_result_value": {"rangeMax": 400}}, '
+            '{"covidstatus": "positive"}, {"smoking": "Non-smoker"}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
+        range_parameters = {
+            "extra_properties__lab_test_result_value__lte": 400,
+            "extra_properties__covidstatus__icontains": "positive",
+            "extra_properties__smoking__icontains": "Non-smoker",
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         if CONFIG_FIELDS:
