@@ -393,3 +393,47 @@ class PublicListIndividualsTest(APITestCase):
                 self.assertEqual(response_obj, self.not_enough_data_response)
             else:
                 self.assertEqual(db_count, response_obj['count'])
+
+    def test_public_filtering_extra_properties_multiple_ranges_1(self):
+        # extra_properties range search (both min and max range, multiple values)
+        response = self.client.get(
+            '/api/public?extra_properties=[{"lab_test_result_value": {"rangeMin": 5, "rangeMax": 900}}, '
+            '{"baseline_creatinine": {"rangeMin": 30, "rangeMax": 300}}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
+        range_parameters = {
+            "extra_properties__lab_test_result_value__gte": 5,
+            "extra_properties__lab_test_result_value__lte": 900,
+            "extra_properties__baseline_creatinine__gte": 30,
+            "extra_properties__baseline_creatinine__lte": 300,
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        if CONFIG_FIELDS:
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+            if db_count <= self.response_threshold:
+                self.assertEqual(response_obj, self.not_enough_data_response)
+            else:
+                self.assertEqual(db_count, response_obj['count'])
+
+    def test_public_filtering_extra_properties_multiple_ranges_2(self):
+        # extra_properties range search (only min or max range, multiple values)
+        response = self.client.get(
+            '/api/public?extra_properties=[{"lab_test_result_value": {"rangeMin": 5}}, '
+            '{"baseline_creatinine": {"rangeMax": 300}}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
+        range_parameters = {
+            "extra_properties__lab_test_result_value__gte": 5,
+            "extra_properties__baseline_creatinine__lte": 300,
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        if CONFIG_FIELDS:
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+            if db_count <= self.response_threshold:
+                self.assertEqual(response_obj, self.not_enough_data_response)
+            else:
+                self.assertEqual(db_count, response_obj['count'])
