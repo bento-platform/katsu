@@ -328,3 +328,46 @@ class PublicListIndividualsTest(APITestCase):
                 self.assertEqual(response_obj, self.not_enough_data_response)
             else:
                 self.assertEqual(db_count, response_obj['count'])
+
+    def test_public_filtering_extra_properties_range_string_1(self):
+        # sex string search and extra_properties range search (both min and max ranges, single value)
+        response = self.client.get(
+            '/api/public?sex=female&extra_properties=[{"lab_test_result_value": {"rangeMin": 5, "rangeMax": 900}}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
+        range_parameters = {
+            "sex__iexact": "female",
+            "extra_properties__lab_test_result_value__gte": 5,
+            "extra_properties__lab_test_result_value__lte": 900
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        if CONFIG_FIELDS:
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+            if db_count <= self.response_threshold:
+                self.assertEqual(response_obj, self.not_enough_data_response)
+            else:
+                self.assertEqual(db_count, response_obj['count'])
+
+    def test_public_filtering_extra_properties_range_string_2(self):
+        # sex string search and extra_properties range search (both min and max ranges, single value)
+        response = self.client.get(
+            '/api/public?extra_properties=[{"lab_test_result_value": {"rangeMin": 5, "rangeMax": 900}}, '
+            '{"covidstatus": "positive"}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
+        range_parameters = {
+            "extra_properties__lab_test_result_value__gte": 5,
+            "extra_properties__lab_test_result_value__lte": 900,
+            "extra_properties__covidstatus__icontains": "positive",
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        if CONFIG_FIELDS:
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+            if db_count <= self.response_threshold:
+                self.assertEqual(response_obj, self.not_enough_data_response)
+            else:
+                self.assertEqual(db_count, response_obj['count'])
