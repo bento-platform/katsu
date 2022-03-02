@@ -67,6 +67,7 @@ def generate_valid_individual():
         "extra_properties": {
             "smoking": random.choice(["Non-smoker", "Smoker", "Former smoker", "Passive smoker", "Not specified"]),
             "death_dc": random.choice(["Alive", "Deceased"]),
-            "covidstatus": random.choice(["Positive", "Negative"])
+            "covidstatus": random.choice(["Positive", "Negative"]),
+            "lab_test_result_value": round(random.uniform(0, 999.99), 2)
         }
     }

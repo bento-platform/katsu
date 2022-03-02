@@ -178,6 +178,7 @@ class PublicListIndividualsTest(APITestCase):
             Individual.objects.create(**individual)
 
     def test_public_get(self):
+        # no filters GET request to /api/public, returns count or not enough data
         response = self.client.get('/api/public')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -191,6 +192,7 @@ class PublicListIndividualsTest(APITestCase):
             self.assertEqual(Individual.objects.all().count(), response_obj['count'])
 
     def test_public_filtering_sex(self):
+        # sex field search
         response = self.client.get('/api/public?sex=female')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -204,6 +206,7 @@ class PublicListIndividualsTest(APITestCase):
             self.assertEqual(Individual.objects.filter(sex__iexact='female').count(), response_obj['count'])
 
     def test_public_filtering_2_fields(self):
+        # sex and extra_properties string search
         # test GET query string search for extra_properties field
         response = self.client.get('/api/public?sex=female&extra_properties=[{"smoking": "Non-smoker"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -218,6 +221,7 @@ class PublicListIndividualsTest(APITestCase):
                 self.assertEqual(db_count, response_obj['count'])
 
     def test_public_filtering_extra_properties_1(self):
+        # extra_properties string search (multiple values)
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, {"death_dc": "Deceased"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -232,7 +236,7 @@ class PublicListIndividualsTest(APITestCase):
                 self.assertEqual(db_count, response_obj['count'])
 
     def test_public_filtering_extra_properties_2(self):
-        # add more values
+        # extra_properties string search (multiple values)
         response = self.client.get(
             '/api/public?extra_properties=[{"smoking": "Non-smoker"},'
             '{"death_dc": "deceased"},{"covidstatus": "positive"}]'
@@ -249,20 +253,78 @@ class PublicListIndividualsTest(APITestCase):
             else:
                 self.assertEqual(db_count, response_obj['count'])
 
-    def test_public_filtering_extra_properties_not_list(self):
+    def test_public_filtering_extra_properties_invalid_1(self):
         # if GET query string doesn't have a list return Not enough data
         response = self.client.get('/api/public?extra_properties="smoking": "Non-smoker","death_dc": "deceased"')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), self.not_enough_data_response)
 
-    def test_public_filtering_extra_properties_list_1(self):
+    def test_public_filtering_extra_properties_invalid_2(self):
         # if GET query string has a random stuff return Not enough data
         response = self.client.get('/api/public?extra_properties=["smoking": "Non-smoker", "5", "Test"]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), self.not_enough_data_response)
 
-    def test_public_filtering_extra_properties_list_2(self):
+    def test_public_filtering_extra_properties_invalid_3(self):
         # if GET query string list has various data types Not enough data
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), self.not_enough_data_response)
+
+    def test_public_filtering_extra_properties_range_1(self):
+        # extra_properties range search (both min and max ranges, single value)
+        response = self.client.get(
+            '/api/public?extra_properties=[{"lab_test_result_value": {"rangeMin": 50, "rangeMax": 999}}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
+        range_parameters = {
+            "extra_properties__lab_test_result_value__gte": 50,
+            "extra_properties__lab_test_result_value__lte": 999
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        if CONFIG_FIELDS:
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+            if db_count <= self.response_threshold:
+                self.assertEqual(response_obj, self.not_enough_data_response)
+            else:
+                self.assertEqual(db_count, response_obj['count'])
+
+    def test_public_filtering_extra_properties_range_2(self):
+        # extra_properties range search (only min range, single value)
+        response = self.client.get(
+            '/api/public?extra_properties=[{"lab_test_result_value": {"rangeMin": 50}}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
+        range_parameters = {
+            "extra_properties__lab_test_result_value__gte": 50
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        if CONFIG_FIELDS:
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+            if db_count <= self.response_threshold:
+                self.assertEqual(response_obj, self.not_enough_data_response)
+            else:
+                self.assertEqual(db_count, response_obj['count'])
+
+    def test_public_filtering_extra_properties_range_3(self):
+        # extra_properties range search (only min range, single value)
+        response = self.client.get(
+            '/api/public?extra_properties=[{"lab_test_result_value": {"rangeMax": 100}}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
+        range_parameters = {
+            "extra_properties__lab_test_result_value__lte": 100
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        if CONFIG_FIELDS:
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+            if db_count <= self.response_threshold:
+                self.assertEqual(response_obj, self.not_enough_data_response)
+            else:
+                self.assertEqual(db_count, response_obj['count'])
