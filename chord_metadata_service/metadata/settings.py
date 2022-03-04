@@ -18,6 +18,8 @@ import json
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
+from .config_test_settings import CONFIG_FIELDS_TEST
+
 from .. import __version__
 
 load_dotenv()
@@ -285,9 +287,13 @@ STATIC_URL = '/static/'
 # Cache time constant
 CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
 
-# read project specific config.json that contains custom search fields
+# Read project specific config.json that contains custom search fields
 if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
     with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
         CONFIG_FIELDS = json.load(config_file)
 else:
     CONFIG_FIELDS = {}
+
+# Use test config for tests
+if 'test' in sys.argv:
+    CONFIG_FIELDS = CONFIG_FIELDS_TEST

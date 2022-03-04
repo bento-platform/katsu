@@ -213,7 +213,7 @@ class PublicListIndividualsTest(APITestCase):
         response_obj = response.json()
         db_count = Individual.objects.filter(sex__iexact='female')\
             .filter(extra_properties__contains={"smoking": "Non-smoker"}).count()
-        if CONFIG_FIELDS:
+        if CONFIG_FIELDS and "extra_properties" in CONFIG_FIELDS:
             self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
             if db_count <= self.response_threshold:
                 self.assertEqual(response_obj, self.not_enough_data_response)
@@ -228,7 +228,7 @@ class PublicListIndividualsTest(APITestCase):
         db_count = Individual.objects.filter(
             extra_properties__contains={"smoking": "Non-smoker", "death_dc": "Deceased"}
         ).count()
-        if CONFIG_FIELDS:
+        if CONFIG_FIELDS and "extra_properties" in CONFIG_FIELDS:
             self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
             if db_count <= self.response_threshold:
                 self.assertEqual(response_obj, self.not_enough_data_response)
@@ -246,7 +246,7 @@ class PublicListIndividualsTest(APITestCase):
         db_count = Individual.objects.filter(
             extra_properties__contains={"smoking": "Non-smoker", "death_dc": "Deceased", "covidstatus": "Positive"}
         ).count()
-        if CONFIG_FIELDS:
+        if CONFIG_FIELDS and "extra_properties" in CONFIG_FIELDS:
             self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
             if db_count <= self.response_threshold:
                 self.assertEqual(response_obj, self.not_enough_data_response)
@@ -284,7 +284,7 @@ class PublicListIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__lte": 999
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        if CONFIG_FIELDS:
+        if CONFIG_FIELDS and "extra_properties" in CONFIG_FIELDS:
             self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
             if db_count <= self.response_threshold:
                 self.assertEqual(response_obj, self.not_enough_data_response)
@@ -303,7 +303,7 @@ class PublicListIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__gte": 50
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        if CONFIG_FIELDS:
+        if CONFIG_FIELDS and "extra_properties" in CONFIG_FIELDS:
             self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
             if db_count <= self.response_threshold:
                 self.assertEqual(response_obj, self.not_enough_data_response)
@@ -322,7 +322,7 @@ class PublicListIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__lte": 100
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        if CONFIG_FIELDS:
+        if CONFIG_FIELDS and "extra_properties" in CONFIG_FIELDS:
             self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
             if db_count <= self.response_threshold:
                 self.assertEqual(response_obj, self.not_enough_data_response)
@@ -343,7 +343,7 @@ class PublicListIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__lte": 900
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        if CONFIG_FIELDS:
+        if CONFIG_FIELDS and "extra_properties" in CONFIG_FIELDS:
             self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
             if db_count <= self.response_threshold:
                 self.assertEqual(response_obj, self.not_enough_data_response)
@@ -365,7 +365,7 @@ class PublicListIndividualsTest(APITestCase):
             "extra_properties__covidstatus__icontains": "positive",
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        if CONFIG_FIELDS:
+        if CONFIG_FIELDS and "extra_properties" in CONFIG_FIELDS:
             self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
             if db_count <= self.response_threshold:
                 self.assertEqual(response_obj, self.not_enough_data_response)
@@ -387,12 +387,20 @@ class PublicListIndividualsTest(APITestCase):
             "extra_properties__smoking__icontains": "Non-smoker",
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        if CONFIG_FIELDS:
+        if CONFIG_FIELDS and "extra_properties" in CONFIG_FIELDS:
             self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
             if db_count <= self.response_threshold:
                 self.assertEqual(response_obj, self.not_enough_data_response)
             else:
                 self.assertEqual(db_count, response_obj['count'])
+        # if extra_properties are not present in the config then the response contains a count of all objects in db
+        # or not enough data response if count <= response_threshold
+        # default behaviour
+        else:
+            if Individual.objects.count() > self.response_threshold:
+                self.assertEqual(Individual.objects.count(), response_obj['count'])
+            else:
+                self.assertEqual(self.not_enough_data_response, response_obj)
 
     def test_public_filtering_extra_properties_multiple_ranges_1(self):
         # extra_properties range search (both min and max range, multiple values)
@@ -410,7 +418,7 @@ class PublicListIndividualsTest(APITestCase):
             "extra_properties__baseline_creatinine__lte": 300,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        if CONFIG_FIELDS:
+        if CONFIG_FIELDS and "extra_properties" in CONFIG_FIELDS:
             self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
             if db_count <= self.response_threshold:
                 self.assertEqual(response_obj, self.not_enough_data_response)
@@ -431,7 +439,7 @@ class PublicListIndividualsTest(APITestCase):
             "extra_properties__baseline_creatinine__lte": 300,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        if CONFIG_FIELDS:
+        if CONFIG_FIELDS and "extra_properties" in CONFIG_FIELDS:
             self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
             if db_count <= self.response_threshold:
                 self.assertEqual(response_obj, self.not_enough_data_response)
