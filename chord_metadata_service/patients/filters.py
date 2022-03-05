@@ -1,9 +1,9 @@
 import django_filters
+from django.conf import settings
 from django.db.models import Q
 from django.db.models import TextField
 from django.db.models.functions import Cast
 from django.contrib.postgres.search import SearchVector
-from chord_metadata_service.metadata.settings import CONFIG_FIELDS
 from .models import Individual
 
 
@@ -185,8 +185,8 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
             # check if it's an array of dicts
             if False not in [isinstance(v, dict) for v in value_to_list]:
                 for dict_item in value_to_list:
-                    if "extra_properties" in CONFIG_FIELDS:
-                        for search_field_key, search_field_val in CONFIG_FIELDS["extra_properties"].items():
+                    if "extra_properties" in settings.CONFIG_FIELDS:
+                        for search_field_key, search_field_val in settings.CONFIG_FIELDS["extra_properties"].items():
                             # add range filter for all number fields
                             if search_field_val["type"] == "number":
                                 for query_key, query_value in dict_item.items():
