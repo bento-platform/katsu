@@ -202,13 +202,29 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
                                             # check for both, or only min or max range values
                                             if range_value is not None:
                                                 qs = qs.filter(**{range_key: range_value})
-                            # add string match filter for all string fields
-                            if search_field_val["type"] == "string":
+                            # add string match filter for all string fields that are not date format
+                            if search_field_val["type"] == "string" and not "format" in search_field_val:
                                 for query_key, query_value in dict_item.items():
                                     if query_key == search_field_key:
                                         qs = qs.filter(
                                             **{f"extra_properties__{search_field_key}__icontains": query_value}
                                         )
+                            # add range filter for all string fields that are date format
+                            if search_field_val["type"] == "string" and "format" in search_field_val:
+                                if search_field_val["format"] == "date":
+                                    for query_key, query_value in dict_item.items():
+                                        # the query string key must match to the field in CONFIG_FIELDS extra_properties
+                                        if query_key == search_field_key:
+                                            range_parameters = {
+                                                f"extra_properties__{search_field_key}__gte":
+                                                    query_value["after"] if "after" in query_value else None,
+                                                f"extra_properties__{search_field_key}__lte":
+                                                    query_value["before"] if "before" in query_value else None
+                                            }
+                                            for range_key, range_value in range_parameters.items():
+                                                # check for both, or only min or max range values
+                                                if range_value is not None:
+                                                    qs = qs.filter(**{range_key: range_value})
             else:
                 return qs.none()
         # bad query string return empty queryset
