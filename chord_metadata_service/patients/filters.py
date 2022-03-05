@@ -203,7 +203,7 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
                                             if range_value is not None:
                                                 qs = qs.filter(**{range_key: range_value})
                             # add string match filter for all string fields that are not date format
-                            if search_field_val["type"] == "string" and not "format" in search_field_val:
+                            if search_field_val["type"] == "string" and "format" not in search_field_val:
                                 for query_key, query_value in dict_item.items():
                                     if query_key == search_field_key:
                                         qs = qs.filter(
