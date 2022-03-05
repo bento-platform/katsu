@@ -311,7 +311,7 @@ def public_overview(_request):
 
     # TODO should this be added to the project config.json file ?
     threshold = 5
-    not_enough_data = "Not enough data."
+    not_enough_data = "Insufficient information available."
 
     individuals = patients_models.Individual.objects.all()
     individuals_set = set()
@@ -379,7 +379,7 @@ def public_overview(_request):
 
     # Response content
     if len(individuals_set) < threshold:
-        content = not_enough_data
+        content = {"message": not_enough_data}
     else:
         content = {
             "individuals": len(individuals_set),

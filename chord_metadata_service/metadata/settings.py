@@ -285,7 +285,7 @@ STATIC_URL = '/static/'
 # Cache time constant
 CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
 
-# read project specific config.json that contains custom search fields
+# Read project specific config.json that contains custom search fields
 if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
     with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
         CONFIG_FIELDS = json.load(config_file)

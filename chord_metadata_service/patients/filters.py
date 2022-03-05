@@ -1,11 +1,9 @@
-import json
-
 import django_filters
+from django.conf import settings
 from django.db.models import Q
 from django.db.models import TextField
 from django.db.models.functions import Cast
 from django.contrib.postgres.search import SearchVector
-
 from .models import Individual
 
 
@@ -174,24 +172,47 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
 
 class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
     sex = django_filters.CharFilter(lookup_expr="iexact")
-    extra_properties = django_filters.CharFilter(method="filter_extra_properties_list", label="Extra properties")
+    extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
 
-    def filter_extra_properties_list(self, qs, name, value):
-        # e.g. extra_properties=[{"smoking":"non-smoker"}, {"covidstatus":"Positive"}]
+    def filter_extra_properties(self, qs, name, value):
         if value.startswith("[") and value.endswith("]"):
+            # convert query string value to list
             try:
                 value_to_list = list(eval(value))
             # catch if list contains non-existent/random strings (types)
             except SyntaxError:
                 return qs.none()
-
+            # check if it's an array of dicts
             if False not in [isinstance(v, dict) for v in value_to_list]:
-                for item in value_to_list:
-                    item_to_string = json.dumps(item).strip('{}')
-                    qs = qs.filter(extra_properties__icontains=item_to_string)
+                for dict_item in value_to_list:
+                    if "extra_properties" in settings.CONFIG_FIELDS:
+                        for search_field_key, search_field_val in settings.CONFIG_FIELDS["extra_properties"].items():
+                            # add range filter for all number fields
+                            if search_field_val["type"] == "number":
+                                for query_key, query_value in dict_item.items():
+                                    # the query string key must match to the field in CONFIG_FIELDS extra_properties
+                                    if query_key == search_field_key:
+                                        range_parameters = {
+                                            f"extra_properties__{search_field_key}__gte":
+                                                query_value["rangeMin"] if "rangeMin" in query_value else None,
+                                            f"extra_properties__{search_field_key}__lte":
+                                                query_value["rangeMax"] if "rangeMax" in query_value else None
+                                        }
+                                        for range_key, range_value in range_parameters.items():
+                                            # check for both, or only min or max range values
+                                            if range_value is not None:
+                                                qs = qs.filter(**{range_key: range_value})
+                            # add string match filter for all string fields
+                            if search_field_val["type"] == "string":
+                                for query_key, query_value in dict_item.items():
+                                    if query_key == search_field_key:
+                                        qs = qs.filter(
+                                            **{f"extra_properties__{search_field_key}__icontains": query_value}
+                                        )
             else:
                 return qs.none()
+        # bad query string return empty queryset
         else:
-            # return empty queryset if the request is not an array
             return qs.none()
+
         return qs
