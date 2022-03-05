@@ -2,7 +2,6 @@ import json
 import csv
 import io
 from django.urls import reverse
-from django.conf import settings
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -246,8 +245,8 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.filter(sex__iexact='female').count()
-        # if extra_properties are not present in the config then the response
-        # contains a count of objects filtered by other than extra_properties filters
+        # if extra_properties are not present in CONFIG_FIELDS then response
+        # contains a count of objects filtered by any other than extra_properties filter
         # or not enough data response if count <= response_threshold
         # default behaviour
         if db_count > self.response_threshold:
@@ -264,9 +263,8 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.filter(sex__iexact='female').count()
-        # if extra_properties are not present in the config then the response
-        # contains a count of objects filtered by other than extra_properties filters
-        # or not enough data response if count <= response_threshold
+        # if CONFIG_FIELDS is empty then response contains a count of objects filtered
+        # by any other than extra_properties filter or not enough data response if count <= response_threshold
         # default behaviour
         if db_count > self.response_threshold:
             self.assertEqual(db_count, response_obj['count'])
@@ -297,8 +295,8 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.count()
-        # if extra_properties are not present in the config then the response
-        # contains a count of objects filtered by other than extra_properties filters
+        # if extra_properties are not present in CONFIG_FIELDS then response
+        # contains a count of objects filtered by any other than extra_properties filter
         # or not enough data response if count <= response_threshold
         # in this test other filters are not used and the response contains count of all objects in db
         # default behaviour
@@ -307,7 +305,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(self.not_enough_data_response, response_obj)
 
-    # test the same as above but with CONFIG_FIELDS without extra_properties values
+    # test the same as above but with an empty CONFIG_FIELDS
     @override_settings(CONFIG_FIELDS={})
     def test_public_filtering_extra_properties_1_config_empty(self):
         # sex and extra_properties string search
@@ -316,7 +314,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.count()
-        # if config is empty then the response contains a count of objects in database
+        # if CONFIG_FIELDS is empty then response contains a count of objects in database
         # or not enough data response if count <= response_threshold
         # default behaviour
         if db_count > self.response_threshold:
@@ -342,21 +340,21 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    # don't need to override the CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
+    # don't need to override CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
     def test_public_filtering_extra_properties_invalid_1(self):
         # if GET query string doesn't have a list return Not enough data
         response = self.client.get('/api/public?extra_properties="smoking": "Non-smoker","death_dc": "deceased"')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), self.not_enough_data_response)
 
-    # don't need to override the CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
+    # don't need to override CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
     def test_public_filtering_extra_properties_invalid_2(self):
         # if GET query string has a random stuff return Not enough data
         response = self.client.get('/api/public?extra_properties=["smoking": "Non-smoker", "5", "Test"]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), self.not_enough_data_response)
 
-    # don't need to override the CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
+    # don't need to override CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
     def test_public_filtering_extra_properties_invalid_3(self):
         # if GET query string list has various data types Not enough data
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
@@ -371,7 +369,6 @@ class PublicFilteringIndividualsTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
         range_parameters = {
             "extra_properties__lab_test_result_value__gte": 50,
             "extra_properties__lab_test_result_value__lte": 999
@@ -391,7 +388,6 @@ class PublicFilteringIndividualsTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
         range_parameters = {
             "extra_properties__lab_test_result_value__gte": 50
         }
@@ -410,7 +406,6 @@ class PublicFilteringIndividualsTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
         range_parameters = {
             "extra_properties__lab_test_result_value__lte": 100
         }
@@ -429,7 +424,6 @@ class PublicFilteringIndividualsTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
         range_parameters = {
             "sex__iexact": "female",
             "extra_properties__lab_test_result_value__gte": 5,
@@ -453,10 +447,9 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.filter(sex__iexact="female").count()
-        # if extra_properties are not present in the config then the response
-        # contains a count of objects filtered by other than extra_properties filters
+        # if extra_properties are not present in CONFIG_FIELDS then response
+        # contains a count of objects filtered by any other than extra_properties filter
         # or not enough data response if count <= response_threshold
-        # in this test other filters are not used and the response contains count of all objects in db
         # default behaviour
         if db_count > self.response_threshold:
             self.assertEqual(db_count, response_obj['count'])
@@ -472,7 +465,6 @@ class PublicFilteringIndividualsTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
         range_parameters = {
             "extra_properties__lab_test_result_value__gte": 5,
             "extra_properties__lab_test_result_value__lte": 900,
@@ -494,7 +486,6 @@ class PublicFilteringIndividualsTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
         range_parameters = {
             "extra_properties__lab_test_result_value__lte": 400,
             "extra_properties__covidstatus__icontains": "positive",
@@ -506,14 +497,6 @@ class PublicFilteringIndividualsTest(APITestCase):
             self.assertEqual(response_obj, self.not_enough_data_response)
         else:
             self.assertEqual(db_count, response_obj['count'])
-        # if extra_properties are not present in the config then the response contains a count of all objects in db
-        # or not enough data response if count <= response_threshold
-        # default behaviour
-        # else:
-        #     if Individual.objects.count() > self.response_threshold:
-        #         self.assertEqual(Individual.objects.count(), response_obj['count'])
-        #     else:
-        #         self.assertEqual(self.not_enough_data_response, response_obj)
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_multiple_ranges_1(self):
@@ -524,7 +507,6 @@ class PublicFilteringIndividualsTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
         range_parameters = {
             "extra_properties__lab_test_result_value__gte": 5,
             "extra_properties__lab_test_result_value__lte": 900,
@@ -547,13 +529,11 @@ class PublicFilteringIndividualsTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        # if there is no CONFIG file then the response_obj count is count of all because the filter is ignored
         range_parameters = {
             "extra_properties__lab_test_result_value__gte": 5,
             "extra_properties__baseline_creatinine__lte": 300,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        print(f"config settings range string 3 : {settings.CONFIG_FIELDS}")
         self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
         if db_count <= self.response_threshold:
             self.assertEqual(response_obj, self.not_enough_data_response)
