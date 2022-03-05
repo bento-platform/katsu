@@ -18,8 +18,6 @@ import json
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
-from .config_test_settings import CONFIG_FIELDS_TEST
-
 from .. import __version__
 
 load_dotenv()
@@ -293,7 +291,3 @@ if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
         CONFIG_FIELDS = json.load(config_file)
 else:
     CONFIG_FIELDS = {}
-
-# Use test config for tests
-if 'test' in sys.argv:
-    CONFIG_FIELDS = CONFIG_FIELDS_TEST
