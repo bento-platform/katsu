@@ -198,12 +198,13 @@ class PublicFilteringIndividualsTest(APITestCase):
 
     response_threshold = 5
     not_enough_data_response = {'message': 'Insufficient information available.'}
+    random_range = 137
 
     def response_threshold_check(self, response):
         return response['count'] if 'count' in response else self.not_enough_data_response
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(137)]  # random range
+        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
         for individual in individuals:
             Individual.objects.create(**individual)
 
@@ -532,6 +533,81 @@ class PublicFilteringIndividualsTest(APITestCase):
         range_parameters = {
             "extra_properties__lab_test_result_value__gte": 5,
             "extra_properties__baseline_creatinine__lte": 300,
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, self.not_enough_data_response)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    def test_public_filtering_extra_properties_date_range_1(self):
+        # extra_properties date range search (only after or before, single value)
+        response = self.client.get(
+            '/api/public?extra_properties=[{"date_of_consent": {"after": "2020-03-01"}}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        range_parameters = {
+            "extra_properties__date_of_consent__gte": "2020-03-01"
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, self.not_enough_data_response)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    def test_public_filtering_extra_properties_date_range_2(self):
+        # extra_properties date range search (both after and before, single value)
+        response = self.client.get(
+            '/api/public?extra_properties=[{"date_of_consent": {"after": "2020-03-01", "before": "2021-05-01"}}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        range_parameters = {
+            "extra_properties__date_of_consent__gte": "2020-03-01",
+            "extra_properties__date_of_consent__lte": "2021-05-01",
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, self.not_enough_data_response)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+    # test the same as above but with CONFIG_FIELDS without extra_properties values
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST_NO_EXTRA_PROPERTIES)
+    def test_public_filtering_extra_properties_date_range_no_extra_properties(self):
+        # extra_properties date range search (both after and before, single value)
+        response = self.client.get(
+            '/api/public?extra_properties=[{"date_of_consent": {"after": "2020-03-01", "before": "2021-05-01"}}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_count = Individual.objects.count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, self.not_enough_data_response)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    def test_public_filtering_extra_properties_date_range_and_other_range(self):
+        # extra_properties date range search (both after and before, single value) and other number range search
+        response = self.client.get(
+            '/api/public?extra_properties=[{"date_of_consent": {"after": "2020-03-01", "before": "2021-05-01"}},'
+            ' {"lab_test_result_value": {"rangeMin": 5, "rangeMax": 300}}]'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        range_parameters = {
+            "extra_properties__date_of_consent__gte": "2020-03-01",
+            "extra_properties__date_of_consent__lte": "2021-05-01",
+            "extra_properties__lab_test_result_value__gte": 5,
+            "extra_properties__lab_test_result_value__lte": 300,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])

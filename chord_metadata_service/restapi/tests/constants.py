@@ -30,7 +30,6 @@ INVALID_SUBJECT_NOT_PRESENT = {
     ]
 }
 
-
 VALID_INDIVIDUAL_1 = {
     "id": "ind:NA19648",
     "date_of_birth": "1993-10-04",
@@ -163,7 +162,6 @@ VALID_INDIVIDUAL_6 = {
     }
 }
 
-
 VALID_INDIVIDUAL_7 = {
     "id": "ind:HG00106",
     "date_of_birth": "1972-06-16",
@@ -210,7 +208,6 @@ VALID_INDIVIDUAL_8 = {
 
 VALID_INDIVIDUALS = [VALID_INDIVIDUAL_1, VALID_INDIVIDUAL_2, VALID_INDIVIDUAL_3, VALID_INDIVIDUAL_4,
                      VALID_INDIVIDUAL_5, VALID_INDIVIDUAL_6, VALID_INDIVIDUAL_7, VALID_INDIVIDUAL_8]
-
 
 CONFIG_FIELDS_TEST = {
     "sex": {
@@ -260,10 +257,14 @@ CONFIG_FIELDS_TEST = {
         "baseline_creatinine": {
             "type": "number",
             "title": "Baseline creatinine"
+        },
+        "date_of_consent": {
+            "type": "string",
+            "format": "date",
+            "title": "Date of consent"
         }
     }
 }
-
 
 CONFIG_FIELDS_TEST_NO_EXTRA_PROPERTIES = {
     "sex": {
