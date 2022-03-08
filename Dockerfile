@@ -1,6 +1,6 @@
-ARG venv_python=3.7
-
-FROM python:${venv_python}-alpine3.13
+ARG venv_python
+ARG alpine_version
+FROM python:${venv_python}-alpine${alpine_version}
 
 LABEL Maintainer="CanDIG Team"
 
