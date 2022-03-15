@@ -74,7 +74,7 @@ def generate_valid_individual():
             "label": "human"
         },
         "age": {
-            "age": f"P{str(random.randrange(16, 89))}Y"
+            "age": f"P{str(random.randrange(16, 89))}Y{str(random.randrange(1, 12))}M{str(random.randrange(1, 31))}D"
         },
         "sex": random.choice(["MALE", "FEMALE", "UNKNOWN_SEX", "OTHER_SEX"]),
         "extra_properties": {
