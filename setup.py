@@ -27,6 +27,7 @@ setuptools.setup(
         "django-rest-swagger==2.2.0",
         "elasticsearch==7.8.0",
         "fhirclient>=3.2,<4.0",
+        "isodate==0.6.0",
         "jsonschema>=3.2,<4.0",
         "psycopg2-binary>=2.8,<2.9",
         "PyJWT[crypto]==1.7.1",
