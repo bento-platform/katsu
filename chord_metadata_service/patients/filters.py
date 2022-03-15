@@ -186,9 +186,9 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
             if "search_function" in settings.CONFIG_FIELDS["age"] and \
                     settings.CONFIG_FIELDS["age"]["function"] == "ceil":
                 from django.db.models.functions import Ceil
-                #from django.db.models import DecimalField
-                #DecimalField.register_lookup(Ceil)
-                # #qs = qs.filter(age_numeric__ceil__lt=value)
+                # from django.db.models import DecimalField
+                # DecimalField.register_lookup(Ceil)
+                # qs = qs.filter(age_numeric__ceil__lt=value)
                 # annotate qs with age_numeric ceiling value, age < ceiling value
                 qs = qs.annotate(age_numeric_ceil=Ceil('age_numeric')).filter(age_numeric_ceil__lt=value)
 
