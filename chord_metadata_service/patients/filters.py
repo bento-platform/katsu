@@ -173,6 +173,8 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
 class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
     sex = django_filters.CharFilter(lookup_expr="iexact")
     extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
+    age_range_min = django_filters.NumberFilter(field_name="age_numeric", lookup_expr="gte", label="Age range min")
+    age_range_max = django_filters.NumberFilter(field_name="age_numeric", lookup_expr="lte", label="Age range max")
 
     def filter_extra_properties(self, qs, name, value):
         if value.startswith("[") and value.endswith("]"):
