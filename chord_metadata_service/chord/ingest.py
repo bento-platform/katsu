@@ -35,6 +35,7 @@ from chord_metadata_service.mcode.parse_fhir_mcode import parse_bundle
 from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
+from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 requests_unixsocket.monkeypatch()
 
@@ -414,9 +415,19 @@ def ingest_phenopacket(phenopacket_data, table_id):
         subject_query = _query_and_check_nulls(subject, "date_of_birth", transform=isoparse)
         for k in ("alternate_ids", "age", "sex", "karyotypic_sex", "taxonomy"):
             subject_query.update(_query_and_check_nulls(subject, k))
+
+        # check if age is represented as a duration string (vs. age range values) and convert it to years
+        age_numeric_value = None
+        age_unit_value = None
+        if "age" in subject:
+            if "age" in subject["age"]:
+                age_numeric_value, age_unit_value = iso_duration_to_years(subject["age"]["age"])
+
         subject, _ = pm.Individual.objects.get_or_create(id=subject["id"],
                                                          race=subject.get("race", ""),
                                                          ethnicity=subject.get("ethnicity", ""),
+                                                         age_numeric=age_numeric_value,
+                                                         age_unit=age_unit_value if age_unit_value else "",
                                                          extra_properties=subject.get("extra_properties", {}),
                                                          **subject_query)
 
