@@ -1,3 +1,7 @@
+import isodate
+import datetime
+
+
 def camel_case_field_names(string):
     """ Function to convert snake_case field names to camelCase """
     # Capitalize every part except the first
@@ -73,3 +77,26 @@ def parse_individual_age(age_obj):
     else:
         raise ValueError(f"Error: {age_obj} format not supported")
     return age
+
+
+def iso_duration_to_years(iso_age_duration: str, unit="years"):
+    """
+    This function takes ISO8601 Duration string in the format e.g 'P20Y6M4D' and converts it to years.
+    """
+    duration = isodate.parse_duration(iso_age_duration)
+    # if duration string includes Y and M then the instance is of both types of Duration and datetime.timedelta
+    if isinstance(duration, isodate.Duration):
+        # 30.5 average days in a month (including leap year)
+        days = (float(duration.months) * 30.5) + duration.days
+        # 24 hours 60 minutes 60 seconds
+        days_to_seconds = days * 24 * 60 * 60
+        # 365.25 average days in a year (including leap year)
+        years = (days_to_seconds / 60 / 60 / 24 / 365.25) + float(duration.years)
+        return (round(years, 2)), unit
+    # if duration string contains only days then the instance is of type datetime.timedelta
+    elif not isinstance(duration, isodate.Duration) and isinstance(duration, datetime.timedelta):
+        if duration.days:
+            days_to_seconds = duration.days * 24 * 60 * 60
+            years = days_to_seconds / 60 / 60 / 24 / 365.25
+            return (round(years, 2)), unit
+    return None, None
