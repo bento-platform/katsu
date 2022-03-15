@@ -18,6 +18,7 @@ from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
+from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 
 from .constants import VALID_DATA_USE_1
@@ -27,6 +28,7 @@ from .example_ingest import (
     EXAMPLE_INGEST_EXPERIMENT,
     EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
     EXAMPLE_INGEST_INVALID_PHENOPACKET,
+    EXAMPLE_INGEST_MULTIPLE_OUTPUTS,
 )
 
 
@@ -127,3 +129,40 @@ class IngestTest(TestCase):
         # resources for experiments
         # check that experiments resource is in database
         self.assertIn(EXAMPLE_INGEST_EXPERIMENT["resources"][0]["id"], [v["id"] for v in Resource.objects.values("id")])
+
+
+class IngestISOAgeToNumberTest(TestCase):
+    def setUp(self) -> None:
+        p = Project.objects.create(title="Project 1", description="")
+        self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
+                                        project=p)
+        # table for phenopackets
+        to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
+                                           dataset=self.d)
+        self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
+
+    def test_ingesting_phenopackets_json(self):
+        ingested_phenopackets = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_MULTIPLE_OUTPUTS, self.t.identifier
+        )
+        self.assertIsInstance(ingested_phenopackets, list)
+        # test for a single individual ind:NA20509001
+        ind_1 = Phenopacket.objects.get(subject="ind:NA20509001")
+        self.assertIsNotNone(ind_1.subject.age_numeric)
+        self.assertIsNotNone(ind_1.subject.age_unit)
+        # test for all individuals
+        for phenopacket in ingested_phenopackets:
+            if phenopacket.subject.age:
+                if "age" in phenopacket.subject.age:
+                    self.assertIsNotNone(phenopacket.subject.age_numeric)
+                    self.assertEqual(
+                        iso_duration_to_years(phenopacket.subject.age["age"])[0],
+                        phenopacket.subject.age_numeric
+                    )
+                    self.assertIsNotNone(phenopacket.subject.age_unit)
+                # if age range then age_numeric is None
+                else:
+                    self.assertIsNone(phenopacket.subject.age_numeric)
+            # if no age then no age_numeric
+            else:
+                self.assertIsNone(phenopacket.subject.age_numeric)
