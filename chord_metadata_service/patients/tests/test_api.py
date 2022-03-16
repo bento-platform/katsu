@@ -3,10 +3,12 @@ import csv
 import io
 from django.urls import reverse
 from django.test import override_settings
+from django.db.models.functions import Ceil
 from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.restapi.tests.constants import CONFIG_FIELDS_TEST, CONFIG_FIELDS_TEST_NO_EXTRA_PROPERTIES
+from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from . import constants as c
 
@@ -208,6 +210,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         for individual in individuals:
             Individual.objects.create(**individual)
 
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_sex(self):
         # sex field search
         response = self.client.get('/api/public?sex=female')
@@ -263,9 +266,9 @@ class PublicFilteringIndividualsTest(APITestCase):
         response = self.client.get('/api/public?sex=female&extra_properties=[{"smoking": "Non-smoker"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        db_count = Individual.objects.filter(sex__iexact='female').count()
-        # if CONFIG_FIELDS is empty then response contains a count of objects filtered
-        # by any other than extra_properties filter or not enough data response if count <= response_threshold
+        db_count = Individual.objects.count()
+        # if CONFIG_FIELDS is empty then response contains a count of all objects
+        # or not enough data response if count <= response_threshold
         # default behaviour
         if db_count > self.response_threshold:
             self.assertEqual(db_count, response_obj['count'])
@@ -290,7 +293,7 @@ class PublicFilteringIndividualsTest(APITestCase):
     # test the same as above but with CONFIG_FIELDS without extra_properties values
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST_NO_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_1_config_no_extra_properties(self):
-        # sex and extra_properties string search
+        # extra_properties string search
         # test GET query string search for extra_properties field
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, {"death_dc": "Deceased"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -309,13 +312,13 @@ class PublicFilteringIndividualsTest(APITestCase):
     # test the same as above but with an empty CONFIG_FIELDS
     @override_settings(CONFIG_FIELDS={})
     def test_public_filtering_extra_properties_1_config_empty(self):
-        # sex and extra_properties string search
+        # extra_properties string search
         # test GET query string search for extra_properties field
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, {"death_dc": "Deceased"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.count()
-        # if CONFIG_FIELDS is empty then response contains a count of objects in database
+        # if CONFIG_FIELDS is empty then response contains a count of all objects in database
         # or not enough data response if count <= response_threshold
         # default behaviour
         if db_count > self.response_threshold:
@@ -341,21 +344,21 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    # don't need to override CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_1(self):
         # if GET query string doesn't have a list return Not enough data
         response = self.client.get('/api/public?extra_properties="smoking": "Non-smoker","death_dc": "deceased"')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), self.not_enough_data_response)
 
-    # don't need to override CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_2(self):
         # if GET query string has a random stuff return Not enough data
         response = self.client.get('/api/public?extra_properties=["smoking": "Non-smoker", "5", "Test"]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), self.not_enough_data_response)
 
-    # don't need to override CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_3(self):
         # if GET query string list has various data types Not enough data
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
@@ -610,6 +613,91 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__lte": 300,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, self.not_enough_data_response)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+
+class PublicAgeRangeFilteringIndividualsTest(APITestCase):
+    """ Test for api/public GET filtering """
+
+    response_threshold = 5
+    not_enough_data_response = {'message': 'Insufficient information available.'}
+    random_range = 45
+
+    def response_threshold_check(self, response):
+        return response['count'] if 'count' in response else self.not_enough_data_response
+
+    def setUp(self):
+        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
+        for individual in individuals:
+            Individual.objects.create(**individual)
+
+        for individual in Individual.objects.all():
+            if individual.age:
+                if "age" in individual.age:
+                    age_numeric, age_unit = iso_duration_to_years(individual.age["age"])
+                    individual.age_numeric = age_numeric
+                    individual.age_unit = age_unit if age_unit else ""
+                    individual.save()
+
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    def test_public_filtering_age_range_min(self):
+        # age range min search
+        response = self.client.get('/api/public?age_range_min=20')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_count = Individual.objects.filter(age_numeric__gte=20).count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, self.not_enough_data_response)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    def test_public_filtering_age_range_max(self):
+        # age range max search
+        response = self.client.get('/api/public?age_range_max=32')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_count = Individual.objects.annotate(age_numeric_ceil=Ceil('age_numeric'))\
+            .filter(age_numeric_ceil__lt=32)\
+            .count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, self.not_enough_data_response)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    def test_public_filtering_age_range_min_and_max(self):
+        # age range min and max search
+        response = self.client.get('/api/public?age_range_min=16&age_range_max=35')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        range_parameters = {
+            "age_numeric__gte": 16,
+            "age_numeric_ceil__lt": 35
+        }
+        db_count = Individual.objects.annotate(age_numeric_ceil=Ceil('age_numeric'))\
+            .filter(**range_parameters)\
+            .count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, self.not_enough_data_response)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_FIELDS={})
+    def test_public_filtering_age_range_min_and_max_no_config(self):
+        # test with config, returns initial queryset
+        # age range min and max search
+        response = self.client.get('/api/public?age_range_min=16&age_range_max=35')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_count = Individual.objects.count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
         if db_count <= self.response_threshold:
             self.assertEqual(response_obj, self.not_enough_data_response)
