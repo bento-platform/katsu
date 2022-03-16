@@ -171,14 +171,24 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
 
 
 class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
-    # TODO include sex filter for all? if no then add this check in the method
-    sex = django_filters.CharFilter(lookup_expr="iexact")
-    # TODO include age filter for all? if no then add this check in the method
-    age_range_min = django_filters.NumberFilter(field_name="age_numeric", lookup_expr="gte", label="Age range min")
+    sex = django_filters.CharFilter(method="filter_sex", label="Sex")
+    age_range_min = django_filters.NumberFilter(
+        field_name="age_numeric", method="filter_age_range_min", label="Age range min"
+    )
     age_range_max = django_filters.NumberFilter(
         field_name="age_numeric", method="filter_age_range_max", label="Age range max"
     )
     extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
+
+    def filter_sex(self, qs, name, value):
+        if "sex" in settings.CONFIG_FIELDS:
+            qs = qs.filter(sex__iexact=value)
+        return qs
+
+    def filter_age_range_min(self, qs, name, value):
+        if "age" in settings.CONFIG_FIELDS:
+            qs = qs.filter(age_numeric__gte=value)
+        return qs
 
     def filter_age_range_max(self, qs, name, value):
         if "age" in settings.CONFIG_FIELDS:

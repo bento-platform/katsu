@@ -210,6 +210,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         for individual in individuals:
             Individual.objects.create(**individual)
 
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_sex(self):
         # sex field search
         response = self.client.get('/api/public?sex=female')
@@ -265,9 +266,9 @@ class PublicFilteringIndividualsTest(APITestCase):
         response = self.client.get('/api/public?sex=female&extra_properties=[{"smoking": "Non-smoker"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        db_count = Individual.objects.filter(sex__iexact='female').count()
-        # if CONFIG_FIELDS is empty then response contains a count of objects filtered
-        # by any other than extra_properties filter or not enough data response if count <= response_threshold
+        db_count = Individual.objects.count()
+        # if CONFIG_FIELDS is empty then response contains a count of all objects
+        # or not enough data response if count <= response_threshold
         # default behaviour
         if db_count > self.response_threshold:
             self.assertEqual(db_count, response_obj['count'])
@@ -292,7 +293,7 @@ class PublicFilteringIndividualsTest(APITestCase):
     # test the same as above but with CONFIG_FIELDS without extra_properties values
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST_NO_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_1_config_no_extra_properties(self):
-        # sex and extra_properties string search
+        # extra_properties string search
         # test GET query string search for extra_properties field
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, {"death_dc": "Deceased"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -311,13 +312,13 @@ class PublicFilteringIndividualsTest(APITestCase):
     # test the same as above but with an empty CONFIG_FIELDS
     @override_settings(CONFIG_FIELDS={})
     def test_public_filtering_extra_properties_1_config_empty(self):
-        # sex and extra_properties string search
+        # extra_properties string search
         # test GET query string search for extra_properties field
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, {"death_dc": "Deceased"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.count()
-        # if CONFIG_FIELDS is empty then response contains a count of objects in database
+        # if CONFIG_FIELDS is empty then response contains a count of all objects in database
         # or not enough data response if count <= response_threshold
         # default behaviour
         if db_count > self.response_threshold:
