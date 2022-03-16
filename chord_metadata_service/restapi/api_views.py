@@ -352,7 +352,9 @@ def public_overview(_request):
             age_bin_size = CONFIG_FIELDS["age"]["bin_size"] \
                 if "age" in CONFIG_FIELDS and "bin_size" in CONFIG_FIELDS["age"] else None
             age_kwargs = dict(values=dict(individuals_age), bin_size=age_bin_size)
-            individuals_age_bins = sort_numeric_values_into_bins(**{k: v for k, v in age_kwargs.items() if v is not None})
+            individuals_age_bins = sort_numeric_values_into_bins(
+                **{k: v for k, v in age_kwargs.items() if v is not None}
+            )
         else:
             individuals_age_bins = {}
 
