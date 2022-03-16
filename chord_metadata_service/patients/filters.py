@@ -198,17 +198,17 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
         return qs
 
     def filter_extra_properties(self, qs, name, value):
-        if value.startswith("[") and value.endswith("]"):
-            # convert query string value to list
-            try:
-                value_to_list = list(eval(value))
-            # catch if list contains non-existent/random strings (types)
-            except SyntaxError:
-                return qs.none()
-            # check if it's an array of dicts
-            if False not in [isinstance(v, dict) for v in value_to_list]:
-                for dict_item in value_to_list:
-                    if "extra_properties" in settings.CONFIG_FIELDS:
+        if "extra_properties" in settings.CONFIG_FIELDS:
+            if value.startswith("[") and value.endswith("]"):
+                # convert query string value to list
+                try:
+                    value_to_list = list(eval(value))
+                # catch if list contains non-existent/random strings (types)
+                except SyntaxError:
+                    return qs.none()
+                # check if it's an array of dicts
+                if False not in [isinstance(v, dict) for v in value_to_list]:
+                    for dict_item in value_to_list:
                         for search_field_key, search_field_val in settings.CONFIG_FIELDS["extra_properties"].items():
                             # add range filter for all number fields
                             if search_field_val["type"] == "number":
@@ -248,10 +248,10 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
                                                 # check for both, or only min or max range values
                                                 if range_value is not None:
                                                     qs = qs.filter(**{range_key: range_value})
+                # bad query string return empty queryset
+                else:
+                    return qs.none()
+            # bad query string return empty queryset
             else:
                 return qs.none()
-        # bad query string return empty queryset
-        else:
-            return qs.none()
-
         return qs

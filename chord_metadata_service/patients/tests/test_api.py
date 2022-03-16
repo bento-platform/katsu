@@ -344,21 +344,21 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    # don't need to override CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_1(self):
         # if GET query string doesn't have a list return Not enough data
         response = self.client.get('/api/public?extra_properties="smoking": "Non-smoker","death_dc": "deceased"')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), self.not_enough_data_response)
 
-    # don't need to override CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_2(self):
         # if GET query string has a random stuff return Not enough data
         response = self.client.get('/api/public?extra_properties=["smoking": "Non-smoker", "5", "Test"]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), self.not_enough_data_response)
 
-    # don't need to override CONFIG_FIELDS here because this check happens before the CONFIG_FIELDS is called
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_3(self):
         # if GET query string list has various data types Not enough data
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
