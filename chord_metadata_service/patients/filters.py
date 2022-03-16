@@ -171,8 +171,9 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
 
 
 class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
+    # TODO include sex filter for all? if no then add this check in the method
     sex = django_filters.CharFilter(lookup_expr="iexact")
-    age = django_filters.RangeFilter(field_name="age_numeric")
+    # TODO include age filter for all? if no then add this check in the method
     age_range_min = django_filters.NumberFilter(field_name="age_numeric", lookup_expr="gte", label="Age range min")
     # age_range_max = django_filters.NumberFilter(field_name="age_numeric", lookup_expr="lte", label="Age range max")
     age_range_max = django_filters.NumberFilter(
@@ -183,7 +184,7 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
     def filter_age_range_max(self, qs, name, value):
         if "age" in settings.CONFIG_FIELDS:
             # TODO is this use case generic? do we need to specify the function in config?
-            if "search_function" in settings.CONFIG_FIELDS["age"] and \
+            if "function" in settings.CONFIG_FIELDS["age"] and \
                     settings.CONFIG_FIELDS["age"]["function"] == "ceil":
                 from django.db.models.functions import Ceil
                 # from django.db.models import DecimalField

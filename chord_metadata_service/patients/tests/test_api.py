@@ -3,6 +3,7 @@ import csv
 import io
 from django.urls import reverse
 from django.test import override_settings
+from django.db.models.functions import Ceil
 from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.patients.models import Individual
@@ -641,6 +642,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
                     individual.age_unit = age_unit if age_unit else ""
                     individual.save()
 
+    @override_settings(CONFIG_FIELDS={"age": {"type": "number"}})
     def test_public_filtering_age_range_min(self):
         # age range min search
         response = self.client.get('/api/public?age_range_min=20')
@@ -653,6 +655,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
+    @override_settings(CONFIG_FIELDS={"age": {"type": "number"}})
     def test_public_filtering_age_range_max(self):
         # age range max search
         response = self.client.get('/api/public?age_range_max=32')
@@ -665,6 +668,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
+    @override_settings(CONFIG_FIELDS={"age": {"type": "number"}})
     def test_public_filtering_age_range_min_and_max(self):
         # age range min and max search
         response = self.client.get('/api/public?age_range_min=16&age_range_max=35')
@@ -681,4 +685,20 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    # TODO override config value and test for ceiling value
+    @override_settings(CONFIG_FIELDS={"age": {"type": "number", "function": "ceil"}})
+    def test_public_filtering_age_range_min_and_max_ceil(self):
+        # age range min and max search
+        response = self.client.get('/api/public?age_range_min=16&age_range_max=35')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_data = Individual.objects.annotate(age_numeric_ceil=Ceil('age_numeric'))
+        range_parameters = {
+            "age_numeric__gte": 16,
+            "age_numeric_ceil__lt": 35
+        }
+        db_count = db_data.filter(**range_parameters).count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, self.not_enough_data_response)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
