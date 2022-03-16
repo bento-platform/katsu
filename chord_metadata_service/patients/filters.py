@@ -175,7 +175,6 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
     sex = django_filters.CharFilter(lookup_expr="iexact")
     # TODO include age filter for all? if no then add this check in the method
     age_range_min = django_filters.NumberFilter(field_name="age_numeric", lookup_expr="gte", label="Age range min")
-    # age_range_max = django_filters.NumberFilter(field_name="age_numeric", lookup_expr="lte", label="Age range max")
     age_range_max = django_filters.NumberFilter(
         field_name="age_numeric", method="filter_age_range_max", label="Age range max"
     )
@@ -183,19 +182,9 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
 
     def filter_age_range_max(self, qs, name, value):
         if "age" in settings.CONFIG_FIELDS:
-            # TODO is this use case generic? do we need to specify the function in config?
-            if "function" in settings.CONFIG_FIELDS["age"] and \
-                    settings.CONFIG_FIELDS["age"]["function"] == "ceil":
-                from django.db.models.functions import Ceil
-                # from django.db.models import DecimalField
-                # DecimalField.register_lookup(Ceil)
-                # qs = qs.filter(age_numeric__ceil__lt=value)
-                # annotate qs with age_numeric ceiling value, age < ceiling value
-                qs = qs.annotate(age_numeric_ceil=Ceil('age_numeric')).filter(age_numeric_ceil__lt=value)
-
-            else:
-                # age <= value
-                qs = qs.filter(age_numeric__lte=value)
+            from django.db.models.functions import Ceil
+            # annotate qs with age_numeric ceiling value, age < ceiling value
+            qs = qs.annotate(age_numeric_ceil=Ceil('age_numeric')).filter(age_numeric_ceil__lt=value)
         return qs
 
     def filter_extra_properties(self, qs, name, value):
