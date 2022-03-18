@@ -298,7 +298,7 @@ def public_search_fields(_request):
     if settings.CONFIG_FIELDS:
         return Response(settings.CONFIG_FIELDS)
     else:
-        return Response("No public search fields configured.")
+        return Response(settings.NO_PUBLIC_FIELDS_CONFIGURED)
 
 
 @api_view(["GET"])
@@ -311,8 +311,6 @@ def public_overview(_request):
 
     # TODO should this be added to the project config.json file ?
     threshold = 5
-    not_enough_data = "Insufficient information available."
-    no_public_data = "There is no public data."
 
     if settings.CONFIG_FIELDS:
         individuals = patients_models.Individual.objects.all()
@@ -383,7 +381,7 @@ def public_overview(_request):
 
         # Response content
         if len(individuals_set) < threshold:
-            content = {"message": not_enough_data}
+            content = settings.INSUFFICIENT_DATA_AVAILABLE
         else:
             content = {
                 "individuals": len(individuals_set)
@@ -401,8 +399,7 @@ def public_overview(_request):
         return Response(content)
 
     else:
-        content = {"message": no_public_data}
-        return Response(content)
+        return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
 
 
 def sort_numeric_values_into_bins(values: dict, bin_size: int = 10, threshold: int = 5):

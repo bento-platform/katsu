@@ -145,18 +145,20 @@ class McodeOverviewTest(APITestCase):
 
 class PublicSearchFieldsTest(APITestCase):
     def test_public_search_fields(self):
-        r = self.client.get(reverse("public-search-fields"), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        response = self.client.get(reverse("public-search-fields"), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
         if settings.CONFIG_FIELDS:
-            self.assertDictEqual(r.json(), settings.CONFIG_FIELDS)
+            self.assertDictEqual(response_obj, settings.CONFIG_FIELDS)
         else:
-            self.assertIsInstance(r.json(), str)
+            self.assertIsInstance(response_obj, dict)
+            self.assertEqual(response_obj, settings.NO_PUBLIC_FIELDS_CONFIGURED)
 
 
 class PublicOverviewTest(APITestCase):
 
     def setUp(self) -> None:
-        # individuals
+        # individuals (count 8)
         individuals = {
             f"individual_{i}": ph_m.Individual.objects.create(**ind) for i, ind in enumerate(VALID_INDIVIDUALS, start=1)
         }
@@ -192,7 +194,7 @@ class PublicOverviewTest(APITestCase):
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
-        # self.assertEqual(response_obj, no_public_data)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
 
 
 class PublicOverviewTest2(APITestCase):
@@ -210,6 +212,7 @@ class PublicOverviewTest2(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
         self.assertNotIn("individuals", response_obj)
+        self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
 
     @override_settings(CONFIG_FIELDS={})
     def test_overview_response_no_config(self):
@@ -217,4 +220,4 @@ class PublicOverviewTest2(APITestCase):
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
-        # self.assertEqual(response_obj, no_public_data)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
