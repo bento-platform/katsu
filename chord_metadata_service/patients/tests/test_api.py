@@ -171,19 +171,20 @@ class PublicListIndividualsTest(APITestCase):
     """ Test for api/public GET all """
 
     response_threshold = 5
+    random_range = 137
 
     @staticmethod
     def response_threshold_check(response):
         return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(137)]  # random range
+        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
         for individual in individuals:
             Individual.objects.create(**individual)
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_get(self):
-        # no filters GET request to /api/public, returns count or not enough data
+        # no filters GET request to /api/public, returns count or INSUFFICIENT_DATA_AVAILABLE
         response = self.client.get('/api/public')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -198,12 +199,11 @@ class PublicListIndividualsTest(APITestCase):
 
     @override_settings(CONFIG_FIELDS={})
     def test_public_get_no_config(self):
-        # no filters GET request to /api/public, returns count or not enough data
+        # no filters GET request to /api/public when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
         response = self.client.get('/api/public')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
-        # if config is empty then there is no public data available
         self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
 
 
@@ -705,6 +705,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
 
     @override_settings(CONFIG_FIELDS={})
     def test_public_filtering_age_range_min_and_max_no_config(self):
+        # test when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
         response = self.client.get('/api/public?age_range_min=16&age_range_max=35')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
