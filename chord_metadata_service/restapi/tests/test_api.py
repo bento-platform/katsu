@@ -144,15 +144,21 @@ class McodeOverviewTest(APITestCase):
 
 
 class PublicSearchFieldsTest(APITestCase):
-    def test_public_search_fields(self):
+
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    def test_public_search_fields_configured(self):
         response = self.client.get(reverse("public-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        if settings.CONFIG_FIELDS:
-            self.assertDictEqual(response_obj, settings.CONFIG_FIELDS)
-        else:
-            self.assertIsInstance(response_obj, dict)
-            self.assertEqual(response_obj, settings.NO_PUBLIC_FIELDS_CONFIGURED)
+        self.assertDictEqual(response_obj, settings.CONFIG_FIELDS)
+
+    @override_settings(CONFIG_FIELDS={})
+    def test_public_search_fields_not_configured(self):
+        response = self.client.get(reverse("public-search-fields"), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_FIELDS_CONFIGURED)
 
 
 class PublicOverviewTest(APITestCase):
