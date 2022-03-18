@@ -172,7 +172,8 @@ class PublicListIndividualsTest(APITestCase):
 
     response_threshold = 5
 
-    def response_threshold_check(self, response):
+    @staticmethod
+    def response_threshold_check(response):
         return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
@@ -212,7 +213,8 @@ class PublicFilteringIndividualsTest(APITestCase):
     response_threshold = 5
     random_range = 137
 
-    def response_threshold_check(self, response):
+    @staticmethod
+    def response_threshold_check(response):
         return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
@@ -344,21 +346,21 @@ class PublicFilteringIndividualsTest(APITestCase):
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_1(self):
-        # if GET query string doesn't have a list return Not enough data
+        # if GET query string doesn't have a list return INSUFFICIENT_DATA_AVAILABLE
         response = self.client.get('/api/public?extra_properties="smoking": "Non-smoker","death_dc": "deceased"')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), settings.INSUFFICIENT_DATA_AVAILABLE)
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_2(self):
-        # if GET query string has a random stuff return Not enough data
+        # if GET query string has a random stuff return INSUFFICIENT_DATA_AVAILABLE
         response = self.client.get('/api/public?extra_properties=["smoking": "Non-smoker", "5", "Test"]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), settings.INSUFFICIENT_DATA_AVAILABLE)
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_3(self):
-        # if GET query string list has various data types Not enough data
+        # if GET query string list has various data types INSUFFICIENT_DATA_AVAILABLE
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), settings.INSUFFICIENT_DATA_AVAILABLE)
@@ -624,7 +626,8 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
     response_threshold = 5
     random_range = 45
 
-    def response_threshold_check(self, response):
+    @staticmethod
+    def response_threshold_check(response):
         return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
