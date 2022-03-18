@@ -1,5 +1,6 @@
 import math
 from collections import Counter
+from django.conf import settings
 from django.views.decorators.cache import cache_page
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -14,7 +15,6 @@ from chord_metadata_service.mcode import models as mcode_models
 from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
-from chord_metadata_service.metadata.settings import CONFIG_FIELDS
 
 
 @api_view()
@@ -295,8 +295,8 @@ def public_search_fields(_request):
     get:
     Return public search fields
     """
-    if CONFIG_FIELDS:
-        return Response(CONFIG_FIELDS)
+    if settings.CONFIG_FIELDS:
+        return Response(settings.CONFIG_FIELDS)
     else:
         return Response("No public search fields configured.")
 
@@ -314,7 +314,7 @@ def public_overview(_request):
     not_enough_data = "Insufficient information available."
     no_public_data = "There is no public data."
 
-    if CONFIG_FIELDS:
+    if settings.CONFIG_FIELDS:
         individuals = patients_models.Individual.objects.all()
         individuals_set = set()
         individuals_sex = Counter()
@@ -334,9 +334,9 @@ def public_overview(_request):
             if individual.age is not None:
                 individuals_age.update((parse_individual_age(individual.age),))
             # collect extra_properties defined in config
-            if individual.extra_properties and "extra_properties" in CONFIG_FIELDS:
+            if individual.extra_properties and "extra_properties" in settings.CONFIG_FIELDS:
                 for key in individual.extra_properties:
-                    if key in CONFIG_FIELDS["extra_properties"]:
+                    if key in settings.CONFIG_FIELDS["extra_properties"]:
                         # add new Counter()
                         if key not in extra_properties:
                             extra_properties[key] = Counter()
@@ -349,8 +349,8 @@ def public_overview(_request):
 
         # Put age in bins
         if individuals_age:
-            age_bin_size = CONFIG_FIELDS["age"]["bin_size"] \
-                if "age" in CONFIG_FIELDS and "bin_size" in CONFIG_FIELDS["age"] else None
+            age_bin_size = settings.CONFIG_FIELDS["age"]["bin_size"] \
+                if "age" in settings.CONFIG_FIELDS and "bin_size" in settings.CONFIG_FIELDS["age"] else None
             age_kwargs = dict(values=dict(individuals_age), bin_size=age_bin_size)
             individuals_age_bins = sort_numeric_values_into_bins(
                 **{k: v for k, v in age_kwargs.items() if v is not None}
@@ -362,10 +362,10 @@ def public_overview(_request):
         if individuals_extra_properties:
             for key, value in list(individuals_extra_properties.items()):
                 # extra_properties contains only the fields specified in config
-                if CONFIG_FIELDS["extra_properties"][key]["type"] == "number":
+                if settings.CONFIG_FIELDS["extra_properties"][key]["type"] == "number":
                     # retrieve bin_size if available
-                    field_bin_size = CONFIG_FIELDS["extra_properties"][key]["bin_size"] \
-                        if "bin_size" in CONFIG_FIELDS["extra_properties"][key] else None
+                    field_bin_size = settings.CONFIG_FIELDS["extra_properties"][key]["bin_size"] \
+                        if "bin_size" in settings.CONFIG_FIELDS["extra_properties"][key] else None
                     # retrieve the values from extra_properties counter
                     values = individuals_extra_properties[key]
                     kwargs = dict(values=values, bin_size=field_bin_size)
@@ -394,7 +394,7 @@ def public_overview(_request):
                      individuals_age_bins,
                      individuals_extra_properties,
                      dict(experiments_type)]):
-                if field in CONFIG_FIELDS:
+                if field in settings.CONFIG_FIELDS:
                     content[field] = value
             if "experiment_type" in content:
                 content["experiments"] = len(experiments_set)
