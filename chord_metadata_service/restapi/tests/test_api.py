@@ -1,16 +1,18 @@
 from copy import deepcopy
+from django.conf import settings
 from django.urls import reverse
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
-from chord_metadata_service.metadata.settings import CONFIG_FIELDS
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
 from chord_metadata_service.experiments.tests import constants as exp_c
 from chord_metadata_service.mcode import models as mcode_m
 from chord_metadata_service.mcode.tests import constants as mcode_c
+from .constants import CONFIG_FIELDS_TEST
 
 from .constants import VALID_INDIVIDUALS
 
@@ -142,19 +144,27 @@ class McodeOverviewTest(APITestCase):
 
 
 class PublicSearchFieldsTest(APITestCase):
-    def test_public_search_fields(self):
-        r = self.client.get(reverse("public-search-fields"), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        if CONFIG_FIELDS:
-            self.assertDictEqual(r.json(), CONFIG_FIELDS)
-        else:
-            self.assertIsInstance(r.json(), str)
+
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    def test_public_search_fields_configured(self):
+        response = self.client.get(reverse("public-search-fields"), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertDictEqual(response_obj, settings.CONFIG_FIELDS)
+
+    @override_settings(CONFIG_FIELDS={})
+    def test_public_search_fields_not_configured(self):
+        response = self.client.get(reverse("public-search-fields"), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_FIELDS_CONFIGURED)
 
 
 class PublicOverviewTest(APITestCase):
 
     def setUp(self) -> None:
-        # individuals
+        # individuals (count 8)
         individuals = {
             f"individual_{i}": ph_m.Individual.objects.create(**ind) for i, ind in enumerate(VALID_INDIVIDUALS, start=1)
         }
@@ -176,6 +186,7 @@ class PublicOverviewTest(APITestCase):
         experiment_2["id"] = "experiment:2"
         self.experiment = exp_m.Experiment.objects.create(**experiment_2)
 
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_overview(self):
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
@@ -183,6 +194,13 @@ class PublicOverviewTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj["individuals"], db_count)
+
+    @override_settings(CONFIG_FIELDS={})
+    def test_overview_no_config(self):
+        response = self.client.get('/api/public_overview')
+        response_obj = response.json()
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
 
 
 class PublicOverviewTest2(APITestCase):
@@ -192,6 +210,7 @@ class PublicOverviewTest2(APITestCase):
         for ind in VALID_INDIVIDUALS[:2]:
             ph_m.Individual.objects.create(**ind)
 
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_overview_response(self):
         # test overview response when individuals count < threshold
         response = self.client.get('/api/public_overview')
@@ -199,3 +218,12 @@ class PublicOverviewTest2(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
         self.assertNotIn("individuals", response_obj)
+        self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+
+    @override_settings(CONFIG_FIELDS={})
+    def test_overview_response_no_config(self):
+        # test overview response when individuals count < threshold
+        response = self.client.get('/api/public_overview')
+        response_obj = response.json()
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)

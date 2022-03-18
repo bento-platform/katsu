@@ -285,9 +285,20 @@ STATIC_URL = '/static/'
 # Cache time constant
 CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
 
+# Settings related to the Public APIs
+
 # Read project specific config.json that contains custom search fields
 if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
     with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
         CONFIG_FIELDS = json.load(config_file)
 else:
     CONFIG_FIELDS = {}
+
+# Public response when there is no enough data that passes the project-custom threshold
+INSUFFICIENT_DATA_AVAILABLE = {"message": "Insufficient data available."}
+
+# Public response when there is no public data available and config file is not provided
+NO_PUBLIC_DATA_AVAILABLE = {"message": "No public data available."}
+
+# Public response when public fields are not configured and config file is not provided
+NO_PUBLIC_FIELDS_CONFIGURED = {"message": "No public fields configured."}

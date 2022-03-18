@@ -216,12 +216,12 @@ CONFIG_FIELDS_TEST = {
             "Male",
             "Female"
         ],
-        "title": "Sex",
-        "bin_size": 10
+        "title": "Sex"
     },
     "age": {
         "type": "number",
-        "title": "Age"
+        "title": "Age",
+        "bin_size": 10
     },
     "extra_properties": {
         "smoking": {

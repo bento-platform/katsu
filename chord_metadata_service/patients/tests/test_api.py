@@ -1,6 +1,7 @@
 import json
 import csv
 import io
+from django.conf import settings
 from django.urls import reverse
 from django.test import override_settings
 from django.db.models.functions import Ceil
@@ -170,40 +171,51 @@ class PublicListIndividualsTest(APITestCase):
     """ Test for api/public GET all """
 
     response_threshold = 5
-    not_enough_data_response = {'message': 'Insufficient information available.'}
+    random_range = 137
 
-    def response_threshold_check(self, response):
-        return response['count'] if 'count' in response else self.not_enough_data_response
+    @staticmethod
+    def response_threshold_check(response):
+        return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(137)]  # random range
+        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
         for individual in individuals:
             Individual.objects.create(**individual)
 
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_get(self):
-        # no filters GET request to /api/public, returns count or not enough data
+        # no filters GET request to /api/public, returns count or INSUFFICIENT_DATA_AVAILABLE
         response = self.client.get('/api/public')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertIn(
             self.response_threshold_check(response_obj),
-            [Individual.objects.all().count(), self.not_enough_data_response]
+            [Individual.objects.all().count(), settings.INSUFFICIENT_DATA_AVAILABLE]
         )
         if Individual.objects.all().count() <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(Individual.objects.all().count(), response_obj['count'])
+
+    @override_settings(CONFIG_FIELDS={})
+    def test_public_get_no_config(self):
+        # no filters GET request to /api/public when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
+        response = self.client.get('/api/public')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
 
 
 class PublicFilteringIndividualsTest(APITestCase):
     """ Test for api/public GET filtering """
 
     response_threshold = 5
-    not_enough_data_response = {'message': 'Insufficient information available.'}
     random_range = 137
 
-    def response_threshold_check(self, response):
-        return response['count'] if 'count' in response else self.not_enough_data_response
+    @staticmethod
+    def response_threshold_check(response):
+        return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
         individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
@@ -218,10 +230,10 @@ class PublicFilteringIndividualsTest(APITestCase):
         response_obj = response.json()
         self.assertIn(
             self.response_threshold_check(response_obj),
-            [Individual.objects.filter(sex__iexact='female').count(), self.not_enough_data_response]
+            [Individual.objects.filter(sex__iexact='female').count(), settings.INSUFFICIENT_DATA_AVAILABLE]
         )
         if Individual.objects.filter(sex__iexact='female').count() <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(Individual.objects.filter(sex__iexact='female').count(), response_obj['count'])
 
@@ -234,9 +246,9 @@ class PublicFilteringIndividualsTest(APITestCase):
         response_obj = response.json()
         db_count = Individual.objects.filter(sex__iexact='female')\
             .filter(extra_properties__contains={"smoking": "Non-smoker"}).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -256,7 +268,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         if db_count > self.response_threshold:
             self.assertEqual(db_count, response_obj['count'])
         else:
-            self.assertEqual(self.not_enough_data_response, response_obj)
+            self.assertEqual(settings.INSUFFICIENT_DATA_AVAILABLE, response_obj)
 
     # test the same as above but with an empty CONFIG_FIELDS
     @override_settings(CONFIG_FIELDS={})
@@ -266,14 +278,8 @@ class PublicFilteringIndividualsTest(APITestCase):
         response = self.client.get('/api/public?sex=female&extra_properties=[{"smoking": "Non-smoker"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        db_count = Individual.objects.count()
-        # if CONFIG_FIELDS is empty then response contains a count of all objects
-        # or not enough data response if count <= response_threshold
-        # default behaviour
-        if db_count > self.response_threshold:
-            self.assertEqual(db_count, response_obj['count'])
-        else:
-            self.assertEqual(self.not_enough_data_response, response_obj)
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_1(self):
@@ -284,9 +290,9 @@ class PublicFilteringIndividualsTest(APITestCase):
         db_count = Individual.objects.filter(
             extra_properties__contains={"smoking": "Non-smoker", "death_dc": "Deceased"}
         ).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -307,7 +313,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         if db_count > self.response_threshold:
             self.assertEqual(db_count, response_obj['count'])
         else:
-            self.assertEqual(self.not_enough_data_response, response_obj)
+            self.assertEqual(settings.INSUFFICIENT_DATA_AVAILABLE, response_obj)
 
     # test the same as above but with an empty CONFIG_FIELDS
     @override_settings(CONFIG_FIELDS={})
@@ -317,14 +323,8 @@ class PublicFilteringIndividualsTest(APITestCase):
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, {"death_dc": "Deceased"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        db_count = Individual.objects.count()
-        # if CONFIG_FIELDS is empty then response contains a count of all objects in database
-        # or not enough data response if count <= response_threshold
-        # default behaviour
-        if db_count > self.response_threshold:
-            self.assertEqual(db_count, response_obj['count'])
-        else:
-            self.assertEqual(self.not_enough_data_response, response_obj)
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_2(self):
@@ -338,32 +338,32 @@ class PublicFilteringIndividualsTest(APITestCase):
         db_count = Individual.objects.filter(
             extra_properties__contains={"smoking": "Non-smoker", "death_dc": "Deceased", "covidstatus": "Positive"}
         ).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_1(self):
-        # if GET query string doesn't have a list return Not enough data
+        # if GET query string doesn't have a list return INSUFFICIENT_DATA_AVAILABLE
         response = self.client.get('/api/public?extra_properties="smoking": "Non-smoker","death_dc": "deceased"')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), self.not_enough_data_response)
+        self.assertEqual(response.json(), settings.INSUFFICIENT_DATA_AVAILABLE)
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_2(self):
-        # if GET query string has a random stuff return Not enough data
+        # if GET query string has a random stuff return INSUFFICIENT_DATA_AVAILABLE
         response = self.client.get('/api/public?extra_properties=["smoking": "Non-smoker", "5", "Test"]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), self.not_enough_data_response)
+        self.assertEqual(response.json(), settings.INSUFFICIENT_DATA_AVAILABLE)
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_invalid_3(self):
-        # if GET query string list has various data types Not enough data
+        # if GET query string list has various data types INSUFFICIENT_DATA_AVAILABLE
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), self.not_enough_data_response)
+        self.assertEqual(response.json(), settings.INSUFFICIENT_DATA_AVAILABLE)
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_range_1(self):
@@ -378,9 +378,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__lte": 999
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -396,9 +396,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__gte": 50
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -414,9 +414,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__lte": 100
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -434,9 +434,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__lte": 900
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -458,7 +458,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         if db_count > self.response_threshold:
             self.assertEqual(db_count, response_obj['count'])
         else:
-            self.assertEqual(self.not_enough_data_response, response_obj)
+            self.assertEqual(settings.INSUFFICIENT_DATA_AVAILABLE, response_obj)
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_range_string_2(self):
@@ -475,9 +475,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__covidstatus__icontains": "positive",
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -496,9 +496,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__smoking__icontains": "Non-smoker",
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -518,9 +518,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__baseline_creatinine__lte": 300,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -538,9 +538,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__baseline_creatinine__lte": 300,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -556,9 +556,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__date_of_consent__gte": "2020-03-01"
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -575,9 +575,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__date_of_consent__lte": "2021-05-01",
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -591,9 +591,9 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -613,9 +613,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__lte": 300,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -624,11 +624,11 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
     """ Test for api/public GET filtering """
 
     response_threshold = 5
-    not_enough_data_response = {'message': 'Insufficient information available.'}
     random_range = 45
 
-    def response_threshold_check(self, response):
-        return response['count'] if 'count' in response else self.not_enough_data_response
+    @staticmethod
+    def response_threshold_check(response):
+        return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
         individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
@@ -650,9 +650,9 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.filter(age_numeric__gte=20).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -665,9 +665,9 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         db_count = Individual.objects.annotate(age_numeric_ceil=Ceil('age_numeric'))\
             .filter(age_numeric_ceil__lt=32)\
             .count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -684,22 +684,31 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         db_count = Individual.objects.annotate(age_numeric_ceil=Ceil('age_numeric'))\
             .filter(**range_parameters)\
             .count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_FIELDS={"sex": {"type": "string"}})
+    def test_public_filtering_age_range_min_and_max_no_age_in_config(self):
+        # test with config without age field, returns initial queryset
+        response = self.client.get('/api/public?age_range_min=16&age_range_max=35')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_count = Individual.objects.count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
     @override_settings(CONFIG_FIELDS={})
     def test_public_filtering_age_range_min_and_max_no_config(self):
-        # test with config, returns initial queryset
-        # age range min and max search
+        # test when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
         response = self.client.get('/api/public?age_range_min=16&age_range_max=35')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        db_count = Individual.objects.count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, self.not_enough_data_response])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, self.not_enough_data_response)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        self.assertIsInstance(response_obj, dict)
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)

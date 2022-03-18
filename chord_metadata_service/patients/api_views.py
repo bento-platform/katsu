@@ -61,11 +61,14 @@ class PublicListIndividuals(APIView):
     def get(self, request, *args, **kwargs):
         base_qs = Individual.objects.all()
         filtered_qs = self.filter_queryset(base_qs)
-        not_enough_data = "Insufficient information available."
-
-        # the threshold for the count response is set to 5
-        if filtered_qs.count() > 5:
-            return Response({"count": filtered_qs.count()})
+        # protect filtering if config is not provided
+        # the settings must be imported from django.conf (not from chord_metadata_service.metadata.settings)
+        if settings.CONFIG_FIELDS:
+            # the threshold for the count response is set to 5
+            if filtered_qs.count() > 5:
+                return Response({"count": filtered_qs.count()})
+            else:
+                # the count < 5, when there is no match in db the queryset is empty, count = 0
+                return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
-            # the count < 5, when there is no match in db the queryset is empty, count = 0
-            return Response({"message": not_enough_data})
+            return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
