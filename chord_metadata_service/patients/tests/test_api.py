@@ -687,20 +687,18 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    # TODO test with config that doesn't have age field
-    # @override_settings(CONFIG_FIELDS={})
-    # def test_public_filtering_age_range_min_and_max_no_age_in_config(self):
-    #     # test with config, returns initial queryset
-    #     # age range min and max search
-    #     response = self.client.get('/api/public?age_range_min=16&age_range_max=35')
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     response_obj = response.json()
-    #     db_count = Individual.objects.count()
-    #     self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
-    #     if db_count <= self.response_threshold:
-    #         self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
-    #     else:
-    #         self.assertEqual(db_count, response_obj['count'])
+    @override_settings(CONFIG_FIELDS={"sex": {"type": "string"}})
+    def test_public_filtering_age_range_min_and_max_no_age_in_config(self):
+        # test with config without age field, returns initial queryset
+        response = self.client.get('/api/public?age_range_min=16&age_range_max=35')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_count = Individual.objects.count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
 
     @override_settings(CONFIG_FIELDS={})
     def test_public_filtering_age_range_min_and_max_no_config(self):
