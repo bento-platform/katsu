@@ -197,7 +197,7 @@ class PublicListIndividualsTest(APITestCase):
             self.assertEqual(Individual.objects.all().count(), response_obj['count'])
 
     @override_settings(CONFIG_FIELDS={})
-    def test_public_get(self):
+    def test_public_get_no_config(self):
         # no filters GET request to /api/public, returns count or not enough data
         response = self.client.get('/api/public')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -282,7 +282,6 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, self.no_public_data)
 
-
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_1(self):
         # extra_properties string search (multiple values)
@@ -327,7 +326,6 @@ class PublicFilteringIndividualsTest(APITestCase):
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, self.no_public_data)
-
 
     @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
     def test_public_filtering_extra_properties_2(self):
@@ -718,4 +716,3 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, self.no_public_data)
-
