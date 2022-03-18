@@ -17,7 +17,6 @@ from chord_metadata_service.restapi.api_renderers import (
     ARGORenderer,
 )
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
-from chord_metadata_service.metadata.settings import CONFIG_FIELDS
 
 
 class IndividualViewSet(viewsets.ModelViewSet):
@@ -65,7 +64,8 @@ class PublicListIndividuals(APIView):
         not_enough_data = "Insufficient information available."
         no_public_data = "There is no public data."
         # protect filtering if config is not provided
-        if CONFIG_FIELDS:
+        # the settings must be imported from django.conf (not from chord_metadata_service.metadata.settings)
+        if settings.CONFIG_FIELDS:
             # the threshold for the count response is set to 5
             if filtered_qs.count() > 5:
                 return Response({"count": filtered_qs.count()})
