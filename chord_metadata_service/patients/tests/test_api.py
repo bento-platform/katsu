@@ -707,7 +707,6 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
     #     else:
     #         self.assertEqual(db_count, response_obj['count'])
 
-
     @override_settings(CONFIG_FIELDS={})
     def test_public_filtering_age_range_min_and_max_no_config(self):
         response = self.client.get('/api/public?age_range_min=16&age_range_max=35')
