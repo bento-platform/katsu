@@ -295,7 +295,7 @@ else:
     CONFIG_FIELDS = {}
 
 # Public response when there is no enough data that passes the project-custom threshold
-INSUFFICIENT_DATA_AVAILABLE = {"message": "Insufficient information available."}
+INSUFFICIENT_DATA_AVAILABLE = {"message": "Insufficient data available."}
 
 # Public response when there is no public data available and config file is not provided
 NO_PUBLIC_DATA_AVAILABLE = {"message": "No public data available."}
