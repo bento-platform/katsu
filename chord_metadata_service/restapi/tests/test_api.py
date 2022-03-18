@@ -192,7 +192,7 @@ class PublicOverviewTest(APITestCase):
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
-        #self.assertEqual(response_obj, no_public_data)
+        # self.assertEqual(response_obj, no_public_data)
 
 
 class PublicOverviewTest2(APITestCase):
@@ -212,7 +212,7 @@ class PublicOverviewTest2(APITestCase):
         self.assertNotIn("individuals", response_obj)
 
     @override_settings(CONFIG_FIELDS={})
-    def test_overview_response(self):
+    def test_overview_response_no_config(self):
         # test overview response when individuals count < threshold
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
