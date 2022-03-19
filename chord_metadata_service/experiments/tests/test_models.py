@@ -89,6 +89,7 @@ class ExperimentResultTest(TestCase):
             identifier="experiment_result:2",
             description="Test Experiment result 2",
             filename="01.vcf.gz",
+            genome_assembly_id="GRCh37",
             file_format="VCF",
             data_output_type="Derived",
             usage="visualized",
