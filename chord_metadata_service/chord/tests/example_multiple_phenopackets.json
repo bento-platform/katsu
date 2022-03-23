@@ -1,0 +1,357 @@
+[
+  {
+    "subject": {
+      "id": "ind:NA20509001",
+      "date_of_birth": "1986-10-22",
+      "age": {
+        "age": "P45Y"
+      },
+      "sex": "MALE",
+      "karyotypic_sex": "XY",
+      "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+      },
+      "extra_properties": {
+        "smoking": "Non-smoker",
+        "covidstatus": "Indeterminate",
+        "death_dc": "Deceased",
+        "mobility": "I have severe problems in walking about",
+        "date_of_consent": "2021-09-22",
+        "lab_test_result_value": 607.82
+      }
+    },
+    "meta_data": {
+      "created_by": "Admin",
+      "submitted_by": "Admin",
+      "resources": [
+        {
+          "id": "NCBITaxon:2018-07-27",
+          "name": "NCBI Taxonomy OBO Edition",
+          "namespace_prefix": "NCBITaxon",
+          "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+          "version": "2018-07-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_"
+        },
+        {
+          "id": "UBERON:2019-06-27",
+          "name": "Uber-anatomy ontology",
+          "namespace_prefix": "UBERON",
+          "url": "http://purl.obolibrary.org/obo/uberon.owl",
+          "version": "2019-06-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/UBERON"
+        },
+        {
+          "id": "NCIT:2015-09-01",
+          "name": "NCI Thesaurus",
+          "namespace_prefix": "NCIT",
+          "url": "https://ncit.nci.nih.gov",
+          "version": "2015-09-01",
+          "iri_prefix": "https://ncit.nci.nih.gov"
+        }
+      ]
+    }
+  },
+  {
+    "subject": {
+      "id": "ind:NA20509002",
+      "date_of_birth": "1950-11-22",
+      "age": {
+        "age": "P65Y6M3D"
+      },
+      "sex": "MALE",
+      "karyotypic_sex": "XY",
+      "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+      },
+      "extra_properties": {
+        "smoking": "Non-smoker",
+        "covidstatus": "Indeterminate",
+        "death_dc": "Deceased",
+        "mobility": "I have severe problems in walking about",
+        "date_of_consent": "2021-09-22",
+        "lab_test_result_value": 607.82
+      }
+    },
+    "meta_data": {
+      "created_by": "Admin",
+      "submitted_by": "Admin",
+      "resources": [
+        {
+          "id": "NCBITaxon:2018-07-27",
+          "name": "NCBI Taxonomy OBO Edition",
+          "namespace_prefix": "NCBITaxon",
+          "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+          "version": "2018-07-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_"
+        },
+        {
+          "id": "UBERON:2019-06-27",
+          "name": "Uber-anatomy ontology",
+          "namespace_prefix": "UBERON",
+          "url": "http://purl.obolibrary.org/obo/uberon.owl",
+          "version": "2019-06-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/UBERON"
+        },
+        {
+          "id": "NCIT:2015-09-01",
+          "name": "NCI Thesaurus",
+          "namespace_prefix": "NCIT",
+          "url": "https://ncit.nci.nih.gov",
+          "version": "2015-09-01",
+          "iri_prefix": "https://ncit.nci.nih.gov"
+        }
+      ]
+    }
+  },
+  {
+    "subject": {
+      "id": "ind:NA20509003",
+      "date_of_birth": "1930-11-22",
+      "age": {
+        "age": "P75.8Y6M3D"
+      },
+      "sex": "MALE",
+      "karyotypic_sex": "XY",
+      "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+      },
+      "extra_properties": {
+        "smoking": "Non-smoker",
+        "covidstatus": "Indeterminate",
+        "death_dc": "Deceased",
+        "mobility": "I have severe problems in walking about",
+        "date_of_consent": "2021-09-22",
+        "lab_test_result_value": 607.82
+      }
+    },
+    "meta_data": {
+      "created_by": "Admin",
+      "submitted_by": "Admin",
+      "resources": [
+        {
+          "id": "NCBITaxon:2018-07-27",
+          "name": "NCBI Taxonomy OBO Edition",
+          "namespace_prefix": "NCBITaxon",
+          "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+          "version": "2018-07-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_"
+        },
+        {
+          "id": "UBERON:2019-06-27",
+          "name": "Uber-anatomy ontology",
+          "namespace_prefix": "UBERON",
+          "url": "http://purl.obolibrary.org/obo/uberon.owl",
+          "version": "2019-06-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/UBERON"
+        },
+        {
+          "id": "NCIT:2015-09-01",
+          "name": "NCI Thesaurus",
+          "namespace_prefix": "NCIT",
+          "url": "https://ncit.nci.nih.gov",
+          "version": "2015-09-01",
+          "iri_prefix": "https://ncit.nci.nih.gov"
+        }
+      ]
+    }
+  },
+  {
+    "subject": {
+      "id": "ind:NA20509004",
+      "age": {
+        "age": "P0Y6M3D"
+      },
+      "sex": "MALE",
+      "karyotypic_sex": "XY",
+      "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+      },
+      "extra_properties": {
+        "covidstatus": "Indeterminate",
+        "death_dc": "Alive",
+        "date_of_consent": "2021-09-22"
+      }
+    },
+    "meta_data": {
+      "created_by": "Admin",
+      "submitted_by": "Admin",
+      "resources": [
+        {
+          "id": "NCBITaxon:2018-07-27",
+          "name": "NCBI Taxonomy OBO Edition",
+          "namespace_prefix": "NCBITaxon",
+          "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+          "version": "2018-07-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_"
+        },
+        {
+          "id": "UBERON:2019-06-27",
+          "name": "Uber-anatomy ontology",
+          "namespace_prefix": "UBERON",
+          "url": "http://purl.obolibrary.org/obo/uberon.owl",
+          "version": "2019-06-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/UBERON"
+        },
+        {
+          "id": "NCIT:2015-09-01",
+          "name": "NCI Thesaurus",
+          "namespace_prefix": "NCIT",
+          "url": "https://ncit.nci.nih.gov",
+          "version": "2015-09-01",
+          "iri_prefix": "https://ncit.nci.nih.gov"
+        }
+      ],
+      "updates": [],
+      "external_references": []
+    }
+  },
+  {
+    "subject": {
+      "id": "ind:NA20509005",
+      "date_of_birth": "1976-11-22",
+      "age": {
+        "start": {
+          "age": "P45Y"
+        },
+        "end": {
+          "age": "P50Y"
+        }
+      },
+      "sex": "MALE",
+      "karyotypic_sex": "XY",
+      "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+      },
+      "extra_properties": {
+        "smoking": "Non-smoker",
+        "covidstatus": "Indeterminate",
+        "death_dc": "Deceased",
+        "mobility": "I have severe problems in walking about",
+        "date_of_consent": "2021-09-22",
+        "lab_test_result_value": 607.82
+      }
+    },
+    "meta_data": {
+      "created_by": "Admin",
+      "submitted_by": "Admin",
+      "resources": [
+        {
+          "id": "NCBITaxon:2018-07-27",
+          "name": "NCBI Taxonomy OBO Edition",
+          "namespace_prefix": "NCBITaxon",
+          "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+          "version": "2018-07-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_"
+        },
+        {
+          "id": "UBERON:2019-06-27",
+          "name": "Uber-anatomy ontology",
+          "namespace_prefix": "UBERON",
+          "url": "http://purl.obolibrary.org/obo/uberon.owl",
+          "version": "2019-06-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/UBERON"
+        },
+        {
+          "id": "NCIT:2015-09-01",
+          "name": "NCI Thesaurus",
+          "namespace_prefix": "NCIT",
+          "url": "https://ncit.nci.nih.gov",
+          "version": "2015-09-01",
+          "iri_prefix": "https://ncit.nci.nih.gov"
+        }
+      ],
+      "updates": [],
+      "external_references": []
+    }
+  },
+  {
+    "subject": {
+      "id": "ind:NA20509006",
+      "age": {
+        "age": "P0Y0M80D"
+      },
+      "sex": "MALE",
+      "karyotypic_sex": "XY",
+      "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+      }
+    },
+    "meta_data": {
+      "created_by": "Admin",
+      "submitted_by": "Admin",
+      "resources": [
+        {
+          "id": "NCBITaxon:2018-07-27",
+          "name": "NCBI Taxonomy OBO Edition",
+          "namespace_prefix": "NCBITaxon",
+          "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+          "version": "2018-07-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_"
+        },
+        {
+          "id": "UBERON:2019-06-27",
+          "name": "Uber-anatomy ontology",
+          "namespace_prefix": "UBERON",
+          "url": "http://purl.obolibrary.org/obo/uberon.owl",
+          "version": "2019-06-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/UBERON"
+        },
+        {
+          "id": "NCIT:2015-09-01",
+          "name": "NCI Thesaurus",
+          "namespace_prefix": "NCIT",
+          "url": "https://ncit.nci.nih.gov",
+          "version": "2015-09-01",
+          "iri_prefix": "https://ncit.nci.nih.gov"
+        }
+      ]
+    }
+  },
+  {
+    "subject": {
+      "id": "ind:NA20509007",
+      "sex": "MALE",
+      "karyotypic_sex": "XY",
+      "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+      }
+    },
+    "meta_data": {
+      "created_by": "Admin",
+      "submitted_by": "Admin",
+      "resources": [
+        {
+          "id": "NCBITaxon:2018-07-27",
+          "name": "NCBI Taxonomy OBO Edition",
+          "namespace_prefix": "NCBITaxon",
+          "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+          "version": "2018-07-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_"
+        },
+        {
+          "id": "UBERON:2019-06-27",
+          "name": "Uber-anatomy ontology",
+          "namespace_prefix": "UBERON",
+          "url": "http://purl.obolibrary.org/obo/uberon.owl",
+          "version": "2019-06-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/UBERON"
+        },
+        {
+          "id": "NCIT:2015-09-01",
+          "name": "NCI Thesaurus",
+          "namespace_prefix": "NCIT",
+          "url": "https://ncit.nci.nih.gov",
+          "version": "2015-09-01",
+          "iri_prefix": "https://ncit.nci.nih.gov"
+        }
+      ]
+    }
+  }
+]
