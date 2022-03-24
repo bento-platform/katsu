@@ -285,6 +285,7 @@ def create_experiment_result(er):
         identifier=er.get("identifier"),
         description=er.get("description"),
         filename=er.get("filename"),
+        genome_assembly_id=er.get("genome_assembly_id"),
         file_format=er.get("file_format"),
         data_output_type=er.get("data_output_type"),
         usage=er.get("usage"),
