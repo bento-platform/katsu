@@ -96,6 +96,12 @@ class ExperimentResult(models.Model, IndexableMixin):
         ("Raw data", "Raw data"),
         ("Derived data", "Derived data"),
     )
+    GENOME_ASSEMBLY_ID = (
+        ("GRCh37", "GRCh37"),
+        ("GRCh38", "GRCh38"),
+        ("GRCm38", "GRCm38"),
+        ("GRCm39", "GRCm39"),
+    )
     # Data usage
     # USAGE = (
     #     ("Visualize", "Visualize"),
@@ -109,6 +115,8 @@ class ExperimentResult(models.Model, IndexableMixin):
                             help_text=rec_help(d.EXPERIMENT_RESULT, "description"))
     filename = CharField(max_length=500, blank=True, null=True,
                          help_text=rec_help(d.EXPERIMENT_RESULT, "filename"))
+    genome_assembly_id = CharField(max_length=50, choices=GENOME_ASSEMBLY_ID, blank=True, null=True,
+                                   help_text=rec_help(d.EXPERIMENT_RESULT, "genome_assembly_id"))
     file_format = CharField(max_length=50, choices=FILE_FORMAT, blank=True, null=True,
                             help_text=rec_help(d.EXPERIMENT_RESULT, "file_format"))
     data_output_type = CharField(max_length=50, choices=DATA_OUTPUT_TYPE, blank=True, null=True,
