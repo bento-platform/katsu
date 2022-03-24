@@ -99,6 +99,8 @@ class ExperimentResult(models.Model, IndexableMixin):
     GENOME_ASSEMBLY_ID = (
         ("GRCh37", "GRCh37"),
         ("GRCh38", "GRCh38"),
+        ("GRCm38", "GRCm38"),
+        ("GRCm39", "GRCm39"),
     )
     # Data usage
     # USAGE = (
