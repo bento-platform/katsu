@@ -311,6 +311,7 @@ def public_overview(_request):
 
     # TODO should this be added to the project config.json file ?
     threshold = 5
+    missing = "missing"
 
     if settings.CONFIG_FIELDS:
         individuals = patients_models.Individual.objects.all()
@@ -373,11 +374,19 @@ def public_overview(_request):
                     )
                     # rewrite with sorted values
                     individuals_extra_properties[key] = extra_prop_values_in_bins
-                # remove string values where count <= threshold
+                    # add missing value count
+                    individuals_extra_properties[key][missing] = len(individuals_set) - sum(v for v in value.values())
                 else:
+                    # add missing value count
+                    value[missing] = len(individuals_set) - sum(v for v in value.values())
+                    # remove string values where count <= threshold
                     for k, v in list(value.items()):
-                        if v <= 5:
+                        if v <= 5 and k != missing:
                             individuals_extra_properties[key].pop(k)
+
+        # Update counters with missing values
+        for counter, all_values in zip([individuals_sex, individuals_age_bins], [individuals_sex, individuals_age]):
+            counter[missing] = len(individuals_set) - sum(v for v in dict(all_values).values())
 
         # Response content
         if len(individuals_set) < threshold:
@@ -388,7 +397,7 @@ def public_overview(_request):
             }
             for field, value in zip(
                     ["sex", "age", "extra_properties", "experiment_type"],
-                    [{k: v for k, v in dict(individuals_sex).items() if v > threshold},
+                    [{k: v for k, v in dict(individuals_sex).items() if v > threshold or k == missing},
                      individuals_age_bins,
                      individuals_extra_properties,
                      dict(experiments_type)]):

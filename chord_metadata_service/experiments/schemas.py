@@ -22,6 +22,10 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
         "filename": {
             "type": "string"
         },
+        "genome_assembly_id": {
+            "type": "string",
+            "enum": ["GRCh37", "GRCh38", "GRCm38", "GRCm39"]
+        },
         "file_format": {
             "type": "string",
             "enum": ["SAM", "BAM", "CRAM", "BAI", "CRAI", "VCF", "BCF", "GVCF", "BigWig", "BigBed", "FASTA",
