@@ -13,6 +13,7 @@ Welcome to Katsu Metadata service's documentation!
    modules/introduction
    modules/installation
    modules/ingestion_workflow_example
+   modules/public_endpoints
    modules/models
    modules/views
 
