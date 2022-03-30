@@ -241,11 +241,11 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_2_fields(self):
         # sex and extra_properties string search
         # test GET query string search for extra_properties field
-        response = self.client.get('/api/public?sex=female&extra_properties=[{"smoking": "Non-smoker"}]')
+        response = self.client.get('/api/public?sex=female&extra_properties=[{"smoking": "Smoker"}]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.filter(sex__iexact='female')\
-            .filter(extra_properties__contains={"smoking": "Non-smoker"}).count()
+            .filter(extra_properties__contains={"smoking": "Smoker"}).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
             self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
@@ -472,7 +472,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         range_parameters = {
             "extra_properties__lab_test_result_value__gte": 5,
             "extra_properties__lab_test_result_value__lte": 900,
-            "extra_properties__covidstatus__icontains": "positive",
+            "extra_properties__covidstatus__iexact": "positive",
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
@@ -486,14 +486,14 @@ class PublicFilteringIndividualsTest(APITestCase):
         # extra_properties range search (only max range) and extra_properties string search (multiple values)
         response = self.client.get(
             '/api/public?extra_properties=[{"lab_test_result_value": {"rangeMax": 400}}, '
-            '{"covidstatus": "positive"}, {"smoking": "Non-smoker"}]'
+            '{"covidstatus": "positive"}, {"smoking": "smoker"}]'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
             "extra_properties__lab_test_result_value__lte": 400,
-            "extra_properties__covidstatus__icontains": "positive",
-            "extra_properties__smoking__icontains": "Non-smoker",
+            "extra_properties__covidstatus__iexact": "positive",
+            "extra_properties__smoking__iexact": "smoker",
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])

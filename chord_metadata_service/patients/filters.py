@@ -230,7 +230,7 @@ class PublicIndividualFilter(django_filters.rest_framework.FilterSet):
                                 for query_key, query_value in dict_item.items():
                                     if query_key == search_field_key:
                                         qs = qs.filter(
-                                            **{f"extra_properties__{search_field_key}__icontains": query_value}
+                                            **{f"extra_properties__{search_field_key}__iexact": query_value}
                                         )
                             # add range filter for all string fields that are date format
                             if search_field_val["type"] == "string" and "format" in search_field_val:
