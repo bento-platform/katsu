@@ -6,6 +6,9 @@ The implementation of public APIs relies on a project customized configuration f
 Currently, there is an :code:`example.config.json` located  in :code:`/katsu/chord_metadata_service` directory which is set to be the project base directory.
 The file can be copied, renamed to :code:`config.json` and modified.
 
+The :code:`config.json` file contains fields that a project agrees to open for public access.
+If the config file is not set up it means there is no public data and no data will be available via these APIs.
+
 Config file specification
 -------------------------
 
@@ -73,4 +76,61 @@ Example of the config.json
 Public APIs
 -------------------------
 
-Coming soon...
+The public APIs include the following endpoints:
+
+
+1. :code:`/api/public_search_fields` GET: returns :code:`config.json` contents in a form of jsonschema.
+
+   The response when public fields are not configured and config file is not provided: :code:`{"message": "No public fields configured."}`
+
+2. :code:`/api/public_overview` GET: returns an overview that contains counts for each field of interest.
+
+   The response when there is no public data available and config file is not provided: :code:`{"message": "No public data available."}`
+
+3. :code:`/api/public`  GET: returns a count of all individuals in database.
+
+   The response when there is no public data available and config file is not provided: :code:`{"message": "No public data available."}`
+
+   The response when there is no enough data that passes the project-custom threshold: :code:`{"message": "Insufficient data available."}`
+
+   When count is less or equal to a project's custom threshold returns message that insufficient data available.
+   Accepts search filters on the fields that are specified in the :code:`config.json` file and set to "queryable".
+   Currently, the following filters are written for the Individual model:
+
+   - sex: e.g. :code:`/api/public?sex=female`
+
+   - age: search by age ranges e.g. :code:`/api/public?age_range_min=20&age_range_max=30`
+
+   - extra_properties: e.g. :code:`/api/public?extra_properties=[{"smoking": "Non-smoker"},{"covidstatus": "positive"}]`
+
+   The :code:`extra_properties` is a JSONField without a schema.
+   To allow searching content in this field the nested fields have to be added to the config file (see the config file example above).
+   The query string must contain a list of objects where each object has a key-value pair representing a nested field name and a search value.
+
+   Examples of extra properties searches:
+
+   Search for items that have a type of string:
+
+   .. code-block::
+
+    /api/public?extra_properties=[{"smoking": "Non-smoker"},{"death_dc": "deceased"},{"covidstatus": "positive"}]
+
+
+   Search for items that contain date ranges:
+
+   .. code-block::
+
+    /api/public?extra_properties=[{"date_of_consent": {"after": "2020-03-01", "before": "2021-05-01"}}]
+
+
+   Search for items that contain numeric ranges:
+
+   .. code-block::
+
+    /api/public?extra_properties=[{"lab_test_result_value": {"rangeMin": 5, "rangeMax": 900}}]
+
+   Examples of combining extra properties search with other fields:
+
+   .. code-block::
+
+    /api/public?sex=female&extra_properties=[{"covidstatus": "positive"}]
