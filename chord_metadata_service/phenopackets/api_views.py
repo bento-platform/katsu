@@ -8,10 +8,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 
-from chord_metadata_service.restapi.api_renderers import (
-    PhenopacketsRenderer, FHIRRenderer,
-    BiosampleCBioPortalSampleRenderer
-)
+from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, FHIRRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from . import models as m, serializers as s, filters as f
@@ -169,7 +166,6 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     serializer_class = s.BiosampleSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = f.BiosampleFilter
-    renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, BiosampleCBioPortalSampleRenderer)
 
 
 PHENOPACKET_PREFETCH = (
