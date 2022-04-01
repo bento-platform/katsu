@@ -1,39 +1,20 @@
 import logging
-import os
-import re
 import csv
-from chord_metadata_service.restapi.cbioportal_export_mapping import biosample_to_sample_header, individual_to_patient_header
-import shutil
-import tempfile
-
 from typing import TextIO
 
-from django.conf import settings
+from .export import ExportFileContext, ExportError
 
-
-from chord_metadata_service.chord.models import Dataset, Table, TableOwnership
+from chord_metadata_service.restapi.cbioportal_export_utils import biosample_to_sample_header, individual_to_patient_header
+from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.experiments import models as em
 from chord_metadata_service.phenopackets import models as pm
-from chord_metadata_service.resources import models as rm, utils as ru
 
-
+__all__ = [
+    "StudyExport",
+]
 
 logger = logging.getLogger(__name__)
 
-WORKFLOWS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "workflows")
-
-
-class ExportError(Exception):
-    pass
-
-
-DRS_URI_SCHEME = "drs"
-FILE_URI_SCHEME = "file"
-HTTP_URI_SCHEME = "http"
-HTTPS_URI_SCHEME = "https"
-
-WINDOWS_DRIVE_SCHEME = re.compile(r"^[a-zA-Z]$")
 
 STUDY_FILENAME        = "meta_study.txt"
 SAMPLE_DATA_FILENAME  = "data_clinical_sample.txt"
@@ -47,55 +28,8 @@ SAMPLE_DATATYPE  = 'SAMPLE'
 class ExportError(Exception):
     pass
 
-class CBioExportFileContext:
-    """
-    Context manager around the tmp export directory for a given study
-    identifier.
-    """
-    path = ""
-    should_del = False
 
-    def __init__(self, project_id: str):
-        tmp_dir = settings.SERVICE_TEMP
-
-        if tmp_dir is None:
-            tmp_dir = tempfile.mkdtemp()
-            self.should_del = True
-
-        if not os.access(tmp_dir, os.W_OK):
-            raise ExportError(f"Directory does not exist or is not writable: {tmp_dir}")
-
-        try:
-            tmp_dir = tmp_dir.rstrip("/") + "/cbio_export/"
-            self.path = os.path.join(tmp_dir, project_id)
-
-            #clean pre-existing export dir
-            isExistant = os.path.exists(self.path)
-            if isExistant:
-                shutil.rmtree(self.path)
-
-            original_umask = os.umask(0)    # fix issue with non-writable dir due to OS based mask
-            os.makedirs(self.path, 0o777)
-
-        except OSError:
-            raise ExportError
-
-        finally:
-            os.umask(original_umask)
-
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        if self.should_del and self.path:
-            shutil.rmtree(self.path)
-
-    def getPath (self, filename: str):
-        return os.path.join(self.path, filename)
-
-
-def StudyExport ():
+def StudyExport (tmp_path: str, project_id: str):
     """Export a given Project as a cBioPortal study"""
     #TODO: a Dataset is a Study (associated with a publication), not a Project!
     if Dataset.objects.count == 0:
@@ -104,7 +38,7 @@ def StudyExport ():
     project_id = str(dataset.identifier)
 
     # create a context wrapping a tmp folder for export
-    with CBioExportFileContext(project_id) as file_export:
+    with ExportFileContext(tmp_path, project_id) as file_export:
 
         # Export study file
         with open(file_export.getPath(STUDY_FILENAME), 'w') as file_study:
