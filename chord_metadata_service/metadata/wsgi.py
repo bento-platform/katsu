@@ -13,4 +13,13 @@ from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chord_metadata_service.metadata.settings')
 
+# debugger section
+from django.conf import settings
+
+if settings.DEBUG:
+    import debugpy
+    debugpy.listen(("0.0.0.0", 5678))
+    print ('Attached')
+# end debugger section
+
 application = get_wsgi_application()
