@@ -15,7 +15,8 @@ from rest_framework.response import Response
 from bento_lib.responses import errors
 #from bento_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
-from .export import WORKFLOW_EXPORT_FUNCTION_MAP, ExportError
+from .export import WORKFLOW_EXPORT_FUNCTION_MAP
+from .export_utils import ExportError
 
 from .ingest import METADATA_WORKFLOWS
 from .models import Dataset, Table

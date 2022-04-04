@@ -2,7 +2,7 @@ import logging
 import csv
 from typing import TextIO
 
-from .export import ExportFileContext, ExportError
+from .export_utils import ExportFileContext, ExportError
 
 from chord_metadata_service.restapi.cbioportal_export_utils import biosample_to_sample_header, individual_to_patient_header
 from chord_metadata_service.chord.models import Dataset
@@ -24,9 +24,6 @@ PATIENT_META_FILENAME = "meta_clinical_patient.txt"
 
 PATIENT_DATATYPE = 'PATIENT'
 SAMPLE_DATATYPE  = 'SAMPLE'
-
-class ExportError(Exception):
-    pass
 
 
 def StudyExport (tmp_path: str, project_id: str):
