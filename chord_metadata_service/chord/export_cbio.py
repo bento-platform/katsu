@@ -14,7 +14,7 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-
+# predefined filenames recognized by cBioPortal
 STUDY_FILENAME        = "meta_study.txt"
 SAMPLE_DATA_FILENAME  = "data_clinical_sample.txt"
 SAMPLE_META_FILENAME  = "meta_clinical_sample.txt"
@@ -25,16 +25,16 @@ PATIENT_DATATYPE = 'PATIENT'
 SAMPLE_DATATYPE  = 'SAMPLE'
 
 
-def StudyExport (tmp_path: str, project_id: str):
+def StudyExport (tmp_path: str, dataset_id: str):
     """Export a given Project as a cBioPortal study"""
     #TODO: a Dataset is a Study (associated with a publication), not a Project!
     if Dataset.objects.count == 0:
-        raise ExportError("No Project to export")
-    dataset = Dataset.objects.first() # TODO: for now export first project
-    project_id = str(dataset.identifier)
+        raise ExportError("No Dataset to export")
+    dataset = Dataset.objects.get(identifier=dataset_id)
+    cbio_study_id = str(dataset.identifier)
 
     # create a context wrapping a tmp folder for export
-    with ExportFileContext(tmp_path, project_id) as file_export:
+    with ExportFileContext(tmp_path, cbio_study_id) as file_export:
 
         # Export study file
         with open(file_export.getPath(STUDY_FILENAME), 'w') as file_study:
@@ -47,7 +47,7 @@ def StudyExport (tmp_path: str, project_id: str):
             IndividualExport(indiv, file_patient)
 
         with open(file_export.getPath(PATIENT_META_FILENAME), 'w') as file_patient_meta:
-            ClinicalMetaExport(project_id, PATIENT_DATATYPE, file_patient_meta)
+            ClinicalMetaExport(cbio_study_id, PATIENT_DATATYPE, file_patient_meta)
 
         # export samples
         with open(file_export.getPath(SAMPLE_DATA_FILENAME), 'w') as file_sample:
@@ -55,7 +55,7 @@ def StudyExport (tmp_path: str, project_id: str):
             SampleExport(sampl, file_sample)
 
         with open(file_export.getPath(SAMPLE_META_FILENAME), 'w') as file_sample_meta:
-            ClinicalMetaExport(project_id, SAMPLE_DATATYPE, file_sample_meta)
+            ClinicalMetaExport(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
 
 
 
