@@ -7,17 +7,16 @@ from jsonschema import Draft7Validator
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.request import Request
 
 
 from chord_metadata_service.chord.schemas import EXPORT_SCHEMA
 from bento_lib.responses import errors
 #from bento_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
-from .export import WORKFLOW_EXPORT_FUNCTION_MAP
-from .export_utils import ExportError
+from .export import EXPORT_FORMAT_FUNCTION_MAP, EXPORT_FORMAT_OBJECT_TYPE_MAP, EXPORT_FORMATS, EXPORT_OBJECT_TYPE
+from .export_utils import ExportError, ExportFileContext
 
-from .ingest import METADATA_WORKFLOWS
-from .models import Dataset, Table
 
 BENTO_EXPORT_SCHEMA_VALIDATOR = Draft7Validator(EXPORT_SCHEMA)
 
@@ -41,26 +40,29 @@ def export(request: Request):
         return Response(errors.bad_request_error("Invalid ingest request body: " + "\n".join(msg_list)), status=400)  # TODO: Validation errors
 
     object_id = request.data["object_id"]
-    object_type = request.data["object_type"]   # 'dataset', 'table',...
+    object_type: str = request.data["object_type"]   # 'dataset', 'table',...
 
-    if (object_type == 'table' 
-        and not Table.objects.filter(ownership_record_id=object_id).exists()):
-        return Response(errors.bad_request_error(f"Table with ID {object_id} does not exist"), status=400)
-    elif (object_type == 'dataset' 
-        and not Dataset.objects.filter(identifier=object_id).exists()):
-        return Response(errors.bad_request_error(f"Dataset with ID {object_id} does not exist"), status=400)
+    model = EXPORT_OBJECT_TYPE[object_type]["model"]
+    if not model.objects.filter(identifier=object_id).exists():
+        return Response(errors.bad_request_error(f"{object_type.capitalize()} with ID {object_id} does not exist"), status=400)
     
+    #object_id = str(uuid.UUID(object_id))  # Normalize ID to UUID's str format.
 
-    object_id = str(uuid.UUID(object_id))  # Normalize ID to UUID's str format.
+    format = request.data["format"].strip()
+    output_path = request.data.get("output_path")   # optional parameter
 
-    workflow_id = request.data["workflow_id"].strip()
-    workflow_exportpath = request.data["workflow_exportpath"]
+    if not format in EXPORT_FORMATS:  # Check that the workflow exists
+        return Response(errors.bad_request_error(f"Export in format {format} is not implemented"), status=400)
 
-    if not workflow_id in METADATA_WORKFLOWS.export:  # Check that the workflow exists
-        return Response(errors.bad_request_error(f"Workflow with ID {workflow_id} does not exist"), status=400)
+    if not object_type in EXPORT_FORMAT_OBJECT_TYPE_MAP[format]:
+        return Response(errors.bad_request_error(f"Exporting entities of type {object_type} in format {format} is not implemented"), status=400)
+
+    # TODO: secure the output_path value
 
     try:
-       WORKFLOW_EXPORT_FUNCTION_MAP[workflow_id](workflow_exportpath, object_id)
+        with ExportFileContext(output_path, object_id) as file_export:
+            # Pass a callable to generate the proper file paths within the export context.
+            EXPORT_FORMAT_FUNCTION_MAP[format](file_export.getPath, object_id)
 
     except ExportError as e:
         return Response(errors.bad_request_error(f"Encountered export error: {e}"), status=400)
