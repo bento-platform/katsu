@@ -1,5 +1,3 @@
-import shutil
-import tempfile
 import uuid
 import io
 from typing import Dict, TextIO
@@ -9,6 +7,7 @@ from django.test import TestCase
 
 from chord_metadata_service.chord.export_cbio import PATIENT_DATA_FILENAME, PATIENT_DATATYPE, PATIENT_META_FILENAME, SAMPLE_DATA_FILENAME, SAMPLE_DATATYPE, SAMPLE_META_FILENAME, STUDY_FILENAME, ClinicalMetaExport, IndividualExport, SampleExport, StudyExport, StudyExportMeta
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
+from chord_metadata_service.chord.export_utils import ExportFileContext
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 # noinspection PyProtectedMember
 from chord_metadata_service.chord.ingest import (
@@ -65,10 +64,10 @@ class ExportCBioTest(TestCase):
         Check files creation.
         Files content is tested subsequently with each file generating function.
         """
-        tmp_dir = tempfile.mkdtemp()
-        try:
-            StudyExport(tmp_dir, self.study_id)
-            export_dir = path.join(tmp_dir, 'cbio_export', self.study_id)
+
+        with ExportFileContext(None, self.study_id) as file_export:
+            StudyExport(file_export.getPath, self.study_id)
+            export_dir = file_export.getPath()
             self.assertTrue(path.exists(export_dir))
             for (dirpath, dirnames, filenames) in walk(export_dir):
                 filesSet = {*filenames}
@@ -81,10 +80,6 @@ class ExportCBioTest(TestCase):
                 }
                 self.assertTrue(expectedSet.issubset(filesSet))
                 break   # do not recurse the directory tree
-
-        # clean
-        finally:
-            shutil.rmtree(tmp_dir)
 
 
     def test_export_cbio_study_meta(self):

@@ -60,5 +60,5 @@ class ExportFileContext:
         if self.should_del and self.path:
             shutil.rmtree(self.path)
 
-    def getPath (self, filename: str):
+    def getPath (self, filename: str = ''):
         return os.path.join(self.path, filename)

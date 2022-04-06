@@ -1,8 +1,8 @@
 import logging
 import csv
-from typing import TextIO
+from typing import TextIO, Callable
 
-from .export_utils import ExportFileContext, ExportError
+from .export_utils import ExportError
 
 from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.patients.models import Individual
@@ -25,7 +25,7 @@ PATIENT_DATATYPE = 'PATIENT'
 SAMPLE_DATATYPE  = 'SAMPLE'
 
 
-def StudyExport (tmp_path: str, dataset_id: str):
+def StudyExport (getPath: Callable[[str], str], dataset_id: str):
     """Export a given Project as a cBioPortal study"""
     #TODO: a Dataset is a Study (associated with a publication), not a Project!
     if Dataset.objects.count == 0:
@@ -33,29 +33,26 @@ def StudyExport (tmp_path: str, dataset_id: str):
     dataset = Dataset.objects.get(identifier=dataset_id)
     cbio_study_id = str(dataset.identifier)
 
-    # create a context wrapping a tmp folder for export
-    with ExportFileContext(tmp_path, cbio_study_id) as file_export:
+    # Export study file
+    with open(getPath(STUDY_FILENAME), 'w') as file_study:
+        StudyExportMeta(dataset, file_study)
 
-        # Export study file
-        with open(file_export.getPath(STUDY_FILENAME), 'w') as file_study:
-            StudyExportMeta(dataset, file_study)
+    # Export patients.
+    with open(getPath(PATIENT_DATA_FILENAME), 'w') as file_patient:
+        # Note: plural in `phenopackets` is intentional (related_name property in model)
+        indiv = Individual.objects.filter(phenopackets__table__ownership_record__dataset_id=dataset.identifier)
+        IndividualExport(indiv, file_patient)
 
-        # export patients.
-        with open(file_export.getPath(PATIENT_DATA_FILENAME), 'w') as file_patient:
-            # Note: plural in `phenopackets` is intentional (related_name property in model)
-            indiv = Individual.objects.filter(phenopackets__table__ownership_record__dataset_id=dataset.identifier)
-            IndividualExport(indiv, file_patient)
+    with open(getPath(PATIENT_META_FILENAME), 'w') as file_patient_meta:
+        ClinicalMetaExport(cbio_study_id, PATIENT_DATATYPE, file_patient_meta)
 
-        with open(file_export.getPath(PATIENT_META_FILENAME), 'w') as file_patient_meta:
-            ClinicalMetaExport(cbio_study_id, PATIENT_DATATYPE, file_patient_meta)
+    # Export samples
+    with open(getPath(SAMPLE_DATA_FILENAME), 'w') as file_sample:
+        sampl = pm.Biosample.objects.filter(phenopacket__table__ownership_record__dataset_id=dataset.identifier)
+        SampleExport(sampl, file_sample)
 
-        # export samples
-        with open(file_export.getPath(SAMPLE_DATA_FILENAME), 'w') as file_sample:
-            sampl = pm.Biosample.objects.filter(phenopacket__table__ownership_record__dataset_id=dataset.identifier)
-            SampleExport(sampl, file_sample)
-
-        with open(file_export.getPath(SAMPLE_META_FILENAME), 'w') as file_sample_meta:
-            ClinicalMetaExport(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
+    with open(getPath(SAMPLE_META_FILENAME), 'w') as file_sample_meta:
+        ClinicalMetaExport(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
 
 
 
