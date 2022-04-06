@@ -1,7 +1,9 @@
 import json
 import logging
 import traceback
-import uuid
+#import uuid
+
+from django.http import FileResponse
 
 from jsonschema import Draft7Validator
 from rest_framework.decorators import api_view, permission_classes
@@ -45,7 +47,7 @@ def export(request: Request):
     model = EXPORT_OBJECT_TYPE[object_type]["model"]
     if not model.objects.filter(identifier=object_id).exists():
         return Response(errors.bad_request_error(f"{object_type.capitalize()} with ID {object_id} does not exist"), status=400)
-    
+
     #object_id = str(uuid.UUID(object_id))  # Normalize ID to UUID's str format.
 
     format = request.data["format"].strip()
@@ -63,6 +65,16 @@ def export(request: Request):
         with ExportFileContext(output_path, object_id) as file_export:
             # Pass a callable to generate the proper file paths within the export context.
             EXPORT_FORMAT_FUNCTION_MAP[format](file_export.getPath, object_id)
+
+            # If no output path parameter has been provided, the generated export
+            # is returned as an attachment to the Response and everything will
+            # be cleaned afterwards.
+            # Otherwise, the provided local path is under the responsability of
+            # the caller
+            if not output_path:
+                tarfile = file_export.writeTar()
+                return FileResponse(open(tarfile, "rb"), as_attachment=True)
+
 
     except ExportError as e:
         return Response(errors.bad_request_error(f"Encountered export error: {e}"), status=400)
