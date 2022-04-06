@@ -3,15 +3,13 @@ import logging
 import traceback
 import uuid
 
-# Can't because code expects `ingestion` namespace
-#from jsonschema import Draft7Validator
+from jsonschema import Draft7Validator
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 
-# Can't because code expects `ingestion` namespace
-#from bento_lib.schemas.bento import BENTO_INGEST_SCHEMA
+from chord_metadata_service.chord.schemas import EXPORT_SCHEMA
 from bento_lib.responses import errors
 #from bento_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
@@ -21,9 +19,7 @@ from .export_utils import ExportError
 from .ingest import METADATA_WORKFLOWS
 from .models import Dataset, Table
 
-
-# Can't because code expects `ingestion` namespace
-#BENTO_INGEST_SCHEMA_VALIDATOR = Draft7Validator(BENTO_INGEST_SCHEMA)
+BENTO_EXPORT_SCHEMA_VALIDATOR = Draft7Validator(EXPORT_SCHEMA)
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +28,7 @@ logger = logging.getLogger(__name__)
 # TODO: Ugly and misleading permissions
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def export(request):
+def export(request: Request):
     # Export data from Katsu.
     # Private endpoints are protected by URL namespace, not by Django permissions.
 
@@ -40,9 +36,9 @@ def export(request):
 
     logger.info(f"Received export request: {json.dumps(request.data)}")
 
-    # Can't because code expects `ingestion` namespace
-    # if not BENTO_INGEST_SCHEMA_VALIDATOR.is_valid(request.data):
-    #     return Response(errors.bad_request_error("Invalid ingest request body"), status=400)  # TODO: Validation errors
+    if not BENTO_EXPORT_SCHEMA_VALIDATOR.is_valid(request.data):
+        msg_list = [err.message for err in BENTO_EXPORT_SCHEMA_VALIDATOR.iter_errors(request.data)]
+        return Response(errors.bad_request_error("Invalid ingest request body: " + "\n".join(msg_list)), status=400)  # TODO: Validation errors
 
     object_id = request.data["object_id"]
     object_type = request.data["object_type"]   # 'dataset', 'table',...
