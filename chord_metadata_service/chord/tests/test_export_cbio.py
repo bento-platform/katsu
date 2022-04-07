@@ -5,7 +5,7 @@ from os import walk, path
 
 from django.test import TestCase
 
-from chord_metadata_service.chord.export_cbio import PATIENT_DATA_FILENAME, PATIENT_DATATYPE, PATIENT_META_FILENAME, SAMPLE_DATA_FILENAME, SAMPLE_DATATYPE, SAMPLE_META_FILENAME, STUDY_FILENAME, ClinicalMetaExport, IndividualExport, SampleExport, StudyExport, StudyExportMeta
+from chord_metadata_service.chord.export_cbio import CBIO_FILES_SET, PATIENT_DATA_FILENAME, PATIENT_DATATYPE, PATIENT_META_FILENAME, SAMPLE_DATA_FILENAME, SAMPLE_DATATYPE, SAMPLE_META_FILENAME, STUDY_FILENAME, ClinicalMetaExport, IndividualExport, SampleExport, StudyExport, StudyExportMeta
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.export_utils import ExportFileContext
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
@@ -71,14 +71,7 @@ class ExportCBioTest(TestCase):
             self.assertTrue(path.exists(export_dir))
             for (dirpath, dirnames, filenames) in walk(export_dir):
                 filesSet = {*filenames}
-                expectedSet = {
-                    STUDY_FILENAME,
-                    SAMPLE_DATA_FILENAME,
-                    SAMPLE_META_FILENAME,
-                    PATIENT_META_FILENAME,
-                    PATIENT_META_FILENAME
-                }
-                self.assertTrue(expectedSet.issubset(filesSet))
+                self.assertTrue(CBIO_FILES_SET.issubset(filesSet))
                 break   # do not recurse the directory tree
 
 
