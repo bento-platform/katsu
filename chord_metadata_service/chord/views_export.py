@@ -30,7 +30,17 @@ logger = logging.getLogger(__name__)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def export(request: Request):
-    # Export data from Katsu.
+    """Export data from Katsu
+
+    Exports the requested data object (e.g. a Dataset or a Project) in the given
+    format.
+    Note that the generated files will be either written locally if a path is
+    provided, or downloaded as a tar gzipped attachment otherwise.
+
+    Args:
+        request: Django Rest Framework request object. The data property contains
+        the payload as a JSON following the export schema.
+    """
     # Private endpoints are protected by URL namespace, not by Django permissions.
 
     # TODO: Schema for OpenAPI doc

@@ -20,8 +20,17 @@ class ExportError(Exception):
 
 class ExportFileContext:
     """
-    Context manager around the tmp export directory for a given study
+    File context manager around a tmp export directory for a given study
     identifier.
+    When no temp directory is provided, this context takes care of removing the
+    temp directories created with their contents.
+
+    Attributes:
+        tmp_dir: path to the directory where the exported files are written.
+            Can be None. In that case the files are written to a tmp directory
+            on the system and cleaned once the context manager finishes.
+        project_id: name that will be used to namespace the export directory.
+            This is also used for the archive filename by the writeTar() method
     """
     path = ""
     should_del = False
@@ -67,9 +76,22 @@ class ExportFileContext:
             shutil.rmtree(self.path)
 
     def getPath (self, filename: str = ''):
+        """Returns a path within the export directory
+        
+        Attributes:
+            filename: optional filename to use
+        """
         return os.path.join(self.path, filename)
 
     def writeTar (self):
+        """Creates a tar gzipped archive from the export directory content
+        
+        Note that the tar file is created inside the context of this ExportFileContext
+        class. If no path was provided at the time of the context creation,
+        then the generated tar file will be deleted along with the tmp directory
+
+        Return: path to the generated tar file
+        """
         tar_path = os.path.join(self.base_path, EXPORT_DIR, self.project_id + '.tar.gz')
         with tarfile.open(tar_path, 'w:gz') as tar:
             output_dir = self.getPath()
