@@ -15,9 +15,9 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 # predefined filenames recognized by cBioPortal
-STUDY_FILENAME        = "meta_study.txt"
-SAMPLE_DATA_FILENAME  = "data_clinical_sample.txt"
-SAMPLE_META_FILENAME  = "meta_clinical_sample.txt"
+STUDY_FILENAME = "meta_study.txt"
+SAMPLE_DATA_FILENAME = "data_clinical_sample.txt"
+SAMPLE_META_FILENAME = "meta_clinical_sample.txt"
 PATIENT_DATA_FILENAME = "data_clinical_patient.txt"
 PATIENT_META_FILENAME = "meta_clinical_patient.txt"
 
@@ -30,12 +30,12 @@ CBIO_FILES_SET = frozenset({
 })
 
 PATIENT_DATATYPE = 'PATIENT'
-SAMPLE_DATATYPE  = 'SAMPLE'
+SAMPLE_DATATYPE = 'SAMPLE'
 
 
-def StudyExport (getPath: Callable[[str], str], dataset_id: str):
+def StudyExport(getPath: Callable[[str], str], dataset_id: str):
     """Export a given Project as a cBioPortal study"""
-    #TODO: a Dataset is a Study (associated with a publication), not a Project!
+    # TODO: a Dataset is a Study (associated with a publication), not a Project!
     if Dataset.objects.count == 0:
         raise ExportError("No Dataset to export")
     dataset = Dataset.objects.get(identifier=dataset_id)
@@ -63,21 +63,19 @@ def StudyExport (getPath: Callable[[str], str], dataset_id: str):
         ClinicalMetaExport(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
 
 
-
-
-def StudyExportMeta (dataset: Dataset, file_handle: TextIO):
+def StudyExportMeta(dataset: Dataset, file_handle: TextIO):
     """
     Study meta data file generation
     """
     lines = dict()
-    lines['type_of_cancer']          = "mixed"   #TODO: find if this information is available. !IMPORTANT! uses Oncotree codes
+    lines['type_of_cancer'] = "mixed"   # TODO: find if this information is available. !IMPORTANT! uses Oncotree codes
     lines['cancer_study_identifier'] = str(dataset.identifier)
-    lines['name']                    = dataset.title
-    lines['description']             = dataset.description
+    lines['name'] = dataset.title
+    lines['description'] = dataset.description
 
     # optional fields
     if len(dataset.primary_publications):
-        lines['citation']           = dataset.primary_publications[0]
+        lines['citation'] = dataset.primary_publications[0]
     # pmid: unvailable
     # groups: unused for authentication
     # add_global_case_list: ?
@@ -88,7 +86,7 @@ def StudyExportMeta (dataset: Dataset, file_handle: TextIO):
         file_handle.write(f"{field}: {value}\n")
 
 
-def ClinicalMetaExport (study_id: str, datatype: str, file_handle: TextIO):
+def ClinicalMetaExport(study_id: str, datatype: str, file_handle: TextIO):
     """
     Clinical Metadata files generation (samples or patients)
     """
@@ -140,7 +138,7 @@ def IndividualExport(results, file_handle: TextIO):
     dict_writer.writerows(individuals)
 
 
-def SampleExport (results, file_handle: TextIO):
+def SampleExport(results, file_handle: TextIO):
     """
     Renders Biosamples as a clinical_sample text file suitable for
     importing by cBioPortal.
@@ -158,7 +156,8 @@ def SampleExport (results, file_handle: TextIO):
     - SAMPLE_DISPLAY_NAME
     - SAMPLE_CLASS
     - METASTATIC_SITE / PRIMARY_SITE overrides the patients level attribute TUMOR_SITE
-    - SAMPLE_TYPE, TUMOR_TISSUE_SITE, TUMOR_TYPE can have the following values (are displayed with a distinct color in the timelines):
+    - SAMPLE_TYPE, TUMOR_TISSUE_SITE, TUMOR_TYPE can have the following values
+        (are displayed with a distinct color in the timelines):
         - "recurrence", "recurred", "progression"
         - "metastatic", "metastasis"
         - "primary" or any other value
@@ -200,10 +199,10 @@ class cbioportal_clinical_header_generator ():
 
     fields_mapping = {}
 
-    def __init__(self, mappings = {}):
+    def __init__(self, mappings={}):
         self.fields_mapping = mappings
 
-    def make_header (self, fields: list):
+    def make_header(self, fields: list):
         """
         Maps a list of field names to a 5 rows header
         suitable for cBioPortal clinical data files.
@@ -241,8 +240,7 @@ class cbioportal_clinical_header_generator ():
         return cbio_header
 
 
-
-def individual_to_patient_header (fields: list):
+def individual_to_patient_header(fields: list):
     """
     Maps a list of Individual field names to a 5 rows header
     suitable for cBioPortal data_clinical_patient.txt file.
@@ -254,10 +252,11 @@ def individual_to_patient_header (fields: list):
         'sex': ('Sex', 'Sex', 'STRING', '1', 'SEX'),
     }
 
-    cbio_header = cbioportal_clinical_header_generator(fields_mapping);
+    cbio_header = cbioportal_clinical_header_generator(fields_mapping)
     return cbio_header.make_header(fields)
 
-def biosample_to_sample_header (fields: list):
+
+def biosample_to_sample_header(fields: list):
     """
     Maps a list of biosamples field names to a 5 rows header
     suitable for cBioPortal data_sample_patient.txt file.
@@ -270,5 +269,5 @@ def biosample_to_sample_header (fields: list):
         'tissue_label': ('Sampled Tissue', 'Sampled Tissue', 'STRING', '1', 'TISSUE_LABEL')
     }
 
-    cbio_header = cbioportal_clinical_header_generator(fields_mapping);
+    cbio_header = cbioportal_clinical_header_generator(fields_mapping)
     return cbio_header.make_header(fields)

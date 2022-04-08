@@ -5,7 +5,18 @@ from os import walk, path
 
 from django.test import TestCase
 
-from chord_metadata_service.chord.export_cbio import CBIO_FILES_SET, PATIENT_DATA_FILENAME, PATIENT_DATATYPE, PATIENT_META_FILENAME, SAMPLE_DATA_FILENAME, SAMPLE_DATATYPE, SAMPLE_META_FILENAME, STUDY_FILENAME, ClinicalMetaExport, IndividualExport, SampleExport, StudyExport, StudyExportMeta
+from chord_metadata_service.chord.export_cbio import (
+    CBIO_FILES_SET,
+    PATIENT_DATA_FILENAME,
+    PATIENT_DATATYPE,
+    SAMPLE_DATA_FILENAME,
+    SAMPLE_DATATYPE,
+    ClinicalMetaExport,
+    IndividualExport,
+    SampleExport,
+    StudyExport,
+    StudyExportMeta
+)
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.export_utils import ExportFileContext
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
@@ -73,7 +84,6 @@ class ExportCBioTest(TestCase):
                 filesSet = {*filenames}
                 self.assertTrue(CBIO_FILES_SET.issubset(filesSet))
                 break   # do not recurse the directory tree
-
 
     def test_export_cbio_study_meta(self):
         with io.StringIO() as output:

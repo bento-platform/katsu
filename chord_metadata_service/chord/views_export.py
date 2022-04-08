@@ -47,23 +47,35 @@ def export(request: Request):
 
     if not BENTO_EXPORT_SCHEMA_VALIDATOR.is_valid(request.data):
         msg_list = [err.message for err in BENTO_EXPORT_SCHEMA_VALIDATOR.iter_errors(request.data)]
-        return Response(errors.bad_request_error("Invalid ingest request body: " + "\n".join(msg_list)), status=400)  # TODO: Validation errors
+        return Response(errors.bad_request_error(
+            "Invalid ingest request body: " + "\n".join(msg_list)),
+            status=400  # TODO: Validation errors
+        )
 
     object_id = request.data["object_id"]
     object_type: str = request.data["object_type"]   # 'dataset', 'table',...
 
     model = EXPORT_OBJECT_TYPE[object_type]["model"]
     if not model.objects.filter(identifier=object_id).exists():
-        return Response(errors.bad_request_error(f"{object_type.capitalize()} with ID {object_id} does not exist"), status=400)
+        return Response(errors.bad_request_error(
+            f"{object_type.capitalize()} with ID {object_id} does not exist"),
+            status=400
+        )
 
     format = request.data["format"].strip()
     output_path = request.data.get("output_path")   # optional parameter
 
-    if not format in EXPORT_FORMATS:  # Check that the workflow exists
-        return Response(errors.bad_request_error(f"Export in format {format} is not implemented"), status=400)
+    if format not in EXPORT_FORMATS:  # Check that the workflow exists
+        return Response(errors.bad_request_error(
+            f"Export in format {format} is not implemented"),
+            status=400
+        )
 
-    if not object_type in EXPORT_FORMAT_OBJECT_TYPE_MAP[format]:
-        return Response(errors.bad_request_error(f"Exporting entities of type {object_type} in format {format} is not implemented"), status=400)
+    if object_type not in EXPORT_FORMAT_OBJECT_TYPE_MAP[format]:
+        return Response(errors.bad_request_error(
+            f"Exporting entities of type {object_type} in format {format} is not implemented"),
+             status=400
+        )
 
     # TODO: secure the output_path value
 
@@ -81,15 +93,15 @@ def export(request: Request):
                 tarfile = file_export.writeTar()
                 return FileResponse(open(tarfile, "rb"), as_attachment=True)
 
-
     except ExportError as e:
         return Response(errors.bad_request_error(f"Encountered export error: {e}"), status=400)
-
 
     except Exception as e:
         # Encountered some other error from the export attempt, return a somewhat detailed message
         logger.error(f"Encountered an exception while processing an export attempt:\n{traceback.format_exc()}")
-        return Response(errors.internal_server_error(f"Encountered an exception while processing an export attempt "
-                                                     f"(error: {repr(e)}"), status=500)
+        return Response(errors.internal_server_error(
+            f"Encountered an exception while processing an export attempt (error: {repr(e)}"),
+            status=500
+        )
 
     return Response(status=204)

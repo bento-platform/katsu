@@ -15,8 +15,10 @@ logger = logging.getLogger(__name__)
 
 EXPORT_DIR = 'export'
 
+
 class ExportError(Exception):
     pass
+
 
 class ExportFileContext:
     """
@@ -49,11 +51,11 @@ class ExportFileContext:
 
         self.base_path = tmp_dir
         self.project_id = project_id
- 
+
         try:
             self.path = os.path.join(tmp_dir, EXPORT_DIR, project_id)
 
-            #clean pre-existing export dir
+            # clean pre-existing export dir
             isExistant = os.path.exists(self.path)
             if isExistant:
                 shutil.rmtree(self.path)
@@ -67,7 +69,6 @@ class ExportFileContext:
         finally:
             os.umask(original_umask)
 
-
     def __enter__(self):
         return self
 
@@ -75,17 +76,17 @@ class ExportFileContext:
         if self.should_del and self.path:
             shutil.rmtree(self.path)
 
-    def getPath (self, filename: str = ''):
+    def getPath(self, filename: str = ''):
         """Returns a path within the export directory
-        
+
         Attributes:
             filename: optional filename to use
         """
         return os.path.join(self.path, filename)
 
-    def writeTar (self):
+    def writeTar(self):
         """Creates a tar gzipped archive from the export directory content
-        
+
         Note that the tar file is created inside the context of this ExportFileContext
         class. If no path was provided at the time of the context creation,
         then the generated tar file will be deleted along with the tmp directory
@@ -97,6 +98,7 @@ class ExportFileContext:
             output_dir = self.getPath()
             tar.add(output_dir, filter=resetTarInfo)
         return tar_path
+
 
 def resetTarInfo(info: tarfile.TarInfo) -> tarfile.TarInfo:
     info.gid = 0

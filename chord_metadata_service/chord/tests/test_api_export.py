@@ -42,7 +42,7 @@ def generate_phenopackets_ingest(table_id):
 
 class ExportTest(APITestCase):
     def setUp(self) -> None:
-         # Creates a test database and populate with a phenopacket test file
+        # Creates a test database and populate with a phenopacket test file
 
         p = Project.objects.create(title="Project 1", description="")
         self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
@@ -61,7 +61,6 @@ class ExportTest(APITestCase):
         self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
 
         self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
-
 
     @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_export_cbio(self):
