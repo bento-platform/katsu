@@ -1,7 +1,6 @@
 import json
 import logging
 import traceback
-#import uuid
 
 from django.http import FileResponse
 
@@ -14,7 +13,6 @@ from rest_framework.request import Request
 
 from chord_metadata_service.chord.schemas import EXPORT_SCHEMA
 from bento_lib.responses import errors
-#from bento_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
 from .export import EXPORT_FORMAT_FUNCTION_MAP, EXPORT_FORMAT_OBJECT_TYPE_MAP, EXPORT_FORMATS, EXPORT_OBJECT_TYPE
 from .export_utils import ExportError, ExportFileContext
@@ -57,8 +55,6 @@ def export(request: Request):
     model = EXPORT_OBJECT_TYPE[object_type]["model"]
     if not model.objects.filter(identifier=object_id).exists():
         return Response(errors.bad_request_error(f"{object_type.capitalize()} with ID {object_id} does not exist"), status=400)
-
-    #object_id = str(uuid.UUID(object_id))  # Normalize ID to UUID's str format.
 
     format = request.data["format"].strip()
     output_path = request.data.get("output_path")   # optional parameter
