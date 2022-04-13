@@ -20,7 +20,7 @@ router = routers.DefaultRouter(trailing_slash=False)
 
 # CHORD app urls
 router.register(r'projects', chord_views.ProjectViewSet)
-router.register(r'datasets', chord_views.DatasetViewSet)
+router.register(r'datasets', chord_views.DatasetViewSet, basename="datasets")
 router.register(r'table_ownership', chord_views.TableOwnershipViewSet)
 router.register(r'tables', chord_views.TableViewSet)
 
