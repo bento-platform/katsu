@@ -18,7 +18,7 @@ def filter_datasets(qs, name, value):
     else:
         return qs
 
-
+# TODO   authorize_datasets(): remove the code == GRU filter, urgently.
 def authorize_datasets(qs, name, value):
     """
     Filter by authorized datasets.
@@ -31,6 +31,9 @@ def authorize_datasets(qs, name, value):
         return qs.filter(**{lookup: []})
     else:
         lookup = "__".join([name, "in"])
+
+        # TODO  THE FILTER BELOW IS JANKY; NEEDS TO BE REMOVED.
+        #       It is only here for the ClinDIG 4.3 demo.
         temp = qs.filter(**{lookup: value.split(",")}).distinct().filter(data_use__consent_code__primary_category__code='GRU')
         for t in temp:
             logger.warn(str(t.data_use))
