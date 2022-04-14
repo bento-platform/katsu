@@ -7,6 +7,11 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from .models import Project, Dataset, TableOwnership, Table
 from .permissions import OverrideOrSuperUserOnly
 from .serializers import ProjectSerializer, DatasetSerializer, TableOwnershipSerializer, TableSerializer
+from .filters import AuthorizedDatasetFilter
+from django_filters.rest_framework import DjangoFilterBackend
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 __all__ = ["ProjectViewSet", "DatasetViewSet", "TableOwnershipViewSet", "TableViewSet"]
@@ -49,9 +54,21 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     Create a new dataset
     """
 
-    queryset = Dataset.objects.all().order_by("identifier")
+    filter_backends = [DjangoFilterBackend]
+    filter_class = AuthorizedDatasetFilter
+
     serializer_class = DatasetSerializer
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
+    
+    def get_queryset(self):
+        if hasattr(self.request, "allowed_datasets"):
+            allowed_datasets = self.request.allowed_datasets
+            queryset = m.Dataset.objects\
+                .filter(table_ownership__dataset__title__in=allowed_datasets)
+        else:
+            queryset = Dataset.objects.all().order_by("title")
+        return queryset
+
 
 
 class TableOwnershipViewSet(CHORDPublicModelViewSet):

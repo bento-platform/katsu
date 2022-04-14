@@ -85,22 +85,22 @@ class CreateDatasetTest(APITestCase):
     @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_create_dataset(self):
         for i, d in enumerate(self.valid_payloads, 1):
-            r = self.client.post(reverse("dataset-list"), data=json.dumps(d), content_type="application/json")
+            r = self.client.post('/api/datasets', data=json.dumps(d), content_type="application/json")
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Dataset.objects.count(), i)
             self.assertEqual(Dataset.objects.get(title=d["title"]).description, d["description"])
             self.assertDictEqual(Dataset.objects.get(title=d["title"]).data_use, d["data_use"])
 
         for d in self.invalid_payloads:
-            r = self.client.post(reverse("dataset-list"), data=json.dumps(d), content_type="application/json")
+            r = self.client.post('/api/datasets', data=json.dumps(d), content_type="application/json")
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
 
     @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_dats(self):
-        r = self.client.post(reverse("dataset-list"), data=json.dumps(self.dats_valid_payload),
+        r = self.client.post('/api/datasets', data=json.dumps(self.dats_valid_payload),
                              content_type="application/json")
-        r_invalid = self.client.post(reverse("dataset-list"), data=json.dumps(self.dats_invalid_payload),
+        r_invalid = self.client.post('/api/datasets', data=json.dumps(self.dats_invalid_payload),
                                      content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         self.assertEqual(r_invalid.status_code, status.HTTP_400_BAD_REQUEST)

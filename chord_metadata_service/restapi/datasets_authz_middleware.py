@@ -14,7 +14,7 @@ class DatasetsAuthzMiddleware:
         self.get_response = get_response
         self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
         self.authorized_paths = [
-            "^/api/phenopackets/?.*", "^/api/diagnoses/?.*", "^/api/diseases/?.*",
+            "^/api/phenopackets/?.*", "^/api/diagnoses/?.*", "^/api/diseases/?.*", "^/api/datasets/?.*",
             "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/htsfiles/?.*", "^/api/individuals/?.*",
             "^/api/interpretations/?.*", "^/api/metadata/?.*", "^/api/phenopackets/?.*", "^/api/phenotypicfeatures/?.*",
             "^/api/procedures/?.*", "^/api/variants/?.*", "^/api/biosamples/?.*", "^/api/labsvital/?.*",
