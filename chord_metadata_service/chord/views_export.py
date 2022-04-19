@@ -82,7 +82,7 @@ def export(request: Request):
     try:
         with ExportFileContext(output_path, object_id) as file_export:
             # Pass a callable to generate the proper file paths within the export context.
-            EXPORT_FORMAT_FUNCTION_MAP[format](file_export.getPath, object_id)
+            EXPORT_FORMAT_FUNCTION_MAP[format](file_export.get_path, object_id)
 
             # If no output path parameter has been provided, the generated export
             # is returned as an attachment to the Response and everything will
@@ -90,7 +90,7 @@ def export(request: Request):
             # Otherwise, the provided local path is under the responsability of
             # the caller
             if not output_path:
-                tarfile = file_export.writeTar()
+                tarfile = file_export.write_tar()
                 return FileResponse(open(tarfile, "rb"), as_attachment=True)
 
     except ExportError as e:

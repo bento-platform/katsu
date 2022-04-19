@@ -9,7 +9,7 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
 
 __all__ = [
-    "StudyExport",
+    "study_export",
 ]
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ PATIENT_DATATYPE = 'PATIENT'
 SAMPLE_DATATYPE = 'SAMPLE'
 
 
-def StudyExport(getPath: Callable[[str], str], dataset_id: str):
+def study_export(getPath: Callable[[str], str], dataset_id: str):
     """Export a given Project as a cBioPortal study"""
     # TODO: a Dataset is a Study (associated with a publication), not a Project!
     if Dataset.objects.count == 0:
@@ -43,27 +43,27 @@ def StudyExport(getPath: Callable[[str], str], dataset_id: str):
 
     # Export study file
     with open(getPath(STUDY_FILENAME), 'w') as file_study:
-        StudyExportMeta(dataset, file_study)
+        study_export_meta(dataset, file_study)
 
     # Export patients.
     with open(getPath(PATIENT_DATA_FILENAME), 'w') as file_patient:
         # Note: plural in `phenopackets` is intentional (related_name property in model)
         indiv = Individual.objects.filter(phenopackets__table__ownership_record__dataset_id=dataset.identifier)
-        IndividualExport(indiv, file_patient)
+        individual_export(indiv, file_patient)
 
     with open(getPath(PATIENT_META_FILENAME), 'w') as file_patient_meta:
-        ClinicalMetaExport(cbio_study_id, PATIENT_DATATYPE, file_patient_meta)
+        clinical_meta_export(cbio_study_id, PATIENT_DATATYPE, file_patient_meta)
 
     # Export samples
     with open(getPath(SAMPLE_DATA_FILENAME), 'w') as file_sample:
         sampl = pm.Biosample.objects.filter(phenopacket__table__ownership_record__dataset_id=dataset.identifier)
-        SampleExport(sampl, file_sample)
+        sample_export(sampl, file_sample)
 
     with open(getPath(SAMPLE_META_FILENAME), 'w') as file_sample_meta:
-        ClinicalMetaExport(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
+        clinical_meta_export(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
 
 
-def StudyExportMeta(dataset: Dataset, file_handle: TextIO):
+def study_export_meta(dataset: Dataset, file_handle: TextIO):
     """
     Study meta data file generation
     """
@@ -86,7 +86,7 @@ def StudyExportMeta(dataset: Dataset, file_handle: TextIO):
         file_handle.write(f"{field}: {value}\n")
 
 
-def ClinicalMetaExport(study_id: str, datatype: str, file_handle: TextIO):
+def clinical_meta_export(study_id: str, datatype: str, file_handle: TextIO):
     """
     Clinical Metadata files generation (samples or patients)
     """
@@ -104,7 +104,7 @@ def ClinicalMetaExport(study_id: str, datatype: str, file_handle: TextIO):
         file_handle.write(f"{field}: {value}\n")
 
 
-def IndividualExport(results, file_handle: TextIO):
+def individual_export(results, file_handle: TextIO):
     """
     Renders Individuals as a clinical_patient text file suitable for
     importing by cBioPortal.
@@ -138,7 +138,7 @@ def IndividualExport(results, file_handle: TextIO):
     dict_writer.writerows(individuals)
 
 
-def SampleExport(results, file_handle: TextIO):
+def sample_export(results, file_handle: TextIO):
     """
     Renders Biosamples as a clinical_sample text file suitable for
     importing by cBioPortal.
@@ -192,7 +192,7 @@ def SampleExport(results, file_handle: TextIO):
     dict_writer.writerows(samples)
 
 
-class cbioportal_clinical_header_generator ():
+class CbioportalClinicalHeaderGenerator():
     """
     Generates cBioPortal data files headers based on field names from katsu models.
     """
@@ -252,7 +252,7 @@ def individual_to_patient_header(fields: list):
         'sex': ('Sex', 'Sex', 'STRING', '1', 'SEX'),
     }
 
-    cbio_header = cbioportal_clinical_header_generator(fields_mapping)
+    cbio_header = CbioportalClinicalHeaderGenerator(fields_mapping)
     return cbio_header.make_header(fields)
 
 
@@ -269,5 +269,5 @@ def biosample_to_sample_header(fields: list):
         'tissue_label': ('Sampled Tissue', 'Sampled Tissue', 'STRING', '1', 'TISSUE_LABEL')
     }
 
-    cbio_header = cbioportal_clinical_header_generator(fields_mapping)
+    cbio_header = CbioportalClinicalHeaderGenerator(fields_mapping)
     return cbio_header.make_header(fields)

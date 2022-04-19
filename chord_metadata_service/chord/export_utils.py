@@ -76,7 +76,7 @@ class ExportFileContext:
         if self.should_del and self.path:
             shutil.rmtree(self.path)
 
-    def getPath(self, filename: str = ''):
+    def get_path(self, filename: str = ''):
         """Returns a path within the export directory
 
         Attributes:
@@ -84,7 +84,7 @@ class ExportFileContext:
         """
         return os.path.join(self.path, filename)
 
-    def writeTar(self):
+    def write_tar(self):
         """Creates a tar gzipped archive from the export directory content
 
         Note that the tar file is created inside the context of this ExportFileContext
@@ -95,12 +95,12 @@ class ExportFileContext:
         """
         tar_path = os.path.join(self.base_path, EXPORT_DIR, self.project_id + '.tar.gz')
         with tarfile.open(tar_path, 'w:gz') as tar:
-            output_dir = self.getPath()
-            tar.add(output_dir, filter=resetTarInfo)
+            output_dir = self.get_path()
+            tar.add(output_dir, filter=reset_tar_info)
         return tar_path
 
 
-def resetTarInfo(info: tarfile.TarInfo) -> tarfile.TarInfo:
+def reset_tar_info(info: tarfile.TarInfo) -> tarfile.TarInfo:
     info.gid = 0
     info.uid = 0
     info.uname = 'root'

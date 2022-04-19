@@ -11,11 +11,11 @@ from chord_metadata_service.chord.export_cbio import (
     PATIENT_DATATYPE,
     SAMPLE_DATA_FILENAME,
     SAMPLE_DATATYPE,
-    ClinicalMetaExport,
-    IndividualExport,
-    SampleExport,
-    StudyExport,
-    StudyExportMeta
+    clinical_meta_export,
+    individual_export,
+    sample_export,
+    study_export,
+    study_export_meta
 )
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.export_utils import ExportFileContext
@@ -58,7 +58,7 @@ class ExportCBioTest(TestCase):
 
         self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
 
-    def streamToDict(self, output: TextIO) -> Dict[str, str]:
+    def stream_to_dict(self, output: TextIO) -> Dict[str, str]:
         """
         Utility function. Parses cBioPortal meta data text files (lines of
         key/value pairs separated by `: `) in a dictionary structure.
@@ -70,15 +70,15 @@ class ExportCBioTest(TestCase):
             content[key] = value
         return content
 
-    def testFileCreation(self):
+    def test_file_creation(self):
         """
         Check files creation.
         Files content is tested subsequently with each file generating function.
         """
 
         with ExportFileContext(None, self.study_id) as file_export:
-            StudyExport(file_export.getPath, self.study_id)
-            export_dir = file_export.getPath()
+            study_export(file_export.get_path, self.study_id)
+            export_dir = file_export.get_path()
             self.assertTrue(path.exists(export_dir))
             for (dirpath, dirnames, filenames) in walk(export_dir):
                 filesSet = {*filenames}
@@ -87,8 +87,8 @@ class ExportCBioTest(TestCase):
 
     def test_export_cbio_study_meta(self):
         with io.StringIO() as output:
-            StudyExportMeta(self.d, output)
-            content = self.streamToDict(output)
+            study_export_meta(self.d, output)
+            content = self.stream_to_dict(output)
 
         self.assertIn('type_of_cancer', content)
         self.assertEqual(content['cancer_study_identifier'], self.study_id)
@@ -97,8 +97,8 @@ class ExportCBioTest(TestCase):
 
     def test_export_cbio_sample_meta(self):
         with io.StringIO() as output:
-            ClinicalMetaExport(self.study_id, SAMPLE_DATATYPE, output)
-            content = self.streamToDict(output)
+            clinical_meta_export(self.study_id, SAMPLE_DATATYPE, output)
+            content = self.stream_to_dict(output)
 
         self.assertEqual(content['cancer_study_identifier'], self.study_id)
         self.assertEqual(content['genetic_alteration_type'], 'CLINICAL')
@@ -107,8 +107,8 @@ class ExportCBioTest(TestCase):
 
     def test_export_cbio_patient_meta(self):
         with io.StringIO() as output:
-            ClinicalMetaExport(self.study_id, PATIENT_DATATYPE, output)
-            content = self.streamToDict(output)
+            clinical_meta_export(self.study_id, PATIENT_DATATYPE, output)
+            content = self.stream_to_dict(output)
 
         self.assertEqual(content['cancer_study_identifier'], self.study_id)
         self.assertEqual(content['genetic_alteration_type'], 'CLINICAL')
@@ -118,7 +118,7 @@ class ExportCBioTest(TestCase):
     def test_export_cbio_patient_data(self):
         indiv = Individual.objects.filter(phenopackets=self.p)
         with io.StringIO() as output:
-            IndividualExport(indiv, output)
+            individual_export(indiv, output)
             # Check header
             output.seek(0)
             field_count = None
@@ -153,7 +153,7 @@ class ExportCBioTest(TestCase):
     def test_export_cbio_sample_data(self):
         samples = PhModel.Biosample.objects.filter(phenopacket=self.p)
         with io.StringIO() as output:
-            SampleExport(samples, output)
+            sample_export(samples, output)
             # Check header
             output.seek(0)
             field_count = None
