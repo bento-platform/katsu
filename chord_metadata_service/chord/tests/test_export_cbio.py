@@ -58,7 +58,9 @@ class ExportCBioTest(TestCase):
 
         self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
 
-        # Update the last sample to remove reference to any individual.
+        # Update the last sample to remove direct reference to any individual.
+        # In that case, Sample and Individual are cross referenced through the
+        # Phenopacket model.
         PhModel.Biosample.objects.filter(
                 id=EXAMPLE_INGEST_PHENOPACKET["biosamples"][-1]["id"]
             ).update(individual=None)
@@ -184,7 +186,7 @@ class ExportCBioTest(TestCase):
                     self.assertIn('SAMPLE_ID', pieces)
                     continue
 
-                # TSV body.
+                # TSV body: 1 row per sample
                 self.assertEqual(field_count, len(pieces))
                 record = dict(zip(field_names, pieces))
 
@@ -198,5 +200,4 @@ class ExportCBioTest(TestCase):
                 )
                 sample_count += 1
 
-            # samples not attached to an individual are not exported
-            self.assertEqual(sample_count, samples.filter(individual_id__isnull=False).count())
+            self.assertEqual(sample_count, samples.count())

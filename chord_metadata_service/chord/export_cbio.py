@@ -175,12 +175,21 @@ def sample_export(results, file_handle: TextIO):
 
     samples = []
     for sample in results:
-        # sample.inidividual can be null. Skip the sample in that case.
-        if sample.individual is None:
-            continue
+
+        # sample.inidividual may be null: use Phenopacket model Subject field
+        # instead if available or skip.
+        subject_id = None
+        if sample.individual is not None:
+            subject_id = sample.individual
+        else:
+            phnpkt = pm.Phenopacket.objects.filter(biosamples=sample).first()
+            if phnpkt.subject is not None:
+                subject_id = phnpkt.subject.id
+            else:
+                continue
 
         sample_obj = {
-            'individual_id': sample.individual.id,
+            'individual_id': subject_id,
             'id': sample.id
         }
         if sample.sampled_tissue:
