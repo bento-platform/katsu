@@ -58,6 +58,11 @@ class ExportCBioTest(TestCase):
 
         self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
 
+        # Update the last sample to remove reference to any individual.
+        PhModel.Biosample.objects.filter(
+                id=EXAMPLE_INGEST_PHENOPACKET["biosamples"][-1]["id"]
+            ).update(individual=None)
+
     def stream_to_dict(self, output: TextIO) -> Dict[str, str]:
         """
         Utility function. Parses cBioPortal meta data text files (lines of
@@ -158,6 +163,7 @@ class ExportCBioTest(TestCase):
             output.seek(0)
             field_count = None
             field_names = []
+            sample_count = 0
             for i, line in enumerate(output):
                 # 4 first header lines begin with `#`
                 if i < 4:
@@ -178,10 +184,19 @@ class ExportCBioTest(TestCase):
                     self.assertIn('SAMPLE_ID', pieces)
                     continue
 
-                # TSV body. Inspect first line and break
+                # TSV body.
                 self.assertEqual(field_count, len(pieces))
                 record = dict(zip(field_names, pieces))
 
-                self.assertEqual(record["PATIENT_ID"], EXAMPLE_INGEST_PHENOPACKET["subject"]["id"])
-                self.assertEqual(record["SAMPLE_ID"], EXAMPLE_INGEST_PHENOPACKET["biosamples"][0]["id"])
-                break
+                self.assertEqual(
+                    record["PATIENT_ID"],
+                    EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["individual_id"]
+                )
+                self.assertEqual(
+                    record["SAMPLE_ID"],
+                    EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["id"]
+                )
+                sample_count += 1
+
+            # samples not attached to an individual are not exported
+            self.assertEqual(sample_count, samples.filter(individual_id__isnull=False).count())

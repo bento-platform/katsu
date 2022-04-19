@@ -175,6 +175,10 @@ def sample_export(results, file_handle: TextIO):
 
     samples = []
     for sample in results:
+        # sample.inidividual can be null. Skip the sample in that case.
+        if sample.individual is None:
+            continue
+
         sample_obj = {
             'individual_id': sample.individual.id,
             'id': sample.id
