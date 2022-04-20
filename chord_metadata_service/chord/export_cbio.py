@@ -1,6 +1,7 @@
 import logging
 import csv
 from typing import TextIO, Callable
+from django.db.models import F
 
 from .export_utils import ExportError
 
@@ -56,7 +57,8 @@ def study_export(getPath: Callable[[str], str], dataset_id: str):
 
     # Export samples
     with open(getPath(SAMPLE_DATA_FILENAME), 'w') as file_sample:
-        sampl = pm.Biosample.objects.filter(phenopacket__table__ownership_record__dataset_id=dataset.identifier)
+        sampl = pm.Biosample.objects.filter(phenopacket__table__ownership_record__dataset_id=dataset.identifier)\
+            .annotate(phenopacket_subject_id=F("phenopacket__subject"))
         sample_export(sampl, file_sample)
 
     with open(getPath(SAMPLE_META_FILENAME), 'w') as file_sample_meta:
@@ -181,12 +183,10 @@ def sample_export(results, file_handle: TextIO):
         subject_id = None
         if sample.individual is not None:
             subject_id = sample.individual
+        elif sample.phenopacket_subject_id is not None:
+            subject_id = sample.phenopacket_subject_id
         else:
-            phnpkt = pm.Phenopacket.objects.filter(biosamples=sample).first()
-            if phnpkt.subject is not None:
-                subject_id = phnpkt.subject.id
-            else:
-                continue
+            continue
 
         sample_obj = {
             'individual_id': subject_id,

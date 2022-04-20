@@ -3,6 +3,7 @@ import io
 from typing import Dict, TextIO
 from os import walk, path
 
+from django.db.models import F
 from django.test import TestCase
 
 from chord_metadata_service.chord.export_cbio import (
@@ -158,7 +159,8 @@ class ExportCBioTest(TestCase):
                 break
 
     def test_export_cbio_sample_data(self):
-        samples = PhModel.Biosample.objects.filter(phenopacket=self.p)
+        samples = PhModel.Biosample.objects.filter(phenopacket=self.p)\
+            .annotate(phenopacket_subject_id=F("phenopacket__subject"))
         with io.StringIO() as output:
             sample_export(samples, output)
             # Check header
