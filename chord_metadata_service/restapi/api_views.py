@@ -1,4 +1,6 @@
 import math
+import logging
+
 from collections import Counter
 from django.conf import settings
 from django.views.decorators.cache import cache_page
@@ -15,6 +17,10 @@ from chord_metadata_service.mcode import models as mcode_models
 from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
+
+
+logger = logging.getLogger("restapi_api_views")
+logger.setLevel(logging.INFO)
 
 
 @api_view()
@@ -339,7 +345,10 @@ def public_overview(_request):
                         # add new Counter()
                         if key not in extra_properties:
                             extra_properties[key] = Counter()
-                        extra_properties[key].update((individual.extra_properties[key],))
+                        try:
+                            extra_properties[key].update((individual.extra_properties[key],))
+                        except TypeError:
+                            logger.error(f"The extra_properties {key} value is not of type string or number.")
                         individuals_extra_properties[key] = dict(extra_properties[key])
         # Experiments
         for experiment in experiments:
