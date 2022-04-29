@@ -1,4 +1,5 @@
 from copy import deepcopy
+
 from django.conf import settings
 from django.urls import reverse
 from django.test import override_settings
@@ -12,9 +13,13 @@ from chord_metadata_service.experiments import models as exp_m
 from chord_metadata_service.experiments.tests import constants as exp_c
 from chord_metadata_service.mcode import models as mcode_m
 from chord_metadata_service.mcode.tests import constants as mcode_c
-from .constants import CONFIG_FIELDS_TEST
 
-from .constants import VALID_INDIVIDUALS
+from .constants import (
+    CONFIG_FIELDS_TEST,
+    VALID_INDIVIDUALS,
+    INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST,
+    INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT
+)
 
 
 class ServiceInfoTest(APITestCase):
@@ -227,3 +232,48 @@ class PublicOverviewTest2(APITestCase):
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+
+
+class PublicOverviewNotSupportedDataTypesListTest(APITestCase):
+    # individuals (count 8)
+    def setUp(self) -> None:
+        # create individuals including those who have not accepted data types
+        for ind in INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST:
+            ph_m.Individual.objects.create(**ind)
+
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    def test_overview_response(self):
+        # test overview response with passing TypeError exception
+        response = self.client.get('/api/public_overview')
+        response_obj = response.json()
+        print(response_obj)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response_obj, dict)
+        # the field name is present, but the keys are not (except 'missing')
+        self.assertIn("baseline_creatinine", response_obj["extra_properties"])
+        self.assertIn("missing", response_obj["extra_properties"]["baseline_creatinine"])
+        self.assertEqual(8, response_obj["extra_properties"]["baseline_creatinine"]["missing"])
+        # if we add support for an array values for the public_overview
+        # then this assertion will fail, so far there is no support for it
+        self.assertNotIn(100, response_obj["extra_properties"]["baseline_creatinine"])
+
+
+class PublicOverviewNotSupportedDataTypesDictTest(APITestCase):
+    # individuals (count 8)
+    def setUp(self) -> None:
+        # create individuals including those who have not accepted data types
+        for ind in INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT:
+            ph_m.Individual.objects.create(**ind)
+
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    def test_overview_response(self):
+        # test overview response with passing TypeError exception
+        response = self.client.get('/api/public_overview')
+        response_obj = response.json()
+        print(response_obj)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response_obj, dict)
+        # the field name is present, but the keys are not (except 'missing')
+        self.assertIn("baseline_creatinine", response_obj["extra_properties"])
+        self.assertIn("missing", response_obj["extra_properties"]["baseline_creatinine"])
+        self.assertEqual(8, response_obj["extra_properties"]["baseline_creatinine"]["missing"])
