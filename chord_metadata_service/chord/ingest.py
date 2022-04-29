@@ -57,6 +57,7 @@ WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
 WORKFLOW_MCODE_JSON = "mcode_json"
 WORKFLOW_READSET = "readset"
+WORKFLOW_CBIOPORTAL = "cbioportal"
 
 METADATA_WORKFLOWS = {
     "ingestion": {
@@ -240,7 +241,30 @@ METADATA_WORKFLOWS = {
             ]
         },
     },
-    "analysis": {}
+    "analysis": {},
+    "export": {
+        WORKFLOW_CBIOPORTAL: {
+            "name": "cBioPortal",
+            "description": "This workflow creates a bundle for cBioPortal ingestion.",
+            "data_type": None,
+            "file": "cbioportal_export.wdl",
+            "inputs": [
+                {
+                    "id": "dataset_id",
+                    "type": "string",
+                    "required": True,
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "cbioportal_archive",
+                    "type": "file",
+                    "map_from_input": "dataset_id",
+                    "value": "{}.tar"
+                }
+            ]
+        }
+    }
 }
 
 WORKFLOWS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "workflows")
