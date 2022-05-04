@@ -1,4 +1,6 @@
 import math
+import logging
+
 from collections import Counter
 from django.conf import settings
 from django.views.decorators.cache import cache_page
@@ -15,6 +17,10 @@ from chord_metadata_service.mcode import models as mcode_models
 from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
+
+
+logger = logging.getLogger("restapi_api_views")
+logger.setLevel(logging.INFO)
 
 
 @api_view()
@@ -339,7 +345,12 @@ def public_overview(_request):
                         # add new Counter()
                         if key not in extra_properties:
                             extra_properties[key] = Counter()
-                        extra_properties[key].update((individual.extra_properties[key],))
+                        try:
+                            extra_properties[key].update((individual.extra_properties[key],))
+                        except TypeError:
+                            logger.error(f"The extra_properties {key} value is not of type string or number.")
+                            pass
+
                         individuals_extra_properties[key] = dict(extra_properties[key])
         # Experiments
         for experiment in experiments:
@@ -367,13 +378,14 @@ def public_overview(_request):
                         if "bin_size" in settings.CONFIG_FIELDS["extra_properties"][key] else None
                     # retrieve the values from extra_properties counter
                     values = individuals_extra_properties[key]
-                    kwargs = dict(values=values, bin_size=field_bin_size)
-                    # sort into bins and remove numeric values where count <= threshold
-                    extra_prop_values_in_bins = sort_numeric_values_into_bins(
-                        **{k: v for k, v in kwargs.items() if v is not None}
-                    )
-                    # rewrite with sorted values
-                    individuals_extra_properties[key] = extra_prop_values_in_bins
+                    if values:
+                        kwargs = dict(values=values, bin_size=field_bin_size)
+                        # sort into bins and remove numeric values where count <= threshold
+                        extra_prop_values_in_bins = sort_numeric_values_into_bins(
+                            **{k: v for k, v in kwargs.items() if v is not None}
+                        )
+                        # rewrite with sorted values
+                        individuals_extra_properties[key] = extra_prop_values_in_bins
                     # add missing value count
                     individuals_extra_properties[key][missing] = len(individuals_set) - sum(v for v in value.values())
                 else:

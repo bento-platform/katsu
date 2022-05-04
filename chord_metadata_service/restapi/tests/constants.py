@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 INVALID_FHIR_BUNDLE_1 = {
     "resourceType": "NotBundle",
     "entry": [
@@ -208,6 +211,40 @@ VALID_INDIVIDUAL_8 = {
 
 VALID_INDIVIDUALS = [VALID_INDIVIDUAL_1, VALID_INDIVIDUAL_2, VALID_INDIVIDUAL_3, VALID_INDIVIDUAL_4,
                      VALID_INDIVIDUAL_5, VALID_INDIVIDUAL_6, VALID_INDIVIDUAL_7, VALID_INDIVIDUAL_8]
+
+
+extra_properties_with_list = {
+        "smoking": "Former smoker",
+        "covidstatus": "Positive",
+        "death_dc": "Alive",
+        "mobility": "I have slight problems in walking about",
+        "date_of_consent": "2021-03-03",
+        "lab_test_result_value": 699.86,
+        "baseline_creatinine": [100, 120]
+    }
+
+extra_properties_with_dict = {
+        "smoking": "Former smoker",
+        "covidstatus": "Positive",
+        "death_dc": "Alive",
+        "mobility": "I have slight problems in walking about",
+        "date_of_consent": "2021-03-03",
+        "lab_test_result_value": 699.86,
+        "baseline_creatinine": {
+            "test_key_1": 120,
+            "test_key_2": "test_value_2"
+        }
+    }
+
+
+INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST = [
+    {**item, "extra_properties": extra_properties_with_list} for item in deepcopy(VALID_INDIVIDUALS)
+]
+
+INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT = [
+    {**item, "extra_properties": extra_properties_with_dict} for item in deepcopy(VALID_INDIVIDUALS)
+]
+
 
 CONFIG_FIELDS_TEST = {
     "sex": {
