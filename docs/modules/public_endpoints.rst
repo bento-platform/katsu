@@ -2,21 +2,21 @@ Public endpoints
 ================
 
 There are several public APIs to perform a search that returns only objects count.
-The implementation of public APIs relies on a project customized configuration file (config.json) that must be placed into base directory.
+The implementation of public APIs relies on a project customized configuration file (config.json) that must be placed in the base directory.
 Currently, there is an :code:`example.config.json` located  in :code:`/katsu/chord_metadata_service` directory which is set to be the project base directory.
 The file can be copied, renamed to :code:`config.json` and modified.
 
-The :code:`config.json` file contains fields that a project agrees to open for public access.
-If the config file is not set up it means there is no public data and no data will be available via these APIs.
+The :code:`config.json` file contains fields that data providers would like to open for public access.
+If the :code:`config.json` file is not set up/created it means there is no public data and no data will be available via these APIs.
 
 Config file specification
 -------------------------
 
-The config.json file follows jsonschema specifications: it includes a field from the current Phenopackets data model, defines it's type and other attributes that determine how the data from this field will be presented in the public response.
+The :code:`config.json` file follows jsonschema specifications: it includes fields from katsu data model, defines their type and other attributes that determine how the data from these fields will be presented in the public response.
 
 **Jsonschema properties**:
 
-- "type" - defines a data type for this field, e.g. "number" or "string"
+- "type" - defines a data type for this field, e.g. "number" or "string" (katsu's config accepts only number and string types)
 - "format" - defines a string format, e.g. "date" to record date in the format of "2021-12-31"
 - "enum" - defines a list of options for this field
 - "title" - field's user-friendly name
@@ -83,15 +83,18 @@ The public APIs include the following endpoints:
 
    The response when public fields are not configured and config file is not provided: :code:`{"message": "No public fields configured."}`
 
+
 2. :code:`/api/public_overview` GET: returns an overview that contains counts for each field of interest.
 
    The response when there is no public data available and config file is not provided: :code:`{"message": "No public data available."}`
+
 
 3. :code:`/api/public`  GET: returns a count of all individuals in database.
 
    The response when there is no public data available and config file is not provided: :code:`{"message": "No public data available."}`
 
    The response when there is no enough data that passes the project-custom threshold: :code:`{"message": "Insufficient data available."}`
+
 
    When count is less or equal to a project's custom threshold returns message that insufficient data available.
    Accepts search filters on the fields that are specified in the :code:`config.json` file and set to "queryable".
@@ -103,9 +106,11 @@ The public APIs include the following endpoints:
 
    - extra_properties: e.g. :code:`/api/public?extra_properties=[{"smoking": "Non-smoker"},{"covidstatus": "positive"}]`
 
+
    The :code:`extra_properties` is a JSONField without a schema.
    To allow searching content in this field the nested fields have to be added to the config file (see the config file example above).
    The query string must contain a list of objects where each object has a key-value pair representing a nested field name and a search value.
+
 
    Examples of extra properties searches:
 
