@@ -1,15 +1,15 @@
 import json
 import csv
-from djangorestframework_camel_case.render import CamelCaseJSONRenderer
-from rest_framework.renderers import JSONRenderer
+from uuid import UUID
 from rdflib import Graph
 from rdflib.plugin import register, Serializer
 from django.http import HttpResponse
-
-from uuid import UUID
+from rest_framework.renderers import JSONRenderer
+from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
 from .jsonld_utils import dataset_to_jsonld
 from .utils import parse_onset
+
 
 register('json-ld', Serializer, 'rdflib_jsonld.serializer', 'JsonLDSerializer')
 
