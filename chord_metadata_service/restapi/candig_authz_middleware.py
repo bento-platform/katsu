@@ -5,9 +5,9 @@ import re
 import json
 
 
-class DatasetsAuthzMiddleware:
+class CandigAuthzMiddleware:
     """
-    A generic middleware for dataset-level authorization.
+    A generic middleware for CanDIGv2 authorization.
     """
 
     def __init__(self, get_response):
