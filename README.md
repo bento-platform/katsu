@@ -443,7 +443,8 @@ The public APIs include the following endpoints:
    The response when there is no enough data that passes the project-custom threshold: `{"message": "Insufficient data available."}`
    When count is less or equal to a project's custom threshold returns message that insufficient data available.
    Accepts search filters on the fields that are specified in the :code:`config.json` file and set to "queryable".
-   Currently, the following filters are written for the Individual model:
+
+   Currently, the following search filters are written for the Individual model:
 
    - sex: e.g. `/api/public?sex=female`
 
