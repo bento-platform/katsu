@@ -308,9 +308,9 @@ Builds an ElasticSearch index for Phenopackets in the database.
 
 ### Accessing the Django Shell from inside a Bento Container
 
-#### When running katsu with `bentoV2`:
+#### When running Katsu with `bentoV2`:
 
-- Enter katsu container
+- Enter Katsu container
 ```
 docker exec -it bentov2-katsu sh
 ```
@@ -334,7 +334,7 @@ Phenopacket.objects.all().count()
 Resource.objects.all().count()
 Experiment.objects.all().count()
 ```
-#### When running katsu with `chord_singularity` (DEPRECATED)
+#### When running Katsu with `chord_singularity` (DEPRECATED)
 
 Assuming `chord_singularity` is being used, the following commands can be used
 to bootstrap your way to a `katsu` environment within a Bento
@@ -348,7 +348,7 @@ export $(cut -d= -f1 /chord/data/metadata/.environment)
 DJANGO_SETTINGS_MODULE=chord_metadata_service.metadata.settings django-admin shell
 ```
 
-## Configuring Public overview and public search fields
+## Configuring public overview and public search fields
 
 There are several public APIs to return data overview and perform a search that returns only objects count.
 The implementation of public APIs relies on a project customized configuration file `config.json` that must be placed in the base directory.
@@ -360,11 +360,11 @@ If the `config.json` is not set up/created it means there is no public data and 
 
 ### Config file specification
 
-The `config.json` follows jsonschema specifications: it includes fields from katsu data model, defines their type and other attributes that determine how the data from these fields will be presented in the public response.
+The `config.json` follows jsonschema specifications: it includes fields from Katsu data model, defines their type and other attributes that determine how the data from these fields will be presented in the public response.
 
 Jsonschema properties:
 
-- `"type"` - defines a data type for this field, e.g. "number" or "string" (katsu's config accepts only number and string types)
+- `"type"` - defines a data type for this field, e.g. "number" or "string" (Katsu's config accepts only number and string types)
 - `"format"` - defines a string format, e.g. "date" to record date in the format of "2021-12-31"
 - `"enum"` - defines a list of options for this field
 - `"title"` - field's user-friendly name
