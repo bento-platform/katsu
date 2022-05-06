@@ -351,16 +351,16 @@ DJANGO_SETTINGS_MODULE=chord_metadata_service.metadata.settings django-admin she
 ### Configuring Public overview and public search fields
 
 There are several public APIs to return data overview and perform a search that returns only objects count.
-The implementation of public APIs relies on a project customized configuration file (config.json) that must be placed in the base directory.
+The implementation of public APIs relies on a project customized configuration file `config.json` that must be placed in the base directory.
 Currently, there is an `example.config.json` located  in `/katsu/chord_metadata_service` directory which is set to be the project base directory.
 The file can be copied, renamed to `config.json` and modified.
 
-The `config.json` file contains fields that data providers would like to open for public access.
-If the `config.json` file is not set up/created it means there is no public data and no data will be available via these APIs.
+The `config.json` contains fields that data providers would like to make open for public access.
+If the `config.json` is not set up/created it means there is no public data and no data will be available via these APIs.
 
 #### Config file specification
 
-The `config.json` file follows jsonschema specifications: it includes fields from katsu data model, defines their type and other attributes that determine how the data from these fields will be presented in the public response.
+The `config.json` follows jsonschema specifications: it includes fields from katsu data model, defines their type and other attributes that determine how the data from these fields will be presented in the public response.
 
 Jsonschema properties:
 
@@ -376,12 +376,12 @@ Custom properties:
 - `"queryable"` (true/false) - defines if the field should be included in search, if set to false the field will only be shown as a chart
 - `"is_range"` (true/false) - defines if this field can  be searched using range search (e.g.min value and max value)
 - `"chart"` (options: pie, bar)-  defines a type of the chart to be used to visualize the data
-- `"taper_left"` and `"taper_right"` (number) - defines the cut offs for the data to be shown in charts
+- `"taper_left"` and `"taper_right"` (number) - defines the cut-offs for the data to be shown in charts
 - `"units"` (string) - defines unit value for numeric fields (e.g. "years", "mg/L")
 - `"minimum"` (number) - defines the minimum value in this field
 - `"maximum"` (number) - defines the maximum value in this field
 
-Example of the config.json
+Example of the `config.json`
 
 ```
 
