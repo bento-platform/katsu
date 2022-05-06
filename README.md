@@ -22,9 +22,9 @@
         * [Patient Commands](#patient-commands)
         * [Phenopacket Commands](#phenopacket-commands)
      * [Accessing the Django Shell from inside a Bento Container](#accessing-the-django-shell-from-inside-a-bento-container)
-     * [Configuring Public overview and public search fields](#configuring-public-overview-and-public-search-fields)
-       * [Config file specification](#config-file-specification)
-       * [Public APIs](#public-apis)
+  * [Configuring Public overview and public search fields](#configuring-public-overview-and-public-search-fields)
+     * [Config file specification](#config-file-specification)
+     * [Public APIs](#public-apis)
 
 ## License
 
@@ -348,7 +348,7 @@ export $(cut -d= -f1 /chord/data/metadata/.environment)
 DJANGO_SETTINGS_MODULE=chord_metadata_service.metadata.settings django-admin shell
 ```
 
-### Configuring Public overview and public search fields
+## Configuring Public overview and public search fields
 
 There are several public APIs to return data overview and perform a search that returns only objects count.
 The implementation of public APIs relies on a project customized configuration file `config.json` that must be placed in the base directory.
@@ -358,7 +358,7 @@ The file can be copied, renamed to `config.json` and modified.
 The `config.json` contains fields that data providers would like to make open for public access.
 If the `config.json` is not set up/created it means there is no public data and no data will be available via these APIs.
 
-#### Config file specification
+### Config file specification
 
 The `config.json` follows jsonschema specifications: it includes fields from katsu data model, defines their type and other attributes that determine how the data from these fields will be presented in the public response.
 
@@ -422,7 +422,7 @@ Example of the `config.json`
 ```
 
 
-#### Public APIs
+### Public APIs
 
 The public APIs include the following endpoints:
 
