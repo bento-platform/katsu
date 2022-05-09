@@ -1,4 +1,5 @@
 from copy import deepcopy
+from uuid import uuid4
 
 from django.conf import settings
 from django.urls import reverse
@@ -7,6 +8,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
+from chord_metadata_service.chord import models as ch_m
+from chord_metadata_service.chord.tests import constants as ch_c
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
@@ -246,7 +250,6 @@ class PublicOverviewNotSupportedDataTypesListTest(APITestCase):
         # test overview response with passing TypeError exception
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
-        print(response_obj)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
         # the field name is present, but the keys are not (except 'missing')
@@ -270,10 +273,56 @@ class PublicOverviewNotSupportedDataTypesDictTest(APITestCase):
         # test overview response with passing TypeError exception
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
-        print(response_obj)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
         # the field name is present, but the keys are not (except 'missing')
         self.assertIn("baseline_creatinine", response_obj["extra_properties"])
         self.assertIn("missing", response_obj["extra_properties"]["baseline_creatinine"])
         self.assertEqual(8, response_obj["extra_properties"]["baseline_creatinine"]["missing"])
+
+
+class PublicOverviewDatasetsMetadataTest(APITestCase):
+
+    def setUp(self) -> None:
+        project = ch_m.Project.objects.create(title="Test project", description="test description")
+        dataset = ch_m.Dataset.objects.create(
+            title="Dataset 1",
+            description="Test dataset",
+            contact_info="Test contact info",
+            types=["test type 1", "test type 2"],
+            privacy="Open",
+            keywords=["test keyword 1", "test keyword 2"],
+            data_use=ch_c.VALID_DATA_USE_1,
+            project=project
+        )
+        table_ownership = ch_m.TableOwnership.objects.create(
+            table_id=str(uuid4()),
+            service_id=str(uuid4()),
+            service_artifact="phenopacket",
+            dataset=dataset
+        )
+        table = ch_m.Table.objects.create(
+            ownership_record=table_ownership, name="Test table 1", data_type=DATA_TYPE_PHENOPACKET
+        )
+        metadata = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+        for i, ind in enumerate(VALID_INDIVIDUALS, start=1):
+            new_individual = ph_m.Individual.objects.create(**ind)
+            ph_m.Phenopacket.objects.create(
+                id=f"phenopacket:{i}",
+                subject=new_individual,
+                meta_data=metadata,
+                table=table
+            )
+
+    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    def test_overview(self):
+        response = self.client.get('/api/public_overview')
+        response_obj = response.json()
+        db_count = ph_m.Individual.objects.all().count()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj["individuals"], db_count)
+        self.assertIsInstance(response_obj["datasets"], list)
+        for dataset in response_obj["datasets"]:
+            self.assertIn("title", dataset.keys())
+            self.assertIsNotNone(dataset["title"])
