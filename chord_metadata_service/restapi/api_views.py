@@ -12,6 +12,7 @@ from chord_metadata_service.phenopackets.api_views import PHENOPACKET_PREFETCH, 
 from chord_metadata_service.restapi.utils import parse_individual_age
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
+from chord_metadata_service.chord import models as chord_models
 from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.mcode import models as mcode_models
 from chord_metadata_service.patients import models as patients_models
@@ -320,6 +321,18 @@ def public_overview(_request):
     missing = "missing"
 
     if settings.CONFIG_FIELDS:
+
+        # Datasets provenance metadata
+        datasets = chord_models.Dataset.objects.values(
+            "title", "description", "contact_info",
+            "dates", "stored_in", "spatial_coverage",
+            "types", "privacy", "distributions",
+            "dimensions", "primary_publications", "citations",
+            "produced_by", "creators", "licenses",
+            "acknowledges", "keywords", "version",
+            "extra_properties"
+        )
+
         individuals = patients_models.Individual.objects.all()
         individuals_set = set()
         individuals_sex = Counter()
@@ -417,6 +430,7 @@ def public_overview(_request):
                     content[field] = value
             if "experiment_type" in content:
                 content["experiments"] = len(experiments_set)
+            content["datasets"] = datasets
         return Response(content)
 
     else:
