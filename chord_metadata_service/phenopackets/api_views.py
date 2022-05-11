@@ -202,6 +202,20 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filter_class = f.PhenopacketFilter
 
+    def list(self, request):
+        # queryset = m.Phenopacket.objects.all()\
+        #     .prefetch_related("biosamples", "biosamples__experiment_set").order_by("id")
+        queryset = m.Phenopacket.objects.all() \
+            .prefetch_related(*PHENOPACKET_PREFETCH) \
+            .select_related(*PHENOPACKET_SELECT_REL) \
+            .order_by("id")
+        # apply filtering
+        filtered_queryset = self.filter_queryset(queryset)
+        # paginate
+        paginated_queryset = self.paginate_queryset(filtered_queryset)
+        serializer = s.ListPhenopacketSerializer(paginated_queryset, many=True)
+        return self.get_paginated_response(serializer.data)
+
 
 class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
     """
