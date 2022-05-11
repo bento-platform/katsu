@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
-from .serializers import IndividualSerializer
+from .serializers import IndividualSerializer, ListIndividualSerializer
 from .models import Individual
 from .filters import IndividualFilter, PublicIndividualFilter
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
@@ -39,6 +39,17 @@ class IndividualViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filter_class = IndividualFilter
     ordering_fields = ["id"]
+
+    def list(self, request):
+        queryset = Individual.objects.all().prefetch_related(
+            "phenopackets__biosamples", "phenopackets__biosamples__experiment_set"
+        ).order_by("id")
+        # apply filtering
+        filtered_queryset = self.filter_queryset(queryset)
+        # paginate
+        paginated_queryset = self.paginate_queryset(filtered_queryset)
+        serializer = ListIndividualSerializer(paginated_queryset, many=True)
+        return self.get_paginated_response(serializer.data)
 
     # Cache page for the requested url, default to 2 hours.
     @method_decorator(cache_page(settings.CACHE_TIME))
