@@ -85,4 +85,6 @@ urlpatterns = [
     path('public_search_fields', public_search_fields, name='public-search-fields',),
     # public overview
     path('public_overview', public_overview, name='public-overview',),
+    # test
+    path('listphenopackets', phenopacket_views.list_phenopackets, name="listphenopackets")
 ]

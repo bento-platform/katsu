@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.db.models import Count
+
 from rest_framework import viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
@@ -270,3 +272,13 @@ def get_chord_phenopacket_schema(_request):
     Chord phenopacket schema that can be shared with data providers.
     """
     return Response(PHENOPACKET_SCHEMA)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def list_phenopackets(_request):
+    # call values() and annotate with ишщыфьздуы фтв experiments scount
+    phenopackets = m.Phenopacket.objects.values("id", "subject")\
+        .annotate(biosamples=Count("biosamples"), experiments=Count("biosamples__experiment")).order_by("id")\
+        .explain(verbose=True, analyze=True)
+    return Response(phenopackets)

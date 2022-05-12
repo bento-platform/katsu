@@ -233,21 +233,21 @@ class PhenopacketSerializer(SimplePhenopacketSerializer):
 
 
 class ListPhenopacketSerializer(GenericSerializer):
-    #biosamples = serializers.SerializerMethodField()
-    #experiments = serializers.SerializerMethodField()
+    biosamples = serializers.SerializerMethodField()
+    experiments = serializers.SerializerMethodField()
 
     class Meta:
         model = Phenopacket
-        fields = ['id']
+        fields = ['id', 'subject', 'biosamples', 'experiments']
         # meta info for converting to FHIR
         fhir_datatype_plural = 'compositions'
         class_converter = fhir_utils.fhir_composition
 
-    # def get_biosamples(self, obj):
-    #     return [b.id for b in obj.biosamples.all()]
-    #
-    # def get_experiments(self, obj):
-    #     return [exp.id for b in obj.biosamples.all() for exp in b.experiment_set.all()]
+    def get_biosamples(self, obj):
+        return [b.id for b in obj.biosamples.all()]
+
+    def get_experiments(self, obj):
+        return [exp.id for b in obj.biosamples.all() for exp in b.experiment_set.all()]
 
 
 #############################################################
