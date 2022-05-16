@@ -26,6 +26,7 @@ router.register(r'tables', chord_views.TableViewSet)
 
 # Experiments app urls
 router.register(r'experiments', experiment_views.ExperimentViewSet)
+router.register(r'experimentresults', experiment_views.ExperimentResultViewSet)
 
 # Patients app urls
 router.register(r'individuals', individual_views.IndividualViewSet)
