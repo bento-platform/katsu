@@ -1,5 +1,5 @@
 import django_filters
-from .models import Experiment
+from .models import Experiment, ExperimentResult
 
 
 class ExperimentFilter(django_filters.rest_framework.FilterSet):
@@ -16,6 +16,25 @@ class ExperimentFilter(django_filters.rest_framework.FilterSet):
     class Meta:
         model = Experiment
         fields = ["id", "reference_registry_id", "biosample"]
+
+    def filter_extra_properties(self, qs, name, value):
+        return qs.filter(extra_properties__icontains=value)
+
+
+class ExperimentResultFilter(django_filters.rest_framework.FilterSet):
+    identifier = django_filters.CharFilter(lookup_expr='exact')
+    description = django_filters.CharFilter(lookup_expr='icontains')
+    filename = django_filters.CharFilter(lookup_expr='icontains')
+    genome_assembly_id = django_filters.CharFilter(lookup_expr='iexact')
+    file_format = django_filters.CharFilter(lookup_expr='iexact')
+    data_output_type = django_filters.CharFilter(lookup_expr='icontains')
+    usage = django_filters.CharFilter(lookup_expr='icontains')
+    created_by = django_filters.CharFilter(lookup_expr='icontains')
+    extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
+
+    class Meta:
+        model = ExperimentResult
+        exclude = ["creation_date", "created", "updated"]
 
     def filter_extra_properties(self, qs, name, value):
         return qs.filter(extra_properties__icontains=value)
