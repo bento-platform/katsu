@@ -63,7 +63,7 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     Create a new experiment result
     """
 
-    queryset = ExperimentResult.objects.all()
+    queryset = ExperimentResult.objects.all().order_by("id")
     serializer_class = ExperimentResultSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
