@@ -13,6 +13,12 @@ class ExperimentFilter(django_filters.rest_framework.FilterSet):
     library_layout = django_filters.CharFilter(lookup_expr='icontains')
     extraction_protocol = django_filters.CharFilter(lookup_expr='icontains')
     extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
+    # filter by datasets
+    datasets = django_filters.CharFilter(
+        method=filter_datasets,
+        field_name="table__ownership_record__dataset__title",
+        label="Datasets"
+    )
 
     class Meta:
         model = Experiment
