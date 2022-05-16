@@ -124,7 +124,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'chord_metadata_service.restapi.datasets_authz_middleware.DatasetsAuthzMiddleware',
+    'django_cprofile_middleware.middleware.ProfilerMiddleware',  # settings for using profiling tool
 ]
+
+DJANGO_CPROFILE_MIDDLEWARE_REQUIRE_STAFF = False  # settings for using profiling tool
 
 CORS_ALLOWED_ORIGINS = []
 
