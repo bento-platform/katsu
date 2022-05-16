@@ -1,4 +1,5 @@
 import django_filters
+from chord_metadata_service.phenopackets.filters import filter_datasets
 from .models import Experiment, ExperimentResult
 
 
@@ -31,6 +32,12 @@ class ExperimentResultFilter(django_filters.rest_framework.FilterSet):
     usage = django_filters.CharFilter(lookup_expr='icontains')
     created_by = django_filters.CharFilter(lookup_expr='icontains')
     extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
+    # filter by datasets
+    datasets = django_filters.CharFilter(
+        method=filter_datasets,
+        field_name="experiment__table__ownership_record__dataset__title",
+        label="Datasets"
+    )
 
     class Meta:
         model = ExperimentResult
