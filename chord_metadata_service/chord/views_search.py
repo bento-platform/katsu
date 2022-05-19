@@ -383,6 +383,15 @@ def chord_private_search(request):
     # Private search endpoints are protected by URL namespace, not by Django permissions.
     return search(request, internal_data=True)
 
+# Test open search endpoint
+# Cache page for the requested url
+@cache_page(60 * 60 * 2)
+@api_view(["GET", "POST"])
+@permission_classes([AllowAny])
+def open_search(request):
+    # Test Open search endpoint are not protected by URL namespace.
+    return search(request, internal_data=True)
+
 
 def phenopacket_filter_results(subject_ids, htsfile_ids, disease_ids, biosample_ids,
                                phenotypicfeature_ids, phenopacket_ids):
