@@ -4,7 +4,7 @@
       "id": "experiment:1",
       "biosample": "sample1",
       "study_type": "Epigenomics",
-      "experiment_type": "Histone H3K27ac",
+      "experiment_type": "WES",
       "experiment_ontology": [
         {
           "id": "EFO:0002692",
@@ -68,7 +68,7 @@
       "id": "experiment:2",
       "biosample": "sample8",
       "study_type": "Epigenomics",
-      "experiment_type": "Histone H3K27ac",
+      "experiment_type": "WES",
       "experiment_ontology": [
         {
           "id": "EFO:0002692",
