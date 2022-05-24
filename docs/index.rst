@@ -13,6 +13,8 @@ Welcome to Katsu Metadata service's documentation!
    modules/introduction
    modules/installation
    modules/ingestion_workflow_example
+   modules/patients_api_endpoints
+   modules/phenopackets_api_endpoints
    modules/public_endpoints
    modules/models
    modules/views
