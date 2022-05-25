@@ -17,6 +17,7 @@ Welcome to Katsu Metadata service's documentation!
    modules/phenopackets_api_endpoints
    modules/experiments_api_endpoints
    modules/mcode_api_endpoints
+   modules/chord_api_endpoints
    modules/public_endpoints
    modules/models
    modules/views
