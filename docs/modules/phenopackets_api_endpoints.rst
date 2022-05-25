@@ -1,5 +1,5 @@
 Phenopackets API endpoints
-======================
+==========================
 
 Data types endpoints
 --------------------
