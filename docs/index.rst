@@ -13,13 +13,13 @@ Welcome to Katsu Metadata service's documentation!
    modules/introduction
    modules/installation
    modules/ingestion_workflow_example
-   modules/patients_api_endpoints
-   modules/phenopackets_api_endpoints
-   modules/experiments_api_endpoints
-   modules/mcode_api_endpoints
-   modules/chord_api_endpoints
-   modules/overview_api_endpoints
-   modules/public_endpoints
+   modules/patients_api
+   modules/phenopackets_api
+   modules/experiments_api
+   modules/mcode_api
+   modules/chord_api
+   modules/overview_api
+   modules/public_api
    modules/models
    modules/views
 
