@@ -37,7 +37,7 @@ Services depend on each other and are separated based on their scope.
 
 **4. Experiments service** handles experiment related data.
 
-- Data model: derived from IHEC metadata `Experiment specification <https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments>`_.
+- Data model: derived from IHEC metadata `Experiment specification <https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments>`_ and `MINSEQE schema <https://github.com/FAIRsharing/mircat/tree/master/minseqe/schema>`_.
 
 **5. Resources service** handles metadata about ontologies used for data annotation.
 
@@ -70,6 +70,8 @@ Metadata standards
 `Phenopackets on FHIR Implementation Guide <https://aehrc.github.io/fhir-phenopackets-ig/>`_ is used to map Phenopackets elements to `FHIR <https://www.hl7.org/fhir/>`_ resources.
 
 `IHEC Metadata Experiment <https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments>`_ is used for describing an experiment.
+
+`MINSEQE (Minimum Information About Sequencing Experiment) schema <https://github.com/FAIRsharing/mircat/tree/master/minseqe/schema>`_  is used for describing an experiment.
 
 REST API highlights
 -------------------
