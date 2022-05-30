@@ -1,5 +1,5 @@
-Overview API endpoints
-======================
+Overview API
+============
 
 Overviews
 ---------

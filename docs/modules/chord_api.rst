@@ -1,5 +1,5 @@
-CHORD API endpoints
-===================
+CHORD API
+=========
 
 Data types endpoints
 --------------------
@@ -66,6 +66,8 @@ Example of POST request to search for all phenopackets that have disease Carcino
         "data_type": "phenopacket",
         "query": ["#ico", ["#resolve", "diseases", "[item]", "term", "label"], "Carcinoma"]
     }
+
+Example of POST request to search for all experiments that have experiments results in VCF format
 
 Ingest endpoint
 ---------------

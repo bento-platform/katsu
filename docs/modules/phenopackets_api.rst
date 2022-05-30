@@ -1,5 +1,5 @@
-Phenopackets API endpoints
-==========================
+Phenopackets API
+================
 
 Data types endpoints
 --------------------
@@ -182,7 +182,7 @@ The following **filters** can be applied:
   :code:`/api/diseases?authorized_datasets=dataset_1,dataset_2`
 
 
-**Bisamples**
+**Biosamples**
 
 :code:`api/biosamples` GET: list of Biosamples
 

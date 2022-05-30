@@ -1,5 +1,5 @@
-Public endpoints
-================
+Public API
+==========
 
 There are several public APIs to return data overview and perform a search that returns only objects count.
 The implementation of public APIs relies on a project customized configuration file (config.json) that must be placed in the base directory.

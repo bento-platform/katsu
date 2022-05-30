@@ -1,5 +1,5 @@
-Patients API endpoints
-======================
+Patients API
+============
 
 Data types endpoints
 --------------------

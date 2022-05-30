@@ -1,5 +1,5 @@
-Experiments API endpoints
-=========================
+Experiments API
+===============
 
 Data types endpoints
 --------------------
