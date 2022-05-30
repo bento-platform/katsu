@@ -1,9 +1,6 @@
 Overview API
 ============
 
-Overviews
----------
-
 :code:`api/overview` GET: returns an overview of all phenopackets, individuals and other related data types.
 The overview includes counts for individuals, unique diseases, phenotypic features, experiments and other information.
 

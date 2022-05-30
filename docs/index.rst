@@ -12,7 +12,6 @@ Welcome to Katsu Metadata service's documentation!
 
    modules/introduction
    modules/installation
-   modules/ingestion_workflow_example
    modules/patients_api
    modules/phenopackets_api
    modules/experiments_api
@@ -20,6 +19,9 @@ Welcome to Katsu Metadata service's documentation!
    modules/chord_api
    modules/overview_api
    modules/public_api
+   modules/schemas_api
+   modules/autocomplete_api
+   modules/ingestion_workflow_example
    modules/models
    modules/views
 

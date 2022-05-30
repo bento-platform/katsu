@@ -73,8 +73,8 @@ Example of the config.json
     }
 
 
-Public APIs
--------------------------
+Public endpoints
+----------------
 
 The public APIs include the following endpoints:
 
