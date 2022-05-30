@@ -17,6 +17,7 @@ Welcome to Katsu Metadata service's documentation!
    modules/experiments_api
    modules/mcode_api
    modules/chord_api
+   modules/resources_api
    modules/overview_api
    modules/public_api
    modules/schemas_api
