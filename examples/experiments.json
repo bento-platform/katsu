@@ -29,7 +29,7 @@
           "filename": "NA19648_01.vcf.gz",
           "file_format": "VCF",
           "data_output_type": "Derived data",
-          "usage": "visualized",
+          "usage": "Visualized",
           "creation_date": "01-09-2021",
           "created_by": "Admin",
           "extra_properties": {
@@ -42,7 +42,7 @@
           "filename": "NA19648_02.vcf.gz",
           "file_format": "CRAM",
           "data_output_type": "Raw data",
-          "usage": "visualized",
+          "usage": "Visualized",
           "creation_date": "01-09-2021",
           "created_by": "Admin",
           "extra_properties": {
@@ -97,7 +97,7 @@
           "filename": "HG00096_01.vcf.gz",
           "file_format": "VCF",
           "data_output_type": "Derived data",
-          "usage": "visualized",
+          "usage": "Visualized",
           "creation_date": "01-09-2021",
           "created_by": "Admin",
           "extra_properties": {
@@ -110,7 +110,7 @@
           "filename": "HG00096_02.vcf.gz",
           "file_format": "CRAM",
           "data_output_type": "Raw data",
-          "usage": "visualized",
+          "usage": "Visualized",
           "creation_date": "01-09-2021",
           "created_by": "Admin",
           "extra_properties": {

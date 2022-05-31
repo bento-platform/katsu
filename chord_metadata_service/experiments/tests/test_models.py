@@ -92,7 +92,7 @@ class ExperimentResultTest(TestCase):
             genome_assembly_id="GRCh37",
             file_format="VCF",
             data_output_type="Derived",
-            usage="visualized",
+            usage="Visualized",
             creation_date="2021-05-10",
             created_by="admin",
             extra_properties={"target": "None"}
@@ -108,7 +108,7 @@ class ExperimentResultTest(TestCase):
             filename="01.vcf.gz",
             file_format="Not VCF",
             data_output_type="Derived data",
-            usage="visualized",
+            usage="Visualized",
             creation_date="2021-05-10",
             created_by="admin",
             extra_properties={"target": "None"}
