@@ -29,6 +29,7 @@ from .example_ingest import (
     EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
     EXAMPLE_INGEST_INVALID_PHENOPACKET,
     EXAMPLE_INGEST_MULTIPLE_OUTPUTS,
+    EXAMPLE_INGEST_INVALID_EXPERIMENT,
 )
 
 
@@ -129,6 +130,16 @@ class IngestTest(TestCase):
         # resources for experiments
         # check that experiments resource is in database
         self.assertIn(EXAMPLE_INGEST_EXPERIMENT["resources"][0]["id"], [v["id"] for v in Resource.objects.values("id")])
+
+    def test_ingesting_invalid_experiment_json(self):
+        # check invalid experiment, must fail validation
+        for exp in EXAMPLE_INGEST_INVALID_EXPERIMENT["experiments"]:
+            validation = schema_validation(exp, EXPERIMENT_SCHEMA)
+            self.assertEqual(validation, False)
+        # check valid experiment, must pass validation
+        for exp in EXAMPLE_INGEST_EXPERIMENT["experiments"]:
+            validation_2 = schema_validation(exp, EXPERIMENT_SCHEMA)
+            self.assertEqual(validation_2, True)
 
 
 class IngestISOAgeToNumberTest(TestCase):
