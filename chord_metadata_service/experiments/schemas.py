@@ -37,7 +37,7 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
         },
         "usage": {
             "type": "string",
-            "enum": ["visualized", "downloaded"]
+            "enum": ["Visualize", "Download"]
         },
         "creation_date": {
             "type": "string"
