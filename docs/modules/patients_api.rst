@@ -22,11 +22,11 @@ The following **filters** can be used:
 - karyotypic_sex (case-insensitive exact match): :code:`/api/individuals?karyotypic_sex=xx`
   options: unknown_karyotype, XX, XY, XO, XXY, XXX, XXYY, XXXY, XXXX, XYY, other_karyotype
 
-- active status: :code:`/api/individuals?active=Yes`
-  options: Unknown, Yes, No
+- active status: :code:`/api/individuals?active=true`
+  options: true, false
 
-- deceased status: :code:`/api/individuals?deceased=Yes`
-  options: Unknown, Yes, No
+- deceased status: :code:`/api/individuals?deceased=false`
+  options: true, false
 
 - ethnicity (case-insensitive partial match): :code:`/api/individuals?ethnicity={value}`
 

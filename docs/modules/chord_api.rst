@@ -69,6 +69,13 @@ Example of POST request to search for all phenopackets that have disease Carcino
 
 Example of POST request to search for all experiments that have experiments results in VCF format
 
+.. code-block:: json
+
+    {
+        "data_type": "experiment",
+        "query": ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
+    }
+
 Ingest endpoint
 ---------------
 

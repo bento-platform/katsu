@@ -14,8 +14,8 @@ The following **filters** can be applied:
 
 - id (exact match, single): :code:`/api/phenotypicfeatures?id=112002`
 
-- negated: :code:`/api/phenotypicfeatures?negated=No`
-  options: Unknown, Yes, No
+- negated: :code:`/api/phenotypicfeatures?negated=false`
+  options: true, false
 
 - description (case-insensitive partial match): :code:`/api/phenotypicfeatures?description=test`
 
@@ -214,8 +214,8 @@ The following **filters** can be applied:
 
 - procedure (single, exact match, searches by procedure id): :code:`/api/biosamples?procedure=1`
 
-- is_control_sample: :code:`/api/biosamples?is_control_sample=No`
-  options: Unknown, Yes, No
+- is_control_sample: :code:`/api/biosamples?is_control_sample=false`
+  options: true, false
 
 - extra_properties (case-insensitive partial match): :code:`/api/biosamples?extra_properties=test`
 
