@@ -37,6 +37,13 @@ class ExperimentTest(TestCase):
             experiment_ontology=["invalid_value"],
             biosample=self.biosample
         )
+        # Missing required experiment_type
+        self.assertRaises(
+            ValidationError,
+            self.create,
+            library_strategy="Bisulfite-Seq",
+            biosample=self.biosample
+        )
 
         # Invalid molecule_ontology
         self.assertRaises(
@@ -48,7 +55,7 @@ class ExperimentTest(TestCase):
             biosample=self.biosample
         )
 
-        # Invalid value in other_fields
+        # Invalid value in extra_properties
         self.assertRaises(
             serializers.ValidationError,
             self.create,
@@ -81,6 +88,7 @@ class ExperimentResultTest(TestCase):
 
     def test_validation(self):
         self.assertEqual(ExperimentResult.objects.count(), 1)
+        self.assertEqual(ExperimentResult.objects.filter(file_format="VCF").count(), 1)
 
 
 class InstrumentTest(TestCase):
