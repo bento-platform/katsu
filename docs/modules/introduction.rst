@@ -37,7 +37,7 @@ Services depend on each other and are separated based on their scope.
 
 **4. Experiments service** handles experiment related data.
 
-- Data model: derived from IHEC metadata `Experiment specification <https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments>`_.
+- Data model: derived from IHEC metadata `Experiment specification <https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments>`_ and `MINSEQE schema <https://github.com/FAIRsharing/mircat/tree/master/minseqe/schema>`_.
 
 **5. Resources service** handles metadata about ontologies used for data annotation.
 
@@ -71,6 +71,8 @@ Metadata standards
 
 `IHEC Metadata Experiment <https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments>`_ is used for describing an experiment.
 
+`MINSEQE (Minimum Information About Sequencing Experiment) schema <https://github.com/FAIRsharing/mircat/tree/master/minseqe/schema>`_  is used for describing an experiment.
+
 REST API highlights
 -------------------
 
@@ -84,11 +86,19 @@ REST API highlights
 
 - Other available renderers:
 
-  - Currently, the following classes can be retrieved in FHIR format by appending :code:`?format=fhir`: Phenopacket, Individual, Biosample, PhenotypicFeature, HtsFile, Gene, Variant, Disease, Procedure.
+  - FHIR renderer uses `SMART on FHIR python client <https://github.com/smart-on-fhir/client-py>`_ for Phenopackets and based on `GA4GH FHIR Implementation Guide <https://github.com/smart-on-fhir/client-py>`_.
 
-  - JSON-LD context to schema.org provided for the Dataset class in order to allow for a Google dataset search for Open Access Data: append :code:`?format=json-ld` when querying dataset endpoint.
+    Currently, the following classes can be retrieved in FHIR format by appending :code:`?format=fhir`: Phenopacket, Individual, Biosample, PhenotypicFeature, HtsFile, Gene, Variant, Disease, Procedure.
 
-  - Dataset description can also be retrieved in RDF format: append :code:`?format=rdf` when querying the dataset endpoint.
+  - RDF and JSON-LD renderers for Dataset metadata, based on `DATS metadata context <https://github.com/datatagsuite/context>`_.
+
+    The context to schema.org provided for the Dataset class in order to allow for a Google dataset search for Open Access Data: append :code:`?format=json-ld` when querying dataset endpoint.
+
+    Dataset description can also be retrieved in RDF format: append :code:`?format=rdf` when querying the dataset endpoint.
+
+  - Custom ARGO renderer which is based on CanDIG mCODE to ARGO mappings.
+
+    Currently, the following classes can be retrieved in ARGO format by appending :code:`?format=argo`: GeneticSpecimen, CancerCondition, CancerRelatedProcedure, MedicationStatement, MCodePacket.
 
 **Data ingest**
 
@@ -115,7 +125,45 @@ Example of Phenopackets POST request body:
       }
     }
 
-**2. mCode data ingest**
+**2. Experiments data ingest**
+
+The data must follow Experiments schema in order to be ingested.
+
+Example of Experiments data POST request body:
+
+.. code-block::
+
+    {
+       "table_id":"table_unique_uuid",
+       "workflow_id":"experiments_json",
+       "workflow_params":{
+          "experiments_json.json_document":"/path/to/data.json"
+       },
+       "workflow_outputs":{
+          "json_document":"/path/to/data.json"
+       }
+    }
+
+**3. mCode data ingest**
+
+The data must follow Katsu's mcode schema in order to be ingested.
+
+Example of mCode data POST request body:
+
+.. code-block::
+
+    {
+       "table_id":"table_unique_uuid",
+       "workflow_id":"mcode_json",
+       "workflow_params":{
+          "mcode_json.json_document":"/path/to/data.json"
+       },
+       "workflow_outputs":{
+          "json_document":"/path/to/data.json"
+       }
+    }
+
+**4. FHIR mCode data ingest**
 
 mCODE data elements are based on FHIR datatypes.
 Only mCode related profiles will be ingested.
@@ -136,8 +184,7 @@ Example of mCode FHIR data POST request body:
        }
     }
 
-
-**3. FHIR data ingest**
+**5. FHIR data ingest**
 
 At the moment there is no implementation guide from FHIR to Phenopackets.
 FHIR data will only be ingested partially where it's possible to establish mapping between FHIR resource and Phenopackets element.

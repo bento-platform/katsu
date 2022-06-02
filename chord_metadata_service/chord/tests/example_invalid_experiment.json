@@ -28,9 +28,9 @@
           "identifier": "sample1_01",
           "description": "test",
           "filename": "sample1_01.vcf.gz",
-          "file_format": "VCF",
-          "data_output_type": "Derived data",
-          "usage": "Visualized",
+          "file_format": "no information",
+          "data_output_type": "derived data",
+          "usage": "visualized",
           "creation_date": "01-09-2021",
           "created_by": "Admin",
           "extra_properties": {
