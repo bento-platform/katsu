@@ -30,7 +30,7 @@ setuptools.setup(
         "isodate==0.6.0",
         "jsonschema>=3.2,<4.0",
         "psycopg2-binary>=2.8,<2.9",
-        "PyJWT[crypto]==1.7.1",
+        "PyJWT[crypto]==2.4.0",
         "python-dateutil>=2.8,<3.0",
         "python-dotenv==0.14.0",
         "PyYAML>=5.3,<6.0",
