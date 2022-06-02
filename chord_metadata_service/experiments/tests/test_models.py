@@ -89,6 +89,16 @@ class ExperimentResultTest(TestCase):
     def test_validation(self):
         self.assertEqual(ExperimentResult.objects.count(), 1)
         self.assertEqual(ExperimentResult.objects.filter(file_format="VCF").count(), 1)
+        # Invalid extra_properties
+        # serializers.ValidationError("Not valid JSON schema for this field.")
+        self.assertRaises(
+            serializers.ValidationError,
+            self.create,
+            identifier="experiment_results:1",
+            description="Test description",
+            filename="test.vcf",
+            extra_properties={"date": 2021}
+        )
 
 
 class InstrumentTest(TestCase):
