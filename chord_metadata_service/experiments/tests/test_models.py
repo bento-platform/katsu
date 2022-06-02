@@ -81,38 +81,6 @@ class ExperimentResultTest(TestCase):
 
     def test_validation(self):
         self.assertEqual(ExperimentResult.objects.count(), 1)
-        # Invalid CV for data_output_type
-        # exceptions.ValidationError: {'data_output_type': ["Value 'Derived' is not a valid choice."]}
-        self.assertRaises(
-            ValidationError,
-            self.create,
-            identifier="experiment_result:2",
-            description="Test Experiment result 2",
-            filename="01.vcf.gz",
-            genome_assembly_id="GRCh37",
-            file_format="VCF",
-            data_output_type="Derived",
-            usage="visualized",
-            creation_date="2021-05-10",
-            created_by="admin",
-            extra_properties={"target": "None"}
-        )
-
-        # Invalid CV for data_output_type
-        # exceptions.ValidationError: {'file_format': ["Value 'Not VCF' is not a valid choice."]}
-        self.assertRaises(
-            ValidationError,
-            self.create,
-            identifier="experiment_result:2",
-            description="Test Experiment result 2",
-            filename="01.vcf.gz",
-            file_format="Not VCF",
-            data_output_type="Derived data",
-            usage="visualized",
-            creation_date="2021-05-10",
-            created_by="admin",
-            extra_properties={"target": "None"}
-        )
 
 
 class InstrumentTest(TestCase):
