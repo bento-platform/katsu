@@ -4,7 +4,7 @@
       "id": "experiment:1",
       "biosample": "sample1",
       "study_type": "Epigenomics",
-      "experiment_type": "Histone H3K27ac",
+      "experiment_type": "WES",
       "experiment_ontology": [
         {
           "id": "EFO:0002692",
@@ -30,7 +30,7 @@
           "filename": "sample1_01.vcf.gz",
           "file_format": "VCF",
           "data_output_type": "Derived data",
-          "usage": "visualized",
+          "usage": "Visualized",
           "creation_date": "01-09-2021",
           "created_by": "Admin",
           "extra_properties": {
@@ -43,7 +43,7 @@
           "filename": "sample1_02.cram",
           "file_format": "CRAM",
           "data_output_type": "Raw data",
-          "usage": "visualized",
+          "usage": "Visualized",
           "creation_date": "01-09-2021",
           "created_by": "Admin",
           "extra_properties": {
@@ -68,7 +68,7 @@
       "id": "experiment:2",
       "biosample": "sample8",
       "study_type": "Epigenomics",
-      "experiment_type": "Histone H3K27ac",
+      "experiment_type": "WES",
       "experiment_ontology": [
         {
           "id": "EFO:0002692",
@@ -94,7 +94,7 @@
           "filename": "sample8_01.vcf.gz",
           "file_format": "VCF",
           "data_output_type": "Derived data",
-          "usage": "visualized",
+          "usage": "Visualized",
           "creation_date": "01-09-2021",
           "created_by": "Admin",
           "extra_properties": {
@@ -107,7 +107,7 @@
           "filename": "sample8_02.cram",
           "file_format": "CRAM",
           "data_output_type": "Raw data",
-          "usage": "visualized",
+          "usage": "Visualized",
           "creation_date": "01-09-2021",
           "created_by": "Admin",
           "extra_properties": {

@@ -32,6 +32,7 @@ The :code:`config.json` file follows jsonschema specifications: it includes fiel
 - "units" (string) - defines unit value for numeric fields (e.g. "years", "mg/L")
 - "minimum" (number) - defines the minimum value in this field
 - "maximum" (number) - defines the maximum value in this field
+- "index" (number) - defines properties display order in the UI
 
 Example of the config.json
 
