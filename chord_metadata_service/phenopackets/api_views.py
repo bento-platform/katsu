@@ -187,7 +187,7 @@ PHENOPACKET_SELECT_REL = (
 )
 
 
-class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
+class PhenopacketViewSet(PhenopacketsModelViewSet):
     """
     get:
     Return a list of all existing phenopackets

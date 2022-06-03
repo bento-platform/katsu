@@ -361,10 +361,11 @@ def _get_section_object(nested_obj, title):
     section_content.entry = []
     for item in nested_obj:
         entry = fhirreference.FHIRReference()
-        if item.get('id'):
-            entry.reference = str(item['id'])
-        else:
-            entry.reference = item['uri']
+        entry.reference = item
+        # if item.get('id'):
+        #     entry.reference = str(item['id'])
+        # else:
+        #     entry.reference = item['uri']
         section_content.entry.append(entry)
     return section_content
 
@@ -375,15 +376,23 @@ def fhir_composition(obj):
     composition = comp.Composition()
     composition.id = obj['id']
     composition.subject = fhirreference.FHIRReference()
-    composition.subject.reference = str(obj['subject']['id'])
+    if isinstance(obj['subject'], str):
+        composition.subject.reference = str(obj['subject'])
+    else:
+        composition.subject.reference = str(obj['subject']['id'])
     composition.title = PHENOPACKETS_ON_FHIR_MAPPING['phenopacket']['title']
     # elements in Composition required by FHIR spec
     composition.status = 'preliminary'
     composition.author = []
     author = fhirreference.FHIRReference()
-    author.reference = obj['meta_data']['created_by']
+    # author.reference = obj['meta_data']['created_by']
+    # composition.author.append(author)
+    # composition.date = fhirdate.FHIRDate(obj['meta_data']['created'])\
+    # placeholder date because it's required to have an author and date by fhir client lib
+    author.reference = "admin"
     composition.author.append(author)
-    composition.date = fhirdate.FHIRDate(obj['meta_data']['created'])
+    # placeholder date
+    composition.date = fhirdate.FHIRDate("2022-06-03")
     composition.type = fhir_codeable_concept({
         "id": PHENOPACKETS_ON_FHIR_MAPPING['phenopacket']['code']['code'],
         "label": PHENOPACKETS_ON_FHIR_MAPPING['phenopacket']['title'],
@@ -393,7 +402,7 @@ def fhir_composition(obj):
     composition.section = []
     sections = ['biosamples', 'variants', 'diseases', 'hts_files']
     for section in sections:
-        if obj[section]:
+        if section in obj:
             section_content = _get_section_object(obj.get(section, None), section)
             composition.section.append(section_content)
 

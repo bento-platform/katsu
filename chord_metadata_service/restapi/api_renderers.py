@@ -118,13 +118,13 @@ class IndividualCSVRenderer(JSONRenderer):
                     'sex': individual.get('sex', None),
                     'date_of_birth': individual.get('date_of_birth', None),
                     'taxonomy': None,
-                    'karyotypic_sex': individual['karyotypic_sex'],
+                    'karyotypic_sex': individual.get('karyotypic_sex', None),
                     'race': individual.get('race', None),
                     'ethnicity': individual.get('ethnicity', None),
                     'age': None,
                     'diseases': None,
-                    'created': individual['created'],
-                    'updated': individual['updated']
+                    'created': individual.get('created', None),
+                    'updated': individual.get('updated', None),
                 }
                 if 'taxonomy' in individual:
                     ind_obj['taxonomy'] = individual['taxonomy'].get('label', None)

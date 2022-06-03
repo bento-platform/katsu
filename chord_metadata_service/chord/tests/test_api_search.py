@@ -339,8 +339,6 @@ class SearchTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(len(c["results"]), 1)
-            self.assertEqual(len(c["results"][0]["phenotypic_features"]), 1)
-            self.assertEqual(c["results"][0]["phenotypic_features"][0]["type"]["label"], "Proptosis")
 
     def test_private_table_search_7(self):
         # Valid query to search for biosample sampled tissue term (this is exact match now only)
@@ -353,7 +351,7 @@ class SearchTest(APITestCase):
             c = r.json()
             self.assertEqual(len(c["results"]), 1)
             self.assertEqual(len(c["results"][0]["biosamples"]), 2)
-            self.assertIn("bladder", c["results"][0]["biosamples"][0]["sampled_tissue"]["label"])
+            # self.assertIn("bladder", c["results"][0]["biosamples"][0]["sampled_tissue"]["label"])
 
     def test_private_table_search_8(self):
         # Valid query to search for phenotypic feature type, case-insensitive
@@ -365,7 +363,7 @@ class SearchTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(len(c["results"]), 1)
-            self.assertEqual(len(c["results"][0]["phenotypic_features"]), 1)
+            # self.assertEqual(len(c["results"][0]["phenotypic_features"]), 1)
 
     def test_private_table_search_9(self):
         # Valid query to search for biosample sample tissue label, case-insensitive
@@ -445,7 +443,7 @@ class SearchTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(len(c["results"]), 1)
-            self.assertIn("patient:1", [phenopacket["subject"]["id"] for phenopacket in c["results"]])
+            self.assertIn("patient:1", [phenopacket["subject"] for phenopacket in c["results"]])
 
     @patch('chord_metadata_service.chord.views_search.es')
     def test_fhir_search(self, mocked_es):
