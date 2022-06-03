@@ -65,6 +65,8 @@ Katsu Metadata Service is a service to store epigenomic metadata.
 
 ## REST API highlights
 
+* Swagger schema docs can be found [here](https://editor.swagger.io/?url=https://raw.githubusercontent.com/bento-platform/katsu/develop/swagger_schema.json).
+
 * Standard api delivers data in snake_case.
 To retrieved data in json compliant with phenopackets that uses camelCase append `?format=phenopackets` .
 
