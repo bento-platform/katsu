@@ -57,7 +57,7 @@ python-dotenv==0.14.0
 pytz==2021.1
 PyYAML==5.4.1
 rdflib==5.0.0
-rdflib-jsonld==0.5.0
+rdflib-jsonld==0.6.2
 redis==3.5.3
 requests==2.25.1
 requests-unixsocket==0.2.0
