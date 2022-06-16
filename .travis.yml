@@ -1,7 +1,7 @@
 dist: focal
 language: python
 python:
-  - "3.7"
+  - "3.10"
 addons:
   postgresql: "12"
   apt:
