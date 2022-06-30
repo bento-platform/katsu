@@ -4,7 +4,8 @@ import logging
 from collections import Counter
 from django.conf import settings
 from django.views.decorators.cache import cache_page
-from django.db.models import Count
+from django.db.models import Count, F, Func, IntegerField
+from django.db.models.functions import Cast
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -76,7 +77,7 @@ def overview(_request):
                     k: individuals_k_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.KARYOTYPIC_SEX)
                 },
                 "taxonomy": stats_for_field(patients_models.Individual, "taxonomy", "label"),
-                "age": dict(),  # dict(individuals_age),
+                "age": get_field_bins(patients_models.Individual, 'age_numeric', 10),  # TODO handle when age is a range
                 "ethnicity": stats_for_field(patients_models.Individual, "ethnicity"),
                 # "extra_properties": dict(individuals_extra_prop),
             },
@@ -368,4 +369,19 @@ def stats_for_field(model, field: str, label_field: str = None):
         if label_field:
             key = item[field][label_field]
         stats[key] = item['total']
+    return stats
+
+
+def get_field_bins(model, field, bin_size):
+    # creates a new field "binned" by substracting the modulo by bin size to
+    # the value which requires binning (e.g. 28 => 28 - 28 % 10 = 20)
+    # cast to integer to avoid numbers such as 60.00 if that was a decimal,
+    # and aggregate over this value.
+    query_set = model.objects.all().annotate(
+        binned=Cast(
+            F(field) - Func(F(field), bin_size, function="MOD"),
+            IntegerField()
+        )
+    ).values('binned').annotate(total=Count('binned'))
+    stats = {item['binned']: item['total'] for item in list(query_set)}
     return stats
