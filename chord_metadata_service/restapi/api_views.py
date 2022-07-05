@@ -24,6 +24,8 @@ from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPA
 logger = logging.getLogger("restapi_api_views")
 logger.setLevel(logging.INFO)
 
+OVERVIEW_AGE_BIN_SIZE = 10
+
 
 @api_view()
 @permission_classes([AllowAny])
@@ -54,8 +56,21 @@ def overview(_request):
     instruments_count = experiments_models.Instrument.objects.all().count()
     phenotypic_features_count = pheno_models.PhenotypicFeature.objects.all().distinct('pftype').count()
 
+    # Sex related fields stats are precomputed here and post processed later
+    # to include missing values inferred from the schema
     individuals_sex = stats_for_field(patients_models.Individual, "sex")
     individuals_k_sex = stats_for_field(patients_models.Individual, "karyotypic_sex")
+
+    # age_numeric is computed at ingestion time of phenopackets. On some instances
+    # it might be unavailable and as a fallback must be computed from the age JSON field which
+    # has two alternate formats (hence more complex and slower to process)
+    individuals_age = get_field_bins(patients_models.Individual, "age_numeric", OVERVIEW_AGE_BIN_SIZE)
+    if None in individuals_age:  # fallback
+        del individuals_age[None]
+        individuals_age = Counter(individuals_age)
+        individuals_age.update(
+            compute_binned_ages(OVERVIEW_AGE_BIN_SIZE)   # single update instead of creating iterables in a loop
+        )
 
     r = {
         "phenopackets": phenopackets_count,
@@ -77,7 +92,7 @@ def overview(_request):
                     k: individuals_k_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.KARYOTYPIC_SEX)
                 },
                 "taxonomy": stats_for_field(patients_models.Individual, "taxonomy", "label"),
-                "age": get_field_bins(patients_models.Individual, 'age_numeric', 10),  # TODO handle when age is a range
+                "age": individuals_age,
                 "ethnicity": stats_for_field(patients_models.Individual, "ethnicity"),
                 # "extra_properties": dict(individuals_extra_prop),
             },
@@ -385,3 +400,14 @@ def get_field_bins(model, field, bin_size):
     ).values('binned').annotate(total=Count('binned'))
     stats = {item['binned']: item['total'] for item in list(query_set)}
     return stats
+
+
+def compute_binned_ages(bin_size):
+    a = pheno_models.Individual.objects.filter(age_numeric__isnull=True).values('age')
+    binned_ages = []
+    for r in a.iterator():  # reduce memory footprint (no caching)
+        if r["age"] is None:
+            continue
+        age = parse_individual_age(r["age"])
+        binned_ages.append(age - age % OVERVIEW_AGE_BIN_SIZE)
+    return binned_ages
