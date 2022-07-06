@@ -64,7 +64,7 @@ class OverviewTest(APITestCase):
         # experiments
         self.instrument = exp_m.Instrument.objects.create(**exp_c.valid_instrument())
         self.experiment = exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_1, self.instrument))
-        exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_2, self.instrument))
+        exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_2, self.instrument, num_experiment=2))
         self.experiment_result = exp_m.ExperimentResult.objects.create(**exp_c.valid_experiment_result())
         self.experiment.experiment_results.set([self.experiment_result])
 

@@ -375,11 +375,16 @@ def stats_for_field(model, field: str):
     # Count() aggregates the results by performing a GROUP BY on the field
     query_set = model.objects.all().values(field).annotate(total=Count(field))
     stats = dict()
-    for item in list(query_set):
+    for item in query_set:
         key = item[field]
         if key is None:
             continue
-        stats[key] = item['total']
+
+        key = key.strip()
+        if key == "":
+            continue
+
+        stats[key] = item["total"]
     return stats
 
 
@@ -394,7 +399,7 @@ def get_field_bins(model, field, bin_size):
             IntegerField()
         )
     ).values('binned').annotate(total=Count('binned'))
-    stats = {item['binned']: item['total'] for item in list(query_set)}
+    stats = {item['binned']: item['total'] for item in query_set}
     return stats
 
 

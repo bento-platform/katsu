@@ -1,9 +1,4 @@
-num_experiment = 0
-
-
-def valid_experiment(biosample, instrument=None, table=None):
-    global num_experiment
-    num_experiment += 1
+def valid_experiment(biosample, instrument=None, table=None, num_experiment=1):
     return {
         "id": f"experiment:{num_experiment}",
         "study_type": "Whole genome Sequencing",
