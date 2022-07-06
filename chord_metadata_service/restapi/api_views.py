@@ -77,8 +77,8 @@ def overview(_request):
         "data_type_specific": {
             "biosamples": {
                 "count": biosamples_count,
-                "taxonomy": stats_for_field(pheno_models.Biosample, "taxonomy", "label"),
-                "sampled_tissue": stats_for_field(pheno_models.Biosample, "sampled_tissue", "label"),
+                "taxonomy": stats_for_field(pheno_models.Biosample, "taxonomy__label"),
+                "sampled_tissue": stats_for_field(pheno_models.Biosample, "sampled_tissue__label"),
             },
             "diseases": {
                 # count is a number of unique disease terms (not all diseases in the database)
@@ -91,15 +91,14 @@ def overview(_request):
                 "karyotypic_sex": {
                     k: individuals_k_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.KARYOTYPIC_SEX)
                 },
-                "taxonomy": stats_for_field(patients_models.Individual, "taxonomy", "label"),
+                "taxonomy": stats_for_field(patients_models.Individual, "taxonomy__label"),
                 "age": individuals_age,
                 "ethnicity": stats_for_field(patients_models.Individual, "ethnicity"),
-                # "extra_properties": dict(individuals_extra_prop),
             },
             "phenotypic_features": {
                 # count is a number of unique phenotypic feature types (not all pfs in the database)
                 "count": phenotypic_features_count,
-                "type": stats_for_field(pheno_models.PhenotypicFeature, "pftype", "label")
+                "type": stats_for_field(pheno_models.PhenotypicFeature, "pftype__label")
             },
             "experiments": {
                 "count": experiments_count,
@@ -370,19 +369,16 @@ def sort_numeric_values_into_bins(values: dict, bin_size: int = 10, threshold: i
     return {k: v for k, v in values_in_bins.items() if v > threshold}
 
 
-def stats_for_field(model, field: str, label_field: str = None):
-    # values() restrict the table of results to this field
+def stats_for_field(model, field: str):
+    # values() restrict the table of results to this COLUMN
     # annotate() creates a `total` column for the aggregation
-    # Count() aggregates the results by performing a group by on the field
+    # Count() aggregates the results by performing a GROUP BY on the field
     query_set = model.objects.all().values(field).annotate(total=Count(field))
     stats = dict()
     for item in list(query_set):
         key = item[field]
         if key is None:
             continue
-
-        if label_field:
-            key = item[field][label_field]
         stats[key] = item['total']
     return stats
 
