@@ -48,7 +48,6 @@ def overview(_request):
     Overview of all Phenopackets in the database
     """
     phenopackets_count = pheno_models.Phenopacket.objects.all().count()
-    diseases_count = pheno_models.Disease.objects.all().count()
     biosamples_count = pheno_models.Biosample.objects.all().count()
     individuals_count = patients_models.Individual.objects.all().count()
     experiments_count = experiments_models.Experiment.objects.all().count()
@@ -60,6 +59,9 @@ def overview(_request):
     # to include missing values inferred from the schema
     individuals_sex = stats_for_field(patients_models.Individual, "sex")
     individuals_k_sex = stats_for_field(patients_models.Individual, "karyotypic_sex")
+
+    diseases_stats = stats_for_field(pheno_models.Phenopacket, "diseases__term__label")
+    diseases_count = len(diseases_stats)
 
     # age_numeric is computed at ingestion time of phenopackets. On some instances
     # it might be unavailable and as a fallback must be computed from the age JSON field which
@@ -83,7 +85,7 @@ def overview(_request):
             "diseases": {
                 # count is a number of unique disease terms (not all diseases in the database)
                 "count": diseases_count,
-                "term": stats_for_field(pheno_models.Phenopacket, "diseases__term__label")
+                "term": diseases_stats
             },
             "individuals": {
                 "count": individuals_count,
