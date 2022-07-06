@@ -83,7 +83,7 @@ def overview(_request):
             "diseases": {
                 # count is a number of unique disease terms (not all diseases in the database)
                 "count": diseases_count,
-                "term": stats_for_field(pheno_models.Disease, "term", "label")
+                "term": stats_for_field(pheno_models.Phenopacket, "diseases__term__label")
             },
             "individuals": {
                 "count": individuals_count,
@@ -120,8 +120,8 @@ def overview(_request):
             },
             "instruments": {
                 "count": instruments_count,
-                "platform": stats_for_field(experiments_models.Instrument, "platform"),
-                "model": stats_for_field(experiments_models.Instrument, "model")
+                "platform": stats_for_field(experiments_models.Experiment, "instrument__platform"),
+                "model": stats_for_field(experiments_models.Experiment, "instrument__model")
             },
         }
     }
