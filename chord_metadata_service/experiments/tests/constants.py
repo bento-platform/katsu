@@ -1,6 +1,11 @@
+num_experiment = 0
+
+
 def valid_experiment(biosample, instrument=None, table=None):
+    global num_experiment
+    num_experiment += 1
     return {
-        "id": "experiment:1",
+        "id": f"experiment:{num_experiment}",
         "study_type": "Whole genome Sequencing",
         "experiment_type": "Chromatin Accessibility",
         "experiment_ontology": [{"id": "ontology:1", "label": "Ontology term 1"}],
