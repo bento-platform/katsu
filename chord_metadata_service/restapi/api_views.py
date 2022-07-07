@@ -217,10 +217,18 @@ def mcode_overview(_request):
 def public_search_fields(_request):
     """
     get:
-    Return public search fields
+    Return public search fields with their configuration
     """
-    if settings.CONFIG_FIELDS:
-        return Response(settings.CONFIG_FIELDS)
+    if settings.CONFIG_PUBLIC:
+        search_conf = settings.CONFIG_PUBLIC["search"]
+        field_conf = settings.CONFIG_PUBLIC["fields"]
+        r = [
+            {
+                **section,
+                "fields": [field_conf[f] for f in section["fields"]]
+            } for section in search_conf
+        ]
+        return Response(r)
     else:
         return Response(settings.NO_PUBLIC_FIELDS_CONFIGURED)
 

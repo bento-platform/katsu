@@ -294,6 +294,12 @@ if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
 else:
     CONFIG_FIELDS = {}
 
+if os.path.isfile(os.path.join(BASE_DIR, 'config.new.json')):
+    with open(os.path.join(BASE_DIR, 'config.new.json')) as config_file:
+        CONFIG_PUBLIC = json.load(config_file)
+else:
+    CONFIG_PUBLIC = {}
+
 # Public response when there is no enough data that passes the project-custom threshold
 INSUFFICIENT_DATA_AVAILABLE = {"message": "Insufficient data available."}
 
