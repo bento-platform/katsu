@@ -2,6 +2,8 @@ import math
 import logging
 
 from collections import Counter
+from typing import TypedDict, Mapping
+
 from django.conf import settings
 from django.views.decorators.cache import cache_page
 from django.db.models import Count, F, Func, IntegerField
@@ -25,6 +27,11 @@ logger = logging.getLogger("restapi_api_views")
 logger.setLevel(logging.INFO)
 
 OVERVIEW_AGE_BIN_SIZE = 10
+
+
+class BinnedStats(TypedDict):
+    labels: list[str]
+    values: list[int]
 
 
 @api_view()
@@ -362,6 +369,108 @@ def public_overview(_request):
         return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
 
 
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def public_overview_new(_request):
+    """
+    get:
+    Overview of all public data in the database
+    """
+
+    if not settings.CONFIG_PUBLIC:
+        return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
+
+    # Datasets provenance metadata
+    datasets = chord_models.Dataset.objects.values(
+        "title", "description", "contact_info",
+        "dates", "stored_in", "spatial_coverage",
+        "types", "privacy", "distributions",
+        "dimensions", "primary_publications", "citations",
+        "produced_by", "creators", "licenses",
+        "acknowledges", "keywords", "version",
+        "extra_properties"
+    )
+
+    # Parse the public config to gather data for each field defined in the
+    # overview
+
+    fields = [field for section in settings.CONFIG_PUBLIC["overview"] for field in section["fields"]]
+    response = {
+        "datasets": datasets,
+        "layout": settings.CONFIG_PUBLIC["overview"],
+        "fields": {}
+    }
+
+    for field in fields:
+        field_props = settings.CONFIG_PUBLIC["fields"][field]
+        response["fields"][field] = {
+            **field_props,
+            "data": {}
+        }
+        if field_props["datatype"] == "string":
+            stats = get_categorical_stats(field_props)
+        elif field_props["datatype"] == "number":
+            stats = get_range_stats(field_props)
+        elif field_props["datatype"] == "date":
+            stats = get_date_stats(field_props)
+
+        response["fields"][field]["data"] = stats
+
+    return Response(response)
+
+
+def get_categorical_stats(field_props) -> BinnedStats:
+    """
+    Fetches statistics for a given categorical field and apply privacy policies
+    """
+    model, field_name = get_model_and_field(field_props["id"])
+    stats = stats_for_field(model, field_name, add_missing=True)
+
+    # Enforce values order from config and apply policies
+    threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
+    labels: list[str] = field_props["config"]["enum"]
+    values: list[int] = []
+
+    for category in labels:
+        v = stats.get(category, 0)
+        if v and v < threshold:
+            v = 0
+        values.append(v)
+
+    if stats["missing"] > 0:
+        labels.append("missing")
+        values.append(stats["missing"])
+
+    return {
+        "labels": labels,
+        "values": values
+    }
+
+
+def get_date_stats(field_props):
+    pass
+
+
+def get_range_stats(field_props):
+    pass
+
+
+def get_model_and_field(field_id: str):
+    model_name, *field_path = field_id.split("/")
+
+    if model_name == "individual":
+        model = pheno_models.Individual
+    elif model_name == "experiment":
+        model = experiments_models.Experiment
+    else:
+        msg = f"Accessing field on model {model_name} not implemented"
+        logger.error(msg)
+        raise NotImplementedError(msg)
+
+    field_name = "__".join(field_path)
+    return model, field_name
+
+
 def sort_numeric_values_into_bins(values: dict, bin_size: int = 10, threshold: int = 5):
     values_in_bins = {}
     # convert keys to int
@@ -379,12 +488,12 @@ def sort_numeric_values_into_bins(values: dict, bin_size: int = 10, threshold: i
     return {k: v for k, v in values_in_bins.items() if v > threshold}
 
 
-def stats_for_field(model, field: str):
+def stats_for_field(model, field: str, add_missing=False) -> Mapping(str, int):
     # values() restrict the table of results to this COLUMN
     # annotate() creates a `total` column for the aggregation
     # Count() aggregates the results by performing a GROUP BY on the field
     query_set = model.objects.all().values(field).annotate(total=Count(field))
-    stats = dict()
+    stats: Mapping(str, int) = dict()
     for item in query_set:
         key = item[field]
         if key is None:
@@ -395,6 +504,11 @@ def stats_for_field(model, field: str):
             continue
 
         stats[key] = item["total"]
+
+    if add_missing:
+        isnull_filter = {f"{field}__isnull": True}
+        stats['missing'] = model.objects.all().values(field).filter(**isnull_filter).count()
+
     return stats
 
 
