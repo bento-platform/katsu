@@ -7,7 +7,7 @@ from calendar import month_abbr
 
 from django.conf import settings
 from django.views.decorators.cache import cache_page
-from django.db.models import Count, F, Func, IntegerField
+from django.db.models import Count, F, Func, CharField, IntegerField, Case, When, Value
 from django.db.models.functions import Cast, Substr
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -518,10 +518,80 @@ def get_date_stats(field_props):
 
 
 def get_range_stats(field_props):
-    pass
+    threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
+    model, field = get_model_and_field(field_props["id"])
+
+    # Generate a list of When conditions that return a label for the given bin.
+    # This is equivalent to an SQL CASE statement.
+    whens = [When(**{f"{field}__gte": floor},  **{f"{field}__lt": ceil}, then=Value(label))
+             for floor, ceil, label in labelled_range_generator(field_props)]
+
+    query_set = model.objects\
+        .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))\
+        .annotate(total=Count("label"))
+
+    stats: Mapping(str, int) = dict()
+    for item in query_set:
+        key = item["label"]
+        stats[key] = item["total"] if item["total"] > threshold else 0
+
+    # All the bins between start and end must be represented and ordered
+    labels: list(str) = []
+    values: list(int) = []
+    for floor, ceil, label in labelled_range_generator(field_props):
+        labels.append(label)
+        values.append(stats.get(label, 0))
+
+    if "missing" in stats:
+        labels.append("missing")
+        values.append(stats["missing"])
+
+    return {
+        "labels": labels,
+        "values": values
+    }
 
 
-def monthly_generator(start: str, end: str) -> (int, int):
+def labelled_range_generator(field_props) -> tuple(int, int, str):
+    """
+    Note: limited to operations on integer values for simplicity
+    A word of caution: when implementing handling of floating point values,
+    be aware of string format (might need to add precision to config?) computations
+    of modulo and lack of support for ranges.
+    """
+
+    c = field_props["config"]
+    minimum = int(c["minimum"])
+    maximum = int(c["maximum"])
+    taper_left = int(c["taper_left"])
+    taper_right = int(c["taper_right"])
+    bin_size = int(c["bin_size"])
+
+    # check prerequisites
+    # Note: it raises an error as it reflects an error in the config file
+    if maximum < minimum:
+        raise ValueError(f"Wrong min/max values in config: {field_props}")
+
+    if (taper_right < taper_left
+            or minimum > taper_left
+            or taper_right > maximum):
+        raise ValueError(f"Wrong taper values in config: {field_props}")
+
+    if (taper_right - taper_left) % bin_size:
+        raise ValueError(f"Range between taper values is not a multiple of bin_size: {field_props}")
+
+    # start generator
+    if minimum != taper_left:
+        yield minimum, taper_left, f"{minimum}-{taper_left}"
+
+    for v in range(taper_left, taper_right, bin_size):
+        yield v, v + bin_size, f"{v}-{v + bin_size}"
+
+    if maximum != taper_right:
+        yield taper_right, maximum, f"≥ {taper_right}"
+
+
+def monthly_generator(start: str, end: str) -> tuple(int, int):
     """
     generator of tuples (year nb, month nb) from a start date to an end date
     as ISO formated strings `yyyy-mm`
