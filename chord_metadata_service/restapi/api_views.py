@@ -31,8 +31,8 @@ OVERVIEW_AGE_BIN_SIZE = 10
 
 
 class BinnedStats(TypedDict):
-    labels: list[str]
-    values: list[int]
+    labels: "list[str]"
+    values: "list[int]"
 
 
 @api_view()
@@ -395,7 +395,7 @@ def public_overview_new(_request):
     # Parse the public config to gather data for each field defined in the
     # overview
 
-    fields = [field for section in settings.CONFIG_PUBLIC["overview"] for field in section["fields"]]
+    fields = [chart["field"] for section in settings.CONFIG_PUBLIC["overview"] for chart in section["charts"]]
     response = {
         "datasets": datasets,
         "layout": settings.CONFIG_PUBLIC["overview"],
@@ -479,7 +479,7 @@ def get_date_stats(field_props):
         .annotate(total=Count(DATE_Y_M))\
         .order_by(DATE_Y_M)  # Note: lexical sort works on ISO dates
 
-    stats: Mapping(str, int) = dict()
+    stats: Mapping[str, int] = dict()
     has_missing = False
     for item in query_set:
         key = item[DATE_Y_M]
@@ -530,7 +530,7 @@ def get_range_stats(field_props):
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))\
         .annotate(total=Count("label"))
 
-    stats: Mapping(str, int) = dict()
+    stats: Mapping[str, int] = dict()
     for item in query_set:
         key = item["label"]
         stats[key] = item["total"] if item["total"] > threshold else 0
@@ -552,7 +552,7 @@ def get_range_stats(field_props):
     }
 
 
-def labelled_range_generator(field_props) -> tuple(int, int, str):
+def labelled_range_generator(field_props) -> (int, int, str):
     """
     Note: limited to operations on integer values for simplicity
     A word of caution: when implementing handling of floating point values,
@@ -591,7 +591,7 @@ def labelled_range_generator(field_props) -> tuple(int, int, str):
         yield taper_right, maximum, f"≥ {taper_right}"
 
 
-def monthly_generator(start: str, end: str) -> tuple(int, int):
+def monthly_generator(start: str, end: str) -> (int, int):
     """
     generator of tuples (year nb, month nb) from a start date to an end date
     as ISO formated strings `yyyy-mm`
@@ -605,7 +605,7 @@ def monthly_generator(start: str, end: str) -> tuple(int, int):
         yield year, month
 
 
-def get_model_and_field(field_id: str) -> tuple(any, str):
+def get_model_and_field(field_id: str) -> (any, str):
     model_name, *field_path = field_id.split("/")
 
     if model_name == "individual":
@@ -638,12 +638,12 @@ def sort_numeric_values_into_bins(values: dict, bin_size: int = 10, threshold: i
     return {k: v for k, v in values_in_bins.items() if v > threshold}
 
 
-def stats_for_field(model, field: str, add_missing=False) -> Mapping(str, int):
+def stats_for_field(model, field: str, add_missing=False) -> Mapping[str, int]:
     # values() restrict the table of results to this COLUMN
     # annotate() creates a `total` column for the aggregation
     # Count() aggregates the results by performing a GROUP BY on the field
     query_set = model.objects.all().values(field).annotate(total=Count(field))
-    stats: Mapping(str, int) = dict()
+    stats: Mapping[str, int] = dict()
     for item in query_set:
         key = item[field]
         if key is None:
