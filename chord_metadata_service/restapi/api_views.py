@@ -3,11 +3,12 @@ import logging
 
 from collections import Counter
 from typing import TypedDict, Mapping
+from calendar import month_abbr
 
 from django.conf import settings
 from django.views.decorators.cache import cache_page
 from django.db.models import Count, F, Func, IntegerField
-from django.db.models.functions import Cast
+from django.db.models.functions import Cast, Substr
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -448,14 +449,93 @@ def get_categorical_stats(field_props) -> BinnedStats:
 
 
 def get_date_stats(field_props):
-    pass
+    """
+    Fetches statistics for a given date field, fill the gaps in the date range
+    and apply privacy policies.
+    Note that dates within a JSON are stored as strings, not instances of datetime.
+    TODO: for now, only dates in extra_properties are handled. Handle dates as
+    regular fields when needed.
+    TODO: for now only dates binned by month are handled
+    """
+    LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
+    DATE_Y_M = 'date'
+    threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
+
+    if field_props["config"]["bin_by"] != "month":
+        msg = f"Binning dates by `{field_props['config']['bin_by']}` method not implemented"
+        logger.error(msg)
+        raise NotImplementedError(msg)
+
+    model, field_name = get_model_and_field(field_props["id"])
+
+    if "extra_properties" not in field_name:
+        msg = "Binning date-like fields that are not in extra-properties is not implemented"
+        logger.error(msg)
+        raise NotImplementedError(msg)
+
+    query_set = model.objects.all()\
+        .annotate(date=Substr(field_name, 1, LENGTH_Y_M))\
+        .values(DATE_Y_M)\
+        .annotate(total=Count(DATE_Y_M))\
+        .order_by(DATE_Y_M)  # Note: lexical sort works on ISO dates
+
+    stats: Mapping(str, int) = dict()
+    has_missing = False
+    for item in query_set:
+        key = item[DATE_Y_M]
+        if key is None:
+            has_missing = True
+            continue
+
+        key = key.strip()
+        if key == "":
+            continue
+
+        stats[key] = item["total"] if item["total"] > threshold else 0
+
+    # All the bins between start and end date must be represented
+    labels: list(str) = []
+    values: list(int) = []
+    if len(stats):
+        keys = list(stats)
+        for year, month in monthly_generator(keys[0], keys[-1]):
+            key = f"{year}-{month}"
+            label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
+            labels.append(label)
+            values.appenf(stats.get(key, 0))
+
+    # Append missing items if any
+    if has_missing:
+        isnull_filter = {f"{field_name}__isnull": True}
+        v = model.objects.all().values(field_name).filter(**isnull_filter).count()
+        labels.append("missing")
+        values.append(v)
+
+    return {
+        "labels": labels,
+        "values": values
+    }
 
 
 def get_range_stats(field_props):
     pass
 
 
-def get_model_and_field(field_id: str):
+def monthly_generator(start: str, end: str) -> (int, int):
+    """
+    generator of tuples (year nb, month nb) from a start date to an end date
+    as ISO formated strings `yyyy-mm`
+    """
+    start_year, start_month = tuple([int(k) for k in start.split("-")])
+    end_year, end_month = tuple([int(k) for k in end.split("-")])
+    last_month_nb = (end_year - start_year) * 12 + end_month
+    for month_nb in range(start_month, last_month_nb):
+        year = start_year + month_nb // 12
+        month = month_nb % 12
+        yield year, month
+
+
+def get_model_and_field(field_id: str) -> tuple(any, str):
     model_name, *field_path = field_id.split("/")
 
     if model_name == "individual":
