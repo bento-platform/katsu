@@ -160,38 +160,37 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
     # get and create CancerCondition
     cancer_conditions = []
     if cancer_condition_data:
-        for cc in cancer_condition_data:
+        cc = cancer_condition_data
+        cancer_condition, cc_created = m.CancerCondition.objects.get_or_create(
+            id=cc["id"],
+            defaults={
+                "code": cc["code"],
+                "condition_type": cc["condition_type"],
+                "clinical_status": cc.get("clinical_status", None),
+                "verification_status": cc.get("verification_status", None),
+                "date_of_diagnosis": cc.get("date_of_diagnosis", None),
+                "body_site": cc.get("body_site", None),
+                "laterality": cc.get("laterality", None),
+                "histology_morphology_behavior": cc.get("histology_morphology_behavior", None)
+            }
+        )
+        _logger_message(cc_created, cancer_condition)
+        cancer_conditions.append(cancer_condition.id)
+        if "tnm_staging" in cc:
+            for tnms in cc["tnm_staging"]:
+                tnm_staging, tnms_created = m.TNMStaging.objects.get_or_create(
+                    id=tnms["id"],
+                    defaults={
+                        "cancer_condition": cancer_condition,
+                        "stage_group": tnms["stage_group"],
+                        "tnm_type": tnms["tnm_type"],
+                        "primary_tumor_category": tnms.get("primary_tumor_category", None),
+                        "regional_nodes_category": tnms.get("regional_nodes_category", None),
+                        "distant_metastases_category": tnms.get("distant_metastases_category", None)
 
-            cancer_condition, cc_created = m.CancerCondition.objects.get_or_create(
-                id=cc["id"],
-                defaults={
-                    "code": cc["code"],
-                    "condition_type": cc["condition_type"],
-                    "clinical_status": cc.get("clinical_status", None),
-                    "verification_status": cc.get("verification_status", None),
-                    "date_of_diagnosis": cc.get("date_of_diagnosis", None),
-                    "body_site": cc.get("body_site", None),
-                    "laterality": cc.get("laterality", None),
-                    "histology_morphology_behavior": cc.get("histology_morphology_behavior", None)
-                }
-            )
-            _logger_message(cc_created, cancer_condition)
-            cancer_conditions.append(cancer_condition.id)
-            if "tnm_staging" in cc:
-                for tnms in cc["tnm_staging"]:
-                    tnm_staging, tnms_created = m.TNMStaging.objects.get_or_create(
-                        id=tnms["id"],
-                        defaults={
-                            "cancer_condition": cancer_condition,
-                            "stage_group": tnms["stage_group"],
-                            "tnm_type": tnms["tnm_type"],
-                            "primary_tumor_category": tnms.get("primary_tumor_category", None),
-                            "regional_nodes_category": tnms.get("regional_nodes_category", None),
-                            "distant_metastases_category": tnms.get("distant_metastases_category", None)
-
-                        }
-                    )
-                    _logger_message(tnms_created, tnm_staging)
+                    }
+                )
+                _logger_message(tnms_created, tnm_staging)
 
     # get and create Cancer Related Procedure
     crprocedures = []
