@@ -64,6 +64,7 @@ class OverviewTest(APITestCase):
         # experiments
         self.instrument = exp_m.Instrument.objects.create(**exp_c.valid_instrument())
         self.experiment = exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_1, self.instrument))
+        exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_2, self.instrument, num_experiment=2))
         self.experiment_result = exp_m.ExperimentResult.objects.create(**exp_c.valid_experiment_result())
         self.experiment.experiment_results.set([self.experiment_result])
 
@@ -76,21 +77,22 @@ class OverviewTest(APITestCase):
         self.assertEqual(response_obj['phenopackets'], 2)
         self.assertEqual(response_obj['data_type_specific']['individuals']['count'], 2)
         self.assertIsInstance(response_obj['data_type_specific']['individuals']['age'], dict)
+        self.assertDictContainsSubset({'40': 1, '30': 1}, response_obj['data_type_specific']['individuals']['age'])
         self.assertEqual(response_obj['data_type_specific']['biosamples']['count'], 2)
         self.assertEqual(response_obj['data_type_specific']['phenotypic_features']['count'], 1)
         self.assertEqual(response_obj['data_type_specific']['diseases']['count'], 1)
         # experiments
-        self.assertEqual(response_obj['data_type_specific']['experiments']['count'], 1)
-        self.assertEqual(response_obj['data_type_specific']['experiments']['study_type']['Whole genome Sequencing'], 1)
+        self.assertEqual(response_obj['data_type_specific']['experiments']['count'], 2)
+        self.assertEqual(response_obj['data_type_specific']['experiments']['study_type']['Whole genome Sequencing'], 2)
         self.assertEqual(
-            response_obj['data_type_specific']['experiments']['experiment_type']['Chromatin Accessibility'], 1
+            response_obj['data_type_specific']['experiments']['experiment_type']['Chromatin Accessibility'], 2
         )
-        self.assertEqual(response_obj['data_type_specific']['experiments']['molecule']['total RNA'], 1)
-        self.assertEqual(response_obj['data_type_specific']['experiments']['library_strategy']['Bisulfite-Seq'], 1)
-        self.assertEqual(response_obj['data_type_specific']['experiments']['library_source']['Genomic'], 1)
-        self.assertEqual(response_obj['data_type_specific']['experiments']['library_selection']['PCR'], 1)
-        self.assertEqual(response_obj['data_type_specific']['experiments']['library_layout']['Single'], 1)
-        self.assertEqual(response_obj['data_type_specific']['experiments']['extraction_protocol']['NGS'], 1)
+        self.assertEqual(response_obj['data_type_specific']['experiments']['molecule']['total RNA'], 2)
+        self.assertEqual(response_obj['data_type_specific']['experiments']['library_strategy']['Bisulfite-Seq'], 2)
+        self.assertEqual(response_obj['data_type_specific']['experiments']['library_source']['Genomic'], 2)
+        self.assertEqual(response_obj['data_type_specific']['experiments']['library_selection']['PCR'], 2)
+        self.assertEqual(response_obj['data_type_specific']['experiments']['library_layout']['Single'], 2)
+        self.assertEqual(response_obj['data_type_specific']['experiments']['extraction_protocol']['NGS'], 2)
         self.assertEqual(response_obj['data_type_specific']['experiment_results']['count'], 1)
         self.assertEqual(response_obj['data_type_specific']['experiment_results']['file_format']['VCF'], 1)
         self.assertEqual(
@@ -98,8 +100,8 @@ class OverviewTest(APITestCase):
         )
         self.assertEqual(response_obj['data_type_specific']['experiment_results']['usage']['download'], 1)
         self.assertEqual(response_obj['data_type_specific']['instruments']['count'], 1)
-        self.assertEqual(response_obj['data_type_specific']['instruments']['platform']['Illumina'], 1)
-        self.assertEqual(response_obj['data_type_specific']['instruments']['model']['Illumina HiSeq 4000'], 1)
+        self.assertEqual(response_obj['data_type_specific']['instruments']['platform']['Illumina'], 2)
+        self.assertEqual(response_obj['data_type_specific']['instruments']['model']['Illumina HiSeq 4000'], 2)
 
 
 class McodeOverviewTest(APITestCase):
