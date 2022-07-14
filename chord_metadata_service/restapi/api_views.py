@@ -601,7 +601,7 @@ def monthly_generator(start: str, end: str) -> (int, int):
     last_month_nb = (end_year - start_year) * 12 + end_month
     for month_nb in range(start_month, last_month_nb):
         year = start_year + month_nb // 12
-        month = month_nb % 12
+        month = month_nb % 12 or 12
         yield year, month
 
 
