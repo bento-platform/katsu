@@ -4,6 +4,7 @@ from chord_metadata_service.restapi.schema_utils import (
     tag_ids_and_describe,
 )
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ONTOLOGY_CLASS_LIST, EXTRA_PROPERTIES_SCHEMA
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_GENE_SCHEMA
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from . import descriptions as d
 
@@ -189,9 +190,7 @@ MCODE_CANCER_GENETIC_VARIANT_SCHEMA = tag_ids_and_describe({
         "cytogenetic_nomenclature": ONTOLOGY_CLASS,
         "gene_studied": {
             "type": "array",
-            "items": {
-                "type": "string"
-            }
+            "items": PHENOPACKET_GENE_SCHEMA
         },
         "genomic_dna_change": ONTOLOGY_CLASS,
         "genomic_source_class": ONTOLOGY_CLASS,
