@@ -2,7 +2,7 @@ import math
 import logging
 
 from collections import Counter, defaultdict
-from typing import TypedDict, Mapping
+from typing import Tuple, TypedDict, Mapping
 from calendar import month_abbr
 
 from django.conf import settings
@@ -548,7 +548,7 @@ def get_range_stats(field_props):
     }
 
 
-def labelled_range_generator(field_props) -> (int, int, str):
+def labelled_range_generator(field_props) -> Tuple[int, int, str]:
     """
     Note: limited to operations on integer values for simplicity
     A word of caution: when implementing handling of floating point values,
@@ -587,7 +587,7 @@ def labelled_range_generator(field_props) -> (int, int, str):
         yield taper_right, maximum, f"≥ {taper_right}"
 
 
-def monthly_generator(start: str, end: str) -> (int, int):
+def monthly_generator(start: str, end: str) -> Tuple[int, int]:
     """
     generator of tuples (year nb, month nb) from a start date to an end date
     as ISO formated strings `yyyy-mm`
@@ -601,7 +601,7 @@ def monthly_generator(start: str, end: str) -> (int, int):
         yield year, month
 
 
-def get_model_and_field(field_id: str) -> (any, str):
+def get_model_and_field(field_id: str) -> Tuple[any, str]:
     model_name, *field_path = field_id.split("/")
 
     if model_name == "individual":
