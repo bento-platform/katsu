@@ -4,7 +4,10 @@
             "section_title": "Demographics",
             "charts": [
                 {"field": "age", "chart_type": "bar"},
-                {"field": "sex", "chart_type": "pie"}
+                {"field": "sex", "chart_type": "pie"},
+                {"field": "date_of_consent", "chart_type": "bar"},
+                {"field": "mobility", "chart_type": "bar"},
+                {"field": "lab_test_result_value", "chart_type": "bar"}
             ]
         },
         {
@@ -91,6 +94,21 @@
                     "I am unable to walk about"
                 ]
             }
+        },
+        "lab_test_result_value": {
+            "id": "individual/extra_properties/lab_test_result_value",
+            "title": "Lab Test Result",
+            "description": "This acts as a placeholder for numeric values",
+            "datatype": "number",
+            "config": {
+                "bin_size": 50,
+                "taper_left": 50,
+                "taper_right": 800,
+                "minimum": 0,
+                "maximum": 1000,
+                "units": "mg/L"
+            }
+
         }
     },
     "rules": {
