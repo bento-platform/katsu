@@ -1,4 +1,3 @@
-import math
 import logging
 
 from collections import Counter, defaultdict
@@ -244,135 +243,6 @@ def public_overview(_request):
     Overview of all public data in the database
     """
 
-    # TODO should this be added to the project config.json file ?
-    threshold = 5
-    missing = "missing"
-
-    if settings.CONFIG_FIELDS:
-
-        # Datasets provenance metadata
-        datasets = chord_models.Dataset.objects.values(
-            "title", "description", "contact_info",
-            "dates", "stored_in", "spatial_coverage",
-            "types", "privacy", "distributions",
-            "dimensions", "primary_publications", "citations",
-            "produced_by", "creators", "licenses",
-            "acknowledges", "keywords", "version",
-            "extra_properties"
-        )
-
-        individuals = patients_models.Individual.objects.all()
-        individuals_set = set()
-        individuals_sex = Counter()
-        individuals_age = Counter()
-        individuals_extra_properties = {}
-        extra_properties = {}
-
-        experiments = experiments_models.Experiment.objects.all()
-        experiments_set = set()
-        experiments_type = Counter()
-
-        for individual in individuals:
-            # subject/individual
-            individuals_set.add(individual.id)
-            individuals_sex.update((individual.sex,))
-            # age
-            if individual.age is not None:
-                individuals_age.update((parse_individual_age(individual.age),))
-            # collect extra_properties defined in config
-            if individual.extra_properties and "extra_properties" in settings.CONFIG_FIELDS:
-                for key in individual.extra_properties:
-                    if key in settings.CONFIG_FIELDS["extra_properties"]:
-                        # add new Counter()
-                        if key not in extra_properties:
-                            extra_properties[key] = Counter()
-                        try:
-                            extra_properties[key].update((individual.extra_properties[key],))
-                        except TypeError:
-                            logger.error(f"The extra_properties {key} value is not of type string or number.")
-                            pass
-
-                        individuals_extra_properties[key] = dict(extra_properties[key])
-        # Experiments
-        for experiment in experiments:
-            experiments_set.add(experiment.id)
-            experiments_type.update((experiment.experiment_type,))
-
-        # Put age in bins
-        if individuals_age:
-            age_bin_size = settings.CONFIG_FIELDS["age"]["bin_size"] \
-                if "age" in settings.CONFIG_FIELDS and "bin_size" in settings.CONFIG_FIELDS["age"] else None
-            age_kwargs = dict(values=dict(individuals_age), bin_size=age_bin_size)
-            individuals_age_bins = sort_numeric_values_into_bins(
-                **{k: v for k, v in age_kwargs.items() if v is not None}
-            )
-        else:
-            individuals_age_bins = {}
-
-        # Put all other numeric values coming from extra_properties in bins and remove values where count <= threshold
-        if individuals_extra_properties:
-            for key, value in list(individuals_extra_properties.items()):
-                # extra_properties contains only the fields specified in config
-                if settings.CONFIG_FIELDS["extra_properties"][key]["type"] == "number":
-                    # retrieve bin_size if available
-                    field_bin_size = settings.CONFIG_FIELDS["extra_properties"][key]["bin_size"] \
-                        if "bin_size" in settings.CONFIG_FIELDS["extra_properties"][key] else None
-                    # retrieve the values from extra_properties counter
-                    values = individuals_extra_properties[key]
-                    if values:
-                        kwargs = dict(values=values, bin_size=field_bin_size)
-                        # sort into bins and remove numeric values where count <= threshold
-                        extra_prop_values_in_bins = sort_numeric_values_into_bins(
-                            **{k: v for k, v in kwargs.items() if v is not None}
-                        )
-                        # rewrite with sorted values
-                        individuals_extra_properties[key] = extra_prop_values_in_bins
-                    # add missing value count
-                    individuals_extra_properties[key][missing] = len(individuals_set) - sum(v for v in value.values())
-                else:
-                    # add missing value count
-                    value[missing] = len(individuals_set) - sum(v for v in value.values())
-                    # remove string values where count <= threshold
-                    for k, v in list(value.items()):
-                        if v <= 5 and k != missing:
-                            individuals_extra_properties[key].pop(k)
-
-        # Update counters with missing values
-        for counter, all_values in zip([individuals_sex, individuals_age_bins], [individuals_sex, individuals_age]):
-            counter[missing] = len(individuals_set) - sum(v for v in dict(all_values).values())
-
-        # Response content
-        if len(individuals_set) < threshold:
-            content = settings.INSUFFICIENT_DATA_AVAILABLE
-        else:
-            content = {
-                "individuals": len(individuals_set)
-            }
-            for field, value in zip(
-                    ["sex", "age", "extra_properties", "experiment_type"],
-                    [{k: v for k, v in dict(individuals_sex).items() if v > threshold or k == missing},
-                     individuals_age_bins,
-                     individuals_extra_properties,
-                     dict(experiments_type)]):
-                if field in settings.CONFIG_FIELDS:
-                    content[field] = value
-            if "experiment_type" in content:
-                content["experiments"] = len(experiments_set)
-            content["datasets"] = datasets
-        return Response(content)
-
-    else:
-        return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def public_overview_new(_request):
-    """
-    get:
-    Overview of all public data in the database
-    """
-
     if not settings.CONFIG_PUBLIC:
         return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
 
@@ -597,23 +467,6 @@ def get_model_and_field(field_id: str) -> Tuple[any, str]:
 
     field_name = "__".join(field_path)
     return model, field_name
-
-
-def sort_numeric_values_into_bins(values: dict, bin_size: int = 10, threshold: int = 5):
-    values_in_bins = {}
-    # convert keys to int
-    keys_to_int_values = {int(k): v for k, v in values.items()}
-    # find the max value and define the  range
-    for j in range(math.ceil(max(keys_to_int_values.keys()) / bin_size)):
-        bin_key = j * bin_size
-        keys = [a for a in keys_to_int_values.keys() if j * bin_size <= a < (j + 1) * bin_size]
-        keys_sum = 0
-        for k, v in keys_to_int_values.items():
-            if k in keys:
-                keys_sum += v
-        values_in_bins[f"{bin_key}"] = keys_sum
-    # remove data if count < 5
-    return {k: v for k, v in values_in_bins.items() if v > threshold}
 
 
 def stats_for_field(model, field: str, add_missing=False) -> Mapping[str, int]:
