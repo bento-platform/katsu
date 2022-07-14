@@ -414,7 +414,10 @@ MCODE_SCHEMA = tag_ids_and_describe({
         "subject": INDIVIDUAL_SCHEMA,
         "genomics_report": MCODE_GENOMICS_REPORT_SCHEMA,
         "cancer_condition": MCODE_CANCER_CONDITION_SCHEMA,
-        "cancer_related_procedures": MCODE_CANCER_RELATED_PROCEDURE_SCHEMA,
+        "cancer_related_procedures": {
+            "type": "array",
+            "items": MCODE_CANCER_RELATED_PROCEDURE_SCHEMA
+        },
         "medication_statement": {
             "type": "array",
             "items": MCODE_MEDICATION_STATEMENT_SCHEMA
