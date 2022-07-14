@@ -1,14 +1,14 @@
 import math
 import logging
 
-from collections import Counter
+from collections import Counter, defaultdict
 from typing import TypedDict, Mapping
 from calendar import month_abbr
 
 from django.conf import settings
 from django.views.decorators.cache import cache_page
 from django.db.models import Count, F, Func, CharField, IntegerField, Case, When, Value
-from django.db.models.functions import Cast, Substr
+from django.db.models.functions import Cast
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -458,7 +458,6 @@ def get_date_stats(field_props):
     TODO: for now only dates binned by month are handled
     """
     LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
-    DATE_Y_M = 'date'
     threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
 
     if field_props["config"]["bin_by"] != "month":
@@ -474,40 +473,37 @@ def get_date_stats(field_props):
         raise NotImplementedError(msg)
 
     query_set = model.objects.all()\
-        .annotate(date=Substr(field_name, 1, LENGTH_Y_M))\
-        .values(DATE_Y_M)\
-        .annotate(total=Count(DATE_Y_M))\
-        .order_by(DATE_Y_M)  # Note: lexical sort works on ISO dates
+        .values(field_name)\
+        .order_by(field_name)\
+        .annotate(total=Count(field_name))   # Note: lexical sort works on ISO dates
 
-    stats: Mapping[str, int] = dict()
-    has_missing = False
+    stats = defaultdict(int)
+    start = end = None
+    # Key the counts on yyyy-mm combination (aggregate same month counts)
     for item in query_set:
-        key = item[DATE_Y_M]
-        if key is None:
-            has_missing = True
-            continue
+        key = 'missing' if item[field_name] is None else item[field_name][:LENGTH_Y_M]
+        stats[key] += item["total"]
 
-        key = key.strip()
-        if key == "":
+        if key == 'missing':
             continue
-
-        stats[key] = item["total"] if item["total"] > threshold else 0
+        if start:
+            end = key
+        else:
+            start = key
 
     # All the bins between start and end date must be represented
     labels: list(str) = []
     values: list(int) = []
-    if len(stats):
-        keys = list(stats)
-        for year, month in monthly_generator(keys[0], keys[-1]):
+    if start:   # at least one month
+        for year, month in monthly_generator(start, end or start):
             key = f"{year}-{month}"
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
             labels.append(label)
-            values.appenf(stats.get(key, 0))
+            v = stats.get(key, 0)
+            values.append(0 if v < threshold else v)
 
-    # Append missing items if any
-    if has_missing:
-        isnull_filter = {f"{field_name}__isnull": True}
-        v = model.objects.all().values(field_name).filter(**isnull_filter).count()
+    # Append missing items at the end if any
+    if 'missing' in stats:
         labels.append("missing")
         values.append(v)
 
@@ -596,8 +592,8 @@ def monthly_generator(start: str, end: str) -> (int, int):
     generator of tuples (year nb, month nb) from a start date to an end date
     as ISO formated strings `yyyy-mm`
     """
-    start_year, start_month = tuple([int(k) for k in start.split("-")])
-    end_year, end_month = tuple([int(k) for k in end.split("-")])
+    [start_year, start_month] = [int(k) for k in start.split("-")]
+    [end_year, end_month] = [int(k) for k in end.split("-")]
     last_month_nb = (end_year - start_year) * 12 + end_month
     for month_nb in range(start_month, last_month_nb):
         year = start_year + month_nb // 12
