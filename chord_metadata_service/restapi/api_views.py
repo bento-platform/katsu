@@ -2,7 +2,7 @@ import math
 import logging
 
 from collections import Counter, defaultdict
-from typing import Tuple, TypedDict, Mapping
+from typing import Tuple, Mapping
 from calendar import month_abbr
 
 from django.conf import settings
@@ -28,11 +28,6 @@ logger = logging.getLogger("restapi_api_views")
 logger.setLevel(logging.INFO)
 
 OVERVIEW_AGE_BIN_SIZE = 10
-
-
-class BinnedStats(TypedDict):
-    labels: "list[str]"
-    values: "list[int]"
 
 
 @api_view()
@@ -420,7 +415,7 @@ def public_overview_new(_request):
     return Response(response)
 
 
-def get_categorical_stats(field_props) -> BinnedStats:
+def get_categorical_stats(field_props):
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
@@ -430,22 +425,18 @@ def get_categorical_stats(field_props) -> BinnedStats:
     # Enforce values order from config and apply policies
     threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
     labels: list[str] = field_props["config"]["enum"]
-    values: list[int] = []
+    bins = []
 
     for category in labels:
         v = stats.get(category, 0)
         if v and v < threshold:
             v = 0
-        values.append(v)
+        bins.append({"label": category, "value": v})
 
     if stats["missing"] > 0:
-        labels.append("missing")
-        values.append(stats["missing"])
+        bins.append({"label": "missing", "value": stats["missing"]})
 
-    return {
-        "labels": labels,
-        "values": values
-    }
+    return bins
 
 
 def get_date_stats(field_props):
@@ -492,25 +483,22 @@ def get_date_stats(field_props):
             start = key
 
     # All the bins between start and end date must be represented
-    labels: list(str) = []
-    values: list(int) = []
+    bins = []
     if start:   # at least one month
         for year, month in monthly_generator(start, end or start):
             key = f"{year}-{month}"
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
-            labels.append(label)
             v = stats.get(key, 0)
-            values.append(0 if v < threshold else v)
+            bins.append({
+                "label": label,
+                "value": 0 if v < threshold else v
+            })
 
     # Append missing items at the end if any
     if 'missing' in stats:
-        labels.append("missing")
-        values.append(v)
+        bins.append({"label": "missing", "value": stats["missing"]})
 
-    return {
-        "labels": labels,
-        "values": values
-    }
+    return bins
 
 
 def get_range_stats(field_props):
@@ -532,20 +520,14 @@ def get_range_stats(field_props):
         stats[key] = item["total"] if item["total"] > threshold else 0
 
     # All the bins between start and end must be represented and ordered
-    labels: list(str) = []
-    values: list(int) = []
+    bins = []
     for floor, ceil, label in labelled_range_generator(field_props):
-        labels.append(label)
-        values.append(stats.get(label, 0))
+        bins.append({"label": label, "value": stats.get(label, 0)})
 
     if "missing" in stats:
-        labels.append("missing")
-        values.append(stats["missing"])
+        bins.append({"label": "missing", "value": stats["missing"]})
 
-    return {
-        "labels": labels,
-        "values": values
-    }
+    return bins
 
 
 def labelled_range_generator(field_props) -> Tuple[int, int, str]:
