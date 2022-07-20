@@ -257,15 +257,23 @@ def public_overview(_request):
         "extra_properties"
     )
 
-    # Parse the public config to gather data for each field defined in the
-    # overview
+    # Predefined counts
+    individuals_count = patients_models.Individual.objects.all().count()
+    experiments_count = experiments_models.Experiment.objects.all().count()
 
-    fields = [chart["field"] for section in settings.CONFIG_PUBLIC["overview"] for chart in section["charts"]]
     response = {
         "datasets": datasets,
         "layout": settings.CONFIG_PUBLIC["overview"],
-        "fields": {}
+        "fields": {},
+        "counts": {
+            "individuals": individuals_count,
+            "experiments": experiments_count
+        },
     }
+
+    # Parse the public config to gather data for each field defined in the
+    # overview
+    fields = [chart["field"] for section in settings.CONFIG_PUBLIC["overview"] for chart in section["charts"]]
 
     for field in fields:
         field_props = settings.CONFIG_PUBLIC["fields"][field]
