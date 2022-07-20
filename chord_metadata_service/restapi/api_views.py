@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
 from chord_metadata_service.restapi.utils import (
+    get_field_options,
     parse_individual_age,
     stats_for_field,
     compute_binned_ages,
@@ -231,7 +232,12 @@ def public_search_fields(_request):
         r = [
             {
                 **section,
-                "fields": [field_conf[f] for f in section["fields"]]
+                "fields": [
+                    {
+                        **field_conf[f],
+                        "options": get_field_options(field_conf[f])
+                    } for f in section["fields"]
+                ]
             } for section in search_conf
         ]
         return Response(r)

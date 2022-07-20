@@ -315,6 +315,37 @@ def get_date_stats(field_props):
     return bins
 
 
+def get_month_date_range(field_props):
+    """
+    Get start date and end date from the database
+    Note that dates within a JSON are stored as strings, not instances of datetime.
+    TODO: for now, only dates in extra_properties are handled. Aggregate functions
+    are not available for data in JSON fields.
+    Implement handling dates as regular fields when needed.
+    TODO: for now only dates binned by month are handled.
+    """
+    if field_props["config"]["bin_by"] != "month":
+        msg = f"Binning dates by `{field_props['config']['bin_by']}` method not implemented"
+        raise NotImplementedError(msg)
+
+    model, field_name = get_model_and_field(field_props["id"])
+
+    if "extra_properties" not in field_name:
+        msg = "Binning date-like fields that are not in extra-properties is not implemented"
+        raise NotImplementedError(msg)
+
+    LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
+
+    query_set = model.objects.all()\
+        .values(field_name)\
+        .order_by(field_name)
+
+    start = query_set.first()[field_name][:LENGTH_Y_M]
+    end = query_set.last()[field_name][:LENGTH_Y_M]
+
+    return start, end
+
+
 def get_range_stats(field_props):
     threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
     model, field = get_model_and_field(field_props["id"])
@@ -342,3 +373,20 @@ def get_range_stats(field_props):
         bins.append({"label": "missing", "value": stats["missing"]})
 
     return bins
+
+
+def get_field_options(field_props):
+    """
+    Given properties for a public field, return the list of authorized options for
+    querying this field.
+    """
+    if field_props["datatype"] == "string":
+        options = field_props["config"]["enum"]   # TODO: handle enum not available
+    elif field_props["datatype"] == "number":
+        options = [label for floor, ceil, label in labelled_range_generator(field_props)]
+    elif field_props["datatype"] == "date":
+        # Assumes the field is in extra_properties, thus can not be aggregated
+        # using SQL MIN/MAX functions
+        start, end = get_month_date_range(field_props)
+        options = [f"{month_abbr[m].capitalize()} {y}" for y, m in monthly_generator(start, end)]
+    return options
