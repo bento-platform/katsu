@@ -2,6 +2,7 @@ import logging
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Gene
 from . import models as m
+from django.utils import timezone
 
 logger = logging.getLogger("mcode_ingest")
 logger.setLevel(logging.INFO)
@@ -257,7 +258,8 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
         genomics_report=new_mcodepacket.get("genomics_report", None),
         date_of_death=new_mcodepacket.get("date_of_death", ""),
         cancer_disease_status=new_mcodepacket.get("cancer_disease_status", None),
-        table_id=table_id
+        table_id=table_id,
+        updated=timezone.now()
     )
     mcodepacket.save()
     logger.info(f"New Mcodepacket {mcodepacket.id} created")
