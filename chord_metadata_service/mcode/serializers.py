@@ -7,6 +7,7 @@ from chord_metadata_service.restapi.argo_utils import (
 )
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.patients.serializers import IndividualSerializer
+from chord_metadata_service.phenopackets.serializers import GeneSerializer
 from . import models as m
 
 
@@ -35,6 +36,7 @@ class GeneticSpecimenSerializer(GenericSerializer):
 
 
 class CancerGeneticVariantSerializer(GenericSerializer):
+    gene_studied = GeneSerializer(many=True)
 
     class Meta:
         model = m.CancerGeneticVariant
