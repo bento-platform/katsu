@@ -177,6 +177,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
         )
         _logger_message(cc_created, cancer_condition)
         cancer_conditions.append(cancer_condition.id)
+        new_mcodepacket["cancer_condition"] = cancer_condition
         if "tnm_staging" in cc:
             for tnms in cc["tnm_staging"]:
                 tnm_staging, tnms_created = m.TNMStaging.objects.get_or_create(
@@ -261,6 +262,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
         id=new_mcodepacket["id"],
         subject=Individual.objects.get(id=new_mcodepacket["subject"]),
         genomics_report=new_mcodepacket.get("genomics_report", None),
+        cancer_condition=new_mcodepacket.get("cancer_condition", None),
         date_of_death=new_mcodepacket.get("date_of_death", ""),
         cancer_disease_status=new_mcodepacket.get("cancer_disease_status", None),
         extra_properties=mcodepacket_data.get("extra_properties", None),
@@ -269,8 +271,6 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
     )
     mcodepacket.save()
     logger.info(f"New Mcodepacket {mcodepacket.id} created")
-    if cancer_conditions:
-        mcodepacket.cancer_condition.set(cancer_conditions)
     if crprocedures:
         mcodepacket.cancer_related_procedures.set(crprocedures)
     if medication_statements:

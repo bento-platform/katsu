@@ -315,10 +315,8 @@ class MCodePacket(models.Model, IndexableMixin):
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.MCODEPACKET, "id"))
     subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
                                 help_text=rec_help(d.MCODEPACKET, "subject"))
-    genomics_report = models.ForeignKey(GenomicsReport, blank=True, null=True, on_delete=models.SET_NULL,
-                                        help_text=rec_help(d.MCODEPACKET, "genomics_report"))
-    cancer_condition = models.ManyToManyField(CancerCondition, blank=True,
-                                              help_text=rec_help(d.MCODEPACKET, "cancer_condition"))
+    genomics_report = models.ForeignKey(GenomicsReport, blank=True, null=True, on_delete=models.SET_NULL, help_text=rec_help(d.MCODEPACKET, "genomics_report"))
+    cancer_condition = models.ForeignKey(CancerCondition, blank=True, null=True, on_delete=models.SET_NULL, help_text=rec_help(d.MCODEPACKET, "cancer_condition"))
     cancer_related_procedures = models.ManyToManyField(CancerRelatedProcedure, blank=True,
                                                        help_text=rec_help(d.MCODEPACKET, "cancer_related_procedures"))
     medication_statement = models.ManyToManyField(MedicationStatement, blank=True,
