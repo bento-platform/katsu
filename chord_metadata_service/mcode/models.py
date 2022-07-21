@@ -320,6 +320,7 @@ class MCodePacket(models.Model, IndexableMixin):
     medication_statement = models.ManyToManyField(MedicationStatement, blank=True, help_text=rec_help(d.MCODEPACKET, "medication_statement"))
     date_of_death = models.CharField(max_length=200, blank=True, help_text=rec_help(d.MCODEPACKET, "date_of_death"))
     cancer_disease_status = JSONField(blank=True, null=True, validators=[ontology_validator], help_text=rec_help(d.MCODEPACKET, "cancer_disease_status"))
+    tumor_marker = models.ManyToManyField(LabsVital, blank=True, help_text=rec_help(d.MCODEPACKET, "tumor_marker"))
     # link to dataset via the table
     table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.MCODEPACKET, "extra_properties"))

@@ -26,7 +26,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
     medication_statement_data = mcodepacket_data.get("medication_statement", None)
     date_of_death_data = mcodepacket_data.get("date_of_death", None)
     cancer_disease_status_data = mcodepacket_data.get("cancer_disease_status", None)
-    tumor_markers = mcodepacket_data.get("tumor_marker", None)
+    tumor_marker_data = mcodepacket_data.get("tumor_marker", None)
 
     # get and create Patient
     if subject:
@@ -247,17 +247,21 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
         new_mcodepacket["cancer_disease_status"] = cancer_disease_status_data
 
     # get tumor marker
-    if tumor_markers:
-        for tm in tumor_markers:
+    tumor_markers = []
+    if tumor_marker_data:
+        for tm in tumor_marker_data:
             tumor_marker, tm_created = m.LabsVital.objects.get_or_create(
                 id=tm["id"],
                 defaults={
                     "tumor_marker_code": tm["tumor_marker_code"],
                     "tumor_marker_data_value": tm.get("tumor_marker_data_value", None),
-                    "individual": m.Individual.objects.get(id=tm["individual"])
+                    "individual": m.Individual.objects.get(id=tm["individual"]),
+                    "extra_properties": tm.get("extra_properties", None)
                 }
             )
+            logger.info(f"hi {tm['extra_properties']} {tumor_marker.extra_properties}")
             _logger_message(tm_created, tumor_marker)
+            tumor_markers.append(tumor_marker.id)
 
     mcodepacket = m.MCodePacket(
         id=new_mcodepacket["id"],
@@ -276,5 +280,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
         mcodepacket.cancer_related_procedures.set(crprocedures)
     if medication_statements:
         mcodepacket.medication_statement.set(medication_statements)
+    if tumor_markers:
+        mcodepacket.tumor_marker.set(tumor_markers)
 
     return mcodepacket
