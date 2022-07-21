@@ -225,7 +225,12 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
             medication_statement, ms_created = m.MedicationStatement.objects.get_or_create(
                 id=ms["id"],
                 defaults={
-                    "medication_code": ms["medication_code"]
+                    "medication_code": ms["medication_code"],
+                    "termination_reason": ms["termination_reason"],
+                    "treatment_intent": ms["treatment_intent"],
+                    "start_date": ms["start_date"],
+                    "end_date": ms["end_date"],
+                    "extra_properties": ms["extra_properties"]
                 }
             )
             _logger_message(ms_created, medication_statement)

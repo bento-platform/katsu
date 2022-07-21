@@ -127,8 +127,7 @@ class MCodePacketSerializer(GenericSerializer):
                                                                  required=False).data
         response['cancer_related_procedures'] = CancerRelatedProcedureSerializer(instance.cancer_related_procedures,
                                                                                  many=True, required=False).data
-        response['medication_statement'] = MedicationStatementSerializer(instance.medication_statement,
-                                                                         many=True, required=False).data
+        response['medication_statement'] = MedicationStatementSerializer(instance.medication_statement, many=True, required=False).data
         # TODO add tumor marker
         return response
 
