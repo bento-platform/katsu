@@ -226,23 +226,24 @@ def public_search_fields(_request):
     get:
     Return public search fields with their configuration
     """
-    if settings.CONFIG_PUBLIC:
-        search_conf = settings.CONFIG_PUBLIC["search"]
-        field_conf = settings.CONFIG_PUBLIC["fields"]
-        r = [
-            {
-                **section,
-                "fields": [
-                    {
-                        **field_conf[f],
-                        "options": get_field_options(field_conf[f])
-                    } for f in section["fields"]
-                ]
-            } for section in search_conf
-        ]
-        return Response(r)
-    else:
+    if not settings.CONFIG_PUBLIC:
         return Response(settings.NO_PUBLIC_FIELDS_CONFIGURED)
+
+    search_conf = settings.CONFIG_PUBLIC["search"]
+    field_conf = settings.CONFIG_PUBLIC["fields"]
+    r = [
+        {
+            **section,
+            "fields": [
+                {
+                    **field_conf[f],
+                    "id": f,
+                    "options": get_field_options(field_conf[f])
+                } for f in section["fields"]
+            ]
+        } for section in search_conf
+    ]
+    return Response(r)
 
 
 @api_view(["GET"])
