@@ -172,7 +172,8 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                 "date_of_diagnosis": cc.get("date_of_diagnosis", None),
                 "body_site": cc.get("body_site", None),
                 "laterality": cc.get("laterality", None),
-                "histology_morphology_behavior": cc.get("histology_morphology_behavior", None)
+                "histology_morphology_behavior": cc.get("histology_morphology_behavior", None),
+                "extra_properties": cc.get("extra_properties", None)
             }
         )
         _logger_message(cc_created, cancer_condition)
@@ -188,8 +189,8 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                         "tnm_type": tnms["tnm_type"],
                         "primary_tumor_category": tnms.get("primary_tumor_category", None),
                         "regional_nodes_category": tnms.get("regional_nodes_category", None),
-                        "distant_metastases_category": tnms.get("distant_metastases_category", None)
-
+                        "distant_metastases_category": tnms.get("distant_metastases_category", None),
+                        "extra_properties": tnms.get("extra_properties", None)
                     }
                 )
                 _logger_message(tnms_created, tnm_staging)
