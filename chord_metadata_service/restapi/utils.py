@@ -390,3 +390,39 @@ def get_field_options(field_props):
         start, end = get_month_date_range(field_props)
         options = [f"{month_abbr[m].capitalize()} {y}" for y, m in monthly_generator(start, end)]
     return options
+
+
+def filter_queryset_field_value(qs, field_props, value: str):
+    """
+    Further filter a queryset using the field defined by field_props and the
+    given value.
+    It is assumed that the field mapping defined in field_props is represented
+    in the queryset object
+    """
+    model, field = get_model_and_field(field_props["mapping"])
+
+    if field_props["datatype"] == "string":
+        condition = {f"{field}": value}
+    elif field_props["datatype"] == "number":
+        # values are of the form "50-150" or "≥ 800"
+        if "-" in value:
+            [start, end] = [int(v) for v in value.split("-")]
+            condition = {
+                f"{field}__gte": start,
+                f"{field}__lt": end
+            }
+        else:
+            [sym, val] = value.split(" ")
+            if sym == "≥":
+                condition = {f"{field}__gte": int(val)}
+            elif sym == "<":
+                condition = {f"{field}__lt": int(val)}
+            else:
+                raise NotImplementedError()
+    elif field_props["datatype"] == "date":
+        # For now, limited to date expressed as month/year such as "May 2022"
+        d = datetime.datetime.strptime(value, "%b %Y")
+        val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"
+        condition = {f"{field}__startswith": val}
+
+    return qs.filter(**condition)

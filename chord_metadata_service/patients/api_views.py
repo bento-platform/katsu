@@ -6,9 +6,11 @@ from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
+from django.core.exceptions import ValidationError
+
 from .serializers import IndividualSerializer
 from .models import Individual
-from .filters import IndividualFilter, PublicIndividualFilter
+from .filters import IndividualFilter
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
 from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer,
@@ -17,6 +19,7 @@ from chord_metadata_service.restapi.api_renderers import (
     ARGORenderer,
 )
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
+from chord_metadata_service.restapi.utils import get_field_options, filter_queryset_field_value
 
 
 class IndividualViewSet(viewsets.ModelViewSet):
@@ -50,12 +53,32 @@ class PublicListIndividuals(APIView):
     """
     View to return only count of all individuals after filtering.
     """
-    filter_backends = [DjangoFilterBackend, ]
-    filter_class = PublicIndividualFilter
 
     def filter_queryset(self, queryset):
-        for backend in list(self.filter_backends):
-            queryset = backend().filter_queryset(self.request, queryset, self)
+        # Check query parameters validity
+        qp = self.request.query_params
+        if not 0 < len(qp) < 3:
+            raise ValidationError(f"Wrong number of fields: {len(qp)}")
+
+        search_conf = settings.CONFIG_PUBLIC["search"]
+        field_conf = settings.CONFIG_PUBLIC["fields"]
+        queryable_fields = dict()
+        for section in search_conf:
+            queryable_fields.update(
+                [(f, field_conf[f]) for f in section["fields"]]
+            )
+
+        for field, value in qp.items():
+            if field not in queryable_fields:
+                raise ValidationError(f"Unsupported field used in query: {field}")
+
+            field_props = queryable_fields[field]
+            if value not in get_field_options(field_props):
+                raise ValidationError(f"Invalid value used in query: {value}")
+
+            # recursion
+            queryset = filter_queryset_field_value(queryset, field_props, value)
+
         return queryset
 
     def get(self, request, *args, **kwargs):
