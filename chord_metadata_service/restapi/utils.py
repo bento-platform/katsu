@@ -235,7 +235,7 @@ def get_categorical_stats(field_props):
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
-    model, field_name = get_model_and_field(field_props["id"])
+    model, field_name = get_model_and_field(field_props["mapping"])
     stats = stats_for_field(model, field_name, add_missing=True)
 
     # Enforce values order from config and apply policies
@@ -271,7 +271,7 @@ def get_date_stats(field_props):
         msg = f"Binning dates by `{field_props['config']['bin_by']}` method not implemented"
         raise NotImplementedError(msg)
 
-    model, field_name = get_model_and_field(field_props["id"])
+    model, field_name = get_model_and_field(field_props["mapping"])
 
     if "extra_properties" not in field_name:
         msg = "Binning date-like fields that are not in extra-properties is not implemented"
@@ -328,7 +328,7 @@ def get_month_date_range(field_props):
         msg = f"Binning dates by `{field_props['config']['bin_by']}` method not implemented"
         raise NotImplementedError(msg)
 
-    model, field_name = get_model_and_field(field_props["id"])
+    model, field_name = get_model_and_field(field_props["mapping"])
 
     if "extra_properties" not in field_name:
         msg = "Binning date-like fields that are not in extra-properties is not implemented"
@@ -348,7 +348,7 @@ def get_month_date_range(field_props):
 
 def get_range_stats(field_props):
     threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
-    model, field = get_model_and_field(field_props["id"])
+    model, field = get_model_and_field(field_props["mapping"])
 
     # Generate a list of When conditions that return a label for the given bin.
     # This is equivalent to an SQL CASE statement.

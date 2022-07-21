@@ -25,7 +25,7 @@
   ],
   "fields": {
       "age": {
-          "id": "individual/age_numeric",
+          "mapping": "individual/age_numeric",
           "title": "Age",
           "description": "Age at arrival",
           "datatype": "number",
@@ -39,7 +39,7 @@
           }
       },
       "sex": {
-          "id": "individual/sex",
+          "mapping": "individual/sex",
           "title": "Sex",
           "description": "Sex at birth",
           "datatype": "string",
@@ -51,7 +51,7 @@
           }
       },
       "experiment_type": {
-          "id": "experiment/experiment_type",
+          "mapping": "experiment/experiment_type",
           "title": "Experiment Types",
           "description": "Types of experiments performed on a sample",
           "datatype": "string",
@@ -60,7 +60,7 @@
           }
       },
       "date_of_consent": {
-          "id": "individual/extra_properties/date_of_consent",
+          "mapping": "individual/extra_properties/date_of_consent",
           "title": "Verbal consent date",
           "description": "Date of initial verbal consent(participant, legal representative or tutor), yyyy-mm-dd",
           "datatype": "date",
@@ -69,7 +69,7 @@
           }
       },
       "type_partic": {
-          "id": "individual/extra_properties/type_partic",
+          "mapping": "individual/extra_properties/type_partic",
           "title": "Participant type",
           "description": "Has the patient been hospitalized or is the patient seen on as an outpatient?",
           "datatype": "string",
@@ -81,7 +81,7 @@
           }
       },
       "mobility": {
-          "id": "individual/extra_properties/mobility",
+          "mapping": "individual/extra_properties/mobility",
           "title": "Functional status",
           "description": "Mobility",
           "datatype": "string",
@@ -96,7 +96,7 @@
           }
       },
       "lab_test_result_value": {
-          "id": "individual/extra_properties/lab_test_result_value",
+          "mapping": "individual/extra_properties/lab_test_result_value",
           "title": "Lab Test Result",
           "description": "This acts as a placeholder for numeric values",
           "datatype": "number",

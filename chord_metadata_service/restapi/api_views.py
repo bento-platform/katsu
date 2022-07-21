@@ -290,6 +290,7 @@ def public_overview(_request):
         field_props = settings.CONFIG_PUBLIC["fields"][field]
         response["fields"][field] = {
             **field_props,
+            "id": field,
             "data": {}
         }
         if field_props["datatype"] == "string":
