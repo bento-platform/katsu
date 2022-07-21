@@ -27,6 +27,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
     date_of_death_data = mcodepacket_data.get("date_of_death", None)
     cancer_disease_status_data = mcodepacket_data.get("cancer_disease_status", None)
     tumor_markers = mcodepacket_data.get("tumor_marker", None)
+    extra_properties = mcodepacket_data.get("extra_properties", None)
 
     # get and create Patient
     if subject:
