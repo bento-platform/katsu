@@ -2,7 +2,8 @@
 
 import chord_metadata_service.restapi.validators
 import django.contrib.postgres.fields.jsonb
-from django.db import migrations
+from django.db import migrations, models
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -12,6 +13,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='mcodepacket',
+            name='tumor_marker',
+            field=models.ManyToManyField(blank=True, help_text='A description of tests performed on patient.', to='mcode.LabsVital'),
+        ),
         migrations.AlterField(
             model_name='cancercondition',
             name='body_site',
@@ -156,6 +162,15 @@ class Migration(migrations.Migration):
             model_name='labsvital',
             name='tumor_marker_data_value',
             field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, help_text='The result of a tumor marker test.', null=True, validators=[chord_metadata_service.restapi.validators.JsonSchemaValidator({'$id': 'katsu:mcode:tumor_marker_data_value', '$schema': 'http://json-schema.org/draft-07/schema#', 'additionalProperties': False, 'description': 'Tumor marker data value schema.', 'properties': {'value': {'$id': 'katsu:mcode:tumor_marker_data_value:value', 'anyOf': [{'$id': 'katsu:common:ontology_class', '$schema': 'http://json-schema.org/draft-07/schema#', 'additionalProperties': False, 'description': 'An ontology term.', 'help': 'An ontology term.', 'properties': {'id': {'$id': 'katsu:common:ontology_class:id', 'description': 'A CURIE-style identifier for an ontology term.', 'help': 'A CURIE-style identifier for an ontology term.', 'type': 'string'}, 'label': {'$id': 'katsu:common:ontology_class:label', 'description': 'A human readable class name for an ontology term.', 'help': 'A human readable class name for an ontology term.', 'type': 'string'}}, 'required': ['id', 'label'], 'title': 'Ontology class schema', 'type': 'object'}, {'$id': 'katsu:mcode:quantity', '$schema': 'http://json-schema.org/draft-07/schema#', 'additionalProperties': False, 'description': 'Schema for the datatype Quantity.', 'properties': {'code': {'$id': 'katsu:mcode:quantity:code', 'type': 'string'}, 'comparator': {'$id': 'katsu:mcode:quantity:comparator', 'enum': ['<', '>', '<=', '>=', '=']}, 'system': {'$id': 'katsu:mcode:quantity:system', 'format': 'uri', 'type': 'string'}, 'unit': {'$id': 'katsu:mcode:quantity:unit', 'type': 'string'}, 'value': {'$id': 'katsu:mcode:quantity:value', 'type': 'number'}}, 'title': 'Quantity schema', 'type': 'object'}, {'$id': 'katsu:mcode:ratio', '$schema': 'http://json-schema.org/draft-07/schema#', 'additionalProperties': False, 'description': 'Ratio schema.', 'properties': {'denominator': {'$id': 'katsu:mcode:quantity', '$schema': 'http://json-schema.org/draft-07/schema#', 'additionalProperties': False, 'description': 'Schema for the datatype Quantity.', 'properties': {'code': {'$id': 'katsu:mcode:quantity:code', 'type': 'string'}, 'comparator': {'$id': 'katsu:mcode:quantity:comparator', 'enum': ['<', '>', '<=', '>=', '=']}, 'system': {'$id': 'katsu:mcode:quantity:system', 'format': 'uri', 'type': 'string'}, 'unit': {'$id': 'katsu:mcode:quantity:unit', 'type': 'string'}, 'value': {'$id': 'katsu:mcode:quantity:value', 'type': 'number'}}, 'title': 'Quantity schema', 'type': 'object'}, 'numerator': {'$id': 'katsu:mcode:quantity', '$schema': 'http://json-schema.org/draft-07/schema#', 'additionalProperties': False, 'description': 'Schema for the datatype Quantity.', 'properties': {'code': {'$id': 'katsu:mcode:quantity:code', 'type': 'string'}, 'comparator': {'$id': 'katsu:mcode:quantity:comparator', 'enum': ['<', '>', '<=', '>=', '=']}, 'system': {'$id': 'katsu:mcode:quantity:system', 'format': 'uri', 'type': 'string'}, 'unit': {'$id': 'katsu:mcode:quantity:unit', 'type': 'string'}, 'value': {'$id': 'katsu:mcode:quantity:value', 'type': 'number'}}, 'title': 'Quantity schema', 'type': 'object'}}, 'title': 'Ratio', 'type': 'object'}]}}, 'title': 'Tumor marker data value', 'type': 'object'}, formats=None)]),
+        ),
+        migrations.RemoveField(
+            model_name='mcodepacket',
+            name='cancer_condition',
+        ),
+        migrations.AddField(
+            model_name='mcodepacket',
+            name='cancer_condition',
+            field=models.ForeignKey(blank=True, help_text="An Individual's cancer condition.", null=True, on_delete=django.db.models.deletion.SET_NULL, to='mcode.CancerCondition'),
         ),
         migrations.AlterField(
             model_name='mcodepacket',
