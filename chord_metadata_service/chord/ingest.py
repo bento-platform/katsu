@@ -35,6 +35,7 @@ from chord_metadata_service.mcode.parse_fhir_mcode import parse_bundle
 from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
+from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 requests_unixsocket.monkeypatch()
 
@@ -56,6 +57,7 @@ WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
 WORKFLOW_MCODE_JSON = "mcode_json"
 WORKFLOW_READSET = "readset"
+WORKFLOW_CBIOPORTAL = "cbioportal"
 
 METADATA_WORKFLOWS = {
     "ingestion": {
@@ -239,7 +241,30 @@ METADATA_WORKFLOWS = {
             ]
         },
     },
-    "analysis": {}
+    "analysis": {},
+    "export": {
+        WORKFLOW_CBIOPORTAL: {
+            "name": "cBioPortal",
+            "description": "This workflow creates a bundle for cBioPortal ingestion.",
+            "data_type": None,
+            "file": "cbioportal_export.wdl",
+            "inputs": [
+                {
+                    "id": "dataset_id",
+                    "type": "string",
+                    "required": True,
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "cbioportal_archive",
+                    "type": "file",
+                    "map_from_input": "dataset_id",
+                    "value": "{}.tar"
+                }
+            ]
+        }
+    }
 }
 
 WORKFLOWS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "workflows")
@@ -284,6 +309,7 @@ def create_experiment_result(er):
         identifier=er.get("identifier"),
         description=er.get("description"),
         filename=er.get("filename"),
+        genome_assembly_id=er.get("genome_assembly_id"),
         file_format=er.get("file_format"),
         data_output_type=er.get("data_output_type"),
         usage=er.get("usage"),
@@ -414,9 +440,19 @@ def ingest_phenopacket(phenopacket_data, table_id):
         subject_query = _query_and_check_nulls(subject, "date_of_birth", transform=isoparse)
         for k in ("alternate_ids", "age", "sex", "karyotypic_sex", "taxonomy"):
             subject_query.update(_query_and_check_nulls(subject, k))
+
+        # check if age is represented as a duration string (vs. age range values) and convert it to years
+        age_numeric_value = None
+        age_unit_value = None
+        if "age" in subject:
+            if "age" in subject["age"]:
+                age_numeric_value, age_unit_value = iso_duration_to_years(subject["age"]["age"])
+
         subject, _ = pm.Individual.objects.get_or_create(id=subject["id"],
                                                          race=subject.get("race", ""),
                                                          ethnicity=subject.get("ethnicity", ""),
+                                                         age_numeric=age_numeric_value,
+                                                         age_unit=age_unit_value if age_unit_value else "",
                                                          extra_properties=subject.get("extra_properties", {}),
                                                          **subject_query)
 

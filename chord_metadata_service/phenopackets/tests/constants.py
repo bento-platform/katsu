@@ -56,6 +56,8 @@ VALID_INDIVIDUAL_1 = {
     "age": {
         "age": "P45Y"
     },
+    "age_numeric": 45.00,
+    "age_unit": "years",
     "extra_properties": {
         "education": "Bachelor's Degree"
     }
@@ -67,10 +69,10 @@ VALID_INDIVIDUAL_2 = {
     "sex": "FEMALE",
     "age": {
         "start": {
-            "age": "P40Y"
+            "age": "P30Y"
         },
         "end": {
-            "age": "P45Y"
+            "age": "P35Y"
         }
     }
 }

@@ -1,0 +1,400 @@
+[
+  {
+    "subject": {
+      "id": "ind:NA20509001",
+      "date_of_birth": "1986-10-22",
+      "age": {
+        "age": "P45Y"
+      },
+      "sex": "MALE",
+      "karyotypic_sex": "XY",
+      "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+      },
+      "extra_properties": {
+        "smoking": "Non-smoker",
+        "covidstatus": "Indeterminate",
+        "death_dc": "Deceased",
+        "mobility": "I have severe problems in walking about",
+        "date_of_consent": "2021-09-22",
+        "lab_test_result_value": 607.82
+      }
+    },
+    "meta_data": {
+      "created_by": "Admin",
+      "submitted_by": "Admin",
+      "resources": [
+        {
+          "id": "NCBITaxon:2018-07-27",
+          "name": "NCBI Taxonomy OBO Edition",
+          "namespace_prefix": "NCBITaxon",
+          "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+          "version": "2018-07-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_"
+        },
+        {
+          "id": "UBERON:2019-06-27",
+          "name": "Uber-anatomy ontology",
+          "namespace_prefix": "UBERON",
+          "url": "http://purl.obolibrary.org/obo/uberon.owl",
+          "version": "2019-06-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/UBERON"
+        },
+        {
+          "id": "NCIT:2015-09-01",
+          "name": "NCI Thesaurus",
+          "namespace_prefix": "NCIT",
+          "url": "https://ncit.nci.nih.gov",
+          "version": "2015-09-01",
+          "iri_prefix": "https://ncit.nci.nih.gov"
+        }
+      ]
+    },
+    "biosamples": [
+        {
+            "id": "sample1",
+            "individual_id": "ind:NA20509001",
+            "description": "",
+            "sampled_tissue": {
+                "id": "UBERON_0001256",
+                "label": "wall of urinary bladder"
+            },
+            "phenotypic_features": [],
+            "individual_age_at_collection": {
+                "age": "P52Y2M"
+            },
+            "histological_diagnosis": {
+                "id": "NCIT:C39853",
+                "label": "Infiltrating Urothelial Carcinoma"
+            },
+            "tumor_progression": {
+                "id": "NCIT:C84509",
+                "label": "Primary Malignant Neoplasm"
+            },
+            "diagnostic_markers": [],
+            "procedure": {
+                "code": {
+                    "id": "NCIT:C5189",
+                    "label": "Radical Cystoprostatectomy"
+                }
+            },
+            "is_control_sample": false
+        },
+        {
+            "id": "sample2",
+            "individual_id": "ind:NA20509001",
+            "description": "",
+            "sampled_tissue": {
+                "id": "UBERON:0002367",
+                "label": "prostate gland"
+            },
+            "phenotypic_features": [],
+            "individual_age_at_collection": {
+                "age": "P52Y2M"
+            },
+            "histological_diagnosis": {
+                "id": "NCIT:C5596",
+                "label": "Prostate Acinar Adenocarcinoma"
+            },
+            "tumor_progression": {
+                "id": "NCIT:C95606",
+                "label": "Second Primary Malignant Neoplasm"
+            },
+            "tumor_grade": {
+                "id": "NCIT:C28091",
+                "label": "Gleason Score 7"
+            },
+            "disease_stage": [],
+            "diagnostic_markers": [],
+            "procedure": {
+                "code": {
+                    "id": "NCIT:C15189",
+                    "label": "Biopsy"
+                }
+            },
+            "is_control_sample": false
+        },
+        {
+            "id": "sample3",
+            "individual_id": "ind:NA20509001",
+            "description": "",
+            "sampled_tissue": {
+                "id": "UBERON:0001223",
+                "label": "left ureter"
+            },
+            "phenotypic_features": [],
+            "individual_age_at_collection": {
+                "age": "P52Y2M"
+            },
+            "histological_diagnosis": {
+                "id": "NCIT:C38757",
+                "label": "Negative Finding"
+            },
+            "disease_stage": [],
+            "diagnostic_markers": [],
+            "procedure": {
+                "code": {
+                    "id": "NCIT:C15189",
+                    "label": "Biopsy"
+                }
+            },
+            "is_control_sample": false
+        },
+        {
+            "id": "sample4",
+            "individual_id": "ind:NA20509001",
+            "description": "",
+            "sampled_tissue": {
+                "id": "UBERON:0001222",
+                "label": "right ureter"
+            },
+            "phenotypic_features": [],
+            "individual_age_at_collection": {
+                "age": "P52Y2M"
+            },
+            "histological_diagnosis": {
+                "id": "NCIT:C38757",
+                "label": "Negative Finding"
+            },
+            "disease_stage": [],
+            "diagnostic_markers": [],
+            "procedure": {
+                "code": {
+                    "id": "NCIT:C15189",
+                    "label": "Biopsy"
+                }
+            },
+            "is_control_sample": false
+        }
+    ]
+  },
+  {
+    "subject": {
+      "id": "ind:NA20509002",
+      "date_of_birth": "1950-11-22",
+      "age": {
+        "age": "P65Y6M3D"
+      },
+      "sex": "MALE",
+      "karyotypic_sex": "XY",
+      "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+      },
+      "extra_properties": {
+        "smoking": "Non-smoker",
+        "covidstatus": "Indeterminate",
+        "death_dc": "Deceased",
+        "mobility": "I have severe problems in walking about",
+        "date_of_consent": "2021-09-22",
+        "lab_test_result_value": 607.82
+      }
+    },
+    "meta_data": {
+      "created_by": "Admin",
+      "submitted_by": "Admin",
+      "resources": [
+        {
+          "id": "NCBITaxon:2018-07-27",
+          "name": "NCBI Taxonomy OBO Edition",
+          "namespace_prefix": "NCBITaxon",
+          "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+          "version": "2018-07-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_"
+        },
+        {
+          "id": "UBERON:2019-06-27",
+          "name": "Uber-anatomy ontology",
+          "namespace_prefix": "UBERON",
+          "url": "http://purl.obolibrary.org/obo/uberon.owl",
+          "version": "2019-06-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/UBERON"
+        },
+        {
+          "id": "NCIT:2015-09-01",
+          "name": "NCI Thesaurus",
+          "namespace_prefix": "NCIT",
+          "url": "https://ncit.nci.nih.gov",
+          "version": "2015-09-01",
+          "iri_prefix": "https://ncit.nci.nih.gov"
+        }
+      ]
+    },
+    "biosamples": [
+        {
+            "id": "sample5",
+            "individual_id": "ind:NA20509002",
+            "description": "",
+            "sampled_tissue": {
+                "id": "UBERON_0001256",
+                "label": "wall of urinary bladder"
+            },
+            "phenotypic_features": [],
+            "individual_age_at_collection": {
+                "age": "P52Y2M"
+            },
+            "histological_diagnosis": {
+                "id": "NCIT:C39853",
+                "label": "Infiltrating Urothelial Carcinoma"
+            },
+            "tumor_progression": {
+                "id": "NCIT:C84509",
+                "label": "Primary Malignant Neoplasm"
+            },
+            "diagnostic_markers": [],
+            "procedure": {
+                "code": {
+                    "id": "NCIT:C5189",
+                    "label": "Radical Cystoprostatectomy"
+                }
+            },
+            "is_control_sample": false
+        },
+        {
+            "id": "sample6",
+            "individual_id": "ind:NA20509002",
+            "description": "",
+            "sampled_tissue": {
+                "id": "UBERON:0002367",
+                "label": "prostate gland"
+            },
+            "phenotypic_features": [],
+            "individual_age_at_collection": {
+                "age": "P52Y2M"
+            },
+            "histological_diagnosis": {
+                "id": "NCIT:C5596",
+                "label": "Prostate Acinar Adenocarcinoma"
+            },
+            "tumor_progression": {
+                "id": "NCIT:C95606",
+                "label": "Second Primary Malignant Neoplasm"
+            },
+            "tumor_grade": {
+                "id": "NCIT:C28091",
+                "label": "Gleason Score 7"
+            },
+            "disease_stage": [],
+            "diagnostic_markers": [],
+            "procedure": {
+                "code": {
+                    "id": "NCIT:C15189",
+                    "label": "Biopsy"
+                }
+            },
+            "is_control_sample": false
+        },
+        {
+            "id": "sample7",
+            "individual_id": "ind:NA20509002",
+            "description": "",
+            "sampled_tissue": {
+                "id": "UBERON:0001223",
+                "label": "left ureter"
+            },
+            "phenotypic_features": [],
+            "individual_age_at_collection": {
+                "age": "P52Y2M"
+            },
+            "histological_diagnosis": {
+                "id": "NCIT:C38757",
+                "label": "Negative Finding"
+            },
+            "disease_stage": [],
+            "diagnostic_markers": [],
+            "procedure": {
+                "code": {
+                    "id": "NCIT:C15189",
+                    "label": "Biopsy"
+                }
+            },
+            "is_control_sample": false
+        }
+    ]
+  },
+  {
+    "subject": {
+      "id": "ind:NA20509003",
+      "date_of_birth": "1930-11-22",
+      "age": {
+        "age": "P75.8Y6M3D"
+      },
+      "sex": "MALE",
+      "karyotypic_sex": "XY",
+      "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+      },
+      "extra_properties": {
+        "smoking": "Non-smoker",
+        "covidstatus": "Indeterminate",
+        "death_dc": "Deceased",
+        "mobility": "I have severe problems in walking about",
+        "date_of_consent": "2021-09-22",
+        "lab_test_result_value": 607.82
+      }
+    },
+    "meta_data": {
+      "created_by": "Admin",
+      "submitted_by": "Admin",
+      "resources": [
+        {
+          "id": "NCBITaxon:2018-07-27",
+          "name": "NCBI Taxonomy OBO Edition",
+          "namespace_prefix": "NCBITaxon",
+          "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+          "version": "2018-07-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_"
+        },
+        {
+          "id": "UBERON:2019-06-27",
+          "name": "Uber-anatomy ontology",
+          "namespace_prefix": "UBERON",
+          "url": "http://purl.obolibrary.org/obo/uberon.owl",
+          "version": "2019-06-27",
+          "iri_prefix": "http://purl.obolibrary.org/obo/UBERON"
+        },
+        {
+          "id": "NCIT:2015-09-01",
+          "name": "NCI Thesaurus",
+          "namespace_prefix": "NCIT",
+          "url": "https://ncit.nci.nih.gov",
+          "version": "2015-09-01",
+          "iri_prefix": "https://ncit.nci.nih.gov"
+        }
+      ]
+    },
+    "biosamples": [
+        {
+            "id": "sample8",
+            "individual_id": "ind:NA20509003",
+            "description": "",
+            "sampled_tissue": {
+                "id": "UBERON_0001256",
+                "label": "wall of urinary bladder"
+            },
+            "phenotypic_features": [],
+            "individual_age_at_collection": {
+                "age": "P52Y2M"
+            },
+            "histological_diagnosis": {
+                "id": "NCIT:C39853",
+                "label": "Infiltrating Urothelial Carcinoma"
+            },
+            "tumor_progression": {
+                "id": "NCIT:C84509",
+                "label": "Primary Malignant Neoplasm"
+            },
+            "diagnostic_markers": [],
+            "procedure": {
+                "code": {
+                    "id": "NCIT:C5189",
+                    "label": "Radical Cystoprostatectomy"
+                }
+            },
+            "is_control_sample": false
+        }
+    ]
+  }
+]

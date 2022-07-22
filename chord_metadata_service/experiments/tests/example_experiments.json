@@ -1,0 +1,142 @@
+{
+  "experiments": [
+    {
+      "id": "experiment:1",
+      "biosample": "sample1",
+      "study_type": "Epigenomics",
+      "experiment_type": "WES",
+      "experiment_ontology": [
+        {
+          "id": "EFO:0002692",
+          "label": "ChIP-seq"
+        }
+      ],
+      "library_strategy": "ChIP-Seq",
+      "library_source": "Genomic",
+      "library_selection": "Random",
+      "library_layout": "Single",
+      "extraction_protocol": "NGS",
+      "molecule": "genomic DNA",
+      "molecule_ontology": [
+        {
+          "id": "SO:0000991",
+          "label": "genomic DNA"
+        }
+      ],
+      "experiment_results": [
+        {
+          "identifier": "sample1_01",
+          "description": "test",
+          "filename": "sample1_01.vcf.gz",
+          "file_format": "VCF",
+          "data_output_type": "Derived data",
+          "usage": "Visualized",
+          "creation_date": "01-09-2021",
+          "created_by": "Admin",
+          "extra_properties": {
+            "test": "test"
+          }
+        },
+        {
+          "identifier": "sample1_02",
+          "description": "test2",
+          "filename": "sample1_02.cram",
+          "file_format": "CRAM",
+          "data_output_type": "Raw data",
+          "usage": "Visualized",
+          "creation_date": "01-09-2021",
+          "created_by": "Admin",
+          "extra_properties": {
+            "test": "test"
+          }
+        }
+      ],
+      "instrument": {
+        "identifier": "instrument:01",
+        "platform": "Illumina",
+        "description": "Test description",
+        "model": "Illumina HiSeq 4000",
+        "extra_properties": {
+          "date": "2021-06-21"
+        }
+      },
+      "extra_properties": {
+        "date_uploaded": "2021-03-16"
+      }
+    },
+    {
+      "id": "experiment:2",
+      "biosample": "sample8",
+      "study_type": "Epigenomics",
+      "experiment_type": "WES",
+      "experiment_ontology": [
+        {
+          "id": "EFO:0002692",
+          "label": "ChIP-seq"
+        }
+      ],
+      "library_strategy": "ChIP-Seq",
+      "library_source": "Genomic",
+      "library_selection": "Random",
+      "library_layout": "Single",
+      "extraction_protocol": "NGS",
+      "molecule": "genomic DNA",
+      "molecule_ontology": [
+        {
+          "id": "SO:0000991",
+          "label": "genomic DNA"
+        }
+      ],
+      "experiment_results": [
+        {
+          "identifier": "sample8_01",
+          "description": "test",
+          "filename": "sample8_01.vcf.gz",
+          "file_format": "VCF",
+          "data_output_type": "Derived data",
+          "usage": "Visualized",
+          "creation_date": "01-09-2021",
+          "created_by": "Admin",
+          "extra_properties": {
+            "test": "test"
+          }
+        },
+        {
+          "identifier": "sample8_02",
+          "description": "test2",
+          "filename": "sample8_02.cram",
+          "file_format": "CRAM",
+          "data_output_type": "Raw data",
+          "usage": "Visualized",
+          "creation_date": "01-09-2021",
+          "created_by": "Admin",
+          "extra_properties": {
+            "test": "test"
+          }
+        }
+      ],
+      "instrument": {
+        "identifier": "instrument:01",
+        "platform": "Illumina",
+        "description": "Test description",
+        "model": "Illumina HiSeq 4000",
+        "extra_properties": {
+          "date": "2021-06-21"
+        }
+      },
+      "extra_properties": {
+        "date_uploaded": "2021-03-16"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "name": "Sequence types and features ontology",
+      "version": "2021-02-16",
+      "namespace_prefix": "SO",
+      "id": "SO:2021-02-16",
+      "iri_prefix": "http://purl.obolibrary.org/obo/so.owl#",
+      "url": "http://purl.obolibrary.org/obo/so.owl"
+    }
+  ]
+}

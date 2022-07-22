@@ -27,3 +27,6 @@ htmlcov/
 # docs build
 
 docs/_build
+
+# project custom config file
+config.json

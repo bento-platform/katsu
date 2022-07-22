@@ -4,7 +4,7 @@
       "id": "experiment:1",
       "biosample": "sample1",
       "study_type": "Epigenomics",
-      "experiment_type": "Histone H3K27ac",
+      "experiment_type": "Other",
       "experiment_ontology": [
         {
           "id": "http://www.ebi.ac.uk/efo/EFO_0002692",
@@ -30,7 +30,7 @@
           "filename": "sample1_01.vcf.gz",
           "file_format": "VCF",
           "data_output_type": "Derived data",
-          "usage": "visualized",
+          "usage": "Visualized",
           "creation_date": "01-09-2021",
           "created_by": "Admin",
           "extra_properties": {
@@ -43,7 +43,7 @@
           "filename": "sample1_02.vcf.gz",
           "file_format": "CRAM",
           "data_output_type": "Raw data",
-          "usage": "visualized",
+          "usage": "Visualized",
           "creation_date": "01-09-2021",
           "created_by": "Admin",
           "extra_properties": {
