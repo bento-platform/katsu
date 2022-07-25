@@ -348,6 +348,9 @@ def get_month_date_range(field_props):
         .values(field_name)\
         .order_by(field_name)
 
+    if query_set.count() == 0:
+        return None, None
+
     start = query_set.first()[field_name][:LENGTH_Y_M]
     end = query_set.last()[field_name][:LENGTH_Y_M]
 
@@ -399,7 +402,7 @@ def get_field_options(field_props):
         # Assumes the field is in extra_properties, thus can not be aggregated
         # using SQL MIN/MAX functions
         start, end = get_month_date_range(field_props)
-        options = [f"{month_abbr[m].capitalize()} {y}" for y, m in monthly_generator(start, end)]
+        options = [f"{month_abbr[m].capitalize()} {y}" for y, m in monthly_generator(start, end)] if start else []
     return options
 
 
