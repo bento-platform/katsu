@@ -19,7 +19,7 @@ from chord_metadata_service.mcode import models as mcode_m
 from chord_metadata_service.mcode.tests import constants as mcode_c
 
 from .constants import (
-    CONFIG_FIELDS_TEST,
+    CONFIG_PUBLIC_TEST,
     VALID_INDIVIDUALS,
     INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST,
     INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT
@@ -156,14 +156,14 @@ class McodeOverviewTest(APITestCase):
 
 class PublicSearchFieldsTest(APITestCase):
 
-    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_search_fields_configured(self):
         response = self.client.get(reverse("public-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        self.assertDictEqual(response_obj, settings.CONFIG_FIELDS)
+        self.assertDictEqual(response_obj, settings.CONFIG_PUBLIC)
 
-    @override_settings(CONFIG_FIELDS={})
+    @override_settings(CONFIG_PUBLIC={})
     def test_public_search_fields_not_configured(self):
         response = self.client.get(reverse("public-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -197,7 +197,7 @@ class PublicOverviewTest(APITestCase):
         experiment_2["id"] = "experiment:2"
         self.experiment = exp_m.Experiment.objects.create(**experiment_2)
 
-    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_overview(self):
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
@@ -206,7 +206,7 @@ class PublicOverviewTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj["individuals"], db_count)
 
-    @override_settings(CONFIG_FIELDS={})
+    @override_settings(CONFIG_PUBLIC={})
     def test_overview_no_config(self):
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
@@ -221,7 +221,7 @@ class PublicOverviewTest2(APITestCase):
         for ind in VALID_INDIVIDUALS[:2]:
             ph_m.Individual.objects.create(**ind)
 
-    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_overview_response(self):
         # test overview response when individuals count < threshold
         response = self.client.get('/api/public_overview')
@@ -231,7 +231,7 @@ class PublicOverviewTest2(APITestCase):
         self.assertNotIn("individuals", response_obj)
         self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
 
-    @override_settings(CONFIG_FIELDS={})
+    @override_settings(CONFIG_PUBLIC={})
     def test_overview_response_no_config(self):
         # test overview response when individuals count < threshold
         response = self.client.get('/api/public_overview')
@@ -247,7 +247,7 @@ class PublicOverviewNotSupportedDataTypesListTest(APITestCase):
         for ind in INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST:
             ph_m.Individual.objects.create(**ind)
 
-    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_overview_response(self):
         # test overview response with passing TypeError exception
         response = self.client.get('/api/public_overview')
@@ -270,7 +270,7 @@ class PublicOverviewNotSupportedDataTypesDictTest(APITestCase):
         for ind in INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT:
             ph_m.Individual.objects.create(**ind)
 
-    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_overview_response(self):
         # test overview response with passing TypeError exception
         response = self.client.get('/api/public_overview')
@@ -316,7 +316,7 @@ class PublicOverviewDatasetsMetadataTest(APITestCase):
                 table=table
             )
 
-    @override_settings(CONFIG_FIELDS=CONFIG_FIELDS_TEST)
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_overview(self):
         response = self.client.get('/api/public_overview')
         response_obj = response.json()

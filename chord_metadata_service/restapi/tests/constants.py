@@ -246,75 +246,135 @@ INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT = [
 ]
 
 
-CONFIG_FIELDS_TEST = {
-    "sex": {
-        "type": "string",
-        "enum": [
-            "Male",
-            "Female"
-        ],
-        "title": "Sex"
-    },
-    "age": {
-        "type": "number",
-        "title": "Age",
-        "bin_size": 10
-    },
-    "extra_properties": {
+CONFIG_PUBLIC_TEST = {
+    "overview": [
+        {
+            "section_title": "First Section",
+            "charts": [
+                {"field": "age", "chart_type": "bar"},
+                {"field": "sex", "chart_type": "pie"},
+            ]
+        },
+        {
+            "section_title": "Second Section",
+            "charts": [
+                {"field": "date_of_consent", "chart_type": "bar"},
+                {"field": "smoking", "chart_type": "bar"},
+            ]
+        }
+    ],
+    "search": [
+        {
+            "section_title": "First Section",
+            "fields": [
+                "sex", "age", "smoking", "covidstatus", "death_dc",
+                "lab_test_result_value", "baseline_creatinine", "date_of_consent"
+            ]
+        }
+    ],
+    "fields": {
+        "sex": {
+            "mapping": "individual/sex",
+            "title": "Sex",
+            "description": "Sex at birth",
+            "datatype": "string",
+            "config": {
+                "enum": None
+            }
+        },
+        "age": {
+            "mapping": "individual/age_numeric",
+            "title": "Age",
+            "description": "Age at arrival",
+            "datatype": "number",
+            "config": {
+                "bin_size": 10,
+                "taper_left": 10,
+                "taper_right": 100,
+                "units": "years",
+                "minimum": 0,
+                "maximum": 100
+            }
+        },
         "smoking": {
-            "type": "string",
-            "enum": [
-                "Non-smoker",
-                "Smoker",
-                "Former smoker",
-                "Passive smoker",
-                "Not specified"
-            ],
-            "title": "Smoking"
+            "mapping": "individual/extra_properties/smoking",
+            "title": "Smoking",
+            "description": "Smoking exposure",
+            "datatype": "string",
+            "config": {
+                "enum": [
+                    "Non-smoker",
+                    "Smoker",
+                    "Former smoker",
+                    "Passive smoker",
+                    "Not specified"
+                ]
+            }
         },
         "covidstatus": {
-            "type": "string",
-            "enum": [
-                "Positive",
-                "Negative",
-                "Indeterminate"
-            ],
-            "title": "Covidstatus"
+            "mapping": "individual/extra_properties/covidstatus",
+            "title": "Covid status",
+            "description": "Covid status",
+            "datatype": "string",
+            "config": {
+                "enum": [
+                    "Positive",
+                    "Negative",
+                    "Indeterminate"
+                ]
+            }
         },
         "death_dc": {
-            "type": "string",
-            "enum": [
-                "Alive",
-                "Deceased"
-            ],
-            "title": "Death"
+            "mapping": "individual/extra_properties/death_dc",
+            "title": "Death",
+            "description": "Death status",
+            "datatype": "string",
+            "config": {
+                "enum": [
+                    "Alive",
+                    "Deceased"
+                ]
+            }
         },
         "lab_test_result_value": {
-            "type": "number",
-            "title": "Lab test result",
-            "minimum": 0,
-            "maximum": 999.99
+            "mapping": "individual/extra_properties/lab_test_result_value",
+            "title": "Lab Test Result",
+            "description": "This acts as a placeholder for numeric values",
+            "datatype": "number",
+            "config": {
+                "bin_size": 50,
+                "taper_left": 50,
+                "taper_right": 800,
+                "minimum": 0,
+                "maximum": 1000,
+                "units": "mg/L"
+            }
         },
         "baseline_creatinine": {
-            "type": "number",
-            "title": "Baseline creatinine"
+            "mapping": "individual/extra_properties/baseline_creatinine",
+            "title": "Creatinine",
+            "description": "Baseline Creatinine",
+            "datatype": "number",
+            "config": {
+                "bin_size": 50,
+                "taper_left": 50,
+                "taper_right": 800,
+                "minimum": 0,
+                "maximum": 1000,
+                "units": "mg/L"
+            }
         },
         "date_of_consent": {
-            "type": "string",
-            "format": "date",
-            "title": "Date of consent"
+            "mapping": "individual/extra_properties/date_of_consent",
+            "title": "Verbal consent date",
+            "description": "Date of initial verbal consent(participant, legal representative or tutor), yyyy-mm-dd",
+            "datatype": "date",
+            "config": {
+                "bin_by": "month"
+            }
         }
-    }
-}
-
-CONFIG_FIELDS_TEST_NO_EXTRA_PROPERTIES = {
-    "sex": {
-        "type": "string",
-        "enum": [
-            "Male",
-            "Female"
-        ],
-        "title": "Sex",
-        "bin_size": 10
+    },
+    "rules": {
+        "count_threshold": 5
     }
 }
