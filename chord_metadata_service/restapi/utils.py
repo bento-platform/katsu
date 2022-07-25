@@ -241,6 +241,10 @@ def get_categorical_stats(field_props):
     # Enforce values order from config and apply policies
     threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
     labels: list[str] = field_props["config"]["enum"]
+    # Special case: for some fields, values are based on what's present in the
+    # dataset. Apply lexical sort in that case.
+    if labels is None:
+        labels = sorted(stats.keys(), key=lambda x: x.lower())
     bins = []
 
     for category in labels:
@@ -381,7 +385,10 @@ def get_field_options(field_props):
     querying this field.
     """
     if field_props["datatype"] == "string":
-        options = field_props["config"]["enum"]   # TODO: handle enum not available
+        options = field_props["config"]["enum"]
+        # Special case: no list of values specified
+        if options is None:
+            options = get_distinct_field_values(field_props)
     elif field_props["datatype"] == "number":
         options = [label for floor, ceil, label in labelled_range_generator(field_props)]
     elif field_props["datatype"] == "date":
@@ -390,6 +397,11 @@ def get_field_options(field_props):
         start, end = get_month_date_range(field_props)
         options = [f"{month_abbr[m].capitalize()} {y}" for y, m in monthly_generator(start, end)]
     return options
+
+
+def get_distinct_field_values(field_props):
+    model, field = get_model_and_field(field_props["mapping"])
+    return model.objects.values_list(field, flat=True).order_by(field).distinct()
 
 
 def filter_queryset_field_value(qs, field_props, value: str):
