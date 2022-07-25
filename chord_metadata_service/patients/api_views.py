@@ -57,7 +57,7 @@ class PublicListIndividuals(APIView):
     def filter_queryset(self, queryset):
         # Check query parameters validity
         qp = self.request.query_params
-        if not 0 < len(qp) < 3:
+        if len(qp) > 2:
             raise ValidationError(f"Wrong number of fields: {len(qp)}")
 
         search_conf = settings.CONFIG_PUBLIC["search"]
