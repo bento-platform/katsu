@@ -73,7 +73,18 @@ class PublicListIndividuals(APIView):
                 raise ValidationError(f"Unsupported field used in query: {field}")
 
             field_props = queryable_fields[field]
-            if value not in get_field_options(field_props):
+            options = get_field_options(field_props)
+            if value not in options \
+                and not (
+                    # case insensitive search on categories
+                    field_props["datatype"] == "string"
+                    and value.lower() in [o.lower() for o in options]
+                ) \
+                and not(
+                    # no restriction when enum is not set for categories
+                    field_props["datatype"] == "string"
+                    and field_props["config"]["enum"] is None
+                    ):
                 raise ValidationError(f"Invalid value used in query: {value}")
 
             # recursion

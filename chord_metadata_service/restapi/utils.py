@@ -418,7 +418,7 @@ def filter_queryset_field_value(qs, field_props, value: str):
     model, field = get_model_and_field(field_props["mapping"])
 
     if field_props["datatype"] == "string":
-        condition = {f"{field}": value}
+        condition = {f"{field}__iexact": value}
     elif field_props["datatype"] == "number":
         # values are of the form "50-150" or "≥ 800"
         if "-" in value:
