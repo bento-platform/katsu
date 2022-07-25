@@ -242,9 +242,13 @@ def get_categorical_stats(field_props):
     threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
     labels: list[str] = field_props["config"]["enum"]
     # Special case: for some fields, values are based on what's present in the
-    # dataset. Apply lexical sort in that case.
+    # dataset. Apply lexical sort, and exclude the "missing" value which will
+    # be appended at the end if it is set.
     if labels is None:
-        labels = sorted(stats.keys(), key=lambda x: x.lower())
+        labels = sorted(
+            [k for k in stats.keys() if k != "missing"],
+            key=lambda x: x.lower()
+        )
     bins = []
 
     for category in labels:
