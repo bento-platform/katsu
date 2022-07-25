@@ -259,11 +259,13 @@ class PublicOverviewNotSupportedDataTypesListTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         # the field name is present, but the keys are not (except 'missing')
         self.assertIn("baseline_creatinine", response_obj["fields"])
-        self.assertIn("missing", response_obj["fields"]["baseline_creatinine"])
-        self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["missing"])
+        self.assertIn("missing", response_obj["fields"]["baseline_creatinine"]["data"][-1]["label"])
+        self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
         # if we add support for an array values for the public_overview
         # then this assertion will fail, so far there is no support for it
-        self.assertNotIn(100, response_obj["extra_properties"]["baseline_creatinine"])
+        self.assertNotIn(
+            100,
+            [data["value"] for data in response_obj["fields"]["baseline_creatinine"]["data"]])
 
 
 class PublicOverviewNotSupportedDataTypesDictTest(APITestCase):
@@ -282,8 +284,8 @@ class PublicOverviewNotSupportedDataTypesDictTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         # the field name is present, but the keys are not (except 'missing')
         self.assertIn("baseline_creatinine", response_obj["fields"])
-        self.assertIn("missing", response_obj["fields"]["baseline_creatinine"])
-        self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["missing"])
+        self.assertIn("missing", response_obj["fields"]["baseline_creatinine"]["data"][-1]["label"])
+        self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
 
 
 class PublicOverviewDatasetsMetadataTest(APITestCase):

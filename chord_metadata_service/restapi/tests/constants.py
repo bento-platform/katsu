@@ -260,6 +260,7 @@ CONFIG_PUBLIC_TEST = {
             "charts": [
                 {"field": "date_of_consent", "chart_type": "bar"},
                 {"field": "smoking", "chart_type": "bar"},
+                {"field": "baseline_creatinine", "chart_type": "bar"}
             ]
         }
     ],
