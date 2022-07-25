@@ -257,6 +257,14 @@ def public_overview(_request):
     if not settings.CONFIG_PUBLIC:
         return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
 
+    # Predefined counts
+    individuals_count = patients_models.Individual.objects.all().count()
+    experiments_count = experiments_models.Experiment.objects.all().count()
+
+    # Early return when there is not enough data
+    if individuals_count < settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
+        return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
+
     # Datasets provenance metadata
     datasets = chord_models.Dataset.objects.values(
         "title", "description", "contact_info",
@@ -267,10 +275,6 @@ def public_overview(_request):
         "acknowledges", "keywords", "version",
         "extra_properties"
     )
-
-    # Predefined counts
-    individuals_count = patients_models.Individual.objects.all().count()
-    experiments_count = experiments_models.Experiment.objects.all().count()
 
     response = {
         "datasets": datasets,
