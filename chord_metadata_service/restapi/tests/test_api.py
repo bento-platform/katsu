@@ -161,7 +161,10 @@ class PublicSearchFieldsTest(APITestCase):
         response = self.client.get(reverse("public-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        self.assertDictEqual(response_obj, settings.CONFIG_PUBLIC)
+        self.assertSetEqual(
+            set(field["id"] for section in response_obj for field in section["fields"]),
+            set(field for section in settings.CONFIG_PUBLIC["search"] for field in section["fields"])
+        )
 
     @override_settings(CONFIG_PUBLIC={})
     def test_public_search_fields_not_configured(self):
@@ -204,7 +207,7 @@ class PublicOverviewTest(APITestCase):
         db_count = ph_m.Individual.objects.all().count()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj["individuals"], db_count)
+        self.assertEqual(response_obj["counts"]["individuals"], db_count)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_overview_no_config(self):
@@ -228,7 +231,7 @@ class PublicOverviewTest2(APITestCase):
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        self.assertNotIn("individuals", response_obj)
+        self.assertNotIn("counts", response_obj)
         self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
 
     @override_settings(CONFIG_PUBLIC={})
@@ -255,9 +258,9 @@ class PublicOverviewNotSupportedDataTypesListTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
         # the field name is present, but the keys are not (except 'missing')
-        self.assertIn("baseline_creatinine", response_obj["extra_properties"])
-        self.assertIn("missing", response_obj["extra_properties"]["baseline_creatinine"])
-        self.assertEqual(8, response_obj["extra_properties"]["baseline_creatinine"]["missing"])
+        self.assertIn("baseline_creatinine", response_obj["fields"])
+        self.assertIn("missing", response_obj["fields"]["baseline_creatinine"])
+        self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["missing"])
         # if we add support for an array values for the public_overview
         # then this assertion will fail, so far there is no support for it
         self.assertNotIn(100, response_obj["extra_properties"]["baseline_creatinine"])
@@ -278,9 +281,9 @@ class PublicOverviewNotSupportedDataTypesDictTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
         # the field name is present, but the keys are not (except 'missing')
-        self.assertIn("baseline_creatinine", response_obj["extra_properties"])
-        self.assertIn("missing", response_obj["extra_properties"]["baseline_creatinine"])
-        self.assertEqual(8, response_obj["extra_properties"]["baseline_creatinine"]["missing"])
+        self.assertIn("baseline_creatinine", response_obj["fields"])
+        self.assertIn("missing", response_obj["fields"]["baseline_creatinine"])
+        self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["missing"])
 
 
 class PublicOverviewDatasetsMetadataTest(APITestCase):
@@ -323,8 +326,22 @@ class PublicOverviewDatasetsMetadataTest(APITestCase):
         db_count = ph_m.Individual.objects.all().count()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj["individuals"], db_count)
+        # counts
+        self.assertEqual(response_obj["counts"]["individuals"], db_count)
+
+        # datasets
         self.assertIsInstance(response_obj["datasets"], list)
         for dataset in response_obj["datasets"]:
             self.assertIn("title", dataset.keys())
             self.assertIsNotNone(dataset["title"])
+
+        # layout
+        self.assertIn("layout", response_obj)
+        self.assertEqual(response_obj["layout"], settings.CONFIG_PUBLIC["overview"])
+
+        # fields
+        self.assertIn("fields", response_obj)
+        self.assertSetEqual(
+            set(response_obj["fields"].keys()),
+            set(chart["field"] for section in settings.CONFIG_PUBLIC["overview"] for chart in section["charts"])
+        )
