@@ -253,7 +253,7 @@ def get_categorical_stats(field_props):
 
     for category in labels:
         v = stats.get(category, 0)
-        if v and v < threshold:
+        if v and v <= threshold:
             v = 0
         bins.append({"label": category, "value": v})
 
@@ -313,7 +313,7 @@ def get_date_stats(field_props):
             v = stats.get(key, 0)
             bins.append({
                 "label": label,
-                "value": 0 if v < threshold else v
+                "value": 0 if v <= threshold else v
             })
 
     # Append missing items at the end if any

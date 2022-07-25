@@ -99,7 +99,7 @@ class PublicListIndividuals(APIView):
         base_qs = Individual.objects.all()
         filtered_qs = self.filter_queryset(base_qs)
 
-        if filtered_qs.count() >= settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
+        if filtered_qs.count() > settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
             return Response({"count": filtered_qs.count()})
         else:
             # the count < threshold when there is no match in db the queryset is empty, count = 0
