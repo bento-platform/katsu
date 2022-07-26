@@ -143,7 +143,7 @@ def labelled_range_generator(field_props) -> Tuple[int, int, str]:
 
     # start generator
     if minimum != taper_left:
-        yield minimum, taper_left, f"{minimum}-{taper_left}"
+        yield minimum, taper_left, f"< {taper_left}"
 
     for v in range(taper_left, taper_right, bin_size):
         yield v, v + bin_size, f"{v}-{v + bin_size}"
@@ -167,6 +167,13 @@ def monthly_generator(start: str, end: str) -> Tuple[int, int]:
 
 
 def get_model_and_field(field_id: str) -> Tuple[any, str]:
+    """
+    Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
+    where the first crumb represents the object in the DB model, and the next ones
+    are the field with their possible joins through tables relations.
+    Returns a tuple of the model object and the Django string representation of the
+    field for this object.
+    """
     model_name, *field_path = field_id.split("/")
 
     if model_name == "individual":
@@ -182,10 +189,15 @@ def get_model_and_field(field_id: str) -> Tuple[any, str]:
 
 
 def stats_for_field(model, field: str, add_missing=False) -> Mapping[str, int]:
+    """
+    Computes counts of distinct values for a given field. Mainly applicable to
+    char fields representing categories
+    """
     # values() restrict the table of results to this COLUMN
     # annotate() creates a `total` column for the aggregation
     # Count() aggregates the results by performing a GROUP BY on the field
     query_set = model.objects.all().values(field).annotate(total=Count(field))
+
     stats: Mapping[str, int] = dict()
     for item in query_set:
         key = item[field]
@@ -206,7 +218,7 @@ def stats_for_field(model, field: str, add_missing=False) -> Mapping[str, int]:
 
 
 def get_field_bins(model, field, bin_size):
-    # creates a new field "binned" by substracting the modulo by bin size to
+    # computes a new column "binned" by substracting the modulo by bin size to
     # the value which requires binning (e.g. 28 => 28 - 28 % 10 = 20)
     # cast to integer to avoid numbers such as 60.00 if that was a decimal,
     # and aggregate over this value.
@@ -221,6 +233,11 @@ def get_field_bins(model, field, bin_size):
 
 
 def compute_binned_ages(bin_size: int):
+    """
+    When age_numeric field is not available, use this function to process
+    the age field in its various formats.
+    Returns an array of values floored to the closest decade (e.g. 25 --> 20)
+    """
     a = pheno_models.Individual.objects.filter(age_numeric__isnull=True).values('age')
     binned_ages = []
     for r in a.iterator():  # reduce memory footprint (no caching)
@@ -346,7 +363,7 @@ def get_month_date_range(field_props):
 
     query_set = model.objects.all()\
         .values(field_name)\
-        .order_by(field_name)
+        .order_by(field_name)   # lexicographic sort is correct with date strings like `2021-03-09`
 
     if query_set.count() == 0:
         return None, None
@@ -415,7 +432,7 @@ def filter_queryset_field_value(qs, field_props, value: str):
     """
     Further filter a queryset using the field defined by field_props and the
     given value.
-    It is assumed that the field mapping defined in field_props is represented
+    It is a prerequisite that the field mapping defined in field_props is represented
     in the queryset object
     """
     model, field = get_model_and_field(field_props["mapping"])
@@ -423,7 +440,7 @@ def filter_queryset_field_value(qs, field_props, value: str):
     if field_props["datatype"] == "string":
         condition = {f"{field}__iexact": value}
     elif field_props["datatype"] == "number":
-        # values are of the form "50-150" or "≥ 800"
+        # values are of the form "50-150", "< 50" or "≥ 800"
         if "-" in value:
             [start, end] = [int(v) for v in value.split("-")]
             condition = {

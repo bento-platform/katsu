@@ -406,7 +406,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
-            "extra_properties__date_of_consent__contains": "2021-03"
+            "extra_properties__date_of_consent__startswith": "2021-03"
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
@@ -424,7 +424,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
-            "extra_properties__date_of_consent__contains": "2021-03",
+            "extra_properties__date_of_consent__startswith": "2021-03",
             "extra_properties__lab_test_result_value__gte": 100,
             "extra_properties__lab_test_result_value__lt": 150,
         }
