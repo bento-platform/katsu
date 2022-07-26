@@ -376,7 +376,8 @@ CONFIG_PUBLIC_TEST = {
         }
     },
     "rules": {
-        "count_threshold": 5
+        "count_threshold": 5,
+        "max_query_parameters": 2
     }
 }
 
