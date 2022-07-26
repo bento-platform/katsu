@@ -53,6 +53,7 @@ EXPERIMENT_RESULT = {
         "identifier": "An arbitrary identifier for an experiment result.",
         "description": "Description of an experiment result.",
         "filename": "The name of the file containing the result.",
+        "genome_assembly_id": "Reference genome assembly ID.",
         "file_format": "(Controlled Vocabulary) File format.",
         "data_output_type": "The type of data output: Raw or Derived data."
                             "Raw data - the data output type that can be converted back to the original result set. "

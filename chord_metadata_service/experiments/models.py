@@ -68,40 +68,6 @@ class Experiment(models.Model, IndexableMixin):
 
 class ExperimentResult(models.Model, IndexableMixin):
     """ Class to represent information about analysis of sequencing data in a file format. """
-
-    FILE_FORMAT = (
-        ("SAM", "SAM"),
-        ("BAM", "BAM"),
-        ("CRAM", "CRAM"),
-        ("BAI", "BAI"),
-        ("CRAI", "CRAI"),
-        ("VCF", "VCF"),
-        ("BCF", "BCF"),
-        ("GVCF", "GVCF"),
-        ("BigWig", "BigWig"),
-        ("BigBed", "BigBed"),
-        ("FASTA", "FASTA"),
-        ("FASTQ", "FASTQ"),
-        ("TAB", "TAB"),
-        ("SRA", "SRA"),
-        ("SRF", "SRF"),
-        ("SFF", "SFF"),
-        ("GFF", "GFF"),
-        ("TABIX", "TABIX"),
-        ("UNKNOWN", "UNKNOWN"),
-        ("OTHER", "OTHER"),
-    )
-    # TODO or Processed/Sequenced vs. Raw/Derived
-    DATA_OUTPUT_TYPE = (
-        ("Raw data", "Raw data"),
-        ("Derived data", "Derived data"),
-    )
-    # Data usage
-    # USAGE = (
-    #     ("Visualize", "Visualize"),
-    #     ("Download", "Download"),
-    # )
-
     # TODO identifier assigned by lab (?)
     identifier = CharField(max_length=200, blank=True, null=True,
                            help_text=rec_help(d.EXPERIMENT_RESULT, "identifier"))
@@ -109,9 +75,11 @@ class ExperimentResult(models.Model, IndexableMixin):
                             help_text=rec_help(d.EXPERIMENT_RESULT, "description"))
     filename = CharField(max_length=500, blank=True, null=True,
                          help_text=rec_help(d.EXPERIMENT_RESULT, "filename"))
-    file_format = CharField(max_length=50, choices=FILE_FORMAT, blank=True, null=True,
+    genome_assembly_id = CharField(max_length=50, blank=True, null=True,
+                                   help_text=rec_help(d.EXPERIMENT_RESULT, "genome_assembly_id"))
+    file_format = CharField(max_length=50, blank=True, null=True,
                             help_text=rec_help(d.EXPERIMENT_RESULT, "file_format"))
-    data_output_type = CharField(max_length=50, choices=DATA_OUTPUT_TYPE, blank=True, null=True,
+    data_output_type = CharField(max_length=200, blank=True, null=True,
                                  help_text=rec_help(d.EXPERIMENT_RESULT, "data_output_type"))
     usage = CharField(max_length=200, blank=True, null=True,
                       help_text=rec_help(d.EXPERIMENT_RESULT, "usage"))

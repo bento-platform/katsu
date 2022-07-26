@@ -7,6 +7,7 @@ from chord_metadata_service.restapi.argo_utils import (
 )
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.patients.serializers import IndividualSerializer
+from chord_metadata_service.phenopackets.serializers import GeneSerializer
 from . import models as m
 
 
@@ -35,6 +36,7 @@ class GeneticSpecimenSerializer(GenericSerializer):
 
 
 class CancerGeneticVariantSerializer(GenericSerializer):
+    gene_studied = GeneSerializer(many=True)
 
     class Meta:
         model = m.CancerGeneticVariant
@@ -121,13 +123,11 @@ class MCodePacketSerializer(GenericSerializer):
         response = super().to_representation(instance)
         response['subject'] = IndividualSerializer(instance.subject).data
         response['genomics_report'] = GenomicsReportSerializer(instance.genomics_report, required=False).data
-        response['cancer_condition'] = CancerConditionSerializer(instance.cancer_condition, many=True,
-                                                                 required=False).data
+        response['cancer_condition'] = CancerConditionSerializer(instance.cancer_condition, required=False).data
         response['cancer_related_procedures'] = CancerRelatedProcedureSerializer(instance.cancer_related_procedures,
-                                                                                 many=True, required=False).data
-        response['medication_statement'] = MedicationStatementSerializer(instance.medication_statement,
-                                                                         many=True, required=False).data
-        # TODO add tumor marker
+            many=True, required=False).data
+        response['medication_statement'] = MedicationStatementSerializer(instance.medication_statement, many=True, required=False).data
+        response['tumor_marker'] = LabsVitalSerializer(instance.tumor_marker, many=True, required=False).data
         return response
 
     class Meta:

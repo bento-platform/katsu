@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views_ingest, views_search
+from . import views_ingest, views_search, views_export
 
 urlpatterns = [
     path('workflows', views_ingest.workflow_list, name="workflows"),
@@ -8,6 +8,7 @@ urlpatterns = [
     path('workflows/<slug:workflow_id>.wdl', views_ingest.workflow_file, name="workflow-file"),
 
     path('private/ingest', views_ingest.ingest, name="ingest"),
+    path('private/export', views_export.export, name="export"),
 
     path('data-types', views_search.data_type_list, name="data-type-list"),
     path('data-types/<str:data_type>', views_search.data_type_detail, name="data-type-detail"),

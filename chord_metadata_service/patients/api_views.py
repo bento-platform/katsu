@@ -1,4 +1,6 @@
 from rest_framework import viewsets, filters
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.settings import api_settings
 from django.conf import settings
 from django.utils.decorators import method_decorator
@@ -6,7 +8,7 @@ from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import IndividualSerializer
 from .models import Individual
-from .filters import IndividualFilter
+from .filters import IndividualFilter, PublicIndividualFilter
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
 from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer,
@@ -54,3 +56,31 @@ class IndividualViewSet(viewsets.ModelViewSet):
     @method_decorator(cache_page(settings.CACHE_TIME))
     def dispatch(self, *args, **kwargs):
         return super(IndividualViewSet, self).dispatch(*args, **kwargs)
+
+
+class PublicListIndividuals(APIView):
+    """
+    View to return only count of all individuals after filtering.
+    """
+    filter_backends = [DjangoFilterBackend, ]
+    filter_class = PublicIndividualFilter
+
+    def filter_queryset(self, queryset):
+        for backend in list(self.filter_backends):
+            queryset = backend().filter_queryset(self.request, queryset, self)
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        base_qs = Individual.objects.all()
+        filtered_qs = self.filter_queryset(base_qs)
+        # protect filtering if config is not provided
+        # the settings must be imported from django.conf (not from chord_metadata_service.metadata.settings)
+        if settings.CONFIG_FIELDS:
+            # the threshold for the count response is set to 5
+            if filtered_qs.count() > 5:
+                return Response({"count": filtered_qs.count()})
+            else:
+                # the count < 5, when there is no match in db the queryset is empty, count = 0
+                return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
+        else:
+            return Response(settings.NO_PUBLIC_DATA_AVAILABLE)

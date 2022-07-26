@@ -22,9 +22,13 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
         "filename": {
             "type": "string"
         },
+        "genome_assembly_id": {
+            "type": "string",
+            "enum": ["GRCh37", "GRCh38", "GRCm38", "GRCm39"]
+        },
         "file_format": {
             "type": "string",
-            "enum": ["SAM", "BAM", "CRAM", "BAI", "CRAI", "VCF", "BCF", "GVCF", "BigWig", "BigBed", "FASTA",
+            "enum": ["SAM", "BAM", "CRAM", "BAI", "CRAI", "VCF", "BCF", "MAF", "GVCF", "BigWig", "BigBed", "FASTA",
                      "FASTQ", "TAB", "SRA", "SRF", "SFF", "GFF", "TABIX", "UNKNOWN", "OTHER"]
         },
         "data_output_type": {
@@ -32,7 +36,8 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
             "enum": ["Raw data", "Derived data"]
         },
         "usage": {
-            "type": "string"
+            "type": "string",
+            "enum": ["Visualized", "Downloaded"]
         },
         "creation_date": {
             "type": "string"
@@ -80,27 +85,36 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
             "type": "string"
         },
         "study_type": {
-            "type": "string"
+            "type": "string",
+            "enum": ["Genomics", "Epigenomics", "Metagenomics", "Transcriptomics", "Other"]
         },
         "experiment_type": {
-            "type": "string"
+            "type": "string",
+            "enum": ["DNA Methylation", "mRNA-Seq", "smRNA-Seq", "RNA-Seq", "WES", "Other"]
         },
         "experiment_ontology": ONTOLOGY_CLASS_LIST,
         "molecule": {
-            "type": "string"
+            "type": "string",
+            "enum": ["total RNA", "polyA RNA", "cytoplasmic RNA", "nuclear RNA",
+                     "small RNA", "genomic DNA", "protein", "Other"]
         },
         "molecule_ontology": ONTOLOGY_CLASS_LIST,
         "library_strategy": {
-            "type": "string"
+            "type": "string",
+            "enum": ["Bisulfite-Seq", "RNA-Seq", "ChIP-Seq", "WES", "Other"]
         },
         "library_source": {
-            "type": "string"
+            "type": "string",
+            "enum": ["Genomic", "Genomic Single Cell", "Transcriptomic", "Transcriptomic Single Cell",
+                     "Metagenomic", "Metatranscriptomic", "Synthetic", "Viral RNA", "Other"]
         },
         "library_selection": {
-            "type": "string"
+            "type": "string",
+            "enum": ["Random", "PCR", "Random PCR", "RT-PCR", "MF", "Exome capture", "Other"]
         },
         "library_layout": {
-            "type": "string"
+            "type": "string",
+            "enum": ["Single", "Paired"]
         },
         "extraction_protocol": {
             "type": "string"
