@@ -231,18 +231,22 @@ def public_search_fields(_request):
 
     search_conf = settings.CONFIG_PUBLIC["search"]
     field_conf = settings.CONFIG_PUBLIC["fields"]
-    r = [
-        {
-            **section,
-            "fields": [
-                {
-                    **field_conf[f],
-                    "id": f,
-                    "options": get_field_options(field_conf[f])
-                } for f in section["fields"]
-            ]
-        } for section in search_conf
-    ]
+    # Note: the array is wrapped in a dictionary structure to help with JSON
+    # processing by some services.
+    r = {
+        "sections": [
+            {
+                **section,
+                "fields": [
+                    {
+                        **field_conf[f],
+                        "id": f,
+                        "options": get_field_options(field_conf[f])
+                    } for f in section["fields"]
+                ]
+            } for section in search_conf
+        ]
+    }
     return Response(r)
 
 

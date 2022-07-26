@@ -162,7 +162,7 @@ class PublicSearchFieldsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertSetEqual(
-            set(field["id"] for section in response_obj for field in section["fields"]),
+            set(field["id"] for section in response_obj["sections"] for field in section["fields"]),
             set(field for section in settings.CONFIG_PUBLIC["search"] for field in section["fields"])
         )
 
