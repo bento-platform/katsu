@@ -63,11 +63,9 @@ class PublicListIndividuals(APIView):
 
         search_conf = settings.CONFIG_PUBLIC["search"]
         field_conf = settings.CONFIG_PUBLIC["fields"]
-        queryable_fields = dict()
-        for section in search_conf:
-            queryable_fields.update(
-                [(f, field_conf[f]) for f in section["fields"]]
-            )
+        queryable_fields = {
+            f"{f}": field_conf[f] for section in search_conf for f in section["fields"]
+        }
 
         for field, value in qp.items():
             if field not in queryable_fields:
