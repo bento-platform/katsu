@@ -296,11 +296,6 @@ def public_overview(_request):
 
     for field in fields:
         field_props = settings.CONFIG_PUBLIC["fields"][field]
-        response["fields"][field] = {
-            **field_props,
-            "id": field,
-            "data": {}
-        }
         if field_props["datatype"] == "string":
             stats = get_categorical_stats(field_props)
         elif field_props["datatype"] == "number":
@@ -308,6 +303,10 @@ def public_overview(_request):
         elif field_props["datatype"] == "date":
             stats = get_date_stats(field_props)
 
-        response["fields"][field]["data"] = stats
+        response["fields"][field] = {
+            **field_props,
+            "id": field,
+            "data": stats
+        }
 
     return Response(response)
