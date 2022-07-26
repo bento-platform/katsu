@@ -295,13 +295,17 @@ class PublicFilteringIndividualsTest(APITestCase):
         response = self.client.get(
             '/api/public?smoking=Non-smoker&death_dc=deceased&covidstatus=positive'
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(response_obj["code"], 400)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_extra_properties_invalid_3(self):
         # if GET query string list has various data types Error
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(response_obj["code"], 400)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_extra_properties_range_1(self):
@@ -328,7 +332,9 @@ class PublicFilteringIndividualsTest(APITestCase):
         response = self.client.get(
             '/api/public?lab_test_result_value=100-200'
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(response_obj["code"], 400)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_extra_properties_range_string_1(self):
@@ -470,13 +476,17 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
     def test_public_filtering_age_invalid_range(self):
         # age invalid range max search
         response = self.client.get('/api/public?age=10-50')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(response_obj["code"], 400)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY)
     def test_public_filtering_age_range_min_and_max_no_age_in_config(self):
         # test with config without age field, returns error
         response = self.client.get('/api/public?age=20-30')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(response_obj["code"], 400)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_public_filtering_age_range_min_and_max_no_config(self):

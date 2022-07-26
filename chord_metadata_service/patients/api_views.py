@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ValidationError
+from bento_lib.responses import errors
 
 from .serializers import IndividualSerializer
 from .models import Individual
@@ -97,7 +98,12 @@ class PublicListIndividuals(APIView):
             return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
 
         base_qs = Individual.objects.all()
-        filtered_qs = self.filter_queryset(base_qs)
+        try:
+            filtered_qs = self.filter_queryset(base_qs)
+        except ValidationError as e:
+            return Response(errors.bad_request_error(
+                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
+            ))
 
         if filtered_qs.count() > settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
             return Response({"count": filtered_qs.count()})
