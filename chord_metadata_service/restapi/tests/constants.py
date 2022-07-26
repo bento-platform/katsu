@@ -379,3 +379,6 @@ CONFIG_PUBLIC_TEST = {
         "count_threshold": 5
     }
 }
+
+CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY = deepcopy(CONFIG_PUBLIC_TEST)
+CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY["search"][0]["fields"] = ["sex"]
