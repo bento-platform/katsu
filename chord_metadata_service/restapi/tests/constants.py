@@ -359,9 +359,9 @@ CONFIG_PUBLIC_TEST = {
             "config": {
                 "bin_size": 50,
                 "taper_left": 50,
-                "taper_right": 800,
-                "minimum": 0,
-                "maximum": 1000,
+                "taper_right": 200,
+                "minimum": 30,
+                "maximum": 600,
                 "units": "mg/L"
             }
         },

@@ -327,6 +327,42 @@ class PublicFilteringIndividualsTest(APITestCase):
             self.assertEqual(db_count, response_obj['count'])
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_public_filtering_extra_properties_range_2(self):
+        # extra_properties range search (above taper, single value)
+        response = self.client.get(
+            '/api/public?baseline_creatinine=≥ 200'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        range_parameters = {
+            "extra_properties__baseline_creatinine__gte": 200,
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_public_filtering_extra_properties_range_3(self):
+        # extra_properties range search (below taper, single value)
+        response = self.client.get(
+            '/api/public?baseline_creatinine=< 50'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        range_parameters = {
+            "extra_properties__baseline_creatinine__lt": 50,
+        }
+        db_count = Individual.objects.filter(**range_parameters).count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_extra_properties_wrong_range(self):
         # extra_properties range search, unauthorized range
         response = self.client.get(
