@@ -139,8 +139,8 @@ for a standalone instance of this server, so it can be swapped out.
 By default, `katsu` uses the CHORD permission system, which
 functions as follows:
 
-  * The service assumes that an **out-of-band** mechanism (such as a 
-    properly-configured reverse proxy) protects URLs under the `/private` 
+  * The service assumes that an **out-of-band** mechanism (such as a
+    properly-configured reverse proxy) protects URLs under the `/private`
     namespace.
   * Requests with the headers `X-User` and `X-User-Role` can be authenticated
     via a Django Remote User-type system, with `X-User-Role: owner` giving
@@ -202,7 +202,7 @@ coverage html
 ### Terminal Commands
 
 Katsu ships with a variety of command-line helpers to facilitate common actions
-that one might perform. 
+that one might perform.
 
 To run them, the Django `manage.py` script is used.
 
@@ -240,7 +240,7 @@ Dataset created: dataset title (ID: 2a8f8e68-a34f-4d31-952a-22f362ebee9e)
 * `756a4530-59b7-4d47-a04a-c6ee5aa52565`: Project ID to put the dataset under
 * `./examples/data_use.json`: Path to data use JSON
 
-Creates a new dataset under the project specified (with its ID), with 
+Creates a new dataset under the project specified (with its ID), with
 corresponding title, description, contact information, and data use conditions.
 
 ```
@@ -265,7 +265,7 @@ Table created: table name (ID: 0d63bafe-5d76-46be-82e6-3a07994bac2e, Type: pheno
 * `phenopacket`: Table data type (either `phenopacket` or `experiment`)
 * `2a8f8e68-a34f-4d31-952a-22f362ebee9e`: Dataset ID to put the table under
 
-Creates a new data table under the dataset specified (with its ID), with a 
+Creates a new data table under the dataset specified (with its ID), with a
 corresponding name and data type (either `phenopacket` or `experiment`.)
 
 ```
@@ -286,10 +286,10 @@ Ingested data successfully.
 ```
 
 * `0d63bafe-5d76-46be-82e6-3a07994bac2e`: ID of table to ingest into
-* `./examples/1000g_phenopackets_1_of_3.json`: Data to ingest (in the format 
+* `./examples/1000g_phenopackets_1_of_3.json`: Data to ingest (in the format
   accepted by the Phenopackets workflow or the Experiments workflow, depending
   on the data type of the table)
-  
+
 #### Patient Commands
 
 ```
@@ -298,7 +298,7 @@ $ ./manage.py patients_build_index
 ```
 
 Builds an ElasticSearch index for patients in the database.
-  
+
 #### Phenopacket Commands
 
 ```
@@ -360,124 +360,5 @@ The file can be copied, renamed to `config.json` and modified.
 The `config.json` contains fields that data providers would like to make open for public access.
 If the `config.json` is not set up/created it means there is no public data and no data will be available via these APIs.
 
-### Config file specification
-
-The `config.json` follows jsonschema specifications: it includes fields from Katsu data model, defines their type and other attributes that determine how the data from these fields will be presented in the public response.
-
-Jsonschema properties:
-
-- `"type"` - defines a data type for this field, e.g. "number" or "string" (Katsu's config accepts only number and string types)
-- `"format"` - defines a string format, e.g. "date" to record date in the format of "2021-12-31"
-- `"enum"` - defines a list of options for this field
-- `"title"` - field's user-friendly name
-- `"description"` - field's description
-
-Custom properties:
-
-- `"bin_size"` (number) - defines a bin size for numeric fields (where "type" is set to "number"), by default bin size is set to 10
-- `"queryable"` (true/false) - defines if the field should be included in search, if set to false the field will only be shown as a chart
-- `"is_range"` (true/false) - defines if this field can  be searched using range search (e.g.min value and max value)
-- `"chart"` (options: pie, bar)-  defines a type of the chart to be used to visualize the data
-- `"taper_left"` and `"taper_right"` (number) - defines the cut-offs for the data to be shown in charts
-- `"units"` (string) - defines unit value for numeric fields (e.g. "years", "mg/L")
-- `"minimum"` (number) - defines the minimum value in this field
-- `"maximum"` (number) - defines the maximum value in this field
-
-Example of the `config.json`
-
-```
-
-    {
-      "age": {
-        "type": "number",
-        "title": "Age",
-        "bin_size": 10,
-        "is_range": true,
-        "queryable": true,
-        "taper_left": 40,
-        "taper_right": 60,
-        "units": "years",
-        "minimum": 0,
-        "description": "Age at arrival"
-      },
-      "sex": {
-        "type": "string",
-        "enum": [
-          "Male",
-          "Female"
-        ],
-        "title": "Sex",
-        "queryable": true,
-        "description": "Sex at birth"
-      },
-      "extra_properties": {
-        "date_of_consent": {
-          "type": "string",
-          "format": "date",
-          "title": "Verbal consent date",
-          "chart": "bar",
-          "queryable": true,
-          "description": "Date of initial verbal consent (participant, legal representative or tutor), yyyy-mm-dd"
-        }
-      }
-    }
-```
-
-
-### Public APIs
-
-The public APIs include the following endpoints:
-
- - `/api/public_search_fields` GET: returns `config.json` contents in a form of jsonschema.
-
-   The response when public fields are not configured and config file is not provided: `{"message": "No public fields configured."}`
-
-
- - `/api/public_overview` GET: returns an overview that contains counts for each field of interest.
-
-   The response when there is no public data available and config file is not provided: `{"message": "No public data available."}`
-
-
- - `/api/public`  GET: returns a count of all individuals in database.
-
-   The response when there is no public data available and config file is not provided: `{"message": "No public data available."}`
-
-   The response when there is no enough data that passes the project-custom threshold: `{"message": "Insufficient data available."}`
-   When count is less or equal to a project's custom threshold returns message that insufficient data available.
-   Accepts search filters on the fields that are specified in the :code:`config.json` file and set to "queryable".
-
-   Currently, the following search filters are written for the Individual model:
-
-   - sex: e.g. `/api/public?sex=female`
-
-   - age: search by age ranges e.g. `/api/public?age_range_min=20&age_range_max=30`
-
-   - extra_properties: e.g. `/api/public?extra_properties=[{"smoking": "Non-smoker"},{"covidstatus": "positive"}]`
-   
-   The `extra_properties` is a JSONField without a schema.
-   To allow searching content in this field the nested fields have to be added to the `config.json` file (see the config file example above).
-   The query string must contain a list of objects where each object has a key-value pair representing a nested field name and a search value.
- 
-   ##### _Examples of extra properties searches_
-
-    Search for items that have a type of string:
-
-   ```
-    /api/public?extra_properties=[{"smoking": "Non-smoker"},{"death_dc": "deceased"},{"covidstatus": "positive"}]
-   ```
-   Search for items that contain date ranges:
-
-   ```
-    /api/public?extra_properties=[{"date_of_consent": {"after": "2020-03-01", "before": "2021-05-01"}}]
-   ```
-   Search for items that contain numeric ranges:
-
-   ```
-    /api/public?extra_properties=[{"lab_test_result_value": {"rangeMin": 5, "rangeMax": 900}}]
-   ```
-   Examples of combining extra properties search with other fields:
-
-   ```
-    /api/public?sex=female&extra_properties=[{"covidstatus": "positive"}]
-   ```
- 
+Refer to the documentation for a detailed description of the config file and
+public API endpoints.
