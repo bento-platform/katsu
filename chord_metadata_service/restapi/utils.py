@@ -360,14 +360,16 @@ def get_month_date_range(field_props):
         raise NotImplementedError(msg)
 
     LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
+    is_not_null_filter = {f"{field_name}__isnull": False}   # property may be missing: avoid handling "None"
 
-    query_set = model.objects.all()\
+    query_set = model.objects\
+        .filter(**is_not_null_filter)\
         .values(field_name)\
+        .distinct()\
         .order_by(field_name)   # lexicographic sort is correct with date strings like `2021-03-09`
 
     if query_set.count() == 0:
         return None, None
-
     start = query_set.first()[field_name][:LENGTH_Y_M]
     end = query_set.last()[field_name][:LENGTH_Y_M]
 

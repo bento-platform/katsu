@@ -157,6 +157,29 @@ class McodeOverviewTest(APITestCase):
 
 class PublicSearchFieldsTest(APITestCase):
 
+    def setUp(self) -> None:
+        # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
+        # one of phenopackets has 1 phenotypic feature and 1 disease
+        self.individual_1 = ph_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
+        self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+        self.phenopacket_1 = ph_m.Phenopacket.objects.create(
+            **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1)
+        )
+        self.disease = ph_m.Disease.objects.create(**ph_c.VALID_DISEASE_1)
+        self.procedure = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
+        self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_1, self.procedure))
+        self.phenotypic_feature = ph_m.PhenotypicFeature.objects.create(
+            **ph_c.valid_phenotypic_feature(self.biosample_1, self.phenopacket_1)
+        )
+        self.phenopacket_1.biosamples.set([self.biosample_1])
+        self.phenopacket_1.diseases.set([self.disease])
+
+        # experiments
+        self.instrument = exp_m.Instrument.objects.create(**exp_c.valid_instrument())
+        self.experiment = exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_1, self.instrument))
+        self.experiment_result = exp_m.ExperimentResult.objects.create(**exp_c.valid_experiment_result())
+        self.experiment.experiment_results.set([self.experiment_result])
+
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_search_fields_configured(self):
         response = self.client.get(reverse("public-search-fields"), content_type="application/json")
