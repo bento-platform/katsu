@@ -20,6 +20,7 @@ from chord_metadata_service.mcode.tests import constants as mcode_c
 
 from .constants import (
     CONFIG_PUBLIC_TEST,
+    CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS,
     VALID_INDIVIDUALS,
     INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST,
     INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT
@@ -173,6 +174,16 @@ class PublicSearchFieldsTest(APITestCase):
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, settings.NO_PUBLIC_FIELDS_CONFIGURED)
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS)
+    def test_public_search_fields_missing_extra_properties(self):
+        response = self.client.get(reverse("public-search-fields"), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertSetEqual(
+            set(field["id"] for section in response_obj["sections"] for field in section["fields"]),
+            set(field for section in settings.CONFIG_PUBLIC["search"] for field in section["fields"])
+        )
 
 
 class PublicOverviewTest(APITestCase):

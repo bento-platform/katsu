@@ -383,3 +383,42 @@ CONFIG_PUBLIC_TEST = {
 
 CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY = deepcopy(CONFIG_PUBLIC_TEST)
 CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY["search"][0]["fields"] = ["sex"]
+
+CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS = deepcopy(CONFIG_PUBLIC_TEST)
+CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS["fields"].update([
+    ("unset_date",
+     {
+        "mapping": "individual/extra_properties/unset_date",
+        "title": "Some date",
+        "description": "Some date",
+        "datatype": "date",
+        "config": {
+            "bin_by": "month"
+        }
+     }),
+    ("unset_numeric",
+     {
+        "mapping": "individual/extra_properties/unset_numeric",
+        "title": "Some measure",
+        "description": "Some measure",
+        "datatype": "number",
+        "config": {
+            "bin_size": 50,
+            "taper_left": 50,
+            "taper_right": 500,
+            "minimum": 0,
+            "maximum": 600,
+            "units": "mg/L"
+        }
+     }),
+    ("unset_category",
+     {
+        "mapping": "individual/extra_properties/unset_category",
+        "title": "Some things",
+        "description": "Some things",
+        "datatype": "string",
+        "config": {
+            "enum": None
+        }
+     })
+])
