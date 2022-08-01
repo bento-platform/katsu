@@ -79,7 +79,7 @@ class PublicListIndividuals(APIView):
                     field_props["datatype"] == "string"
                     and value.lower() in [o.lower() for o in options]
                 ) \
-                and not(
+                and not (
                     # no restriction when enum is not set for categories
                     field_props["datatype"] == "string"
                     and field_props["config"]["enum"] is None
