@@ -30,8 +30,7 @@ router.register(r'experimentresults', experiment_views.ExperimentResultViewSet)
 
 # Patients app urls
 router.register(r'individuals', individual_views.IndividualViewSet)
-# router.register(r'individualsgetcsv', individual_views.IndividualViewSetCSV)
-router.register(r'individualsgetcsv', individual_views.IndividualGetCSVViewSet, basename='individualsgetcsv')
+router.register(r'batch/individuals', individual_views.IndividualGetCSVViewSet, basename='batch_individuals_csv')
 
 # Phenopackets app urls
 router.register(r'phenotypicfeatures', phenopacket_views.PhenotypicFeatureViewSet)

@@ -1,9 +1,10 @@
-from django.http import HttpResponse
 import csv
+
 from rest_framework import viewsets, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.settings import api_settings
+from django.http import HttpResponse
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -64,59 +65,59 @@ class IndividualGetCSVViewSet(viewsets.ModelViewSet):
         ).order_by("id")
         serializer_class = IndividualSerializer
         serialized_data = serializer_class(queryset, many=True)
-
-        individuals = []
-        for individual in serialized_data.data:
-            ind_obj = {
-                'id': individual['id'],
-                'sex': individual.get('sex', None),
-                'date_of_birth': individual.get('date_of_birth', None),
-                'taxonomy': None,
-                'karyotypic_sex': individual['karyotypic_sex'],
-                'race': individual.get('race', None),
-                'ethnicity': individual.get('ethnicity', None),
-                'age': None,
-                'diseases': None,
-                'created': individual['created'],
-                'updated': individual['updated']
-            }
-            if 'taxonomy' in individual:
-                ind_obj['taxonomy'] = individual['taxonomy'].get('label', None)
-            if 'age' in individual:
-                if 'age' in individual['age']:
-                    ind_obj['age'] = individual['age'].get('age', None)
-                elif 'start' and 'end' in individual['age']:
-                    ind_obj['age'] = str(
-                        individual['age']['start'].get('age', "NA")
-                        + ' - ' +
-                        individual['age']['end'].get('age', "NA")
-                    )
-                else:
-                    ind_obj['age'] = None
-            if 'phenopackets' in individual:
-                all_diseases = []
-                for phenopacket in individual['phenopackets']:
-                    if 'diseases' in phenopacket:
-                        # use ; because some disease terms might contain , in their label
-                        single_phenopacket_diseases = '; '.join(
-                            [
-                                f"{d['term']['label']} ({parse_onset(d['onset'])})"
-                                if 'onset' in d else d['term']['label'] for d in phenopacket['diseases']
-                            ]
+        if request.data.get("format") == "csv":
+            individuals = []
+            for individual in serialized_data.data:
+                ind_obj = {
+                    'id': individual['id'],
+                    'sex': individual.get('sex', None),
+                    'date_of_birth': individual.get('date_of_birth', None),
+                    'taxonomy': None,
+                    'karyotypic_sex': individual['karyotypic_sex'],
+                    'race': individual.get('race', None),
+                    'ethnicity': individual.get('ethnicity', None),
+                    'age': None,
+                    'diseases': None,
+                    'created': individual['created'],
+                    'updated': individual['updated']
+                }
+                if 'taxonomy' in individual:
+                    ind_obj['taxonomy'] = individual['taxonomy'].get('label', None)
+                if 'age' in individual:
+                    if 'age' in individual['age']:
+                        ind_obj['age'] = individual['age'].get('age', None)
+                    elif 'start' and 'end' in individual['age']:
+                        ind_obj['age'] = str(
+                            individual['age']['start'].get('age', "NA")
+                            + ' - ' +
+                            individual['age']['end'].get('age', "NA")
                         )
-                        all_diseases.append(single_phenopacket_diseases)
-                if all_diseases:
-                    ind_obj['diseases'] = '; '.join(all_diseases)
-            individuals.append(ind_obj)
-        columns = individuals[0].keys()
-        # remove underscore and capitalize column names
-        headers = {key: key.replace('_', ' ').capitalize() for key in individuals[0].keys()}
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = "attachment; filename='export.csv'"
-        dict_writer = csv.DictWriter(response, fieldnames=columns)
-        dict_writer.writerow(headers)
-        dict_writer.writerows(individuals)
-        return response
+                    else:
+                        ind_obj['age'] = None
+                if 'phenopackets' in individual:
+                    all_diseases = []
+                    for phenopacket in individual['phenopackets']:
+                        if 'diseases' in phenopacket:
+                            # use ; because some disease terms might contain , in their label
+                            single_phenopacket_diseases = '; '.join(
+                                [
+                                    f"{d['term']['label']} ({parse_onset(d['onset'])})"
+                                    if 'onset' in d else d['term']['label'] for d in phenopacket['diseases']
+                                ]
+                            )
+                            all_diseases.append(single_phenopacket_diseases)
+                    if all_diseases:
+                        ind_obj['diseases'] = '; '.join(all_diseases)
+                individuals.append(ind_obj)
+            columns = individuals[0].keys()
+            # remove underscore and capitalize column names
+            headers = {key: key.replace('_', ' ').capitalize() for key in individuals[0].keys()}
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = "attachment; filename='export.csv'"
+            dict_writer = csv.DictWriter(response, fieldnames=columns)
+            dict_writer.writerow(headers)
+            dict_writer.writerows(individuals)
+            return response
 
 
 class PublicListIndividuals(APIView):
