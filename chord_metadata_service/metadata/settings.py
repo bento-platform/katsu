@@ -81,10 +81,10 @@ DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/dr
 
 # Candig-specific settings
 
-CANDIG_AUTHORIZATION = os.environ.get("CANDIG_AUTHORIZATION")
-CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL")
+CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "")
+CANDIG_OPA_URL = os.getenv("CANDIG_OPA_URL", "")
 CANDIG_OPA_SECRET = os.getenv("CANDIG_OPA_SECRET", "my-secret-beacon-token")
-CANDIG_OPA_SITE_ADMIN_KEY = os.environ.get("CANDIG_OPA_SITE_ADMIN_KEY")
+CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("CANDIG_OPA_SITE_ADMIN_KEY", "site-admin")
 
 # Application definition
 
