@@ -228,11 +228,11 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                 id=ms["id"],
                 defaults={
                     "medication_code": ms["medication_code"],
-                    "termination_reason": ms["termination_reason"],
-                    "treatment_intent": ms["treatment_intent"],
-                    "start_date": ms["start_date"],
-                    "end_date": ms["end_date"],
-                    "extra_properties": ms["extra_properties"]
+                    "termination_reason": ms.get("termination_reason", None),
+                    "treatment_intent": ms.get("treatment_intent", None),
+                    "start_date": ms.get("start_date", None),
+                    "end_date": ms.get("end_date", None),
+                    "extra_properties": ms.get("extra_properties", None)
                 }
             )
             _logger_message(ms_created, medication_statement)
@@ -259,7 +259,6 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
                     "extra_properties": tm.get("extra_properties", None)
                 }
             )
-            logger.info(f"hi {tm['extra_properties']} {tumor_marker.extra_properties}")
             _logger_message(tm_created, tumor_marker)
             tumor_markers.append(tumor_marker.id)
 
