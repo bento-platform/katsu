@@ -59,10 +59,19 @@ class IndividualViewSet(viewsets.ModelViewSet):
 
 class IndividualGetCSVViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
+        # print(f'Individuals {Individual.objects.all()}')
+        # print(request.data.get("ids"))
+        if not request.data.get("ids"):
+            return Response({"error": "No ids provided"}, status=400)
         queryset = Individual.objects.filter(id__in=request.data.get("ids")).prefetch_related(
             *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
             *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
         ).order_by("id")
+
+        # invalid individual id/ids
+        if queryset.count() != len(request.data.get("ids")):
+            return Response({"error": "Invalid id/ids"}, status=400)
+
         serializer_class = IndividualSerializer
         serialized_data = serializer_class(queryset, many=True)
         if request.data.get("format") == "csv":
@@ -118,6 +127,11 @@ class IndividualGetCSVViewSet(viewsets.ModelViewSet):
             dict_writer.writerow(headers)
             dict_writer.writerows(individuals)
             return response
+        else:
+            return Response({"message": "Format not yet implemented"}, status=501)
+
+    # def dispatch(self, request, *args, **kwargs):
+    #     return HttpResponse(status=405)
 
 
 class PublicListIndividuals(APIView):
