@@ -166,6 +166,52 @@ class IndividualFullTextSearchTest(APITestCase):
         self.assertEqual(len(response_obj_2['results']), 2)
 
 
+class BatchIndividualsCSVTest(APITestCase):
+    """ Test for getting a batch of individuals as csv. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_batch_individuals_csv(self):
+        ids = [self.individual_one.id, self.individual_two.id]
+        data = json.dumps({'format': 'csv', 'ids': ids})
+        get_resp = self.client.post('/api/batch/individuals', data, content_type='application/json')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        content = get_resp.content.decode('utf-8')
+        resp_csv_reader = csv.reader(io.StringIO(content))
+        resp_body = list(resp_csv_reader)
+        correct_content = f"{c.CSV_HEADER}\n{c.INDIVIDUAL_1_CSV}\n{c.INDIVIDUAL_2_CSV}"
+        corrct_csv_reader = csv.reader(io.StringIO(correct_content))
+        correct_body = list(corrct_csv_reader)
+        self.assertEqual(resp_body[0], correct_body[0])
+        for i in range(1, len(resp_body)):
+            correct_body_row = correct_body[i]
+            id = correct_body_row[0]
+            correct_body_row[-1] = Individual.objects.get(id=id).updated.isoformat().replace('+00:00', 'Z')
+            correct_body_row[-2] = Individual.objects.get(id=id).created.isoformat().replace('+00:00', 'Z')
+            self.assertEqual(resp_body[i], correct_body[i])
+
+    def test_batch_individuals_csv_no_ids(self):
+        data = json.dumps({'format': 'csv'})
+        get_resp = self.client.post('/api/batch/individuals', data, content_type='application/json')
+        self.assertEqual(get_resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_batch_individuals_csv_invalid_ids(self):
+        data = json.dumps({'format': 'csv', 'ids': ['invalid']})
+        get_resp = self.client.post('/api/batch/individuals', data, content_type='application/json')
+        self.assertEqual(get_resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+        data = json.dumps({'format': 'csv', 'ids': [self.individual_one.id, 'invalid', "I don't exist"]})
+        get_resp = self.client.post('/api/batch/individuals', data, content_type='application/json')
+        self.assertEqual(get_resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_batch_individuals_csv_invalid_format(self):
+        data = json.dumps({'format': 'invalid', 'ids': [self.individual_one.id]})
+        get_resp = self.client.post('/api/batch/individuals', data, content_type='application/json')
+        self.assertEqual(get_resp.status_code, status.HTTP_501_NOT_IMPLEMENTED)
+
+
 class PublicListIndividualsTest(APITestCase):
     """ Test for api/public GET all """
 
