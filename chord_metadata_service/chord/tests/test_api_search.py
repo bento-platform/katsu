@@ -36,6 +36,7 @@ from .constants import (
     TEST_SEARCH_QUERY_7,
     TEST_SEARCH_QUERY_8,
     TEST_SEARCH_QUERY_9,
+    TEST_SEARCH_QUERY_10,
     TEST_FHIR_SEARCH_QUERY,
 )
 from ..models import Project, Dataset, TableOwnership, Table
@@ -446,6 +447,23 @@ class SearchTest(APITestCase):
             c = r.json()
             self.assertEqual(len(c["results"]), 1)
             self.assertIn("patient:1", [phenopacket["subject"]["id"] for phenopacket in c["results"]])
+
+    def test_private_table_search_13(self):
+        # Valid query to search for biosample id in list
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            self.assertEqual(len(c["results"]), 2)
+            self.assertIn("biosample_id:1", [b["id"]
+                                             for phenopacket in c["results"]
+                                             for b in phenopacket["biosamples"]
+                                             ])
 
     @patch('chord_metadata_service.chord.views_search.es')
     def test_fhir_search(self, mocked_es):
