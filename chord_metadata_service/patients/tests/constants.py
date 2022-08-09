@@ -66,8 +66,8 @@ VALID_INDIVIDUAL_2 = {
 }
 
 CSV_HEADER = "Id,Sex,Date of birth,Taxonomy,Karyotypic sex,Race,Ethnicity,Age,Diseases,Created,Updated"
-INDIVIDUAL_1_CSV = "patient:1,FEMALE,1960-01-01,human,UNKNOWN_KARYOTYPE,,,P45Y - P49Y,,--TO BE FILLED--,--TO BE FILLED--"
-INDIVIDUAL_2_CSV = "patient:2,MALE,1967-01-01,human,UNKNOWN_KARYOTYPE,,,P55Y,,--TO BE FILLED--,--TO BE FILLED--"
+INDIVIDUAL_1_CSV = "patient:1,FEMALE,1960-01-01,human,UNKNOWN_KARYOTYPE,,,P45Y - P49Y,,--IGNORE--,--IGNORE--"
+INDIVIDUAL_2_CSV = "patient:2,MALE,1967-01-01,human,UNKNOWN_KARYOTYPE,,,P55Y,,--IGNORE--,--IGNORE--"
 
 
 def generate_valid_individual():
