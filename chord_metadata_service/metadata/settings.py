@@ -290,9 +290,9 @@ CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
 # Read project specific config.json that contains custom search fields
 if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
     with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
-        CONFIG_FIELDS = json.load(config_file)
+        CONFIG_PUBLIC = json.load(config_file)
 else:
-    CONFIG_FIELDS = {}
+    CONFIG_PUBLIC = {}
 
 # Public response when there is no enough data that passes the project-custom threshold
 INSUFFICIENT_DATA_AVAILABLE = {"message": "Insufficient data available."}

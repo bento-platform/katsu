@@ -1,4 +1,3 @@
-import os
 import sys
 import subprocess
 
@@ -35,6 +34,7 @@ def main():
             stderr=subprocess.PIPE,
         )
         if response.returncode:
+            print(response.stderr)
             print('"{}" does not seem to be a valid table'.format(table))
         else:
             print("Deleted data on table {}".format(table))
