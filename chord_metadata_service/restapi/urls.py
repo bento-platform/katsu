@@ -13,10 +13,12 @@ from chord_metadata_service.phenopackets.autocomplete_views import (
 )
 from chord_metadata_service.resources import api_views as resources_views
 from .api_views import overview, mcode_overview, public_search_fields, public_overview
+from chord_metadata_service.restapi.routers import BatchListRouter
 
-__all__ = ["router", "urlpatterns"]
+__all__ = ["router", "batch_router", "urlpatterns"]
 
 router = routers.DefaultRouter(trailing_slash=False)
+batch_router = BatchListRouter()
 
 # CHORD app urls
 router.register(r'projects', chord_views.ProjectViewSet)
@@ -30,7 +32,7 @@ router.register(r'experimentresults', experiment_views.ExperimentResultViewSet)
 
 # Patients app urls
 router.register(r'individuals', individual_views.IndividualViewSet)
-router.register(r'batch/individuals', individual_views.IndividualGetCSVViewSet, basename='batch_individuals_csv')
+batch_router.register(r'batch/individuals', individual_views.IndividualBatchViewSet, basename="batch/individuals")
 
 # Phenopackets app urls
 router.register(r'phenotypicfeatures', phenopacket_views.PhenotypicFeatureViewSet)
@@ -63,6 +65,7 @@ router.register(r'resources', resources_views.ResourceViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('', include(batch_router.urls)),
     # apps schemas
     path('chord_phenopacket_schema', phenopacket_views.get_chord_phenopacket_schema,
          name="chord-phenopacket-schema"),
