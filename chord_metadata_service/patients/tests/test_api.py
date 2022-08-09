@@ -193,8 +193,7 @@ class BatchIndividualsCSVTest1(APITestCase):
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv(self):
-        ids = [self.individual_one.id, self.individual_two.id]
-        data = json.dumps({'format': 'csv', 'ids': ids})
+        data = json.dumps({'format': 'csv', 'id': [self.individual_one.id, self.individual_two.id]})
         get_resp = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
 
@@ -218,7 +217,7 @@ class BatchIndividualsCSVTest2(APITestCase):
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv_invalid_ids(self):
-        data = json.dumps({'format': 'csv', 'ids': ['invalid']})
+        data = json.dumps({'format': 'csv', 'id': ['invalid']})
         response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -231,7 +230,7 @@ class BatchIndividualsCSVTest3(APITestCase):
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv_invalid_ids(self):
-        data = json.dumps({'format': 'csv', 'ids': [self.individual_one.id, 'invalid', "I don't exist"]})
+        data = json.dumps({'format': 'csv', 'id': [self.individual_one.id, 'invalid', "I don't exist"]})
         response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         lines = response.content.decode('utf8').split('\n')
@@ -248,7 +247,7 @@ class BatchIndividualsCSVTest4(APITestCase):
 
     def test_batch_individuals_csv_invalid_format(self):
         # defaults to default renderer
-        data = json.dumps({'format': 'invalid', 'ids': [self.individual_one.id]})
+        data = json.dumps({'format': 'invalid', 'id': [self.individual_one.id]})
         response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

@@ -73,7 +73,7 @@ class IndividualBatchViewSet(BatchViewSet):
     content_negotiation_class = FormatInPostContentNegotiation
 
     def get_queryset(self):
-        individual_id = self.request.data.get("ids", None)
+        individual_id = self.request.data.get("id", None)
         filter_by_id = {"id__in": individual_id} if individual_id else {}
         queryset = Individual.objects.filter(**filter_by_id)\
             .prefetch_related(
