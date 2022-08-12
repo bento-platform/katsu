@@ -385,7 +385,7 @@ MCODE_MEDICATION_STATEMENT_SCHEMA = tag_ids_and_describe({
             "type": "string"
         },
         "medication_code": ONTOLOGY_CLASS,
-        "termination_reason": ONTOLOGY_CLASS_LIST,
+        "termination_reason": ONTOLOGY_CLASS,
         "treatment_intent": ONTOLOGY_CLASS,
         "start_date": {
             "type": "string",
