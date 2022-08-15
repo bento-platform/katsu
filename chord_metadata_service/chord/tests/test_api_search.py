@@ -459,7 +459,7 @@ class SearchTest(APITestCase):
             r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
-            self.assertEqual(len(c["results"]), 2)
+            self.assertEqual(len(c["results"]), 1)  # 1 phenopacket that contains 2 matching biosamples
             self.assertIn("biosample_id:1", [b["id"]
                                              for phenopacket in c["results"]
                                              for b in phenopacket["biosamples"]
