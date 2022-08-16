@@ -311,32 +311,39 @@ QUERY_RESULT_SERIALIZERS = {
 
 
 def search(request, internal_data=False):
-    if request.method == "POST":
-        data_type = (request.data or {}).get("data_type")
-    else:
-        data_type = request.query_params.get("data_type")
+    """
+    Generic function that takes a request object containing the following parameters:
+    - query: a Bento specific string representation of a query. e.g.
+        ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
+    - data_type: one of "experiment", "mcode", "phenopacket"
+    If internal_data is False, this function returns the tables id where matches
+    are found.
+    If internal_data is True, this function returns matches grouped by their
+    "owning" tables.
+    The request can be made using POST or GET methods.
+    """
+    query_params = request.query_params if request.method == "GET" else (request.data or {})
+    data_type = query_params.get("data_type")
 
     if not data_type:
         return Response(errors.bad_request_error("Missing data_type in request body"), status=400)
 
-    if request.method == "POST":
-        query = (request.data or {}).get("query")
-    else:
-        print(request.query_params)
-        query = request.query_params.get("query", "null")  # This'll get decoded to None as a fallback case
+    if data_type not in DATA_TYPES:
+        return Response(errors.bad_request_error(f"Missing or invalid data type (Specified: {data_type})"), status=400)
+
+    query = query_params.get("query")
+    if query is None:
+        return Response(errors.bad_request_error("Missing query in request body"), status=400)
+
+    if request.method == "GET":     # Query passed as a JSON in the URL: must be decoded.
+        # print(request.query_params)
 
         try:
             query = json.loads(query)
         except json.decoder.JSONDecodeError:
             return Response(errors.bad_request_error(f"Invalid query JSON: {query}"), status=400)
 
-    if query is None:
-        return Response(errors.bad_request_error("Missing query in request body"), status=400)
-
     start = datetime.now()
-
-    if data_type not in DATA_TYPES:
-        return Response(errors.bad_request_error(f"Missing or invalid data type (Specified: {data_type})"), status=400)
 
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(query, DATA_TYPES[data_type]["schema"])
