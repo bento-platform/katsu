@@ -289,7 +289,7 @@ class MedicationStatement(models.Model, IndexableMixin):
     # list http://hl7.org/fhir/us/core/STU3.1/ValueSet-us-core-medication-codes.html
     medication_code = JSONField(validators=[ontology_validator],
                                 help_text=rec_help(d.MEDICATION_STATEMENT, "medication_code"))
-    termination_reason = JSONField(null=True, validators=[ontology_list_validator],
+    termination_reason = JSONField(null=True, validators=[ontology_validator],
                                    help_text=rec_help(d.MEDICATION_STATEMENT, 'termination_reason'))
     treatment_intent = JSONField(blank=True, null=True, validators=[ontology_validator],
                                  help_text=rec_help(d.MEDICATION_STATEMENT, "treatment_intent"))
