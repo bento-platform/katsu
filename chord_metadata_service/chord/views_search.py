@@ -278,18 +278,31 @@ def data_type_results(query, params, key="id"):
 def experiment_query_results(query, params, options=None):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: Prefetch related biosample or no?
-    return Experiment.objects \
-        .filter(id__in=data_type_results(query, params, "id")) \
-        .select_related(*EXPERIMENT_SELECT_REL) \
+    queryset = Experiment.objects\
+        .filter(id__in=data_type_results(query, params, "id"))
+
+    output_format = options.get("output") if options else None
+    if output_format == "values_list":
+        field_lookup = get_field_lookup(options.get("field", []))
+        return queryset.values_list(field_lookup, flat=True)
+
+    return queryset.select_related(*EXPERIMENT_SELECT_REL) \
         .prefetch_related(*EXPERIMENT_PREFETCH)
 
 
 def mcodepacket_query_results(query, params, options=None):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: select_related / prefetch_related for instant performance boost!
-    return MCodePacket.objects.filter(
+    queryset = MCodePacket.objects.filter(
         id__in=data_type_results(query, params, "id")
     )
+
+    output_format = options.get("output") if options else None
+    if output_format == "values_list":
+        field_lookup = get_field_lookup(options.get("field", []))
+        return queryset.values_list(field_lookup, flat=True)
+
+    return queryset
 
 
 def phenopacket_query_results(query, params, options=None):
