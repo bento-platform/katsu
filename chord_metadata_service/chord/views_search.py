@@ -260,6 +260,14 @@ def debug_log(message):  # pragma: no cover
         print(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}", flush=True)
 
 
+def get_field_lookup(field):
+    """
+    Given a field identifier as a schema-like path e.g. ['biosamples', '[item]', 'id'],
+    returns a Django ORM field lookup string e.g. 'biosamples__id'
+    """
+    return "__".join(f for f in field if f != "[item]")
+
+
 def data_type_results(query, params, key="id"):
     with connection.cursor() as cursor:
         debug_log(f"Executing SQL:\n    {query.as_string(cursor.connection)}")
@@ -267,7 +275,7 @@ def data_type_results(query, params, key="id"):
         return set(dict(zip([col[0] for col in cursor.description], row))[key] for row in cursor.fetchall())
 
 
-def experiment_query_results(query, params):
+def experiment_query_results(query, params, options=None):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: Prefetch related biosample or no?
     return Experiment.objects \
@@ -276,7 +284,7 @@ def experiment_query_results(query, params):
         .prefetch_related(*EXPERIMENT_PREFETCH)
 
 
-def mcodepacket_query_results(query, params):
+def mcodepacket_query_results(query, params, options=None):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: select_related / prefetch_related for instant performance boost!
     return MCodePacket.objects.filter(
@@ -284,16 +292,22 @@ def mcodepacket_query_results(query, params):
     )
 
 
-def phenopacket_query_results(query, params):
+def phenopacket_query_results(query, params, options=None):
     # TODO: possibly a quite inefficient way of doing things...
     # To expand further on this query : the select_related call
     # will join on these tables we'd call anyway, thus 2 less request
     # to the DB. prefetch_related works on M2M relationships and makes
     # sure that, for instance, when querying diseases, we won't make multiple call
     # for the same set of data
-    return Phenopacket.objects \
-        .filter(id__in=data_type_results(query, params, "id")) \
-        .select_related(*PHENOPACKET_SELECT_REL) \
+    queryset = Phenopacket.objects \
+        .filter(id__in=data_type_results(query, params, "id"))
+
+    output_format = options.get("output") if options else None
+    if output_format == "values_list":
+        field_lookup = get_field_lookup(options.get("field", []))
+        return queryset.values_list(field_lookup, flat=True)
+
+    return queryset.select_related(*PHENOPACKET_SELECT_REL) \
         .prefetch_related(*PHENOPACKET_PREFETCH)
 
 
@@ -322,51 +336,36 @@ def search(request, internal_data=False):
     "owning" tables.
     The request can be made using POST or GET methods.
     """
-    query_params = request.query_params if request.method == "GET" else (request.data or {})
-    data_type = query_params.get("data_type")
-
-    if not data_type:
-        return Response(errors.bad_request_error("Missing data_type in request body"), status=400)
-
-    if data_type not in DATA_TYPES:
-        return Response(errors.bad_request_error(f"Missing or invalid data type (Specified: {data_type})"), status=400)
-
-    query = query_params.get("query")
-    if query is None:
-        return Response(errors.bad_request_error("Missing query in request body"), status=400)
-
-    if request.method == "GET":     # Query passed as a JSON in the URL: must be decoded.
-        # print(request.query_params)
-
-        try:
-            query = json.loads(query)
-        except json.decoder.JSONDecodeError:
-            return Response(errors.bad_request_error(f"Invalid query JSON: {query}"), status=400)
+    search_params, err = get_chord_search_parameters(request)
+    if err:
+        return Response(errors.bad_request_error(err), status=400)
 
     start = datetime.now()
-
-    try:
-        compiled_query, params = postgres.search_query_to_psycopg2_sql(query, DATA_TYPES[data_type]["schema"])
-    except (SyntaxError, TypeError, ValueError) as e:
-        return Response(errors.bad_request_error(f"Error compiling query (message: {str(e)})"), status=400)
+    data_type = search_params["data_type"]
+    compiled_query = search_params["compiled_query"]
+    query_params = search_params["params"]
 
     if not internal_data:
         tables = Table.objects.filter(ownership_record_id__in=data_type_results(
             query=compiled_query,
-            params=params,
+            params=query_params,
             key="table_id"
         ))  # TODO: Maybe can avoid hitting DB here
         return Response(build_search_response([{"id": t.identifier, "data_type": data_type} for t in tables], start))
 
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
     query_function = QUERY_RESULTS_FN[data_type]
+    queryset = query_function(compiled_query, query_params, search_params)
+
+    if search_params["output"] == "values_list":
+        return Response(build_search_response(list(queryset), start))
 
     return Response(build_search_response({
         table_id: {
             "data_type": data_type,
             "matches": list(serializer_class(p).data for p in table_objects)
         } for table_id, table_objects in itertools.groupby(
-            query_function(compiled_query, params),
+            queryset,
             key=lambda o: str(o.table_id)
         )
     }, start))
@@ -377,6 +376,11 @@ def search(request, internal_data=False):
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_search(request):
+    """
+    Free-form search using Bento specific syntax. Returns the list of tables
+    having matches (does not leak values from records)
+    - request parameters: see chord_private_search
+    """
     return search(request, internal_data=False)
 
 
@@ -387,6 +391,30 @@ def chord_search(request):
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_private_search(request):
+    """
+    Free-form search using Bento specific syntax. Results are grouped by table
+    of origin.
+    request parameters (either via GET or POST) must contain:
+    - query: a Bento specific object representing a query e.g.:
+        ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
+        Note: for GET method, it must be encoded as a JSON string.
+    - data_type: one of "phenopackets"/"experiments"/"mcodepackets"
+    - optional parameters:
+        see chord_private_table_search
+
+    - Returns:
+        {
+            time: query duration,
+            results: {
+                table_id#1: {
+                    data_type: "phenopacket",
+                    matches: [serialized results]
+                }
+            }.
+        }
+        The optional `output` parameter can be used to define a more restrictive
+        response.
+    """
     # Private search endpoints are protected by URL namespace, not by Django permissions.
     return search(request, internal_data=True)
 
@@ -488,55 +516,123 @@ def fhir_private_search(request):
     return fhir_search(request, internal_data=True)
 
 
-def chord_table_search(query, table_id, start, internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
-    # Check that dataset exists
-    table = Table.objects.get(ownership_record_id=table_id)
+def get_chord_search_parameters(request, data_type=None):
+    """
+    Extracts, either from the request body (POST) or the request query parameters,
+    the information to make the search.
+    - parameters:
+        - request: DRF Request object. See `chord_private_table_search` for a
+        detail of the possible values
+        - data_type: optional argument. Can be "experiment"/"phenopacket"/"mcodepacket"
+            This value is provided for the chord searches that are restricted to
+            a specific table (values inferred from the table properties)
+    - returns:
+        {
+            - data_type: type of data table. This value is used to infer the
+                proper search schema, serializers and search functions
+            - query: a nested array, defining the query using Bento specific syntax
+            - compiled_query: a psycopg2 SQL object defined from `query`
+            - params: values used for interpolations in the compiled_query
+            - output: optional parameter
+            - field: optional parameter, set when output is "values_list"
+        }
+    """
+    query_params = request.query_params if request.method == "GET" else (request.data or {})
+    data_type = query_params.get("data_type") or data_type
+
+    if not data_type:
+        return None, "Missing data_type in request body"
+
+    if data_type not in DATA_TYPES:
+        return None, f"Missing or invalid data type (Specified: {data_type})"
+
+    query = query_params.get("query")
+    if query is None:
+        return None, "Missing query in request body"
+
+    if request.method == "GET":     # Query passed as a JSON in the URL: must be decoded.
+        # print(request.query_params)
+        try:
+            query = json.loads(query)
+        except json.decoder.JSONDecodeError:
+            return None, f"Invalid query JSON: {query}"
 
     try:
-        compiled_query, params = postgres.search_query_to_psycopg2_sql(query, DATA_TYPES[table.data_type]["schema"])
+        compiled_query, params = postgres.search_query_to_psycopg2_sql(query, DATA_TYPES[data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
         print(f"[CHORD Metadata] Error encountered compiling query {query}:\n    {str(e)}")
         return None, f"Error compiling query (message: {str(e)})"
 
-    debug_log(f"Finished compiling query in {datetime.now() - start}")
+    field = query_params.get("field", None)
+    if isinstance(field, str):
+        try:
+            field = json.loads(field)
+        except json.decoder.JSONDecodeError:
+            return None, f"Invalid field identifier as JSON string: {field}"
 
-    query_results = QUERY_RESULTS_FN[table.data_type](
-        query=sql.SQL("{} AND table_id = {}").format(compiled_query, sql.Placeholder()),
-        params=params + (table.identifier,)
+    return {
+        "query": query,
+        "compiled_query": compiled_query,
+        "params": params,
+        "data_type": data_type,
+        "output": query_params.get("output", None),
+        "field": field
+    }, None
+
+
+def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
+    """
+    Performs a search based on a psycopg2 object and paramaters and restricted
+    to a given table.
+    """
+    data_type = search_params["data_type"]
+    serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
+    query_function = QUERY_RESULTS_FN[data_type]
+
+    queryset = query_function(
+        query=sql.SQL("{} AND table_id = {}").format(search_params["compiled_query"], sql.Placeholder()),
+        params=search_params["params"] + (table_id,),
+        options=search_params
     )
 
-    if internal:
-        debug_log(f"Started fetching from queryset and serializing data at {datetime.now() - start}")
-        serialized_data = QUERY_RESULT_SERIALIZERS[table.data_type](query_results, many=True).data
-        debug_log(f"Finished running query and serializing in {datetime.now() - start}")
+    if not internal:
+        return queryset.exists(), None    # True if at least one match
 
-        return serialized_data, None
+    if search_params["output"] == "values_list":
+        return list(queryset), None
 
-    return len(query_results) > 0, None
+    debug_log(f"Started fetching from queryset and serializing data at {datetime.now() - start}")
+    serialized_data = serializer_class(queryset, many=True).data
+    debug_log(f"Finished running query and serializing in {datetime.now() - start}")
+
+    return serialized_data, None
 
 
 def chord_table_search_response(request, table_id, internal=False):
+    """
+    Executes a free-form query using the Bento specific syntax, restricted to
+    a given table and generates DRF Responses.
+    - Parameters:
+        - request: DRF Request object, see `chord_table_private_search` for
+            the expected values
+        - table_id: table_id to restrict the results to. Extracted from the
+            URL (hence, unverified)
+        - internal: if set to True, the response contains values from records.
+            if set to False, the response is a Boolean (no private data can
+            be leaked).
+    """
     start = datetime.now()
     debug_log(f"Started {'private' if internal else 'public'} table search")
 
-    # We let people either use GET or POST. Get stuff from params if GET, or data if POST.
+    table = Table.objects.get(ownership_record_id=table_id)
+    data_type = table.data_type
 
-    if request.method == "POST":
-        query = (request.data or {}).get("query")
+    search_params, err = get_chord_search_parameters(request, data_type)
+    if err:
+        return Response(errors.bad_request_error(err), status=400)
 
-    else:
-        query = request.query_params.get("query", "null")  # This will get decoded to None as a fallback case
-
-        try:
-            query = json.loads(query)
-        except json.decoder.JSONDecodeError:
-            return Response(errors.bad_request_error("Invalid query JSON"), status=400)
-
-    if query is None:
-        # TODO: Better error
-        return Response(errors.bad_request_error("Missing query in request body"), status=400)
-
-    data, err = chord_table_search(query, table_id, start, internal=internal)
+    debug_log(f"Finished compiling query in {datetime.now() - start}")
+    data, err = chord_table_search(search_params, table_id, start, internal)
 
     if err:
         return Response(errors.bad_request_error(err), status=400)
@@ -552,6 +648,17 @@ def chord_table_search_response(request, table_id, internal=False):
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_public_table_search(request, table_id):
+    """
+    Returns a Boolean value to indicate that a match with the query exists in
+    the given table.
+    See `chord_private_table_search for a detail of the request parameters
+
+    - Returns
+      {
+        time: query duration,
+        results: boolean
+      }
+    """
     # Search data types in specific tables without leaking internal data
     return chord_table_search_response(request, table_id, internal=False)
 
@@ -563,6 +670,30 @@ def chord_public_table_search(request, table_id):
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_private_table_search(request, table_id):
+    """
+    Free-form search using Bento specific syntax in a given table.
+    request parameters (either via GET or POST) must contain:
+    - query: a Bento specific object representing a query e.g.:
+        ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
+        Note: for GET method, it must be encoded as a JSON string.
+    - optional parameters:
+        - output: predefined output types in {"values_list", }
+          If not set, the objects in the results
+          set will be serialized using the default serializer for this data-type
+          (for example: phenopackets serializer)
+        - field: when `output="values_list"`, defines which field should be in
+           used to get the list of values.
+
+    - Returns:
+        {
+            time: query duration,
+            results: [] see infra.
+        }
+        Serialized objects of the result set. If the table `data-type` is `experiment`
+        the Experiments serializer will be used.
+        The optional `output` parameter can be used to define a more restrictive
+        response.
+    """
     # Search data types in specific tables
     # Private search endpoints are protected by URL namespace, not by Django permissions.
     return chord_table_search_response(request, table_id, internal=True)

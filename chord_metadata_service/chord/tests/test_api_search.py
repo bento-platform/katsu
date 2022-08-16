@@ -465,6 +465,23 @@ class SearchTest(APITestCase):
                                              for b in phenopacket["biosamples"]
                                              ])
 
+    def test_private_table_search_values_list(self):
+        # Valid query to search for biosample id in list
+        # Output as a list of values from a single field
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10,
+            "output": "values_list",
+            "field": '["biosamples", "[item]", "id"]'
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            self.assertEqual(len(c["results"]), 2)  # 2 biosamples id for the matching phenopacket
+            self.assertTrue(all([isinstance(item, str) for item in c["results"]]))
+
     @patch('chord_metadata_service.chord.views_search.es')
     def test_fhir_search(self, mocked_es):
         mocked_es.search.return_value = SEARCH_SUCCESS
