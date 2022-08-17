@@ -7,12 +7,15 @@ from bento_lib.search import build_search_response, postgres
 from collections import Counter
 from datetime import datetime
 from django.db import connection
+from django.db.models import Count
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
 from django.views.decorators.cache import cache_page
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework import status
 from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
@@ -36,7 +39,7 @@ from .models import Dataset, TableOwnership, Table
 from .permissions import ReadOnly, OverrideOrSuperUserOnly
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
-OUTPUT_FORMAT_BENTO_SEARCH_RESULTS = "bento_search_results"
+OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
 @api_view(["GET"])
@@ -309,20 +312,26 @@ def mcodepacket_query_results(query, params, options=None):
 
 
 def phenopacket_query_results(query, params, options=None):
-    # TODO: possibly a quite inefficient way of doing things...
-    # To expand further on this query : the select_related call
-    # will join on these tables we'd call anyway, thus 2 less request
-    # to the DB. prefetch_related works on M2M relationships and makes
-    # sure that, for instance, when querying diseases, we won't make multiple call
-    # for the same set of data
     queryset = Phenopacket.objects \
         .filter(id__in=data_type_results(query, params, "id"))
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
+        # Only an array of values.
         field_lookup = get_field_lookup(options.get("field", []))
         return queryset.values_list(field_lookup, flat=True)
+    if output_format == "bento_search_result":
+        # Results displayed as 3 columns: individuals ID/Biosamples list/number of experiments
+        return queryset.values("subject_id").annotate(
+            biosamples=ArrayAgg("biosamples__id"),
+            num_experiments=Count("biosamples__experiment")
+        )
 
+    # To expand further on this query : the select_related call
+    # will join on these tables we'd call anyway, thus 2 less request
+    # to the DB. prefetch_related works on M2M relationships and makes
+    # sure that, for instance, when querying diseases, we won't make multiple call
+    # for the same set of data
     return queryset.select_related(*PHENOPACKET_SELECT_REL) \
         .prefetch_related(*PHENOPACKET_PREFETCH)
 
@@ -356,6 +365,13 @@ def search(request, internal_data=False):
     if err:
         return Response(errors.bad_request_error(err), status=400)
 
+    if (search_params["output"] == OUTPUT_FORMAT_VALUES_LIST
+       or search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT):
+        return Response(errors.not_implemented_error(
+            f"{search_params['output']} output is only available on table based queries"
+            ),
+            status=status.HTTP_501_NOT_IMPLEMENTED)
+
     start = datetime.now()
     data_type = search_params["data_type"]
     compiled_query = search_params["compiled_query"]
@@ -372,9 +388,6 @@ def search(request, internal_data=False):
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
     query_function = QUERY_RESULTS_FN[data_type]
     queryset = query_function(compiled_query, query_params, search_params)
-
-    if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
-        return Response(build_search_response(list(queryset), start))
 
     return Response(build_search_response({
         table_id: {
@@ -615,6 +628,8 @@ def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[
         return queryset.exists(), None    # True if at least one match
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
+        return list(queryset), None
+    if search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
         return list(queryset), None
 
     debug_log(f"Started fetching from queryset and serializing data at {datetime.now() - start}")

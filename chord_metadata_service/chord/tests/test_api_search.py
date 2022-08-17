@@ -482,6 +482,39 @@ class SearchTest(APITestCase):
             self.assertEqual(len(c["results"]), 2)  # 2 biosamples id for the matching phenopacket
             self.assertTrue(all([isinstance(item, str) for item in c["results"]]))
 
+    def test_private_table_search_bento_search_results(self):
+        # Valid query to search for biosample id in list
+        # Output as Bento search (a list of 3 values)
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10,
+            "output": "bento_search_result",
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            self.assertEqual(len(c["results"]), 1)  # 1 matching phenopacket
+            self.assertTrue(len(c["results"][0]), 3)    # 3 columns by result
+            self.assertListEqual(["subject_id", "biosamples", "num_experiments"], list(c["results"][0].keys()))
+
+    def test_private_search_bento_search_results(self):
+        # Valid query to search for biosample id in list
+        # Output as a bento search is not implemented
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10,
+            "output": "bento_search_result",
+            "data_type": "phenopacket",
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-search", data=d, method=method)
+            c = r.json()
+            print(c)
+            self.assertEqual(r.status_code, status.HTTP_501_NOT_IMPLEMENTED)
+
     @patch('chord_metadata_service.chord.views_search.es')
     def test_fhir_search(self, mocked_es):
         mocked_es.search.return_value = SEARCH_SUCCESS
