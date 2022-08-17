@@ -35,6 +35,9 @@ from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_P
 from .models import Dataset, TableOwnership, Table
 from .permissions import ReadOnly, OverrideOrSuperUserOnly
 
+OUTPUT_FORMAT_VALUES_LIST = "values_list"
+OUTPUT_FORMAT_BENTO_SEARCH_RESULTS = "bento_search_results"
+
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -282,7 +285,7 @@ def experiment_query_results(query, params, options=None):
         .filter(id__in=data_type_results(query, params, "id"))
 
     output_format = options.get("output") if options else None
-    if output_format == "values_list":
+    if output_format == OUTPUT_FORMAT_VALUES_LIST:
         field_lookup = get_field_lookup(options.get("field", []))
         return queryset.values_list(field_lookup, flat=True)
 
@@ -298,7 +301,7 @@ def mcodepacket_query_results(query, params, options=None):
     )
 
     output_format = options.get("output") if options else None
-    if output_format == "values_list":
+    if output_format == OUTPUT_FORMAT_VALUES_LIST:
         field_lookup = get_field_lookup(options.get("field", []))
         return queryset.values_list(field_lookup, flat=True)
 
@@ -316,7 +319,7 @@ def phenopacket_query_results(query, params, options=None):
         .filter(id__in=data_type_results(query, params, "id"))
 
     output_format = options.get("output") if options else None
-    if output_format == "values_list":
+    if output_format == OUTPUT_FORMAT_VALUES_LIST:
         field_lookup = get_field_lookup(options.get("field", []))
         return queryset.values_list(field_lookup, flat=True)
 
@@ -370,7 +373,7 @@ def search(request, internal_data=False):
     query_function = QUERY_RESULTS_FN[data_type]
     queryset = query_function(compiled_query, query_params, search_params)
 
-    if search_params["output"] == "values_list":
+    if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
         return Response(build_search_response(list(queryset), start))
 
     return Response(build_search_response({
@@ -611,7 +614,7 @@ def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[
     if not internal:
         return queryset.exists(), None    # True if at least one match
 
-    if search_params["output"] == "values_list":
+    if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
         return list(queryset), None
 
     debug_log(f"Started fetching from queryset and serializing data at {datetime.now() - start}")
