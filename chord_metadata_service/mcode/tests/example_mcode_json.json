@@ -1,3 +1,4 @@
+[
 {
     "id": "8670db4d-77ad-4bee-b38c-599453510c6a",
     "subject": {
@@ -169,7 +170,7 @@
         "comment": "Test data"
       }
     },
-    "cancer_condition": [
+    "cancer_condition": 
       {
         "id": "5f2395f3-3271-441d-841a-af276c238eb2",
         "clinical_status": {
@@ -261,7 +262,7 @@
             "label": "In situ melanocytic morphology"
           }
       }
-    ],
+    ,
     "cancer_disease_status": {
       "id": "http://snomed.info/sct:268910001",
       "label": "Patient's condition improved"
@@ -327,3 +328,4 @@
       }
     ]
   }
+]
