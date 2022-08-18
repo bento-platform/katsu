@@ -321,9 +321,9 @@ def phenopacket_query_results(query, params, options=None):
         field_lookup = get_field_lookup(options.get("field", []))
         return queryset.values_list(field_lookup, flat=True)
     if output_format == "bento_search_result":
-        # Results displayed as 3 columns: individuals ID/Biosamples list/number of experiments
+        # Results displayed as 3 columns: "individuals ID", [Biosamples list...], number of experiments
         return queryset.values("subject_id").annotate(
-            biosamples=ArrayAgg("biosamples__id"),
+            biosamples=ArrayAgg("biosamples__id"),  # Postgre specific: aggregates multiple values in a list
             num_experiments=Count("biosamples__experiment")
         )
 
@@ -551,7 +551,8 @@ def get_chord_search_parameters(request, data_type=None):
     the information to make the search.
     - parameters:
         - request: DRF Request object. See `chord_private_table_search` for a
-        detail of the possible values
+        detail of the possible values. Note that the "output" parameter is not
+        implemented for this search.
         - data_type: optional argument. Can be "experiment"/"phenopacket"/"mcodepacket"
             This value is provided for the chord searches that are restricted to
             a specific table (values inferred from the table properties)
@@ -708,7 +709,7 @@ def chord_private_table_search(request, table_id):
         ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
         Note: for GET method, it must be encoded as a JSON string.
     - optional parameters:
-        - output: predefined output types in {"values_list", }
+        - output: predefined output types in {"values_list", "bento_search_result"}
           If not set, the objects in the results
           set will be serialized using the default serializer for this data-type
           (for example: phenopackets serializer)
