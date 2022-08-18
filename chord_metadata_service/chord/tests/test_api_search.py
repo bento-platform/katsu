@@ -482,6 +482,37 @@ class SearchTest(APITestCase):
             self.assertEqual(len(c["results"]), 2)  # 2 biosamples id for the matching phenopacket
             self.assertTrue(all([isinstance(item, str) for item in c["results"]]))
 
+    def test_private_table_experiment_search_values_list(self):
+        # Valid query to search for experiment
+        # Output as a list of values from a single field
+
+        d = {
+            "query": TEST_SEARCH_QUERY_7,
+            "output": "values_list",
+            "field": '["biosample"]'
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-table-search", args=[str(self.t_exp.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            self.assertEqual(len(c["results"]), 1)  # 1 biosamples id in the database
+            self.assertEqual(c["results"][0], str(self.biosample_1.id))
+
+    def test_private_table_search_values_list_invalid_field_syntax(self):
+        # Valid query to search for biosample id in list
+        # Output as a list of values from a single field badly defined
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10,
+            "output": "values_list",
+            "field": '["biosamples", "[item]"'
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_private_table_search_bento_search_results(self):
         # Valid query to search for biosample id in list
         # Output as Bento search (a list of 3 values)
