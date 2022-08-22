@@ -1,4 +1,4 @@
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, mixins
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.settings import api_settings
@@ -19,8 +19,12 @@ from chord_metadata_service.restapi.api_renderers import (
     IndividualCSVRenderer,
     ARGORenderer,
 )
-from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
-from chord_metadata_service.restapi.utils import get_field_options, filter_queryset_field_value
+from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
+from chord_metadata_service.restapi.utils import (
+    get_field_options,
+    filter_queryset_field_value
+)
+from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 
 
 class IndividualViewSet(viewsets.ModelViewSet):
@@ -32,6 +36,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
     Create a new individual
 
     """
+    # TODO: BIOSAMPLE_PREFETCH is already part of PHENOPACKET_PREFETCH. Check
     queryset = Individual.objects.all().prefetch_related(
         *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
         *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
@@ -48,6 +53,34 @@ class IndividualViewSet(viewsets.ModelViewSet):
     @method_decorator(cache_page(settings.CACHE_TIME))
     def dispatch(self, *args, **kwargs):
         return super(IndividualViewSet, self).dispatch(*args, **kwargs)
+
+
+class BatchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    A viewset that only implements the 'list' action.
+    To be used with the BatchListRouter which maps the POST method to .list()
+    """
+    pass
+
+
+class IndividualBatchViewSet(BatchViewSet):
+
+    serializer_class = IndividualSerializer
+    pagination_class = BatchResultsSetPagination
+    renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
+                        PhenopacketsRenderer, IndividualCSVRenderer, ARGORenderer)
+    # Override to infer the renderer based on a `format` argument from the POST request body
+    content_negotiation_class = FormatInPostContentNegotiation
+
+    def get_queryset(self):
+        individual_id = self.request.data.get("id", None)
+        filter_by_id = {"id__in": individual_id} if individual_id else {}
+        queryset = Individual.objects.filter(**filter_by_id)\
+            .prefetch_related(
+                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
+            ).order_by("id")
+
+        return queryset
 
 
 class PublicListIndividuals(APIView):

@@ -166,6 +166,92 @@ class IndividualFullTextSearchTest(APITestCase):
         self.assertEqual(len(response_obj_2['results']), 2)
 
 
+# Note: the next five tests use the same setUp method. Initially they were
+# all combined in the same class. But this caused bugs with regard to unavailable
+# postgre cursor in the call to `setUp()` after the first invocation for undetermined reasons.
+# One hypothesis is that using POST requests without actually
+# adding data to the database creates unexpected behaviour with one of the
+# libraries used  during the testing (?) maybe at teardown time.
+class BatchIndividualsCSVTest(APITestCase):
+    """ Test for getting a batch of individuals as csv. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_batch_individuals_csv_no_ids(self):
+        data = json.dumps({'format': 'csv'})
+        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class BatchIndividualsCSVTest1(APITestCase):
+    """ Test for getting a batch of individuals as csv. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_batch_individuals_csv(self):
+        data = json.dumps({'format': 'csv', 'id': [self.individual_one.id, self.individual_two.id]})
+        get_resp = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+
+        content = get_resp.content.decode('utf-8')
+        resp_csv_reader = csv.reader(io.StringIO(content))
+        resp_body = list(resp_csv_reader)
+        correct_content = f"{c.CSV_HEADER}\n{c.INDIVIDUAL_1_CSV}\n{c.INDIVIDUAL_2_CSV}"
+        correct_csv_reader = csv.reader(io.StringIO(correct_content))
+        correct_body = list(correct_csv_reader)
+        self.assertEqual(resp_body[0], correct_body[0])
+        for i in range(1, len(resp_body)):
+            # last 2 columns are dates with a specific formating. We ignore those in the test by slicing
+            self.assertEqual(resp_body[i][:-2], correct_body[i][:-2])
+
+
+class BatchIndividualsCSVTest2(APITestCase):
+    """ Test for getting a batch of individuals as csv. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_batch_individuals_csv_invalid_ids(self):
+        data = json.dumps({'format': 'csv', 'id': ['invalid']})
+        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class BatchIndividualsCSVTest3(APITestCase):
+    """ Test for getting a batch of individuals as csv. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_batch_individuals_csv_invalid_ids(self):
+        data = json.dumps({'format': 'csv', 'id': [self.individual_one.id, 'invalid', "I don't exist"]})
+        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        lines = response.content.decode('utf8').split('\n')
+        nb_lines = len([line for line in lines if line])    # ignore trailing line break
+        self.assertEqual(nb_lines, 2)   # 2 lines expected: header + individual_one
+
+
+class BatchIndividualsCSVTest4(APITestCase):
+    """ Test for getting a batch of individuals as csv. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_batch_individuals_csv_invalid_format(self):
+        # defaults to default renderer
+        data = json.dumps({'format': 'invalid', 'id': [self.individual_one.id]})
+        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
 class PublicListIndividualsTest(APITestCase):
     """ Test for api/public GET all """
 

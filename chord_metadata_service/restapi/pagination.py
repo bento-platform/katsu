@@ -39,3 +39,13 @@ class LargeResultsSetPagination(pagination.PageNumberPagination):
             # Monkey-patch rewrite build_absolute_uri
             self.request.build_absolute_uri = self._get_chord_absolute_uri
         super(LargeResultsSetPagination, self).get_html_context()
+
+
+class BatchResultsSetPagination(LargeResultsSetPagination):
+    """
+    Overrides the page_size parameter with the max page size value.
+    This allows for results to be formatted in a single page without having to pass
+    an arbitrary page_size as a GET parameter.
+    """
+    def get_page_size(self, request):
+        return self.max_page_size
