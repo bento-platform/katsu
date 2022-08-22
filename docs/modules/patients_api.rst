@@ -74,6 +74,7 @@ The following **filters** can be used:
 
 The following **body JSON options** can be used:
 
-- format: :code:`csv` is the only supported format at the moment
+- format: case-sensitive, exact match: :code:`csv`
+  options: csv, phenopackets, fhir, argo
 
-- ids: single or multiple ids can be sent as an array :code:`{"ids": ["HP:0000822", "HP:0000823"]}`
+- id: single or multiple ids can be provided as an array :code:`{"id": ["HP:0000822", "HP:0000823"]}`
