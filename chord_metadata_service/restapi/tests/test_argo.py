@@ -78,9 +78,9 @@ class ARGOMcodepacketTest(APITestCase):
             cancer_disease_status={
                 "id": "001",
                 "label": "patient's condition improved"
-            }
+            },
+            cancer_condition=self.cancer_condition
         )
-        self.mcodepacket.cancer_condition.set([self.cancer_condition, self.cancer_condition_2])
         self.mcodepacket.cancer_related_procedures.set([self.cancer_related_procedure])
         self.mcodepacket.medication_statement.set([self.medication_statement])
 
@@ -94,26 +94,37 @@ class ARGOMcodepacketTest(APITestCase):
         # primary_diagnoses
         self.assertIn("Carcinosarcoma",
                       get_resp_obj["composition_objects"][0]["primary_diagnoses"][0]["cancer_type_code"]["label"])
+        # ===================== DISABLED ASSERTIONS ====================
+        # The following assertions have been disabled when the mCode cancer condition format
+        # has been moved from a list to a single value.
+        # >>>>>>>>>>>>>>>>>>>>>>>>
         # tnm staging clinical
         # second primary diagnosis (cancer condition 2) has two clinical tnm stagings
-        for field in ["clinical_stage_group", "clinical_t_category",
-                      "clinical_n_category", "clinical_m_category"]:
-            self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1][field],
-                                  list)
-            self.assertEqual(len(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1][field]), 2)
+        # for field in ["clinical_stage_group", "clinical_t_category",
+        #               "clinical_n_category", "clinical_m_category"]:
+        #     self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1][field],
+        #                           list)
+        #     self.assertEqual(len(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1][field]), 2)
+        # <<<<<<<<<<<<<<<<<<<<<<<<<
         # tnm staging pathlogical
         self.assertEqual(len(TNMStaging.objects.all()), 4)
         self.assertEqual(TNMStaging.objects.filter(tnm_type="pathologic").count(), 2)
         self.assertEqual(TNMStaging.objects.filter(cancer_condition__id="cancer_condition:02").count(), 4)
         self.assertEqual(TNMStaging.objects.filter
                          (Q(cancer_condition__id="cancer_condition:02") & Q(tnm_type="pathologic")).count(), 2)
-        for field in ["pathological_stage_group", "pathological_t_category",
-                      "pathological_n_category", "pathological_m_category"]:
-            self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["specimen"][field],
-                                  list)
-            self.assertEqual(
-                len(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["specimen"][field]), 2
-            )
+        # ===================== DISABLED ASSERTIONS ====================
+        # The following assertions have been disabled when the mCode cancer condition format
+        # has been moved from a list to a single value.
+        # `primary_diagnoses` is composed from the cancer_condition field
+        # >>>>>>>>>>>>>>>>>>>>>>>>
+        # for field in ["pathological_stage_group", "pathological_t_category",
+        #               "pathological_n_category", "pathological_m_category"]:
+        #     self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["specimen"][field],
+        #                           list)
+        #     self.assertEqual(
+        #         len(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["specimen"][field]), 2
+        #     )
+        # <<<<<<<<<<<<<<<<<<<<<<<<<<
         # treatments
         self.assertEqual("Radiation therapy",
                          get_resp_obj["composition_objects"][0]["treatments"][0]["treatment_type"])
@@ -124,8 +135,14 @@ class ARGOMcodepacketTest(APITestCase):
                          ["anatomical_site_irradiated"][0]["label"])
         self.assertIn("Curative",
                       get_resp_obj["composition_objects"][0]["treatments"][0]["treatment_intent"]["label"])
-        self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["specimen"],
-                              dict)
+        # ===================== DISABLED ASSERTIONS ====================
+        # The following assertions have been disabled when the mCode cancer condition format
+        # has been moved from a list to a single value.
+        # `primary_diagnoses` is composed from the cancer_condition field
+        # >>>>>>>>>>>>>>>>>>>>>>>>
+        # self.assertIsInstance(get_resp_obj["composition_objects"][0]["primary_diagnoses"][1]["specimen"],
+        #                       dict)
+        # <<<<<<<<<<<<<<<<<<<<<<<<
         # therapies
         self.assertIsInstance(
             get_resp_obj["composition_objects"][0]["immunotherapies_chemotherapies_hormone_therapies"],
