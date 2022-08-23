@@ -2,20 +2,12 @@ from copy import deepcopy
 from uuid import uuid4
 
 from django.conf import settings
-from copy import deepcopy
-from uuid import uuid4
-
-from django.conf import settings
 from django.urls import reverse
-from django.test import override_settings
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
-from chord_metadata_service.chord import models as ch_m
-from chord_metadata_service.chord.tests import constants as ch_c
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
@@ -74,7 +66,6 @@ class OverviewTest(APITestCase):
         self.instrument = exp_m.Instrument.objects.create(**exp_c.valid_instrument())
         self.experiment = exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_1, self.instrument))
         exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_2, self.instrument, num_experiment=2))
-        exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_2, self.instrument, num_experiment=2))
         self.experiment_result = exp_m.ExperimentResult.objects.create(**exp_c.valid_experiment_result())
         self.experiment.experiment_results.set([self.experiment_result])
 
@@ -87,7 +78,6 @@ class OverviewTest(APITestCase):
         self.assertEqual(response_obj['phenopackets'], 2)
         self.assertEqual(response_obj['data_type_specific']['individuals']['count'], 2)
         self.assertIsInstance(response_obj['data_type_specific']['individuals']['age'], dict)
-        self.assertDictContainsSubset({'40': 1, '30': 1}, response_obj['data_type_specific']['individuals']['age'])
         self.assertDictContainsSubset({'40': 1, '30': 1}, response_obj['data_type_specific']['individuals']['age'])
         self.assertEqual(response_obj['data_type_specific']['biosamples']['count'], 2)
         self.assertEqual(response_obj['data_type_specific']['phenotypic_features']['count'], 1)

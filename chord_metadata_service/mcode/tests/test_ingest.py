@@ -3,7 +3,7 @@ import os
 
 from django.test import TestCase
 
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
+from chord_metadata_service.chord.data_types import DATA_TYPE_MCODEPACKET
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Gene
@@ -14,7 +14,6 @@ from chord_metadata_service.chord.ingest import (
 )
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 
-from ..parse_fhir_mcode import parse_bundle, patient_to_individual
 from ..models import (
     MCodePacket, CancerCondition, MedicationStatement,
     CancerRelatedProcedure, GenomicsReport, GeneticSpecimen,
@@ -24,6 +23,7 @@ from ..models import (
 EXAMPLE_INGEST_OUTPUTS_MCODE_JSON = {
     "json_document": os.path.join(os.path.dirname(__file__), "example_mcode_json.json"),
 }
+
 
 class IngestMcodeJsonTest(TestCase):
 
