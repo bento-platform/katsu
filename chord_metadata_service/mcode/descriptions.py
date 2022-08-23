@@ -166,6 +166,7 @@ MCODEPACKET = {
         "date_of_death": "An indication that the patient is no longer living, given by a date of death or boolean.",
         "cancer_disease_status": "A clinician's qualitative judgment on the current trend of the cancer, e.g., "
                                  "whether it is stable, worsening (progressing), or improving (responding).",
+        "tumor_marker": "A description of tests performed on patient.",
         **EXTRA_PROPERTIES
     }
 }

@@ -4,6 +4,8 @@ from collections import Counter
 
 from django.conf import settings
 from django.views.decorators.cache import cache_page
+from django.db.models import Count, F, Func, IntegerField
+from django.db.models.functions import Cast
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -45,8 +47,6 @@ def service_info(_request):
     return Response(SERVICE_INFO)
 
 
-# Cache page for the requested url for 2 hours
-@cache_page(60 * 60 * 2)
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly])
 def overview(_request):

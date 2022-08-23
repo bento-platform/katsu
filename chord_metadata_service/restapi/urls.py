@@ -22,7 +22,7 @@ batch_router = BatchListRouter()
 
 # CHORD app urls
 router.register(r'projects', chord_views.ProjectViewSet)
-router.register(r'datasets', chord_views.DatasetViewSet)
+router.register(r'datasets', chord_views.DatasetViewSet, basename="datasets")
 router.register(r'table_ownership', chord_views.TableOwnershipViewSet)
 router.register(r'tables', chord_views.TableViewSet)
 
@@ -31,34 +31,36 @@ router.register(r'experiments', experiment_views.ExperimentViewSet)
 router.register(r'experimentresults', experiment_views.ExperimentResultViewSet)
 
 # Patients app urls
-router.register(r'individuals', individual_views.IndividualViewSet)
+router.register(r'individuals', individual_views.IndividualViewSet, basename="individuals")
 batch_router.register(r'batch/individuals', individual_views.IndividualBatchViewSet, basename="batch/individuals")
 
 # Phenopackets app urls
-router.register(r'phenotypicfeatures', phenopacket_views.PhenotypicFeatureViewSet)
-router.register(r'procedures', phenopacket_views.ProcedureViewSet)
-router.register(r'htsfiles', phenopacket_views.HtsFileViewSet)
-router.register(r'genes', phenopacket_views.GeneViewSet)
-router.register(r'variants', phenopacket_views.VariantViewSet)
-router.register(r'diseases', phenopacket_views.DiseaseViewSet)
-router.register(r'metadata', phenopacket_views.MetaDataViewSet)
-router.register(r'biosamples', phenopacket_views.BiosampleViewSet)
-router.register(r'phenopackets', phenopacket_views.PhenopacketViewSet)
-router.register(r'genomicinterpretations', phenopacket_views.GenomicInterpretationViewSet)
-router.register(r'diagnoses', phenopacket_views.DiagnosisViewSet)
-router.register(r'interpretations', phenopacket_views.InterpretationViewSet)
+router.register(r'phenotypicfeatures', phenopacket_views.PhenotypicFeatureViewSet, basename="phenotypicfeatures")
+router.register(r'procedures', phenopacket_views.ProcedureViewSet, basename="procedures")
+router.register(r'htsfiles', phenopacket_views.HtsFileViewSet, basename="htsfiles")
+router.register(r'genes', phenopacket_views.GeneViewSet, basename="genes")
+router.register(r'variants', phenopacket_views.VariantViewSet, basename="variants")
+router.register(r'diseases', phenopacket_views.DiseaseViewSet, basename="diseases")
+router.register(r'metadata', phenopacket_views.MetaDataViewSet, basename="metadata")
+router.register(r'biosamples', phenopacket_views.BiosampleViewSet, basename="biosamples")
+router.register(r'phenopackets', phenopacket_views.PhenopacketViewSet, basename="phenopackets")
+router.register(r'genomicinterpretations', phenopacket_views.GenomicInterpretationViewSet,
+                basename="genomicinterpretations")
+router.register(r'diagnoses', phenopacket_views.DiagnosisViewSet, basename="diagnoses")
+router.register(r'interpretations', phenopacket_views.InterpretationViewSet, basename="interpretations")
 
 # mCode app urls
-router.register(r'geneticspecimens', mcode_views.GeneticSpecimenViewSet)
-router.register(r'cancergeneticvariants', mcode_views.CancerGeneticVariantViewSet)
-router.register(r'genomicregionsstudied', mcode_views.GenomicRegionStudiedViewSet)
-router.register(r'genomicsreports', mcode_views.GenomicsReportViewSet)
-router.register(r'labsvital', mcode_views.LabsVitalViewSet)
-router.register(r'cancerconditions', mcode_views.CancerConditionViewSet)
-router.register(r'tnmstaging', mcode_views.TNMStagingViewSet)
-router.register(r'cancerrelatedprocedures', mcode_views.CancerRelatedProcedureViewSet)
-router.register(r'medicationstatements', mcode_views.MedicationStatementViewSet)
-router.register(r'mcodepackets', mcode_views.MCodePacketViewSet)
+router.register(r'geneticspecimens', mcode_views.GeneticSpecimenViewSet, basename="geneticspecimens")
+router.register(r'cancergeneticvariants', mcode_views.CancerGeneticVariantViewSet, basename="cancergeneticvariants")
+router.register(r'genomicregionsstudied', mcode_views.GenomicRegionStudiedViewSet, basename="genomicregionsstudied")
+router.register(r'genomicsreports', mcode_views.GenomicsReportViewSet, basename="genomicsreports")
+router.register(r'labsvital', mcode_views.LabsVitalViewSet, basename="labsvital")
+router.register(r'cancerconditions', mcode_views.CancerConditionViewSet, basename="cancerconditions")
+router.register(r'tnmstaging', mcode_views.TNMStagingViewSet, basename="tnmstaging")
+router.register(r'cancerrelatedprocedures', mcode_views.CancerRelatedProcedureViewSet,
+                basename="cancerrelatedprocedures")
+router.register(r'medicationstatements', mcode_views.MedicationStatementViewSet, basename="medicationstatements")
+router.register(r'mcodepackets', mcode_views.MCodePacketViewSet, basename="mcodepackets")
 
 # Resources app urls
 router.register(r'resources', resources_views.ResourceViewSet)

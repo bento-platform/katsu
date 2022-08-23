@@ -1,4 +1,4 @@
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from django.test import override_settings
 from rest_framework import status
 from chord_metadata_service.chord.tests.constants import (
@@ -7,6 +7,7 @@ from chord_metadata_service.chord.tests.constants import (
     dats_dataset,
 )
 from chord_metadata_service.restapi.tests.utils import get_response
+import json
 
 
 class JSONLDDatasetTest(APITestCase):
@@ -16,7 +17,12 @@ class JSONLDDatasetTest(APITestCase):
         self.project = project.json()
         self.creators = VALID_DATS_CREATORS
         self.dataset = dats_dataset(self.project['identifier'], self.creators)
-        get_response('dataset-list', self.dataset)
+        client = APIClient()
+        client.post(
+            '/api/datasets',
+            data=json.dumps(self.dataset),
+            content_type='application/json'
+        )
 
     def test_jsonld(self):
         get_resp = self.client.get('/api/datasets?format=json-ld')

@@ -25,7 +25,7 @@ class CreateIndividualTest(APITestCase):
         """ POST a new individual. """
 
         response = self.client.post(
-            reverse('individual-list'),
+            reverse('individuals-list'),
             data=json.dumps(self.valid_payload),
             content_type='application/json'
         )
@@ -37,7 +37,7 @@ class CreateIndividualTest(APITestCase):
         """ POST a new individual with invalid data. """
 
         invalid_response = self.client.post(
-            reverse('individual-list'),
+            reverse('individuals-list'),
             data=json.dumps(self.invalid_payload),
             content_type='application/json'
         )
@@ -77,7 +77,7 @@ class UpdateIndividualTest(APITestCase):
 
         response = self.client.put(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
                 ),
             data=json.dumps(self.put_valid_payload),
@@ -90,7 +90,7 @@ class UpdateIndividualTest(APITestCase):
 
         response = self.client.put(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
                 ),
             data=json.dumps(self.invalid_payload),
@@ -110,7 +110,7 @@ class DeleteIndividualTest(APITestCase):
 
         response = self.client.delete(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
                 )
             )
@@ -121,7 +121,7 @@ class DeleteIndividualTest(APITestCase):
 
         response = self.client.delete(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': 'patient:what'}
                 )
             )
@@ -134,6 +134,7 @@ class IndividualCSVRendererTest(APITestCase):
     def setUp(self):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
 
+    @override_settings(CANDIG_OPA_URL=None)
     def test_csv_export(self):
         get_resp = self.client.get('/api/individuals?format=csv')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
@@ -154,6 +155,7 @@ class IndividualFullTextSearchTest(APITestCase):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
+    @override_settings(CANDIG_OPA_URL=None)
     def test_search(self):
         get_resp_1 = self.client.get('/api/individuals?search=P49Y')
         self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)

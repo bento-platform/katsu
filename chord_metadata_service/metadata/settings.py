@@ -26,7 +26,10 @@ logging.getLogger().setLevel(logging.INFO)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+POSTGRES_PASSWORD_FILE = os.environ.get('POSTGRES_PASSWORD_FILE')
+if POSTGRES_PASSWORD_FILE is not None:
+    with open(os.environ.get('POSTGRES_PASSWORD_FILE'), "r") as f:
+        POSTGRES_PASSWORD_FILE = f.read()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -80,9 +83,10 @@ DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/dr
 
 # Candig-specific settings
 
-CANDIG_AUTHORIZATION = os.environ.get("CANDIG_AUTHORIZATION")
-CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL")
+CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "")
+CANDIG_OPA_URL = os.getenv("CANDIG_OPA_URL", "")
 CANDIG_OPA_SECRET = os.getenv("CANDIG_OPA_SECRET", "my-secret-beacon-token")
+CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("CANDIG_OPA_SITE_ADMIN_KEY", "site-admin")
 
 # Application definition
 
@@ -116,6 +120,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'chord_metadata_service.restapi.preflight_req_middleware.PreflightRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -123,10 +128,12 @@ MIDDLEWARE = [
     'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'chord_metadata_service.restapi.datasets_authz_middleware.DatasetsAuthzMiddleware',
+    'chord_metadata_service.restapi.candig_authz_middleware.CandigAuthzMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = []
+
+CORS_PREFLIGHT_MAX_AGE = 0
 
 ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
 
@@ -206,7 +213,6 @@ DATABASES = {
         'PASSWORD': get_secret(
             os.environ["POSTGRES_PASSWORD_FILE"]
         ) if "POSTGRES_PASSWORD_FILE" in os.environ else os.environ.get("POSTGRES_PASSWORD", "admin"),
-
         # Use sockets if we're inside a CHORD container / as a priority
         'HOST': os.environ.get("POSTGRES_SOCKET_DIR", os.environ.get("POSTGRES_HOST", "localhost")),
         'PORT': os.environ.get("POSTGRES_PORT", "5432"),
