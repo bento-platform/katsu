@@ -59,7 +59,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
     serializer_class = DatasetSerializer
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
-    
+
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
@@ -68,7 +68,6 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         else:
             queryset = Dataset.objects.all().order_by("title")
         return queryset
-
 
 
 class TableOwnershipViewSet(CHORDPublicModelViewSet):

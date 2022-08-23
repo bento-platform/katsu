@@ -19,6 +19,7 @@ EXAMPLE_INGEST_OUTPUTS_MCODE_JSON = {
     "json_document": os.path.join(os.path.dirname(__file__), "example_mcode_json.json"),
 }
 
+
 @override_settings(CANDIG_AUTHORIZATION='')
 class GetMcodeApiTest(APITestCase):
     """

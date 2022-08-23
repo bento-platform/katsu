@@ -55,6 +55,7 @@ class CancerGeneticVariantViewSet(McodeModelViewSet):
             queryset = m.CancerGeneticVariant.objects.all()
         return queryset
 
+
 class GenomicRegionStudiedViewSet(McodeModelViewSet):
     serializer_class = s.GenomicRegionStudiedSerializer
     filter_backends = [DjangoFilterBackend]

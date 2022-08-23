@@ -14,24 +14,24 @@ class CandigAuthzMiddleware:
         self.get_response = get_response
         self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
 
-
     def __call__(self, request):
         if settings.CANDIG_AUTHORIZATION == 'OPA':
             token = self.get_auth_token(request.headers)
             if self.is_authorized_get(request):
                 """
                 You may incorporate any data source for dataset authorization.
-        
+
                 Note, if no datasets are authorized, you MUST set it to 'NO_DATASETS_AUTHORIZED'.
-        
+
                 If authorized datasets exist, set it to a comma-separated string with titles of authorized datasets.
-        
+
                 For example, if datasets d100 and d200 are authorized, you should set
                 self.authorize_datasets = 'd100,d200'
                 """
                 if settings.CACHE_TIME != 0:
                     error_response = {
-                        "error": "This request failed because caching is not disabled. Please contact your system administrator for assistance."
+                        "error": "This request failed because caching is not disabled. Please contact your system "
+                                 "administrator for assistance."
                     }
                     response = HttpResponseForbidden(json.dumps(error_response))
                     response["Content-Type"] = "application/json"
@@ -52,10 +52,9 @@ class CandigAuthzMiddleware:
                     response = HttpResponseForbidden(json.dumps(error_response))
                     response["Content-Type"] = "application/json"
                     return response
-        
+
         return self.get_response(request)
 
-    
     def is_authorized_get(self, request):
         authorized_paths = [
             "^/api/phenopackets/?.*", "^/api/diagnoses/?.*", "^/api/diseases/?.*", "^/api/datasets/?.*",
@@ -67,8 +66,7 @@ class CandigAuthzMiddleware:
             "^/api/cancerconditions/?.*", "^/api/tnmstaging/?.*", "^/api/cancerrelatedprocedures/?.*"
         ]
         return request.method == 'GET' and any(re.match(path_re, request.path) for path_re in authorized_paths)
-    
-    
+
     def is_authorized_post(self, request):
         authorized_paths = [
             "^/api/datasets",
@@ -77,7 +75,6 @@ class CandigAuthzMiddleware:
             "^/private/ingest"
         ]
         return request.method == 'POST' and any(re.match(path_re, request.path) for path_re in authorized_paths)
-        
 
     def get_auth_token(self, headers):
         """
@@ -88,7 +85,6 @@ class CandigAuthzMiddleware:
             return ""
         else:
             return token.split()[1]
-
 
     def get_opa_datasets(self, token, path, method):
         """
@@ -122,7 +118,6 @@ class CandigAuthzMiddleware:
         allowed_datasets = response.json()["result"]
 
         return allowed_datasets
-
 
     def is_opa_site_admin(self, token):
         """
