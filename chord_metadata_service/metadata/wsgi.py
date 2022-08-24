@@ -16,10 +16,13 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chord_metadata_service.metadata
 
 # debugger section
 if settings.DEBUG:
-    import debugpy
-    DEBUGGER_PORT = int(os.environ.get('DEBUGGER_PORT', 5678))
-    debugpy.listen(("0.0.0.0", DEBUGGER_PORT))
-    print('Attached')
+    try:
+        import debugpy
+        DEBUGGER_PORT = int(os.environ.get('DEBUGGER_PORT', 5678))
+        debugpy.listen(("0.0.0.0", DEBUGGER_PORT))
+        print('Debugger Attached')
+    except ImportError:
+        print("Module debugpy not found. Install to enable debugging with VS-Code")
 # end debugger section
 
 application = get_wsgi_application()
