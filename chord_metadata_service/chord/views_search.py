@@ -7,7 +7,7 @@ from bento_lib.search import build_search_response, postgres
 from collections import Counter
 from datetime import datetime
 from django.db import connection
-from django.db.models import Count
+from django.db.models import Count, F
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
 from django.views.decorators.cache import cache_page
@@ -321,8 +321,9 @@ def phenopacket_query_results(query, params, options=None):
         field_lookup = get_field_lookup(options.get("field", []))
         return queryset.values_list(field_lookup, flat=True)
     if output_format == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
-        # Results displayed as 3 columns: "individuals ID", [Biosamples list...], number of experiments
-        return queryset.values("subject_id").annotate(
+        # Results displayed as 4 columns:
+        # "individuals ID", [Alternate ids list], [Biosamples list...], number of experiments
+        return queryset.values("subject_id", alternate_ids=F("subject__alternate_ids")).annotate(
             biosamples=ArrayAgg("biosamples__id"),  # Postgre specific: aggregates multiple values in a list
             num_experiments=Count("biosamples__experiment")
         )
