@@ -63,7 +63,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
             allowed_datasets = self.request.allowed_datasets
-            queryset = m.Dataset.objects\
+            queryset = Dataset.objects\
                 .filter(table_ownership__dataset__title__in=allowed_datasets)
         else:
             queryset = Dataset.objects.all().order_by("title")
