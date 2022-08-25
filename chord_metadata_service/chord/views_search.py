@@ -320,7 +320,7 @@ def phenopacket_query_results(query, params, options=None):
         # Only an array of values.
         field_lookup = get_field_lookup(options.get("field", []))
         return queryset.values_list(field_lookup, flat=True)
-    if output_format == "bento_search_result":
+    if output_format == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
         # Results displayed as 3 columns: "individuals ID", [Biosamples list...], number of experiments
         return queryset.values("subject_id").annotate(
             biosamples=ArrayAgg("biosamples__id"),  # Postgre specific: aggregates multiple values in a list
