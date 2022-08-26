@@ -113,7 +113,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'rest_framework',
-    'django_nose',
     'rest_framework_swagger',
 ]
 
@@ -136,8 +135,6 @@ CORS_ALLOWED_ORIGINS = []
 CORS_PREFLIGHT_MAX_AGE = 0
 
 ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
-
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 TEMPLATES = [
     {
