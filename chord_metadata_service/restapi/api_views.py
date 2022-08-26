@@ -169,8 +169,8 @@ def mcode_overview(_request):
             individuals_age.update((parse_individual_age(individual.age),))
         if individual.taxonomy is not None:
             individuals_taxonomy.update((individual.taxonomy["label"],))
-        for cancer_condition in mcodepacket.cancer_condition.all():
-            cancer_condition_counter.update((cancer_condition.code["label"],))
+        if mcodepacket.cancer_condition is not None:
+            cancer_condition_counter.update((mcodepacket.cancer_condition.condition_type,))
         for cancer_related_procedure in mcodepacket.cancer_related_procedures.all():
             cancer_related_procedure_type_counter.update((cancer_related_procedure.procedure_type,))
             cancer_related_procedure_counter.update((cancer_related_procedure.code["label"],))

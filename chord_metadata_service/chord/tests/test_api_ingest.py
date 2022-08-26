@@ -48,9 +48,7 @@ class WorkflowTest(APITestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         # TODO: Check file contents
 
-
 class IngestTest(APITestCase):
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def setUp(self) -> None:
         r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
@@ -65,7 +63,6 @@ class IngestTest(APITestCase):
         r = self.client.post(reverse("table-list"), data=json.dumps(table_record), content_type="application/json")
         self.table = r.json()
 
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_phenopackets_ingest(self):
         # No ingestion body
         r = self.client.post(reverse("ingest"), content_type="application/json")

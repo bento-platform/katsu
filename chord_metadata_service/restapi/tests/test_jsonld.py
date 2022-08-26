@@ -11,7 +11,6 @@ import json
 
 
 class JSONLDDatasetTest(APITestCase):
-    @override_settings(AUTH_OVERRIDE=True)
     def setUp(self) -> None:
         project = get_response('project-list', VALID_PROJECT_1)
         self.project = project.json()
