@@ -325,7 +325,7 @@ def get_date_stats(field_props):
     bins = []
     if start:   # at least one month
         for year, month in monthly_generator(start, end or start):
-            key = f"{year}-{month}"
+            key = f"{year}-{month:02d}"
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
             v = stats.get(key, 0)
             bins.append({
