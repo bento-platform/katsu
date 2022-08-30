@@ -320,13 +320,18 @@ def phenopacket_query_results(query, params, options=None):
         # Only an array of values.
         field_lookup = get_field_lookup(options.get("field", []))
         return queryset.values_list(field_lookup, flat=True)
+
     if output_format == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
-        # Results displayed as 4 columns:
-        # "individuals ID", [Alternate ids list], [Biosamples list...], number of experiments
-        return queryset.values("subject_id", alternate_ids=F("subject__alternate_ids")).annotate(
-            biosamples=ArrayAgg("biosamples__id"),  # Postgre specific: aggregates multiple values in a list
-            num_experiments=Count("biosamples__experiment")
-        )
+        # Results displayed as 5 columns:
+        # "individuals ID", "table ID" [Alternate ids list], [Biosamples list...], number of experiments
+        return queryset.values(
+                "subject_id",
+                "table_id",
+                alternate_ids=F("subject__alternate_ids")
+            ).annotate(
+                biosamples=ArrayAgg("biosamples__id"),  # Postgre specific: aggregates multiple values in a list
+                num_experiments=Count("biosamples__experiment")
+            )
 
     # To expand further on this query : the select_related call
     # will join on these tables we'd call anyway, thus 2 less request
@@ -366,8 +371,7 @@ def search(request, internal_data=False):
     if err:
         return Response(errors.bad_request_error(err), status=400)
 
-    if (search_params["output"] == OUTPUT_FORMAT_VALUES_LIST
-       or search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT):
+    if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
         return Response(errors.not_implemented_error(
             f"{search_params['output']} output is only available on table based queries"
             ),
@@ -390,13 +394,28 @@ def search(request, internal_data=False):
     query_function = QUERY_RESULTS_FN[data_type]
     queryset = query_function(compiled_query, query_params, search_params)
 
+    if search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
+        # The queryset for the bento_search_result output is based on the
+        # usage of `values()` to restrict its content to specific fields.
+        # This result in a slight change of the queryset iterable where
+        # items are dictionaries instead of objects.
+        return Response(build_search_response({
+            table_id: {
+                "data_type": data_type,
+                "matches": [p for p in table_dicts]
+            } for table_id, table_dicts in itertools.groupby(
+                queryset,
+                key=lambda d: str(d["table_id"])    # dict here
+            )
+        }, start))
+
     return Response(build_search_response({
         table_id: {
             "data_type": data_type,
             "matches": list(serializer_class(p).data for p in table_objects)
         } for table_id, table_objects in itertools.groupby(
             queryset,
-            key=lambda o: str(o.table_id)
+            key=lambda o: str(o.table_id)           # object here
         )
     }, start))
 
