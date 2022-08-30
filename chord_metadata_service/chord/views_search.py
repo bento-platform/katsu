@@ -273,6 +273,19 @@ def get_field_lookup(field):
     return "__".join(f for f in field if f != "[item]")
 
 
+def get_values_list(queryset, options):
+    field_lookup = get_field_lookup(options.get("field", []))
+    if "add_field" in options:
+        # Return a list of the dict, with the additional field and the field
+        # used for the value. It will require further processing to get a list
+        # of values.
+        # this is used to group values by table ID for example.
+        return queryset.values(options["add_field"], value=F(field_lookup))
+
+    # Only a list of values
+    return queryset.values_list(field_lookup, flat=True)
+
+
 def data_type_results(query, params, key="id"):
     with connection.cursor() as cursor:
         debug_log(f"Executing SQL:\n    {query.as_string(cursor.connection)}")
@@ -288,10 +301,7 @@ def experiment_query_results(query, params, options=None):
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
-        field_lookup = get_field_lookup(options.get("field", []))
-        if "add_field" in options:
-            return queryset.values(options["add_field"], value=F(field_lookup))
-        return queryset.values_list(field_lookup, flat=True)
+        return get_values_list(queryset, options)
 
     return queryset.select_related(*EXPERIMENT_SELECT_REL) \
         .prefetch_related(*EXPERIMENT_PREFETCH)
@@ -306,10 +316,7 @@ def mcodepacket_query_results(query, params, options=None):
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
-        field_lookup = get_field_lookup(options.get("field", []))
-        if "add_field" in options:
-            return queryset.values(options["add_field"], value=F(field_lookup))
-        return queryset.values_list(field_lookup, flat=True)
+        return get_values_list(queryset, options)
 
     return queryset
 
@@ -320,17 +327,7 @@ def phenopacket_query_results(query, params, options=None):
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
-        field_lookup = get_field_lookup(options.get("field", []))
-
-        if "add_field" in options:
-            # Return a list of the dict, with the additional field and the field
-            # used for the value. It will require further processing to get a list
-            # of values.
-            # this is used to group values by table ID for example.
-            return queryset.values(options["add_field"], value=F(field_lookup))
-
-        # Only an array of values.
-        return queryset.values_list(field_lookup, flat=True)
+        return get_values_list(queryset, options)
 
     if output_format == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
         # Results displayed as 5 columns:
