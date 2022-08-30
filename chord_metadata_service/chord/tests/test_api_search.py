@@ -550,6 +550,25 @@ class SearchTest(APITestCase):
             matches = c["results"][table_id]["matches"]
             self.assertEqual(len(matches), 1)   # 1 matching phenopacket
 
+    def test_private_search_values_list(self):
+        # Valid query to search for biosample id in list
+        # Output as a list of values
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10,
+            "output": "values_list",
+            "field": '["biosamples", "[item]", "id"]',
+            "data_type": "phenopacket",
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-search", data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            table_id = list(c["results"].keys())[0]
+            matches = c["results"][table_id]["matches"]
+            self.assertEqual(len(matches), 2)   # 2 biosamples in list
+
     @patch('chord_metadata_service.chord.views_search.es')
     def test_fhir_search(self, mocked_es):
         mocked_es.search.return_value = SEARCH_SUCCESS

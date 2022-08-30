@@ -15,7 +15,6 @@ from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import status
 from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
@@ -290,6 +289,8 @@ def experiment_query_results(query, params, options=None):
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
         field_lookup = get_field_lookup(options.get("field", []))
+        if "add_field" in options:
+            return queryset.values(options["add_field"], value=F(field_lookup))
         return queryset.values_list(field_lookup, flat=True)
 
     return queryset.select_related(*EXPERIMENT_SELECT_REL) \
@@ -306,6 +307,8 @@ def mcodepacket_query_results(query, params, options=None):
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
         field_lookup = get_field_lookup(options.get("field", []))
+        if "add_field" in options:
+            return queryset.values(options["add_field"], value=F(field_lookup))
         return queryset.values_list(field_lookup, flat=True)
 
     return queryset
@@ -317,8 +320,16 @@ def phenopacket_query_results(query, params, options=None):
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
-        # Only an array of values.
         field_lookup = get_field_lookup(options.get("field", []))
+
+        if "add_field" in options:
+            # Return a list of the dict, with the additional field and the field
+            # used for the value. It will require further processing to get a list
+            # of values.
+            # this is used to group values by table ID for example.
+            return queryset.values(options["add_field"], value=F(field_lookup))
+
+        # Only an array of values.
         return queryset.values_list(field_lookup, flat=True)
 
     if output_format == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
@@ -372,10 +383,7 @@ def search(request, internal_data=False):
         return Response(errors.bad_request_error(err), status=400)
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
-        return Response(errors.not_implemented_error(
-            f"{search_params['output']} output is only available on table based queries"
-            ),
-            status=status.HTTP_501_NOT_IMPLEMENTED)
+        search_params["add_field"] = "table_id"
 
     start = datetime.now()
     data_type = search_params["data_type"]
@@ -393,6 +401,17 @@ def search(request, internal_data=False):
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
     query_function = QUERY_RESULTS_FN[data_type]
     queryset = query_function(compiled_query, query_params, search_params)
+
+    if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
+        return Response(build_search_response({
+            table_id: {
+                "data_type": data_type,
+                "matches": [p["value"] for p in table_dicts]
+            } for table_id, table_dicts in itertools.groupby(
+                queryset,
+                key=lambda d: str(d["table_id"])    # dict here
+            )
+        }, start))
 
     if search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
         # The queryset for the bento_search_result output is based on the
