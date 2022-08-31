@@ -20,6 +20,7 @@ __all__ = [
     "TEST_SEARCH_QUERY_7",
     "TEST_SEARCH_QUERY_8",
     "TEST_SEARCH_QUERY_9",
+    "TEST_SEARCH_QUERY_10",
     "TEST_FHIR_SEARCH_QUERY",
 ]
 
@@ -249,4 +250,6 @@ TEST_SEARCH_QUERY_6 = ["#ico", ["#resolve", "biosamples", "[item]", "sampled_tis
 TEST_SEARCH_QUERY_7 = ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
 TEST_SEARCH_QUERY_8 = ["#ico", ["#resolve", "experiment_type"], "chromatin"]
 TEST_SEARCH_QUERY_9 = ["#eq", ["#resolve", "subject", "id"], "patient:1"]
+TEST_SEARCH_QUERY_10 = ["#in", ["#resolve", "biosamples", "[item]", "id"],
+                        ["#list", "biosample_id:1", "biosample_id:2"]]
 TEST_FHIR_SEARCH_QUERY = {"query": {"match": {"gender": "FEMALE"}}}
