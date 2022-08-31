@@ -57,16 +57,6 @@ class ProcedureViewSet(ExtendedPhenopacketsModelViewSet):
     filter_class = f.ProcedureFilter
     queryset = m.Procedure.objects.all().order_by("id")
 
-    # def get_queryset(self):
-    #     if hasattr(self.request, "allowed_datasets"):
-    #         allowed_datasets = self.request.allowed_datasets
-    #         queryset = m.Procedure.objects.filter(
-    #             biosample__phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
-    #             .order_by("id")
-    #     else:
-    #         queryset = m.Procedure.objects.all().order_by("id")
-    #     return queryset
-
 
 class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
     """
@@ -95,15 +85,6 @@ class GeneViewSet(ExtendedPhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filter_class = f.GeneFilter
     queryset = m.Gene.objects.all().order_by("id")
-
-    # def get_queryset(self):
-    #     if hasattr(self.request, "allowed_datasets"):
-    #         allowed_datasets = self.request.allowed_datasets
-    #         queryset = m.Gene.objects.filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
-    #             .order_by("id")
-    #     else:
-    #         queryset = m.Gene.objects.all().order_by("id")
-    #     return queryset
 
 
 class VariantViewSet(ExtendedPhenopacketsModelViewSet):
@@ -134,16 +115,6 @@ class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filter_class = f.DiseaseFilter
     queryset = m.Disease.objects.all().order_by("id")
-
-    # def get_queryset(self):
-    #     if hasattr(self.request, "allowed_datasets"):
-    #         allowed_datasets = self.request.allowed_datasets
-    #         queryset = m.Disease.objects\
-    #             .filter(phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
-    #             .order_by("id")
-    #     else:
-    #         queryset = m.Disease.objects.all().order_by("id")
-    #     return queryset
 
 
 META_DATA_PREFETCH = (
@@ -195,16 +166,6 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filter_class = f.BiosampleFilter
     queryset = m.Biosample.objects.all().prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
-
-    # def get_queryset(self):
-    #     if hasattr(self.request, "allowed_datasets"):
-    #         allowed_datasets = self.request.allowed_datasets
-    #         queryset = m.Biosample.objects.filter(
-    #             phenopacket__table__ownership_record__dataset__title__in=allowed_datasets).\
-    #             prefetch_related(*BIOSAMPLE_PREFETCH).select_related(*BIOSAMPLE_SELECT_REL).order_by("id")
-    #     else:
-    #         queryset = m.Biosample.objects.all().prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
-    #     return queryset
 
 
 PHENOPACKET_PREFETCH = (
@@ -267,16 +228,6 @@ class DiagnosisViewSet(PhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filter_class = f.DiagnosisFilter
     queryset = m.Diagnosis.objects.all().order_by("id")
-
-    # def get_queryset(self):
-    #     if hasattr(self.request, "allowed_datasets"):
-    #         allowed_datasets = self.request.allowed_datasets
-    #         queryset = m.Diagnosis.objects.filter(
-    #             disease__phenopacket__table__ownership_record__dataset__title__in=allowed_datasets)\
-    #             .order_by("id")
-    #     else:
-    #         queryset = m.Diagnosis.objects.all().order_by("id")
-    #     return queryset
 
 
 class InterpretationViewSet(PhenopacketsModelViewSet):
