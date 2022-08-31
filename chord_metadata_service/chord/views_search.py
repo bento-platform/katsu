@@ -330,11 +330,14 @@ def phenopacket_query_results(query, params, options=None):
         return get_values_list(queryset, options)
 
     if output_format == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
-        # Results displayed as 5 columns:
-        # "individuals ID", "table ID" [Alternate ids list], [Biosamples list...], number of experiments
+        fields = ["subject_id"]
+        if "add_field" in options:
+            fields.append(options["add_field"])
+
+        # Results displayed as 4/5 columns:
+        # "individuals ID", "table ID" (optional), [Alternate ids list], [Biosamples list...], number of experiments
         return queryset.values(
-                "subject_id",
-                "table_id",
+                *fields,
                 alternate_ids=F("subject__alternate_ids")
             ).annotate(
                 biosamples=ArrayAgg("biosamples__id"),  # Postgre specific: aggregates multiple values in a list
@@ -379,7 +382,8 @@ def search(request, internal_data=False):
     if err:
         return Response(errors.bad_request_error(err), status=400)
 
-    if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
+    if (search_params["output"] == OUTPUT_FORMAT_VALUES_LIST
+       or search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT):
         search_params["add_field"] = "table_id"
 
     start = datetime.now()
@@ -412,13 +416,16 @@ def search(request, internal_data=False):
 
     if search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
         # The queryset for the bento_search_result output is based on the
-        # usage of `values()` to restrict its content to specific fields.
+        # usage of Django ORM `values()` to restrict its content to specific fields.
         # This result in a slight change of the queryset iterable where
         # items are dictionaries instead of objects.
         return Response(build_search_response({
             table_id: {
                 "data_type": data_type,
-                "matches": [p for p in table_dicts]
+                "matches": [
+                    {key: value for key, value in p.items() if key != "table_id"}
+                    for p in table_dicts
+                ]
             } for table_id, table_dicts in itertools.groupby(
                 queryset,
                 key=lambda d: str(d["table_id"])    # dict here

@@ -515,7 +515,7 @@ class SearchTest(APITestCase):
 
     def test_private_table_search_bento_search_results(self):
         # Valid query to search for biosample id in list
-        # Output as Bento search (a list of 5 values)
+        # Output as Bento search (a list of 4 values)
 
         d = {
             "query": TEST_SEARCH_QUERY_10,
@@ -527,9 +527,9 @@ class SearchTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(len(c["results"]), 1)  # 1 matching phenopacket
-            self.assertEqual(len(c["results"][0]), 5)    # 5 columns by result
+            self.assertEqual(len(c["results"][0]), 4)    # 4 columns by result
             self.assertListEqual(
-                ["subject_id", "table_id", "alternate_ids", "biosamples", "num_experiments"],
+                ["subject_id", "alternate_ids", "biosamples", "num_experiments"],
                 list(c["results"][0].keys()))
 
     def test_private_search_bento_search_results(self):
