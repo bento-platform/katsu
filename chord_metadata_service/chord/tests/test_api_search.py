@@ -531,6 +531,7 @@ class SearchTest(APITestCase):
             self.assertListEqual(
                 ["subject_id", "alternate_ids", "biosamples", "num_experiments"],
                 list(c["results"][0].keys()))
+            self.assertIsInstance(c["results"][0]["alternate_ids"], list)
 
     def test_private_search_bento_search_results(self):
         # Valid query to search for biosample id in list

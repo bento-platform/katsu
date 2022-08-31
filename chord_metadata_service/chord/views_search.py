@@ -8,6 +8,7 @@ from collections import Counter
 from datetime import datetime
 from django.db import connection
 from django.db.models import Count, F
+from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
 from django.views.decorators.cache import cache_page
@@ -338,9 +339,12 @@ def phenopacket_query_results(query, params, options=None):
         # "individuals ID", "table ID" (optional), [Alternate ids list], [Biosamples list...], number of experiments
         return queryset.values(
                 *fields,
-                alternate_ids=F("subject__alternate_ids")
+                alternate_ids=Coalesce(F("subject__alternate_ids"), [])
             ).annotate(
-                biosamples=ArrayAgg("biosamples__id"),  # Postgre specific: aggregates multiple values in a list
+                biosamples=Coalesce(
+                    ArrayAgg("biosamples__id"),  # Postgre specific: aggregates multiple values in a list
+                    []
+                ),
                 num_experiments=Count("biosamples__experiment")
             )
 
