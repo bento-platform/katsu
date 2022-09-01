@@ -97,7 +97,7 @@ class CandigAuthzMiddleware:
         try:
             response = requests.post(
                 settings.CANDIG_OPA_URL + "/v1/data/permissions/datasets",
-                headers={"Authorization": f"Bearer {settings.CANDIG_OPA_SECRET}"},
+                headers={"X-Opa": f"{settings.CANDIG_OPA_SECRET}"},
                 json={
                     "input": {
                             "token": token,
