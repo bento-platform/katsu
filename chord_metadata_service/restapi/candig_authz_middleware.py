@@ -52,7 +52,9 @@ class CandigAuthzMiddleware:
                     response = HttpResponseForbidden(json.dumps(error_response))
                     response["Content-Type"] = "application/json"
                     return response
-        
+
+        # if CANDIG_AUTHORIZATION is unknown, mean no authorization
+        self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
         return self.get_response(request)
 
     
