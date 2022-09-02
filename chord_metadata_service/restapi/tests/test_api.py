@@ -1,5 +1,5 @@
+import os
 from copy import deepcopy
-from uuid import uuid4
 
 from django.conf import settings
 from django.urls import reverse
@@ -10,7 +10,6 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
 from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
@@ -322,11 +321,15 @@ class PublicOverviewNotSupportedDataTypesDictTest(APITestCase):
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
 
 
-class PublicOverviewDatasetsMetadataTest(APITestCase):
+class PublicDatasetsMetadataTest(APITestCase):
 
     def setUp(self) -> None:
         project = ch_m.Project.objects.create(title="Test project", description="test description")
-        dataset = ch_m.Dataset.objects.create(
+        dats_path = os.path.join(os.path.dirname(__file__), "example_dats_provenance.json")
+        with open(dats_path) as f:
+            dats_content = f.read()
+
+        ch_m.Dataset.objects.create(
             title="Dataset 1",
             description="Test dataset",
             contact_info="Test contact info",
@@ -334,50 +337,21 @@ class PublicOverviewDatasetsMetadataTest(APITestCase):
             privacy="Open",
             keywords=["test keyword 1", "test keyword 2"],
             data_use=ch_c.VALID_DATA_USE_1,
-            project=project
+            project=project,
+            dats_file=dats_content
         )
-        table_ownership = ch_m.TableOwnership.objects.create(
-            table_id=str(uuid4()),
-            service_id=str(uuid4()),
-            service_artifact="phenopacket",
-            dataset=dataset
-        )
-        table = ch_m.Table.objects.create(
-            ownership_record=table_ownership, name="Test table 1", data_type=DATA_TYPE_PHENOPACKET
-        )
-        metadata = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
-        for i, ind in enumerate(VALID_INDIVIDUALS, start=1):
-            new_individual = ph_m.Individual.objects.create(**ind)
-            ph_m.Phenopacket.objects.create(
-                id=f"phenopacket:{i}",
-                subject=new_individual,
-                meta_data=metadata,
-                table=table
-            )
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_overview(self):
-        response = self.client.get('/api/public_overview')
+        response = self.client.get(reverse("public-dataset"))
         response_obj = response.json()
-        db_count = ph_m.Individual.objects.all().count()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        # counts
-        self.assertEqual(response_obj["counts"]["individuals"], db_count)
 
         # datasets
         self.assertIsInstance(response_obj["datasets"], list)
-        for dataset in response_obj["datasets"]:
+        for i, dataset in enumerate(response_obj["datasets"]):
             self.assertIn("title", dataset.keys())
             self.assertIsNotNone(dataset["title"])
-
-        # layout
-        self.assertIn("layout", response_obj)
-        self.assertEqual(response_obj["layout"], settings.CONFIG_PUBLIC["overview"])
-
-        # fields
-        self.assertIn("fields", response_obj)
-        self.assertSetEqual(
-            set(response_obj["fields"].keys()),
-            set(chart["field"] for section in settings.CONFIG_PUBLIC["overview"] for chart in section["charts"])
-        )
+            if i == 0:
+                self.assertTrue("keywords" in dataset["dats_file"])

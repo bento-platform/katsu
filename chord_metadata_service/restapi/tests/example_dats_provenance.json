@@ -1,0 +1,124 @@
+{
+    "title": "Mockup Dataset",
+    "description": "This is a long description .",
+    "creators": [
+        {
+            "name": "Canadian Centre for Computational Genomics",
+            "abbreviation": "C3G"
+        }
+    ],
+    "types": [
+        {
+            "information": {
+                "value": "Biobank"
+            }
+        }
+    ],
+    "version": "1.0",
+    "privacy": "controlled",
+    "licenses": [
+        {
+            "name": "Controlled access"
+        }
+    ],
+    "distributions": [
+        {
+            "formats": [
+                "XLSX, CRAM, VCF, PLINK, etc."
+            ],
+            "size": 500,
+            "unit": {
+                "value": "TB"
+            },
+            "access": {
+                "landingPage": "https://myurl.org/",
+                "authorizations": [
+                    {
+                        "value": "public"
+                    }
+                ]
+            }
+        }
+    ],
+    "isAbout": [
+        {
+            "name": "Homo sapiens",
+            "identifier": {
+                "identifier": "https://www.ncbi.nlm.nih.gov/taxonomy/9606",
+                "identifierSource": "NCBI Taxonomy Database"
+            }
+        }
+    ],
+    "spatialCoverage": [
+        {
+            "name": "Quebec, Canada",
+            "description": ""
+        }
+    ],
+    "acknowledges": [
+        {
+            "name": "Grants",
+            "funders": [
+                {
+                    "name": "https://www.myurl.org/a_link_to_the_grant_document/",
+                    "abbreviation": ""
+                }
+            ]
+        }
+    ],
+    "keywords": [
+        {
+            "value": "genomics, biobank"
+        }
+    ],
+    "extraProperties": [
+        {
+            "category": "files",
+            "values": [
+                {
+                    "value": "1"
+                }
+            ]
+        },
+        {
+            "category": "origin_consortium",
+            "values": [
+                {
+                    "value": "C3G"
+                }
+            ]
+        },
+        {
+            "category": "origin_province",
+            "values": [
+                {
+                    "value": "Quebec"
+                }
+            ]
+        },
+        {
+            "category": "origin_country",
+            "values": [
+                {
+                    "value": "Canada"
+                }
+            ]
+        },
+        {
+            "category": "logo",
+            "values": [
+                {
+                    "value": "https://www.myurl.org/images/logo/logo.png"
+                }
+            ]
+        },
+        {
+            "category": "contact",
+            "values": [
+                {
+                    "value": "C3G support, info@myurl.org"
+                }
+            ]
+        }
+    ]
+}
