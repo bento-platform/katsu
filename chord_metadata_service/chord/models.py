@@ -138,6 +138,8 @@ class Dataset(models.Model):
                                                              "its discovery.")
     version = models.CharField(max_length=200, blank=True, default=version_default,
                                help_text="A release point for the dataset when applicable.")
+    dats_file = models.TextField(blank=True, help_text="Content of a valid DATS file, in JSON format, that specifies"
+                                 " the dataset provenance.")
     extra_properties = JSONField(blank=True, null=True, help_text="Extra properties that do not fit in the previous "
                                                                   "specified attributes.")
 
