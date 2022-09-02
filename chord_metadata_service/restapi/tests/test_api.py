@@ -342,7 +342,7 @@ class PublicDatasetsMetadataTest(APITestCase):
         )
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
-    def test_overview(self):
+    def test_public_dataset(self):
         response = self.client.get(reverse("public-dataset"))
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -355,3 +355,10 @@ class PublicDatasetsMetadataTest(APITestCase):
             self.assertIsNotNone(dataset["title"])
             if i == 0:
                 self.assertTrue("keywords" in dataset["dats_file"])
+
+    @override_settings(CONFIG_PUBLIC={})
+    def test_public_dataset_response_no_config(self):
+        response = self.client.get(reverse("public-dataset"))
+        response_obj = response.json()
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
