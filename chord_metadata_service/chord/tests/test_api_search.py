@@ -233,7 +233,6 @@ class SearchTest(APITestCase):
                 "data_type": DATA_TYPE_PHENOPACKET,
                 "query": TEST_SEARCH_QUERY_1
             }, method=method)
-            print(r, r.json())
             self.assertEqual(r.status_code, status.HTTP_200_OK)
 
             c = r.json()

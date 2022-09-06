@@ -73,14 +73,11 @@ class FHIRIndividualTest(APITestCase):
     """ Test module for creating an Individual. """
 
     def setUp(self):
-        self.individual = VALID_INDIVIDUAL
-        self.individual_second = VALID_INDIVIDUAL_2
+        self.individual = Individual.objects.create(**VALID_INDIVIDUAL)
+        self.individual_second = Individual.objects.create(**VALID_INDIVIDUAL_2)
 
     @override_settings(CANDIG_OPA_URL=None)
     def test_get_fhir(self):
-        response_1 = get_response('individuals-list', self.individual)
-        response_2 = get_response('individuals-list', self.individual_second)
-        print(response_1.data, response_2.data)
         get_resp = self.client.get('/api/individuals?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
