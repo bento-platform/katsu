@@ -34,6 +34,8 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         method="filter_on_treatment_name", field_name="mcodepacket__cancer_condition",
         label="Treatment Name"
     )
+    date_of_birth_from = django_filters.DateFilter(field_name='date_of_birth', lookup_expr=('gte'),)
+    date_of_birth_to = django_filters.DateFilter(field_name='date_of_birth', lookup_expr=('lte'))
 
     extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
     # full-text search at api/individuals?search=
