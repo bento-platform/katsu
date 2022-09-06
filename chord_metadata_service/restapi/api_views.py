@@ -269,19 +269,7 @@ def public_overview(_request):
     if individuals_count < settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
         return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
 
-    # Datasets provenance metadata
-    datasets = chord_models.Dataset.objects.values(
-        "title", "description", "contact_info",
-        "dates", "stored_in", "spatial_coverage",
-        "types", "privacy", "distributions",
-        "dimensions", "primary_publications", "citations",
-        "produced_by", "creators", "licenses",
-        "acknowledges", "keywords", "version",
-        "extra_properties"
-    )
-
     response = {
-        "datasets": datasets,
         "layout": settings.CONFIG_PUBLIC["overview"],
         "fields": {},
         "counts": {
@@ -310,3 +298,30 @@ def public_overview(_request):
         }
 
     return Response(response)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def public_dataset(_request):
+    """
+    get:
+    Properties of the datasets
+    """
+
+    if not settings.CONFIG_PUBLIC:
+        return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
+
+    # Datasets provenance metadata
+    datasets = chord_models.Dataset.objects.values(
+        "title", "description", "contact_info",
+        "dates", "stored_in", "spatial_coverage",
+        "types", "privacy", "distributions",
+        "dimensions", "primary_publications", "citations",
+        "produced_by", "creators", "licenses",
+        "acknowledges", "keywords", "version", "dats_file",
+        "extra_properties"
+    )
+
+    return Response({
+        "datasets": datasets
+    })
