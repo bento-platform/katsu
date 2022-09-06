@@ -29,7 +29,7 @@ class GeneticSpecimenViewSet(McodeModelViewSet):
     serializer_class = s.GeneticSpecimenSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.GeneticSpecimenFilter
+    filterset_class = f.GeneticSpecimenFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -44,7 +44,7 @@ class GeneticSpecimenViewSet(McodeModelViewSet):
 class CancerGeneticVariantViewSet(McodeModelViewSet):
     serializer_class = s.CancerGeneticVariantSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.CancerGeneticVariantFilter
+    filterset_class = f.CancerGeneticVariantFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -59,7 +59,7 @@ class CancerGeneticVariantViewSet(McodeModelViewSet):
 class GenomicRegionStudiedViewSet(McodeModelViewSet):
     serializer_class = s.GenomicRegionStudiedSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.GenomicRegionStudiedFilter
+    filterset_class = f.GenomicRegionStudiedFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -84,7 +84,7 @@ GENOMIC_REPORT_SELECT = (
 class GenomicsReportViewSet(McodeModelViewSet):
     serializer_class = s.GenomicsReportSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.GenomicsReportFilter
+    filterset_class = f.GenomicsReportFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -99,7 +99,7 @@ class GenomicsReportViewSet(McodeModelViewSet):
 class LabsVitalViewSet(McodeModelViewSet):
     serializer_class = s.LabsVitalSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.LabsVitalFilter
+    filterset_class = f.LabsVitalFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -120,7 +120,7 @@ class CancerConditionViewSet(McodeModelViewSet):
     serializer_class = s.CancerConditionSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.CancerConditionFilter
+    filterset_class = f.CancerConditionFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -135,7 +135,7 @@ class CancerConditionViewSet(McodeModelViewSet):
 class TNMStagingViewSet(McodeModelViewSet):
     serializer_class = s.TNMStagingSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.TNMStagingFilter
+    filterset_class = f.TNMStagingFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -156,7 +156,7 @@ class CancerRelatedProcedureViewSet(McodeModelViewSet):
     serializer_class = s.CancerRelatedProcedureSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.CancerRelatedProcedureFilter
+    filterset_class = f.CancerRelatedProcedureFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -172,7 +172,7 @@ class MedicationStatementViewSet(McodeModelViewSet):
     serializer_class = s.MedicationStatementSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.MedicationStatementFilter
+    filterset_class = f.MedicationStatementFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -200,7 +200,7 @@ class MCodePacketViewSet(McodeModelViewSet):
     serializer_class = s.MCodePacketSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.MCodePacketFilter
+    filterset_class = f.MCodePacketFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):

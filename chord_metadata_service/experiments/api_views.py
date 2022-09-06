@@ -46,7 +46,7 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
     filter_backends = [DjangoFilterBackend]
-    filter_class = ExperimentFilter
+    filterset_class = ExperimentFilter
 
     def dispatch(self, *args, **kwargs):
         return super(ExperimentViewSet, self).dispatch(*args, **kwargs)
@@ -66,7 +66,7 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
     filter_backends = [DjangoFilterBackend]
-    filter_class = ExperimentResultFilter
+    filterset_class = ExperimentResultFilter
 
     # Cache page for the requested url for 2 hours
     @method_decorator(cache_page(60 * 60 * 2))

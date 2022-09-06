@@ -39,7 +39,7 @@ class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
     """
     serializer_class = s.PhenotypicFeatureSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.PhenotypicFeatureFilter
+    filterset_class = f.PhenotypicFeatureFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -64,7 +64,7 @@ class ProcedureViewSet(ExtendedPhenopacketsModelViewSet):
     """
     serializer_class = s.ProcedureSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.ProcedureFilter
+    filterset_class = f.ProcedureFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -111,7 +111,7 @@ class GeneViewSet(ExtendedPhenopacketsModelViewSet):
     """
     serializer_class = s.GeneSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.GeneFilter
+    filterset_class = f.GeneFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -134,7 +134,7 @@ class VariantViewSet(ExtendedPhenopacketsModelViewSet):
     """
     serializer_class = s.VariantSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.VariantFilter
+    filterset_class = f.VariantFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -158,7 +158,7 @@ class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
     """
     serializer_class = s.DiseaseSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.DiseaseFilter
+    filterset_class = f.DiseaseFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -187,7 +187,7 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
     """
     serializer_class = s.MetaDataSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.MetaDataFilter
+    filterset_class = f.MetaDataFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -227,7 +227,7 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
         .order_by("id")
     serializer_class = s.BiosampleSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.BiosampleFilter
+    filterset_class = f.BiosampleFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -268,7 +268,7 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     """
     serializer_class = s.PhenopacketSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.PhenopacketFilter
+    filterset_class = f.PhenopacketFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -292,7 +292,7 @@ class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
     queryset = m.GenomicInterpretation.objects.all().order_by("id")
     serializer_class = s.GenomicInterpretationSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.GenomicInterpretationFilter
+    filterset_class = f.GenomicInterpretationFilter
 
 
 class DiagnosisViewSet(PhenopacketsModelViewSet):
@@ -306,7 +306,7 @@ class DiagnosisViewSet(PhenopacketsModelViewSet):
     """
     serializer_class = s.DiagnosisSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.DiagnosisFilter
+    filterset_class = f.DiagnosisFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):
@@ -330,7 +330,7 @@ class InterpretationViewSet(PhenopacketsModelViewSet):
     """
     serializer_class = s.InterpretationSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.InterpretationFilter
+    filterset_class = f.InterpretationFilter
 
     def get_queryset(self):
         if hasattr(self.request, "allowed_datasets"):

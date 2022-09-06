@@ -24,4 +24,4 @@ class ResourceViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
     pagination_class = LargeResultsSetPagination
     filter_backends = [DjangoFilterBackend]
-    filter_class = ResourceFilter
+    filterset_class = ResourceFilter

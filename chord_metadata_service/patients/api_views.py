@@ -41,7 +41,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
                         PhenopacketsRenderer, IndividualCSVRenderer, ARGORenderer)
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filter_class = IndividualFilter
+    filterset_class = IndividualFilter
     ordering_fields = ["id"]
 
     def get_queryset(self):
