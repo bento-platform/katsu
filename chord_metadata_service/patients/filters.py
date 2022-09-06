@@ -25,13 +25,24 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         method="filter_found_phenotypic_feature", field_name="phenopackets__phenotypic_features",
         label="Found phenotypic feature"
     )
+    cancer_condition_name = django_filters.CharFilter(
+        method="filter_on_cancer_condition_name", field_name="mcodepacket__cancer_condition",
+        label="Cancer Condition Name"
+    )
+
+    treatment_name = django_filters.CharFilter(
+        method="filter_on_treatment_name", field_name="mcodepacket__cancer_condition",
+        label="Treatment Name"
+    )
+
     extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
     # full-text search at api/individuals?search=
     search = django_filters.CharFilter(method="filter_search", label="Search")
 
     class Meta:
         model = Individual
-        fields = ["id", "alternate_ids", "active", "deceased", "phenopackets__biosamples", "phenopackets"]
+        fields = ["id", "alternate_ids", "active", "deceased", 
+                  "phenopackets__biosamples", "phenopackets"]
 
     def filter_found_phenotypic_feature(self, qs, name, value):
         """
@@ -42,6 +53,14 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
             Q(phenopackets__phenotypic_features__pftype__label__icontains=value),
             phenopackets__phenotypic_features__negated=False
         ).distinct()
+        return qs
+    
+    def filter_on_cancer_condition_name(self, qs, name, value):
+        qs = qs.filter(mcodepacket__cancer_condition__body_site__icontains=value).distinct()
+        return qs
+    
+    def filter_on_treatment_name(self, qs, name, value):
+        qs = qs.filter(mcodepacket__cancer_related_procedures__code__icontains=value).distinct()
         return qs
 
     def filter_disease(self, qs, name, value):
