@@ -16,7 +16,7 @@ setuptools.setup(
 
     python_requires=">=3.6",
     install_requires=[
-        "bento_lib[django]==2.1.0",
+        "bento_lib[django]==2.3.0",
         "Django>=2.2.20,<3.0",
         "django-autocomplete-light==3.8.2",
         "django-cors-headers>=3.7,<3.8",
@@ -32,9 +32,7 @@ setuptools.setup(
         "PyJWT[crypto]==2.4.0",
         "python-dateutil>=2.8,<3.0",
         "python-dotenv==0.14.0",
-        "PyYAML>=5.3,<6.0",
         "rdflib==6.0.1",
-        "rdflib-jsonld==0.5.0",
         "requests>=2.25.1,<3.0",
         "requests-unixsocket>=0.2.0,<0.3.0",
         "rfc3987==1.3.8",
