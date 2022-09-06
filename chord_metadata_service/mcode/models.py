@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.db import models
-from django.contrib.postgres.fields import JSONField, ArrayField
+from django.db.models import JSONField
+from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.phenopackets.models import Gene
 from chord_metadata_service.patients.models import Individual
