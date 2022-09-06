@@ -265,6 +265,8 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTHENTICATION_BACKENDS = ["bento_lib.auth.django_remote_user.BentoRemoteUserBackend"] + (
     ["django.contrib.auth.backends.ModelBackend"] if DEBUG else [])
 
+# Models
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
