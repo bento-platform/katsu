@@ -126,15 +126,12 @@ class DeleteIndividualTest(APITestCase):
                 )
             )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-
 class IndividualCSVRendererTest(APITestCase):
     """ Test csv export for Individuals. """
 
     def setUp(self):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
 
-    @override_settings(CANDIG_OPA_URL=None)
     def test_csv_export(self):
         get_resp = self.client.get('/api/individuals?format=csv')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
@@ -147,7 +144,6 @@ class IndividualCSVRendererTest(APITestCase):
                        'race', 'ethnicity', 'age', 'diseases', 'created', 'updated']:
             self.assertIn(column, [column_name.lower() for column_name in headers])
 
-
 class IndividualFullTextSearchTest(APITestCase):
     """ Test for api/individuals?search= """
 
@@ -155,7 +151,6 @@ class IndividualFullTextSearchTest(APITestCase):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
-    @override_settings(CANDIG_OPA_URL=None)
     def test_search(self):
         get_resp_1 = self.client.get('/api/individuals?search=P49Y')
         self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)

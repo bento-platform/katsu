@@ -62,7 +62,6 @@ class ExportTest(APITestCase):
 
         self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
 
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_export_cbio(self):
         # Test with no export body
         r = self.client.post(reverse("export"), content_type="application/json")

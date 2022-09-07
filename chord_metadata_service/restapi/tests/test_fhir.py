@@ -44,7 +44,6 @@ class FHIRPhenopacketTest(APITestCase):
         )
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
-    @override_settings(CANDIG_OPA_URL=None)
     def test_get_fhir(self):
         get_resp = self.client.get('/api/phenopackets?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
@@ -76,7 +75,6 @@ class FHIRIndividualTest(APITestCase):
         self.individual = Individual.objects.create(**VALID_INDIVIDUAL)
         self.individual_second = Individual.objects.create(**VALID_INDIVIDUAL_2)
 
-    @override_settings(CANDIG_OPA_URL=None)
     def test_get_fhir(self):
         get_resp = self.client.get('/api/individuals?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
@@ -86,7 +84,6 @@ class FHIRIndividualTest(APITestCase):
         self.assertEqual(get_resp_obj['patients'][1]['extension'][0]['url'],
                          'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-age')
         self.assertIsInstance(get_resp_obj['patients'][1]['extension'][0]['valueAge'], dict)
-
 
 class FHIRPhenotypicFeatureTest(APITestCase):
 

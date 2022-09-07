@@ -92,7 +92,6 @@ class TableTest(APITestCase):
             "schema": DATA_TYPES[table["data_type"]]["schema"],
         }
 
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def setUp(self) -> None:
         # Add example data
 

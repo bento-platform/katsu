@@ -43,22 +43,12 @@ class IndividualViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = IndividualFilter
     ordering_fields = ["id"]
+    search_fields = ["sex", "ethnicity"]
+    queryset = Individual.objects.all().prefetch_related(
+        *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+        *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
+    ).order_by("id")
 
-    def get_queryset(self):
-        # TODO: BIOSAMPLE_PREFETCH is already part of PHENOPACKET_PREFETCH. Check
-        if hasattr(self.request, "allowed_datasets"):
-            allowed_datasets = self.request.allowed_datasets
-            queryset = Individual.objects.\
-                filter(phenopackets__table__ownership_record__dataset__title__in=allowed_datasets).\
-                prefetch_related(*(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-                                 *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject")).\
-                order_by("id")
-        else:
-            queryset = Individual.objects.all().prefetch_related(
-                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
-            ).order_by("id")
-        return queryset
 
     # Cache page for the requested url, default to 2 hours.
     @method_decorator(cache_page(settings.CACHE_TIME))
