@@ -10,6 +10,7 @@ from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 from .jsonld_utils import dataset_to_jsonld
 from .utils import parse_onset
 
+OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 register('json-ld', Serializer, 'rdflib_jsonld.serializer', 'JsonLDSerializer')
 
@@ -165,3 +166,31 @@ class IndividualCSVRenderer(JSONRenderer):
         dict_writer.writerow(headers)
         dict_writer.writerows(individuals)
         return response
+
+
+class IndividualBentoSearchRenderer(JSONRenderer):
+    media_type = 'application/json'
+    format = OUTPUT_FORMAT_BENTO_SEARCH_RESULT
+
+    def render(self, data, media_type=None, renderer_context=None):
+        if 'results' not in data or not data['results']:
+            return
+
+        individuals = []
+        for individual in data['results']:
+            ind_obj = {
+                'id': individual['id'],
+                'alternate_ids': individual.get('alternate_ids', []),   # may be NULL
+                'biosamples': [],
+                'num_experiments': 0
+            }
+            if 'biosamples' in individual:
+                ids = []
+                for biosample in individual['biosamples']:
+                    ids.append(biosample['id'])
+                    if 'experiments' in biosample:
+                        ind_obj['num_experiments'] += len(biosample['experiments'])
+                ind_obj['biosamples'] = ids
+            individuals.append(ind_obj)
+        data['results'] = individuals
+        return super(IndividualBentoSearchRenderer, self).render(data, self.media_type, renderer_context)
