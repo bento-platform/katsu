@@ -179,7 +179,7 @@ class IndividualBentoSearchRenderer(JSONRenderer):
         individuals = []
         for individual in data['results']:
             ind_obj = {
-                'id': individual['id'],
+                'subject_id': individual['id'],
                 'alternate_ids': individual.get('alternate_ids', []),   # may be NULL
                 'biosamples': [],
                 'num_experiments': 0
