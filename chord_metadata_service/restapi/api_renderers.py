@@ -173,11 +173,8 @@ class IndividualBentoSearchRenderer(JSONRenderer):
     format = OUTPUT_FORMAT_BENTO_SEARCH_RESULT
 
     def render(self, data, media_type=None, renderer_context=None):
-        if 'results' not in data or not data['results']:
-            return
-
         individuals = []
-        for individual in data['results']:
+        for individual in data.get('results', []):
             ind_obj = {
                 'subject_id': individual['id'],
                 'alternate_ids': individual.get('alternate_ids', []),   # may be NULL
