@@ -117,7 +117,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'rest_framework',
-    'rest_framework_swagger',
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -146,7 +146,7 @@ ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR + "/templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -246,7 +246,8 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
     'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    # 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
@@ -314,3 +315,10 @@ NO_PUBLIC_DATA_AVAILABLE = {"message": "No public data available."}
 
 # Public response when public fields are not configured and config file is not provided
 NO_PUBLIC_FIELDS_CONFIGURED = {"message": "No public fields configured."}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Metadata Service API',
+    'DESCRIPTION': 'Metadata Service provides a phenotypic description of an Individual in the context of biomedical research.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
