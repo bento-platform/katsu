@@ -1,3 +1,4 @@
+import json
 import logging
 
 from collections import Counter
@@ -321,6 +322,13 @@ def public_dataset(_request):
         "acknowledges", "keywords", "version", "dats_file",
         "extra_properties"
     )
+
+    # convert dats_file json content to dict
+    datasets = [
+        {
+            **d,
+            "dats_file": json.loads(d["dats_file"]) if d["dats_file"] else None
+        } for d in datasets]
 
     return Response({
         "datasets": datasets
