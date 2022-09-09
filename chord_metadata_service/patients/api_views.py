@@ -25,7 +25,8 @@ from chord_metadata_service.restapi.utils import (
     filter_queryset_field_value
 )
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
-
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 
 class IndividualViewSet(viewsets.ModelViewSet):
     """
@@ -84,6 +85,17 @@ class IndividualBatchViewSet(BatchViewSet):
         return queryset
 
 
+@extend_schema(
+    description="Individual list available in public endpoint",
+    responses={
+        200: inline_serializer(
+            name='PublicListIndividuals_response',
+            fields={
+                'count': serializers.JSONField(),
+            }
+        )
+    }
+)
 class PublicListIndividuals(APIView):
     """
     View to return only count of all individuals after filtering.

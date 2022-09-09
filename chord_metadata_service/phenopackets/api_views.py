@@ -12,7 +12,8 @@ from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, F
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from . import models as m, serializers as s, filters as f
-
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
@@ -230,6 +231,7 @@ class DiagnosisViewSet(PhenopacketsModelViewSet):
     queryset = m.Diagnosis.objects.all().order_by("id")
 
 
+
 class InterpretationViewSet(PhenopacketsModelViewSet):
     """
     get:
@@ -245,6 +247,17 @@ class InterpretationViewSet(PhenopacketsModelViewSet):
     queryset = m.Interpretation.objects.all().order_by("id")
 
 
+@extend_schema(
+    description="Chord phenopacket schema that can be shared with data providers",
+    responses={
+        200: inline_serializer(
+            name='chord_phenopacket_schema_response',
+            fields={
+                'PHENOPACKET_SCHEMA': serializers.JSONField(),
+            }
+        )
+    }
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_chord_phenopacket_schema(_request):

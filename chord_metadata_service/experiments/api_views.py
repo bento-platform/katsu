@@ -12,6 +12,8 @@ from .models import Experiment, ExperimentResult
 from .schemas import EXPERIMENT_SCHEMA
 from .filters import ExperimentFilter, ExperimentResultFilter
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
+from drf_spectacular.utils import extend_schema, OpenApiResponse, inline_serializer
+from rest_framework import serializers
 
 __all__ = [
     "EXPERIMENT_SELECT_REL",
@@ -74,6 +76,17 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
         return super(ExperimentResultViewSet, self).dispatch(*args, **kwargs)
 
 
+@extend_schema(
+    description="Experiment schema",
+    responses={
+        200: inline_serializer(
+            name='get_experiment_schema_response',
+            fields={
+                'EXPERIMENT_SCHEMA': serializers.JSONField(),
+            }
+        )
+    }
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_experiment_schema(_request):

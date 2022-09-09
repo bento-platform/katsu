@@ -18,6 +18,7 @@ from os.path import exists
 
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
+from django.urls import reverse_lazy
 
 from .. import __version__
 
@@ -321,4 +322,18 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Metadata Service provides a phenotypic description of an Individual in the context of biomedical research.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    # Filter out the url patterns we don't want documented
+    'PREPROCESSING_HOOKS': ['chord_metadata_service.metadata.hooks.preprocessing_filter_path'],
+    # Split components into request and response parts where appropriate
+    'COMPONENT_SPLIT_REQUEST': True,
+    # Aid client generator targets that have trouble with read-only properties.
+    'COMPONENT_NO_READ_ONLY_REQUIRED': True,
+    # Create separate components for PATCH endpoints (without required list)
+    'COMPONENT_SPLIT_PATCH': True,
+    # Adds "blank" and "null" enum choices where appropriate. disable on client generation issues
+    'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': True,
+    # Determines if and how free-form 'additionalProperties' should be emitted in the schema. Some
+    # code generator targets are sensitive to this. None disables generic 'additionalProperties'.
+    # allowed values are 'dict', 'bool', None
+    'GENERIC_ADDITIONAL_PROPERTIES': 'dict',
 }

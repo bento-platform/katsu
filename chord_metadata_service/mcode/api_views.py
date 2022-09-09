@@ -13,7 +13,8 @@ from .schemas import MCODE_SCHEMA
 from . import models as m, serializers as s, filters as f
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, ARGORenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
-
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 
 class McodeModelViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
@@ -132,6 +133,17 @@ class MCodePacketViewSet(McodeModelViewSet):
     queryset = m.MCodePacket.objects.all()
 
 
+@extend_schema(
+    description="Mcodepacket schema",
+    responses={
+        200: inline_serializer(
+            name='mcode_schema_response',
+            fields={
+                'MCODE_SCHEMA': serializers.JSONField(),
+            }
+        )
+    }
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_mcode_schema(_request):
