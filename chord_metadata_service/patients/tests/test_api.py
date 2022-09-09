@@ -165,6 +165,13 @@ class IndividualFullTextSearchTest(APITestCase):
         response_obj_2 = get_resp_2.json()
         self.assertEqual(len(response_obj_2['results']), 2)
 
+    def test_search_bento_search_format(self):
+        get_resp_1 = self.client.get('/api/individuals?search=P49Y&format=bento_search_result')
+        self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
+        response_obj_1 = get_resp_1.json()
+        self.assertEqual(len(response_obj_1['results']), 1)
+        self.assertEqual(len(response_obj_1['results'][0]), 4)  # 4 fields in the bento search response
+
 
 # Note: the next five tests use the same setUp method. Initially they were
 # all combined in the same class. But this caused bugs with regard to unavailable

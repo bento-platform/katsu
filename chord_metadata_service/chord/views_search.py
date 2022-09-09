@@ -276,6 +276,11 @@ def get_field_lookup(field):
 
 def get_values_list(queryset, options):
     field_lookup = get_field_lookup(options.get("field", []))
+
+    # Filter out null values because these values will be used to make joins,
+    # or fetch back some records.
+    queryset = queryset.filter(**{f"{field_lookup}__isnull": False})
+
     if "add_field" in options:
         # Return a list of the dict, with the additional field and the field
         # used for the value. It will require further processing to get a list
