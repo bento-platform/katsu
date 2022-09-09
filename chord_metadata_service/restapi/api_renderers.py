@@ -181,12 +181,14 @@ class IndividualBentoSearchRenderer(JSONRenderer):
                 'biosamples': [],
                 'num_experiments': 0
             }
-            if 'biosamples' in individual:
+            if 'phenopackets' in individual:
                 ids = []
-                for biosample in individual['biosamples']:
-                    ids.append(biosample['id'])
-                    if 'experiments' in biosample:
-                        ind_obj['num_experiments'] += len(biosample['experiments'])
+                for p in individual['phenopackets']:
+                    if 'biosamples' in p:
+                        for biosample in p['biosamples']:
+                            ids.append(biosample['id'])
+                            if 'experiments' in biosample:
+                                ind_obj['num_experiments'] += len(biosample['experiments'])
                 ind_obj['biosamples'] = ids
             individuals.append(ind_obj)
         data['results'] = individuals
