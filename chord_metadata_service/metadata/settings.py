@@ -117,7 +117,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'rest_framework',
-    "drf_spectacular",
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -133,7 +133,7 @@ MIDDLEWARE = [
 ]
 
 # This middlewares are specific to the CANDIG service
-if os.getenv("INSIDE_CANDIG", ""):
+if os.getenv('INSIDE_CANDIG', ''):
     MIDDLEWARE.append('chord_metadata_service.restapi.preflight_req_middleware.PreflightRequestMiddleware')
     MIDDLEWARE.append('chord_metadata_service.restapi.candig_authz_middleware.CandigAuthzMiddleware')
 
@@ -246,7 +246,7 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
     'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
@@ -269,11 +269,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTHENTICATION_BACKENDS = ["bento_lib.auth.django_remote_user.BentoRemoteUserBackend"] + (
-    ["django.contrib.auth.backends.ModelBackend"] if DEBUG else [])
+AUTHENTICATION_BACKENDS = ['bento_lib.auth.django_remote_user.BentoRemoteUserBackend'] + (
+    ['django.contrib.auth.backends.ModelBackend'] if DEBUG else [])
 
 # Models
-DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -295,7 +295,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Cache time constant
-CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
+CACHE_TIME = int(os.getenv('CACHE_TIME', 60 * 60 * 2))
 
 # Settings related to the Public APIs
 
