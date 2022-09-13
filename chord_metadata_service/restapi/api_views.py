@@ -1,16 +1,23 @@
-import math
 import logging
 
 from collections import Counter
+
 from django.conf import settings
 from django.views.decorators.cache import cache_page
-from django.db.models import Count, F, Func, IntegerField
-from django.db.models.functions import Cast
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
-from chord_metadata_service.restapi.utils import parse_individual_age
+from chord_metadata_service.restapi.utils import (
+    get_field_options,
+    parse_individual_age,
+    stats_for_field,
+    compute_binned_ages,
+    get_field_bins,
+    get_categorical_stats,
+    get_date_stats,
+    get_range_stats
+)
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
 from chord_metadata_service.chord import models as chord_models
@@ -19,7 +26,8 @@ from chord_metadata_service.mcode import models as mcode_models
 from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
-
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 
 logger = logging.getLogger("restapi_api_views")
 logger.setLevel(logging.INFO)
@@ -38,6 +46,18 @@ def service_info(_request):
     return Response(SERVICE_INFO)
 
 
+@extend_schema(
+    description="Overview of all Phenopackets in the database",
+    responses={
+        200: inline_serializer(
+            name='overview_response',
+            fields={
+                'phenopackets': serializers.IntegerField(),
+                'data_type_specific': serializers.JSONField(),
+            }
+        )
+    }
+)
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly])
 def overview(_request):
@@ -128,6 +148,18 @@ def overview(_request):
     return Response(r)
 
 
+@extend_schema(
+    description="Overview of all mCode data in the database",
+    responses={
+        200: inline_serializer(
+            name='mcode_overview_response',
+            fields={
+                'mcodepackets': serializers.IntegerField(),
+                'data_type_specific': serializers.JSONField(),
+            }
+        )
+    }
+)
 # Cache page for the requested url for 2 hours
 @cache_page(60 * 60 * 2)
 @api_view(["GET"])
@@ -210,19 +242,59 @@ def mcode_overview(_request):
     })
 
 
+@extend_schema(
+    description="Public search fields with their configuration",
+    responses={
+        200: inline_serializer(
+            name='public_search_fields_response',
+            fields={
+                'sections': serializers.JSONField(),
+            }
+        )
+    }
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def public_search_fields(_request):
     """
     get:
-    Return public search fields
+    Return public search fields with their configuration
     """
-    if settings.CONFIG_FIELDS:
-        return Response(settings.CONFIG_FIELDS)
-    else:
+    if not settings.CONFIG_PUBLIC:
         return Response(settings.NO_PUBLIC_FIELDS_CONFIGURED)
 
+    search_conf = settings.CONFIG_PUBLIC["search"]
+    field_conf = settings.CONFIG_PUBLIC["fields"]
+    # Note: the array is wrapped in a dictionary structure to help with JSON
+    # processing by some services.
+    r = {
+        "sections": [
+            {
+                **section,
+                "fields": [
+                    {
+                        **field_conf[f],
+                        "id": f,
+                        "options": get_field_options(field_conf[f])
+                    } for f in section["fields"]
+                ]
+            } for section in search_conf
+        ]
+    }
+    return Response(r)
 
+
+@extend_schema(
+    description="Overview of all public data in the database",
+    responses={
+        200: inline_serializer(
+            name='public_overview_response',
+            fields={
+                'datasets': serializers.CharField(),
+            }
+        )
+    }
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def public_overview(_request):
@@ -231,184 +303,55 @@ def public_overview(_request):
     Overview of all public data in the database
     """
 
-    # TODO should this be added to the project config.json file ?
-    threshold = 5
-    missing = "missing"
-
-    if settings.CONFIG_FIELDS:
-
-        # Datasets provenance metadata
-        datasets = chord_models.Dataset.objects.values(
-            "title", "description", "contact_info",
-            "dates", "stored_in", "spatial_coverage",
-            "types", "privacy", "distributions",
-            "dimensions", "primary_publications", "citations",
-            "produced_by", "creators", "licenses",
-            "acknowledges", "keywords", "version",
-            "extra_properties"
-        )
-
-        individuals = patients_models.Individual.objects.all()
-        individuals_set = set()
-        individuals_sex = Counter()
-        individuals_age = Counter()
-        individuals_extra_properties = {}
-        extra_properties = {}
-
-        experiments = experiments_models.Experiment.objects.all()
-        experiments_set = set()
-        experiments_type = Counter()
-
-        for individual in individuals:
-            # subject/individual
-            individuals_set.add(individual.id)
-            individuals_sex.update((individual.sex,))
-            # age
-            if individual.age is not None:
-                individuals_age.update((parse_individual_age(individual.age),))
-            # collect extra_properties defined in config
-            if individual.extra_properties and "extra_properties" in settings.CONFIG_FIELDS:
-                for key in individual.extra_properties:
-                    if key in settings.CONFIG_FIELDS["extra_properties"]:
-                        # add new Counter()
-                        if key not in extra_properties:
-                            extra_properties[key] = Counter()
-                        try:
-                            extra_properties[key].update((individual.extra_properties[key],))
-                        except TypeError:
-                            logger.error(f"The extra_properties {key} value is not of type string or number.")
-                            pass
-
-                        individuals_extra_properties[key] = dict(extra_properties[key])
-        # Experiments
-        for experiment in experiments:
-            experiments_set.add(experiment.id)
-            experiments_type.update((experiment.experiment_type,))
-
-        # Put age in bins
-        if individuals_age:
-            age_bin_size = settings.CONFIG_FIELDS["age"]["bin_size"] \
-                if "age" in settings.CONFIG_FIELDS and "bin_size" in settings.CONFIG_FIELDS["age"] else None
-            age_kwargs = dict(values=dict(individuals_age), bin_size=age_bin_size)
-            individuals_age_bins = sort_numeric_values_into_bins(
-                **{k: v for k, v in age_kwargs.items() if v is not None}
-            )
-        else:
-            individuals_age_bins = {}
-
-        # Put all other numeric values coming from extra_properties in bins and remove values where count <= threshold
-        if individuals_extra_properties:
-            for key, value in list(individuals_extra_properties.items()):
-                # extra_properties contains only the fields specified in config
-                if settings.CONFIG_FIELDS["extra_properties"][key]["type"] == "number":
-                    # retrieve bin_size if available
-                    field_bin_size = settings.CONFIG_FIELDS["extra_properties"][key]["bin_size"] \
-                        if "bin_size" in settings.CONFIG_FIELDS["extra_properties"][key] else None
-                    # retrieve the values from extra_properties counter
-                    values = individuals_extra_properties[key]
-                    if values:
-                        kwargs = dict(values=values, bin_size=field_bin_size)
-                        # sort into bins and remove numeric values where count <= threshold
-                        extra_prop_values_in_bins = sort_numeric_values_into_bins(
-                            **{k: v for k, v in kwargs.items() if v is not None}
-                        )
-                        # rewrite with sorted values
-                        individuals_extra_properties[key] = extra_prop_values_in_bins
-                    # add missing value count
-                    individuals_extra_properties[key][missing] = len(individuals_set) - sum(v for v in value.values())
-                else:
-                    # add missing value count
-                    value[missing] = len(individuals_set) - sum(v for v in value.values())
-                    # remove string values where count <= threshold
-                    for k, v in list(value.items()):
-                        if v <= 5 and k != missing:
-                            individuals_extra_properties[key].pop(k)
-
-        # Update counters with missing values
-        for counter, all_values in zip([individuals_sex, individuals_age_bins], [individuals_sex, individuals_age]):
-            counter[missing] = len(individuals_set) - sum(v for v in dict(all_values).values())
-
-        # Response content
-        if len(individuals_set) < threshold:
-            content = settings.INSUFFICIENT_DATA_AVAILABLE
-        else:
-            content = {
-                "individuals": len(individuals_set)
-            }
-            for field, value in zip(
-                    ["sex", "age", "extra_properties", "experiment_type"],
-                    [{k: v for k, v in dict(individuals_sex).items() if v > threshold or k == missing},
-                     individuals_age_bins,
-                     individuals_extra_properties,
-                     dict(experiments_type)]):
-                if field in settings.CONFIG_FIELDS:
-                    content[field] = value
-            if "experiment_type" in content:
-                content["experiments"] = len(experiments_set)
-            content["datasets"] = datasets
-        return Response(content)
-
-    else:
+    if not settings.CONFIG_PUBLIC:
         return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
 
+    # Predefined counts
+    individuals_count = patients_models.Individual.objects.all().count()
+    experiments_count = experiments_models.Experiment.objects.all().count()
 
-def sort_numeric_values_into_bins(values: dict, bin_size: int = 10, threshold: int = 5):
-    values_in_bins = {}
-    # convert keys to int
-    keys_to_int_values = {int(k): v for k, v in values.items()}
-    # find the max value and define the  range
-    for j in range(math.ceil(max(keys_to_int_values.keys()) / bin_size)):
-        bin_key = j * bin_size
-        keys = [a for a in keys_to_int_values.keys() if j * bin_size <= a < (j + 1) * bin_size]
-        keys_sum = 0
-        for k, v in keys_to_int_values.items():
-            if k in keys:
-                keys_sum += v
-        values_in_bins[f"{bin_key}"] = keys_sum
-    # remove data if count < 5
-    return {k: v for k, v in values_in_bins.items() if v > threshold}
+    # Early return when there is not enough data
+    if individuals_count < settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
+        return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
 
+    # Datasets provenance metadata
+    datasets = chord_models.Dataset.objects.values(
+        "title", "description", "contact_info",
+        "dates", "stored_in", "spatial_coverage",
+        "types", "privacy", "distributions",
+        "dimensions", "primary_publications", "citations",
+        "produced_by", "creators", "licenses",
+        "acknowledges", "keywords", "version",
+        "extra_properties"
+    )
 
-def stats_for_field(model, field: str):
-    # values() restrict the table of results to this COLUMN
-    # annotate() creates a `total` column for the aggregation
-    # Count() aggregates the results by performing a GROUP BY on the field
-    query_set = model.objects.all().values(field).annotate(total=Count(field))
-    stats = dict()
-    for item in query_set:
-        key = item[field]
-        if key is None:
-            continue
+    response = {
+        "datasets": datasets,
+        "layout": settings.CONFIG_PUBLIC["overview"],
+        "fields": {},
+        "counts": {
+            "individuals": individuals_count,
+            "experiments": experiments_count
+        },
+    }
 
-        key = key.strip()
-        if key == "":
-            continue
+    # Parse the public config to gather data for each field defined in the
+    # overview
+    fields = [chart["field"] for section in settings.CONFIG_PUBLIC["overview"] for chart in section["charts"]]
 
-        stats[key] = item["total"]
-    return stats
+    for field in fields:
+        field_props = settings.CONFIG_PUBLIC["fields"][field]
+        if field_props["datatype"] == "string":
+            stats = get_categorical_stats(field_props)
+        elif field_props["datatype"] == "number":
+            stats = get_range_stats(field_props)
+        elif field_props["datatype"] == "date":
+            stats = get_date_stats(field_props)
 
+        response["fields"][field] = {
+            **field_props,
+            "id": field,
+            "data": stats
+        }
 
-def get_field_bins(model, field, bin_size):
-    # creates a new field "binned" by substracting the modulo by bin size to
-    # the value which requires binning (e.g. 28 => 28 - 28 % 10 = 20)
-    # cast to integer to avoid numbers such as 60.00 if that was a decimal,
-    # and aggregate over this value.
-    query_set = model.objects.all().annotate(
-        binned=Cast(
-            F(field) - Func(F(field), bin_size, function="MOD"),
-            IntegerField()
-        )
-    ).values('binned').annotate(total=Count('binned'))
-    stats = {item['binned']: item['total'] for item in query_set}
-    return stats
-
-
-def compute_binned_ages(bin_size):
-    a = pheno_models.Individual.objects.filter(age_numeric__isnull=True).values('age')
-    binned_ages = []
-    for r in a.iterator():  # reduce memory footprint (no caching)
-        if r["age"] is None:
-            continue
-        age = parse_individual_age(r["age"])
-        binned_ages.append(age - age % OVERVIEW_AGE_BIN_SIZE)
-    return binned_ages
+    return Response(response)

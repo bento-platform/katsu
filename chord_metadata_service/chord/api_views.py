@@ -55,12 +55,11 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     """
 
     filter_backends = [DjangoFilterBackend]
-    filter_class = AuthorizedDatasetFilter
+    filterset_class = AuthorizedDatasetFilter
 
     serializer_class = DatasetSerializer
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
     queryset = Dataset.objects.all().order_by("title")
-
 
 class TableOwnershipViewSet(CHORDPublicModelViewSet):
     """

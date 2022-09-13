@@ -67,3 +67,14 @@ The following **filters** can be used:
   :code:`/api/individuals?phenopackets__biosamples=2615-01&phenopackets__biosamples=2390-11`
 
 - phenopackets (single or multiple phenopacket ids): :code:`/api/individuals?phenopackets=10080&phenopackets=12045`
+
+**Batch Individuals**
+
+:code:`api/batch/individuals` POST: list of individuals
+
+The following **body JSON options** can be used:
+
+- format: case-sensitive, exact match: :code:`csv`
+  options: csv, phenopackets, fhir, argo
+
+- id: single or multiple ids can be provided as an array :code:`{"id": ["HP:0000822", "HP:0000823"]}`

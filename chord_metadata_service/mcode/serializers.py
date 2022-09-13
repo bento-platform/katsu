@@ -124,9 +124,10 @@ class MCodePacketSerializer(GenericSerializer):
         response['subject'] = IndividualSerializer(instance.subject).data
         response['genomics_report'] = GenomicsReportSerializer(instance.genomics_report, required=False).data
         response['cancer_condition'] = CancerConditionSerializer(instance.cancer_condition, required=False).data
-        response['cancer_related_procedures'] = CancerRelatedProcedureSerializer(instance.cancer_related_procedures,
-            many=True, required=False).data
-        response['medication_statement'] = MedicationStatementSerializer(instance.medication_statement, many=True, required=False).data
+        response['cancer_related_procedures'] = CancerRelatedProcedureSerializer(
+            instance.cancer_related_procedures, many=True, required=False).data
+        response['medication_statement'] = MedicationStatementSerializer(
+            instance.medication_statement, many=True, required=False).data
         response['tumor_marker'] = LabsVitalSerializer(instance.tumor_marker, many=True, required=False).data
         return response
 

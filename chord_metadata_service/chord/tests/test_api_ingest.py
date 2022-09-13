@@ -83,7 +83,6 @@ class IngestTest(APITestCase):
         )
 
         for data in bad_ingest_bodies:
-            print(data, flush=True)
             r = self.client.post(reverse("ingest"), data=json.dumps(data), content_type="application/json")
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 

@@ -14,9 +14,11 @@ import os
 import sys
 import logging
 import json
+from os.path import exists
 
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
+from django.urls import reverse_lazy
 
 from .. import __version__
 
@@ -62,7 +64,9 @@ AUTH_OVERRIDE = not CHORD_PERMISSIONS
 HOST_CONTAINER_NAME = os.environ.get("HOST_CONTAINER_NAME", "")
 
 CHORD_HOST = urlparse(CHORD_URL or "").netloc
-ALLOWED_HOSTS = ["*"]  # we'll determine access via middleware before we get here
+logging.info(f"Chord debug: {DEBUG}")
+logging.info(f"Chord host: {CHORD_HOST}")
+ALLOWED_HOSTS = [CHORD_HOST or "localhost"]
 if DEBUG:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
 if HOST_CONTAINER_NAME != "":
@@ -85,6 +89,9 @@ CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "")
 CANDIG_OPA_URL = os.getenv("CANDIG_OPA_URL", "")
 CANDIG_OPA_SECRET = os.getenv("CANDIG_OPA_SECRET", "my-secret-beacon-token")
 CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("CANDIG_OPA_SITE_ADMIN_KEY", "site-admin")
+if exists("/run/secrets/opa-root-token"):
+    with open("/run/secrets/opa-root-token", "r") as f:
+        CANDIG_OPA_SECRET = f.read()
 
 # Application definition
 
@@ -111,8 +118,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'rest_framework',
-    'django_nose',
-    'rest_framework_swagger',
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -138,12 +144,10 @@ CORS_PREFLIGHT_MAX_AGE = 0
 
 ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
 
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR + "/templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -243,7 +247,8 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
     'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    # 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
@@ -269,6 +274,8 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTHENTICATION_BACKENDS = ["bento_lib.auth.django_remote_user.BentoRemoteUserBackend"] + (
     ["django.contrib.auth.backends.ModelBackend"] if DEBUG else [])
 
+# Models
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -297,9 +304,9 @@ CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
 # Read project specific config.json that contains custom search fields
 if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
     with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
-        CONFIG_FIELDS = json.load(config_file)
+        CONFIG_PUBLIC = json.load(config_file)
 else:
-    CONFIG_FIELDS = {}
+    CONFIG_PUBLIC = {}
 
 # Public response when there is no enough data that passes the project-custom threshold
 INSUFFICIENT_DATA_AVAILABLE = {"message": "Insufficient data available."}
@@ -309,3 +316,24 @@ NO_PUBLIC_DATA_AVAILABLE = {"message": "No public data available."}
 
 # Public response when public fields are not configured and config file is not provided
 NO_PUBLIC_FIELDS_CONFIGURED = {"message": "No public fields configured."}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Metadata Service API',
+    'DESCRIPTION': 'Metadata Service provides a phenotypic description of an Individual in the context of biomedical research.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # Filter out the url patterns we don't want documented
+    'PREPROCESSING_HOOKS': ['chord_metadata_service.metadata.hooks.preprocessing_filter_path'],
+    # Split components into request and response parts where appropriate
+    'COMPONENT_SPLIT_REQUEST': True,
+    # Aid client generator targets that have trouble with read-only properties.
+    'COMPONENT_NO_READ_ONLY_REQUIRED': True,
+    # Create separate components for PATCH endpoints (without required list)
+    'COMPONENT_SPLIT_PATCH': True,
+    # Adds "blank" and "null" enum choices where appropriate. disable on client generation issues
+    'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': True,
+    # Determines if and how free-form 'additionalProperties' should be emitted in the schema. Some
+    # code generator targets are sensitive to this. None disables generic 'additionalProperties'.
+    # allowed values are 'dict', 'bool', None
+    'GENERIC_ADDITIONAL_PROPERTIES': 'dict',
+}

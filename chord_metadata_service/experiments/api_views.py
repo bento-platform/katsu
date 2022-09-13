@@ -3,14 +3,17 @@ from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django_filters.rest_framework import DjangoFilterBackend
+
 from .serializers import ExperimentSerializer, ExperimentResultSerializer
 from .models import Experiment, ExperimentResult
 from .schemas import EXPERIMENT_SCHEMA
 from .filters import ExperimentFilter, ExperimentResultFilter
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
+from drf_spectacular.utils import extend_schema, OpenApiResponse, inline_serializer
+from rest_framework import serializers
 
 __all__ = [
     "EXPERIMENT_SELECT_REL",
@@ -45,7 +48,7 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
     filter_backends = [DjangoFilterBackend]
-    filter_class = ExperimentFilter
+    filterset_class = ExperimentFilter
 
     def dispatch(self, *args, **kwargs):
         return super(ExperimentViewSet, self).dispatch(*args, **kwargs)
@@ -65,7 +68,7 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
     filter_backends = [DjangoFilterBackend]
-    filter_class = ExperimentResultFilter
+    filterset_class = ExperimentResultFilter
 
     # Cache page for the requested url for 2 hours
     @method_decorator(cache_page(60 * 60 * 2))
@@ -73,6 +76,17 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
         return super(ExperimentResultViewSet, self).dispatch(*args, **kwargs)
 
 
+@extend_schema(
+    description="Experiment schema",
+    responses={
+        200: inline_serializer(
+            name='get_experiment_schema_response',
+            fields={
+                'EXPERIMENT_SCHEMA': serializers.JSONField(),
+            }
+        )
+    }
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_experiment_schema(_request):

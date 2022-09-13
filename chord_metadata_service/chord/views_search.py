@@ -1,5 +1,6 @@
 import itertools
 import json
+import logging
 import uuid
 
 from bento_lib.responses import errors
@@ -34,6 +35,9 @@ from chord_metadata_service.phenopackets.serializers import PhenopacketSerialize
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset, TableOwnership, Table
 from .permissions import ReadOnly, OverrideOrSuperUserOnly
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG if DEBUG else logging.INFO)
 
 
 @api_view(["GET"])
@@ -256,8 +260,7 @@ def chord_table_summary(_request, table_id):
 
 # TODO: CHORD-standardized logging
 def debug_log(message):  # pragma: no cover
-    if DEBUG:
-        print(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}", flush=True)
+    logging.debug(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}", flush=True)
 
 
 def data_type_results(query, params, key="id"):
@@ -322,7 +325,7 @@ def search(request, internal_data=False):
     if request.method == "POST":
         query = (request.data or {}).get("query")
     else:
-        print(request.query_params)
+        logger.info(request.query_params)
         query = request.query_params.get("query", "null")  # This'll get decoded to None as a fallback case
 
         try:
@@ -488,7 +491,7 @@ def chord_table_search(query, table_id, start, internal=False) -> Tuple[Union[No
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(query, DATA_TYPES[table.data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
-        print(f"[CHORD Metadata] Error encountered compiling query {query}:\n    {str(e)}")
+        logger.exception(f"[CHORD Metadata] Error encountered compiling query {query}:\n    {str(e)}")
         return None, f"Error compiling query (message: {str(e)})"
 
     debug_log(f"Finished compiling query in {datetime.now() - start}")
