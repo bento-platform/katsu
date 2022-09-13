@@ -29,20 +29,21 @@ class GeneticSpecimenViewSet(McodeModelViewSet):
     serializer_class = s.GeneticSpecimenSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.GeneticSpecimenFilter
+    filterset_class = f.GeneticSpecimenFilter
     queryset = m.GeneticSpecimen.objects.all()
 
 
 class CancerGeneticVariantViewSet(McodeModelViewSet):
     serializer_class = s.CancerGeneticVariantSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.CancerGeneticVariantFilter
+    filterset_class = f.CancerGeneticVariantFilter
     queryset = m.CancerGeneticVariant.objects.all()
+
 
 class GenomicRegionStudiedViewSet(McodeModelViewSet):
     serializer_class = s.GenomicRegionStudiedSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.GenomicRegionStudiedFilter
+    filterset_class = f.GenomicRegionStudiedFilter
     queryset = m.GenomicRegionStudied.objects.all()
 
 
@@ -59,14 +60,14 @@ GENOMIC_REPORT_SELECT = (
 class GenomicsReportViewSet(McodeModelViewSet):
     serializer_class = s.GenomicsReportSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.GenomicsReportFilter
+    filterset_class = f.GenomicsReportFilter
     queryset = m.GenomicsReport.objects.all()
 
 
 class LabsVitalViewSet(McodeModelViewSet):
     serializer_class = s.LabsVitalSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.LabsVitalFilter
+    filterset_class = f.LabsVitalFilter
     queryset = m.LabsVital.objects.all()
 
 
@@ -79,14 +80,14 @@ class CancerConditionViewSet(McodeModelViewSet):
     serializer_class = s.CancerConditionSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.CancerConditionFilter
+    filterset_class = f.CancerConditionFilter
     queryset = m.CancerCondition.objects.all()
 
 
 class TNMStagingViewSet(McodeModelViewSet):
     serializer_class = s.TNMStagingSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.TNMStagingFilter
+    filterset_class = f.TNMStagingFilter
     queryset = m.TNMStaging.objects.all()
 
 
@@ -99,7 +100,7 @@ class CancerRelatedProcedureViewSet(McodeModelViewSet):
     serializer_class = s.CancerRelatedProcedureSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.CancerRelatedProcedureFilter
+    filterset_class = f.CancerRelatedProcedureFilter
     queryset = m.CancerRelatedProcedure.objects.all()
 
 
@@ -107,7 +108,7 @@ class MedicationStatementViewSet(McodeModelViewSet):
     serializer_class = s.MedicationStatementSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.MedicationStatementFilter
+    filterset_class = f.MedicationStatementFilter
     queryset = m.MedicationStatement.objects.all()
 
 
@@ -127,7 +128,7 @@ class MCodePacketViewSet(McodeModelViewSet):
     serializer_class = s.MCodePacketSerializer
     renderer_classes = tuple(McodeModelViewSet.renderer_classes) + (ARGORenderer,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = f.MCodePacketFilter
+    filterset_class = f.MCodePacketFilter
     queryset = m.MCodePacket.objects.all()
 
 

@@ -78,7 +78,7 @@ class ExportTest(APITestCase):
 
             # Test with no output_path: expect a tar archive to be returned
             r = self.client.post(reverse("export"), data=json.dumps(export_payload), content_type="application/json")
-            self.assertEquals(r.get('Content-Disposition'), f"attachment; filename=\"{self.study_id}.tar.gz\"")
+            self.assertEqual(r.get('Content-Disposition'), f"attachment; filename=\"{self.study_id}.tar.gz\"")
 
             # Test with output_path provided: expect files created in this directory
             export_payload["output_path"] = tmp_dir

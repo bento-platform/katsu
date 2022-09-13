@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.db import models
-from django.contrib.postgres.fields import JSONField, ArrayField
+from django.db.models import JSONField
+from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.phenopackets.models import Gene
 from chord_metadata_service.patients.models import Individual
@@ -313,13 +314,19 @@ class MCodePacket(models.Model, IndexableMixin):
     """
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.MCODEPACKET, "id"))
-    subject = models.ForeignKey(Individual, on_delete=models.CASCADE, help_text=rec_help(d.MCODEPACKET, "subject"))
-    genomics_report = models.ForeignKey(GenomicsReport, blank=True, null=True, on_delete=models.SET_NULL, help_text=rec_help(d.MCODEPACKET, "genomics_report"))
-    cancer_condition = models.ForeignKey(CancerCondition, blank=True, null=True, on_delete=models.SET_NULL, help_text=rec_help(d.MCODEPACKET, "cancer_condition"))
-    cancer_related_procedures = models.ManyToManyField(CancerRelatedProcedure, blank=True, help_text=rec_help(d.MCODEPACKET, "cancer_related_procedures"))
-    medication_statement = models.ManyToManyField(MedicationStatement, blank=True, help_text=rec_help(d.MCODEPACKET, "medication_statement"))
+    subject = models.ForeignKey(Individual, on_delete=models.CASCADE,
+                                help_text=rec_help(d.MCODEPACKET, "subject"))
+    genomics_report = models.ForeignKey(GenomicsReport, blank=True, null=True, on_delete=models.SET_NULL,
+                                        help_text=rec_help(d.MCODEPACKET, "genomics_report"))
+    cancer_condition = models.ForeignKey(CancerCondition, blank=True, null=True, on_delete=models.SET_NULL,
+                                         help_text=rec_help(d.MCODEPACKET, "cancer_condition"))
+    cancer_related_procedures = models.ManyToManyField(CancerRelatedProcedure, blank=True,
+                                                       help_text=rec_help(d.MCODEPACKET, "cancer_related_procedures"))
+    medication_statement = models.ManyToManyField(MedicationStatement, blank=True,
+                                                  help_text=rec_help(d.MCODEPACKET, "medication_statement"))
     date_of_death = models.CharField(max_length=200, blank=True, help_text=rec_help(d.MCODEPACKET, "date_of_death"))
-    cancer_disease_status = JSONField(blank=True, null=True, validators=[ontology_validator], help_text=rec_help(d.MCODEPACKET, "cancer_disease_status"))
+    cancer_disease_status = JSONField(blank=True, null=True, validators=[ontology_validator],
+                                      help_text=rec_help(d.MCODEPACKET, "cancer_disease_status"))
     tumor_marker = models.ManyToManyField(LabsVital, blank=True, help_text=rec_help(d.MCODEPACKET, "tumor_marker"))
     # link to dataset via the table
     table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text

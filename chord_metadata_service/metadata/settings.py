@@ -63,7 +63,9 @@ AUTH_OVERRIDE = not CHORD_PERMISSIONS
 HOST_CONTAINER_NAME = os.environ.get("HOST_CONTAINER_NAME", "")
 
 CHORD_HOST = urlparse(CHORD_URL or "").netloc
-ALLOWED_HOSTS = ["*"]  # we'll determine access via middleware before we get here
+logging.info(f"Chord debug: {DEBUG}")
+logging.info(f"Chord host: {CHORD_HOST}")
+ALLOWED_HOSTS = [CHORD_HOST or "localhost"]
 if DEBUG:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
 if HOST_CONTAINER_NAME != "":
@@ -115,7 +117,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'rest_framework',
-    'django_nose',
     'rest_framework_swagger',
 ]
 
@@ -141,8 +142,6 @@ CORS_ALLOWED_ORIGINS = []
 CORS_PREFLIGHT_MAX_AGE = 0
 
 ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
-
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 TEMPLATES = [
     {
@@ -273,6 +272,8 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTHENTICATION_BACKENDS = ["bento_lib.auth.django_remote_user.BentoRemoteUserBackend"] + (
     ["django.contrib.auth.backends.ModelBackend"] if DEBUG else [])
 
+# Models
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -301,9 +302,9 @@ CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
 # Read project specific config.json that contains custom search fields
 if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
     with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
-        CONFIG_FIELDS = json.load(config_file)
+        CONFIG_PUBLIC = json.load(config_file)
 else:
-    CONFIG_FIELDS = {}
+    CONFIG_PUBLIC = {}
 
 # Public response when there is no enough data that passes the project-custom threshold
 INSUFFICIENT_DATA_AVAILABLE = {"message": "Insufficient data available."}
