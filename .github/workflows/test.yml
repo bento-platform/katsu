@@ -37,7 +37,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: python -m pip install -r requirements.dev.txt
+      run: python -m pip install -r requirements-dev.txt
     - name: Test
       run: |
         export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5432

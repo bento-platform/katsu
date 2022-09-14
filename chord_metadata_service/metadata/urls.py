@@ -29,5 +29,5 @@ urlpatterns = [
     *([path('admin/', admin.site.urls)] if DEBUG else []),
     # OpenAPI 3 documentation with Swagger UI
     path('schema/', SpectacularAPIView.as_view(), name="schema"),
-    path('',SpectacularSwaggerView.as_view(), name="swagger-ui"),
+    path('', SpectacularSwaggerView.as_view(), name="swagger-ui"),
 ]
