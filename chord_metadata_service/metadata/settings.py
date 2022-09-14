@@ -146,7 +146,7 @@ ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR + "/templates"], # this is needed for custom swagger ui
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -339,4 +339,8 @@ SPECTACULAR_SETTINGS = {
     # Determines whether operation parameters should be sorted alphanumerically or just in
     # the order they arrived. Accepts either True, False, or a callable for sort's key arg.
     'SORT_OPERATION_PARAMETERS': False,
+    # modify and override the SwaggerUI template
+    'SWAGGER_UI_SETTINGS': {
+        'docExpansion': 'none', # collapse all endpoints by default
+    },
 }
