@@ -22,24 +22,15 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 # TODO: django.conf.settings breaks reverse(), how to import properly?
 from .settings import DEBUG
 
-# schema_view = get_schema_view(
-#     title="Metadata Service API",
-#     description="Metadata Service provides a phenotypic description of an Individual in the context of biomedical "
-#                 "research.",
-#     version="0.1"
-# )
-
 urlpatterns = [
-    # path('', swagger_schema_view),
     path('api/', include(restapi_urls)),
-    # path('api/schema', schema_view, name='openapi-schema'),
     path('service-info', api_views.service_info, name="service-info"),
     *chord_urls.urlpatterns,  # TODO: Use include? can we double up?
     *([path('admin/', admin.site.urls)] if DEBUG else []),
     # OpenAPI 3 documentation with Swagger UI
-    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path('schema/', SpectacularAPIView.as_view(), name="schema"),
     path(
-        "",
+        '',
         SpectacularSwaggerView.as_view(
             template_name="swagger-ui.html", url_name="schema"
         ),

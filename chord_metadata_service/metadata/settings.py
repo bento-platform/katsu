@@ -146,7 +146,7 @@ ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR + "/templates"],
+        'DIRS': [BASE_DIR + "/templates"], # this is needed for custom swagger ui
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

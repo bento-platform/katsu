@@ -15,7 +15,7 @@
         const ui = SwaggerUIBundle({
             url: "{% url 'schema' %}",
             dom_id: '#swagger-ui',
-            docExpansion: 'none',
+            docExpansion: 'none', // this will collapse all the endpoints by default
             presets: [
                 SwaggerUIBundle.presets.apis,
                 SwaggerUIBundle.SwaggerUIStandalonePreset
