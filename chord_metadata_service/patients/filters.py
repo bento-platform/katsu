@@ -30,16 +30,6 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
     # e.g. date_of_birth_after=1987-01-01&date_of_birth_before=1990-12-31
     date_of_birth = django_filters.DateFromToRangeFilter()
 
-    cancer_condition_name = django_filters.CharFilter(
-        method="filter_on_cancer_condition_name", field_name="mcodepacket__cancer_condition",
-        label="Cancer Condition Name"
-    )
-
-    treatment_name = django_filters.CharFilter(
-        method="filter_on_treatment_name", field_name="mcodepacket__cancer_condition",
-        label="Treatment Name"
-    )
-
     class Meta:
         model = Individual
         fields = ["id", "alternate_ids", "active", "deceased",
