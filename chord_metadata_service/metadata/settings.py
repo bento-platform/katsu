@@ -336,4 +336,7 @@ SPECTACULAR_SETTINGS = {
     # code generator targets are sensitive to this. None disables generic 'additionalProperties'.
     # allowed values are 'dict', 'bool', None
     'GENERIC_ADDITIONAL_PROPERTIES': 'dict',
+    # Determines whether operation parameters should be sorted alphanumerically or just in
+    # the order they arrived. Accepts either True, False, or a callable for sort's key arg.
+    'SORT_OPERATION_PARAMETERS': False,
 }

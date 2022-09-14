@@ -13,8 +13,6 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
     karyotypic_sex = django_filters.CharFilter(lookup_expr="iexact")
     ethnicity = django_filters.CharFilter(lookup_expr="icontains")
     race = django_filters.CharFilter(lookup_expr="icontains")
-    # e.g. date_of_birth_after=1987-01-01&date_of_birth_before=1990-12-31
-    date_of_birth = django_filters.DateFromToRangeFilter()
     disease = django_filters.CharFilter(
         method="filter_disease", field_name="phenopackets__diseases",
         label="Disease"
@@ -24,6 +22,14 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         method="filter_found_phenotypic_feature", field_name="phenopackets__phenotypic_features",
         label="Found phenotypic feature"
     )
+
+    extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
+    # full-text search at api/individuals?search=
+    search = django_filters.CharFilter(method="filter_search", label="Search")
+
+    # e.g. date_of_birth_after=1987-01-01&date_of_birth_before=1990-12-31
+    date_of_birth = django_filters.DateFromToRangeFilter()
+
     cancer_condition_name = django_filters.CharFilter(
         method="filter_on_cancer_condition_name", field_name="mcodepacket__cancer_condition",
         label="Cancer Condition Name"
@@ -33,12 +39,6 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         method="filter_on_treatment_name", field_name="mcodepacket__cancer_condition",
         label="Treatment Name"
     )
-    date_of_birth_from = django_filters.DateFilter(field_name='date_of_birth', lookup_expr=('gte'),)
-    date_of_birth_to = django_filters.DateFilter(field_name='date_of_birth', lookup_expr=('lte'))
-
-    extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
-    # full-text search at api/individuals?search=
-    search = django_filters.CharFilter(method="filter_search", label="Search")
 
     class Meta:
         model = Individual
