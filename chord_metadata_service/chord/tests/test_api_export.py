@@ -4,7 +4,6 @@ import shutil
 import tempfile
 import uuid
 
-from django.test import override_settings
 from django.urls import reverse
 from chord_metadata_service.chord.export_cbio import CBIO_FILES_SET
 from chord_metadata_service.chord.export_utils import EXPORT_DIR

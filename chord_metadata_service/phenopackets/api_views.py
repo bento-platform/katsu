@@ -15,6 +15,7 @@ from . import models as m, serializers as s, filters as f
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 
+
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
     pagination_class = LargeResultsSetPagination
@@ -229,7 +230,6 @@ class DiagnosisViewSet(PhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.DiagnosisFilter
     queryset = m.Diagnosis.objects.all().order_by("id")
-
 
 
 class InterpretationViewSet(PhenopacketsModelViewSet):

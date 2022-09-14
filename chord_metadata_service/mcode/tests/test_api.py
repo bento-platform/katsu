@@ -3,7 +3,6 @@ import os
 
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.test import override_settings
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_MCODEPACKET
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
@@ -18,6 +17,7 @@ from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 EXAMPLE_INGEST_OUTPUTS_MCODE_JSON = {
     "json_document": os.path.join(os.path.dirname(__file__), "example_mcode_json.json"),
 }
+
 
 class GetMcodeApiTest(APITestCase):
     """

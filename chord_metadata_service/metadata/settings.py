@@ -18,7 +18,6 @@ from os.path import exists
 
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
-from django.urls import reverse_lazy
 
 from .. import __version__
 
@@ -319,7 +318,8 @@ NO_PUBLIC_FIELDS_CONFIGURED = {"message": "No public fields configured."}
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Metadata Service API',
-    'DESCRIPTION': 'Metadata Service provides a phenotypic description of an Individual in the context of biomedical research.',
+    'DESCRIPTION': ('Metadata Service provides a phenotypic description of an '
+                    'Individual in the context of biomedical research.'),
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     # Filter out the url patterns we don't want documented

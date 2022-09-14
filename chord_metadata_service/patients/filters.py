@@ -42,7 +42,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = Individual
-        fields = ["id", "alternate_ids", "active", "deceased", 
+        fields = ["id", "alternate_ids", "active", "deceased",
                   "phenopackets__biosamples", "phenopackets"]
 
     def filter_found_phenotypic_feature(self, qs, name, value):
@@ -55,11 +55,11 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
             phenopackets__phenotypic_features__negated=False
         ).distinct()
         return qs
-    
+
     def filter_on_cancer_condition_name(self, qs, name, value):
         qs = qs.filter(mcodepacket__cancer_condition__body_site__icontains=value).distinct()
         return qs
-    
+
     def filter_on_treatment_name(self, qs, name, value):
         qs = qs.filter(mcodepacket__cancer_related_procedures__code__icontains=value).distinct()
         return qs

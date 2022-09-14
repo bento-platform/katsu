@@ -1,6 +1,5 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.test import override_settings
 
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.patients.tests.constants import VALID_INDIVIDUAL, VALID_INDIVIDUAL_2
@@ -84,6 +83,7 @@ class FHIRIndividualTest(APITestCase):
         self.assertEqual(get_resp_obj['patients'][1]['extension'][0]['url'],
                          'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-age')
         self.assertIsInstance(get_resp_obj['patients'][1]['extension'][0]['valueAge'], dict)
+
 
 class FHIRPhenotypicFeatureTest(APITestCase):
 

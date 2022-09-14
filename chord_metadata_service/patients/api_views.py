@@ -28,6 +28,7 @@ from chord_metadata_service.restapi.negociation import FormatInPostContentNegoti
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 
+
 class IndividualViewSet(viewsets.ModelViewSet):
     """
     get:
@@ -50,8 +51,8 @@ class IndividualViewSet(viewsets.ModelViewSet):
         *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
     ).order_by("id")
 
-
     # Cache page for the requested url, default to 2 hours.
+
     @method_decorator(cache_page(settings.CACHE_TIME))
     def dispatch(self, *args, **kwargs):
         return super(IndividualViewSet, self).dispatch(*args, **kwargs)
@@ -80,7 +81,7 @@ class IndividualBatchViewSet(BatchViewSet):
         queryset = Individual.objects.filter(**filter_by_id)\
             .prefetch_related(
                 *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
-            ).order_by("id")
+        ).order_by("id")
 
         return queryset
 
@@ -120,15 +121,15 @@ class PublicListIndividuals(APIView):
             field_props = queryable_fields[field]
             options = get_field_options(field_props)
             if value not in options \
-                and not (
-                    # case insensitive search on categories
-                    field_props["datatype"] == "string"
-                    and value.lower() in [o.lower() for o in options]
-                ) \
-                and not (
-                    # no restriction when enum is not set for categories
-                    field_props["datatype"] == "string"
-                    and field_props["config"]["enum"] is None
+                    and not (
+                        # case insensitive search on categories
+                        field_props["datatype"] == "string"
+                        and value.lower() in [o.lower() for o in options]
+                    ) \
+                    and not (
+                        # no restriction when enum is not set for categories
+                        field_props["datatype"] == "string"
+                        and field_props["config"]["enum"] is None
                     ):
                 raise ValidationError(f"Invalid value used in query: {value}")
 

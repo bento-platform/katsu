@@ -79,10 +79,10 @@ class UpdateIndividualTest(APITestCase):
             reverse(
                 'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                ),
+            ),
             data=json.dumps(self.put_valid_payload),
             content_type='application/json'
-            )
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_invalid_individual(self):
@@ -92,10 +92,10 @@ class UpdateIndividualTest(APITestCase):
             reverse(
                 'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                ),
+            ),
             data=json.dumps(self.invalid_payload),
             content_type='application/json'
-            )
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -112,8 +112,8 @@ class DeleteIndividualTest(APITestCase):
             reverse(
                 'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                )
             )
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_delete_non_existing_individual(self):
@@ -123,9 +123,11 @@ class DeleteIndividualTest(APITestCase):
             reverse(
                 'individuals-detail',
                 kwargs={'pk': 'patient:what'}
-                )
             )
+        )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
 class IndividualCSVRendererTest(APITestCase):
     """ Test csv export for Individuals. """
 
@@ -143,6 +145,7 @@ class IndividualCSVRendererTest(APITestCase):
         for column in ['id', 'sex', 'date of birth', 'taxonomy', 'karyotypic sex',
                        'race', 'ethnicity', 'age', 'diseases', 'created', 'updated']:
             self.assertIn(column, [column_name.lower() for column_name in headers])
+
 
 class IndividualFullTextSearchTest(APITestCase):
     """ Test for api/individuals?search= """
