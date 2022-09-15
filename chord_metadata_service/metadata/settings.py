@@ -347,3 +347,8 @@ SPECTACULAR_SETTINGS = {
         'docExpansion': 'none',  # collapse all endpoints by default
     },
 }
+
+# SPECTACULAR_SETTINGS['SERVERS'] defines the url to which calls are made when
+# testing a request within the swagger UI
+if CHORD_URL:
+    SPECTACULAR_SETTINGS['SERVERS'] = [{'url': CHORD_URL + FORCE_SCRIPT_NAME}]
