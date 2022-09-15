@@ -11,9 +11,7 @@ addons:
 before_install:
   - sudo -u postgres psql -U postgres -p 5433 -d postgres -c "alter user postgres with password 'hj38f3Ntr';"
 install:
-  - pip install -r requirements.txt
-  - sudo pip install codecov
-  - python3 -m pip install coverage
+  - pip install -r requirements-dev.txt
 script:
   - export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="hj38f3Ntr" && export POSTGRES_PORT=5433
   - python3 -m coverage run ./manage.py test
