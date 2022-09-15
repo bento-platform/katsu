@@ -61,7 +61,7 @@ AUTH_OVERRIDE = not CHORD_PERMISSIONS
 # When Katsu is hosted on a subpath (e.g. http://myportal.com/api/katsu), this
 # parameter is used by Django to compute correct URLs in templates (for example
 # in DRF API discovery pages, or swagger UI)
-FORCE_SCRIPT_NAME = os.getenv("SCRIPT_NAME", "")
+FORCE_SCRIPT_NAME = os.getenv("CHORD_METADATA_SUB_PATH", "")
 
 # Allowed hosts - TODO: Derive from CHORD_URL
 HOST_CONTAINER_NAME = os.environ.get("HOST_CONTAINER_NAME", "")
