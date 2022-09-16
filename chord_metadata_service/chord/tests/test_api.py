@@ -1,6 +1,5 @@
 import json
 
-from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -39,7 +38,6 @@ class CreateProjectTest(APITestCase):
             }
         ]
 
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_create_project(self):
         for i, p in enumerate(self.valid_payloads, 1):
             r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
@@ -57,7 +55,6 @@ class CreateProjectTest(APITestCase):
 # TODO: Delete Project
 
 class CreateDatasetTest(APITestCase):
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def setUp(self) -> None:
         r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
@@ -82,7 +79,6 @@ class CreateDatasetTest(APITestCase):
             }
         ]
 
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_create_dataset(self):
         for i, d in enumerate(self.valid_payloads, 1):
             r = self.client.post('/api/datasets', data=json.dumps(d), content_type="application/json")
@@ -96,7 +92,6 @@ class CreateDatasetTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
 
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_dats(self):
         r = self.client.post('/api/datasets', data=json.dumps(self.dats_valid_payload),
                              content_type="application/json")

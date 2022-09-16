@@ -14,6 +14,7 @@ import os
 import sys
 import logging
 import json
+from os.path import exists
 
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
@@ -57,6 +58,10 @@ CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE_NO_VER)
 # SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
 AUTH_OVERRIDE = not CHORD_PERMISSIONS
 
+# When Katsu is hosted on a subpath (e.g. http://myportal.com/api/katsu), this
+# parameter is used by Django to compute correct URLs in templates (for example
+# in DRF API discovery pages, or swagger UI)
+FORCE_SCRIPT_NAME = os.getenv("CHORD_METADATA_SUB_PATH", "")
 
 # Allowed hosts - TODO: Derive from CHORD_URL
 HOST_CONTAINER_NAME = os.environ.get("HOST_CONTAINER_NAME", "")
@@ -87,6 +92,9 @@ CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "")
 CANDIG_OPA_URL = os.getenv("CANDIG_OPA_URL", "")
 CANDIG_OPA_SECRET = os.getenv("CANDIG_OPA_SECRET", "my-secret-beacon-token")
 CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("CANDIG_OPA_SITE_ADMIN_KEY", "site-admin")
+if exists("/run/secrets/opa-root-token"):
+    with open("/run/secrets/opa-root-token", "r") as f:
+        CANDIG_OPA_SECRET = f.read()
 
 # Application definition
 
@@ -113,13 +121,12 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'rest_framework',
-    'rest_framework_swagger',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'chord_metadata_service.restapi.preflight_req_middleware.PreflightRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -127,8 +134,12 @@ MIDDLEWARE = [
     'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'chord_metadata_service.restapi.candig_authz_middleware.CandigAuthzMiddleware',
 ]
+
+# This middlewares are specific to the CANDIG service
+if os.getenv('INSIDE_CANDIG', ''):
+    MIDDLEWARE.append('chord_metadata_service.restapi.preflight_req_middleware.PreflightRequestMiddleware')
+    MIDDLEWARE.append('chord_metadata_service.restapi.candig_authz_middleware.CandigAuthzMiddleware')
 
 CORS_ALLOWED_ORIGINS = []
 
@@ -239,7 +250,7 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
     'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
@@ -262,11 +273,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTHENTICATION_BACKENDS = ["bento_lib.auth.django_remote_user.BentoRemoteUserBackend"] + (
-    ["django.contrib.auth.backends.ModelBackend"] if DEBUG else [])
+AUTHENTICATION_BACKENDS = ['bento_lib.auth.django_remote_user.BentoRemoteUserBackend'] + (
+    ['django.contrib.auth.backends.ModelBackend'] if DEBUG else [])
 
 # Models
-DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -288,7 +299,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Cache time constant
-CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
+CACHE_TIME = int(os.getenv('CACHE_TIME', 60 * 60 * 2))
 
 # Settings related to the Public APIs
 
@@ -307,3 +318,38 @@ NO_PUBLIC_DATA_AVAILABLE = {"message": "No public data available."}
 
 # Public response when public fields are not configured and config file is not provided
 NO_PUBLIC_FIELDS_CONFIGURED = {"message": "No public fields configured."}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Metadata Service API',
+    'DESCRIPTION': ('Metadata Service provides a phenotypic description of an '
+                    'Individual in the context of biomedical research.'),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # Filter out the url patterns we don't want documented
+    'PREPROCESSING_HOOKS': ['chord_metadata_service.metadata.hooks.preprocessing_filter_path'],
+    # Split components into request and response parts where appropriate
+    'COMPONENT_SPLIT_REQUEST': True,
+    # Aid client generator targets that have trouble with read-only properties.
+    'COMPONENT_NO_READ_ONLY_REQUIRED': True,
+    # Create separate components for PATCH endpoints (without required list)
+    'COMPONENT_SPLIT_PATCH': True,
+    # Adds "blank" and "null" enum choices where appropriate. disable on client generation issues
+    'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': True,
+    # Determines if and how free-form 'additionalProperties' should be emitted in the schema. Some
+    # code generator targets are sensitive to this. None disables generic 'additionalProperties'.
+    # allowed values are 'dict', 'bool', None
+    'GENERIC_ADDITIONAL_PROPERTIES': 'dict',
+    # Determines whether operation parameters should be sorted alphanumerically or just in
+    # the order they arrived. Accepts either True, False, or a callable for sort's key arg.
+    'SORT_OPERATION_PARAMETERS': False,
+    # modify and override the SwaggerUI template
+    'SWAGGER_UI_SETTINGS': {
+        'docExpansion': 'none',  # collapse all endpoints by default
+        'supportedSubmitMethod': ['get', 'put', 'post', 'delete', 'patch'] if DEBUG else ['get'], # readonly in prod
+    }
+}
+
+# SPECTACULAR_SETTINGS['SERVERS'] defines the url to which calls are made when
+# testing a request within the swagger UI
+if CHORD_URL:
+    SPECTACULAR_SETTINGS['SERVERS'] = [{'url': CHORD_URL + FORCE_SCRIPT_NAME}]

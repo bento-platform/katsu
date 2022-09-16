@@ -1,5 +1,5 @@
 -r requirements.txt
-codecov==2.1.11
-coverage==5.4
-flake8==3.8.4
-tox==3.22.0
+codecov==2.1.12
+coverage==6.4.4
+flake8==5.0.4
+tox==3.26.0

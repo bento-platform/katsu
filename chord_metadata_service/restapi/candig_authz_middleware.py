@@ -53,6 +53,8 @@ class CandigAuthzMiddleware:
                     response["Content-Type"] = "application/json"
                     return response
 
+        # if CANDIG_AUTHORIZATION is unknown, mean no authorization
+        self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
         return self.get_response(request)
 
     def is_authorized_get(self, request):
@@ -93,7 +95,7 @@ class CandigAuthzMiddleware:
         try:
             response = requests.post(
                 settings.CANDIG_OPA_URL + "/v1/data/permissions/datasets",
-                headers={"Authorization": f"Bearer {settings.CANDIG_OPA_SECRET}"},
+                headers={"X-Opa": f"{settings.CANDIG_OPA_SECRET}"},
                 json={
                     "input": {
                             "token": token,

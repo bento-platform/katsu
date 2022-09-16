@@ -1,5 +1,4 @@
 from rest_framework.test import APITestCase, APIClient
-from django.test import override_settings
 from rest_framework import status
 from chord_metadata_service.chord.tests.constants import (
     VALID_PROJECT_1,
@@ -11,7 +10,6 @@ import json
 
 
 class JSONLDDatasetTest(APITestCase):
-    @override_settings(AUTH_OVERRIDE=True)
     def setUp(self) -> None:
         project = get_response('project-list', VALID_PROJECT_1)
         self.project = project.json()

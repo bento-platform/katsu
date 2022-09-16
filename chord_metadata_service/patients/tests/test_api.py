@@ -79,10 +79,10 @@ class UpdateIndividualTest(APITestCase):
             reverse(
                 'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                ),
+            ),
             data=json.dumps(self.put_valid_payload),
             content_type='application/json'
-            )
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_invalid_individual(self):
@@ -92,10 +92,10 @@ class UpdateIndividualTest(APITestCase):
             reverse(
                 'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                ),
+            ),
             data=json.dumps(self.invalid_payload),
             content_type='application/json'
-            )
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -112,8 +112,8 @@ class DeleteIndividualTest(APITestCase):
             reverse(
                 'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                )
             )
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_delete_non_existing_individual(self):
@@ -123,8 +123,8 @@ class DeleteIndividualTest(APITestCase):
             reverse(
                 'individuals-detail',
                 kwargs={'pk': 'patient:what'}
-                )
             )
+        )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -134,7 +134,6 @@ class IndividualCSVRendererTest(APITestCase):
     def setUp(self):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
 
-    @override_settings(CANDIG_OPA_URL=None)
     def test_csv_export(self):
         get_resp = self.client.get('/api/individuals?format=csv')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
@@ -155,7 +154,6 @@ class IndividualFullTextSearchTest(APITestCase):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
-    @override_settings(CANDIG_OPA_URL=None)
     def test_search(self):
         get_resp_1 = self.client.get('/api/individuals?search=P49Y')
         self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)

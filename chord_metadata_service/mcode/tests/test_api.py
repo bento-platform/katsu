@@ -3,7 +3,6 @@ import os
 
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.test import override_settings
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_MCODEPACKET
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
@@ -20,7 +19,6 @@ EXAMPLE_INGEST_OUTPUTS_MCODE_JSON = {
 }
 
 
-@override_settings(CANDIG_AUTHORIZATION='')
 class GetMcodeApiTest(APITestCase):
     """
     Test that we can retrieve mcodepackets with valid dataset titles or without dataset title.
