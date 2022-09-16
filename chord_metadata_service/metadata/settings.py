@@ -345,7 +345,7 @@ SPECTACULAR_SETTINGS = {
     # modify and override the SwaggerUI template
     'SWAGGER_UI_SETTINGS': {
         'docExpansion': 'none',  # collapse all endpoints by default
-        'supportedSubmitMethod': ['get', 'put', 'post', 'delete', 'patch'] if DEBUG else ['get'], # readonly in prod
+        'supportedSubmitMethods': ['get', 'put', 'post', 'delete', 'patch'] if DEBUG else ['get'],  # readonly in prod
     }
 }
 
