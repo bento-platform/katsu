@@ -193,13 +193,21 @@ def stats_for_field(model, field: str, add_missing=False) -> Mapping[str, int]:
     Computes counts of distinct values for a given field. Mainly applicable to
     char fields representing categories
     """
+    queryset = model.objects.all()
+    return queryset_stats_for_field(queryset, field, add_missing)
+
+
+def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping[str, int]:
+    """
+    Computes counts of distinct values for a queryset.
+    """
     # values() restrict the table of results to this COLUMN
     # annotate() creates a `total` column for the aggregation
     # Count() aggregates the results by performing a GROUP BY on the field
-    query_set = model.objects.all().values(field).annotate(total=Count(field))
+    queryset = queryset.values(field).annotate(total=Count(field))
 
     stats: Mapping[str, int] = dict()
-    for item in query_set:
+    for item in queryset:
         key = item[field]
         if key is None:
             continue
@@ -212,7 +220,7 @@ def stats_for_field(model, field: str, add_missing=False) -> Mapping[str, int]:
 
     if add_missing:
         isnull_filter = {f"{field}__isnull": True}
-        stats['missing'] = model.objects.all().values(field).filter(**isnull_filter).count()
+        stats['missing'] = queryset.values(field).filter(**isnull_filter).count()
 
     return stats
 
@@ -246,6 +254,27 @@ def compute_binned_ages(bin_size: int):
         age = parse_individual_age(r["age"])
         binned_ages.append(age - age % bin_size)
     return binned_ages
+
+
+def get_queryset_stats(queryset, field):
+    """
+    Fetches public statistics for a field within a given queryset. This function
+    is used to compute statistics after filtering has been applied.
+    A cutoff is applied to all counts to avoid leaking too small sets of results.
+    """
+    stats = queryset_stats_for_field(queryset, field, add_missing=True)
+    threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
+    bins = []
+    total = 0
+    for key, value in stats.items():
+        bins.append({
+            "label": key,
+            "value": value if value > threshold else 0
+        })
+        total += value
+    if total <= threshold:
+        total = 0
+    return bins, total
 
 
 def get_categorical_stats(field_props):

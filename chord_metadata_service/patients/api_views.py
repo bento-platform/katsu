@@ -23,7 +23,8 @@ from chord_metadata_service.restapi.api_renderers import (
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.utils import (
     get_field_options,
-    filter_queryset_field_value
+    filter_queryset_field_value,
+    get_queryset_stats
 )
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 
@@ -140,7 +141,25 @@ class PublicListIndividuals(APIView):
             ))
 
         if filtered_qs.count() > settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
-            return Response({"count": filtered_qs.count()})
+            tissues_count, sampled_tissues = get_queryset_stats(
+                filtered_qs,
+                "phenopackets__biosamples__sampled_tissue"
+            )
+            experiments_count, experiment_type = get_queryset_stats(
+                filtered_qs,
+                "phenopackets__biosamples__experiment__experiment_type"
+            )
+            return Response({
+                "count": filtered_qs.count(),
+                "biosamples": {
+                    "count": tissues_count,
+                    "sampled_tissue": sampled_tissues
+                },
+                "experiments": {
+                    "count": experiments_count,
+                    "experiment_type": experiment_type
+                }
+            })
         else:
             # the count < threshold when there is no match in db the queryset is empty, count = 0
             return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
