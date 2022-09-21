@@ -1,7 +1,7 @@
 import isodate
 import datetime
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 from typing import Tuple, Mapping
 from calendar import month_abbr
 
@@ -11,6 +11,9 @@ from django.conf import settings
 
 from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.experiments import models as experiments_models
+
+
+OVERVIEW_AGE_BIN_SIZE = 10
 
 
 def camel_case_field_names(string):
@@ -240,13 +243,17 @@ def get_field_bins(query_set, field, bin_size):
     return stats
 
 
-def compute_binned_ages(bin_size: int):
+def compute_binned_ages(individual_queryset, bin_size: int):
     """
     When age_numeric field is not available, use this function to process
     the age field in its various formats.
-    Returns an array of values floored to the closest decade (e.g. 25 --> 20)
+    Params:
+        - individual_queryset: a queryset made on the individual model, containing
+            the age and age_numeric fields
+        - bin_size: how many years there is per bin
+    Returns a list of values floored to the closest decade (e.g. 25 --> 20)
     """
-    a = pheno_models.Individual.objects.filter(age_numeric__isnull=True).values('age')
+    a = individual_queryset.filter(age_numeric__isnull=True).values('age')
     binned_ages = []
     for r in a.iterator():  # reduce memory footprint (no caching)
         if r["age"] is None:
@@ -254,6 +261,24 @@ def compute_binned_ages(bin_size: int):
         age = parse_individual_age(r["age"])
         binned_ages.append(age - age % bin_size)
     return binned_ages
+
+
+def get_age_numeric_binned(individual_queryset, bin_size):
+    """
+    age_numeric is computed at ingestion time of phenopackets. On some instances
+    it might be unavailable and as a fallback must be computed from the age JSON field which
+    has two alternate formats (hence more complex and slower to process)
+    """
+    individuals_age = get_field_bins(individual_queryset, "age_numeric", bin_size)
+    if None not in individuals_age:
+        return individuals_age
+
+    del individuals_age[None]
+    individuals_age = Counter(individuals_age)
+    individuals_age.update(
+        compute_binned_ages(individual_queryset, bin_size)   # single update instead of creating iterables in a loop
+    )
+    return individuals_age
 
 
 def get_queryset_stats(queryset, field):

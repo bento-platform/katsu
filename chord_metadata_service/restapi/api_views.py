@@ -10,12 +10,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
 from chord_metadata_service.restapi.utils import (
+    get_age_numeric_binned,
     get_field_options,
     parse_individual_age,
     stats_for_field,
     queryset_stats_for_field,
-    compute_binned_ages,
-    get_field_bins,
     get_categorical_stats,
     get_date_stats,
     get_range_stats
@@ -72,16 +71,7 @@ def overview(_request):
     diseases_stats = stats_for_field(pheno_models.Phenopacket, "diseases__term__label")
     diseases_count = len(diseases_stats)
 
-    # age_numeric is computed at ingestion time of phenopackets. On some instances
-    # it might be unavailable and as a fallback must be computed from the age JSON field which
-    # has two alternate formats (hence more complex and slower to process)
-    individuals_age = get_field_bins(patients_models.Individual.objects.all(), "age_numeric", OVERVIEW_AGE_BIN_SIZE)
-    if None in individuals_age:  # fallback
-        del individuals_age[None]
-        individuals_age = Counter(individuals_age)
-        individuals_age.update(
-            compute_binned_ages(OVERVIEW_AGE_BIN_SIZE)   # single update instead of creating iterables in a loop
-        )
+    individuals_age = get_age_numeric_binned(patients_models.Individual.objects.all(), OVERVIEW_AGE_BIN_SIZE)
 
     r = {
         "phenopackets": phenopackets_count,
@@ -162,17 +152,6 @@ def search_overview(request):
     # to include missing values inferred from the schema
     individuals_sex = queryset_stats_for_field(queryset, "sex")
 
-    # age_numeric is computed at ingestion time of phenopackets. On some instances
-    # it might be unavailable and as a fallback must be computed from the age JSON field which
-    # has two alternate formats (hence more complex and slower to process)
-    individuals_age = get_field_bins(queryset, "age_numeric", OVERVIEW_AGE_BIN_SIZE)
-    if None in individuals_age:  # fallback
-        del individuals_age[None]
-        individuals_age = Counter(individuals_age)
-        individuals_age.update(
-            compute_binned_ages(OVERVIEW_AGE_BIN_SIZE)   # single update instead of creating iterables in a loop
-        )
-
     r = {
         "biosamples": {
             "count": biosamples_count,
@@ -187,7 +166,7 @@ def search_overview(request):
         },
         "individuals": {
             "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.SEX)},
-            "age": individuals_age,
+            "age": get_age_numeric_binned(queryset, OVERVIEW_AGE_BIN_SIZE),
         },
         "phenotypic_features": {
             "type": queryset_stats_for_field(queryset, "phenopackets__phenotypic_features__pftype__label")
