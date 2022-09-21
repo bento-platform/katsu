@@ -73,6 +73,7 @@ router.register(r'resources', resources_views.ResourceViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(batch_router.urls)),
+
     # apps schemas
     path('chord_phenopacket_schema', phenopacket_views.get_chord_phenopacket_schema,
          name="chord-phenopacket-schema"),
@@ -80,25 +81,23 @@ urlpatterns = [
          name="experiment-schema"),
     path('mcode_schema', mcode_views.get_mcode_schema,
          name="mcode-schema"),
-    # overview
+
+    # overviews (statistics)
     path('overview', overview, name="overview"),
-    # mcode overview
     path('mcode_overview', mcode_overview, name="mcode-overview"),
-    # search overview
     path('search_overview', search_overview, name="search-overview"),
+
     # autocomplete URLs
     path('disease_term_autocomplete', DiseaseTermAutocomplete.as_view(), name='disease-term-autocomplete',),
     path('phenotypic_feature_type_autocomplete', PhenotypicFeatureTypeAutocomplete.as_view(),
          name='phenotypic-feature-type-autocomplete',),
     path('biosample_sampled_tissue_autocomplete', BiosampleSampledTissueAutocomplete.as_view(),
          name='biosample-sampled-tissue-autocomplete',),
-    # public search results
+
+    # public endpoints (no confidential information leak)
     path('public', individual_views.PublicListIndividuals.as_view(),
          name='public',),
-    # public search fields schema
     path('public_search_fields', public_search_fields, name='public-search-fields',),
-    # public overview
     path('public_overview', public_overview, name='public-overview',),
-    # public dataset properties
     path('public_dataset', public_dataset, name='public-dataset'),
 ]
