@@ -74,7 +74,7 @@ def overview(_request):
     # age_numeric is computed at ingestion time of phenopackets. On some instances
     # it might be unavailable and as a fallback must be computed from the age JSON field which
     # has two alternate formats (hence more complex and slower to process)
-    individuals_age = get_field_bins(patients_models.Individual, "age_numeric", OVERVIEW_AGE_BIN_SIZE)
+    individuals_age = get_field_bins(patients_models.Individual.objects.all(), "age_numeric", OVERVIEW_AGE_BIN_SIZE)
     if None in individuals_age:  # fallback
         del individuals_age[None]
         individuals_age = Counter(individuals_age)

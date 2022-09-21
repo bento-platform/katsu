@@ -225,12 +225,12 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
     return stats
 
 
-def get_field_bins(model, field, bin_size):
+def get_field_bins(query_set, field, bin_size):
     # computes a new column "binned" by substracting the modulo by bin size to
     # the value which requires binning (e.g. 28 => 28 - 28 % 10 = 20)
     # cast to integer to avoid numbers such as 60.00 if that was a decimal,
     # and aggregate over this value.
-    query_set = model.objects.all().annotate(
+    query_set = query_set.annotate(
         binned=Cast(
             F(field) - Func(F(field), bin_size, function="MOD"),
             IntegerField()
