@@ -140,26 +140,25 @@ class PublicListIndividuals(APIView):
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
             ))
 
-        if filtered_qs.count() > settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
-            tissues_count, sampled_tissues = get_queryset_stats(
-                filtered_qs,
-                "phenopackets__biosamples__sampled_tissue"
-            )
-            experiments_count, experiment_type = get_queryset_stats(
-                filtered_qs,
-                "phenopackets__biosamples__experiment__experiment_type"
-            )
-            return Response({
-                "count": filtered_qs.count(),
-                "biosamples": {
-                    "count": tissues_count,
-                    "sampled_tissue": sampled_tissues
-                },
-                "experiments": {
-                    "count": experiments_count,
-                    "experiment_type": experiment_type
-                }
-            })
-        else:
-            # the count < threshold when there is no match in db the queryset is empty, count = 0
+        if filtered_qs.count() <= settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
             return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
+
+        tissues_count, sampled_tissues = get_queryset_stats(
+            filtered_qs,
+            "phenopackets__biosamples__sampled_tissue"
+        )
+        experiments_count, experiment_type = get_queryset_stats(
+            filtered_qs,
+            "phenopackets__biosamples__experiment__experiment_type"
+        )
+        return Response({
+            "count": filtered_qs.count(),
+            "biosamples": {
+                "count": tissues_count,
+                "sampled_tissue": sampled_tissues
+            },
+            "experiments": {
+                "count": experiments_count,
+                "experiment_type": experiment_type
+            }
+        })
