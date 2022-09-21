@@ -136,10 +136,9 @@ def search_overview(request):
     get+post:
     Overview statistics of a list of patients (associated with a search result)
     - Parameter
-        - id: an arrays of patient ids
+        - id: a list of patient ids
     """
-    query_params = request.query_params if request.method == "GET" else (request.data or {})
-    individual_id = query_params.get("id", [])
+    individual_id = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
 
     queryset = patients_models.Individual.objects.all()
     if len(individual_id) > 0:
