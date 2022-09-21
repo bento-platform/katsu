@@ -35,6 +35,7 @@ RUN apk add --no-cache \
 RUN mkdir /app
 WORKDIR /app
 ADD ./requirements.txt /app
+ADD ./requirements-dev.txt /app
 RUN pip install -r requirements-dev.txt
 
 COPY . /app/chord_metadata_service
