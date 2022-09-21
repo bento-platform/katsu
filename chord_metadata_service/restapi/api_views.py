@@ -13,6 +13,7 @@ from chord_metadata_service.restapi.utils import (
     get_field_options,
     parse_individual_age,
     stats_for_field,
+    queryset_stats_for_field,
     compute_binned_ages,
     get_field_bins,
     get_categorical_stats,
@@ -135,6 +136,67 @@ def overview(_request):
         }
     }
 
+    return Response(r)
+
+
+@api_view(["GET", "POST"])
+@permission_classes([OverrideOrSuperUserOnly])
+def search_overview(request):
+    """
+    get+post:
+    Overview statistics of a list of patients (associated with a search result)
+    - Parameter
+        - id: an arrays of patient ids
+    """
+    query_params = request.query_params if request.method == "GET" else (request.data or {})
+    individual_id = query_params.get("id", [])
+
+    queryset = patients_models.Individual.objects.all()
+    if len(individual_id) > 0:
+        queryset = queryset.filter(id__in=individual_id)
+
+    biosamples_count = queryset.values("phenopackets__biosamples__id").count()
+    experiments_count = queryset.values("phenopackets__experiments__id").count()
+
+    # Sex related fields stats are precomputed here and post processed later
+    # to include missing values inferred from the schema
+    individuals_sex = queryset_stats_for_field(queryset, "sex")
+
+    # age_numeric is computed at ingestion time of phenopackets. On some instances
+    # it might be unavailable and as a fallback must be computed from the age JSON field which
+    # has two alternate formats (hence more complex and slower to process)
+    individuals_age = get_field_bins(queryset, "age_numeric", OVERVIEW_AGE_BIN_SIZE)
+    if None in individuals_age:  # fallback
+        del individuals_age[None]
+        individuals_age = Counter(individuals_age)
+        individuals_age.update(
+            compute_binned_ages(OVERVIEW_AGE_BIN_SIZE)   # single update instead of creating iterables in a loop
+        )
+
+    r = {
+        "biosamples": {
+            "count": biosamples_count,
+            "sampled_tissue": queryset_stats_for_field(queryset, "phenopackets__biosamples__sampled_tissue__label"),
+            "histological_diagnosis": queryset_stats_for_field(
+                queryset,
+                "phenopackets__biosamples__histological_diagnosis__label"
+            ),
+        },
+        "diseases": {
+            "term": queryset_stats_for_field(queryset, "phenopackets__diseases__term__label"),
+        },
+        "individuals": {
+            "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.SEX)},
+            "age": individuals_age,
+        },
+        "phenotypic_features": {
+            "type": queryset_stats_for_field(queryset, "phenopackets__phenotypic_features__pftype__label")
+        },
+        "experiments": {
+            "count": experiments_count,
+            "experiment_type": queryset_stats_for_field(queryset, "phenopackets__experiments__experiment_type"),
+        },
+    }
     return Response(r)
 
 
