@@ -299,7 +299,7 @@ def get_queryset_stats(queryset, field):
         total += value
     if total <= threshold:
         total = 0
-    return bins, total
+    return total, bins
 
 
 def get_categorical_stats(field_props):
