@@ -18,6 +18,7 @@ from .api_views import (
      public_search_fields,
      public_overview,
      public_dataset,
+     search_overview
 )
 from chord_metadata_service.restapi.routers import BatchListRouter
 
@@ -83,6 +84,8 @@ urlpatterns = [
     path('overview', overview, name="overview"),
     # mcode overview
     path('mcode_overview', mcode_overview, name="mcode-overview"),
+    # search overview
+    path('search_overview', search_overview, name="search-overview"),
     # autocomplete URLs
     path('disease_term_autocomplete', DiseaseTermAutocomplete.as_view(), name='disease-term-autocomplete',),
     path('phenotypic_feature_type_autocomplete', PhenotypicFeatureTypeAutocomplete.as_view(),
