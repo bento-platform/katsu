@@ -61,6 +61,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
     queryset = Dataset.objects.all().order_by("title")
 
+
 class TableOwnershipViewSet(CHORDPublicModelViewSet):
     """
     get:

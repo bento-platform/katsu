@@ -117,7 +117,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'rest_framework',
-    'rest_framework_swagger',
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -246,7 +246,7 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
     'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
@@ -314,3 +314,32 @@ NO_PUBLIC_DATA_AVAILABLE = {"message": "No public data available."}
 
 # Public response when public fields are not configured and config file is not provided
 NO_PUBLIC_FIELDS_CONFIGURED = {"message": "No public fields configured."}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Metadata Service API',
+    'DESCRIPTION': ('Metadata Service provides a phenotypic description of an '
+                    'Individual in the context of biomedical research.'),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # Filter out the url patterns we don't want documented
+    'PREPROCESSING_HOOKS': ['chord_metadata_service.metadata.hooks.preprocessing_filter_path'],
+    # Split components into request and response parts where appropriate
+    'COMPONENT_SPLIT_REQUEST': True,
+    # Aid client generator targets that have trouble with read-only properties.
+    'COMPONENT_NO_READ_ONLY_REQUIRED': True,
+    # Create separate components for PATCH endpoints (without required list)
+    'COMPONENT_SPLIT_PATCH': True,
+    # Adds "blank" and "null" enum choices where appropriate. disable on client generation issues
+    'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': True,
+    # Determines if and how free-form 'additionalProperties' should be emitted in the schema. Some
+    # code generator targets are sensitive to this. None disables generic 'additionalProperties'.
+    # allowed values are 'dict', 'bool', None
+    'GENERIC_ADDITIONAL_PROPERTIES': 'dict',
+    # Determines whether operation parameters should be sorted alphanumerically or just in
+    # the order they arrived. Accepts either True, False, or a callable for sort's key arg.
+    'SORT_OPERATION_PARAMETERS': False,
+    # modify and override the SwaggerUI template
+    'SWAGGER_UI_SETTINGS': {
+        'docExpansion': 'none',  # collapse all endpoints by default
+    },
+}

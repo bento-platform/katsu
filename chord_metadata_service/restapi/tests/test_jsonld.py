@@ -1,5 +1,4 @@
 from rest_framework.test import APITestCase, APIClient
-from django.test import override_settings
 from rest_framework import status
 from chord_metadata_service.chord.tests.constants import (
     VALID_PROJECT_1,

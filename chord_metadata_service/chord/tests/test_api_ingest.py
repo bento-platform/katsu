@@ -1,6 +1,5 @@
 import json
 
-from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -47,6 +46,7 @@ class WorkflowTest(APITestCase):
         r = self.client.get(reverse("workflow-file", args=("phenopackets_json",)), content_type="text/plain")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         # TODO: Check file contents
+
 
 class IngestTest(APITestCase):
     def setUp(self) -> None:

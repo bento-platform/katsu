@@ -26,7 +26,8 @@ from chord_metadata_service.mcode import models as mcode_models
 from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
-
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 
 logger = logging.getLogger("restapi_api_views")
 logger.setLevel(logging.INFO)
@@ -45,6 +46,18 @@ def service_info(_request):
     return Response(SERVICE_INFO)
 
 
+@extend_schema(
+    description="Overview of all Phenopackets in the database",
+    responses={
+        200: inline_serializer(
+            name='overview_response',
+            fields={
+                'phenopackets': serializers.IntegerField(),
+                'data_type_specific': serializers.JSONField(),
+            }
+        )
+    }
+)
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly])
 def overview(_request):
@@ -135,6 +148,18 @@ def overview(_request):
     return Response(r)
 
 
+@extend_schema(
+    description="Overview of all mCode data in the database",
+    responses={
+        200: inline_serializer(
+            name='mcode_overview_response',
+            fields={
+                'mcodepackets': serializers.IntegerField(),
+                'data_type_specific': serializers.JSONField(),
+            }
+        )
+    }
+)
 # Cache page for the requested url for 2 hours
 @cache_page(60 * 60 * 2)
 @api_view(["GET"])
@@ -217,6 +242,17 @@ def mcode_overview(_request):
     })
 
 
+@extend_schema(
+    description="Public search fields with their configuration",
+    responses={
+        200: inline_serializer(
+            name='public_search_fields_response',
+            fields={
+                'sections': serializers.JSONField(),
+            }
+        )
+    }
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def public_search_fields(_request):
@@ -248,6 +284,17 @@ def public_search_fields(_request):
     return Response(r)
 
 
+@extend_schema(
+    description="Overview of all public data in the database",
+    responses={
+        200: inline_serializer(
+            name='public_overview_response',
+            fields={
+                'datasets': serializers.CharField(),
+            }
+        )
+    }
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def public_overview(_request):

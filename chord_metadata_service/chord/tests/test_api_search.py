@@ -3,7 +3,6 @@ import uuid
 
 from unittest.mock import patch
 
-from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
