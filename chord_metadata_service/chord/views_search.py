@@ -344,16 +344,18 @@ def phenopacket_query_results(query, params, options=None):
             fields.append(options["add_field"])
 
         # Results displayed as 4/5 columns:
-        # "individuals ID", "table ID" (optional), [Alternate ids list], [Biosamples list...], number of experiments
+        # "individuals ID", "table ID" (optional), [Alternate ids list], number of experiments, [Biosamples list...]
         return queryset.values(
                 *fields,
                 alternate_ids=Coalesce(F("subject__alternate_ids"), [])
             ).annotate(
+                # Weird bug with Django 4.1 here: num_experiments must come before the use of ArrayAgg or biosamples
+                # is considered as an ArrayField...
+                num_experiments=Count("biosamples__experiment"),
                 biosamples=Coalesce(
                     ArrayAgg("biosamples__id"),  # Postgre specific: aggregates multiple values in a list
                     []
-                ),
-                num_experiments=Count("biosamples__experiment")
+                )
             )
 
     # To expand further on this query : the select_related call

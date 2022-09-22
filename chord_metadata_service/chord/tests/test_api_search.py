@@ -525,9 +525,9 @@ class SearchTest(APITestCase):
             c = r.json()
             self.assertEqual(len(c["results"]), 1)  # 1 matching phenopacket
             self.assertEqual(len(c["results"][0]), 4)    # 4 columns by result
-            self.assertListEqual(
-                ["subject_id", "alternate_ids", "biosamples", "num_experiments"],
-                list(c["results"][0].keys()))
+            self.assertEqual(
+                {"subject_id", "alternate_ids", "biosamples", "num_experiments"},
+                set(c["results"][0].keys()))
             self.assertIsInstance(c["results"][0]["alternate_ids"], list)
 
     def test_private_search_bento_search_results(self):
