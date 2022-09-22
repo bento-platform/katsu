@@ -26,6 +26,8 @@ from chord_metadata_service.restapi.utils import (
     filter_queryset_field_value
 )
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 
 
 class IndividualViewSet(viewsets.ModelViewSet):
@@ -37,21 +39,22 @@ class IndividualViewSet(viewsets.ModelViewSet):
     Create a new individual
 
     """
-    # TODO: BIOSAMPLE_PREFETCH is already part of PHENOPACKET_PREFETCH. Check
-    queryset = Individual.objects.all().prefetch_related(
-        *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-        *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
-    ).order_by("id")
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
                         PhenopacketsRenderer, IndividualCSVRenderer, ARGORenderer,
                         IndividualBentoSearchRenderer)
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filter_class = IndividualFilter
+    filterset_class = IndividualFilter
     ordering_fields = ["id"]
+    search_fields = ["sex", "ethnicity"]
+    queryset = Individual.objects.all().prefetch_related(
+        *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+        *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
+    ).order_by("id")
 
     # Cache page for the requested url, default to 2 hours.
+
     @method_decorator(cache_page(settings.CACHE_TIME))
     def dispatch(self, *args, **kwargs):
         return super(IndividualViewSet, self).dispatch(*args, **kwargs)
@@ -81,11 +84,22 @@ class IndividualBatchViewSet(BatchViewSet):
         queryset = Individual.objects.filter(**filter_by_id)\
             .prefetch_related(
                 *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
-            ).order_by("id")
+        ).order_by("id")
 
         return queryset
 
 
+@extend_schema(
+    description="Individual list available in public endpoint",
+    responses={
+        200: inline_serializer(
+            name='PublicListIndividuals_response',
+            fields={
+                'count': serializers.JSONField(),
+            }
+        )
+    }
+)
 class PublicListIndividuals(APIView):
     """
     View to return only count of all individuals after filtering.
@@ -110,15 +124,15 @@ class PublicListIndividuals(APIView):
             field_props = queryable_fields[field]
             options = get_field_options(field_props)
             if value not in options \
-                and not (
-                    # case insensitive search on categories
-                    field_props["datatype"] == "string"
-                    and value.lower() in [o.lower() for o in options]
-                ) \
-                and not (
-                    # no restriction when enum is not set for categories
-                    field_props["datatype"] == "string"
-                    and field_props["config"]["enum"] is None
+                    and not (
+                        # case insensitive search on categories
+                        field_props["datatype"] == "string"
+                        and value.lower() in [o.lower() for o in options]
+                    ) \
+                    and not (
+                        # no restriction when enum is not set for categories
+                        field_props["datatype"] == "string"
+                        and field_props["config"]["enum"] is None
                     ):
                 raise ValidationError(f"Invalid value used in query: {value}")
 

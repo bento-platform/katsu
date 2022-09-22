@@ -13,8 +13,6 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
     karyotypic_sex = django_filters.CharFilter(lookup_expr="iexact")
     ethnicity = django_filters.CharFilter(lookup_expr="icontains")
     race = django_filters.CharFilter(lookup_expr="icontains")
-    # e.g. date_of_birth_after=1987-01-01&date_of_birth_before=1990-12-31
-    date_of_birth = django_filters.DateFromToRangeFilter()
     disease = django_filters.CharFilter(
         method="filter_disease", field_name="phenopackets__diseases",
         label="Disease"
@@ -24,13 +22,18 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         method="filter_found_phenotypic_feature", field_name="phenopackets__phenotypic_features",
         label="Found phenotypic feature"
     )
+
     extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
     # full-text search at api/individuals?search=
     search = django_filters.CharFilter(method="filter_search", label="Search")
 
+    # e.g. date_of_birth_after=1987-01-01&date_of_birth_before=1990-12-31
+    date_of_birth = django_filters.DateFromToRangeFilter()
+
     class Meta:
         model = Individual
-        fields = ["id", "alternate_ids", "active", "deceased", "phenopackets__biosamples", "phenopackets"]
+        fields = ["id", "alternate_ids", "active", "deceased",
+                  "phenopackets__biosamples", "phenopackets"]
 
     def filter_found_phenotypic_feature(self, qs, name, value):
         """
@@ -41,6 +44,14 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
             Q(phenopackets__phenotypic_features__pftype__label__icontains=value),
             phenopackets__phenotypic_features__negated=False
         ).distinct()
+        return qs
+
+    def filter_on_cancer_condition_name(self, qs, name, value):
+        qs = qs.filter(mcodepacket__cancer_condition__body_site__icontains=value).distinct()
+        return qs
+
+    def filter_on_treatment_name(self, qs, name, value):
+        qs = qs.filter(mcodepacket__cancer_related_procedures__code__icontains=value).distinct()
         return qs
 
     def filter_disease(self, qs, name, value):

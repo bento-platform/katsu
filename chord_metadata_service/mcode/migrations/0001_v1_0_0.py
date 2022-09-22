@@ -184,7 +184,7 @@ class Migration(migrations.Migration):
                 ('extra_properties', django.contrib.postgres.fields.jsonb.JSONField(blank=True, help_text='Extra properties that are not supported by current schema.', null=True)),
                 ('created', models.DateTimeField(auto_now=True)),
                 ('updated', models.DateTimeField(auto_now_add=True)),
-                ('cancer_condition', models.ManyToManyField(blank=True, help_text="An Individual's cancer condition.", to='mcode.CancerCondition')),
+                ('cancer_condition', models.ForeignKey(blank=True, help_text="An Individual's cancer condition.", null=True, on_delete=django.db.models.deletion.SET_NULL, to='mcode.CancerCondition')),
                 ('cancer_related_procedures', models.ManyToManyField(blank=True, help_text='A radiological or surgical procedures addressing a cancer condition.', to='mcode.CancerRelatedProcedure')),
                 ('genomics_report', models.ForeignKey(blank=True, help_text='A genomics report associated with an Individual.', null=True, on_delete=django.db.models.deletion.SET_NULL, to='mcode.GenomicsReport')),
                 ('medication_statement', models.ManyToManyField(blank=True, help_text='Medication treatment addressed to an Individual.', to='mcode.MedicationStatement')),

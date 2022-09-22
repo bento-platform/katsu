@@ -1,5 +1,6 @@
 import itertools
 import json
+import logging
 import uuid
 
 from bento_lib.responses import errors
@@ -40,6 +41,9 @@ from .permissions import ReadOnly, OverrideOrSuperUserOnly
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG if DEBUG else logging.INFO)
 
 
 @api_view(["GET"])
@@ -262,8 +266,7 @@ def chord_table_summary(_request, table_id):
 
 # TODO: CHORD-standardized logging
 def debug_log(message):  # pragma: no cover
-    if DEBUG:
-        print(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}", flush=True)
+    logging.debug(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}", flush=True)
 
 
 def get_field_lookup(field):
@@ -642,7 +645,7 @@ def get_chord_search_parameters(request, data_type=None):
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(query, DATA_TYPES[data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
-        print(f"[CHORD Metadata] Error encountered compiling query {query}:\n    {str(e)}")
+        logger.exception(f"[CHORD Metadata] Error encountered compiling query {query}:\n    {str(e)}")
         return None, f"Error compiling query (message: {str(e)})"
 
     field = query_params.get("field", None)

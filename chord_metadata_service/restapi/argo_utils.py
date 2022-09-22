@@ -151,7 +151,7 @@ def argo_composition_object(obj):
     """
     composition_object = {
         "donor": argo_donor(obj["subject"]),
-        "primary_diagnoses": [argo_primary_diagnosis(cc) for cc in obj["cancer_condition"]],
+        "primary_diagnoses": [argo_primary_diagnosis(obj["cancer_condition"])],
         "treatments": [argo_treatment(crp) for crp in obj["cancer_related_procedures"]],
         # the name doesn't look nice but there is no therapy type field in mcode
         "immunotherapies_chemotherapies_hormone_therapies": [argo_therapy(ms) for ms in obj["medication_statement"]]

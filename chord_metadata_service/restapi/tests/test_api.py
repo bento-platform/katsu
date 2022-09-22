@@ -77,7 +77,9 @@ class OverviewTest(APITestCase):
         self.assertEqual(response_obj['phenopackets'], 2)
         self.assertEqual(response_obj['data_type_specific']['individuals']['count'], 2)
         self.assertIsInstance(response_obj['data_type_specific']['individuals']['age'], dict)
-        self.assertDictContainsSubset({'40': 1, '30': 1}, response_obj['data_type_specific']['individuals']['age'])
+        self.assertEqual(
+            response_obj['data_type_specific']['individuals']['age'],
+            {**{'40': 1, '30': 1}, **response_obj['data_type_specific']['individuals']['age']})
         self.assertEqual(response_obj['data_type_specific']['biosamples']['count'], 2)
         self.assertEqual(response_obj['data_type_specific']['phenotypic_features']['count'], 1)
         self.assertEqual(response_obj['data_type_specific']['diseases']['count'], 1)
@@ -125,9 +127,9 @@ class McodeOverviewTest(APITestCase):
             cancer_disease_status={
                 "id": "SNOMED:268910001",
                 "label": "Patient's condition improved"
-            }
+            },
+            cancer_condition=self.cancer_condition
         )
-        self.mcodepacket_1.cancer_condition.set([self.cancer_condition])
         self.mcodepacket_1.cancer_related_procedures.set([self.cancer_related_procedure])
         self.mcodepacket_1.medication_statement.set([self.medication_statement])
         self.mcodepacket_2 = mcode_m.MCodePacket.objects.create(
@@ -136,9 +138,9 @@ class McodeOverviewTest(APITestCase):
             cancer_disease_status={
                 "id": "SNOMED:359746009",
                 "label": "Patient's condition stable"
-            }
+            },
+            cancer_condition=self.cancer_condition_2
         )
-        self.mcodepacket_2.cancer_condition.set([self.cancer_condition_2])
 
     def test_mcode_overview(self):
         response = self.client.get("/api/mcode_overview")

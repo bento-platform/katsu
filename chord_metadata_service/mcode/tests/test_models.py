@@ -138,9 +138,9 @@ class McodePacketTest(TestCase):
             cancer_disease_status={
                 "id": "TEST:01",
                 "label": "Patient's condition improved"
-            }
+            },
+            cancer_condition=self.cancer_condition
         )
-        self.mcodepacket.cancer_condition.set([self.cancer_condition])
         self.mcodepacket.cancer_related_procedures.set([self.cancer_related_procedure])
         self.mcodepacket.medication_statement.set([self.medication_statement])
 
@@ -149,7 +149,7 @@ class McodePacketTest(TestCase):
         self.assertEqual(mcodepacket.subject.id, "patient:1")
         self.assertIsInstance(mcodepacket.cancer_disease_status, dict)
         self.assertEqual(mcodepacket.cancer_disease_status["label"], "Patient's condition improved")
-        self.assertEqual(len(mcodepacket.cancer_condition.all()), 1)
+        self.assertEqual(mcodepacket.cancer_condition.id, "cancer_condition:01")
         self.assertEqual(len(mcodepacket.cancer_related_procedures.all()), 1)
         self.assertEqual(mcodepacket.genomics_report.id, "genomics_report:01")
         self.assertEqual(len(mcodepacket.medication_statement.all()), 1)

@@ -25,7 +25,7 @@ class CreateIndividualTest(APITestCase):
         """ POST a new individual. """
 
         response = self.client.post(
-            reverse('individual-list'),
+            reverse('individuals-list'),
             data=json.dumps(self.valid_payload),
             content_type='application/json'
         )
@@ -37,7 +37,7 @@ class CreateIndividualTest(APITestCase):
         """ POST a new individual with invalid data. """
 
         invalid_response = self.client.post(
-            reverse('individual-list'),
+            reverse('individuals-list'),
             data=json.dumps(self.invalid_payload),
             content_type='application/json'
         )
@@ -77,12 +77,12 @@ class UpdateIndividualTest(APITestCase):
 
         response = self.client.put(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                ),
+            ),
             data=json.dumps(self.put_valid_payload),
             content_type='application/json'
-            )
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_invalid_individual(self):
@@ -90,12 +90,12 @@ class UpdateIndividualTest(APITestCase):
 
         response = self.client.put(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                ),
+            ),
             data=json.dumps(self.invalid_payload),
             content_type='application/json'
-            )
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -110,10 +110,10 @@ class DeleteIndividualTest(APITestCase):
 
         response = self.client.delete(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                )
             )
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_delete_non_existing_individual(self):
@@ -121,10 +121,10 @@ class DeleteIndividualTest(APITestCase):
 
         response = self.client.delete(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': 'patient:what'}
-                )
             )
+        )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 

@@ -1,6 +1,6 @@
 from django.db import models
-from django.db.models import CharField
-from django.contrib.postgres.fields import JSONField, ArrayField
+from django.db.models import CharField, JSONField
+from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.validators import ontology_list_validator, key_value_validator
