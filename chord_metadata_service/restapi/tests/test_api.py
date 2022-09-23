@@ -1,3 +1,4 @@
+import json
 import os
 from copy import deepcopy
 
@@ -104,6 +105,17 @@ class OverviewTest(APITestCase):
         self.assertEqual(response_obj['data_type_specific']['instruments']['count'], 1)
         self.assertEqual(response_obj['data_type_specific']['instruments']['platform']['Illumina'], 2)
         self.assertEqual(response_obj['data_type_specific']['instruments']['model']['Illumina HiSeq 4000'], 2)
+
+    def test_search_overview(self):
+        payload = json.dumps({'id': [ph_c.VALID_INDIVIDUAL_1['id']]})
+        response = self.client.post(reverse('search-overview'), payload, content_type='application/json')
+        response_obj = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj['biosamples']['count'], 1)
+        self.assertIn('wall of urinary bladder', response_obj['biosamples']['sampled_tissue'])
+        self.assertIn('Proptosis', response_obj['phenotypic_features']['type'])
+        self.assertIn(ph_c.VALID_DISEASE_1['term']['label'], response_obj['diseases']['term'])
 
 
 class McodeOverviewTest(APITestCase):

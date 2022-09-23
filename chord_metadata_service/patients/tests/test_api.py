@@ -288,6 +288,10 @@ class PublicListIndividualsTest(APITestCase):
             self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(Individual.objects.all().count(), response_obj['count'])
+            self.assertEqual(response_obj['biosamples']['count'], 0)
+            self.assertIsInstance(response_obj['biosamples']['sampled_tissue'], list)
+            self.assertEqual(response_obj['experiments']['count'], 0)
+            self.assertIsInstance(response_obj['experiments']['experiment_type'], list)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_public_get_no_config(self):

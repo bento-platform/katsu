@@ -10,11 +10,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
 from chord_metadata_service.restapi.utils import (
+    get_age_numeric_binned,
     get_field_options,
     parse_individual_age,
     stats_for_field,
-    compute_binned_ages,
-    get_field_bins,
+    queryset_stats_for_field,
     get_categorical_stats,
     get_date_stats,
     get_range_stats
@@ -82,16 +82,7 @@ def overview(_request):
     diseases_stats = stats_for_field(pheno_models.Phenopacket, "diseases__term__label")
     diseases_count = len(diseases_stats)
 
-    # age_numeric is computed at ingestion time of phenopackets. On some instances
-    # it might be unavailable and as a fallback must be computed from the age JSON field which
-    # has two alternate formats (hence more complex and slower to process)
-    individuals_age = get_field_bins(patients_models.Individual, "age_numeric", OVERVIEW_AGE_BIN_SIZE)
-    if None in individuals_age:  # fallback
-        del individuals_age[None]
-        individuals_age = Counter(individuals_age)
-        individuals_age.update(
-            compute_binned_ages(OVERVIEW_AGE_BIN_SIZE)   # single update instead of creating iterables in a loop
-        )
+    individuals_age = get_age_numeric_binned(patients_models.Individual.objects.all(), OVERVIEW_AGE_BIN_SIZE)
 
     r = {
         "phenopackets": phenopackets_count,
@@ -146,6 +137,58 @@ def overview(_request):
         }
     }
 
+    return Response(r)
+
+
+@api_view(["GET", "POST"])
+@permission_classes([OverrideOrSuperUserOnly])
+def search_overview(request):
+    """
+    get+post:
+    Overview statistics of a list of patients (associated with a search result)
+    - Parameter
+        - id: a list of patient ids
+    """
+    individual_id = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
+
+    queryset = patients_models.Individual.objects.all()
+    if len(individual_id) > 0:
+        queryset = queryset.filter(id__in=individual_id)
+
+    biosamples_count = queryset.values("phenopackets__biosamples__id").count()
+    experiments_count = queryset.values("phenopackets__biosamples__experiment__id").count()
+
+    # Sex related fields stats are precomputed here and post processed later
+    # to include missing values inferred from the schema
+    individuals_sex = queryset_stats_for_field(queryset, "sex")
+
+    r = {
+        "biosamples": {
+            "count": biosamples_count,
+            "sampled_tissue": queryset_stats_for_field(queryset, "phenopackets__biosamples__sampled_tissue__label"),
+            "histological_diagnosis": queryset_stats_for_field(
+                queryset,
+                "phenopackets__biosamples__histological_diagnosis__label"
+            ),
+        },
+        "diseases": {
+            "term": queryset_stats_for_field(queryset, "phenopackets__diseases__term__label"),
+        },
+        "individuals": {
+            "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.SEX)},
+            "age": get_age_numeric_binned(queryset, OVERVIEW_AGE_BIN_SIZE),
+        },
+        "phenotypic_features": {
+            "type": queryset_stats_for_field(queryset, "phenopackets__phenotypic_features__pftype__label")
+        },
+        "experiments": {
+            "count": experiments_count,
+            "experiment_type": queryset_stats_for_field(
+                queryset,
+                "phenopackets__biosamples__experiment__experiment_type"
+            ),
+        },
+    }
     return Response(r)
 
 
