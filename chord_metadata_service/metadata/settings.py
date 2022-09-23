@@ -323,7 +323,7 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Metadata Service API',
     'DESCRIPTION': ('Metadata Service provides a phenotypic description of an '
                     'Individual in the context of biomedical research.'),
-    'VERSION': '1.0.0',
+    'VERSION': __version__,
     'SERVE_INCLUDE_SCHEMA': False,
     # Filter out the url patterns we don't want documented
     'PREPROCESSING_HOOKS': ['chord_metadata_service.metadata.hooks.preprocessing_filter_path'],
