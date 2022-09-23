@@ -3,7 +3,6 @@ import uuid
 
 from unittest.mock import patch
 
-from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -93,14 +92,13 @@ class TableTest(APITestCase):
             "schema": DATA_TYPES[table["data_type"]]["schema"],
         }
 
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def setUp(self) -> None:
         # Add example data
 
         r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
 
-        r = self.client.post(reverse("dataset-list"), data=json.dumps(valid_dataset_1(self.project["identifier"])),
+        r = self.client.post('/api/datasets', data=json.dumps(valid_dataset_1(self.project["identifier"])),
                              content_type="application/json")
         self.dataset = r.json()
 
@@ -234,7 +232,6 @@ class SearchTest(APITestCase):
                 "data_type": DATA_TYPE_PHENOPACKET,
                 "query": TEST_SEARCH_QUERY_1
             }, method=method)
-            print(r, r.json())
             self.assertEqual(r.status_code, status.HTTP_200_OK)
 
             c = r.json()
@@ -528,9 +525,9 @@ class SearchTest(APITestCase):
             c = r.json()
             self.assertEqual(len(c["results"]), 1)  # 1 matching phenopacket
             self.assertEqual(len(c["results"][0]), 4)    # 4 columns by result
-            self.assertListEqual(
-                ["subject_id", "alternate_ids", "biosamples", "num_experiments"],
-                list(c["results"][0].keys()))
+            self.assertEqual(
+                {"subject_id", "alternate_ids", "biosamples", "num_experiments"},
+                set(c["results"][0].keys()))
             self.assertIsInstance(c["results"][0]["alternate_ids"], list)
 
     def test_private_search_bento_search_results(self):

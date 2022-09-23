@@ -1,6 +1,5 @@
 import json
 
-from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -50,12 +49,11 @@ class WorkflowTest(APITestCase):
 
 
 class IngestTest(APITestCase):
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def setUp(self) -> None:
         r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
 
-        r = self.client.post(reverse("dataset-list"), data=json.dumps(valid_dataset_1(self.project["identifier"])),
+        r = self.client.post('/api/datasets', data=json.dumps(valid_dataset_1(self.project["identifier"])),
                              content_type="application/json")
         self.dataset = r.json()
 
@@ -65,7 +63,6 @@ class IngestTest(APITestCase):
         r = self.client.post(reverse("table-list"), data=json.dumps(table_record), content_type="application/json")
         self.table = r.json()
 
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_phenopackets_ingest(self):
         # No ingestion body
         r = self.client.post(reverse("ingest"), content_type="application/json")
@@ -86,7 +83,6 @@ class IngestTest(APITestCase):
         )
 
         for data in bad_ingest_bodies:
-            print(data, flush=True)
             r = self.client.post(reverse("ingest"), data=json.dumps(data), content_type="application/json")
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 

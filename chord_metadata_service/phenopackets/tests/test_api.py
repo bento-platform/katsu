@@ -67,7 +67,7 @@ class CreateBiosampleTest(APITestCase):
     def test_create_biosample(self):
         """ POST a new biosample. """
 
-        response = get_response('biosample-list', self.valid_payload)
+        response = get_response('biosamples-list', self.valid_payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.Biosample.objects.count(), 1)
         self.assertEqual(m.Biosample.objects.get().id, 'biosample_id:1')
@@ -75,7 +75,7 @@ class CreateBiosampleTest(APITestCase):
     def test_create_invalid_biosample(self):
         """ POST a new biosample with invalid data. """
 
-        invalid_response = get_response('biosample-list', self.invalid_payload)
+        invalid_response = get_response('biosamples-list', self.invalid_payload)
         self.assertEqual(
             invalid_response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(m.Biosample.objects.count(), 0)
@@ -109,7 +109,7 @@ class CreatePhenotypicFeatureTest(APITestCase):
     def test_create_phenotypic_feature(self):
         """ POST a new phenotypic feature. """
 
-        response = get_response('phenotypicfeature-list', self.valid_phenotypic_feature)
+        response = get_response('phenotypicfeatures-list', self.valid_phenotypic_feature)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.PhenotypicFeature.objects.count(), 1)
 
@@ -126,11 +126,11 @@ class CreateProcedureTest(APITestCase):
         self.valid_procedure_duplicate_code = c.VALID_PROCEDURE_2
 
     def test_procedure(self):
-        response = get_response('procedure-list', self.valid_procedure)
+        response = get_response('procedures-list', self.valid_procedure)
         response_duplicate = get_response(
-            'procedure-list', self.duplicate_procedure)
+            'procedures-list', self.duplicate_procedure)
         response_duplicate_code = get_response(
-            'procedure-list', self.valid_procedure_duplicate_code)
+            'procedures-list', self.valid_procedure_duplicate_code)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response_duplicate.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response_duplicate_code.status_code, status.HTTP_201_CREATED)
@@ -143,7 +143,7 @@ class CreateHtsFileTest(APITestCase):
         self.hts_file = c.VALID_HTS_FILE
 
     def test_hts_file(self):
-        response = get_response('htsfile-list', self.hts_file)
+        response = get_response('htsfiles-list', self.hts_file)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.HtsFile.objects.count(), 1)
 
@@ -156,8 +156,8 @@ class CreateGeneTest(APITestCase):
         self.invalid_gene = c.INVALID_GENE_2
 
     def test_gene(self):
-        response = get_response('gene-list', self.gene)
-        response_duplicate = get_response('htsfile-list', self.duplicate_gene)
+        response = get_response('genes-list', self.gene)
+        response_duplicate = get_response('htsfiles-list', self.duplicate_gene)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response_duplicate.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(m.Gene.objects.count(), 1)
@@ -174,14 +174,14 @@ class CreateVariantTest(APITestCase):
         self.variant_2 = c.VALID_VARIANT_2
 
     def test_variant(self):
-        response = get_response('variant-list', self.variant)
+        response = get_response('variants-list', self.variant)
         serializer = s.VariantSerializer(data=self.variant)
         self.assertEqual(serializer.is_valid(), True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.Variant.objects.count(), 1)
 
     def test_to_represenation(self):
-        response = get_response('variant-list', self.variant_2)
+        response = get_response('variants-list', self.variant_2)
         serializer = s.VariantSerializer(data=self.variant)
         self.assertEqual(serializer.is_valid(), True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -195,7 +195,7 @@ class CreateDiseaseTest(APITestCase):
         self.invalid_disease = c.INVALID_DISEASE_2
 
     def test_disease(self):
-        response = get_response('disease-list', self.disease)
+        response = get_response('diseases-list', self.disease)
         serializer = s.DiseaseSerializer(data=self.disease)
         self.assertEqual(serializer.is_valid(), True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -235,7 +235,7 @@ class CreatePhenopacketTest(APITestCase):
             meta_data=self.metadata)
 
     def test_phenopacket(self):
-        response = get_response('phenopacket-list', self.phenopacket)
+        response = get_response('phenopackets-list', self.phenopacket)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.Phenopacket.objects.count(), 1)
 
@@ -255,7 +255,7 @@ class CreateGenomicInterpretationTest(APITestCase):
         )
 
     def test_genomic_interpretation(self):
-        response = get_response('genomicinterpretation-list',
+        response = get_response('genomicinterpretations-list',
                                 self.genomic_interpretation)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.GenomicInterpretation.objects.count(), 1)
@@ -272,7 +272,7 @@ class CreateDiagnosisTest(APITestCase):
         self.diagnosis = c.valid_diagnosis(self.disease)
 
     def test_diagnosis(self):
-        response = get_response('diagnosis-list',
+        response = get_response('diagnoses-list',
                                 self.diagnosis)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         serializer = s.DiagnosisSerializer(data=self.diagnosis)
@@ -298,7 +298,7 @@ class CreateInterpretationTest(APITestCase):
         self.interpretation['diagnosis'] = [self.diagnosis]
 
     def test_interpretation(self):
-        response = get_response('interpretation-list',
+        response = get_response('interpretations-list',
                                 self.interpretation)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
