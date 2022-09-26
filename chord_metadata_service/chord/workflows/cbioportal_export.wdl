@@ -101,7 +101,7 @@ task get_maf {
             open(MUTATION_DATA_FILE, 'wb') as mutation_file_handle:
 
             # Each line in maf_list begins with the file name
-            file_no = 0
+            nb_files_processed = 0
             for i, line in enumerate(file_handle):
 
                 ### REMOVE THIS ####
@@ -146,15 +146,15 @@ task get_maf {
                     stream=True
                 )
                 for line_no, chunk in enumerate(response.iter_lines(chunk_size=4096)):
-                    # first line of .maf file is skipped, unless it is the first
-                    # file processed
-
-                    if line_no == 0 and file_no > 0:
+                    # first line of .maf file has the version number
+                    # second line contains field names
+                    # Both are skipped, unless it is the first file processed
+                    if line_no < 2 and nb_files_processed > 0:
                         continue
 
                     mutation_file_handle.write(chunk + b"\n")
 
-                file_no += 1
+                nb_files_processed += 1
 
         # Append to the case_list file, the list of sample ids associated with
         # mutation data
@@ -165,7 +165,6 @@ task get_maf {
     >>>
 
     output {
-        File mutation_data = "${run_dir}/export/${dataset_id}/data_mutations_extended.txt"
         File txt_output_maf = stdout()
         File err_output_maf = stderr()
     }
