@@ -89,7 +89,7 @@ class ExportFileContext:
         if not os.path.exists(dirpath):
             os.makedirs(dirpath, 0o777)
 
-        return os.path.join(self.path, filename)
+        return path
 
     def write_tar(self):
         """Creates a tar gzipped archive from the export directory content
