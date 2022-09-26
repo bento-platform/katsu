@@ -5,13 +5,12 @@ import re
 
 from django.db.models import F
 
-from chord_metadata_service.experiments.models import ExperimentResult
-
 from .export_utils import ExportError
 
 from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
+from chord_metadata_service.experiments.models import ExperimentResult
 
 __all__ = [
     "study_export",
@@ -114,7 +113,7 @@ def study_export_meta(dataset: Dataset, file_handle: TextIO):
     # optional fields
     if len(dataset.primary_publications):
         lines['citation'] = dataset.primary_publications[0]
-    # pmid: unvailable
+    # pmid: unavailable
     # groups: unused for authentication
     lines['add_global_case_list'] = 'true'  # otherwise causes an error at validation
     # tags_file: ?
