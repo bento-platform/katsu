@@ -70,7 +70,7 @@ task katsu_dataset_export_vcf {
         # (actually the upper limit)
         # TODO: handle pagination, i.e. if the `next` property is set, loop
         # over the pages of results
-        metadata_url = "${metadata_url}/api/experimentresults?datasets=${dataset_name}&file_format=vcf&page=2&page_size=10000"
+        metadata_url = "${metadata_url}/api/experimentresults?datasets=${dataset_name}&file_format=vcf&page_size=10000"
         response = requests.get(metadata_url, verify=False)
         r = response.json()
 
