@@ -89,7 +89,7 @@ task get_maf {
             for i, maf_uri in enumerate(file_handle):
 
                 # Request from DRS the maf file absolute local path
-                object_id = maf_uri.split("/")[-1]
+                object_id = maf_uri.split("/")[-1].rstrip()
                 drs_object_url = f"${drs_url}/objects/{object_id}?internal_path=1"
                 response = requests.get(drs_object_url, verify=False)
                 r = response.json()
@@ -110,7 +110,7 @@ task get_maf {
                     start_line = 0 if no_file_processed_yet else 2
 
                     for line_no, line in enumerate(maf_file_handle, start=start_line):
-                        mutation_file_handle.write(line + "\n")
+                        mutation_file_handle.write(line.rstrip() + "\n")
 
                     no_file_processed_yet = False
 
