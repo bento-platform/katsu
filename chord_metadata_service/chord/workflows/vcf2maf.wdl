@@ -8,6 +8,7 @@ workflow vcf2maf {
     String dataset_id
     String dataset_name
     String vep_cache_dir
+    String run_dir
 
     # Defaults (see: https://github.com/openwdl/wdl/blob/main/versions/1.0/SPEC.md#declared-inputs-defaults-and-overrides)
     String vep_species = "Homo_sapiens"     # ensembl syntax
@@ -25,7 +26,8 @@ workflow vcf2maf {
             vep_cache_dir = vep_cache_dir,
             drs_url = drs_url,
             temp_token_drs = temp_token_drs,
-            auth_host = auth_host
+            auth_host = auth_host,
+            run_dir = run_dir
     }
 
     call katsu_update_experiment_results_with_maf {
@@ -86,7 +88,8 @@ task katsu_dataset_export_vcf {
                 if vcf in vcf_dict:
                     continue
 
-                # TODO add a default global parameter
+                # TODO add a default global parameter for when genome_assembly_id
+                # is not defined on experiment results records.
                 assembly_id = result.get("genome_assembly_id", "GRCh37")
 
                 drs_url = f"${drs_url}/search?name={vcf}&internal_path=1"
@@ -130,6 +133,7 @@ task vcf_2_maf {
     String drs_url
     String temp_token_drs
     String auth_host
+    String run_dir
 
     # workaround for var interpolation. Syntax ${} confuses wdl parsers
     # between wdl level interpolation and shell string interpolation.
@@ -170,8 +174,7 @@ task vcf_2_maf {
             # prepare file names
             export vcf_file_name=$(basename ${dollar}{g_vcf})
             filtered_vcf=$(echo ${dollar}{vcf_file_name} | sed 's/\(.*\.\)vcf\.gz/\1filtered\.vcf/')
-            export maf=${dollar}{vcf_file_name}.maf
-            echo ${dollar}{maf} >> /tmp/dump.tsv
+            export maf=${run_dir}/${dollar}{vcf_file_name}.maf
 
             # filter out variants that are homozyguous and identical to assemby ref.
             bcftools view -i 'GT[*]="alt"' ${dollar}{g_vcf} > ${dollar}{filtered_vcf}
