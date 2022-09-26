@@ -89,9 +89,8 @@ def study_export(getPath: Callable[[str], str], dataset_id: str):
 
     # .maf files stored
     with open(getPath(MAF_LIST_FILENAME), 'w', newline='\n') as file_maf_list:
-        # TODO: change to MAF format when it is added to Katsu
         exp_res = ExperimentResult.objects.filter(experiment__table__ownership_record__dataset_id=dataset.identifier) \
-            .filter(file_format='VCF') \
+            .filter(file_format='MAF') \
             .annotate(biosample_id=F("experiment__biosample"))
         maf_list(exp_res, file_maf_list)
 
