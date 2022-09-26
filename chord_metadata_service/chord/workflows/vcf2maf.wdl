@@ -92,6 +92,8 @@ task katsu_dataset_export_vcf {
                 # is not defined on experiment results records.
                 assembly_id = result.get("genome_assembly_id", "GRCh37")
 
+                # Query DRS with the filename to get the absolute file path in
+                # DRS for processing.
                 drs_url = f"${drs_url}/search?name={vcf}&internal_path=1"
                 response = requests.get(drs_url, verify=False)
                 if not response.ok:
@@ -106,7 +108,7 @@ task katsu_dataset_export_vcf {
                     lambda method: method["type"] == "file", drs_resp[0]["access_methods"]
                 )
                 location = next(filtered_methods)["access_url"]["url"].replace("file://", "")
-                file_handle.write(f"{location}\t{assembly_id}\n")
+                file_handle.write(f"{location}\t{assembly_id}\t{vcf}\n")
 
                 vcf_dict[vcf] = result
 
@@ -152,10 +154,10 @@ task vcf_2_maf {
         echo -e "vcf\tmaf\turi" > maf.list.tsv
 
         # Loop through list of VCF files
-        cat ${vcf_files} | while read -r g_vcf assembly_id
+        cat ${vcf_files} | while read -r g_vcf assembly_id orig_vcf_filename
         do
             # prepare file names
-            export vcf_file_name=$(basename ${dollar}{g_vcf})
+            export vcf_file_name=$(basename ${dollar}{orig_vcf_filename})
             filtered_vcf=$(echo ${dollar}{vcf_file_name} | sed 's/\(.*\.\)vcf\.gz/\1filtered\.vcf/')
             export maf=${run_dir}/${dollar}{vcf_file_name}.maf
 
