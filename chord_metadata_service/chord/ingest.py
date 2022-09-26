@@ -253,6 +253,13 @@ METADATA_WORKFLOWS = {
                     "id": "dataset_id",
                     "type": "string",
                     "required": True,
+                },
+                {
+                    "id": "chord_url",
+                    "type": "string",
+                    "required": True,
+                    "value": settings.CHORD_URL,
+                    "hidden": True,
                 }
             ],
             "outputs": [
