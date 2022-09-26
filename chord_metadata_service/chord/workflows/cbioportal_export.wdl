@@ -88,10 +88,6 @@ task get_maf {
             no_file_processed_yet = True
             for i, maf_uri in enumerate(file_handle):
 
-                ### REMOVE THIS ####
-                ### TESTING ONLY ####
-                if i > 10: break
-
                 # Request from DRS the maf file absolute local path
                 object_id = maf_uri.split("/")[-1]
                 drs_object_url = f"${drs_url}/objects/{object_id}?internal_path=1"
@@ -122,7 +118,7 @@ task get_maf {
     >>>
 
     output {
-        # File txt_output_maf = stdout()
-        # File err_output_maf = stderr()
+        File txt_output_maf = stdout()
+        File err_output_maf = stderr()
     }
 }
