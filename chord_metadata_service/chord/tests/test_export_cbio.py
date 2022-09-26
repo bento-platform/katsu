@@ -235,14 +235,17 @@ class ExportCBioTest(TestCase):
         exp_res = self.exp_res.filter(experiment__table__ownership_record__dataset_id=self.study_id)\
             .filter(file_format="MAF") \
             .annotate(biosample_id=F("experiment__biosample"))
-        self.assertTrue(exp_res.count() > 0)
+        maf_count = exp_res.count()
+        self.assertTrue(maf_count > 0)
         with io.StringIO() as output:
             maf_list(exp_res, output)
             output.seek(0)
+            i = 0
             for line in output:
                 # line contains a drs uri
                 self.assertIn("drs://", line)
-                break
+                i += 1
+            self.assertEqual(i, maf_count)
 
     def test_export_mutation_meta(self):
         with io.StringIO() as output:

@@ -244,7 +244,7 @@ def maf_list(results, file_handle: TextIO):
     """
     List of maf files associated with this dataset.
     """
-    maf_uri = [experiment.extra_properties['uri'] for experiment in results]
+    maf_uri = [experiment.extra_properties['uri'] + '\n' for experiment in results]
     file_handle.writelines(maf_uri)
 
 
