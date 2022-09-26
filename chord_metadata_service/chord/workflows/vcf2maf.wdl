@@ -1,6 +1,7 @@
 workflow vcf2maf {
     String chord_url
-    String temp_token_metadata_api
+    String drs_url
+    String metadata_url
     String one_time_token_metadata_ingest
     String temp_token_drs
     String auth_host
@@ -13,10 +14,8 @@ workflow vcf2maf {
 
     call katsu_dataset_export_vcf {
         input:  dataset_name = dataset_name,
-                chord_url  = chord_url,
-                temp_token_metadata_api = temp_token_metadata_api,
-                auth_host = auth_host,
-                temp_token_drs = temp_token_drs
+                drs_url  = drs_url,
+                metadata_url = metadata_url
     }
 
     call vcf_2_maf {
@@ -24,7 +23,7 @@ workflow vcf2maf {
             vcf_files = katsu_dataset_export_vcf.vcf_files,
             vep_species = vep_species,
             vep_cache_dir = vep_cache_dir,
-            chord_url  = chord_url,
+            drs_url = drs_url,
             temp_token_drs = temp_token_drs,
             auth_host = auth_host
     }
@@ -33,7 +32,7 @@ workflow vcf2maf {
         input:  dataset_id = dataset_id,
                 experiment_results_json = katsu_dataset_export_vcf.experiment_results_json,
                 maf_list = vcf_2_maf.maf_list,
-                chord_url  = chord_url,
+                metadata_url  = metadata_url,
                 one_time_token_metadata_ingest = one_time_token_metadata_ingest,
                 auth_host = auth_host
     }
@@ -46,10 +45,8 @@ workflow vcf2maf {
 task katsu_dataset_export_vcf {
     #>>>>>> task inputs <<<<<<
     String dataset_name
-    String chord_url
-    String temp_token_metadata_api
-    String temp_token_drs
-    String auth_host
+    String drs_url
+    String metadata_url
 
     # Enclosing command with curly braces {} causes issues with parsing in this
     # command block (tested with womtool-v78). Using triple angle braces made
@@ -65,29 +62,19 @@ task katsu_dataset_export_vcf {
         # Query Katsu for experiment results as VCF files
         # Note: it is not possible to get the corresponding experiments at
         # this step due to the many to many relationship between these objects.
-        headers = (
-            {"Host": "${auth_host}", "X-TT": "${temp_token_metadata_api}"}
-            if "${temp_token_metadata_api}"
-            else {}
-        )
+
         # Beware: results are paginated! 10,000 is supposedly big enough
         # (actually the upper limit)
         # TODO: handle pagination, i.e. if the `next` property is set, loop
         # over the pages of results
-        metadata_url = "${chord_url}/api/metadata/api/experimentresults?datasets=${dataset_name}&file_format=vcf&page_size=20"
-        response = requests.get(metadata_url, headers=headers, verify=False)
+        metadata_url = "${metadata_url}/api/experimentresults?datasets=${dataset_name}&file_format=vcf&page_size=20"
+        response = requests.get(metadata_url, verify=False)
         r = response.json()
 
         if r["count"] == 0:
             sys.exit("No VCF file to convert from dataset ${dataset_name}")
 
         # Process each VCF from the results
-        headers = (
-            {"Host": "${auth_host}", "X-TT": "${temp_token_drs}"}
-            if "${temp_token_drs}"
-            else {}
-        )
-
         vcf_dict = dict()   # vcf processed keyed by filename
         with open("vcf_files.tsv", "w") as file_handle:
 
@@ -102,8 +89,8 @@ task katsu_dataset_export_vcf {
                 # TODO add a default global parameter
                 assembly_id = result.get("genome_assembly_id", "GRCh37")
 
-                drs_url = f"${chord_url}/api/drs/search?name={vcf}&internal_path=1"
-                response = requests.get(drs_url, headers=headers, verify=False)
+                drs_url = f"${drs_url}/search?name={vcf}&internal_path=1"
+                response = requests.get(drs_url, verify=False)
                 if not response.ok:
                     continue
                 drs_resp = response.json()
@@ -140,7 +127,7 @@ task vcf_2_maf {
     File vcf_files
     String vep_species
     String vep_cache_dir
-    String chord_url
+    String drs_url
     String temp_token_drs
     String auth_host
 
@@ -237,7 +224,7 @@ task vcf_2_maf {
             "deduplicate": True
         }
 
-        drs_url = "${chord_url}/api/drs/private/ingest/"
+        drs_url = "${drs_url}/private/ingest/"
         try:
             response = requests.post(
                 drs_url,
@@ -279,7 +266,7 @@ task vcf_2_maf {
 task katsu_update_experiment_results_with_maf {
     #>>>>>> task inputs <<<<<<
     String dataset_id
-    String chord_url
+    String metadata_url
     String one_time_token_metadata_ingest
     String auth_host
     File experiment_results_json
@@ -351,7 +338,7 @@ task katsu_update_experiment_results_with_maf {
             else {}
         )
 
-        metadata_url = f"${chord_url}/api/metadata/private/ingest"
+        metadata_url = f"${metadata_url}/private/ingest"
         data = {
             "table_id": "FROM_DERIVED_DATA",
             "workflow_id": "maf_derived_from_vcf_json",

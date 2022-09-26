@@ -61,6 +61,8 @@ WORKFLOW_MAF_DERIVED_FROM_VCF_JSON = "maf_derived_from_vcf_json"
 WORKFLOW_VCF2MAF = "vcf2maf"
 WORKFLOW_CBIOPORTAL = "cbioportal"
 
+FROM_CONFIG = "FROM_CONFIG"
+
 METADATA_WORKFLOWS = {
     "ingestion": {
         WORKFLOW_PHENOPACKETS_JSON: {
@@ -273,11 +275,6 @@ METADATA_WORKFLOWS = {
             "file": "vcf2maf.wdl",
             "auth": [
                 {
-                    "id": "temp_token_metadata_api",
-                    "type": "tt",
-                    "scope": "/api/metadata/api/",
-                },
-                {
                     "id": "one_time_token_metadata_ingest",
                     "type": "ott",
                     "scope": "/api/metadata/private/ingest/",
@@ -303,16 +300,30 @@ METADATA_WORKFLOWS = {
                     "id": "chord_url",
                     "type": "string",
                     "required": True,
-                    "value": settings.CHORD_URL,
+                    "value": FROM_CONFIG,
                     "hidden": True,
                 },
                 {
                     "id": "vep_cache_dir",
                     "type": "string",
                     "required": True,
-                    "value": "",
+                    "value": FROM_CONFIG,
                     "hidden": True,
-                }
+                },
+                {
+                    "id": "drs_url",
+                    "type": "string",
+                    "required": True,
+                    "value": FROM_CONFIG,
+                    "hidden": True,
+                },
+                {
+                    "id": "metadata_url",
+                    "type": "string",
+                    "required": True,
+                    "value": FROM_CONFIG,
+                    "hidden": True,
+                },
             ],
             "outputs": [
                 {
