@@ -92,7 +92,7 @@ task get_maf {
 
         MAF_LIST = "${run_dir}/export/${dataset_id}/maf_list.tsv"
         MUTATION_DATA_FILE= "${run_dir}/export/${dataset_id}/data_mutations_extended.txt"
-        CASE_FILE = "${run_dir}/export/${dataset_id}/case_list_sequenced.txt"
+        CASE_FILE = "${run_dir}/export/${dataset_id}/case_lists/case_list_sequenced.txt"
 
         # TODO: replae this when MAF files can be inferred from experimental_results data
         case_list = set()  # sample ids that have a maf file associated with

@@ -99,10 +99,13 @@ class ExportCBioTest(TestCase):
             study_export(file_export.get_path, self.study_id)
             export_dir = file_export.get_path()
             self.assertTrue(path.exists(export_dir))
-            for (dirpath, dirnames, filenames) in walk(export_dir):
-                filesSet = {*filenames}
-                self.assertTrue(CBIO_FILES_SET.issubset(filesSet))
-                break   # do not recurse the directory tree
+
+            # recursively walk the export dir to get the generated files
+            filesSet = set()
+            for dirpath, dirnames, filenames in walk(export_dir):
+                filesSet.update([path.relpath(path.join(dirpath, fn), export_dir) for fn in filenames])
+
+            self.assertTrue(CBIO_FILES_SET.issubset(filesSet))
 
     def test_export_cbio_study_meta(self):
         with io.StringIO() as output:

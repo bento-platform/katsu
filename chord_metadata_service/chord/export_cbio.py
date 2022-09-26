@@ -26,7 +26,7 @@ PATIENT_META_FILENAME = "meta_clinical_patient.txt"
 MUTATION_META_FILENAME = "meta_mutation.txt"
 MUTATION_DATA_FILENAME = "data_mutations_extended.txt"   # is generated during workflow from files coming from DRS
 MAF_LIST_FILENAME = 'maf_list.tsv'  # Accessory file
-CASE_LIST_SEQUENCED = "case_list_sequenced.txt"
+CASE_LIST_SEQUENCED = "case_lists/case_list_sequenced.txt"  # in a subfolder
 
 
 CBIO_FILES_SET = frozenset({
