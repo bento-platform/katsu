@@ -235,8 +235,8 @@ class ExportCBioTest(TestCase):
                 pieces = line.rstrip().split('\t')
                 # 2 fields per line
                 self.assertEqual(len(pieces), 2)
-                # first field is a vcf filename
-                self.assertIn('.vcf', pieces[0])
+                # first field is a maf filename
+                self.assertIn('.maf', pieces[0])
                 break
 
     def test_export_mutation_meta(self):
