@@ -2,22 +2,21 @@ workflow cbioportal {
     String dataset_id
     String chord_url
     String run_dir
-    String one_time_token
-    String one_time_token_host
-    String? temp_token = ""
-    String? temp_token_host = ""
+    String one_time_token_metadata_export
+    String auth_host
+    String? temp_token_drs = ""
 
     call katsu_dataset_export {
         input: dataset_id = dataset_id,
                chord_url = chord_url,
                run_dir = run_dir,
-               one_time_token = one_time_token,
-               one_time_token_host = one_time_token_host
+               one_time_token_metadata_export = one_time_token_metadata_export,
+               auth_host = auth_host
     }
 
     call get_maf {
-        input: temp_token = temp_token,
-               temp_token_host = temp_token_host,
+        input: temp_token_drs = temp_token_drs,
+               auth_host = auth_host,
                chord_url = chord_url,
                dataset_id = dataset_id,
                run_dir = run_dir
@@ -35,8 +34,8 @@ task katsu_dataset_export {
     String dataset_id
     String chord_url
     String run_dir
-    String one_time_token
-    String one_time_token_host
+    String one_time_token_metadata_export
+    String auth_host
 
     #>>>>>> task constants <<<<<
     # workaround for var interpolation. Syntax ${} confuses wdl parsers
@@ -51,7 +50,7 @@ task katsu_dataset_export {
     command <<<
         # Export results at export_path and returns http code 200 in case of success
         RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
-            -H "Content-Type: application/json" -H "Host: ${one_time_token_host}" -H "X-OTT: ${one_time_token}" \
+            -H "Content-Type: application/json" -H "Host: ${auth_host}" -H "X-OTT: ${one_time_token_metadata_export}" \
             -d '{"format": "cbioportal", "object_type": "dataset", "object_id": "${dataset_id}", "output_path": "${run_dir}"}' \
             "${chord_url}/api/metadata/private/export")
 
@@ -72,8 +71,8 @@ task katsu_dataset_export {
 
 task get_maf {
     #>>>>>>> task inputs <<<<<<<
-    String temp_token
-    String temp_token_host
+    String temp_token_drs
+    String auth_host
     String chord_url
     String run_dir
     String dataset_id
@@ -88,7 +87,7 @@ task get_maf {
         import json
         import requests
 
-        headers = {"Host": "${temp_token_host}", "X-TT": "${temp_token}"} if "${temp_token}" else {}
+        headers = {"Host": "${auth_host}", "X-TT": "${temp_token_drs}"} if "${temp_token_drs}" else {}
 
         work_dir = "${run_dir}/export/${dataset_id}"
         MAF_LIST = f"{work_dir}/maf_list.txt"
