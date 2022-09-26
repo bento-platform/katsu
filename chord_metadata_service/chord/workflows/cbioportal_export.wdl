@@ -45,7 +45,7 @@ task katsu_dataset_export {
 
     # Enclosing command with curly braces {} causes issues with parsing in this
     # command block (tested with womtool-v78). Using triple angle braces made
-    # interpolation more straightforward. According to specs, this should 
+    # interpolation more straightforward. According to specs, this should
     # restrict to ~{} syntax instead of ${} for string interpolation, which is
     # accepted by womtools but is not recognized by toil runner...
     command <<<
@@ -54,7 +54,7 @@ task katsu_dataset_export {
             -H "Content-Type: application/json" -H "Host: ${one_time_token_host}" -H "X-OTT: ${one_time_token}" \
             -d '{"format": "cbioportal", "object_type": "dataset", "object_id": "${dataset_id}", "output_path": "${run_dir}"}' \
             "${chord_url}/api/metadata/private/export")
-        
+
         if [ $RESPONSE != "204" ]
         then
             echo "Error: Metadata service replied with HTTP code ${dollar}{RESPONSE}" 1>&2  # to stderr
@@ -94,14 +94,14 @@ task get_maf {
         MUTATION_DATA_FILE= "${run_dir}/export/${dataset_id}/data_mutations_extended.txt"
         CASE_FILE = "${run_dir}/export/${dataset_id}/case_lists/case_list_sequenced.txt"
 
-        # TODO: replae this when MAF files can be inferred from experimental_results data
+        # TODO: replace this when MAF files can be inferred from experimental_results data
         case_list = set()  # sample ids that have a maf file associated with
 
         with open(MAF_LIST) as file_handle, \
-            open(MUTATION_DATA_FILE, 'wb') as mutation_file_handle:
+            open(MUTATION_DATA_FILE, 'w') as mutation_file_handle:
 
-            # Each line in maf_list begins with the file name
-            nb_files_processed = 0
+            # Each line in maf_list begins with the file uri
+            no_file_processed_yet = True
             for i, line in enumerate(file_handle):
 
                 ### REMOVE THIS ####
@@ -109,52 +109,38 @@ task get_maf {
                 if i > 10: break
 
                 fields = line.split()
-                maf_file = fields[0]
+                maf_uri = fields[0]
+                object_id = maf_uri.split("/")[-1]
 
-                # Ask DRS for the maf file URI
-                # TODO: for now infer maf filename from vcf file names
-                # TODO: change the logic when MAF files are added to the 
-                # experiment_results in the metadata service
-                drs_url = f"${chord_url}/api/drs/search?fuzzy_name={maf_file}.maf"
-                response = requests.get(drs_url, headers=headers, verify=False)
+
+                # Request from DRS the maf file absolute local path
+                drs_object_url = f"${chord_url}/api/drs/objects/{object_id}?internal_path=1"
+                response = requests.get(drs_object_url, headers=headers, verify=False)
                 r = response.json()
-                
+
                 if (len(r) == 0):
-                    print(f"maf file {maf_file} not found")
+                    print(f"maf file with id {object_id} not found")
                     continue
 
-                case_list.add(fields[1])
+                maf_path = filter(
+                    lambda method: method["type"] == "file",
+                    r[0]["access_methods"]
+                )[0]["access_url"]["url"]
 
-                # Extract DRS generated URL
-                # The following code breaks due to a bug in the DRS url generation
-                # See: issue #1085 in bento redmine repo
-                # Until it is fixed, urls must be generated "manually" assuming
-                # the http access is available for the given file.
-                # method = next(filter(
-                #     lambda method: method['type'] == 'http',
-                #     r[0]['access_methods']
-                # ), None)
-                # if method is None:
-                #     print(f"No suitable access method found for maf file {maf_file}")
-                #     continue
-
-                # Get the file from DRS and append its content to the mutation file
-                drs_object_url = f"${chord_url}/api/drs/objects/{r[0]['id']}/download"
-                response = requests.get(drs_object_url,
-                    headers=headers,
-                    verify=False,
-                    stream=True
-                )
-                for line_no, chunk in enumerate(response.iter_lines(chunk_size=4096)):
+                with open(maf_path, "r") as maf_file_handle:
                     # first line of .maf file has the version number
                     # second line contains field names
                     # Both are skipped, unless it is the first file processed
-                    if line_no < 2 and nb_files_processed > 0:
-                        continue
+                    start_line = 0 if no_file_processed_yet else 2
 
-                    mutation_file_handle.write(chunk + b"\n")
+                    for line_no, line in enumerate(maf_file_handle, start=start_line):
+                        mutation_file_handle.write(line + "\n")
 
-                nb_files_processed += 1
+                    no_file_processed_yet = False
+
+                # As the file has been found, prepare the case list with the
+                # corresponding sample ID.
+                case_list.add(fields[1])
 
         # Append to the case_list file, the list of sample ids associated with
         # mutation data
