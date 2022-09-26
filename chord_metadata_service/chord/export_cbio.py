@@ -66,39 +66,39 @@ def study_export(getPath: Callable[[str], str], dataset_id: str):
     cbio_study_id = str(dataset.identifier)
 
     # Export study file
-    with open(getPath(STUDY_FILENAME), 'w') as file_study:
+    with open(getPath(STUDY_FILENAME), 'w', newline='\n') as file_study:
         study_export_meta(dataset, file_study)
 
     # Export patients.
-    with open(getPath(PATIENT_DATA_FILENAME), 'w') as file_patient:
+    with open(getPath(PATIENT_DATA_FILENAME), 'w', newline='\n') as file_patient:
         # Note: plural in `phenopackets` is intentional (related_name property in model)
         indiv = Individual.objects.filter(phenopackets__table__ownership_record__dataset_id=dataset.identifier)
         individual_export(indiv, file_patient)
 
-    with open(getPath(PATIENT_META_FILENAME), 'w') as file_patient_meta:
+    with open(getPath(PATIENT_META_FILENAME), 'w', newline='\n') as file_patient_meta:
         clinical_meta_export(cbio_study_id, PATIENT_DATATYPE, file_patient_meta)
 
     # Export samples
-    with open(getPath(SAMPLE_DATA_FILENAME), 'w') as file_sample:
+    with open(getPath(SAMPLE_DATA_FILENAME), 'w', newline='\n') as file_sample:
         sampl = pm.Biosample.objects.filter(phenopacket__table__ownership_record__dataset_id=dataset.identifier)\
             .annotate(phenopacket_subject_id=F("phenopacket__subject"))
         sample_export(sampl, file_sample)
 
-    with open(getPath(SAMPLE_META_FILENAME), 'w') as file_sample_meta:
+    with open(getPath(SAMPLE_META_FILENAME), 'w', newline='\n') as file_sample_meta:
         clinical_meta_export(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
 
     # .maf files stored
-    with open(getPath(MAF_LIST_FILENAME), 'w') as file_maf_list:
+    with open(getPath(MAF_LIST_FILENAME), 'w', newline='\n') as file_maf_list:
         # TODO: change to MAF format when it is added to Katsu
         exp_res = ExperimentResult.objects.filter(experiment__table__ownership_record__dataset_id=dataset.identifier) \
             .filter(file_format='VCF') \
             .annotate(biosample_id=F("experiment__biosample"))
         maf_list(exp_res, file_maf_list)
 
-    with open(getPath(MUTATION_META_FILENAME), 'w') as file_mutation_meta:
+    with open(getPath(MUTATION_META_FILENAME), 'w', newline='\n') as file_mutation_meta:
         mutation_meta_export(cbio_study_id, file_mutation_meta)
 
-    with open(getPath(CASE_LIST_SEQUENCED), 'w') as file_case_list:
+    with open(getPath(CASE_LIST_SEQUENCED), 'w', newline='\n') as file_case_list:
         case_list_export(cbio_study_id, file_case_list)
 
 
@@ -173,7 +173,7 @@ def individual_export(results, file_handle: TextIO):
     headers = individual_to_patient_header(columns)
 
     file_handle.writelines([line + '\n' for line in headers])
-    dict_writer = csv.DictWriter(file_handle, fieldnames=columns, delimiter='\t')
+    dict_writer = csv.DictWriter(file_handle, fieldnames=columns, delimiter='\t', lineterminator='\n')
     dict_writer.writerows(individuals)
 
 
@@ -238,7 +238,7 @@ def sample_export(results, file_handle: TextIO):
     headers = biosample_to_sample_header(columns)
 
     file_handle.writelines([line + '\n' for line in headers])
-    dict_writer = csv.DictWriter(file_handle, fieldnames=columns, delimiter='\t')
+    dict_writer = csv.DictWriter(file_handle, fieldnames=columns, delimiter='\t', lineterminator='\n')
     dict_writer.writerows(samples)
 
 
