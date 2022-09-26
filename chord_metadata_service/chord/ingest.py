@@ -340,18 +340,6 @@ METADATA_WORKFLOWS = {
             "description": "This workflow creates a bundle for cBioPortal ingestion.",
             "data_type": None,
             "file": "cbioportal_export.wdl",
-            "auth": [
-                {
-                    "id": "temp_token_drs",
-                    "type": "tt",
-                    "scope": "/api/drs/",
-                },
-                {
-                    "id": "one_time_token_metadata_export",
-                    "type": "ott",
-                    "scope": "/api/metadata/private/export/",
-                },
-            ],
             "inputs": [
                 {
                     "id": "dataset_id",
@@ -359,12 +347,19 @@ METADATA_WORKFLOWS = {
                     "required": True,
                 },
                 {
-                    "id": "chord_url",
+                    "id": "metadata_url",
                     "type": "string",
                     "required": True,
-                    "value": settings.CHORD_URL,
+                    "value": FROM_CONFIG,
                     "hidden": True,
-                }
+                },
+                {
+                    "id": "drs_url",
+                    "type": "string",
+                    "required": True,
+                    "value": FROM_CONFIG,
+                    "hidden": True,
+                },
             ],
             "outputs": [
                 {

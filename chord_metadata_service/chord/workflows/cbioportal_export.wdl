@@ -1,23 +1,17 @@
 workflow cbioportal {
     String dataset_id
-    String chord_url
     String run_dir
-    String one_time_token_metadata_export
-    String auth_host
-    String? temp_token_drs = ""
+    String metadata_url
+    String drs_url
 
     call katsu_dataset_export {
         input: dataset_id = dataset_id,
-               chord_url = chord_url,
                run_dir = run_dir,
-               one_time_token_metadata_export = one_time_token_metadata_export,
-               auth_host = auth_host
+               metadata_url = metadata_url
     }
 
     call get_maf {
-        input: temp_token_drs = temp_token_drs,
-               auth_host = auth_host,
-               chord_url = chord_url,
+        input: drs_url = drs_url,
                dataset_id = dataset_id,
                run_dir = run_dir
     }
@@ -32,10 +26,8 @@ workflow cbioportal {
 task katsu_dataset_export {
     #>>>>>> task inputs <<<<<<
     String dataset_id
-    String chord_url
+    String metadata_url
     String run_dir
-    String one_time_token_metadata_export
-    String auth_host
 
     #>>>>>> task constants <<<<<
     # workaround for var interpolation. Syntax ${} confuses wdl parsers
@@ -52,9 +44,9 @@ task katsu_dataset_export {
         RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -d '{"format": "cbioportal", "object_type": "dataset", "object_id": "${dataset_id}", "output_path": "${run_dir}"}' \
-            "${chord_url}/api/metadata/private/export")
+            "${metadata_url}/private/export")
 
-        if [ $RESPONSE != "204" ]
+        if [ "${dollar}{RESPONSE}" != "204" ]
         then
             echo "Error: Metadata service replied with HTTP code ${dollar}{RESPONSE}" 1>&2  # to stderr
             exit 1
@@ -71,9 +63,7 @@ task katsu_dataset_export {
 
 task get_maf {
     #>>>>>>> task inputs <<<<<<<
-    String temp_token_drs
-    String auth_host
-    String chord_url
+    String drs_url
     String run_dir
     String dataset_id
 
@@ -86,8 +76,6 @@ task get_maf {
         python <<CODE
         import json
         import requests
-
-        headers = {"Host": "${auth_host}", "X-TT": "${temp_token_drs}"} if "${temp_token_drs}" else {}
 
         work_dir = "${run_dir}/export/${dataset_id}"
         MAF_LIST = f"{work_dir}/maf_list.txt"
@@ -106,8 +94,8 @@ task get_maf {
 
                 # Request from DRS the maf file absolute local path
                 object_id = maf_uri.split("/")[-1]
-                drs_object_url = f"${chord_url}/api/drs/objects/{object_id}?internal_path=1"
-                response = requests.get(drs_object_url, headers=headers, verify=False)
+                drs_object_url = f"${drs_url}/objects/{object_id}?internal_path=1"
+                response = requests.get(drs_object_url, verify=False)
                 r = response.json()
 
                 if (len(r) == 0):
@@ -134,7 +122,7 @@ task get_maf {
     >>>
 
     output {
-        File txt_output_maf = stdout()
-        File err_output_maf = stderr()
+        # File txt_output_maf = stdout()
+        # File err_output_maf = stderr()
     }
 }
