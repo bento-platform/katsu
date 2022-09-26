@@ -4,6 +4,8 @@ workflow cbioportal {
     String run_dir
     String one_time_token
     String one_time_token_host
+    String? temp_token = ""
+    String? temp_token_host = ""
 
     call katsu_dataset_export {
         input: dataset_id = dataset_id,
@@ -11,6 +13,14 @@ workflow cbioportal {
                run_dir = run_dir,
                one_time_token = one_time_token,
                one_time_token_host = one_time_token_host
+    }
+
+    call get_maf {
+        input: temp_token = temp_token,
+               temp_token_host = temp_token_host,
+               chord_url = chord_url,
+               dataset_id = dataset_id,
+               run_dir = run_dir
     }
 
     output {
@@ -52,9 +62,100 @@ task katsu_dataset_export {
         fi
         echo ${dollar}{RESPONSE}
     >>>
+
     output {
-        Array[File] data_txt = glob("export/${dataset_id}/*.txt")
+        Array[File] data_txt = glob("${run_dir}/export/${dataset_id}/*.txt")
         File txt_output = stdout()
         File err_output = stderr()
+    }
+}
+
+task get_maf {
+    #>>>>>>> task inputs <<<<<<<
+    String temp_token
+    String temp_token_host
+    String chord_url
+    String run_dir
+    String dataset_id
+
+    #>>>>>> task constants <<<<<
+    # workaround for var interpolation. Syntax ${} confuses wdl parsers
+    # between wdl level interpolation and shell string interpolation.
+    String dollar = "$"
+
+    command <<<
+        python <<CODE
+        import json
+        import requests
+
+        headers = {"Host": "${temp_token_host}", "X-TT": "${temp_token}"} if "${temp_token}" else {}
+
+        MAF_LIST = "${run_dir}/export/${dataset_id}/maf_list.tsv"
+        MUTATION_DATA_FILE="${run_dir}/export/${dataset_id}/data_mutations_extended.txt"
+
+        with open(MAF_LIST) as file_handle, \
+            open(MUTATION_DATA_FILE, 'wb') as mutation_file_handle:
+
+            # Each line in maf_list begins with the file name
+            file_no = 0
+            for i, line in enumerate(file_handle):
+
+                ### REMOVE THIS ####
+                ### TESTING ONLY ####
+                if i > 10: break
+
+                fields = line.split()
+                maf_file = fields[0]
+
+                # Ask DRS for the maf file URI
+                # TODO: for now infer maf filename from vcf file names
+                # TODO: change the logic when MAF files are added to the 
+                # experiment_results in the metadata service
+                drs_url = f"${chord_url}/api/drs/search?fuzzy_name={maf_file}.maf"
+                response = requests.get(drs_url, headers=headers, verify=False)
+                r = response.json()
+                
+                if (len(r) == 0):
+                    print(f"maf file {maf_file} not found")
+                    continue
+
+                # Extract DRS generated URL
+                # The following code breaks due to a bug in the DRS url generation
+                # See: issue #1085 in bento redmine repo
+                # Until it is fixed, urls must be generated "manually" assuming
+                # the http access is available for the given file.
+                # method = next(filter(
+                #     lambda method: method['type'] == 'http',
+                #     r[0]['access_methods']
+                # ), None)
+                # if method is None:
+                #     print(f"No suitable access method found for maf file {maf_file}")
+                #     continue
+
+                # Get the file from DRS and append its content to the mutation file
+                drs_object_url = f"${chord_url}/api/drs/objects/{r[0]['id']}/download"
+                response = requests.get(drs_object_url,
+                    headers=headers,
+                    verify=False,
+                    stream=True
+                )
+                for line_no, chunk in enumerate(response.iter_lines(chunk_size=4096)):
+                    # first line of .maf file is skipped, unless it is the first
+                    # file processed
+
+                    if line_no == 0 and file_no > 0:
+                        continue
+
+                    mutation_file_handle.write(chunk + b"\n")
+
+                file_no += 1
+
+        CODE
+    >>>
+
+    output {
+        File mutation_data = "${run_dir}/export/${dataset_id}/data_mutations_extended.txt"
+        File txt_output_maf = stdout()
+        File err_output_maf = stderr()
     }
 }
