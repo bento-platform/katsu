@@ -31,6 +31,7 @@ from chord_metadata_service.experiments.models import ExperimentResult
 # noinspection PyProtectedMember
 from chord_metadata_service.chord.ingest import (
     WORKFLOW_EXPERIMENTS_JSON,
+    WORKFLOW_MAF_DERIVED_FROM_VCF_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
     WORKFLOW_INGEST_FUNCTION_MAP,
 )
@@ -41,6 +42,7 @@ from chord_metadata_service.phenopackets import models as PhModel
 from .constants import VALID_DATA_USE_1
 from .example_ingest import (
     EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
+    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT,
     EXAMPLE_INGEST_PHENOPACKET,
     EXAMPLE_INGEST_OUTPUTS,
 )
@@ -71,7 +73,12 @@ class ExportCBioTest(TestCase):
         self.exp = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
             EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.t_exp.identifier
         )
-        self.exp_res = ExperimentResult.objects.filter(experiment=self.exp)
+        # append derived MAF files to experiment results
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT, self.t_exp.identifier
+        )
+        self.exp_res = ExperimentResult.objects.all()
+
         # Update the last sample to remove direct reference to any individual.
         # In that case, Sample and Individual are cross referenced through the
         # Phenopacket model.
@@ -87,7 +94,7 @@ class ExportCBioTest(TestCase):
         output.seek(0)
         content = dict()
         for line in output:
-            key, value = line.rstrip().split(': ')
+            key, value = line.rstrip().split(": ")
             content[key] = value
         return content
 
@@ -114,30 +121,30 @@ class ExportCBioTest(TestCase):
             study_export_meta(self.d, output)
             content = self.stream_to_dict(output)
 
-        self.assertIn('type_of_cancer', content)
-        self.assertEqual(content['cancer_study_identifier'], self.study_id)
-        self.assertEqual(content['name'], self.d.title)
-        self.assertEqual(content['description'], self.d.description)
+        self.assertIn("type_of_cancer", content)
+        self.assertEqual(content["cancer_study_identifier"], self.study_id)
+        self.assertEqual(content["name"], self.d.title)
+        self.assertEqual(content["description"], self.d.description)
 
     def test_export_cbio_sample_meta(self):
         with io.StringIO() as output:
             clinical_meta_export(self.study_id, SAMPLE_DATATYPE, output)
             content = self.stream_to_dict(output)
 
-        self.assertEqual(content['cancer_study_identifier'], self.study_id)
-        self.assertEqual(content['genetic_alteration_type'], 'CLINICAL')
-        self.assertEqual(content['datatype'], 'SAMPLE_ATTRIBUTES')
-        self.assertEqual(content['data_filename'], SAMPLE_DATA_FILENAME)
+        self.assertEqual(content["cancer_study_identifier"], self.study_id)
+        self.assertEqual(content["genetic_alteration_type"], "CLINICAL")
+        self.assertEqual(content["datatype"], "SAMPLE_ATTRIBUTES")
+        self.assertEqual(content["data_filename"], SAMPLE_DATA_FILENAME)
 
     def test_export_cbio_patient_meta(self):
         with io.StringIO() as output:
             clinical_meta_export(self.study_id, PATIENT_DATATYPE, output)
             content = self.stream_to_dict(output)
 
-        self.assertEqual(content['cancer_study_identifier'], self.study_id)
-        self.assertEqual(content['genetic_alteration_type'], 'CLINICAL')
-        self.assertEqual(content['datatype'], 'PATIENT_ATTRIBUTES')
-        self.assertEqual(content['data_filename'], PATIENT_DATA_FILENAME)
+        self.assertEqual(content["cancer_study_identifier"], self.study_id)
+        self.assertEqual(content["genetic_alteration_type"], "CLINICAL")
+        self.assertEqual(content["datatype"], "PATIENT_ATTRIBUTES")
+        self.assertEqual(content["data_filename"], PATIENT_DATA_FILENAME)
 
     def test_export_cbio_patient_data(self):
         indiv = Individual.objects.filter(phenopackets=self.p)
@@ -150,11 +157,11 @@ class ExportCBioTest(TestCase):
             for i, line in enumerate(output):
                 # 4 first header lines begin with `#`
                 if i < 4:
-                    self.assertEqual(line[0], '#')
+                    self.assertEqual(line[0], "#")
                     continue
 
                 # Following lines are regular TSV formatted lines
-                pieces = line.rstrip().split('\t')
+                pieces = line.rstrip().split("\t")
 
                 # 5th line is a header with predefined field names
                 if i == 4:
@@ -163,7 +170,7 @@ class ExportCBioTest(TestCase):
 
                     # At least PATIENT_ID and SEX
                     self.assertGreaterEqual(field_count, 2)
-                    self.assertIn('PATIENT_ID', pieces)
+                    self.assertIn("PATIENT_ID", pieces)
                     continue
 
                 # TSV body. Inspect first line and break
@@ -171,7 +178,7 @@ class ExportCBioTest(TestCase):
                 record = dict(zip(field_names, pieces))
 
                 # PATIENT_ID can't contain characters other than letters/numbers/hyphen/underscore
-                self.assertTrue(REGEXP_INVALID_FOR_ID.search(record['PATIENT_ID']) is None)
+                self.assertTrue(REGEXP_INVALID_FOR_ID.search(record["PATIENT_ID"]) is None)
                 self.assertEqual(record["PATIENT_ID"], sanitize_id(EXAMPLE_INGEST_PHENOPACKET["subject"]["id"]))
                 self.assertEqual(record["SEX"], EXAMPLE_INGEST_PHENOPACKET["subject"]["sex"])
                 break
@@ -189,11 +196,11 @@ class ExportCBioTest(TestCase):
             for i, line in enumerate(output):
                 # 4 first header lines begin with `#`
                 if i < 4:
-                    self.assertEqual(line[0], '#')
+                    self.assertEqual(line[0], "#")
                     continue
 
                 # Following lines are regular TSV formatted lines
-                pieces = line.rstrip().split('\t')
+                pieces = line.rstrip().split("\t")
 
                 # 5th line is a header with predefined field names
                 if i == 4:
@@ -202,16 +209,16 @@ class ExportCBioTest(TestCase):
 
                     # At least PATIENT_ID and SAMPLE_ID
                     self.assertGreaterEqual(field_count, 2)
-                    self.assertIn('PATIENT_ID', pieces)
-                    self.assertIn('SAMPLE_ID', pieces)
+                    self.assertIn("PATIENT_ID", pieces)
+                    self.assertIn("SAMPLE_ID", pieces)
                     continue
 
                 # TSV body: 1 row per sample
                 self.assertEqual(field_count, len(pieces))
                 record = dict(zip(field_names, pieces))
 
-                self.assertTrue(REGEXP_INVALID_FOR_ID.search(record['PATIENT_ID']) is None)
-                self.assertTrue(REGEXP_INVALID_FOR_ID.search(record['SAMPLE_ID']) is None)
+                self.assertTrue(REGEXP_INVALID_FOR_ID.search(record["PATIENT_ID"]) is None)
+                self.assertTrue(REGEXP_INVALID_FOR_ID.search(record["SAMPLE_ID"]) is None)
                 self.assertEqual(
                     record["PATIENT_ID"],
                     sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["individual_id"])
@@ -226,17 +233,15 @@ class ExportCBioTest(TestCase):
 
     def test_export_maf_list(self):
         exp_res = self.exp_res.filter(experiment__table__ownership_record__dataset_id=self.study_id)\
-            .filter(file_format='VCF') \
+            .filter(file_format="MAF") \
             .annotate(biosample_id=F("experiment__biosample"))
+        self.assertTrue(exp_res.count() > 0)
         with io.StringIO() as output:
             maf_list(exp_res, output)
             output.seek(0)
-            for line in enumerate(output):
-                pieces = line.rstrip().split('\t')
-                # 2 fields per line
-                self.assertEqual(len(pieces), 2)
-                # first field is a maf filename
-                self.assertIn('.maf', pieces[0])
+            for line in output:
+                # line contains a drs uri
+                self.assertIn("drs://", line)
                 break
 
     def test_export_mutation_meta(self):
@@ -244,17 +249,20 @@ class ExportCBioTest(TestCase):
             mutation_meta_export(self.study_id, output)
             content = self.stream_to_dict(output)
 
-        self.assertEqual(content['cancer_study_identifier'], self.study_id)
-        self.assertEqual(content['genetic_alteration_type'], 'MUTATION_EXTENDED')
-        self.assertEqual(content['datatype'], 'MAF')
-        self.assertEqual(content['data_filename'], MUTATION_DATA_FILENAME)
+        self.assertEqual(content["cancer_study_identifier"], self.study_id)
+        self.assertEqual(content["genetic_alteration_type"], "MUTATION_EXTENDED")
+        self.assertEqual(content["datatype"], "MAF")
+        self.assertEqual(content["data_filename"], MUTATION_DATA_FILENAME)
 
     def test_export_case_list(self):
+        exp_res = self.exp_res.filter(experiment__table__ownership_record__dataset_id=self.study_id)\
+            .filter(file_format="MAF") \
+            .annotate(biosample_id=F("experiment__biosample"))
         with io.StringIO() as output:
-            case_list_export(self.study_id, output)
+            case_list_export(self.study_id, exp_res, output)
             content = self.stream_to_dict(output)
 
-        self.assertEqual(content['cancer_study_identifier'], self.study_id)
-        self.assertIn(self.study_id, content['stable_id'])
-        self.assertIn('case_list_name', content)
-        self.assertIn('case_list_description', content)
+        self.assertEqual(content["cancer_study_identifier"], self.study_id)
+        self.assertIn(self.study_id, content["stable_id"])
+        self.assertIn("case_list_name", content)
+        self.assertIn("case_list_description", content)
