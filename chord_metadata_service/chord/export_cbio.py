@@ -252,7 +252,7 @@ def maf_list(results, file_handle: TextIO):
 
     experiments = []
     for experiment in results:
-        experiments.append((experiment.filename, experiment.biosample_id))
+        experiments.append((experiment.filename, sanitize_id(experiment.biosample_id)))
 
     csv_writer = csv.writer(file_handle, delimiter='\t')
     csv_writer.writerows(experiments)
