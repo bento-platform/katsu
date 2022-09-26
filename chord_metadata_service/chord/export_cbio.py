@@ -117,7 +117,7 @@ def study_export_meta(dataset: Dataset, file_handle: TextIO):
         lines['citation'] = dataset.primary_publications[0]
     # pmid: unvailable
     # groups: unused for authentication
-    # add_global_case_list: ?
+    lines['add_global_case_list'] = 'true'  # otherwise causes an error at validation
     # tags_file: ?
     # reference_genome: ?
 
