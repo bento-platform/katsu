@@ -50,7 +50,7 @@ task katsu_dataset_export {
     command <<<
         # Export results at export_path and returns http code 200 in case of success
         RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
-            -H "Content-Type: application/json" -H "Host: ${auth_host}" -H "X-OTT: ${one_time_token_metadata_export}" \
+            -H "Content-Type: application/json" \
             -d '{"format": "cbioportal", "object_type": "dataset", "object_id": "${dataset_id}", "output_path": "${run_dir}"}' \
             "${chord_url}/api/metadata/private/export")
 
