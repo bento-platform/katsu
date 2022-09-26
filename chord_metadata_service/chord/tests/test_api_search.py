@@ -39,7 +39,14 @@ from .constants import (
     TEST_FHIR_SEARCH_QUERY,
 )
 from ..models import Project, Dataset, TableOwnership, Table
-from ..data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
+from ..data_types import (
+    DATA_TYPE_EXPERIMENT,
+    DATA_TYPE_EXPERIMENT_RESULT,
+    DATA_TYPE_MCODEPACKET,
+    DATA_TYPE_PHENOPACKET,
+    DATA_TYPE_READSET,
+    DATA_TYPES
+)
 
 POST_GET = ("POST", "GET")
 
@@ -49,11 +56,13 @@ class DataTypeTest(APITestCase):
         r = self.client.get(reverse("data-type-list"))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
-        self.assertEqual(len(c), 4)
-        ids = (c[0]["id"], c[1]["id"], c[2]["id"])
+        self.assertEqual(len(c), len(DATA_TYPES))
+        ids = [dt["id"] for dt in c]
         self.assertIn(DATA_TYPE_EXPERIMENT, ids)
         self.assertIn(DATA_TYPE_MCODEPACKET, ids)
         self.assertIn(DATA_TYPE_PHENOPACKET, ids)
+        self.assertIn(DATA_TYPE_READSET, ids)
+        self.assertIn(DATA_TYPE_EXPERIMENT_RESULT, ids)
 
     def test_data_type_detail(self):
         r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}))

@@ -16,11 +16,14 @@ from bento_lib.schemas.bento import BENTO_INGEST_SCHEMA
 from bento_lib.responses import errors
 from bento_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
-from .ingest import METADATA_WORKFLOWS, WORKFLOWS_PATH, WORKFLOW_INGEST_FUNCTION_MAP, IngestError
+from .ingest import (METADATA_WORKFLOWS, WORKFLOWS_PATH,
+                     WORKFLOW_INGEST_FUNCTION_MAP, IngestError)
 from .models import Table
 
 
 BENTO_INGEST_SCHEMA_VALIDATOR = Draft7Validator(BENTO_INGEST_SCHEMA)
+FROM_DERIVED_DATA = "FROM_DERIVED_DATA"
+TABLE_ID_OVERRIDES = {FROM_DERIVED_DATA}    # These special values skip the checks on the table
 
 logger = logging.getLogger(__name__)
 
@@ -78,10 +81,11 @@ def ingest(request):
 
     table_id = request.data["table_id"]
 
-    if not Table.objects.filter(ownership_record_id=table_id).exists():
-        return Response(errors.bad_request_error(f"Table with ID {table_id} does not exist"), status=400)
+    if table_id not in TABLE_ID_OVERRIDES:
+        if not Table.objects.filter(ownership_record_id=table_id).exists():
+            return Response(errors.bad_request_error(f"Table with ID {table_id} does not exist"), status=400)
 
-    table_id = str(uuid.UUID(table_id))  # Normalize dataset ID to UUID's str format.
+        table_id = str(uuid.UUID(table_id))  # Normalize dataset ID to UUID's str format.
 
     workflow_id = request.data["workflow_id"].strip()
     workflow_outputs = request.data["workflow_outputs"]

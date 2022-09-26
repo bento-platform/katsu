@@ -1,12 +1,14 @@
 import uuid
 
 from django.test import TestCase
+from chord_metadata_service.chord.views_ingest import TABLE_ID_OVERRIDES
 from dateutil.parser import isoparse
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 # noinspection PyProtectedMember
 from chord_metadata_service.chord.ingest import (
+    WORKFLOW_MAF_DERIVED_FROM_VCF_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
     create_phenotypic_feature,
     WORKFLOW_INGEST_FUNCTION_MAP,
@@ -23,10 +25,12 @@ from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from .constants import VALID_DATA_USE_1
 from .example_ingest import (
+    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT,
     EXAMPLE_INGEST_PHENOPACKET,
     EXAMPLE_INGEST_OUTPUTS,
     EXAMPLE_INGEST_EXPERIMENT,
     EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
+    EXAMPLE_INGEST_EXPERIMENT_RESULT,
     EXAMPLE_INGEST_INVALID_PHENOPACKET,
     EXAMPLE_INGEST_MULTIPLE_OUTPUTS,
     EXAMPLE_INGEST_INVALID_EXPERIMENT,
@@ -140,6 +144,26 @@ class IngestTest(TestCase):
         for exp in EXAMPLE_INGEST_EXPERIMENT["experiments"]:
             validation_2 = schema_validation(exp, EXPERIMENT_SCHEMA)
             self.assertEqual(validation_2, True)
+
+    def test_ingesting_experiment_results_json(self):
+        # ingest list of experiments
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.t_exp.identifier
+        )
+        # ingest list of experiment results
+        experiment_results = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT, TABLE_ID_OVERRIDES
+        )
+        self.assertEqual(len(experiment_results), len(EXAMPLE_INGEST_EXPERIMENT_RESULT))
+        # check that it has been linked to the same experiment as the file it
+        # has been derived from.
+        related_results = ExperimentResult.objects.filter(
+            experiment__experiment_results__identifier=EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["identifier"])
+        self.assertIn(
+            EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["extra_properties"]["derived_from"],
+            [v["identifier"] for v in related_results.values("identifier")]
+        )
 
 
 class IngestISOAgeToNumberTest(TestCase):

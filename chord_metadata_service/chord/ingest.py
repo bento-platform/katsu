@@ -19,7 +19,7 @@ from django.conf import settings
 from bento_lib.drs.utils import get_access_method_of_type, fetch_drs_record_by_uri
 
 from chord_metadata_service.chord.data_types import (
-    DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET, DATA_TYPE_READSET
+    DATA_TYPE_EXPERIMENT, DATA_TYPE_EXPERIMENT_RESULT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET, DATA_TYPE_READSET
 )
 from chord_metadata_service.chord.models import Table, TableOwnership
 from chord_metadata_service.experiments import models as em
@@ -34,7 +34,7 @@ from chord_metadata_service.restapi.fhir_ingest import (
 from chord_metadata_service.mcode.parse_fhir_mcode import parse_bundle
 from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
-from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
+from chord_metadata_service.experiments.schemas import EXPERIMENT_RESULT_SCHEMA, EXPERIMENT_SCHEMA
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 requests_unixsocket.monkeypatch()
@@ -57,6 +57,7 @@ WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
 WORKFLOW_MCODE_JSON = "mcode_json"
 WORKFLOW_READSET = "readset"
+WORKFLOW_MAF_DERIVED_FROM_VCF_JSON = "maf_derived_from_vcf_json"
 WORKFLOW_CBIOPORTAL = "cbioportal"
 
 METADATA_WORKFLOWS = {
@@ -237,6 +238,28 @@ METADATA_WORKFLOWS = {
                     "type": "file[]",
                     "map_from_input": "readset_files",
                     "value": "{}"
+                }
+            ]
+        },
+        WORKFLOW_MAF_DERIVED_FROM_VCF_JSON: {
+            "name": "MAF files derived from VCF files as a JSON",
+            "description": "This ingestion workflow will add to the current experiment results "
+                           "MAF files that were generated from VCF files found in the Dataset. ",
+            "data_type": DATA_TYPE_EXPERIMENT_RESULT,
+            "file": "maf_derived_from_vcf_json.wdl",
+            "inputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "required": True,
+                    "extensions": [".json"]
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "json_document",
+                    "type": "file",
+                    "value": "{json_document}"
                 }
             ]
         },
@@ -764,6 +787,59 @@ def ingest_readset_workflow(workflow_outputs, table_id):
             logger.info(f"Attempting ingestion of Readset file from path: {readset_file_path}")
 
 
+# The table_id is required to fit the bento_ingest.schema.json in bento_lib
+# but it is unused. It can be set to any valid table_id or to one of the override
+# values defined in view_ingest.py
+def ingest_maf_derived_from_vcf_workflow(workflow_outputs, table_id):
+    with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
+        logger.info(f"Attempting ingestion of maf derived from vcf JSON from path: {json_doc_path}")
+        return ingest_derived_experiment_results(json_doc_path)
+
+
+def ingest_derived_experiment_results(file):
+    """ Reads a JSON file containing a list of experiment results and adds them
+        to the database.
+        The linkage to experiments is inferred from the `derived_from` category
+        in `extra_properties`
+    """
+
+    exp_res_list = []
+    # Create a map of experiment results identifier to experiment id.
+    # Prefetch results due to the many to many relationship
+    exp = em.Experiment.objects.all().prefetch_related("experiment_results")
+    exp_result2exp = dict()
+    for row in exp.values("id", "experiment_results__identifier"):
+        exp_result2exp[row["experiment_results__identifier"]] = row["id"]
+
+    # JSON file parsing
+    with open(file) as file_handle:
+        json_data = json.load(file_handle)
+        for exp_result in json_data:
+            validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
+            print(f"Validation: {validation} experiment result:{json.dumps(exp_result)}")
+            if not validation:
+                logger.warning(f"Improper schema for experiment result: {json.dumps(exp_result)}")
+                continue
+
+            derived_identifier = exp_result['extra_properties']['derived_from']
+            experiment_id = exp_result2exp.get(derived_identifier, None)
+            if experiment_id is None:
+                logger.warning(f"{exp_result['file_format']} file {exp_result['filename']} derived from \
+                    file {derived_identifier} could not be associated with an experiment.")
+                continue
+
+            new_experiment_results = em.ExperimentResult.objects.create(**exp_result)
+
+            # Add experiment results to the parent experiment (as a many to many
+            # relationship)
+            exp = em.Experiment.objects.get(pk=experiment_id)
+            exp.experiment_results.add(new_experiment_results)
+
+            exp_res_list.append(new_experiment_results)
+
+    return exp_res_list
+
+
 WORKFLOW_INGEST_FUNCTION_MAP = {
     WORKFLOW_EXPERIMENTS_JSON: ingest_experiments_workflow,
     WORKFLOW_PHENOPACKETS_JSON: ingest_phenopacket_workflow,
@@ -771,4 +847,5 @@ WORKFLOW_INGEST_FUNCTION_MAP = {
     WORKFLOW_MCODE_FHIR_JSON: ingest_mcode_fhir_workflow,
     WORKFLOW_MCODE_JSON: ingest_mcode_workflow,
     WORKFLOW_READSET: ingest_readset_workflow,
+    WORKFLOW_MAF_DERIVED_FROM_VCF_JSON: ingest_maf_derived_from_vcf_workflow,
 }
