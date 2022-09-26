@@ -91,26 +91,22 @@ task get_maf {
         headers = {"Host": "${temp_token_host}", "X-TT": "${temp_token}"} if "${temp_token}" else {}
 
         work_dir = "${run_dir}/export/${dataset_id}"
-        MAF_LIST = f"{work_dir}/maf_list.tsv"
+        MAF_LIST = f"{work_dir}/maf_list.txt"
         MUTATION_DATA_FILE= f"{work_dir}/data_mutations_extended.txt"
 
         with open(MAF_LIST) as file_handle, \
             open(MUTATION_DATA_FILE, 'w') as mutation_file_handle:
 
-            # Each line in maf_list begins with the file uri
+            # Each line in maf_list contains the file uri
             no_file_processed_yet = True
-            for i, line in enumerate(file_handle):
+            for i, maf_uri in enumerate(file_handle):
 
                 ### REMOVE THIS ####
                 ### TESTING ONLY ####
                 if i > 10: break
 
-                fields = line.split()
-                maf_uri = fields[0]
-                object_id = maf_uri.split("/")[-1]
-
-
                 # Request from DRS the maf file absolute local path
+                object_id = maf_uri.split("/")[-1]
                 drs_object_url = f"${chord_url}/api/drs/objects/{object_id}?internal_path=1"
                 response = requests.get(drs_object_url, headers=headers, verify=False)
                 r = response.json()

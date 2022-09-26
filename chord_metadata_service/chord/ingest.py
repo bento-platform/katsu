@@ -816,7 +816,6 @@ def ingest_derived_experiment_results(file):
         json_data = json.load(file_handle)
         for exp_result in json_data:
             validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
-            print(f"Validation: {validation} experiment result:{json.dumps(exp_result)}")
             if not validation:
                 logger.warning(f"Improper schema for experiment result: {json.dumps(exp_result)}")
                 continue

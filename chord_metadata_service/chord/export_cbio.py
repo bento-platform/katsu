@@ -26,7 +26,7 @@ PATIENT_DATA_FILENAME = "data_clinical_patient.txt"
 PATIENT_META_FILENAME = "meta_clinical_patient.txt"
 MUTATION_META_FILENAME = "meta_mutation.txt"
 MUTATION_DATA_FILENAME = "data_mutations_extended.txt"   # is generated during workflow from files coming from DRS
-MAF_LIST_FILENAME = 'maf_list.tsv'  # Accessory file
+MAF_LIST_FILENAME = 'maf_list.txt'  # Accessory file
 CASE_LIST_SEQUENCED = "case_lists/case_list_sequenced.txt"  # in a subfolder
 
 
@@ -98,9 +98,6 @@ def study_export(getPath: Callable[[str], str], dataset_id: str):
 
     with open(getPath(MUTATION_META_FILENAME), 'w', newline='\n') as file_mutation_meta:
         mutation_meta_export(cbio_study_id, file_mutation_meta)
-
-    with open(getPath(CASE_LIST_SEQUENCED), 'w', newline='\n') as file_case_list:
-        case_list_export(cbio_study_id, file_case_list)
 
 
 def study_export_meta(dataset: Dataset, file_handle: TextIO):
@@ -245,18 +242,10 @@ def sample_export(results, file_handle: TextIO):
 
 def maf_list(results, file_handle: TextIO):
     """
-    List of maf files/biosample ids associated with this dataset.
-
-    The biosample IDs are added to the maf file before it is catenated to the
-    other maf files for cbioportal ingestion.
+    List of maf files associated with this dataset.
     """
-
-    experiments = []
-    for experiment in results:
-        experiments.append((experiment.extra_properties['uri'], sanitize_id(experiment.biosample_id)))
-
-    csv_writer = csv.writer(file_handle, delimiter='\t')
-    csv_writer.writerows(experiments)
+    maf_uri = [experiment.extra_properties['uri'] for experiment in results]
+    file_handle.writelines(maf_uri)
 
 
 def mutation_meta_export(study_id: str, file_handle: TextIO):

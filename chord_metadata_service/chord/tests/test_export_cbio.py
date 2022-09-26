@@ -258,6 +258,7 @@ class ExportCBioTest(TestCase):
         exp_res = self.exp_res.filter(experiment__table__ownership_record__dataset_id=self.study_id)\
             .filter(file_format="MAF") \
             .annotate(biosample_id=F("experiment__biosample"))
+        self.assertGreater(exp_res.count(), 0)
         with io.StringIO() as output:
             case_list_export(self.study_id, exp_res, output)
             content = self.stream_to_dict(output)
@@ -266,3 +267,8 @@ class ExportCBioTest(TestCase):
         self.assertIn(self.study_id, content["stable_id"])
         self.assertIn("case_list_name", content)
         self.assertIn("case_list_description", content)
+        self.assertIn("case_list_ids", content)
+        self.assertSetEqual(
+            set(content["case_list_ids"].split("\t")),
+            set([sanitize_id(e.biosample_id) for e in exp_res])
+        )
