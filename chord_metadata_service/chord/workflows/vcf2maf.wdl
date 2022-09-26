@@ -151,26 +151,9 @@ task vcf_2_maf {
         # Generate TSV file header
         echo -e "vcf\tmaf\turi\n" > maf.list.tsv
 
-        cat ${vcf_files} > /tmp/dump.tsv
-
-        echo "start loop" >> /tmp/dump.tsv
-        cat ${vcf_files} | while read -r g_vcf assembly_id
-        do
-            echo ${dollar}assembly_id >> /tmp/dump.tsv
-        done
-        echo "end first loop" >> /tmp/dump.tsv
-
-        echo "start loop #2" >> /tmp/dump.tsv
-        cat ${vcf_files} | while read -r g_vcf assembly_id
-        do
-            echo ${dollar}g_vcf >> /tmp/dump.tsv
-        done
-        echo "end first loop#2" >> /tmp/dump.tsv
-
         # Loop through list of VCF files
         cat ${vcf_files} | while read -r g_vcf assembly_id
         do
-            echo ${dollar}g_vcf >> /tmp/dump.tsv
             # prepare file names
             export vcf_file_name=$(basename ${dollar}{g_vcf})
             filtered_vcf=$(echo ${dollar}{vcf_file_name} | sed 's/\(.*\.\)vcf\.gz/\1filtered\.vcf/')
@@ -203,8 +186,6 @@ task vcf_2_maf {
             # TODO: check output and syntax if multiple samples are present.
             SAMPLE_ID=$(bcftools query -l ${dollar}{g_vcf})
 
-            echo ${dollar}{SAMPLE_ID} >> /tmp/dump.tsv
-
             perl /opt/vcf2maf.pl \
                 --input-vcf ${dollar}{filtered_vcf} \
                 --output-maf ${dollar}{maf} \
@@ -212,8 +193,6 @@ task vcf_2_maf {
                 --ref-fasta ${dollar}{REF_FASTA_PATH}/${dollar}{REF_FASTA_TOPLEVEL} \
                 --vep-path ${dollar}{VEP_PATH} \
                 --tumor-id ${dollar}{SAMPLE_ID}
-
-            echo ${dollar}{maf} >> /tmp/dump.tsv
 
             # Store the maf file in DRS and register its uri
             python -c '
