@@ -98,10 +98,11 @@ task get_maf {
                     print(f"maf file with id {object_id} not found")
                     continue
 
-                maf_path = filter(
+                filtered_methods = filter(
                     lambda method: method["type"] == "file",
-                    r[0]["access_methods"]
-                )[0]["access_url"]["url"]
+                    r["access_methods"]
+                )
+                maf_path = next(filtered_methods)["access_url"]["url"].replace("file://", "")
 
                 with open(maf_path, "r") as maf_file_handle:
                     # first line of .maf file has the version number
