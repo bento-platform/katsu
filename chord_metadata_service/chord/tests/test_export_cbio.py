@@ -11,6 +11,7 @@ from chord_metadata_service.chord.export_cbio import (
     MUTATION_DATA_FILENAME,
     PATIENT_DATA_FILENAME,
     PATIENT_DATATYPE,
+    REGEXP_INVALID_FOR_ID,
     SAMPLE_DATA_FILENAME,
     SAMPLE_DATATYPE,
     case_list_export,
@@ -19,6 +20,7 @@ from chord_metadata_service.chord.export_cbio import (
     maf_list,
     mutation_meta_export,
     sample_export,
+    sanitize_id,
     study_export,
     study_export_meta
 )
@@ -168,7 +170,9 @@ class ExportCBioTest(TestCase):
                 self.assertEqual(field_count, len(pieces))
                 record = dict(zip(field_names, pieces))
 
-                self.assertEqual(record["PATIENT_ID"], EXAMPLE_INGEST_PHENOPACKET["subject"]["id"])
+                # PATIENT_ID can't contain characters other than letters/numbers/hyphen/underscore
+                self.assertTrue(REGEXP_INVALID_FOR_ID.search(record['PATIENT_ID']) is None)
+                self.assertEqual(record["PATIENT_ID"], sanitize_id(EXAMPLE_INGEST_PHENOPACKET["subject"]["id"]))
                 self.assertEqual(record["SEX"], EXAMPLE_INGEST_PHENOPACKET["subject"]["sex"])
                 break
 
@@ -206,13 +210,15 @@ class ExportCBioTest(TestCase):
                 self.assertEqual(field_count, len(pieces))
                 record = dict(zip(field_names, pieces))
 
+                self.assertTrue(REGEXP_INVALID_FOR_ID.search(record['PATIENT_ID']) is None)
+                self.assertTrue(REGEXP_INVALID_FOR_ID.search(record['SAMPLE_ID']) is None)
                 self.assertEqual(
                     record["PATIENT_ID"],
-                    EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["individual_id"]
+                    sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["individual_id"])
                 )
                 self.assertEqual(
                     record["SAMPLE_ID"],
-                    EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["id"]
+                    sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["id"])
                 )
                 sample_count += 1
 

@@ -1,6 +1,8 @@
 import logging
 import csv
 from typing import TextIO, Callable
+import re
+
 from django.db.models import F
 
 from chord_metadata_service.experiments.models import ExperimentResult
@@ -43,6 +45,17 @@ CBIO_FILES_SET = frozenset({
 PATIENT_DATATYPE = 'PATIENT'
 SAMPLE_DATATYPE = 'SAMPLE'
 
+# [     List
+#   ^   not in...
+#   a-z lowercase letter
+#   A-Z uppercase
+#   0-9 digit
+#   _   underscore
+#   \.  dot
+#   \-  hyphen
+# ]     Closing list
+REGEXP_INVALID_FOR_ID = re.compile(r"[^a-zA-Z0-9_\.\-]")
+
 
 def study_export(getPath: Callable[[str], str], dataset_id: str):
     """Export a given Project as a cBioPortal study"""
@@ -77,7 +90,7 @@ def study_export(getPath: Callable[[str], str], dataset_id: str):
     # .maf files stored
     with open(getPath(MAF_LIST_FILENAME), 'w') as file_maf_list:
         # TODO: change to MAF format when it is added to Katsu
-        exp_res = ExperimentResult.objects.filter(experiment__table__ownership_record__dataset_id=dataset.identifier)\
+        exp_res = ExperimentResult.objects.filter(experiment__table__ownership_record__dataset_id=dataset.identifier) \
             .filter(file_format='VCF') \
             .annotate(biosample_id=F("experiment__biosample"))
         maf_list(exp_res, file_maf_list)
@@ -151,7 +164,7 @@ def individual_export(results, file_handle: TextIO):
     individuals = []
     for individual in results:
         ind_obj = {
-            'id': individual.id,
+            'id': sanitize_id(individual.id),
             'sex': individual.sex,
         }
         individuals.append(ind_obj)
@@ -213,8 +226,8 @@ def sample_export(results, file_handle: TextIO):
             continue
 
         sample_obj = {
-            'individual_id': subject_id,
-            'id': sample.id
+            'individual_id': sanitize_id(subject_id),
+            'id': sanitize_id(sample.id)
         }
         if sample.sampled_tissue:
             sample_obj['tissue_label'] = sample.sampled_tissue.get('label', '')
@@ -390,3 +403,15 @@ def biosample_to_sample_header(fields: list):
 
     cbio_header = CbioportalClinicalHeaderGenerator(fields_mapping)
     return cbio_header.make_header(fields)
+
+
+def sanitize_id(id: str):
+    """Ensure IDs are compatible with cBioPortal specifications
+
+    IDs must contain alphanumeric characters, dot, hyphen or underscore
+    """
+    id = str(id)    # force casting to string
+    if REGEXP_INVALID_FOR_ID.search(id) is None:
+        return id
+
+    return REGEXP_INVALID_FOR_ID.sub('_', id)
