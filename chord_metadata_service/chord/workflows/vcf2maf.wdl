@@ -36,7 +36,8 @@ workflow vcf2maf {
                 maf_list = vcf_2_maf.maf_list,
                 metadata_url  = metadata_url,
                 one_time_token_metadata_ingest = one_time_token_metadata_ingest,
-                auth_host = auth_host
+                auth_host = auth_host,
+                run_dir = run_dir
     }
 
     output {
@@ -253,6 +254,7 @@ task katsu_update_experiment_results_with_maf {
     String metadata_url
     String one_time_token_metadata_ingest
     String auth_host
+    String run_dir
     File experiment_results_json
     File maf_list
 
@@ -272,7 +274,6 @@ task katsu_update_experiment_results_with_maf {
         import csv
         import json
         import requests
-        import sys
         from datetime import date
         from os import path
 
@@ -290,7 +291,6 @@ task katsu_update_experiment_results_with_maf {
                     continue
 
                 vcf_props = vcf_dict[vcf_file_name]
-
                 maf_exp_res_list.append({
                     "identifier": f"{vcf_props['identifier']}-MAF",
                     "description": "MAF file",
@@ -307,7 +307,7 @@ task katsu_update_experiment_results_with_maf {
                     }
                 })
 
-        EXPERIMENT_RESULTS_JSON = 'experiment_results_maf.json'
+        EXPERIMENT_RESULTS_JSON = path.join("${run_dir}", "experiment_results_maf.json")
         with open(EXPERIMENT_RESULTS_JSON, "w") as file_handle:
             json.dump(maf_exp_res_list, file_handle)
 
