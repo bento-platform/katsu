@@ -227,7 +227,7 @@ task vcf_2_maf {
             "deduplicate": True
         }
 
-        drs_url = "${drs_url}/private/ingest/"
+        drs_url = "${drs_url}/private/ingest"
         try:
             response = requests.post(
                 drs_url,
@@ -237,7 +237,7 @@ task vcf_2_maf {
             )
             response.raise_for_status()
 
-        except requests.RequestsException as e:
+        except requests.exceptions.RequestException as e:
             msg = e.response.json() if hasattr(e, "response") else ""
             sys.exit(f"An error occured during DRS ingestion ({msg})")
 
