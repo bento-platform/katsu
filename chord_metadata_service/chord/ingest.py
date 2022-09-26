@@ -58,6 +58,7 @@ WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
 WORKFLOW_MCODE_JSON = "mcode_json"
 WORKFLOW_READSET = "readset"
 WORKFLOW_MAF_DERIVED_FROM_VCF_JSON = "maf_derived_from_vcf_json"
+WORKFLOW_VCF2MAF = "vcf2maf"
 WORKFLOW_CBIOPORTAL = "cbioportal"
 
 METADATA_WORKFLOWS = {
@@ -264,7 +265,64 @@ METADATA_WORKFLOWS = {
             ]
         },
     },
-    "analysis": {},
+    "analysis": {
+        WORKFLOW_VCF2MAF: {
+            "name": "Convert VCF to MAF files",
+            "description": "This analysis workflow will create MAF files from every VCF file found in a dataset.",
+            "data_type": None,
+            "file": "vcf2maf.wdl",
+            "auth": [
+                {
+                    "id": "temp_token_metadata_api",
+                    "type": "tt",
+                    "scope": "/api/metadata/api/",
+                },
+                {
+                    "id": "one_time_token_metadata_ingest",
+                    "type": "ott",
+                    "scope": "/api/metadata/private/ingest/",
+                },
+                {
+                    "id": "temp_token_drs",
+                    "type": "tt",
+                    "scope": "/api/drs/",
+                },
+            ],
+            "inputs": [
+                {
+                    "id": "dataset_id",
+                    "type": "string",
+                    "required": True,
+                },
+                {
+                    "id": "dataset_name",
+                    "type": "string",
+                    "required": True,
+                },
+                {
+                    "id": "chord_url",
+                    "type": "string",
+                    "required": True,
+                    "value": settings.CHORD_URL,
+                    "hidden": True,
+                },
+                {
+                    "id": "vep_cache_dir",
+                    "type": "string",
+                    "required": True,
+                    "value": "",
+                    "hidden": True,
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "maf_files",
+                    "type": "file[]",
+                    "value": "glob('*.maf')",
+                },
+            ],
+        }
+    },
     "export": {
         WORKFLOW_CBIOPORTAL: {
             "name": "cBioPortal",
