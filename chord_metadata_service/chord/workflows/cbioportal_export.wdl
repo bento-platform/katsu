@@ -110,7 +110,9 @@ task get_maf {
                     # Both are skipped, unless it is the first file processed
                     start_line = 0 if no_file_processed_yet else 2
 
-                    for line_no, line in enumerate(maf_file_handle, start=start_line):
+                    for line_no, line in enumerate(maf_file_handle):
+                        if line_no < start_line:
+                            continue
                         mutation_file_handle.write(line.rstrip() + "\n")
 
                     no_file_processed_yet = False
