@@ -90,12 +90,9 @@ task get_maf {
 
         headers = {"Host": "${temp_token_host}", "X-TT": "${temp_token}"} if "${temp_token}" else {}
 
-        MAF_LIST = "${run_dir}/export/${dataset_id}/maf_list.tsv"
-        MUTATION_DATA_FILE= "${run_dir}/export/${dataset_id}/data_mutations_extended.txt"
-        CASE_FILE = "${run_dir}/export/${dataset_id}/case_lists/case_list_sequenced.txt"
-
-        # TODO: replace this when MAF files can be inferred from experimental_results data
-        case_list = set()  # sample ids that have a maf file associated with
+        work_dir = "${run_dir}/export/${dataset_id}"
+        MAF_LIST = f"{work_dir}/maf_list.tsv"
+        MUTATION_DATA_FILE= f"{work_dir}/data_mutations_extended.txt"
 
         with open(MAF_LIST) as file_handle, \
             open(MUTATION_DATA_FILE, 'w') as mutation_file_handle:
@@ -137,15 +134,6 @@ task get_maf {
                         mutation_file_handle.write(line + "\n")
 
                     no_file_processed_yet = False
-
-                # As the file has been found, prepare the case list with the
-                # corresponding sample ID.
-                case_list.add(fields[1])
-
-        # Append to the case_list file, the list of sample ids associated with
-        # mutation data
-        with open(CASE_FILE, 'a') as file_handle:
-            file_handle.write('case_list_ids: ' + '\t'.join(case_list))
 
         CODE
     >>>

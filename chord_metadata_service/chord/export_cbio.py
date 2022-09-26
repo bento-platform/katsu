@@ -87,11 +87,14 @@ def study_export(getPath: Callable[[str], str], dataset_id: str):
         clinical_meta_export(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
 
     # .maf files stored
-    with open(getPath(MAF_LIST_FILENAME), 'w', newline='\n') as file_maf_list:
+    with open(getPath(MAF_LIST_FILENAME), 'w', newline='\n') as file_maf_list,\
+         open(getPath(CASE_LIST_SEQUENCED), 'w', newline='\n') as file_case_list:
         exp_res = ExperimentResult.objects.filter(experiment__table__ownership_record__dataset_id=dataset.identifier) \
             .filter(file_format='MAF') \
             .annotate(biosample_id=F("experiment__biosample"))
+
         maf_list(exp_res, file_maf_list)
+        case_list_export(cbio_study_id, exp_res, file_case_list)
 
     with open(getPath(MUTATION_META_FILENAME), 'w', newline='\n') as file_mutation_meta:
         mutation_meta_export(cbio_study_id, file_mutation_meta)
@@ -289,7 +292,7 @@ def mutation_meta_export(study_id: str, file_handle: TextIO):
         file_handle.write(f"{field}: {value}\n")
 
 
-def case_list_export(study_id: str, file_handle: TextIO):
+def case_list_export(study_id: str, results, file_handle: TextIO):
     """
     Case list. For now, sequenced data only.
 
@@ -314,10 +317,7 @@ def case_list_export(study_id: str, file_handle: TextIO):
     lines['stable_id'] = f'{study_id}_sequenced'
     lines['case_list_name'] = 'All samples'
     lines['case_list_description'] = 'All samples'
-    # case_list_ids will be added as part of the workflow for now. When Katsu is
-    # reliably holding the information about which mafs files are actually
-    # available from DRS for a given experiment, the list of cases ids could be
-    # built entirely here
+    lines['case_list_ids'] = '\t'.join([sanitize_id(exp_res.biosample_id) for exp_res in results])
 
     for field, value in lines.items():
         file_handle.write(f"{field}: {value}\n")
