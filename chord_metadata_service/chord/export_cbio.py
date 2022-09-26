@@ -23,14 +23,21 @@ SAMPLE_DATA_FILENAME = "data_clinical_sample.txt"
 SAMPLE_META_FILENAME = "meta_clinical_sample.txt"
 PATIENT_DATA_FILENAME = "data_clinical_patient.txt"
 PATIENT_META_FILENAME = "meta_clinical_patient.txt"
-MAF_LIST_FILENAME = 'maf_list.tsv'
+MUTATION_META_FILENAME = "meta_mutation.txt"
+MUTATION_DATA_FILENAME = "data_mutations_extended.txt"   # is generated during workflow from files coming from DRS
+MAF_LIST_FILENAME = 'maf_list.tsv'  # Accessory file
+CASE_LIST_SEQUENCED = "case_list_sequenced.txt"
+
 
 CBIO_FILES_SET = frozenset({
     STUDY_FILENAME,
     SAMPLE_DATA_FILENAME,
     SAMPLE_META_FILENAME,
     PATIENT_DATA_FILENAME,
-    PATIENT_META_FILENAME
+    PATIENT_META_FILENAME,
+    MUTATION_META_FILENAME,
+    # MUTATION_DATA_FILENAME is not part of the files generated here
+    CASE_LIST_SEQUENCED
 })
 
 PATIENT_DATATYPE = 'PATIENT'
@@ -69,11 +76,17 @@ def study_export(getPath: Callable[[str], str], dataset_id: str):
 
     # .maf files stored
     with open(getPath(MAF_LIST_FILENAME), 'w') as file_maf_list:
-        # TODO: change to MAF
+        # TODO: change to MAF format when it is added to Katsu
         exp_res = ExperimentResult.objects.filter(experiment__table__ownership_record__dataset_id=dataset.identifier)\
             .filter(file_format='VCF') \
             .annotate(biosample_id=F("experiment__biosample"))
         maf_list(exp_res, file_maf_list)
+
+    with open(getPath(MUTATION_META_FILENAME), 'w') as file_mutation_meta:
+        mutation_meta_export(cbio_study_id, file_mutation_meta)
+
+    with open(getPath(CASE_LIST_SEQUENCED), 'w') as file_case_list:
+        case_list_export(cbio_study_id, file_case_list)
 
 
 def study_export_meta(dataset: Dataset, file_handle: TextIO):
@@ -230,6 +243,72 @@ def maf_list(results, file_handle: TextIO):
 
     csv_writer = csv.writer(file_handle, delimiter='\t')
     csv_writer.writerows(experiments)
+
+
+def mutation_meta_export(study_id: str, file_handle: TextIO):
+    """
+    Mutation data, metadata file generation
+
+    specifications:
+    cancer_study_identifier: same value as specified in study meta file
+    genetic_alteration_type: MUTATION_EXTENDED
+    datatype: MAF
+    stable_id: mutations
+    show_profile_in_analysis_tab: true
+    profile_name: A name for the mutation data, e.g., "Mutations".
+    profile_description: A description of the mutation data, e.g., "Mutation data from whole exome sequencing.".
+    data_filename: your data file
+    gene_panel (optional): gene panel stable id. See Gene panels for mutation data.
+    swissprot_identifier (optional): accession or name, indicating the type of identifier in the SWISSPROT column
+    variant_classification_filter (optional): List of Variant_Classifications values to be filtered out.
+    namespaces (optional): Comma-delimited list of namespaces to import.
+    """
+    lines = dict()
+    lines['cancer_study_identifier'] = study_id
+    lines['genetic_alteration_type'] = 'MUTATION_EXTENDED'
+    lines['datatype'] = 'MAF'
+    lines['stable_id'] = 'mutations'
+    lines['show_profile_in_analysis_tab'] = 'true'
+    lines['profile_name'] = 'Mutations'
+    lines['profile_description'] = 'Mutation data from whole exome sequencing'  # TODO: extract from experiments
+    lines['data_filename'] = MUTATION_DATA_FILENAME
+
+    for field, value in lines.items():
+        file_handle.write(f"{field}: {value}\n")
+
+
+def case_list_export(study_id: str, file_handle: TextIO):
+    """
+    Case list. For now, sequenced data only.
+
+    Specifications:
+    cancer_study_identifier: same value as specified in study meta file
+    stable_id: it must contain the cancer_study_identifier followed by an underscore.
+        Typically, after this a relevant suffix, e.g., _custom, is added.
+        There are some naming rules to follow if you want the case list to be
+        selected automatically in the query UI base on the selected sample
+        profiles. See subsection below.
+    case_list_name: A name for the patient list, e.g., "All Tumors".
+    case_list_description: A description of the patient list, e.g.,
+        "All tumor samples (825 samples).".
+    case_list_ids: A tab-delimited list of sample ids from the dataset.
+    case_list_category: Optional alternative way of linking your case list to a
+        specific molecular profile. E.g. setting this to all_cases_with_cna_data
+        will signal to the portal that this is the list of samples to be associated
+        with CNA data in some of the analysis.
+    """
+    lines = dict()
+    lines['cancer_study_identifier'] = study_id
+    lines['stable_id'] = f'{study_id}_sequenced'
+    lines['case_list_name'] = 'All samples'
+    lines['case_list_description'] = 'All samples'
+    # case_list_ids will be added as part of the workflow for now. When Katsu is
+    # reliably holding the information about which mafs files are actually
+    # available from DRS for a given experiment, the list of cases ids could be
+    # built entirely here
+
+    for field, value in lines.items():
+        file_handle.write(f"{field}: {value}\n")
 
 
 class CbioportalClinicalHeaderGenerator():

@@ -8,13 +8,16 @@ from django.test import TestCase
 
 from chord_metadata_service.chord.export_cbio import (
     CBIO_FILES_SET,
+    MUTATION_DATA_FILENAME,
     PATIENT_DATA_FILENAME,
     PATIENT_DATATYPE,
     SAMPLE_DATA_FILENAME,
     SAMPLE_DATATYPE,
+    case_list_export,
     clinical_meta_export,
     individual_export,
     maf_list,
+    mutation_meta_export,
     sample_export,
     study_export,
     study_export_meta
@@ -226,3 +229,23 @@ class ExportCBioTest(TestCase):
                 # first field is a vcf filename
                 self.assertIn('.vcf', pieces[0])
                 break
+
+    def test_export_mutation_meta(self):
+        with io.StringIO() as output:
+            mutation_meta_export(self.study_id, output)
+            content = self.stream_to_dict(output)
+
+        self.assertEqual(content['cancer_study_identifier'], self.study_id)
+        self.assertEqual(content['genetic_alteration_type'], 'MUTATION_EXTENDED')
+        self.assertEqual(content['datatype'], 'MAF')
+        self.assertEqual(content['data_filename'], MUTATION_DATA_FILENAME)
+
+    def test_export_case_list(self):
+        with io.StringIO() as output:
+            case_list_export(self.study_id, output)
+            content = self.stream_to_dict(output)
+
+        self.assertEqual(content['cancer_study_identifier'], self.study_id)
+        self.assertIn(self.study_id, content['stable_id'])
+        self.assertIn('case_list_name', content)
+        self.assertIn('case_list_description', content)
