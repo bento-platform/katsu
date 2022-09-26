@@ -14,6 +14,7 @@ from chord_metadata_service.chord.export_cbio import (
     SAMPLE_DATATYPE,
     clinical_meta_export,
     individual_export,
+    maf_list,
     sample_export,
     study_export,
     study_export_meta
@@ -21,8 +22,10 @@ from chord_metadata_service.chord.export_cbio import (
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.export_utils import ExportFileContext
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+from chord_metadata_service.experiments.models import ExperimentResult
 # noinspection PyProtectedMember
 from chord_metadata_service.chord.ingest import (
+    WORKFLOW_EXPERIMENTS_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
     WORKFLOW_INGEST_FUNCTION_MAP,
 )
@@ -32,6 +35,7 @@ from chord_metadata_service.phenopackets import models as PhModel
 
 from .constants import VALID_DATA_USE_1
 from .example_ingest import (
+    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
     EXAMPLE_INGEST_PHENOPACKET,
     EXAMPLE_INGEST_OUTPUTS,
 )
@@ -58,7 +62,11 @@ class ExportCBioTest(TestCase):
         self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
 
         self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
-
+        # ingest list of experiments
+        self.exp = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.t_exp.identifier
+        )
+        self.exp_res = ExperimentResult.objects.filter(experiment=self.exp)
         # Update the last sample to remove direct reference to any individual.
         # In that case, Sample and Individual are cross referenced through the
         # Phenopacket model.
@@ -203,3 +211,18 @@ class ExportCBioTest(TestCase):
                 sample_count += 1
 
             self.assertEqual(sample_count, samples.count())
+
+    def test_export_maf_list(self):
+        exp_res = self.exp_res.filter(experiment__table__ownership_record__dataset_id=self.study_id)\
+            .filter(file_format='VCF') \
+            .annotate(biosample_id=F("experiment__biosample"))
+        with io.StringIO() as output:
+            maf_list(exp_res, output)
+            output.seek(0)
+            for line in enumerate(output):
+                pieces = line.rstrip().split('\t')
+                # 2 fields per line
+                self.assertEqual(len(pieces), 2)
+                # first field is a vcf filename
+                self.assertIn('.vcf', pieces[0])
+                break

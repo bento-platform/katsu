@@ -3,6 +3,8 @@ import csv
 from typing import TextIO, Callable
 from django.db.models import F
 
+from chord_metadata_service.experiments.models import ExperimentResult
+
 from .export_utils import ExportError
 
 from chord_metadata_service.chord.models import Dataset
@@ -21,6 +23,7 @@ SAMPLE_DATA_FILENAME = "data_clinical_sample.txt"
 SAMPLE_META_FILENAME = "meta_clinical_sample.txt"
 PATIENT_DATA_FILENAME = "data_clinical_patient.txt"
 PATIENT_META_FILENAME = "meta_clinical_patient.txt"
+MAF_LIST_FILENAME = 'maf_list.tsv'
 
 CBIO_FILES_SET = frozenset({
     STUDY_FILENAME,
@@ -63,6 +66,14 @@ def study_export(getPath: Callable[[str], str], dataset_id: str):
 
     with open(getPath(SAMPLE_META_FILENAME), 'w') as file_sample_meta:
         clinical_meta_export(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
+
+    # .maf files stored
+    with open(getPath(MAF_LIST_FILENAME), 'w') as file_maf_list:
+        # TODO: change to MAF
+        exp_res = ExperimentResult.objects.filter(experiment__table__ownership_record__dataset_id=dataset.identifier)\
+            .filter(file_format='VCF') \
+            .annotate(biosample_id=F("experiment__biosample"))
+        maf_list(exp_res, file_maf_list)
 
 
 def study_export_meta(dataset: Dataset, file_handle: TextIO):
@@ -203,6 +214,22 @@ def sample_export(results, file_handle: TextIO):
     file_handle.writelines([line + '\n' for line in headers])
     dict_writer = csv.DictWriter(file_handle, fieldnames=columns, delimiter='\t')
     dict_writer.writerows(samples)
+
+
+def maf_list(results, file_handle: TextIO):
+    """
+    List of maf files/biosample ids associated with this dataset.
+
+    The biosample IDs are added to the maf file before it is catenated to the
+    other maf files for cbioportal ingestion.
+    """
+
+    experiments = []
+    for experiment in results:
+        experiments.append((experiment.filename, experiment.biosample_id))
+
+    csv_writer = csv.writer(file_handle, delimiter='\t')
+    csv_writer.writerows(experiments)
 
 
 class CbioportalClinicalHeaderGenerator():
