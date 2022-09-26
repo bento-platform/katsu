@@ -285,6 +285,7 @@ def mutation_meta_export(study_id: str, file_handle: TextIO):
     lines['profile_name'] = 'Mutations'
     lines['profile_description'] = 'Mutation data from whole exome sequencing'  # TODO: extract from experiments
     lines['data_filename'] = MUTATION_DATA_FILENAME
+    lines['swissprot_identifier'] = 'name'
 
     for field, value in lines.items():
         file_handle.write(f"{field}: {value}\n")
