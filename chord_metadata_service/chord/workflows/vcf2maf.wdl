@@ -149,7 +149,7 @@ task vcf_2_maf {
         # that have been computed and their uri in DRS
 
         # Generate TSV file header
-        echo -e "vcf\tmaf\turi\n" > maf.list.tsv
+        echo -e "vcf\tmaf\turi" > maf.list.tsv
 
         # Loop through list of VCF files
         cat ${vcf_files} | while read -r g_vcf assembly_id
