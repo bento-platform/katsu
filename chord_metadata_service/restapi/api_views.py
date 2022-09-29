@@ -28,6 +28,8 @@ from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
+from django.db.models import Count
+
 
 logger = logging.getLogger("restapi_api_views")
 logger.setLevel(logging.INFO)
@@ -355,3 +357,21 @@ def public_overview(_request):
         }
 
     return Response(response)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_stats_summmary(_request):
+    """
+        Return a summary of the statistics for the database
+    """
+    return Response({
+        "province_count": 1, # dummy
+        "hospital_count": 52, # dummy
+        "center_count": 157, # dummy
+        "individual_count": patients_models.Individual.objects.count(),
+        "ethnicity_count": list(patients_models.Individual.objects.values('ethnicity').annotate(
+            total=Count('ethnicity')).order_by()),
+        "gender_count": list(patients_models.Individual.objects.values('sex').annotate(
+            total=Count('sex')).order_by()),
+    })
