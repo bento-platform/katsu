@@ -366,9 +366,9 @@ def get_stats_summmary(_request):
         Return a summary of the statistics for the database
     """
     return Response({
-        "province_count": 1, # dummy
-        "hospital_count": 52, # dummy
-        "center_count": 157, # dummy
+        "province_count": 1,  # dummy
+        "hospital_count": 52,  # dummy
+        "center_count": 157,  # dummy
         "individual_count": patients_models.Individual.objects.count(),
         "ethnicity_count": list(patients_models.Individual.objects.values('ethnicity').annotate(
             total=Count('ethnicity')).order_by()),
