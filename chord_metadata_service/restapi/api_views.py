@@ -361,7 +361,7 @@ def public_overview(_request):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def get_stats_summmary(_request):
+def moh_overview(_request):
     """
         Return a summary of the statistics for the database
     """
@@ -370,8 +370,8 @@ def get_stats_summmary(_request):
         "hospital_count": 52,  # dummy
         "center_count": 157,  # dummy
         "individual_count": patients_models.Individual.objects.count(),
-        "ethnicity_count": list(patients_models.Individual.objects.values('ethnicity').annotate(
-            total=Count('ethnicity')).order_by()),
-        "gender_count": list(patients_models.Individual.objects.values('sex').annotate(
-            total=Count('sex')).order_by()),
+        "ethnicity": list(patients_models.Individual.objects.values('ethnicity').annotate(
+            count=Count('ethnicity')).order_by()),
+        "gender": list(patients_models.Individual.objects.values('sex').annotate(
+            count=Count('sex')).order_by()),
     })

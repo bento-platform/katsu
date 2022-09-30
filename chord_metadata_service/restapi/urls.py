@@ -12,7 +12,7 @@ from chord_metadata_service.phenopackets.autocomplete_views import (
     BiosampleSampledTissueAutocomplete
 )
 from chord_metadata_service.resources import api_views as resources_views
-from .api_views import overview, mcode_overview, public_search_fields, public_overview, get_stats_summmary
+from .api_views import overview, mcode_overview, public_search_fields, public_overview, moh_overview
 from chord_metadata_service.restapi.routers import BatchListRouter
 
 __all__ = ["router", "batch_router", "urlpatterns"]
@@ -93,5 +93,5 @@ urlpatterns = [
     # public overview
     path('public_overview', public_overview, name='public-overview',),
     # stats summary
-    path('get_stats_summmary', get_stats_summmary)
+    path('moh_overview', moh_overview)
 ]
