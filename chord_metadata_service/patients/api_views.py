@@ -115,8 +115,8 @@ class IndividualBatchViewSet(BatchViewSet):
     content_negotiation_class = FormatInPostContentNegotiation
 
     def get_queryset(self):
-        individual_id = self.request.data.get("id", None)
-        filter_by_id = {"id__in": individual_id} if individual_id else {}
+        individual_ids = self.request.data.get("id", None)
+        filter_by_id = {"id__in": individual_ids} if individual_ids else {}
         queryset = Individual.objects.filter(**filter_by_id)\
             .prefetch_related(
                 *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
