@@ -179,30 +179,30 @@ def mcodepacket_table_summary(table):
 
 
 def phenopacket_table_summary(table):
-    phenopackets = Phenopacket.objects.filter(table=table)  # TODO
+    phenopacket_qs = Phenopacket.objects.filter(table=table)  # TODO
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema
-    individuals_sex = queryset_stats_for_field(phenopackets, "subject__sex")
-    individuals_k_sex = queryset_stats_for_field(phenopackets, "subject__karyotypic_sex")
+    individuals_sex = queryset_stats_for_field(phenopacket_qs, "subject__sex")
+    individuals_k_sex = queryset_stats_for_field(phenopacket_qs, "subject__karyotypic_sex")
 
     return Response({
-        "count": phenopackets.count(),
+        "count": phenopacket_qs.count(),
         "data_type_specific": {
             "biosamples": {
-                "count": phenopackets.values("biosamples__id").count(),
-                "is_control_sample": queryset_stats_for_field(phenopackets, "biosamples__is_control_sample"),
-                "taxonomy": queryset_stats_for_field(phenopackets, "biosamples__taxonomy__label"),
+                "count": phenopacket_qs.values("biosamples__id").count(),
+                "is_control_sample": queryset_stats_for_field(phenopacket_qs, "biosamples__is_control_sample"),
+                "taxonomy": queryset_stats_for_field(phenopacket_qs, "biosamples__taxonomy__label"),
             },
-            "diseases": queryset_stats_for_field(phenopackets, "diseases__term__label"),
+            "diseases": queryset_stats_for_field(phenopacket_qs, "diseases__term__label"),
             "individuals": {
-                "count": phenopackets.values("subject__id").count(),
+                "count": phenopacket_qs.values("subject__id").count(),
                 "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in Individual.SEX)},
                 "karyotypic_sex": {k: individuals_k_sex.get(k, 0) for k in (s[0] for s in Individual.KARYOTYPIC_SEX)},
-                "taxonomy": queryset_stats_for_field(phenopackets, "subject__taxonomy__label"),
+                "taxonomy": queryset_stats_for_field(phenopacket_qs, "subject__taxonomy__label"),
                 # TODO: age histogram
             },
-            "phenotypic_features": queryset_stats_for_field(phenopackets, "phenotypic_features__pftype__label"),
+            "phenotypic_features": queryset_stats_for_field(phenopacket_qs, "phenotypic_features__pftype__label"),
         }
     })
 
