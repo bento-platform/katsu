@@ -5,7 +5,6 @@ import uuid
 
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response, postgres
-from collections import Counter
 from datetime import datetime
 from django.db import connection
 from django.db.models import Count, F
@@ -14,6 +13,7 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
 from django.views.decorators.cache import cache_page
 from psycopg2 import sql
+from chord_metadata_service.restapi.utils import queryset_stats_for_field
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -181,66 +181,28 @@ def mcodepacket_table_summary(table):
 def phenopacket_table_summary(table):
     phenopackets = Phenopacket.objects.filter(table=table)  # TODO
 
-    diseases_counter = Counter()
-    phenotypic_features_counter = Counter()
-
-    biosamples_set = set()
-    individuals_set = set()
-
-    biosamples_cs = Counter()
-    biosamples_taxonomy = Counter()
-
-    individuals_sex = Counter()
-    individuals_k_sex = Counter()
-    individuals_taxonomy = Counter()
-
-    def count_individual(ind):
-        individuals_set.add(ind.id)
-        individuals_sex.update((ind.sex,))
-        individuals_k_sex.update((ind.karyotypic_sex,))
-        if ind.taxonomy is not None:
-            individuals_taxonomy.update((ind.taxonomy["id"],))
-
-    for p in phenopackets.prefetch_related("biosamples"):
-        for b in p.biosamples.all():
-            biosamples_set.add(b.id)
-            biosamples_cs.update((b.is_control_sample,))
-
-            if b.taxonomy is not None:
-                biosamples_taxonomy.update((b.taxonomy["id"],))
-
-            if b.individual is not None:
-                count_individual(b.individual)
-
-            for pf in b.phenotypic_features.all():
-                phenotypic_features_counter.update((pf.pftype["id"],))
-
-        for d in p.diseases.all():
-            diseases_counter.update((d.term["id"],))
-
-        for pf in p.phenotypic_features.all():
-            phenotypic_features_counter.update((pf.pftype["id"],))
-
-        # Currently, phenopacket subject is required so we can assume it's not None
-        count_individual(p.subject)
+    # Sex related fields stats are precomputed here and post processed later
+    # to include missing values inferred from the schema
+    individuals_sex = queryset_stats_for_field(phenopackets, "subject__sex")
+    individuals_k_sex = queryset_stats_for_field(phenopackets, "subject__karyotypic_sex")
 
     return Response({
         "count": phenopackets.count(),
         "data_type_specific": {
             "biosamples": {
-                "count": len(biosamples_set),
-                "is_control_sample": dict(biosamples_cs),
-                "taxonomy": dict(biosamples_taxonomy),
+                "count": phenopackets.values("biosamples__id").count(),
+                "is_control_sample": queryset_stats_for_field(phenopackets, "biosamples__is_control_sample"),
+                "taxonomy": queryset_stats_for_field(phenopackets, "biosamples__taxonomy__label"),
             },
-            "diseases": dict(diseases_counter),
+            "diseases": queryset_stats_for_field(phenopackets, "diseases__term__label"),
             "individuals": {
-                "count": len(individuals_set),
-                "sex": {k: individuals_sex[k] for k in (s[0] for s in Individual.SEX)},
-                "karyotypic_sex": {k: individuals_k_sex[k] for k in (s[0] for s in Individual.KARYOTYPIC_SEX)},
-                "taxonomy": dict(individuals_taxonomy),
+                "count": phenopackets.values("subject__id").count(),
+                "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in Individual.SEX)},
+                "karyotypic_sex": {k: individuals_k_sex.get(k, 0) for k in (s[0] for s in Individual.KARYOTYPIC_SEX)},
+                "taxonomy": queryset_stats_for_field(phenopackets, "subject__taxonomy__label"),
                 # TODO: age histogram
             },
-            "phenotypic_features": dict(phenotypic_features_counter),
+            "phenotypic_features": queryset_stats_for_field(phenopackets, "phenotypic_features__pftype__label"),
         }
     })
 
