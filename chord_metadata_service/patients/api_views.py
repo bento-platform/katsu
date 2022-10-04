@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import viewsets, filters, mixins
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,12 +9,17 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ValidationError
+from django.db.models import Count, F
+from django.db.models.functions import Coalesce
+from django.contrib.postgres.aggregates import ArrayAgg
 from bento_lib.responses import errors
+from bento_lib.search import build_search_response
 
 from .serializers import IndividualSerializer
 from .models import Individual
 from .filters import IndividualFilter
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
+from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer,
     PhenopacketsRenderer,
@@ -29,6 +36,8 @@ from chord_metadata_service.restapi.utils import (
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
+
+OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
 class IndividualViewSet(viewsets.ModelViewSet):
@@ -59,6 +68,32 @@ class IndividualViewSet(viewsets.ModelViewSet):
     @method_decorator(cache_page(settings.CACHE_TIME))
     def dispatch(self, *args, **kwargs):
         return super(IndividualViewSet, self).dispatch(*args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        if request.query_params.get("format") == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
+            start = datetime.now()
+            # filterset applies filtering from the GET parameters
+            filterset = self.filterset_class(request.query_params, queryset=self.queryset)
+            # Note: it is necessary here to use a second queryset because
+            # filterset is a queryset containing a `distinct()` method which
+            # is incompatible with the annotations defined bellow.
+            # (in SQL the DISTINCT clause is not compatible with GROUP BY statements
+            # which serve a similar purpose)
+            individual_ids = filterset.qs.values_list("id", flat=True)
+            # TODO: code duplicated from chord/view_search.py
+            qs = Phenopacket.objects.filter(subject__id__in=individual_ids).values(
+                "subject_id",
+                alternate_ids=Coalesce(F("subject__alternate_ids"), [])
+            ).annotate(
+                num_experiments=Count("biosamples__experiment"),
+                biosamples=Coalesce(
+                    ArrayAgg("biosamples__id"),
+                    []
+                )
+            )
+            return Response(build_search_response(list(qs), start))
+
+        return super(IndividualViewSet, self).list(request, *args, **kwargs)
 
 
 class BatchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
