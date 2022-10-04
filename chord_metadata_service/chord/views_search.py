@@ -13,7 +13,7 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
 from django.views.decorators.cache import cache_page
 from psycopg2 import sql
-from chord_metadata_service.restapi.utils import queryset_stats_for_field
+from chord_metadata_service.restapi.utils import get_field_bins, queryset_stats_for_field
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -200,7 +200,7 @@ def phenopacket_table_summary(table):
                 "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in Individual.SEX)},
                 "karyotypic_sex": {k: individuals_k_sex.get(k, 0) for k in (s[0] for s in Individual.KARYOTYPIC_SEX)},
                 "taxonomy": queryset_stats_for_field(phenopacket_qs, "subject__taxonomy__label"),
-                # TODO: age histogram
+                "age": get_field_bins(phenopacket_qs, "subject__age_numeric", 10),
             },
             "phenotypic_features": queryset_stats_for_field(phenopacket_qs, "phenotypic_features__pftype__label"),
         }
