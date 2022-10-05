@@ -49,6 +49,7 @@
         },
         "experiment_type": {
             "mapping": "experiment/experiment_type",
+            "mapping_for_search_filter": "individual/biosamples/experiment/experiment_type",
             "title": "Experiment Types",
             "description": "Types of experiments performed on a sample",
             "datatype": "string",

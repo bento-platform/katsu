@@ -556,9 +556,15 @@ def filter_queryset_field_value(qs, field_props, value: str):
     Further filter a queryset using the field defined by field_props and the
     given value.
     It is a prerequisite that the field mapping defined in field_props is represented
-    in the queryset object
+    in the queryset object.
+    `mapping_for_search_filter` is an optional property that gets precedence over `mapping`
+    for the necessity of filtering. It is not necessary to specify this when
+    the `mapping` value is based on the same model as the queryset.
     """
-    model, field = get_model_and_field(field_props["mapping"])
+    model, field = get_model_and_field(
+        field_props["mapping_for_search_filter"] if "mapping_for_search_filter" in field_props
+        else field_props["mapping"]
+    )
 
     if field_props["datatype"] == "string":
         condition = {f"{field}__iexact": value}

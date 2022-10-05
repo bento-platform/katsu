@@ -1,3 +1,4 @@
+from copy import deepcopy
 import json
 import csv
 import io
@@ -13,6 +14,9 @@ from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
 
 from . import constants as c
+
+CONFIG_PUBLIC_TEST_NO_THRESHOLD = deepcopy(CONFIG_PUBLIC_TEST)
+CONFIG_PUBLIC_TEST_NO_THRESHOLD["rules"]["count_threshold"] = 0
 
 
 class CreateIndividualTest(APITestCase):
@@ -323,6 +327,8 @@ class PublicFilteringIndividualsTest(APITestCase):
         individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
         for individual in individuals:
             Individual.objects.create(**individual)
+        p = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
+        ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0], p))
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_sex(self):
@@ -573,6 +579,14 @@ class PublicFilteringIndividualsTest(APITestCase):
             self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_NO_THRESHOLD)
+    def test_public_filtering_mapping_for_search_filter(self):
+        # biosample tissue field search
+        response = self.client.get('/api/public?tissues=wall of urinary bladder')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(1, response_obj["count"])
 
 
 class PublicAgeRangeFilteringIndividualsTest(APITestCase):
