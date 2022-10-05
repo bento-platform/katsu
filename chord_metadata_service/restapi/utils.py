@@ -246,6 +246,8 @@ def get_model_and_field(field_id: str) -> Tuple[any, str]:
         model = pheno_models.Individual
     elif model_name == "experiment":
         model = experiments_models.Experiment
+    elif model_name == "biosample":
+        model = pheno_models.Biosample
     else:
         msg = f"Accessing field on model {model_name} not implemented"
         raise NotImplementedError(msg)
