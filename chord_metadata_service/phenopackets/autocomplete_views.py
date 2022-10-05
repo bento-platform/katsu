@@ -3,7 +3,7 @@ from .models import Disease, PhenotypicFeature, Biosample
 
 
 class DiseaseTermAutocomplete(autocomplete.Select2QuerySetView):
-    paginate_by = 50
+    paginate_by = 200
 
     # get_result_value return result.pk
 
@@ -27,7 +27,7 @@ class DiseaseTermAutocomplete(autocomplete.Select2QuerySetView):
 
 
 class PhenotypicFeatureTypeAutocomplete(autocomplete.Select2QuerySetView):
-    paginate_by = 50
+    paginate_by = 200
 
     def get_result_value(self, result):
         # returns phenotypic feature type ontology id
@@ -46,7 +46,7 @@ class PhenotypicFeatureTypeAutocomplete(autocomplete.Select2QuerySetView):
 
 
 class BiosampleSampledTissueAutocomplete(autocomplete.Select2QuerySetView):
-    paginate_by = 50
+    paginate_by = 200
 
     def get_result_value(self, result):
         # returns biosample sample tissue ontology id
