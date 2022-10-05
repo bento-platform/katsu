@@ -169,27 +169,10 @@ class IndividualCSVRenderer(JSONRenderer):
 
 
 class IndividualBentoSearchRenderer(JSONRenderer):
+    """
+    This renderer directly maps bento_search_result to the JSON Renderer
+    Note: this seems necessary to be able to use the format parameter
+    "bento_search_result" in the Individual ViewSet.
+    """
     media_type = 'application/json'
     format = OUTPUT_FORMAT_BENTO_SEARCH_RESULT
-
-    def render(self, data, media_type=None, renderer_context=None):
-        individuals = []
-        for individual in data.get('results', []):
-            ind_obj = {
-                'subject_id': individual['id'],
-                'alternate_ids': individual.get('alternate_ids', []),   # may be NULL
-                'biosamples': [],
-                'num_experiments': 0
-            }
-            if 'phenopackets' in individual:
-                ids = []
-                for p in individual['phenopackets']:
-                    if 'biosamples' in p:
-                        for biosample in p['biosamples']:
-                            ids.append(biosample['id'])
-                            if 'experiments' in biosample:
-                                ind_obj['num_experiments'] += len(biosample['experiments'])
-                ind_obj['biosamples'] = ids
-            individuals.append(ind_obj)
-        data['results'] = individuals
-        return super(IndividualBentoSearchRenderer, self).render(data, self.media_type, renderer_context)

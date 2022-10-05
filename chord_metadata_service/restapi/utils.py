@@ -50,10 +50,10 @@ def parse_onset(onset):
     if 'age' in onset:
         return onset['age']
     # age ontology
-    elif 'id' and 'label' in onset:
+    elif 'id' in onset and 'label' in onset:
         return f"{onset['label']} {onset['id']}"
     # age range
-    elif 'start' and 'end' in onset:
+    elif 'start' in onset and 'end' in onset:
         if 'age' in onset['start'] and 'age' in onset['end']:
             return f"{onset['start']['age']} - {onset['end']['age']}"
     else:

@@ -9,6 +9,8 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.restapi.tests.constants import CONFIG_PUBLIC_TEST, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
 from chord_metadata_service.restapi.utils import iso_duration_to_years
+from chord_metadata_service.phenopackets.tests import constants as ph_c
+from chord_metadata_service.phenopackets import models as ph_m
 
 from . import constants as c
 
@@ -153,6 +155,10 @@ class IndividualFullTextSearchTest(APITestCase):
     def setUp(self):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+        self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+        self.phenopacket_1 = ph_m.Phenopacket.objects.create(
+            **ph_c.valid_phenopacket(subject=self.individual_one, meta_data=self.metadata_1)
+        )
 
     def test_search(self):
         get_resp_1 = self.client.get('/api/individuals?search=P49Y')
