@@ -505,6 +505,14 @@ def chord_private_search(request):
     return search(request, internal_data=True)
 
 
+@cache_page(60 * 60 * 2)
+@api_view(["GET", "POST"])
+@permission_classes([AllowAny])
+def beacon_search(request):
+    # Equivalent to chord_private_search above, but protected by gateway only
+    return search(request, internal_data=True)
+
+
 def phenopacket_filter_results(subject_ids, htsfile_ids, disease_ids, biosample_ids,
                                phenotypicfeature_ids, phenopacket_ids):
     query = Phenopacket.objects.get_queryset()

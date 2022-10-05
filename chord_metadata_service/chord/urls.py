@@ -21,6 +21,7 @@ urlpatterns = [
     path('tables/<str:table_id>/summary', views_search.chord_table_summary, name="table-summary"),
     path('tables/<str:table_id>/search', views_search.chord_public_table_search, name="public-table-search"),
     path('search', views_search.chord_search, name="search"),
+    path('beacon-search', views_search.beacon_search, name="beacon-search"),
     path('fhir-search', views_search.fhir_public_search, name="fhir-search"),
     path('private/fhir-search', views_search.fhir_private_search, name="fhir-private-search"),
     path('private/search', views_search.chord_private_search, name="private-search"),
