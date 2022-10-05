@@ -50,12 +50,21 @@ A dictionary, keyed by field id of:
 
   - [datatype=number].config:
 
-    - "bin-size" (number): bins width. Due to implementation limitations, must be an integer for now.
-    - "minimum" (number): values lesser than minimum can't be queried
-    - "maximum" (number): values greater than or equal to maximum can't be queried
-    - "taper_left" (number): cutoff value for the first bin. Disabled when equals to ``minimum``
-    - "taper_right" (number): cutoff value for the last bin. Disabled when equals to ``maximum``
-    - "units" (string): unit that will be displayed to the user
+    - Config for auto-binning:
+
+      - "bin-size" (number): bins width. Due to implementation limitations, must be an integer for now.
+      - "minimum" (number): values lesser than minimum can't be queried
+      - "maximum" (number): values greater than or equal to maximum can't be queried
+      - "taper_left" (number): cutoff value for the first bin. Disabled when equals to ``minimum``
+      - "taper_right" (number): cutoff value for the last bin. Disabled when equals to ``maximum``
+      - "units" (string): unit that will be displayed to the user
+
+    - Config for custom binning:
+
+      - "bins" (list of numbers): boundaries of the bins
+      - "minimum" *optional* (number): values lesser than minimum can't be queried. When absent, no limit is applied on the minimum boundary for the first bin.
+      - "maximum" *optional* (number): values greater than or equal to maximum can't be queried. When absent, no limit is applied on the maximum boundary for the last bin.
+
 
   - [datatype=string].config:
 
