@@ -343,11 +343,8 @@ CONFIG_PUBLIC_TEST = {
             "description": "This acts as a placeholder for numeric values",
             "datatype": "number",
             "config": {
-                "bin_size": 50,
-                "taper_left": 50,
-                "taper_right": 800,
+                "bins": [200, 300, 500, 1000, 1500, 2000],
                 "minimum": 0,
-                "maximum": 1000,
                 "units": "mg/L"
             }
         },
