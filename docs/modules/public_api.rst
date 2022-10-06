@@ -43,6 +43,7 @@ An array of:
 A dictionary, keyed by field id of:
 
 - "mapping" (string) - defines in a path like format, the mapping between the field and its object representation in the Django ORM. The first part is a reference to the model. The following is the "location" of the field relative to the model (might be nested or made accross joins). Example "individual/extra_properties/date_of_consent"
+- "mapping_for_search_filter" *optional* (string) - defines the mapping between the field and its object representation relative to the Individual model in the Django ORM for use in  counting matching indivduals. Example "individual/biosamples/experiment/experiment_type". When absent the value from the "mapping" property is used by default.
 - "title" (string) - name that is displayed to the user
 - "description" (string) - detailed description of the field, suitable for a tooltip
 - "datatype" (options number, date, string) - defines the type of field
@@ -135,6 +136,7 @@ Example of the config.json
         },
         "experiment_type": {
             "mapping": "experiment/experiment_type",
+            "mapping_for_search_filter": "individual/biosamples/experiment/experiment_type"
             "title": "Experiment Types",
             "description": "Types of experiments performed on a sample",
             "datatype": "string",
