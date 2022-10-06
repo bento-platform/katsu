@@ -21,6 +21,10 @@
         {
             "section_title": "Demographics",
             "fields": ["age", "sex", "date_of_consent", "lab_test_result_value"]
+        },
+        {
+            "section_title": "Experiments",
+            "fields": ["experiment_type"]
         }
     ],
     "fields": {
