@@ -269,7 +269,6 @@ class SearchTest(APITestCase):
 
         # TODO: Check schema?
 
-
     def test_beacon_search(self):
         # Valid search with result
         for method in POST_GET:
@@ -283,7 +282,6 @@ class SearchTest(APITestCase):
             self.assertIn(str(self.table.identifier), c["results"])
             self.assertEqual(c["results"][str(self.table.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
             self.assertEqual(self.phenopacket.id, c["results"][str(self.table.identifier)]["matches"][0]["id"])
-
 
     def test_private_table_search_1(self):
         # No body
