@@ -215,7 +215,11 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
         if key is None:
             continue
 
-        key = key.strip()
+        if not isinstance(key, str):
+            key = str(key)
+        else:
+            key = key.strip()
+
         if key == "":
             continue
 
