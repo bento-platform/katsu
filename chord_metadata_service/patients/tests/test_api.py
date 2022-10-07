@@ -1,3 +1,4 @@
+from copy import deepcopy
 import json
 import csv
 import io
@@ -13,6 +14,9 @@ from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
 
 from . import constants as c
+
+CONFIG_PUBLIC_TEST_NO_THRESHOLD = deepcopy(CONFIG_PUBLIC_TEST)
+CONFIG_PUBLIC_TEST_NO_THRESHOLD["rules"]["count_threshold"] = 0
 
 
 class CreateIndividualTest(APITestCase):
@@ -323,6 +327,8 @@ class PublicFilteringIndividualsTest(APITestCase):
         individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
         for individual in individuals:
             Individual.objects.create(**individual)
+        p = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
+        ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0], p))
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_sex(self):
@@ -414,13 +420,13 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_range_1(self):
         # extra_properties range search (both min and max ranges, single value)
         response = self.client.get(
-            '/api/public?lab_test_result_value=50-100'
+            '/api/public?lab_test_result_value=200-300'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
-            "extra_properties__lab_test_result_value__gte": 50,
-            "extra_properties__lab_test_result_value__lt": 100
+            "extra_properties__lab_test_result_value__gte": 200,
+            "extra_properties__lab_test_result_value__lt": 300
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
@@ -479,14 +485,14 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_range_string_1(self):
         # sex string search and extra_properties range search
         response = self.client.get(
-            '/api/public?sex=female&lab_test_result_value=100-150'
+            '/api/public?sex=female&lab_test_result_value=< 200'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
             "sex__iexact": "female",
-            "extra_properties__lab_test_result_value__gte": 100,
-            "extra_properties__lab_test_result_value__lt": 150
+            "extra_properties__lab_test_result_value__gte": 0,
+            "extra_properties__lab_test_result_value__lt": 200
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
@@ -497,15 +503,15 @@ class PublicFilteringIndividualsTest(APITestCase):
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_extra_properties_range_string_2(self):
-        # extra_properties range search (both min and max ranges) and extra_properties string search (single value)
+        # extra_properties range search and extra_properties string search (single value)
         response = self.client.get(
-            '/api/public?lab_test_result_value=100-150&covidstatus=positive'
+            '/api/public?lab_test_result_value=< 200&covidstatus=positive'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
-            "extra_properties__lab_test_result_value__gte": 100,
-            "extra_properties__lab_test_result_value__lt": 150,
+            "extra_properties__lab_test_result_value__gte": 0,
+            "extra_properties__lab_test_result_value__lt": 200,
             "extra_properties__covidstatus__iexact": "positive",
         }
         db_count = Individual.objects.filter(**range_parameters).count()
@@ -519,13 +525,13 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_multiple_ranges_1(self):
         # extra_properties range search (both min and max range, multiple values)
         response = self.client.get(
-            '/api/public?lab_test_result_value=100-150&baseline_creatinine=100-150'
+            '/api/public?lab_test_result_value=< 200&baseline_creatinine=100-150'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
-            "extra_properties__lab_test_result_value__gte": 100,
-            "extra_properties__lab_test_result_value__lt": 150,
+            "extra_properties__lab_test_result_value__gte": 0,
+            "extra_properties__lab_test_result_value__lt": 200,
             "extra_properties__baseline_creatinine__gte": 100,
             "extra_properties__baseline_creatinine__lt": 150,
         }
@@ -558,14 +564,14 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_date_range_and_other_range(self):
         # extra_properties date range search (both after and before, single value) and other number range search
         response = self.client.get(
-            '/api/public?date_of_consent=Mar 2021&lab_test_result_value=100-150'
+            '/api/public?date_of_consent=Mar 2021&lab_test_result_value=< 200'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
             "extra_properties__date_of_consent__startswith": "2021-03",
-            "extra_properties__lab_test_result_value__gte": 100,
-            "extra_properties__lab_test_result_value__lt": 150,
+            "extra_properties__lab_test_result_value__gte": 0,
+            "extra_properties__lab_test_result_value__lt": 200,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
@@ -573,6 +579,14 @@ class PublicFilteringIndividualsTest(APITestCase):
             self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_NO_THRESHOLD)
+    def test_public_filtering_mapping_for_search_filter(self):
+        # biosample tissue field search
+        response = self.client.get('/api/public?tissues=wall of urinary bladder')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(1, response_obj["count"])
 
 
 class PublicAgeRangeFilteringIndividualsTest(APITestCase):

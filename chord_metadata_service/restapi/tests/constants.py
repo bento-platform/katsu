@@ -269,7 +269,8 @@ CONFIG_PUBLIC_TEST = {
             "section_title": "First Section",
             "fields": [
                 "sex", "age", "smoking", "covidstatus", "death_dc",
-                "lab_test_result_value", "baseline_creatinine", "date_of_consent"
+                "lab_test_result_value", "baseline_creatinine", "date_of_consent",
+                "tissues"
             ]
         }
     ],
@@ -343,11 +344,8 @@ CONFIG_PUBLIC_TEST = {
             "description": "This acts as a placeholder for numeric values",
             "datatype": "number",
             "config": {
-                "bin_size": 50,
-                "taper_left": 50,
-                "taper_right": 800,
+                "bins": [200, 300, 500, 1000, 1500, 2000],
                 "minimum": 0,
-                "maximum": 1000,
                 "units": "mg/L"
             }
         },
@@ -372,6 +370,16 @@ CONFIG_PUBLIC_TEST = {
             "datatype": "date",
             "config": {
                 "bin_by": "month"
+            }
+        },
+        "tissues": {
+            "mapping": "biosample/sampled_tissue/label",
+            "mapping_for_search_filter": "individual/biosamples/sampled_tissue/label",
+            "title": "Tissue",
+            "description": "Tissue from which the biosample was extracted",
+            "datatype": "string",
+            "config": {
+                "enum": None
             }
         }
     },

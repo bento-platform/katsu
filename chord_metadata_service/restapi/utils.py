@@ -2,7 +2,7 @@ import isodate
 import datetime
 
 from collections import defaultdict, Counter
-from typing import Tuple, Mapping
+from typing import Tuple, Mapping, Generator
 from calendar import month_abbr
 
 from django.db.models import Count, F, Func, IntegerField, CharField, Case, When, Value
@@ -116,7 +116,70 @@ def iso_duration_to_years(iso_age_duration: str, unit="years"):
     return None, None
 
 
-def labelled_range_generator(field_props) -> Tuple[int, int, str]:
+def labelled_range_generator(field_props) -> Generator[Tuple[int, int, str], None, None]:
+    """
+    Returns a generator yielding floor, ceil and label value for each bin from
+    a numeric field configuration
+    """
+
+    c = field_props["config"]
+    if "bins" in c:
+        return custom_binning_generator(field_props)
+
+    return auto_binning_generator(field_props)
+
+
+def custom_binning_generator(field_props) -> Generator[Tuple[int, int, str], None, None]:
+    """
+    Generator for custom bins. It expects an array of bin boundaries (`bins` property)
+    `minimum` and `maximum` properties are optional. When absent, there is no lower/upper
+    bound and the corresponding bin limit is open ended (as in "< 5").
+    If present but equal to the closest bin boundary, there is no open ended bin.
+    If present but different from closest bin, an extra bin is added to collect
+    all values down/up to the min/max value that is set (open-ended without limit)
+    For example, given the following configuration:
+    {
+        minimum: 0,
+        bins: [2, 4, 8]
+    }
+    the first bin will be labelled "<2" and contain only values between 0-2
+    while the last bin will be labelled "≥ 8" and contain any value greater than
+    or equal to 8.
+    """
+
+    c = field_props["config"]
+    minimum = int(c["minimum"]) if "minimum" in c else None
+    maximum = int(c["maximum"]) if "maximum" in c else None
+    bins = [int(value) for value in c["bins"]]
+
+    # check prerequisites
+    # Note: it raises an error as it reflects an error in the config file
+    if maximum is not None and minimum is not None and maximum < minimum:
+        raise ValueError(f"Wrong min/max values in config: {field_props}")
+
+    if minimum is not None and minimum > bins[0]:
+        raise ValueError(f"Min value in config is greater than first bin: {field_props}")
+
+    if maximum is not None and maximum < bins[-1]:
+        raise ValueError(f"Max value in config is lower than last bin: {field_props}")
+
+    if len(bins) < 2:
+        raise ValueError(f"Error in bins value. At least 2 values required for defining a single bin: {field_props}")
+
+    # start generator
+    if minimum is None or minimum != bins[0]:
+        yield minimum, bins[0], f"< {bins[0]}"
+
+    for i in range(1, len(bins) - 2):
+        lhs = bins[i - 1]
+        rhs = bins[i]
+        yield lhs, rhs, f"{lhs}-{rhs}"
+
+    if maximum is None or maximum != bins[-1]:
+        yield bins[-1], maximum, f"≥ {bins[-1]}"
+
+
+def auto_binning_generator(field_props) -> Generator[Tuple[int, int, str], None, None]:
     """
     Note: limited to operations on integer values for simplicity
     A word of caution: when implementing handling of floating point values,
@@ -183,6 +246,8 @@ def get_model_and_field(field_id: str) -> Tuple[any, str]:
         model = pheno_models.Individual
     elif model_name == "experiment":
         model = experiments_models.Experiment
+    elif model_name == "biosample":
+        model = pheno_models.Biosample
     else:
         msg = f"Accessing field on model {model_name} not implemented"
         raise NotImplementedError(msg)
@@ -440,7 +505,11 @@ def get_range_stats(field_props):
 
     # Generate a list of When conditions that return a label for the given bin.
     # This is equivalent to an SQL CASE statement.
-    whens = [When(**{f"{field}__gte": floor},  **{f"{field}__lt": ceil}, then=Value(label))
+    whens = [When(
+                  **{f"{field}__gte": floor} if floor is not None else {},
+                  **{f"{field}__lt": ceil} if ceil is not None else {},
+                  then=Value(label)
+                 )
              for floor, ceil, label in labelled_range_generator(field_props)]
 
     query_set = model.objects\
@@ -493,9 +562,15 @@ def filter_queryset_field_value(qs, field_props, value: str):
     Further filter a queryset using the field defined by field_props and the
     given value.
     It is a prerequisite that the field mapping defined in field_props is represented
-    in the queryset object
+    in the queryset object.
+    `mapping_for_search_filter` is an optional property that gets precedence over `mapping`
+    for the necessity of filtering. It is not necessary to specify this when
+    the `mapping` value is based on the same model as the queryset.
     """
-    model, field = get_model_and_field(field_props["mapping"])
+    model, field = get_model_and_field(
+        field_props["mapping_for_search_filter"] if "mapping_for_search_filter" in field_props
+        else field_props["mapping"]
+    )
 
     if field_props["datatype"] == "string":
         condition = {f"{field}__iexact": value}

@@ -67,6 +67,75 @@ class TestLabelledRangeGenerator(TestCase):
         self.assertRaises(ValueError, list, rg)
 
 
+class TestLabelledRangeGeneratorCustomBins(TestCase):
+    def setUp(self):
+        self.fp = {
+            "config": {
+                "bins": [200, 300, 500, 1000, 1500, 2000],
+                "minimum": 0,
+                "units": "mg/L"
+            }
+        }
+
+    def test_custom_bins_config(self):
+        rg = list(labelled_range_generator(self.fp))
+        self.assertEqual(rg[0], (0, 200, "< 200"))
+        self.assertEqual(rg[-1], (2000, None, "≥ 2000"))
+        self.assertEqual(rg[1], (200, 300, "200-300"))
+
+    def test_custom_bins_config_no_open_ended(self):
+        c = {
+            "config": {
+                **self.fp["config"],
+                "minimum": 200,
+                "maximum": 2000
+            }
+        }
+        rg = list(labelled_range_generator(c))
+        self.assertIn("-", rg[0][2])
+        self.assertIn("-", rg[-1][2])
+
+    def test_custom_bins_wrong_min(self):
+        c = {
+            "config": {
+                **self.fp["config"],
+                "minimum": 300
+            }
+        }
+        rg = labelled_range_generator(c)
+        self.assertRaises(ValueError, list, rg)
+
+    def test_custom_bins_wrong_max(self):
+        c = {
+            "config": {
+                **self.fp["config"],
+                "maximum": 300
+            }
+        }
+        rg = labelled_range_generator(c)
+        self.assertRaises(ValueError, list, rg)
+
+    def test_custom_bins_wrong_max_2(self):
+        c = {
+            "config": {
+                **self.fp["config"],
+                "maximum": -10
+            }
+        }
+        rg = labelled_range_generator(c)
+        self.assertRaises(ValueError, list, rg)
+
+    def test_custom_bins_wrong_bins(self):
+        c = {
+            "config": {
+                **self.fp["config"],
+                "bins": [200]
+            }
+        }
+        rg = labelled_range_generator(c)
+        self.assertRaises(ValueError, list, rg)
+
+
 class TestModelField(TestCase):
 
     def test_get_model_field_basic(self):
