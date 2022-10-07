@@ -175,6 +175,7 @@ def search_overview(request):
             "term": queryset_stats_for_field(queryset, "phenopackets__diseases__term__label"),
         },
         "individuals": {
+            "count": queryset.count(),
             "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.SEX)},
             "age": get_age_numeric_binned(queryset, OVERVIEW_AGE_BIN_SIZE),
         },
