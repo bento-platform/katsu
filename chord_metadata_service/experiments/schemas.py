@@ -86,11 +86,15 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         },
         "study_type": {
             "type": "string",
-            "enum": ["Genomics", "Epigenomics", "Metagenomics", "Transcriptomics", "Other"]
+            "enum": ["Genomics", "Epigenomics", "Metagenomics", "Transcriptomics",
+                     "Serology", "Metabolomics", "Proteomics", "Other"]
         },
         "experiment_type": {
             "type": "string",
-            "enum": ["DNA Methylation", "mRNA-Seq", "smRNA-Seq", "RNA-Seq", "WES", "Other"]
+            "enum": ["DNA Methylation", "mRNA-Seq", "smRNA-Seq", "RNA-Seq", "WES",
+                     "WGS", "Genotyping", "Proteomic profiling",
+                     "Enzyme-linked immunosorbent assay", "Metabolite profiling",
+                     "Antibody measurement", "Other"]
         },
         "experiment_ontology": ONTOLOGY_CLASS_LIST,
         "molecule": {

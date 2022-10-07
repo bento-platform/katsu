@@ -4,7 +4,6 @@ import shutil
 import tempfile
 import uuid
 
-from django.test import override_settings
 from django.urls import reverse
 from chord_metadata_service.chord.export_cbio import CBIO_FILES_SET
 from chord_metadata_service.chord.export_utils import EXPORT_DIR
@@ -62,7 +61,6 @@ class ExportTest(APITestCase):
 
         self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
 
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def test_export_cbio(self):
         # Test with no export body
         r = self.client.post(reverse("export"), content_type="application/json")
@@ -79,7 +77,7 @@ class ExportTest(APITestCase):
 
             # Test with no output_path: expect a tar archive to be returned
             r = self.client.post(reverse("export"), data=json.dumps(export_payload), content_type="application/json")
-            self.assertEquals(r.get('Content-Disposition'), f"attachment; filename=\"{self.study_id}.tar.gz\"")
+            self.assertEqual(r.get('Content-Disposition'), f"attachment; filename=\"{self.study_id}.tar.gz\"")
 
             # Test with output_path provided: expect files created in this directory
             export_payload["output_path"] = tmp_dir

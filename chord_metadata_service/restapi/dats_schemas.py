@@ -37,6 +37,7 @@ def get_dats_schema(field):
         if schema_name == field_schema_name:
             schema_file = open(filename)
             schema = json.loads(schema_file.read())
+            schema_file.close()
             return schema
 
 
@@ -45,6 +46,7 @@ def _get_creators_schema(creator_type):
 
     dats_creators_schema = open(os.path.join(DATS_PATH, '{}.json'.format(creator_type)))
     creator_schema = json.loads(dats_creators_schema.read())
+    dats_creators_schema.close()
     return creator_schema
 
 

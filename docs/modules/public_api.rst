@@ -43,6 +43,7 @@ An array of:
 A dictionary, keyed by field id of:
 
 - "mapping" (string) - defines in a path like format, the mapping between the field and its object representation in the Django ORM. The first part is a reference to the model. The following is the "location" of the field relative to the model (might be nested or made accross joins). Example "individual/extra_properties/date_of_consent"
+- "mapping_for_search_filter" *optional* (string) - defines the mapping between the field and its object representation relative to the Individual model in the Django ORM for use in  counting matching indivduals. Example "individual/biosamples/experiment/experiment_type". When absent the value from the "mapping" property is used by default.
 - "title" (string) - name that is displayed to the user
 - "description" (string) - detailed description of the field, suitable for a tooltip
 - "datatype" (options number, date, string) - defines the type of field
@@ -50,12 +51,21 @@ A dictionary, keyed by field id of:
 
   - [datatype=number].config:
 
-    - "bin-size" (number): bins width. Due to implementation limitations, must be an integer for now.
-    - "minimum" (number): values lesser than minimum can't be queried
-    - "maximum" (number): values greater than or equal to maximum can't be queried
-    - "taper_left" (number): cutoff value for the first bin. Disabled when equals to ``minimum``
-    - "taper_right" (number): cutoff value for the last bin. Disabled when equals to ``maximum``
-    - "units" (string): unit that will be displayed to the user
+    - Config for auto-binning:
+
+      - "bin-size" (number): bins width. Due to implementation limitations, must be an integer for now.
+      - "minimum" (number): values lesser than minimum can't be queried
+      - "maximum" (number): values greater than or equal to maximum can't be queried
+      - "taper_left" (number): cutoff value for the first bin. Disabled when equals to ``minimum``
+      - "taper_right" (number): cutoff value for the last bin. Disabled when equals to ``maximum``
+      - "units" (string): unit that will be displayed to the user
+
+    - Config for custom binning:
+
+      - "bins" (list of numbers): boundaries of the bins
+      - "minimum" *optional* (number): values lesser than minimum can't be queried. When absent, no limit is applied on the minimum boundary for the first bin.
+      - "maximum" *optional* (number): values greater than or equal to maximum can't be queried. When absent, no limit is applied on the maximum boundary for the last bin.
+
 
   - [datatype=string].config:
 
@@ -126,6 +136,7 @@ Example of the config.json
         },
         "experiment_type": {
             "mapping": "experiment/experiment_type",
+            "mapping_for_search_filter": "individual/biosamples/experiment/experiment_type"
             "title": "Experiment Types",
             "description": "Types of experiments performed on a sample",
             "datatype": "string",

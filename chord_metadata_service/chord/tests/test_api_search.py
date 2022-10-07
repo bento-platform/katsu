@@ -3,7 +3,6 @@ import uuid
 
 from unittest.mock import patch
 
-from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -36,6 +35,7 @@ from .constants import (
     TEST_SEARCH_QUERY_7,
     TEST_SEARCH_QUERY_8,
     TEST_SEARCH_QUERY_9,
+    TEST_SEARCH_QUERY_10,
     TEST_FHIR_SEARCH_QUERY,
 )
 from ..models import Project, Dataset, TableOwnership, Table
@@ -92,14 +92,13 @@ class TableTest(APITestCase):
             "schema": DATA_TYPES[table["data_type"]]["schema"],
         }
 
-    @override_settings(AUTH_OVERRIDE=True)  # For permissions
     def setUp(self) -> None:
         # Add example data
 
         r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
 
-        r = self.client.post(reverse("dataset-list"), data=json.dumps(valid_dataset_1(self.project["identifier"])),
+        r = self.client.post('/api/datasets', data=json.dumps(valid_dataset_1(self.project["identifier"])),
                              content_type="application/json")
         self.dataset = r.json()
 
@@ -233,7 +232,6 @@ class SearchTest(APITestCase):
                 "data_type": DATA_TYPE_PHENOPACKET,
                 "query": TEST_SEARCH_QUERY_1
             }, method=method)
-            print(r, r.json())
             self.assertEqual(r.status_code, status.HTTP_200_OK)
 
             c = r.json()
@@ -446,6 +444,128 @@ class SearchTest(APITestCase):
             c = r.json()
             self.assertEqual(len(c["results"]), 1)
             self.assertIn("patient:1", [phenopacket["subject"]["id"] for phenopacket in c["results"]])
+
+    def test_private_table_search_13(self):
+        # Valid query to search for biosample id in list
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            self.assertEqual(len(c["results"]), 1)  # 1 phenopacket that contains 2 matching biosamples
+            self.assertIn("biosample_id:1", [b["id"]
+                                             for phenopacket in c["results"]
+                                             for b in phenopacket["biosamples"]
+                                             ])
+
+    def test_private_table_search_values_list(self):
+        # Valid query to search for biosample id in list
+        # Output as a list of values from a single field
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10,
+            "output": "values_list",
+            "field": '["biosamples", "[item]", "id"]'
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            self.assertEqual(len(c["results"]), 2)  # 2 biosamples id for the matching phenopacket
+            self.assertTrue(all([isinstance(item, str) for item in c["results"]]))
+
+    def test_private_table_experiment_search_values_list(self):
+        # Valid query to search for experiment
+        # Output as a list of values from a single field
+
+        d = {
+            "query": TEST_SEARCH_QUERY_7,
+            "output": "values_list",
+            "field": '["biosample"]'
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-table-search", args=[str(self.t_exp.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            self.assertEqual(len(c["results"]), 1)  # 1 biosamples id in the database
+            self.assertEqual(c["results"][0], str(self.biosample_1.id))
+
+    def test_private_table_search_values_list_invalid_field_syntax(self):
+        # Valid query to search for biosample id in list
+        # Output as a list of values from a single field badly defined
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10,
+            "output": "values_list",
+            "field": '["biosamples", "[item]"'
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_private_table_search_bento_search_results(self):
+        # Valid query to search for biosample id in list
+        # Output as Bento search (a list of 4 values)
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10,
+            "output": "bento_search_result",
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            self.assertEqual(len(c["results"]), 1)  # 1 matching phenopacket
+            self.assertEqual(len(c["results"][0]), 4)    # 4 columns by result
+            self.assertEqual(
+                {"subject_id", "alternate_ids", "biosamples", "num_experiments"},
+                set(c["results"][0].keys()))
+            self.assertIsInstance(c["results"][0]["alternate_ids"], list)
+
+    def test_private_search_bento_search_results(self):
+        # Valid query to search for biosample id in list
+        # Output as a bento search is valid
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10,
+            "output": "bento_search_result",
+            "data_type": "phenopacket",
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-search", data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            table_id = list(c["results"].keys())[0]
+            matches = c["results"][table_id]["matches"]
+            self.assertEqual(len(matches), 1)   # 1 matching phenopacket
+
+    def test_private_search_values_list(self):
+        # Valid query to search for biosample id in list
+        # Output as a list of values
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10,
+            "output": "values_list",
+            "field": '["biosamples", "[item]", "id"]',
+            "data_type": "phenopacket",
+        }
+
+        for method in POST_GET:
+            r = self._search_call("private-search", data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            table_id = list(c["results"].keys())[0]
+            matches = c["results"][table_id]["matches"]
+            self.assertEqual(len(matches), 2)   # 2 biosamples in list
 
     @patch('chord_metadata_service.chord.views_search.es')
     def test_fhir_search(self, mocked_es):

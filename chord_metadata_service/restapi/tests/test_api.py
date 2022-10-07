@@ -1,5 +1,6 @@
+import json
+import os
 from copy import deepcopy
-from uuid import uuid4
 
 from django.conf import settings
 from django.urls import reverse
@@ -10,7 +11,6 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
 from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
@@ -78,7 +78,9 @@ class OverviewTest(APITestCase):
         self.assertEqual(response_obj['phenopackets'], 2)
         self.assertEqual(response_obj['data_type_specific']['individuals']['count'], 2)
         self.assertIsInstance(response_obj['data_type_specific']['individuals']['age'], dict)
-        self.assertDictContainsSubset({'40': 1, '30': 1}, response_obj['data_type_specific']['individuals']['age'])
+        self.assertEqual(
+            response_obj['data_type_specific']['individuals']['age'],
+            {**{'40': 1, '30': 1}, **response_obj['data_type_specific']['individuals']['age']})
         self.assertEqual(response_obj['data_type_specific']['biosamples']['count'], 2)
         self.assertEqual(response_obj['data_type_specific']['phenotypic_features']['count'], 1)
         self.assertEqual(response_obj['data_type_specific']['diseases']['count'], 1)
@@ -104,6 +106,17 @@ class OverviewTest(APITestCase):
         self.assertEqual(response_obj['data_type_specific']['instruments']['platform']['Illumina'], 2)
         self.assertEqual(response_obj['data_type_specific']['instruments']['model']['Illumina HiSeq 4000'], 2)
 
+    def test_search_overview(self):
+        payload = json.dumps({'id': [ph_c.VALID_INDIVIDUAL_1['id']]})
+        response = self.client.post(reverse('search-overview'), payload, content_type='application/json')
+        response_obj = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj['biosamples']['count'], 1)
+        self.assertIn('wall of urinary bladder', response_obj['biosamples']['sampled_tissue'])
+        self.assertIn('Proptosis', response_obj['phenotypic_features']['type'])
+        self.assertIn(ph_c.VALID_DISEASE_1['term']['label'], response_obj['diseases']['term'])
+
 
 class McodeOverviewTest(APITestCase):
     # create 2 mcodepackets for 2 individuals
@@ -126,9 +139,9 @@ class McodeOverviewTest(APITestCase):
             cancer_disease_status={
                 "id": "SNOMED:268910001",
                 "label": "Patient's condition improved"
-            }
+            },
+            cancer_condition=self.cancer_condition
         )
-        self.mcodepacket_1.cancer_condition.set([self.cancer_condition])
         self.mcodepacket_1.cancer_related_procedures.set([self.cancer_related_procedure])
         self.mcodepacket_1.medication_statement.set([self.medication_statement])
         self.mcodepacket_2 = mcode_m.MCodePacket.objects.create(
@@ -137,9 +150,9 @@ class McodeOverviewTest(APITestCase):
             cancer_disease_status={
                 "id": "SNOMED:359746009",
                 "label": "Patient's condition stable"
-            }
+            },
+            cancer_condition=self.cancer_condition_2
         )
-        self.mcodepacket_2.cancer_condition.set([self.cancer_condition_2])
 
     def test_mcode_overview(self):
         response = self.client.get("/api/mcode_overview")
@@ -322,11 +335,15 @@ class PublicOverviewNotSupportedDataTypesDictTest(APITestCase):
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
 
 
-class PublicOverviewDatasetsMetadataTest(APITestCase):
+class PublicDatasetsMetadataTest(APITestCase):
 
     def setUp(self) -> None:
         project = ch_m.Project.objects.create(title="Test project", description="test description")
-        dataset = ch_m.Dataset.objects.create(
+        dats_path = os.path.join(os.path.dirname(__file__), "example_dats_provenance.json")
+        with open(dats_path) as f:
+            dats_content = f.read()
+
+        ch_m.Dataset.objects.create(
             title="Dataset 1",
             description="Test dataset",
             contact_info="Test contact info",
@@ -334,50 +351,28 @@ class PublicOverviewDatasetsMetadataTest(APITestCase):
             privacy="Open",
             keywords=["test keyword 1", "test keyword 2"],
             data_use=ch_c.VALID_DATA_USE_1,
-            project=project
+            project=project,
+            dats_file=dats_content
         )
-        table_ownership = ch_m.TableOwnership.objects.create(
-            table_id=str(uuid4()),
-            service_id=str(uuid4()),
-            service_artifact="phenopacket",
-            dataset=dataset
-        )
-        table = ch_m.Table.objects.create(
-            ownership_record=table_ownership, name="Test table 1", data_type=DATA_TYPE_PHENOPACKET
-        )
-        metadata = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
-        for i, ind in enumerate(VALID_INDIVIDUALS, start=1):
-            new_individual = ph_m.Individual.objects.create(**ind)
-            ph_m.Phenopacket.objects.create(
-                id=f"phenopacket:{i}",
-                subject=new_individual,
-                meta_data=metadata,
-                table=table
-            )
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
-    def test_overview(self):
-        response = self.client.get('/api/public_overview')
+    def test_public_dataset(self):
+        response = self.client.get(reverse("public-dataset"))
         response_obj = response.json()
-        db_count = ph_m.Individual.objects.all().count()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        # counts
-        self.assertEqual(response_obj["counts"]["individuals"], db_count)
 
         # datasets
         self.assertIsInstance(response_obj["datasets"], list)
-        for dataset in response_obj["datasets"]:
+        for i, dataset in enumerate(response_obj["datasets"]):
             self.assertIn("title", dataset.keys())
             self.assertIsNotNone(dataset["title"])
+            if i == 0:
+                self.assertTrue("keywords" in dataset["dats_file"])
 
-        # layout
-        self.assertIn("layout", response_obj)
-        self.assertEqual(response_obj["layout"], settings.CONFIG_PUBLIC["overview"])
-
-        # fields
-        self.assertIn("fields", response_obj)
-        self.assertSetEqual(
-            set(response_obj["fields"].keys()),
-            set(chart["field"] for section in settings.CONFIG_PUBLIC["overview"] for chart in section["charts"])
-        )
+    @override_settings(CONFIG_PUBLIC={})
+    def test_public_dataset_response_no_config(self):
+        response = self.client.get(reverse("public-dataset"))
+        response_obj = response.json()
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)

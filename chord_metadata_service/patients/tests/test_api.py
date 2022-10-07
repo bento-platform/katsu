@@ -1,3 +1,4 @@
+from copy import deepcopy
 import json
 import csv
 import io
@@ -9,8 +10,13 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.restapi.tests.constants import CONFIG_PUBLIC_TEST, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
 from chord_metadata_service.restapi.utils import iso_duration_to_years
+from chord_metadata_service.phenopackets.tests import constants as ph_c
+from chord_metadata_service.phenopackets import models as ph_m
 
 from . import constants as c
+
+CONFIG_PUBLIC_TEST_NO_THRESHOLD = deepcopy(CONFIG_PUBLIC_TEST)
+CONFIG_PUBLIC_TEST_NO_THRESHOLD["rules"]["count_threshold"] = 0
 
 
 class CreateIndividualTest(APITestCase):
@@ -25,7 +31,7 @@ class CreateIndividualTest(APITestCase):
         """ POST a new individual. """
 
         response = self.client.post(
-            reverse('individual-list'),
+            reverse('individuals-list'),
             data=json.dumps(self.valid_payload),
             content_type='application/json'
         )
@@ -37,7 +43,7 @@ class CreateIndividualTest(APITestCase):
         """ POST a new individual with invalid data. """
 
         invalid_response = self.client.post(
-            reverse('individual-list'),
+            reverse('individuals-list'),
             data=json.dumps(self.invalid_payload),
             content_type='application/json'
         )
@@ -77,12 +83,12 @@ class UpdateIndividualTest(APITestCase):
 
         response = self.client.put(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                ),
+            ),
             data=json.dumps(self.put_valid_payload),
             content_type='application/json'
-            )
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_invalid_individual(self):
@@ -90,12 +96,12 @@ class UpdateIndividualTest(APITestCase):
 
         response = self.client.put(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                ),
+            ),
             data=json.dumps(self.invalid_payload),
             content_type='application/json'
-            )
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -110,10 +116,10 @@ class DeleteIndividualTest(APITestCase):
 
         response = self.client.delete(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': self.individual_one.id}
-                )
             )
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_delete_non_existing_individual(self):
@@ -121,10 +127,10 @@ class DeleteIndividualTest(APITestCase):
 
         response = self.client.delete(
             reverse(
-                'individual-detail',
+                'individuals-detail',
                 kwargs={'pk': 'patient:what'}
-                )
             )
+        )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -153,6 +159,10 @@ class IndividualFullTextSearchTest(APITestCase):
     def setUp(self):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+        self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+        self.phenopacket_1 = ph_m.Phenopacket.objects.create(
+            **ph_c.valid_phenopacket(subject=self.individual_one, meta_data=self.metadata_1)
+        )
 
     def test_search(self):
         get_resp_1 = self.client.get('/api/individuals?search=P49Y')
@@ -164,6 +174,99 @@ class IndividualFullTextSearchTest(APITestCase):
         self.assertEqual(get_resp_2.status_code, status.HTTP_200_OK)
         response_obj_2 = get_resp_2.json()
         self.assertEqual(len(response_obj_2['results']), 2)
+
+    def test_search_bento_search_format(self):
+        get_resp_1 = self.client.get('/api/individuals?search=P49Y&format=bento_search_result')
+        self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
+        response_obj_1 = get_resp_1.json()
+        self.assertEqual(len(response_obj_1['results']), 1)
+        self.assertEqual(len(response_obj_1['results'][0]), 4)  # 4 fields in the bento search response
+
+
+# Note: the next five tests use the same setUp method. Initially they were
+# all combined in the same class. But this caused bugs with regard to unavailable
+# postgre cursor in the call to `setUp()` after the first invocation for undetermined reasons.
+# One hypothesis is that using POST requests without actually
+# adding data to the database creates unexpected behaviour with one of the
+# libraries used  during the testing (?) maybe at teardown time.
+class BatchIndividualsCSVTest(APITestCase):
+    """ Test for getting a batch of individuals as csv. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_batch_individuals_csv_no_ids(self):
+        data = json.dumps({'format': 'csv'})
+        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class BatchIndividualsCSVTest1(APITestCase):
+    """ Test for getting a batch of individuals as csv. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_batch_individuals_csv(self):
+        data = json.dumps({'format': 'csv', 'id': [self.individual_one.id, self.individual_two.id]})
+        get_resp = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+
+        content = get_resp.content.decode('utf-8')
+        resp_csv_reader = csv.reader(io.StringIO(content))
+        resp_body = list(resp_csv_reader)
+        correct_content = f"{c.CSV_HEADER}\n{c.INDIVIDUAL_1_CSV}\n{c.INDIVIDUAL_2_CSV}"
+        correct_csv_reader = csv.reader(io.StringIO(correct_content))
+        correct_body = list(correct_csv_reader)
+        self.assertEqual(resp_body[0], correct_body[0])
+        for i in range(1, len(resp_body)):
+            # last 2 columns are dates with a specific formating. We ignore those in the test by slicing
+            self.assertEqual(resp_body[i][:-2], correct_body[i][:-2])
+
+
+class BatchIndividualsCSVTest2(APITestCase):
+    """ Test for getting a batch of individuals as csv. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_batch_individuals_csv_invalid_ids(self):
+        data = json.dumps({'format': 'csv', 'id': ['invalid']})
+        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class BatchIndividualsCSVTest3(APITestCase):
+    """ Test for getting a batch of individuals as csv. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_batch_individuals_csv_invalid_ids(self):
+        data = json.dumps({'format': 'csv', 'id': [self.individual_one.id, 'invalid', "I don't exist"]})
+        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        lines = response.content.decode('utf8').split('\n')
+        nb_lines = len([line for line in lines if line])    # ignore trailing line break
+        self.assertEqual(nb_lines, 2)   # 2 lines expected: header + individual_one
+
+
+class BatchIndividualsCSVTest4(APITestCase):
+    """ Test for getting a batch of individuals as csv. """
+
+    def setUp(self):
+        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+    def test_batch_individuals_csv_invalid_format(self):
+        # defaults to default renderer
+        data = json.dumps({'format': 'invalid', 'id': [self.individual_one.id]})
+        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 class PublicListIndividualsTest(APITestCase):
@@ -195,6 +298,10 @@ class PublicListIndividualsTest(APITestCase):
             self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(Individual.objects.all().count(), response_obj['count'])
+            self.assertEqual(response_obj['biosamples']['count'], 0)
+            self.assertIsInstance(response_obj['biosamples']['sampled_tissue'], list)
+            self.assertEqual(response_obj['experiments']['count'], 0)
+            self.assertIsInstance(response_obj['experiments']['experiment_type'], list)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_public_get_no_config(self):
@@ -220,6 +327,8 @@ class PublicFilteringIndividualsTest(APITestCase):
         individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
         for individual in individuals:
             Individual.objects.create(**individual)
+        p = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
+        ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0], p))
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_sex(self):
@@ -311,13 +420,13 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_range_1(self):
         # extra_properties range search (both min and max ranges, single value)
         response = self.client.get(
-            '/api/public?lab_test_result_value=50-100'
+            '/api/public?lab_test_result_value=200-300'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
-            "extra_properties__lab_test_result_value__gte": 50,
-            "extra_properties__lab_test_result_value__lt": 100
+            "extra_properties__lab_test_result_value__gte": 200,
+            "extra_properties__lab_test_result_value__lt": 300
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
@@ -376,14 +485,14 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_range_string_1(self):
         # sex string search and extra_properties range search
         response = self.client.get(
-            '/api/public?sex=female&lab_test_result_value=100-150'
+            '/api/public?sex=female&lab_test_result_value=< 200'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
             "sex__iexact": "female",
-            "extra_properties__lab_test_result_value__gte": 100,
-            "extra_properties__lab_test_result_value__lt": 150
+            "extra_properties__lab_test_result_value__gte": 0,
+            "extra_properties__lab_test_result_value__lt": 200
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
@@ -394,15 +503,15 @@ class PublicFilteringIndividualsTest(APITestCase):
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_extra_properties_range_string_2(self):
-        # extra_properties range search (both min and max ranges) and extra_properties string search (single value)
+        # extra_properties range search and extra_properties string search (single value)
         response = self.client.get(
-            '/api/public?lab_test_result_value=100-150&covidstatus=positive'
+            '/api/public?lab_test_result_value=< 200&covidstatus=positive'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
-            "extra_properties__lab_test_result_value__gte": 100,
-            "extra_properties__lab_test_result_value__lt": 150,
+            "extra_properties__lab_test_result_value__gte": 0,
+            "extra_properties__lab_test_result_value__lt": 200,
             "extra_properties__covidstatus__iexact": "positive",
         }
         db_count = Individual.objects.filter(**range_parameters).count()
@@ -416,13 +525,13 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_multiple_ranges_1(self):
         # extra_properties range search (both min and max range, multiple values)
         response = self.client.get(
-            '/api/public?lab_test_result_value=100-150&baseline_creatinine=100-150'
+            '/api/public?lab_test_result_value=< 200&baseline_creatinine=100-150'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
-            "extra_properties__lab_test_result_value__gte": 100,
-            "extra_properties__lab_test_result_value__lt": 150,
+            "extra_properties__lab_test_result_value__gte": 0,
+            "extra_properties__lab_test_result_value__lt": 200,
             "extra_properties__baseline_creatinine__gte": 100,
             "extra_properties__baseline_creatinine__lt": 150,
         }
@@ -455,14 +564,14 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_date_range_and_other_range(self):
         # extra_properties date range search (both after and before, single value) and other number range search
         response = self.client.get(
-            '/api/public?date_of_consent=Mar 2021&lab_test_result_value=100-150'
+            '/api/public?date_of_consent=Mar 2021&lab_test_result_value=< 200'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
             "extra_properties__date_of_consent__startswith": "2021-03",
-            "extra_properties__lab_test_result_value__gte": 100,
-            "extra_properties__lab_test_result_value__lt": 150,
+            "extra_properties__lab_test_result_value__gte": 0,
+            "extra_properties__lab_test_result_value__lt": 200,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
@@ -470,6 +579,14 @@ class PublicFilteringIndividualsTest(APITestCase):
             self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_NO_THRESHOLD)
+    def test_public_filtering_mapping_for_search_filter(self):
+        # biosample tissue field search
+        response = self.client.get('/api/public?tissues=wall of urinary bladder')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(1, response_obj["count"])
 
 
 class PublicAgeRangeFilteringIndividualsTest(APITestCase):

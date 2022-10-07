@@ -2,6 +2,7 @@ import logging
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Gene
 from . import models as m
+from django.utils import timezone
 
 logger = logging.getLogger("mcode_ingest")
 logger.setLevel(logging.INFO)
@@ -25,7 +26,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
     medication_statement_data = mcodepacket_data.get("medication_statement", None)
     date_of_death_data = mcodepacket_data.get("date_of_death", None)
     cancer_disease_status_data = mcodepacket_data.get("cancer_disease_status", None)
-    tumor_markers = mcodepacket_data.get("tumor_marker", None)
+    tumor_marker_data = mcodepacket_data.get("tumor_marker", None)
 
     # get and create Patient
     if subject:
@@ -160,38 +161,39 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
     # get and create CancerCondition
     cancer_conditions = []
     if cancer_condition_data:
-        for cc in cancer_condition_data:
-
-            cancer_condition, cc_created = m.CancerCondition.objects.get_or_create(
-                id=cc["id"],
-                defaults={
-                    "code": cc["code"],
-                    "condition_type": cc["condition_type"],
-                    "clinical_status": cc.get("clinical_status", None),
-                    "verification_status": cc.get("verification_status", None),
-                    "date_of_diagnosis": cc.get("date_of_diagnosis", None),
-                    "body_site": cc.get("body_site", None),
-                    "laterality": cc.get("laterality", None),
-                    "histology_morphology_behavior": cc.get("histology_morphology_behavior", None)
-                }
-            )
-            _logger_message(cc_created, cancer_condition)
-            cancer_conditions.append(cancer_condition.id)
-            if "tnm_staging" in cc:
-                for tnms in cc["tnm_staging"]:
-                    tnm_staging, tnms_created = m.TNMStaging.objects.get_or_create(
-                        id=tnms["id"],
-                        defaults={
-                            "cancer_condition": cancer_condition,
-                            "stage_group": tnms["stage_group"],
-                            "tnm_type": tnms["tnm_type"],
-                            "primary_tumor_category": tnms.get("primary_tumor_category", None),
-                            "regional_nodes_category": tnms.get("regional_nodes_category", None),
-                            "distant_metastases_category": tnms.get("distant_metastases_category", None)
-
-                        }
-                    )
-                    _logger_message(tnms_created, tnm_staging)
+        cc = cancer_condition_data
+        cancer_condition, cc_created = m.CancerCondition.objects.get_or_create(
+            id=cc["id"],
+            defaults={
+                "code": cc["code"],
+                "condition_type": cc["condition_type"],
+                "clinical_status": cc.get("clinical_status", None),
+                "verification_status": cc.get("verification_status", None),
+                "date_of_diagnosis": cc.get("date_of_diagnosis", None),
+                "body_site": cc.get("body_site", None),
+                "laterality": cc.get("laterality", None),
+                "histology_morphology_behavior": cc.get("histology_morphology_behavior", None),
+                "extra_properties": cc.get("extra_properties", None)
+            }
+        )
+        _logger_message(cc_created, cancer_condition)
+        cancer_conditions.append(cancer_condition.id)
+        new_mcodepacket["cancer_condition"] = cancer_condition
+        if "tnm_staging" in cc:
+            for tnms in cc["tnm_staging"]:
+                tnm_staging, tnms_created = m.TNMStaging.objects.get_or_create(
+                    id=tnms["id"],
+                    defaults={
+                        "cancer_condition": cancer_condition,
+                        "stage_group": tnms["stage_group"],
+                        "tnm_type": tnms["tnm_type"],
+                        "primary_tumor_category": tnms.get("primary_tumor_category", None),
+                        "regional_nodes_category": tnms.get("regional_nodes_category", None),
+                        "distant_metastases_category": tnms.get("distant_metastases_category", None),
+                        "extra_properties": tnms.get("extra_properties", None)
+                    }
+                )
+                _logger_message(tnms_created, tnm_staging)
 
     # get and create Cancer Related Procedure
     crprocedures = []
@@ -225,7 +227,12 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
             medication_statement, ms_created = m.MedicationStatement.objects.get_or_create(
                 id=ms["id"],
                 defaults={
-                    "medication_code": ms["medication_code"]
+                    "medication_code": ms["medication_code"],
+                    "termination_reason": ms.get("termination_reason", None),
+                    "treatment_intent": ms.get("treatment_intent", None),
+                    "start_date": ms.get("start_date", None),
+                    "end_date": ms.get("end_date", None),
+                    "extra_properties": ms.get("extra_properties", None)
                 }
             )
             _logger_message(ms_created, medication_statement)
@@ -240,33 +247,39 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
         new_mcodepacket["cancer_disease_status"] = cancer_disease_status_data
 
     # get tumor marker
-    if tumor_markers:
-        for tm in tumor_markers:
+    tumor_markers = []
+    if tumor_marker_data:
+        for tm in tumor_marker_data:
             tumor_marker, tm_created = m.LabsVital.objects.get_or_create(
                 id=tm["id"],
                 defaults={
                     "tumor_marker_code": tm["tumor_marker_code"],
                     "tumor_marker_data_value": tm.get("tumor_marker_data_value", None),
-                    "individual": m.Individual.objects.get(id=tm["individual"])
+                    "individual": m.Individual.objects.get(id=tm["individual"]),
+                    "extra_properties": tm.get("extra_properties", None)
                 }
             )
             _logger_message(tm_created, tumor_marker)
+            tumor_markers.append(tumor_marker.id)
 
     mcodepacket = m.MCodePacket(
         id=new_mcodepacket["id"],
         subject=Individual.objects.get(id=new_mcodepacket["subject"]),
         genomics_report=new_mcodepacket.get("genomics_report", None),
+        cancer_condition=new_mcodepacket.get("cancer_condition", None),
         date_of_death=new_mcodepacket.get("date_of_death", ""),
         cancer_disease_status=new_mcodepacket.get("cancer_disease_status", None),
-        table_id=table_id
+        extra_properties=mcodepacket_data.get("extra_properties", None),
+        table_id=table_id,
+        updated=timezone.now()
     )
     mcodepacket.save()
     logger.info(f"New Mcodepacket {mcodepacket.id} created")
-    if cancer_conditions:
-        mcodepacket.cancer_condition.set(cancer_conditions)
     if crprocedures:
         mcodepacket.cancer_related_procedures.set(crprocedures)
     if medication_statements:
         mcodepacket.medication_statement.set(medication_statements)
+    if tumor_markers:
+        mcodepacket.tumor_marker.set(tumor_markers)
 
     return mcodepacket

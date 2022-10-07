@@ -12,6 +12,8 @@ from .models import Experiment, ExperimentResult
 from .schemas import EXPERIMENT_SCHEMA
 from .filters import ExperimentFilter, ExperimentResultFilter
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 
 __all__ = [
     "EXPERIMENT_SELECT_REL",
@@ -46,10 +48,8 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
     filter_backends = [DjangoFilterBackend]
-    filter_class = ExperimentFilter
+    filterset_class = ExperimentFilter
 
-    # Cache page for the requested url for 2 hours
-    @method_decorator(cache_page(60 * 60 * 2))
     def dispatch(self, *args, **kwargs):
         return super(ExperimentViewSet, self).dispatch(*args, **kwargs)
 
@@ -68,7 +68,7 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
     filter_backends = [DjangoFilterBackend]
-    filter_class = ExperimentResultFilter
+    filterset_class = ExperimentResultFilter
 
     # Cache page for the requested url for 2 hours
     @method_decorator(cache_page(60 * 60 * 2))
@@ -76,6 +76,17 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
         return super(ExperimentResultViewSet, self).dispatch(*args, **kwargs)
 
 
+@extend_schema(
+    description="Experiment schema",
+    responses={
+        200: inline_serializer(
+            name='get_experiment_schema_response',
+            fields={
+                'EXPERIMENT_SCHEMA': serializers.JSONField(),
+            }
+        )
+    }
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_experiment_schema(_request):
