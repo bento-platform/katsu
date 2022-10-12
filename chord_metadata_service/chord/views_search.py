@@ -7,7 +7,7 @@ from bento_lib.responses import errors
 from bento_lib.search import build_search_response, postgres
 from datetime import datetime
 from django.db import connection
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
@@ -314,8 +314,9 @@ def phenopacket_query_results(query, params, options=None):
                 # Weird bug with Django 4.1 here: num_experiments must come before the use of ArrayAgg or biosamples
                 # is considered as an ArrayField...
                 num_experiments=Count("biosamples__experiment"),
+                # Postgre specific: aggregates multiple values in a list
                 biosamples=Coalesce(
-                    ArrayAgg("biosamples__id"),  # Postgre specific: aggregates multiple values in a list
+                    ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
                     []
                 )
             )
