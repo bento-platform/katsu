@@ -363,12 +363,14 @@ def public_overview(_request):
 @permission_classes([AllowAny])
 def moh_overview(_request):
     """
-        Return a summary of the statistics for the database
+        Return a summary of the statistics for the database:
+        - cohort_count: number of datasets
+        - individual_count: number of individuals
+        - ethnicity: the count of each ethenicity
+        - gender: the count of each gender
     """
     return Response({
-        "province_count": 1,  # dummy
-        "hospital_count": 52,  # dummy
-        "center_count": 157,  # dummy
+        "cohort_count": chord_models.Dataset.objects.all().count(),
         "individual_count": patients_models.Individual.objects.count(),
         "ethnicity": list(patients_models.Individual.objects.values('ethnicity').annotate(
             count=Count('ethnicity')).order_by()),
