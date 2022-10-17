@@ -9,7 +9,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ValidationError
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from bento_lib.responses import errors
@@ -87,7 +87,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
             ).annotate(
                 num_experiments=Count("biosamples__experiment"),
                 biosamples=Coalesce(
-                    ArrayAgg("biosamples__id"),
+                    ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
                     []
                 )
             )
