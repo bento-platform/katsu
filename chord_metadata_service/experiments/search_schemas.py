@@ -27,7 +27,7 @@ EXPERIMENT_RESULT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPE
             "search": search_optional_eq(4)
         },
         "usage": {
-            "search": search_optional_str(5)
+            "search": search_optional_eq(5)
         },
         "genome_assembly_id": {
             "search": search_optional_eq(6)
@@ -79,21 +79,21 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
             "search": {"order": 2, "database": {"type": "array"}}
         },
         "experiment_type": {
-            "search": search_optional_str(3),
+            "search": search_optional_eq(3),
         },
         "experiment_ontology": {
             "items": ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
             "search": {"order": 4, "database": {"type": "jsonb"}}
         },
         "molecule": {
-            "search": search_optional_str(5),
+            "search": search_optional_eq(5),
         },
         "molecule_ontology": {
             "items": ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
             "search": {"order": 6, "database": {"type": "jsonb"}}
         },
         "library_strategy": {
-            "search": search_optional_str(7),
+            "search": search_optional_eq(7),
         },
         "biosample": {
             "search": merge_schema_dictionaries(
@@ -105,16 +105,16 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
             "search": search_optional_str(9),
         },
         "study_type": {
-            "search": search_optional_str(10),
+            "search": search_optional_eq(10),
         },
         "library_source": {
-            "search": search_optional_str(11),
+            "search": search_optional_eq(11),
         },
         "library_selection": {
-            "search": search_optional_str(12),
+            "search": search_optional_eq(12),
         },
         "library_layout": {
-            "search": search_optional_str(13),
+            "search": search_optional_eq(13),
         },
         # query example: ["#ico", ["#resolve", "instrument", "model"], "Illumina"]
         "instrument": merge_schema_dictionaries(
