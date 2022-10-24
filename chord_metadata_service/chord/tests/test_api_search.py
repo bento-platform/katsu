@@ -427,7 +427,7 @@ class SearchTest(APITestCase):
             self.assertIn(str(self.t_exp.identifier), c["results"])
             self.assertEqual(c["results"][str(self.t_exp.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
             self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["experiment_type"],
-                             "Chromatin Accessibility")
+                             "DNA Methylation")
 
     # TODO table search fr experiments
 
