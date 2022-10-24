@@ -248,7 +248,7 @@ TEST_SEARCH_QUERY_5 = ["#ico", ["#resolve", "phenotypic_features", "[item]", "ty
 TEST_SEARCH_QUERY_6 = ["#ico", ["#resolve", "biosamples", "[item]", "sampled_tissue", "label"],
                        "URINARY BLADDER"]
 TEST_SEARCH_QUERY_7 = ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
-TEST_SEARCH_QUERY_8 = ["#ico", ["#resolve", "experiment_type"], "chromatin"]
+TEST_SEARCH_QUERY_8 = ["#eq", ["#resolve", "experiment_type"], "DNA Methylation"]
 TEST_SEARCH_QUERY_9 = ["#eq", ["#resolve", "subject", "id"], "patient:1"]
 TEST_SEARCH_QUERY_10 = ["#in", ["#resolve", "biosamples", "[item]", "id"],
                         ["#list", "biosample_id:1", "biosample_id:2"]]

@@ -88,7 +88,7 @@ class OverviewTest(APITestCase):
         self.assertEqual(response_obj['data_type_specific']['experiments']['count'], 2)
         self.assertEqual(response_obj['data_type_specific']['experiments']['study_type']['Whole genome Sequencing'], 2)
         self.assertEqual(
-            response_obj['data_type_specific']['experiments']['experiment_type']['Chromatin Accessibility'], 2
+            response_obj['data_type_specific']['experiments']['experiment_type']['DNA Methylation'], 2
         )
         self.assertEqual(response_obj['data_type_specific']['experiments']['molecule']['total RNA'], 2)
         self.assertEqual(response_obj['data_type_specific']['experiments']['library_strategy']['Bisulfite-Seq'], 2)
