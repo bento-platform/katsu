@@ -27,7 +27,7 @@ EXPERIMENT_RESULT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPE
             "search": search_optional_eq(4)
         },
         "usage": {
-            "search": search_optional_eq(5)
+            "search": search_optional_str(5)
         },
         "genome_assembly_id": {
             "search": search_optional_eq(6)
