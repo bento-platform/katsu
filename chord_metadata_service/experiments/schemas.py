@@ -36,8 +36,7 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
             "enum": ["Raw data", "Derived data"]
         },
         "usage": {
-            "type": "string",
-            "enum": ["Visualized", "Downloaded"]
+            "type": "string"
         },
         "creation_date": {
             "type": "string"
