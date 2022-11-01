@@ -194,11 +194,13 @@ class PublicListIndividuals(APIView):
 
         tissues_count, sampled_tissues = get_queryset_stats(
             filtered_qs,
-            "phenopackets__biosamples__sampled_tissue__label"
+            "phenopackets__biosamples__sampled_tissue__label",
+            censor_small_categories=False
         )
         experiments_count, experiment_type = get_queryset_stats(
             filtered_qs,
-            "phenopackets__biosamples__experiment__experiment_type"
+            "phenopackets__biosamples__experiment__experiment_type",
+            censor_small_categories=False
         )
         return Response({
             "count": filtered_qs.count(),
