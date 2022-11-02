@@ -271,13 +271,15 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
     """
     # values() restrict the table of results to this COLUMN
     # annotate() creates a `total` column for the aggregation
-    # Count() aggregates the results by performing a GROUP BY on the field
-    queryset = queryset.values(field).annotate(total=Count(field))
+    # Count("*") aggregates results including nulls
+    annotated_queryset = queryset.values(field).annotate(total=Count("*"))
+    num_missing = 0
 
     stats: Mapping[str, int] = dict()
-    for item in queryset:
+    for item in annotated_queryset:
         key = item[field]
         if key is None:
+            num_missing = item["total"]
             continue
 
         if not isinstance(key, str):
@@ -291,8 +293,7 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
         stats[key] = item["total"]
 
     if add_missing:
-        isnull_filter = {f"{field}__isnull": True}
-        stats['missing'] = queryset.values(field).filter(**isnull_filter).count()
+        stats["missing"] = num_missing
 
     return stats
 
