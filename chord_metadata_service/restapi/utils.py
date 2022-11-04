@@ -351,27 +351,6 @@ def get_age_numeric_binned(individual_queryset, bin_size):
     return individuals_age
 
 
-def get_queryset_stats(queryset, field, censor_small_categories=True):
-    """
-    Fetches public statistics for a field within a given queryset. This function
-    is used to compute statistics after filtering has been applied.
-    Defaults to applying a cutoff for categories under the threshold
-    """
-    stats = queryset_stats_for_field(queryset, field, add_missing=True)
-    threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
-    bins = []
-    total = 0
-    for key, value in stats.items():
-        bins.append({
-            "label": key,
-            "value": value if not (value < threshold and censor_small_categories) else 0
-        })
-        total += value
-    if total <= threshold:
-        total = 0
-    return total, bins
-
-
 def get_categorical_stats(field_props):
     """
     Fetches statistics for a given categorical field and apply privacy policies

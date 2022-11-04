@@ -31,7 +31,6 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination,
 from chord_metadata_service.restapi.utils import (
     get_field_options,
     filter_queryset_field_value,
-    get_queryset_stats,
     biosample_tissue_stats,
     experiment_type_stats
 )
