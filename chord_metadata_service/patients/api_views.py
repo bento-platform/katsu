@@ -31,7 +31,9 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination,
 from chord_metadata_service.restapi.utils import (
     get_field_options,
     filter_queryset_field_value,
-    get_queryset_stats
+    get_queryset_stats,
+    biosample_tissue_stats,
+    experiment_type_stats
 )
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -192,16 +194,9 @@ class PublicListIndividuals(APIView):
         if filtered_qs.count() <= settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
             return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
 
-        tissues_count, sampled_tissues = get_queryset_stats(
-            filtered_qs,
-            "phenopackets__biosamples__sampled_tissue__label",
-            censor_small_categories=False
-        )
-        experiments_count, experiment_type = get_queryset_stats(
-            filtered_qs,
-            "phenopackets__biosamples__experiment__experiment_type",
-            censor_small_categories=False
-        )
+        tissues_count, sampled_tissues = biosample_tissue_stats(filtered_qs)
+        experiments_count, experiment_types = experiment_type_stats(filtered_qs)
+
         return Response({
             "count": filtered_qs.count(),
             "biosamples": {
@@ -210,6 +205,6 @@ class PublicListIndividuals(APIView):
             },
             "experiments": {
                 "count": experiments_count,
-                "experiment_type": experiment_type
+                "experiment_type": experiment_types
             }
         })

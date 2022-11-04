@@ -598,3 +598,37 @@ def filter_queryset_field_value(qs, field_props, value: str):
         condition = {f"{field}__startswith": val}
 
     return qs.filter(**condition)
+
+
+def experiment_type_stats(queryset):
+    """
+    returns count and bento_public format list of stats for experiment type
+    note that queryset_stats_for_field() does not count "missing" correctly when the field has multiple foreign keys
+    """
+    e_types = queryset.values(label=F("phenopackets__biosamples__experiment__experiment_type")).annotate(
+        value=Count("phenopackets__biosamples__experiment", distinct=True))
+    return bento_public_format_count_and_stats_list(e_types)
+
+
+def biosample_tissue_stats(queryset):
+    """
+    returns count and bento_public format list of stats for biosample sampled_tissue
+    """
+    b_tissue = queryset.values(label=F("phenopackets__biosamples__sampled_tissue__label")).annotate(
+        value=Count("phenopackets__biosamples", distinct=True))
+    return bento_public_format_count_and_stats_list(b_tissue)
+
+
+def bento_public_format_count_and_stats_list(annotated_queryset):
+    stats_list = []
+    total = 0
+    for q in annotated_queryset:
+        label = q["label"]
+        value = int(q["value"])
+        if label is not None:
+            total += value
+            stats_list.append({"label": label, "value": value})
+        elif value > 0:
+            stats_list.append({"missing": value})
+
+    return total, stats_list
