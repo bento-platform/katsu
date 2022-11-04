@@ -625,8 +625,8 @@ def bento_public_format_count_and_stats_list(annotated_queryset):
     for q in annotated_queryset:
         label = q["label"]
         value = int(q["value"])
+        total += value
         if label is not None:
-            total += value
             stats_list.append({"label": label, "value": value})
         elif value > 0:
             stats_list.append({"missing": value})
