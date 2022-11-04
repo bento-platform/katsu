@@ -355,7 +355,7 @@ def get_queryset_stats(queryset, field, censor_small_categories=True):
     """
     Fetches public statistics for a field within a given queryset. This function
     is used to compute statistics after filtering has been applied.
-    Optionally apply a cutoff for categories under the threshold
+    Defaults to applying a cutoff for categories under the threshold
     """
     stats = queryset_stats_for_field(queryset, field, add_missing=True)
     threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
