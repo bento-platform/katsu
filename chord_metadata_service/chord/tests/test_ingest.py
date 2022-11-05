@@ -27,6 +27,7 @@ from .example_ingest import (
     EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT,
     EXAMPLE_INGEST_PHENOPACKET,
     EXAMPLE_INGEST_OUTPUTS,
+    EXAMPLE_INGEST_OUTPUTS_UPDATE,
     EXAMPLE_INGEST_EXPERIMENT,
     EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
     EXAMPLE_INGEST_EXPERIMENT_RESULT,
@@ -96,15 +97,23 @@ class IngestTest(TestCase):
         self.assertEqual(len(biosamples), 5)
         # TODO: More
 
-    def test_reingesting_phenopackets_json(self):
+    def test_reingesting_updating_phenopackets_json(self):
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
-        p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS_UPDATE, self.t.identifier)
 
         self.assertNotEqual(p.id, p2.id)
         self.assertEqual(p.subject.id, p2.subject.id)
 
+        p.refresh_from_db()
+        self.assertTrue(p.subject.extra_properties["music_enjoyer"])
+        self.assertTrue(p2.subject.extra_properties["music_enjoyer"])
+        self.assertTrue(p2.subject.extra_properties["cool_guy"])
+
         for b1, b2 in zip(p.biosamples.all().order_by("id"), p2.biosamples.all().order_by("id")):
             self.assertEqual(b1.id, b2.id)
+
+        for m1, m2 in zip(p.meta_data.resources.all().order_by("id"), p2.meta_data.resources.all().order_by("id")):
+            self.assertEqual(m1.id, m2.id)
 
     def test_ingesting_invalid_phenopackets_json(self):
         # check invalid phenopacket, must fail validation

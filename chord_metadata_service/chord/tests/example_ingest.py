@@ -6,7 +6,9 @@ __all__ = [
     "EXAMPLE_INGEST_EXPERIMENT",
     "EXAMPLE_INGEST_EXPERIMENT_RESULT",
     "EXAMPLE_INGEST_PHENOPACKET",
+    "EXAMPLE_INGEST_PHENOPACKET_UPDATE",
     "EXAMPLE_INGEST_OUTPUTS",
+    "EXAMPLE_INGEST_OUTPUTS_UPDATE",
     "EXAMPLE_INGEST_OUTPUTS_EXPERIMENT",
     "EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT",
     "EXAMPLE_INGEST_INVALID_EXPERIMENT",
@@ -18,8 +20,15 @@ __all__ = [
 with open(os.path.join(os.path.dirname(__file__), "example_phenopacket.json"), "r") as pf:
     EXAMPLE_INGEST_PHENOPACKET = json.load(pf)
 
+with open(os.path.join(os.path.dirname(__file__), "example_phenopacket_2.json"), "r") as pf:
+    EXAMPLE_INGEST_PHENOPACKET_UPDATE = json.load(pf)
+
 EXAMPLE_INGEST_OUTPUTS = {
     "json_document": os.path.join(os.path.dirname(__file__), "example_phenopacket.json"),
+}
+
+EXAMPLE_INGEST_OUTPUTS_UPDATE = {
+    "json_document": os.path.join(os.path.dirname(__file__), "example_phenopacket_2.json"),
 }
 
 

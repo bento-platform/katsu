@@ -44,6 +44,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str) -> Optio
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
 
     subject = phenopacket_data.get("subject")
+    subject_obj: Optional[pm.Individual] = None
     phenotypic_features = phenopacket_data.get("phenotypic_features", [])
     biosamples = phenopacket_data.get("biosamples", [])
     genes = phenopacket_data.get("genes", [])
@@ -52,28 +53,52 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str) -> Optio
     meta_data = phenopacket_data["meta_data"]
 
     if subject:
-        # Be a bit flexible with the subject date_of_birth field for Signature; convert blank strings to None.
+        extra_properties: dict[str, Any] = subject.get("extra_properties", {})
+
+        # Pre-process subject data:    ---------------------------------------------------------------------------------
+
+        # - Be a bit flexible with the subject date_of_birth field for Signature; convert blank strings to None.
         subject["date_of_birth"] = subject.get("date_of_birth") or None
         subject_query = query_and_check_nulls(subject, "date_of_birth", transform=isoparse)
         for k in ("alternate_ids", "age", "sex", "karyotypic_sex", "taxonomy"):
             subject_query.update(query_and_check_nulls(subject, k))
 
-        # check if age is represented as a duration string (vs. age range values) and convert it to years
+        # - Check if age is represented as a duration string (vs. age range values) and convert it to years
         age_numeric_value = None
         age_unit_value = None
         if "age" in subject:
             if "age" in subject["age"]:
                 age_numeric_value, age_unit_value = iso_duration_to_years(subject["age"]["age"])
 
-        subject, _ = pm.Individual.objects.get_or_create(
+        # --------------------------------------------------------------------------------------------------------------
+
+        # Check if subject already exists
+        try:
+            existing_subject = pm.Individual.objects.get(id=subject["id"])
+            overlapping_extra_properties = {
+                k: v for k, v in extra_properties.items()
+                if k in existing_subject.extra_properties
+            }
+        except pm.Individual.DoesNotExist:
+            overlapping_extra_properties = extra_properties
+            pass
+
+        # --------------------------------------------------------------------------------------------------------------
+
+        subject_obj, subject_obj_created = pm.Individual.objects.get_or_create(
             id=subject["id"],
             race=subject.get("race", ""),
             ethnicity=subject.get("ethnicity", ""),
             age_numeric=age_numeric_value,
             age_unit=age_unit_value if age_unit_value else "",
-            extra_properties=subject.get("extra_properties", {}),
+            extra_properties=overlapping_extra_properties,
             **subject_query
         )
+
+        if not subject_obj_created:
+            # Add any new extra properties to subject if they already exist
+            subject_obj.extra_properties = extra_properties
+            subject_obj.save()
 
     phenotypic_features_db = [create_phenotypic_feature(pf) for pf in phenotypic_features]
 
@@ -171,7 +196,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str) -> Optio
 
     new_phenopacket = pm.Phenopacket(
         id=new_phenopacket_id,
-        subject=subject,
+        subject=subject_obj,
         meta_data=meta_data_obj,
         table=Table.objects.get(ownership_record_id=table_id, data_type=DATA_TYPE_PHENOPACKET)
     )
