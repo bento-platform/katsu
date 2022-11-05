@@ -53,7 +53,7 @@ class Experiment(models.Model, IndexableMixin):
     # EXPERIMENT RESULT
     experiment_results = models.ManyToManyField("ExperimentResult", blank=True,
                                                 help_text=rec_help(d.EXPERIMENT, "experiment_results"))
-    # INTSRUMENT
+    # INSTRUMENT
     instrument = models.ForeignKey("Instrument", blank=True, null=True, on_delete=models.CASCADE,
                                    help_text=rec_help(d.EXPERIMENT, "instrument"))
     # EXTRA
