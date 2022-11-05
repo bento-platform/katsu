@@ -82,7 +82,14 @@ class ExportFileContext:
         Attributes:
             filename: optional filename to use
         """
-        return os.path.join(self.path, filename)
+        path = os.path.join(self.path, filename)
+
+        # if filename contains a subdirectory, ensure it is created
+        dirpath = os.path.dirname(path)
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath, 0o777)
+
+        return path
 
     def write_tar(self):
         """Creates a tar gzipped archive from the export directory content

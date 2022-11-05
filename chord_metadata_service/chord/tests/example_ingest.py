@@ -27,6 +27,14 @@ with open(os.path.join(os.path.dirname(__file__), "example_invalid_experiment.js
     EXAMPLE_INGEST_INVALID_EXPERIMENT = json.load(pf)
 
 
+with open(os.path.join(os.path.dirname(__file__), "example_derived_experiment_result.json"), "r") as exp:
+    EXAMPLE_INGEST_EXPERIMENT_RESULT = json.load(exp)
+
+EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT = {
+    "json_document": os.path.join(os.path.dirname(__file__), "example_derived_experiment_result.json"),
+}
+
+
 with open(os.path.join(os.path.dirname(__file__), "example_invalid_phenopacket.json"), "r") as pf:
     EXAMPLE_INGEST_INVALID_PHENOPACKET = json.load(pf)
 
