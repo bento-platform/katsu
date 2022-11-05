@@ -5,16 +5,18 @@ from chord_metadata_service.experiments.schemas import EXPERIMENT_RESULT_SCHEMA
 
 __all__ = [
     "DATA_TYPE_EXPERIMENT",
+    "DATA_TYPE_EXPERIMENT_RESULT",
     "DATA_TYPE_PHENOPACKET",
     "DATA_TYPE_MCODEPACKET",
+    "DATA_TYPE_READSET",
     "DATA_TYPES",
 ]
 
 DATA_TYPE_EXPERIMENT = "experiment"
+DATA_TYPE_EXPERIMENT_RESULT = "experiment_result"
 DATA_TYPE_PHENOPACKET = "phenopacket"
 DATA_TYPE_MCODEPACKET = "mcodepacket"
 DATA_TYPE_READSET = "readset"
-DATA_TYPE_EXPERIMENT_RESULT = "experiment_result"
 
 DATA_TYPES = {
     DATA_TYPE_EXPERIMENT: {

@@ -6,6 +6,7 @@ from os import walk, path
 from django.db.models import F
 from django.test import TestCase
 
+from chord_metadata_service.chord import export_cbio as exp
 from chord_metadata_service.chord.export_cbio import (
     CBIO_FILES_SET,
     MUTATION_DATA_FILENAME,
@@ -14,29 +15,19 @@ from chord_metadata_service.chord.export_cbio import (
     REGEXP_INVALID_FOR_ID,
     SAMPLE_DATA_FILENAME,
     SAMPLE_DATATYPE,
-    case_list_export,
-    clinical_meta_export,
-    individual_export,
-    maf_list,
-    mutation_meta_export,
-    sample_export,
-    sanitize_id,
-    study_export,
-    study_export_meta
 )
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.export_utils import ExportFileContext
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 from chord_metadata_service.experiments.models import ExperimentResult
-# noinspection PyProtectedMember
-from chord_metadata_service.chord.ingest import (
+from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
+from chord_metadata_service.chord.workflows.metadata import (
     WORKFLOW_EXPERIMENTS_JSON,
     WORKFLOW_MAF_DERIVED_FROM_VCF_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
-    WORKFLOW_INGEST_FUNCTION_MAP,
 )
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets import models as PhModel
+from chord_metadata_service.phenopackets import models as pm
 
 
 from .constants import VALID_DATA_USE_1
@@ -80,15 +71,16 @@ class ExportCBioTest(TestCase):
         self.exp_res = ExperimentResult.objects.all()
 
         # Update the last sample to remove direct reference to any individual.
-        # In that case, Sample and Individual are cross referenced through the
+        # In that case, Sample and Individual are cross-referenced through the
         # Phenopacket model.
-        PhModel.Biosample.objects.filter(
+        pm.Biosample.objects.filter(
                 id=EXAMPLE_INGEST_PHENOPACKET["biosamples"][-1]["id"]
             ).update(individual=None)
 
-    def stream_to_dict(self, output: TextIO) -> Dict[str, str]:
+    @staticmethod
+    def stream_to_dict(output: TextIO) -> Dict[str, str]:
         """
-        Utility function. Parses cBioPortal meta data text files (lines of
+        Utility function. Parses cBioPortal metadata text files (lines of
         key/value pairs separated by `: `) in a dictionary structure.
         """
         output.seek(0)
@@ -105,20 +97,20 @@ class ExportCBioTest(TestCase):
         """
 
         with ExportFileContext(None, self.study_id) as file_export:
-            study_export(file_export.get_path, self.study_id)
+            exp.study_export(file_export.get_path, self.study_id)
             export_dir = file_export.get_path()
             self.assertTrue(path.exists(export_dir))
 
             # recursively walk the export dir to get the generated files
-            filesSet = set()
+            files_set = set()
             for dirpath, dirnames, filenames in walk(export_dir):
-                filesSet.update([path.relpath(path.join(dirpath, fn), export_dir) for fn in filenames])
+                files_set.update([path.relpath(path.join(dirpath, fn), export_dir) for fn in filenames])
 
-            self.assertTrue(CBIO_FILES_SET.issubset(filesSet))
+            self.assertTrue(CBIO_FILES_SET.issubset(files_set))
 
     def test_export_cbio_study_meta(self):
         with io.StringIO() as output:
-            study_export_meta(self.d, output)
+            exp.study_export_meta(self.d, output)
             content = self.stream_to_dict(output)
 
         self.assertIn("type_of_cancer", content)
@@ -128,7 +120,7 @@ class ExportCBioTest(TestCase):
 
     def test_export_cbio_sample_meta(self):
         with io.StringIO() as output:
-            clinical_meta_export(self.study_id, SAMPLE_DATATYPE, output)
+            exp.clinical_meta_export(self.study_id, SAMPLE_DATATYPE, output)
             content = self.stream_to_dict(output)
 
         self.assertEqual(content["cancer_study_identifier"], self.study_id)
@@ -138,7 +130,7 @@ class ExportCBioTest(TestCase):
 
     def test_export_cbio_patient_meta(self):
         with io.StringIO() as output:
-            clinical_meta_export(self.study_id, PATIENT_DATATYPE, output)
+            exp.clinical_meta_export(self.study_id, PATIENT_DATATYPE, output)
             content = self.stream_to_dict(output)
 
         self.assertEqual(content["cancer_study_identifier"], self.study_id)
@@ -149,7 +141,7 @@ class ExportCBioTest(TestCase):
     def test_export_cbio_patient_data(self):
         indiv = Individual.objects.filter(phenopackets=self.p)
         with io.StringIO() as output:
-            individual_export(indiv, output)
+            exp.individual_export(indiv, output)
             # Check header
             output.seek(0)
             field_count = None
@@ -179,15 +171,15 @@ class ExportCBioTest(TestCase):
 
                 # PATIENT_ID can't contain characters other than letters/numbers/hyphen/underscore
                 self.assertTrue(REGEXP_INVALID_FOR_ID.search(record["PATIENT_ID"]) is None)
-                self.assertEqual(record["PATIENT_ID"], sanitize_id(EXAMPLE_INGEST_PHENOPACKET["subject"]["id"]))
+                self.assertEqual(record["PATIENT_ID"], exp.sanitize_id(EXAMPLE_INGEST_PHENOPACKET["subject"]["id"]))
                 self.assertEqual(record["SEX"], EXAMPLE_INGEST_PHENOPACKET["subject"]["sex"])
                 break
 
     def test_export_cbio_sample_data(self):
-        samples = PhModel.Biosample.objects.filter(phenopacket=self.p)\
+        samples = pm.Biosample.objects.filter(phenopacket=self.p)\
             .annotate(phenopacket_subject_id=F("phenopacket__subject"))
         with io.StringIO() as output:
-            sample_export(samples, output)
+            exp.sample_export(samples, output)
             # Check header
             output.seek(0)
             field_count = None
@@ -221,11 +213,11 @@ class ExportCBioTest(TestCase):
                 self.assertTrue(REGEXP_INVALID_FOR_ID.search(record["SAMPLE_ID"]) is None)
                 self.assertEqual(
                     record["PATIENT_ID"],
-                    sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["individual_id"])
+                    exp.sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["individual_id"])
                 )
                 self.assertEqual(
                     record["SAMPLE_ID"],
-                    sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["id"])
+                    exp.sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["id"])
                 )
                 sample_count += 1
 
@@ -238,7 +230,7 @@ class ExportCBioTest(TestCase):
         maf_count = exp_res.count()
         self.assertTrue(maf_count > 0)
         with io.StringIO() as output:
-            maf_list(exp_res, output)
+            exp.maf_list(exp_res, output)
             output.seek(0)
             i = 0
             for line in output:
@@ -249,7 +241,7 @@ class ExportCBioTest(TestCase):
 
     def test_export_mutation_meta(self):
         with io.StringIO() as output:
-            mutation_meta_export(self.study_id, output)
+            exp.mutation_meta_export(self.study_id, output)
             content = self.stream_to_dict(output)
 
         self.assertEqual(content["cancer_study_identifier"], self.study_id)
@@ -263,7 +255,7 @@ class ExportCBioTest(TestCase):
             .annotate(biosample_id=F("experiment__biosample"))
         self.assertGreater(exp_res.count(), 0)
         with io.StringIO() as output:
-            case_list_export(self.study_id, exp_res, output)
+            exp.case_list_export(self.study_id, exp_res, output)
             content = self.stream_to_dict(output)
 
         self.assertEqual(content["cancer_study_identifier"], self.study_id)
@@ -273,5 +265,5 @@ class ExportCBioTest(TestCase):
         self.assertIn("case_list_ids", content)
         self.assertSetEqual(
             set(content["case_list_ids"].split("\t")),
-            set([sanitize_id(e.biosample_id) for e in exp_res])
+            set([exp.sanitize_id(e.biosample_id) for e in exp_res])
         )

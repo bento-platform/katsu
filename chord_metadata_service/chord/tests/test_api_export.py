@@ -13,16 +13,11 @@ from rest_framework.test import APITestCase
 from ..views_ingest import METADATA_WORKFLOWS
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
-# noinspection PyProtectedMember
-from chord_metadata_service.chord.ingest import (
-    WORKFLOW_PHENOPACKETS_JSON,
-    WORKFLOW_INGEST_FUNCTION_MAP,
-)
+from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
+from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 
 from .constants import VALID_DATA_USE_1
-from .example_ingest import (
-    EXAMPLE_INGEST_OUTPUTS,
-)
+from .example_ingest import EXAMPLE_INGEST_OUTPUTS
 
 
 def generate_phenopackets_ingest(table_id):

@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 from uuid import uuid4
 
 from .constants import VALID_PROJECT_1, valid_dataset_1, valid_table_1
-from ..views_ingest import METADATA_WORKFLOWS
+from ..workflows.metadata import METADATA_WORKFLOWS
 
 
 def generate_phenopackets_ingest(table_id):

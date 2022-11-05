@@ -7,10 +7,8 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.chord.data_types import DATA_TYPE_MCODEPACKET
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 # noinspection PyProtectedMember
-from chord_metadata_service.chord.ingest import (
-    WORKFLOW_INGEST_FUNCTION_MAP,
-    WORKFLOW_MCODE_JSON
-)
+from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
+from chord_metadata_service.chord.workflows.metadata import WORKFLOW_MCODE_JSON
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 
 

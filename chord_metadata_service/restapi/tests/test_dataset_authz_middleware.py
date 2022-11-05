@@ -7,11 +7,8 @@ from django.test import modify_settings
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
-# noinspection PyProtectedMember
-from chord_metadata_service.chord.ingest import (
-    WORKFLOW_INGEST_FUNCTION_MAP,
-    WORKFLOW_PHENOPACKETS_JSON
-)
+from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
+from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 
 import logging

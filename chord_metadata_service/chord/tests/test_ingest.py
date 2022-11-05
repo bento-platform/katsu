@@ -6,14 +6,13 @@ from dateutil.parser import isoparse
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
-# noinspection PyProtectedMember
-from chord_metadata_service.chord.ingest import (
+from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
+from chord_metadata_service.chord.ingest.schema import schema_validation
+from chord_metadata_service.chord.ingest.phenopackets import create_phenotypic_feature
+from chord_metadata_service.chord.workflows.metadata import (
+    WORKFLOW_EXPERIMENTS_JSON,
     WORKFLOW_MAF_DERIVED_FROM_VCF_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
-    create_phenotypic_feature,
-    WORKFLOW_INGEST_FUNCTION_MAP,
-    WORKFLOW_EXPERIMENTS_JSON,
-    schema_validation
 )
 from chord_metadata_service.phenopackets.models import PhenotypicFeature, Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA

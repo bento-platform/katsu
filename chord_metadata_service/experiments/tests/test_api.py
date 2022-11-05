@@ -6,11 +6,8 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.chord.ingest import (
-    WORKFLOW_INGEST_FUNCTION_MAP,
-    WORKFLOW_PHENOPACKETS_JSON,
-    WORKFLOW_EXPERIMENTS_JSON,
-)
+from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
+from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON, WORKFLOW_EXPERIMENTS_JSON
 
 
 EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON = {
