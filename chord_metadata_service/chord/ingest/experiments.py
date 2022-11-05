@@ -111,15 +111,15 @@ def ingest_experiments_workflow(workflow_outputs, table_id):
         with open(json_doc_path, "r") as jf:
             json_data = json.load(jf)
 
-            dataset = TableOwnership.objects.get(table_id=table_id).dataset
+    dataset = TableOwnership.objects.get(table_id=table_id).dataset
 
-            for rs in json_data.get("resources", []):
-                dataset.additional_resources.add(ingest_resource(rs))
+    for rs in json_data.get("resources", []):
+        dataset.additional_resources.add(ingest_resource(rs))
 
-            return [ingest_experiment(exp, table_id) for exp in json_data.get("experiments", [])]
+    return [ingest_experiment(exp, table_id) for exp in json_data.get("experiments", [])]
 
 
-def ingest_derived_experiment_results(file):
+def ingest_derived_experiment_results(json_data):
     """ Reads a JSON file containing a list of experiment results and adds them
         to the database.
         The linkage to experiments is inferred from the `derived_from` category
@@ -134,30 +134,27 @@ def ingest_derived_experiment_results(file):
     for row in exp.values("id", "experiment_results__identifier"):
         exp_result2exp[row["experiment_results__identifier"]] = row["id"]
 
-    # JSON file parsing
-    with open(file) as file_handle:
-        json_data = json.load(file_handle)
-        for exp_result in json_data:
-            validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
-            if not validation:
-                logger.warning(f"Improper schema for experiment result: {json.dumps(exp_result)}")
-                continue
+    for exp_result in json_data:
+        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
+        if not validation:
+            logger.warning(f"Improper schema for experiment result: {json.dumps(exp_result)}")
+            continue
 
-            derived_identifier = exp_result['extra_properties']['derived_from']
-            experiment_id = exp_result2exp.get(derived_identifier, None)
-            if experiment_id is None:
-                logger.warning(f"{exp_result['file_format']} file {exp_result['filename']} derived from \
-                    file {derived_identifier} could not be associated with an experiment.")
-                continue
+        derived_identifier = exp_result['extra_properties']['derived_from']
+        experiment_id = exp_result2exp.get(derived_identifier, None)
+        if experiment_id is None:
+            logger.warning(f"{exp_result['file_format']} file {exp_result['filename']} derived from \
+                file {derived_identifier} could not be associated with an experiment.")
+            continue
 
-            new_experiment_results = em.ExperimentResult.objects.create(**exp_result)
+        new_experiment_results = em.ExperimentResult.objects.create(**exp_result)
 
-            # Add experiment results to the parent experiment (as a many-to-many
-            # relationship)
-            exp = em.Experiment.objects.get(pk=experiment_id)
-            exp.experiment_results.add(new_experiment_results)
+        # Add experiment results to the parent experiment (as a many-to-many
+        # relationship)
+        exp = em.Experiment.objects.get(pk=experiment_id)
+        exp.experiment_results.add(new_experiment_results)
 
-            exp_res_list.append(new_experiment_results)
+        exp_res_list.append(new_experiment_results)
 
     return exp_res_list
 
@@ -167,5 +164,8 @@ def ingest_derived_experiment_results(file):
 # values defined in view_ingest.py
 def ingest_maf_derived_from_vcf_workflow(workflow_outputs, table_id):
     with workflow_file_output_to_path(get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
-        logger.info(f"Attempting ingestion of maf derived from vcf JSON from path: {json_doc_path}")
-        return ingest_derived_experiment_results(json_doc_path)
+        logger.info(f"Attempting ingestion of MAF-derived-from-VCF JSON from path: {json_doc_path}")
+        with open(json_doc_path, "r") as fh:
+            json_data = json.load(fh)
+
+    return ingest_derived_experiment_results(json_data)

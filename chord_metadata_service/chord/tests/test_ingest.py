@@ -96,10 +96,15 @@ class IngestTest(TestCase):
         self.assertEqual(len(biosamples), 5)
         # TODO: More
 
-        # Test ingesting again
+    def test_reingesting_phenopackets_json(self):
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
         p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+
         self.assertNotEqual(p.id, p2.id)
-        # TODO: More
+        self.assertEqual(p.subject.id, p2.subject.id)
+
+        for b1, b2 in zip(p.biosamples.all().order_by("id"), p2.biosamples.all().order_by("id")):
+            self.assertEqual(b1.id, b2.id)
 
     def test_ingesting_invalid_phenopackets_json(self):
         # check invalid phenopacket, must fail validation

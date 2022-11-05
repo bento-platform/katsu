@@ -10,8 +10,9 @@ def ingest_mcode_fhir_workflow(workflow_outputs, table_id):
         logger.info(f"Attempting ingestion of MCODE FIHR from path: {json_doc_path}")
         with open(json_doc_path, "r") as jf:
             json_data = json.load(jf)
-            mcodepacket = parse_bundle(json_data)
-            ingest_mcodepacket(mcodepacket, table_id)
+
+    mcodepacket = parse_bundle(json_data)
+    ingest_mcodepacket(mcodepacket, table_id)
 
 
 def ingest_mcode_workflow(workflow_outputs, table_id):
@@ -19,8 +20,9 @@ def ingest_mcode_workflow(workflow_outputs, table_id):
         logger.info(f"Attempting ingestion of MCODE from path: {json_doc_path}")
         with open(json_doc_path, "r") as jf:
             json_data = json.load(jf)
-            if isinstance(json_data, list):
-                for mcodepacket in json_data:
-                    ingest_mcodepacket(mcodepacket, table_id)
-            else:
-                ingest_mcodepacket(json_data, table_id)
+
+    if isinstance(json_data, list):
+        for mcodepacket in json_data:
+            ingest_mcodepacket(mcodepacket, table_id)
+    else:
+        ingest_mcodepacket(json_data, table_id)

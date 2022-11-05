@@ -14,6 +14,8 @@ from .resources import ingest_resource
 from .schema import schema_validation
 from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, workflow_file_output_to_path
 
+from typing import Any, Optional
+
 
 def create_phenotypic_feature(pf):
     pf_obj = pm.PhenotypicFeature(
@@ -31,7 +33,7 @@ def create_phenotypic_feature(pf):
     return pf_obj
 
 
-def ingest_phenopacket(phenopacket_data, table_id):
+def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str) -> Optional[pm.Phenopacket]:
     """Ingests a single phenopacket."""
 
     # validate phenopackets data against phenopacket schema
@@ -190,4 +192,5 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id):
         logger.info(f"Attempting ingestion of phenopackets from path: {json_doc_path}")
         with open(json_doc_path, "r") as jf:
             json_data = json.load(jf)
-            return map_if_list(ingest_phenopacket, json_data, table_id)
+
+    return map_if_list(ingest_phenopacket, json_data, table_id)
