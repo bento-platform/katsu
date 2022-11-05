@@ -3,7 +3,11 @@
         "id": "patient1",
         "date_of_birth": "1964-03-15T00:00:00Z",
         "sex": "MALE",
-        "karyotypic_sex": "UNKNOWN_KARYOTYPE"
+        "karyotypic_sex": "UNKNOWN_KARYOTYPE",
+        "extra_properties": {
+            "cool_guy": true,
+            "smoker": false
+        }
     },
     "phenotypic_features": [
         {
