@@ -14,7 +14,7 @@ from .resources import ingest_resource
 from .schema import schema_validation
 from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, workflow_file_output_to_path
 
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 
 def create_phenotypic_feature(pf):
@@ -33,7 +33,7 @@ def create_phenotypic_feature(pf):
     return pf_obj
 
 
-def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str) -> Optional[pm.Phenopacket]:
+def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str) -> Optional[pm.Phenopacket]:
     """Ingests a single phenopacket."""
 
     # validate phenopackets data against phenopacket schema
@@ -53,7 +53,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str) -> Optio
     meta_data = phenopacket_data["meta_data"]
 
     if subject:
-        extra_properties: dict[str, Any] = subject.get("extra_properties", {})
+        extra_properties: Dict[str, Any] = subject.get("extra_properties", {})
 
         # Pre-process subject data:    ---------------------------------------------------------------------------------
 
