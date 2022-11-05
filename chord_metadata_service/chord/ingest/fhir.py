@@ -10,14 +10,14 @@ from chord_metadata_service.restapi.fhir_ingest import (
 from .logger import logger
 from .utils import get_output_or_raise, workflow_file_output_to_path
 
-from typing import Callable
+from typing import Callable, Dict
 
 __all__ = [
     "ingest_fhir_workflow",
 ]
 
 
-file_id_to_ingest_fn: dict[str, Callable] = {
+file_id_to_ingest_fn: Dict[str, Callable] = {
     "patients": ingest_patients,
     "observations": ingest_observations,
     "conditions": ingest_conditions,
