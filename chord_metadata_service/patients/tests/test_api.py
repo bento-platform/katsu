@@ -662,7 +662,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
 class PublicFilteringBiosampleAndExperimentStatsTest(APITestCase):
     """ Test for stats returned by api/public GET """
 
-    response_threshold = 1
+    response_threshold = 0
     num_individuals_without_phenopackets = 30
 
     def setUp(self) -> None:
