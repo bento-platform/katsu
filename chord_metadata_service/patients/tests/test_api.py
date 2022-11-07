@@ -1,5 +1,6 @@
 from copy import deepcopy
 import json
+import uuid
 import csv
 import io
 from django.conf import settings
@@ -12,6 +13,13 @@ from chord_metadata_service.restapi.tests.constants import CONFIG_PUBLIC_TEST, C
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
+from chord_metadata_service.experiments.tests.constants import valid_experiment
+from chord_metadata_service.phenopackets.models import Biosample, Procedure, Biosample, MetaData, Phenopacket, Procedure
+from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
+from chord_metadata_service.experiments.tests import constants as exp_c
+from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
+from chord_metadata_service.chord.tests import constants as chord_c
 
 from . import constants as c
 
@@ -650,3 +658,59 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+
+
+class PublicFilteringBiosampleAndExperimentStatsTest(APITestCase):
+    """ Test for stats returned by api/public GET """
+
+    response_threshold = 1
+    num_individuals_without_phenopackets = 30
+
+    def setUp(self) -> None:
+        self.project = Project.objects.create(**chord_c.VALID_PROJECT_1)
+        self.dataset = Dataset.objects.create(**chord_c.valid_dataset_1(self.project))
+        to, tr = chord_c.valid_table_1(self.dataset.identifier, model_compatible=True)
+        TableOwnership.objects.create(**to)
+        self.table = Table.objects.create(**tr)
+
+        # plain individuals from other tests above, no phenopackets
+        self.individuals = [c.generate_valid_individual() for _ in range(self.num_individuals_without_phenopackets)]
+        for individual in self.individuals:
+            Individual.objects.create(**individual)
+
+        # ..... but add someone with 2 biosamples and one experiment
+        self.individual, _ = Individual.objects.get_or_create(
+            id='patient:1', sex='FEMALE', age={"age": "P25Y3M2D"})
+        self.procedure = Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
+        self.biosample_1 = Biosample.objects.create(**ph_c.valid_biosample_1(self.individual, self.procedure))
+        self.biosample_2 = Biosample.objects.create(**ph_c.valid_biosample_2(None, self.procedure))
+        self.meta_data = MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+        self.phenopacket = Phenopacket.objects.create(
+            id="phenopacket_id:1",
+            subject=self.individual,
+            meta_data=self.meta_data,
+            table=self.table
+        )
+        self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
+
+        # table for experiments metadata
+        to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
+                                               service_artifact="experiments", dataset=self.dataset)
+        self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
+
+        # add Experiments metadata and link to self.biosample_1
+        self.instrument = Instrument.objects.create(**exp_c.valid_instrument())
+        self.experiment_result = ExperimentResult.objects.create(**exp_c.valid_experiment_result())
+        self.experiment = Experiment.objects.create(**exp_c.valid_experiment(
+            biosample=self.biosample_1, instrument=self.instrument, table=self.t_exp))
+        self.experiment.experiment_results.set([self.experiment_result])
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_public_get_stats(self):
+        response = self.client.get('/api/public?sex=FEMALE')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(response_obj['biosamples']['count'], 2)
+        self.assertIsInstance(response_obj['biosamples']['sampled_tissue'], list)
+        self.assertEqual(response_obj['experiments']['count'], 1)
+        self.assertIsInstance(response_obj['experiments']['experiment_type'], list)
