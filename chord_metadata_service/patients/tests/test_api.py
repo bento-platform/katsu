@@ -13,8 +13,7 @@ from chord_metadata_service.restapi.tests.constants import CONFIG_PUBLIC_TEST, C
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
-from chord_metadata_service.experiments.tests.constants import valid_experiment
-from chord_metadata_service.phenopackets.models import Biosample, Procedure, Biosample, MetaData, Phenopacket, Procedure
+from chord_metadata_service.phenopackets.models import Biosample, Procedure, MetaData, Phenopacket
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
 from chord_metadata_service.experiments.tests import constants as exp_c
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
