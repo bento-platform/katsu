@@ -227,7 +227,7 @@ def monthly_generator(start: str, end: str) -> Tuple[int, int]:
     [end_year, end_month] = [int(k) for k in end.split("-")]
     last_month_nb = (end_year - start_year) * 12 + end_month
     for month_nb in range(start_month, last_month_nb):
-        year = start_year + month_nb // 12
+        year = start_year + (month_nb - 1) // 12
         month = month_nb % 12 or 12
         yield year, month
 
@@ -486,11 +486,11 @@ def get_range_stats(field_props):
     # Generate a list of When conditions that return a label for the given bin.
     # This is equivalent to an SQL CASE statement.
     whens = [When(
-                  **{f"{field}__gte": floor} if floor is not None else {},
-                  **{f"{field}__lt": ceil} if ceil is not None else {},
-                  then=Value(label)
-                 )
-             for floor, ceil, label in labelled_range_generator(field_props)]
+        **{f"{field}__gte": floor} if floor is not None else {},
+        **{f"{field}__lt": ceil} if ceil is not None else {},
+        then=Value(label)
+    )
+        for floor, ceil, label in labelled_range_generator(field_props)]
 
     query_set = model.objects\
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))\
