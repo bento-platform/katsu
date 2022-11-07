@@ -1,5 +1,5 @@
 bento-lib==4.0.0
-Django==4.1.1
+Django==4.1.2
 django-autocomplete-light==3.9.4
 django-cors-headers==3.13.0
 django-filter==22.1
