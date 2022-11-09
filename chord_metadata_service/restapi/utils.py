@@ -226,8 +226,8 @@ def monthly_generator(start: str, end: str) -> Tuple[int, int]:
     [start_year, start_month] = [int(k) for k in start.split("-")]
     [end_year, end_month] = [int(k) for k in end.split("-")]
     last_month_nb = (end_year - start_year) * 12 + end_month
-    for month_nb in range(start_month, last_month_nb):
-        year = start_year + month_nb // 12
+    for month_nb in range(start_month, last_month_nb + 1):
+        year = start_year + (month_nb - 1) // 12
         month = month_nb % 12 or 12
         yield year, month
 
@@ -271,13 +271,15 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
     """
     # values() restrict the table of results to this COLUMN
     # annotate() creates a `total` column for the aggregation
-    # Count() aggregates the results by performing a GROUP BY on the field
-    queryset = queryset.values(field).annotate(total=Count(field))
+    # Count("*") aggregates results including nulls
+    annotated_queryset = queryset.values(field).annotate(total=Count("*"))
+    num_missing = 0
 
     stats: Mapping[str, int] = dict()
-    for item in queryset:
+    for item in annotated_queryset:
         key = item[field]
         if key is None:
+            num_missing = item["total"]
             continue
 
         if not isinstance(key, str):
@@ -291,8 +293,7 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
         stats[key] = item["total"]
 
     if add_missing:
-        isnull_filter = {f"{field}__isnull": True}
-        stats['missing'] = queryset.values(field).filter(**isnull_filter).count()
+        stats["missing"] = num_missing
 
     return stats
 
@@ -348,27 +349,6 @@ def get_age_numeric_binned(individual_queryset, bin_size):
         compute_binned_ages(individual_queryset, bin_size)   # single update instead of creating iterables in a loop
     )
     return individuals_age
-
-
-def get_queryset_stats(queryset, field):
-    """
-    Fetches public statistics for a field within a given queryset. This function
-    is used to compute statistics after filtering has been applied.
-    A cutoff is applied to all counts to avoid leaking too small sets of results.
-    """
-    stats = queryset_stats_for_field(queryset, field, add_missing=True)
-    threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
-    bins = []
-    total = 0
-    for key, value in stats.items():
-        bins.append({
-            "label": key,
-            "value": value if value > threshold else 0
-        })
-        total += value
-    if total <= threshold:
-        total = 0
-    return total, bins
 
 
 def get_categorical_stats(field_props):
@@ -597,3 +577,35 @@ def filter_queryset_field_value(qs, field_props, value: str):
         condition = {f"{field}__startswith": val}
 
     return qs.filter(**condition)
+
+
+def experiment_type_stats(queryset):
+    """
+    returns count and bento_public format list of stats for experiment type
+    note that queryset_stats_for_field() does not count "missing" correctly when the field has multiple foreign keys
+    """
+    e_types = queryset.values(label=F("phenopackets__biosamples__experiment__experiment_type")).annotate(
+        value=Count("phenopackets__biosamples__experiment", distinct=True))
+    return bento_public_format_count_and_stats_list(e_types)
+
+
+def biosample_tissue_stats(queryset):
+    """
+    returns count and bento_public format list of stats for biosample sampled_tissue
+    """
+    b_tissue = queryset.values(label=F("phenopackets__biosamples__sampled_tissue__label")).annotate(
+        value=Count("phenopackets__biosamples", distinct=True))
+    return bento_public_format_count_and_stats_list(b_tissue)
+
+
+def bento_public_format_count_and_stats_list(annotated_queryset):
+    stats_list = []
+    total = 0
+    for q in annotated_queryset:
+        label = q["label"]
+        value = int(q["value"])
+        total += value
+        if label is not None:
+            stats_list.append({"label": label, "value": value})
+
+    return total, stats_list
