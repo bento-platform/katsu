@@ -75,12 +75,9 @@ def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str) -> Optio
         # Check if subject already exists
         try:
             existing_subject = pm.Individual.objects.get(id=subject["id"])
-            overlapping_extra_properties = {
-                k: v for k, v in extra_properties.items()
-                if k in existing_subject.extra_properties
-            }
+            existing_extra_properties = existing_subject.extra_properties
         except pm.Individual.DoesNotExist:
-            overlapping_extra_properties = extra_properties
+            existing_extra_properties = extra_properties
             pass
 
         # --------------------------------------------------------------------------------------------------------------
@@ -91,7 +88,7 @@ def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str) -> Optio
             ethnicity=subject.get("ethnicity", ""),
             age_numeric=age_numeric_value,
             age_unit=age_unit_value if age_unit_value else "",
-            extra_properties=overlapping_extra_properties,
+            extra_properties=existing_extra_properties,
             **subject_query
         )
 
