@@ -104,6 +104,7 @@ class IngestTest(TestCase):
         self.assertNotEqual(p.id, p2.id)
         self.assertEqual(p.subject.id, p2.subject.id)
 
+        # Check that extra_properties has been replaced/augmented
         p.refresh_from_db()
         self.assertTrue(p.subject.extra_properties["music_enjoyer"])
         self.assertTrue(p2.subject.extra_properties["music_enjoyer"])
