@@ -3,6 +3,7 @@ from django.http import HttpResponseForbidden
 import requests
 import re
 import json
+import authx.auth
 
 
 class CandigAuthzMiddleware:
@@ -16,7 +17,10 @@ class CandigAuthzMiddleware:
 
     def __call__(self, request):
         if settings.CANDIG_AUTHORIZATION == 'OPA':
-            token = self.get_auth_token(request.headers)
+            opa_url = settings.CANDIG_OPA_URL
+            opa_secret = settings.CANDIG_OPA_SECRET
+            opa_site_admin = settings.CANDIG_OPA_SITE_ADMIN_KEY
+
             if self.is_authorized_get(request):
                 """
                 You may incorporate any data source for dataset authorization.
@@ -36,7 +40,7 @@ class CandigAuthzMiddleware:
                     response = HttpResponseForbidden(json.dumps(error_response))
                     response["Content-Type"] = "application/json"
                     return response
-                opa_res_datasets = self.get_opa_datasets(token, request.path, request.method)
+                opa_res_datasets = authx.auth.get_opa_datasets(request, opa_url, opa_secret)
                 if len(opa_res_datasets) == 0:
                     self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
                 elif type(opa_res_datasets) == tuple and opa_res_datasets[0] == "error":  # error response
@@ -47,7 +51,7 @@ class CandigAuthzMiddleware:
                 request.GET.update({'authorized_datasets': self.authorize_datasets})
             elif self.is_authorized_post(request):
                 request.POST = request.POST.copy()  # Make request.POST mutable
-                if not self.is_opa_site_admin(token):
+                if not authx.auth.is_site_admin(request, opa_url, opa_secret, site_admin_key=opa_site_admin):
                     error_response = {"error": "You do not have permission to POST"}
                     response = HttpResponseForbidden(json.dumps(error_response))
                     response["Content-Type"] = "application/json"
@@ -77,74 +81,3 @@ class CandigAuthzMiddleware:
             "^/private/ingest"
         ]
         return request.method == 'POST' and any(re.match(path_re, request.path) for path_re in authorized_paths)
-
-    def get_auth_token(self, headers):
-        """
-        Extracts token from request's header Authorization
-        """
-        token = headers.get('Authorization')
-        if token is None:
-            return ""
-        else:
-            return token.split()[1]
-
-    def get_opa_datasets(self, token, path, method):
-        """
-        Get allowed dataset result from OPA
-        """
-        try:
-            response = requests.post(
-                settings.CANDIG_OPA_URL + "/v1/data/permissions/datasets",
-                headers={
-                    "X-Opa": f"{settings.CANDIG_OPA_SECRET}",
-                    "Authorization": f"Bearer {token}"
-                },
-                json={
-                    "input": {
-                            "token": token,
-                            "body": {
-                                "path": path,
-                                "method": method
-                            }
-                        }
-                    }
-                )
-            response.raise_for_status()
-        except requests.exceptions.RequestException:
-            error_response = {
-                "error": "This request failed because we are unable to retrieve necessary info \
-                                related to your account. Please contact your system administrator \
-                                for assistance."
-            }
-            response = HttpResponseForbidden(json.dumps(error_response))
-            response["Content-Type"] = "application/json"
-            return ("error", response)
-
-        allowed_datasets = response.json()["result"]
-
-        return allowed_datasets
-
-    def is_opa_site_admin(self, token):
-        """
-        Is the user associated with the token a site admin?
-        """
-        try:
-            response = requests.post(
-                settings.CANDIG_OPA_URL + "/v1/data/idp/" + settings.CANDIG_OPA_SITE_ADMIN_KEY,
-                headers={
-                    "X-Opa": f"{settings.CANDIG_OPA_SECRET}",
-                    "Authorization": f"Bearer {token}"
-                },
-                json={
-                    "input": {
-                            "token": token
-                        }
-                    }
-                )
-            response.raise_for_status()
-        except requests.exceptions.RequestException:
-            return False
-        if "result" in response.json():
-            if response.json()["result"] is True or response.json()["result"] == "true":
-                return True
-        return False
