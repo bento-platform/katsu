@@ -2,7 +2,6 @@ import json
 import uuid
 
 from dateutil.parser import isoparse
-from django.core.exceptions import MultipleObjectsReturned
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Table
@@ -50,7 +49,7 @@ def get_or_create_phenotypic_feature(pf):
         evidence=pf.get("evidence"),  # TODO: Separate class for evidence?
         extra_properties=pf.get("extra_properties", {}),
     )
-
+    pf_obj.save()
     return pf_obj
 
 
