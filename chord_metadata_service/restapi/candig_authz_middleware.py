@@ -40,7 +40,7 @@ class CandigAuthzMiddleware:
                     response["Content-Type"] = "application/json"
                     return response
                 try:
-                    opa_res_datasets = get_opa_datasets(request, opa_url=opa_url, opa_secret)
+                    opa_res_datasets = get_opa_datasets(request, opa_url=opa_url, admin_secret=opa_secret)
                 except Exception as e:
                     response = HttpResponseForbidden(e)
                     return response
@@ -54,7 +54,7 @@ class CandigAuthzMiddleware:
                 request.GET.update({'authorized_datasets': self.authorize_datasets})
             elif self.is_authorized_post(request):
                 request.POST = request.POST.copy()  # Make request.POST mutable
-                if not is_site_admin(request, opa_url=opa_url, opa_secret, site_admin_key=opa_site_admin):
+                if not is_site_admin(request, opa_url=opa_url, admin_secret=opa_secret, site_admin_key=opa_site_admin):
                     error_response = {"error": "You do not have permission to POST"}
                     response = HttpResponseForbidden(json.dumps(error_response))
                     response["Content-Type"] = "application/json"
