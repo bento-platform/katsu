@@ -40,8 +40,12 @@ class CandigAuthzMiddleware:
                     response = HttpResponseForbidden(json.dumps(error_response))
                     response["Content-Type"] = "application/json"
                     return response
-                opa_res_datasets = authx.auth.get_opa_datasets(request, opa_url, opa_secret)
-                if len(opa_res_datasets) == 0:
+                try:
+                    opa_res_datasets = get_opa_datasets(request, opa_url, opa_secret)
+                except Exception as e:
+                    response = HttpResponseForbidden(e)
+                    return response
+                if opa_res_datasets is not None and len(opa_res_datasets) == 0:
                     self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
                 elif type(opa_res_datasets) == tuple and opa_res_datasets[0] == "error":  # error response
                     return opa_res_datasets[1]
