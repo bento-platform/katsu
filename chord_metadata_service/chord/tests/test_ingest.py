@@ -8,7 +8,7 @@ from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.ingest.schema import schema_validation
-from chord_metadata_service.chord.ingest.phenopackets import create_phenotypic_feature
+from chord_metadata_service.chord.ingest.phenopackets import get_or_create_phenotypic_feature
 from chord_metadata_service.chord.workflows.metadata import (
     WORKFLOW_EXPERIMENTS_JSON,
     WORKFLOW_MAF_DERIVED_FROM_VCF_JSON,
@@ -54,7 +54,7 @@ class IngestTest(TestCase):
         self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
 
     def test_create_pf(self):
-        p1 = create_phenotypic_feature({
+        p1 = get_or_create_phenotypic_feature({
             "description": "test",
             "type": {
                 "id": "HP:0000790",
@@ -68,6 +68,50 @@ class IngestTest(TestCase):
         p2 = PhenotypicFeature.objects.get(description="test")
 
         self.assertEqual(p1.pk, p2.pk)
+
+        p3 = get_or_create_phenotypic_feature({
+            "description": "test",
+            "type": {
+                "id": "HP:0000790",
+                "label": "Hematuria"
+            },
+            "negated": False,
+            "modifier": [],
+            "evidence": []
+        })
+
+        self.assertEqual(p3.pk, p1.pk)
+
+    def test_create_pf_multi_existing(self):
+        import sys
+
+        common = dict(
+            description="test",
+            pftype={
+                "id": "HP:0000790",
+                "label": "Hematuria"
+            },
+            negated=False,
+            modifier=[],
+            evidence=None,
+            extra_properties={},
+        )
+
+        p1 = PhenotypicFeature(**common)
+        p1.save()
+        p2 = PhenotypicFeature(**common)
+        p2.save()
+
+        # skipped duplicate check, so should be different entities like Katsu used to make pre version 2.15.
+        self.assertNotEqual(p1.pk, p2.pk)
+
+        common2 = {**common, "type": common["pftype"]}
+        del common2["pftype"]
+
+        p3 = get_or_create_phenotypic_feature(common2)
+
+        # Now we get to re-use the first one
+        self.assertEqual(p3.pk, p1.pk)
 
     def test_ingesting_phenopackets_json(self):
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)

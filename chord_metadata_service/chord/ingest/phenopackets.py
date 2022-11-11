@@ -2,6 +2,7 @@ import json
 import uuid
 
 from dateutil.parser import isoparse
+from django.core.exceptions import MultipleObjectsReturned
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Table
@@ -17,19 +18,26 @@ from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, work
 from typing import Any, Dict, Optional
 
 
-def create_phenotypic_feature(pf):
-    pf_obj = pm.PhenotypicFeature(
+def get_or_create_phenotypic_feature(pf):
+    pf_query = {}
+    # TODO: Separate class for evidence?
+    for k in ("severity", "onset", "evidence"):
+        pf_query.update(query_and_check_nulls(pf, k))
+
+    get_q = dict(
         description=pf.get("description", ""),
         pftype=pf["type"],
         negated=pf.get("negated", False),
-        severity=pf.get("severity"),
         modifier=pf.get("modifier", []),  # TODO: Validate ontology term in schema...
-        onset=pf.get("onset"),
-        evidence=pf.get("evidence"),  # TODO: Separate class?
-        extra_properties=pf.get("extra_properties", {})
+        extra_properties=pf.get("extra_properties", {}),
+        **pf_query,
     )
 
-    pf_obj.save()
+    try:
+        pf_obj, _ = pm.PhenotypicFeature.objects.get_or_create(**get_q)
+    except MultipleObjectsReturned:
+        pf_obj = pm.PhenotypicFeature.objects.filter(**get_q).first()
+
     return pf_obj
 
 
@@ -97,7 +105,7 @@ def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str) -> Optio
             subject_obj.extra_properties = extra_properties
             subject_obj.save()
 
-    phenotypic_features_db = [create_phenotypic_feature(pf) for pf in phenotypic_features]
+    phenotypic_features_db = [get_or_create_phenotypic_feature(pf) for pf in phenotypic_features]
 
     biosamples_db = []
     for bs in biosamples:
@@ -131,7 +139,7 @@ def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str) -> Optio
                 variants_db.append(variant_obj)
 
         if bs_created:
-            bs_pfs = [create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
+            bs_pfs = [get_or_create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
             bs_obj.phenotypic_features.set(bs_pfs)
 
             if variants_db:
