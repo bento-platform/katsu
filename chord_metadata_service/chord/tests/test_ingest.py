@@ -69,49 +69,53 @@ class IngestTest(TestCase):
 
         self.assertEqual(p1.pk, p2.pk)
 
-        p3 = get_or_create_phenotypic_feature({
-            "description": "test",
-            "type": {
-                "id": "HP:0000790",
-                "label": "Hematuria"
-            },
-            "negated": False,
-            "modifier": [],
-            "evidence": []
-        })
+        # Below is code for if we want to re-use phenotypic features in the future
+        # For now, the lack of a many-to-many relationship doesn't let us do that.
+        #  - David Lougheed, Nov 11 2022
+        # p3 = get_or_create_phenotypic_feature({
+        #     "description": "test",
+        #     "type": {
+        #         "id": "HP:0000790",
+        #         "label": "Hematuria"
+        #     },
+        #     "negated": False,
+        #     "modifier": [],
+        #     "evidence": []
+        # })
+        #
+        # self.assertEqual(p3.pk, p1.pk)
 
-        self.assertEqual(p3.pk, p1.pk)
-
-    def test_create_pf_multi_existing(self):
-        import sys
-
-        common = dict(
-            description="test",
-            pftype={
-                "id": "HP:0000790",
-                "label": "Hematuria"
-            },
-            negated=False,
-            modifier=[],
-            evidence=None,
-            extra_properties={},
-        )
-
-        p1 = PhenotypicFeature(**common)
-        p1.save()
-        p2 = PhenotypicFeature(**common)
-        p2.save()
-
-        # skipped duplicate check, so should be different entities like Katsu used to make pre version 2.15.
-        self.assertNotEqual(p1.pk, p2.pk)
-
-        common2 = {**common, "type": common["pftype"]}
-        del common2["pftype"]
-
-        p3 = get_or_create_phenotypic_feature(common2)
-
-        # Now we get to re-use the first one
-        self.assertEqual(p3.pk, p1.pk)
+    # Below is code for if we want to re-use phenotypic features in the future
+    # For now, the lack of a many-to-many relationship doesn't let us do that.
+    #  - David Lougheed, Nov 11 2022
+    # def test_create_pf_multi_existing(self):
+    #     common = dict(
+    #         description="test",
+    #         pftype={
+    #             "id": "HP:0000790",
+    #             "label": "Hematuria"
+    #         },
+    #         negated=False,
+    #         modifier=[],
+    #         evidence=None,
+    #         extra_properties={},
+    #     )
+    #
+    #     p1 = PhenotypicFeature(**common)
+    #     p1.save()
+    #     p2 = PhenotypicFeature(**common)
+    #     p2.save()
+    #
+    #     # skipped duplicate check, so should be different entities like Katsu used to make pre version 2.15.
+    #     self.assertNotEqual(p1.pk, p2.pk)
+    #
+    #     common2 = {**common, "type": common["pftype"]}
+    #     del common2["pftype"]
+    #
+    #     p3 = get_or_create_phenotypic_feature(common2)
+    #
+    #     # Now we get to re-use the first one
+    #     self.assertEqual(p3.pk, p1.pk)
 
     def test_ingesting_phenopackets_json(self):
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)

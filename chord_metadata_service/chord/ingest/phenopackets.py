@@ -19,24 +19,37 @@ from typing import Any, Dict, Optional
 
 
 def get_or_create_phenotypic_feature(pf):
-    pf_query = {}
-    # TODO: Separate class for evidence?
-    for k in ("severity", "onset", "evidence"):
-        pf_query.update(query_and_check_nulls(pf, k))
+    # Below is code for if we want to re-use phenotypic features in the future
+    # For now, the lack of a many-to-many relationship doesn't let us do that.
+    #  - David Lougheed, Nov 11 2022
+    # pf_query = {}
+    # for k in ("severity", "onset", "evidence"):
+    #     pf_query.update(query_and_check_nulls(pf, k))
+    #
+    # get_q = dict(
+    #     description=pf.get("description", ""),
+    #     pftype=pf["type"],
+    #     negated=pf.get("negated", False),
+    #     modifier=pf.get("modifier", []),  # TODO: Validate ontology term in schema...
+    #     extra_properties=pf.get("extra_properties", {}),
+    #     **pf_query,
+    # )
+    #
+    # try:
+    #     pf_obj, _ = pm.PhenotypicFeature.objects.get_or_create(**get_q)
+    # except MultipleObjectsReturned:
+    #     pf_obj = pm.PhenotypicFeature.objects.filter(**get_q).first()
 
-    get_q = dict(
+    pf_obj = pm.PhenotypicFeature(
         description=pf.get("description", ""),
         pftype=pf["type"],
         negated=pf.get("negated", False),
         modifier=pf.get("modifier", []),  # TODO: Validate ontology term in schema...
+        severity=pf.get("severity"),
+        onset=pf.get("onset"),
+        evidence=pf.get("evidence"),  # TODO: Separate class for evidence?
         extra_properties=pf.get("extra_properties", {}),
-        **pf_query,
     )
-
-    try:
-        pf_obj, _ = pm.PhenotypicFeature.objects.get_or_create(**get_q)
-    except MultipleObjectsReturned:
-        pf_obj = pm.PhenotypicFeature.objects.filter(**get_q).first()
 
     return pf_obj
 
