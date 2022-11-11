@@ -88,7 +88,7 @@ class GetPhenopacketsWithOpaTest(APITestCase):
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 1)
 
-    @override_settings(CANDIG_AUTHORIZATION='OPA', CANDIG_OPA_URL='http://0.0.0.0', CACHE_TIME=0)
+    @override_settings(CANDIG_AUTHORIZATION='OPA', OPA_URL='http://0.0.0.0', CACHE_TIME=0)
     def test_get_phenopackets_with_invalid_OPA_config_3(self):
         """
         Test that the server returns 403 for /api/phenopackets if the OPA Server cannot be reached.
