@@ -16,7 +16,7 @@ import logging
 import json
 from os.path import exists
 
-from urllib.parse import quote, urlparse
+from urllib.parse import quote
 from dotenv import load_dotenv
 
 from .. import __version__
