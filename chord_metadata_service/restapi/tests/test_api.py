@@ -256,6 +256,21 @@ class PublicOverviewTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj["counts"]["individuals"], db_count)
 
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_overview_bins(self):
+        # test that there is the correct number of data entries for number
+        # histograms, vs. number of bins
+        response = self.client.get('/api/public_overview')
+        response_obj = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(
+            # 1 more bin than intervals expected: e.g. for config.bins = [2, 3, 4],
+            # we expect data entries for ≤2, [2 3), [3 4), ≥4
+            len(response_obj["fields"]["lab_test_result_value"]["config"]["bins"]) + 1,
+            len(response_obj["fields"]["lab_test_result_value"]["data"]),
+        )
+
     @override_settings(CONFIG_PUBLIC={})
     def test_overview_no_config(self):
         response = self.client.get('/api/public_overview')
