@@ -11,7 +11,7 @@ import uuid
 import jsonschema
 
 from dateutil.parser import isoparse
-from typing import Callable
+from typing import Callable, Optional
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -485,17 +485,27 @@ def ingest_experiment(experiment_data, table_id):
     extraction_protocol = experiment_data.get("extraction_protocol")
     reference_registry_id = experiment_data.get("reference_registry_id")
     qc_flags = experiment_data.get("qc_flags", [])
-    biosample = experiment_data.get("biosample")
+    biosample_id = experiment_data.get("biosample")
     experiment_results = experiment_data.get("experiment_results", [])
     instrument = experiment_data.get("instrument", {})
     extra_properties = experiment_data.get("extra_properties", {})
+
+    biosample: Optional[pm.Biosample] = None
+
     # get existing biosample id
-    if biosample is not None:
-        biosample = pm.Biosample.objects.get(id=biosample)  # TODO: Handle error nicer
+    if biosample_id is not None:
+        try:
+            biosample = pm.Biosample.objects.get(id=biosample_id)  # TODO: Handle error nicer
+        except pm.Biosample.DoesNotExist as e:
+            logger.error(f"Could not find biosample with ID: {biosample_id}")
+            raise e
+
     # create related experiment results
     experiment_results_db = [create_experiment_result(er) for er in experiment_results]
+
     # create related instrument
     instrument_db = create_instrument(instrument)
+
     # create new experiment
     new_experiment = em.Experiment.objects.create(
         id=new_experiment_id,
