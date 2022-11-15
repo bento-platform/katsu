@@ -11,5 +11,5 @@ python manage.py migrate
 
 hypercorn chord_metadata_service.metadata.asgi:application \
   --workers 1 \
-  --worker_class uvloop \
+  -k uvloop \
   --bind "0.0.0.0:${INTERNAL_PORT}"
