@@ -171,14 +171,16 @@ def custom_binning_generator(field_props) -> Generator[Tuple[int, int, str], Non
         yield minimum, bins[0], f"< {bins[0]}"
 
     # Generate interstitial bins for the range.
-    # Range is semi-open: [1, len(bins))
+    # range() is semi-open: [1, len(bins))
+    # – so in terms of indices, we skip the first bin (we access it via i-1 for lhs)
+    #   and generate [lhs, rhs) pairs for each pair of bins until the end.
     # Values beyond the last bin gets handled separately.
     for i in range(1, len(bins)):
         lhs = bins[i - 1]
         rhs = bins[i]
         yield lhs, rhs, f"{lhs}-{rhs}"
 
-    # Then, handle values which surpass the last bin
+    # Then, handle values beyond the value of the last bin
     if maximum is None or maximum != bins[-1]:
         yield bins[-1], maximum, f"≥ {bins[-1]}"
 
