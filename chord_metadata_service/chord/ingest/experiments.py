@@ -7,6 +7,8 @@ from chord_metadata_service.experiments import models as em
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERIMENT_RESULT_SCHEMA
 from chord_metadata_service.phenopackets import models as pm
 
+from typing import Optional
+
 from .logger import logger
 from .resources import ingest_resource
 from .schema import schema_validation
@@ -68,17 +70,27 @@ def ingest_experiment(experiment_data, table_id):
     extraction_protocol = experiment_data.get("extraction_protocol")
     reference_registry_id = experiment_data.get("reference_registry_id")
     qc_flags = experiment_data.get("qc_flags", [])
-    biosample = experiment_data.get("biosample")
+    biosample_id = experiment_data.get("biosample")
     experiment_results = experiment_data.get("experiment_results", [])
     instrument = experiment_data.get("instrument", {})
     extra_properties = experiment_data.get("extra_properties", {})
+
+    biosample: Optional[pm.Biosample] = None
+
     # get existing biosample id
-    if biosample is not None:
-        biosample = pm.Biosample.objects.get(id=biosample)  # TODO: Handle error nicer
+    if biosample_id is not None:
+        try:
+            biosample = pm.Biosample.objects.get(id=biosample_id)
+        except pm.Biosample.DoesNotExist as e:
+            logger.error(f"Could not find biosample with ID: {biosample_id}")
+            raise e
+
     # create related experiment results
     experiment_results_db = [create_experiment_result(er) for er in experiment_results]
+
     # create related instrument
     instrument_db = create_instrument(instrument)
+
     # create new experiment
     new_experiment = em.Experiment.objects.create(
         id=new_experiment_id,
@@ -99,6 +111,7 @@ def ingest_experiment(experiment_data, table_id):
         extra_properties=extra_properties,
         table=Table.objects.get(ownership_record_id=table_id, data_type=DATA_TYPE_EXPERIMENT)
     )
+
     # create m2m relationships
     new_experiment.experiment_results.set(experiment_results_db)
 

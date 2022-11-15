@@ -10,11 +10,12 @@ __all__ = [
     "EXAMPLE_INGEST_OUTPUTS",
     "EXAMPLE_INGEST_OUTPUTS_UPDATE",
     "EXAMPLE_INGEST_OUTPUTS_EXPERIMENT",
+    "EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_BAD_BIOSAMPLE",
     "EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT",
     "EXAMPLE_INGEST_INVALID_EXPERIMENT",
     "EXAMPLE_INGEST_INVALID_PHENOPACKET",
     "EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS",
-    "EXAMPLE_INGEST_MULTIPLE_OUTPUTS"
+    "EXAMPLE_INGEST_MULTIPLE_OUTPUTS",
 ]
 
 with open(os.path.join(os.path.dirname(__file__), "example_phenopacket.json"), "r") as pf:
@@ -37,6 +38,10 @@ with open(os.path.join(os.path.dirname(__file__), "example_experiment.json"), "r
 
 EXAMPLE_INGEST_OUTPUTS_EXPERIMENT = {
     "json_document": os.path.join(os.path.dirname(__file__), "example_experiment.json"),
+}
+
+EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_BAD_BIOSAMPLE = {
+    "json_document": os.path.join(os.path.dirname(__file__), "example_experiment_bad_biosample.json"),
 }
 
 
