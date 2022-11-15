@@ -228,7 +228,7 @@ def chord_table_summary(_request, table_id):
 
 # TODO: CHORD-standardized logging
 def debug_log(message):  # pragma: no cover
-    logging.debug(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}", flush=True)
+    logging.debug(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}")
 
 
 def get_field_lookup(field):
