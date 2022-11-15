@@ -16,7 +16,7 @@ import logging
 import json
 from os.path import exists
 
-from urllib.parse import quote, urlparse
+from urllib.parse import quote
 from dotenv import load_dotenv
 
 from .. import __version__
@@ -86,7 +86,7 @@ DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/dr
 # Candig-specific settings
 
 CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "")
-CANDIG_OPA_URL = os.getenv("CANDIG_OPA_URL", "")
+CANDIG_OPA_URL = os.getenv("OPA_URL", "")
 CANDIG_OPA_SECRET = os.getenv("CANDIG_OPA_SECRET", "my-secret-beacon-token")
 CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("CANDIG_OPA_SITE_ADMIN_KEY", "site-admin")
 if exists("/run/secrets/opa-root-token"):
