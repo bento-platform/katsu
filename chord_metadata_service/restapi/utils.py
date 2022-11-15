@@ -2,8 +2,8 @@ import isodate
 import datetime
 
 from collections import defaultdict, Counter
-from typing import Tuple, Mapping, Generator
 from calendar import month_abbr
+from typing import Dict, List, Tuple, Mapping, Generator
 
 from django.db.models import Count, F, Func, IntegerField, CharField, Case, When, Value
 from django.db.models.functions import Cast
@@ -133,9 +133,9 @@ def custom_binning_generator(field_props) -> Generator[Tuple[int, int, str], Non
     """
     Generator for custom bins. It expects an array of bin boundaries (`bins` property)
     `minimum` and `maximum` properties are optional. When absent, there is no lower/upper
-    bound and the corresponding bin limit is open ended (as in "< 5").
-    If present but equal to the closest bin boundary, there is no open ended bin.
-    If present but different from closest bin, an extra bin is added to collect
+    bound and the corresponding bin limit is open-ended (as in "< 5").
+    If present but equal to the closest bin boundary, there is no open-ended bin.
+    If present but different from the closest bin, an extra bin is added to collect
     all values down/up to the min/max value that is set (open-ended without limit)
     For example, given the following configuration:
     {
@@ -150,7 +150,7 @@ def custom_binning_generator(field_props) -> Generator[Tuple[int, int, str], Non
     c = field_props["config"]
     minimum = int(c["minimum"]) if "minimum" in c else None
     maximum = int(c["maximum"]) if "maximum" in c else None
-    bins = [int(value) for value in c["bins"]]
+    bins: List[int] = [int(value) for value in c["bins"]]
 
     # check prerequisites
     # Note: it raises an error as it reflects an error in the config file
@@ -170,11 +170,15 @@ def custom_binning_generator(field_props) -> Generator[Tuple[int, int, str], Non
     if minimum is None or minimum != bins[0]:
         yield minimum, bins[0], f"< {bins[0]}"
 
-    for i in range(1, len(bins) - 2):
+    # Generate interstitial bins for the range.
+    # Range is semi-open: [1, len(bins))
+    # Values beyond the last bin gets handled separately.
+    for i in range(1, len(bins)):
         lhs = bins[i - 1]
         rhs = bins[i]
         yield lhs, rhs, f"{lhs}-{rhs}"
 
+    # Then, handle values which surpass the last bin
     if maximum is None or maximum != bins[-1]:
         yield bins[-1], maximum, f"≥ {bins[-1]}"
 
@@ -275,7 +279,7 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
     annotated_queryset = queryset.values(field).annotate(total=Count("*"))
     num_missing = 0
 
-    stats: Mapping[str, int] = dict()
+    stats: Dict[str, int] = dict()
     for item in annotated_queryset:
         key = item[field]
         if key is None:
@@ -496,7 +500,7 @@ def get_range_stats(field_props):
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))\
         .annotate(total=Count("label"))
 
-    stats: Mapping[str, int] = dict()
+    stats: Dict[str, int] = dict()
     for item in query_set:
         key = item["label"]
         stats[key] = item["total"] if item["total"] > threshold else 0
