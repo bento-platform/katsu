@@ -129,7 +129,7 @@ def iso_duration_to_years(iso_age_duration: str, unit: str = "years") -> Tuple[O
 
     # if duration string contains only days then the instance is of type datetime.timedelta
     if not isinstance(duration, isodate.Duration) and isinstance(duration, datetime.timedelta):
-        if duration.days:
+        if duration.days is not None:
             days_to_seconds = duration.days * 24 * 60 * 60
             years = days_to_seconds / 60 / 60 / 24 / 365.25
             return (round(years, 2)), unit
