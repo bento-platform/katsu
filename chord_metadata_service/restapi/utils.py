@@ -5,7 +5,7 @@ import datetime
 
 from collections import defaultdict, Counter
 from calendar import month_abbr
-from typing import Any, Dict, List, Optional, Tuple, Type, Mapping, Generator
+from typing import Any, Optional, Type, Mapping, Generator
 
 from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value
 from django.db.models.functions import Cast
@@ -18,7 +18,7 @@ from chord_metadata_service.experiments import models as experiments_models
 OVERVIEW_AGE_BIN_SIZE = 10
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 
-MODEL_NAMES_TO_MODEL: Dict[str, Type[Model]] = {
+MODEL_NAMES_TO_MODEL: dict[str, Type[Model]] = {
     "individual": pheno_models.Individual,
     "experiment": experiments_models.Experiment,
     "biosample": pheno_models.Biosample,
@@ -113,7 +113,7 @@ def parse_individual_age(age_obj: dict) -> int:
     raise ValueError(f"Error: {age_obj} format not supported")
 
 
-def iso_duration_to_years(iso_age_duration: str, unit: str = "years") -> Tuple[Optional[float], Optional[str]]:
+def iso_duration_to_years(iso_age_duration: str, unit: str = "years") -> tuple[Optional[float], Optional[str]]:
     """
     This function takes ISO8601 Duration string in the format e.g 'P20Y6M4D' and converts it to years.
     """
@@ -139,7 +139,7 @@ def iso_duration_to_years(iso_age_duration: str, unit: str = "years") -> Tuple[O
     return None, None
 
 
-def labelled_range_generator(field_props: dict) -> Generator[Tuple[int, int, str], None, None]:
+def labelled_range_generator(field_props: dict) -> Generator[tuple[int, int, str], None, None]:
     """
     Returns a generator yielding floor, ceil and label value for each bin from
     a numeric field configuration
@@ -151,7 +151,7 @@ def labelled_range_generator(field_props: dict) -> Generator[Tuple[int, int, str
     return auto_binning_generator(field_props)
 
 
-def custom_binning_generator(field_props) -> Generator[Tuple[int, int, str], None, None]:
+def custom_binning_generator(field_props) -> Generator[tuple[int, int, str], None, None]:
     """
     Generator for custom bins. It expects an array of bin boundaries (`bins` property)
     `minimum` and `maximum` properties are optional. When absent, there is no lower/upper
@@ -172,7 +172,7 @@ def custom_binning_generator(field_props) -> Generator[Tuple[int, int, str], Non
     c = field_props["config"]
     minimum: Optional[int] = int(c["minimum"]) if "minimum" in c else None
     maximum: Optional[int] = int(c["maximum"]) if "maximum" in c else None
-    bins: List[int] = [int(value) for value in c["bins"]]
+    bins: list[int] = [int(value) for value in c["bins"]]
 
     # check prerequisites
     # Note: it raises an error as it reflects an error in the config file
@@ -207,7 +207,7 @@ def custom_binning_generator(field_props) -> Generator[Tuple[int, int, str], Non
         yield bins[-1], maximum, f"≥ {bins[-1]}"
 
 
-def auto_binning_generator(field_props) -> Generator[Tuple[int, int, str], None, None]:
+def auto_binning_generator(field_props) -> Generator[tuple[int, int, str], None, None]:
     """
     Note: limited to operations on integer values for simplicity
     A word of caution: when implementing handling of floating point values,
@@ -247,7 +247,7 @@ def auto_binning_generator(field_props) -> Generator[Tuple[int, int, str], None,
         yield taper_right, maximum, f"≥ {taper_right}"
 
 
-def monthly_generator(start: str, end: str) -> Tuple[int, int]:
+def monthly_generator(start: str, end: str) -> tuple[int, int]:
     """
     generator of tuples (year nb, month nb) from a start date to an end date
     as ISO formated strings `yyyy-mm`
@@ -261,7 +261,7 @@ def monthly_generator(start: str, end: str) -> Tuple[int, int]:
         yield year, month
 
 
-def get_model_and_field(field_id: str) -> Tuple[any, str]:
+def get_model_and_field(field_id: str) -> tuple[any, str]:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
     where the first crumb represents the object in the DB model, and the next ones
@@ -471,7 +471,7 @@ def get_date_stats(field_props):
     return bins
 
 
-def get_month_date_range(field_props: dict) -> Tuple[Optional[str], Optional[str]]:
+def get_month_date_range(field_props: dict) -> tuple[Optional[str], Optional[str]]:
     """
     Get start date and end date from the database
     Note that dates within a JSON are stored as strings, not instances of datetime.
