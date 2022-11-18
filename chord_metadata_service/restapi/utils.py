@@ -300,7 +300,7 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
     annotated_queryset = queryset.values(field).annotate(total=Count("*"))
     num_missing = 0
 
-    stats: Dict[str, int] = dict()
+    stats: dict[str, int] = dict()
     for item in annotated_queryset:
         key = item[field]
         if key is None:
@@ -528,7 +528,7 @@ def get_range_stats(field_props: dict) -> list[dict]:
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))\
         .annotate(total=Count("label"))
 
-    stats: Dict[str, int] = dict()
+    stats: dict[str, int] = dict()
     for item in query_set:
         key = item["label"]
         stats[key] = item["total"] if item["total"] > threshold else 0
