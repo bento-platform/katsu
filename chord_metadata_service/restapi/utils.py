@@ -386,7 +386,6 @@ def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
     stats = stats_for_field(model, field_name, add_missing=True)
 
     # Enforce values order from config and apply policies
-    threshold = get_threshold()
     labels: list[str] = field_props["config"]["enum"]
     # Special case: for some fields, values are based on what's present in the
     # dataset. Apply lexical sort, and exclude the "missing" value which will
@@ -397,6 +396,7 @@ def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
             key=lambda x: x.lower()
         )
 
+    threshold = get_threshold()
     bins: list[BinWithValue] = []
 
     for category in labels:
@@ -420,8 +420,6 @@ def get_date_stats(field_props: dict) -> list[BinWithValue]:
     regular fields when needed.
     TODO: for now only dates binned by month are handled
     """
-
-    threshold = get_threshold()
 
     if (bin_by := field_props["config"]["bin_by"]) != "month":
         msg = f"Binning dates by `{bin_by}` method not implemented"
@@ -459,6 +457,7 @@ def get_date_stats(field_props: dict) -> list[BinWithValue]:
             start = key
 
     # All the bins between start and end date must be represented
+    threshold = get_threshold()
     bins: list[BinWithValue] = []
     if start:   # at least one month
         for year, month in monthly_generator(start, end or start):
@@ -516,9 +515,6 @@ def get_month_date_range(field_props: dict) -> tuple[Optional[str], Optional[str
 
 
 def get_range_stats(field_props: dict) -> list[BinWithValue]:
-    # Minimum number of entries needed to include a label in the returned counts
-    threshold = get_threshold()
-
     model, field = get_model_and_field(field_props["mapping"])
 
     # Generate a list of When conditions that return a label for the given bin.
@@ -533,6 +529,7 @@ def get_range_stats(field_props: dict) -> list[BinWithValue]:
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))\
         .annotate(total=Count("label"))
 
+    threshold = get_threshold()  # Minimum number of entries needed to include a label in the returned counts
     stats: dict[str, int] = dict()
     for item in query_set:
         key = item["label"]
