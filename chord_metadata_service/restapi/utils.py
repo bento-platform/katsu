@@ -15,7 +15,6 @@ from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.experiments import models as experiments_models
 
 
-OVERVIEW_AGE_BIN_SIZE = 10
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 
 MODEL_NAMES_TO_MODEL: dict[str, Type[Model]] = {
