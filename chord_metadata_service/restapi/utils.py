@@ -5,7 +5,7 @@ import datetime
 
 from collections import defaultdict, Counter
 from calendar import month_abbr
-from typing import Any, Optional, Type, Mapping, Generator
+from typing import Any, Optional, Type, TypedDict, Mapping, Generator
 
 from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value
 from django.db.models.functions import Cast
@@ -23,6 +23,11 @@ MODEL_NAMES_TO_MODEL: dict[str, Type[Model]] = {
     "experiment": experiments_models.Experiment,
     "biosample": pheno_models.Biosample,
 }
+
+
+class BinWithValue(TypedDict):
+    label: str
+    value: int
 
 
 def get_threshold() -> int:
@@ -373,7 +378,7 @@ def get_age_numeric_binned(individual_queryset, bin_size: int) -> dict:
     return individuals_age
 
 
-def get_categorical_stats(field_props):
+def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
@@ -391,7 +396,8 @@ def get_categorical_stats(field_props):
             [k for k in stats.keys() if k != "missing"],
             key=lambda x: x.lower()
         )
-    bins = []
+
+    bins: list[BinWithValue] = []
 
     for category in labels:
         v = stats.get(category, 0)
@@ -405,7 +411,7 @@ def get_categorical_stats(field_props):
     return bins
 
 
-def get_date_stats(field_props):
+def get_date_stats(field_props: dict) -> list[BinWithValue]:
     """
     Fetches statistics for a given date field, fill the gaps in the date range
     and apply privacy policies.
@@ -453,7 +459,7 @@ def get_date_stats(field_props):
             start = key
 
     # All the bins between start and end date must be represented
-    bins = []
+    bins: list[BinWithValue] = []
     if start:   # at least one month
         for year, month in monthly_generator(start, end or start):
             key = f"{year}-{month:02d}"
@@ -465,7 +471,7 @@ def get_date_stats(field_props):
             })
 
     # Append missing items at the end if any
-    if 'missing' in stats:
+    if "missing" in stats:
         bins.append({"label": "missing", "value": stats["missing"]})
 
     return bins
@@ -509,8 +515,7 @@ def get_month_date_range(field_props: dict) -> tuple[Optional[str], Optional[str
     return start, end
 
 
-# TODO: Typing for return dicts
-def get_range_stats(field_props: dict) -> list[dict]:
+def get_range_stats(field_props: dict) -> list[BinWithValue]:
     # Minimum number of entries needed to include a label in the returned counts
     threshold = get_threshold()
 
@@ -534,7 +539,7 @@ def get_range_stats(field_props: dict) -> list[dict]:
         stats[key] = item["total"] if item["total"] > threshold else 0
 
     # All the bins between start and end must be represented and ordered
-    bins = []
+    bins: list[BinWithValue] = []
     for floor, ceil, label in labelled_range_generator(field_props):
         bins.append({"label": label, "value": stats.get(label, 0)})
 
@@ -635,7 +640,7 @@ def biosample_tissue_stats(queryset):
     return bento_public_format_count_and_stats_list(b_tissue)
 
 
-def bento_public_format_count_and_stats_list(annotated_queryset):
+def bento_public_format_count_and_stats_list(annotated_queryset) -> tuple[int, list[BinWithValue]]:
     stats_list = []
     total = 0
     for q in annotated_queryset:
