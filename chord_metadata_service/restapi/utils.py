@@ -525,11 +525,13 @@ def get_range_stats(field_props: dict) -> list[BinWithValue]:
         then=Value(label)
     ) for floor, ceil, label in labelled_range_generator(field_props)]
 
-    query_set = model.objects\
-        .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))\
+    query_set = (
+        model.objects
+        .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))
         .annotate(total=Count("label"))
+    )
 
-    threshold = get_threshold()  # Minimum number of entries needed to include a label in the returned counts
+    threshold = get_threshold()  # Maximum number of entries needed to round a count down to 0 (censored discovery)
     stats: dict[str, int] = dict()
     for item in query_set:
         key = item["label"]
