@@ -155,7 +155,7 @@ def labelled_range_generator(field_props: dict) -> Generator[tuple[int, int, str
     return auto_binning_generator(field_props)
 
 
-def custom_binning_generator(field_props) -> Generator[tuple[int, int, str], None, None]:
+def custom_binning_generator(field_props: dict) -> Generator[tuple[int, int, str], None, None]:
     """
     Generator for custom bins. It expects an array of bin boundaries (`bins` property)
     `minimum` and `maximum` properties are optional. When absent, there is no lower/upper
@@ -204,7 +204,7 @@ def custom_binning_generator(field_props) -> Generator[tuple[int, int, str], Non
     for i in range(1, len(bins)):
         lhs = bins[i - 1]
         rhs = bins[i]
-        yield lhs, rhs, f"{lhs}-{rhs}"
+        yield lhs, rhs, f"[{lhs}, {rhs})"
 
     # Then, handle values beyond the value of the last bin: [bins[-1], maximum) or [bins[-1], infinity)
     if maximum is None or maximum != bins[-1]:
