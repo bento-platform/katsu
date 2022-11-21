@@ -32,9 +32,8 @@ class BinWithValue(TypedDict):
 
 def get_threshold() -> int:
     """
-    Gets the minimum count threshold for showing censored data.
-    This is a function to prevent settings errors if not
-    running/importing this file in a Django context.
+    Gets the maximum count threshold for hiding censored data (i.e., rounding to 0).
+    This is a function to prevent settings errors if not running/importing this file in a Django context.
     """
     return settings.CONFIG_PUBLIC["rules"]["count_threshold"]
 
