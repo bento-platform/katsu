@@ -593,9 +593,10 @@ def filter_queryset_field_value(qs, field_props, value: str):
     if field_props["datatype"] == "string":
         condition = {f"{field}__iexact": value}
     elif field_props["datatype"] == "number":
-        # values are of the form "50-150", "< 50" or "≥ 800"
-        if "-" in value:
-            [start, end] = [int(v) for v in value.split("-")]
+        # values are of the form "[50, 150)", "< 50" or "≥ 800"
+
+        if value.startswith("["):
+            [start, end] = [int(v) for v in value.lstrip("[").rstrip(")").split(", ")]
             condition = {
                 f"{field}__gte": start,
                 f"{field}__lt": end
