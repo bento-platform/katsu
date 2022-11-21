@@ -639,7 +639,7 @@ def biosample_tissue_stats(queryset):
 
 
 def bento_public_format_count_and_stats_list(annotated_queryset) -> tuple[int, list[BinWithValue]]:
-    stats_list = []
+    stats_list: list[BinWithValue] = []
     total = 0
     for q in annotated_queryset:
         label = q["label"]
