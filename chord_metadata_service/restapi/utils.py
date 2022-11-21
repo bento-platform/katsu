@@ -245,7 +245,7 @@ def auto_binning_generator(field_props) -> Generator[tuple[int, int, str], None,
         yield minimum, taper_left, f"< {taper_left}"
 
     for v in range(taper_left, taper_right, bin_size):
-        yield v, v + bin_size, f"{v}-{v + bin_size}"
+        yield v, v + bin_size, f"[{v}, {v + bin_size})"
 
     if maximum != taper_right:
         yield taper_right, maximum, f"≥ {taper_right}"

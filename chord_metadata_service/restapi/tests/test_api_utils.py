@@ -24,7 +24,7 @@ class TestLabelledRangeGenerator(TestCase):
             }
         }
 
-    def test_config_with_tappers(self):
+    def test_config_with_tapers(self):
         rg = list(labelled_range_generator(self.fp))
         c = self.fp["config"]
         self.assertEqual(rg[0], (c["minimum"], c["taper_left"], f"< {c['taper_left']}"))
@@ -39,8 +39,8 @@ class TestLabelledRangeGenerator(TestCase):
             "taper_right": 1000
         }
         rg = list(labelled_range_generator(self.fp))
-        self.assertIn("-", rg[0][2])
-        self.assertIn("-", rg[-1][2])
+        self.assertIn("[", rg[0][2])
+        self.assertIn("[", rg[-1][2])
 
     def test_wrong_config_min_max(self):
         self.fp["config"] = {
@@ -92,8 +92,8 @@ class TestLabelledRangeGeneratorCustomBins(TestCase):
             }
         }
         rg = list(labelled_range_generator(c))
-        self.assertIn("-", rg[0][2])
-        self.assertIn("-", rg[-1][2])
+        self.assertIn("[", rg[0][2])
+        self.assertIn("[", rg[-1][2])
 
     def test_custom_bins_wrong_min(self):
         c = {
