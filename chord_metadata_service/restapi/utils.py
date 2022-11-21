@@ -585,6 +585,7 @@ def filter_queryset_field_value(qs, field_props, value: str):
     for the necessity of filtering. It is not necessary to specify this when
     the `mapping` value is based on the same model as the queryset.
     """
+
     model, field = get_model_and_field(
         field_props["mapping_for_search_filter"] if "mapping_for_search_filter" in field_props
         else field_props["mapping"]
