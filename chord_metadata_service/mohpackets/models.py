@@ -94,3 +94,23 @@ class Specimen(models.Model):
 
     def __str__(self):
         return f"Specimen ID: {self.submitter_specimen_id}"
+
+
+class SampleRegistration(models.Model):
+    sample_registration_id = models.CharField(
+        max_length=64, primary_key=True)
+    program_id = models.CharField(
+        max_length=64, null=False, blank=False)
+    submitter_donor_id = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False)
+    submitter_specimen_id = models.ForeignKey(
+        Specimen, on_delete=models.CASCADE, null=False, blank=False)
+    gender = models.CharField(max_length=32, null=False, blank=False)
+    sex_at_birth = models.CharField(max_length=32, null=False, blank=False)
+    specimen_tissue_source = models.CharField(max_length=255, null=False, blank=False)
+    tumour_normal_designation = models.CharField(max_length=32, null=False, blank=False)
+    specimen_type = models.CharField(max_length=255, null=False, blank=False)
+    sample_type = models.CharField(max_length=128, null=False, blank=False)
+
+    def __str__(self):
+        return f'SampleRegistration ID: {self.sample_registration_id}'
