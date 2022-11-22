@@ -75,9 +75,7 @@ class Specimen(models.Model):
     submitter_primary_diagnosis_id = models.ForeignKey(
         PrimaryDiagnosis, on_delete=models.CASCADE, null=False, blank=False
     )
-    pathological_tumour_staging_system = models.CharField(
-        max_length=255
-    )
+    pathological_tumour_staging_system = models.CharField(max_length=255)
     pathological_t_category = models.CharField(max_length=64)
     pathological_n_category = models.CharField(max_length=64)
     pathological_m_category = models.CharField(max_length=64)
