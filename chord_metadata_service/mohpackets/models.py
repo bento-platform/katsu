@@ -4,9 +4,10 @@ from django.db import models
     This module contains the models for the Marathon of Hope app.
     
     The schema are defined in the MOHCCN Clinical Data Model V1: Data Standards Sub-Committee (DSC)
-    Model Schema (Google): https://docs.google.com/spreadsheets/d/1pChl2DQiynU0OdueDHW7saJiLliv31GutgNbW8XSfUk/edit#gid=0
+    Model Schema (Excel): https://docs.google.com/spreadsheets/d/1pChl2DQiynU0OdueDHW7saJiLliv31GutgNbW8XSfUk/edit#gid=0
     Model Schema (PDF): https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/mohccn-clinical-data-model_v1_endorsed6oct-2022.pdf?Status=Master&sfvrsn=7f6bd159_7
     ER Diagram: https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/mohccn_data_standard_er_diagram_endorsed6oct22.pdf?Status=Master&sfvrsn=dd57a75e_5
+    Schema last updated: September 2022
     
     NOTES: Permissible values are not enforced in the model.  
     They are checked in the serializer and ingest process.
@@ -93,3 +94,4 @@ class Specimen(models.Model):
 
     def __str__(self):
         return f"Specimen ID: {self.submitter_specimen_id}"
+   
