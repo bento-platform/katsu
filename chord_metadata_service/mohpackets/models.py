@@ -114,3 +114,26 @@ class SampleRegistration(models.Model):
 
     def __str__(self):
         return f'SampleRegistration ID: {self.sample_registration_id}'
+    
+class Treatment (models.Model):
+    submitter_treatment_id = models.CharField(
+        max_length=64, primary_key=True)
+    program_id = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=False, blank=False)
+    submitter_donor_id = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False)
+    submitter_primary_diagnosis_id = models.ForeignKey(
+        PrimaryDiagnosis, on_delete=models.CASCADE, null=False, blank=False)
+    treatment_type = models.CharField(max_length=255, null=False, blank=False)
+    is_primary_treatment = models.CharField(max_length=32, null=False, blank=False)
+    treatment_start_date = models.CharField(max_length=32, null=False, blank=False)
+    treatment_end_date = models.CharField(max_length=32, null=False, blank=False)
+    treatment_setting = models.CharField(max_length=128, null=False, blank=False)
+    treatment_intent = models.CharField(max_length=128, null=False, blank=False)
+    days_per_cycle = models.IntegerField(blank=True, null=True)
+    number_of_cycles = models.IntegerField(blank=True, null=True)
+    response_to_treatment_criteria_method = models.CharField(max_length=255, null=False, blank=False)
+    response_to_treatment = models.CharField(max_length=255, null=False, blank=False)
+
+    def __str__(self):
+        return f'Treatment ID: {self.submitter_treatment_id}'
