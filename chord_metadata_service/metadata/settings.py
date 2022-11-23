@@ -40,6 +40,7 @@ SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("CHORD_DEBUG", "true").lower() == "true"
+logging.info(f"DEBUG: {DEBUG}")
 
 
 # CHORD-specific settings
@@ -63,17 +64,24 @@ AUTH_OVERRIDE = not CHORD_PERMISSIONS
 # in DRF API discovery pages, or swagger UI)
 FORCE_SCRIPT_NAME = os.getenv("CHORD_METADATA_SUB_PATH", "")
 
-# Allowed hosts - TODO: Derive from CHORD_URL
-HOST_CONTAINER_NAME = os.environ.get("HOST_CONTAINER_NAME", "")
+# Additional allowed hosts, comma-delimited (no spaces!)
+# Use HOST_CONTAINER_NAME as a backup value for backwards compatibility.
+ADDL_ALLOWED_HOSTS = [
+    v for v in os.environ.get("KATSU_ADDL_ALLOWED_HOSTS", os.environ.get("HOST_CONTAINER_NAME", "")).split(",")
+    if v.strip()
+]
 
 CHORD_HOST = urlparse(CHORD_URL or "").netloc
-logging.info(f"Chord debug: {DEBUG}")
-logging.info(f"Chord host: {CHORD_HOST}")
+logging.info(f"CHORD_HOST: {CHORD_HOST}")
+
 ALLOWED_HOSTS = [CHORD_HOST or "localhost"]
 if DEBUG:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
-if HOST_CONTAINER_NAME != "":
-    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + [HOST_CONTAINER_NAME]))
+if ADDL_ALLOWED_HOSTS:
+    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ADDL_ALLOWED_HOSTS))
+if "*" in ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ["*"]  # Simplify
+
 logging.info(f"Allowed hosts: {ALLOWED_HOSTS}")
 
 APPEND_SLASH = False
