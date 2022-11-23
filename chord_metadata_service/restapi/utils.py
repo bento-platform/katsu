@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import isodate
 import datetime
 
 from collections import defaultdict, Counter
-from typing import Tuple, Mapping, Generator
 from calendar import month_abbr
+from typing import Any, Optional, Type, TypedDict, Mapping, Generator
 
-from django.db.models import Count, F, Func, IntegerField, CharField, Case, When, Value
+from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value
 from django.db.models.functions import Cast
 from django.conf import settings
 
@@ -13,10 +15,29 @@ from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.experiments import models as experiments_models
 
 
-OVERVIEW_AGE_BIN_SIZE = 10
+LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
+
+MODEL_NAMES_TO_MODEL: dict[str, Type[Model]] = {
+    "individual": pheno_models.Individual,
+    "experiment": experiments_models.Experiment,
+    "biosample": pheno_models.Biosample,
+}
 
 
-def camel_case_field_names(string):
+class BinWithValue(TypedDict):
+    label: str
+    value: int
+
+
+def get_threshold() -> int:
+    """
+    Gets the maximum count threshold for hiding censored data (i.e., rounding to 0).
+    This is a function to prevent settings errors if not running/importing this file in a Django context.
+    """
+    return settings.CONFIG_PUBLIC["rules"]["count_threshold"]
+
+
+def camel_case_field_names(string) -> str:
     """ Function to convert snake_case field names to camelCase """
     # Capitalize every part except the first
     return "".join(
@@ -25,7 +46,8 @@ def camel_case_field_names(string):
     )
 
 
-def transform_keys(obj):
+# TODO: Typing: generics
+def transform_keys(obj: Any) -> Any:
     """
     The function validates against DATS schemas that use camelCase.
     It iterates over a dict and changes all keys in nested objects to camelCase.
@@ -66,7 +88,7 @@ def parse_duration(string):
     return int(float(string.split('Y')[0]))
 
 
-def parse_individual_age(age_obj):
+def parse_individual_age(age_obj: dict) -> int:
     """ Parses two possible age representations and returns average age or age as integer. """
     # AGE OPTIONS
     # "age": {
@@ -81,23 +103,25 @@ def parse_individual_age(age_obj):
     #         "age": "P49Y"
     #     }
     # }
-    if 'start' in age_obj:
-        start_age = parse_duration(age_obj['start']['age'])
-        end_age = parse_duration(age_obj['end']['age'])
+
+    if "start" in age_obj:
+        start_age = parse_duration(age_obj["start"]["age"])
+        end_age = parse_duration(age_obj["end"]["age"])
         # for the duration calculate the average age
-        age = (start_age + end_age) // 2
-    elif 'age' in age_obj:
-        age = parse_duration(age_obj['age'])
-    else:
-        raise ValueError(f"Error: {age_obj} format not supported")
-    return age
+        return (start_age + end_age) // 2
+
+    if "age" in age_obj:
+        return parse_duration(age_obj["age"])
+
+    raise ValueError(f"Error: {age_obj} format not supported")
 
 
-def iso_duration_to_years(iso_age_duration: str, unit="years"):
+def iso_duration_to_years(iso_age_duration: str, unit: str = "years") -> tuple[Optional[float], Optional[str]]:
     """
     This function takes ISO8601 Duration string in the format e.g 'P20Y6M4D' and converts it to years.
     """
     duration = isodate.parse_duration(iso_age_duration)
+
     # if duration string includes Y and M then the instance is of both types of Duration and datetime.timedelta
     if isinstance(duration, isodate.Duration):
         # 30.5 average days in a month (including leap year)
@@ -107,35 +131,36 @@ def iso_duration_to_years(iso_age_duration: str, unit="years"):
         # 365.25 average days in a year (including leap year)
         years = (days_to_seconds / 60 / 60 / 24 / 365.25) + float(duration.years)
         return (round(years, 2)), unit
+
     # if duration string contains only days then the instance is of type datetime.timedelta
-    elif not isinstance(duration, isodate.Duration) and isinstance(duration, datetime.timedelta):
-        if duration.days:
+    if not isinstance(duration, isodate.Duration) and isinstance(duration, datetime.timedelta):
+        if duration.days is not None:
             days_to_seconds = duration.days * 24 * 60 * 60
             years = days_to_seconds / 60 / 60 / 24 / 365.25
             return (round(years, 2)), unit
+
     return None, None
 
 
-def labelled_range_generator(field_props) -> Generator[Tuple[int, int, str], None, None]:
+def labelled_range_generator(field_props: dict) -> Generator[tuple[int, int, str], None, None]:
     """
     Returns a generator yielding floor, ceil and label value for each bin from
     a numeric field configuration
     """
 
-    c = field_props["config"]
-    if "bins" in c:
+    if "bins" in field_props["config"]:
         return custom_binning_generator(field_props)
 
     return auto_binning_generator(field_props)
 
 
-def custom_binning_generator(field_props) -> Generator[Tuple[int, int, str], None, None]:
+def custom_binning_generator(field_props: dict) -> Generator[tuple[int, int, str], None, None]:
     """
     Generator for custom bins. It expects an array of bin boundaries (`bins` property)
     `minimum` and `maximum` properties are optional. When absent, there is no lower/upper
-    bound and the corresponding bin limit is open ended (as in "< 5").
-    If present but equal to the closest bin boundary, there is no open ended bin.
-    If present but different from closest bin, an extra bin is added to collect
+    bound and the corresponding bin limit is open-ended (as in "< 5").
+    If present but equal to the closest bin boundary, there is no open-ended bin.
+    If present but different from the closest bin, an extra bin is added to collect
     all values down/up to the min/max value that is set (open-ended without limit)
     For example, given the following configuration:
     {
@@ -148,9 +173,9 @@ def custom_binning_generator(field_props) -> Generator[Tuple[int, int, str], Non
     """
 
     c = field_props["config"]
-    minimum = int(c["minimum"]) if "minimum" in c else None
-    maximum = int(c["maximum"]) if "maximum" in c else None
-    bins = [int(value) for value in c["bins"]]
+    minimum: Optional[int] = int(c["minimum"]) if "minimum" in c else None
+    maximum: Optional[int] = int(c["maximum"]) if "maximum" in c else None
+    bins: list[int] = [int(value) for value in c["bins"]]
 
     # check prerequisites
     # Note: it raises an error as it reflects an error in the config file
@@ -166,20 +191,26 @@ def custom_binning_generator(field_props) -> Generator[Tuple[int, int, str], Non
     if len(bins) < 2:
         raise ValueError(f"Error in bins value. At least 2 values required for defining a single bin: {field_props}")
 
-    # start generator
+    # Start of generator: bin of [minimum, bins[0]) or [-infinity, bins[0])
     if minimum is None or minimum != bins[0]:
         yield minimum, bins[0], f"< {bins[0]}"
 
-    for i in range(1, len(bins) - 2):
+    # Generate interstitial bins for the range.
+    # range() is semi-open: [1, len(bins))
+    # – so in terms of indices, we skip the first bin (we access it via i-1 for lhs)
+    #   and generate [lhs, rhs) pairs for each pair of bins until the end.
+    # Values beyond the last bin gets handled separately.
+    for i in range(1, len(bins)):
         lhs = bins[i - 1]
         rhs = bins[i]
-        yield lhs, rhs, f"{lhs}-{rhs}"
+        yield lhs, rhs, f"[{lhs}, {rhs})"
 
+    # Then, handle values beyond the value of the last bin: [bins[-1], maximum) or [bins[-1], infinity)
     if maximum is None or maximum != bins[-1]:
         yield bins[-1], maximum, f"≥ {bins[-1]}"
 
 
-def auto_binning_generator(field_props) -> Generator[Tuple[int, int, str], None, None]:
+def auto_binning_generator(field_props) -> Generator[tuple[int, int, str], None, None]:
     """
     Note: limited to operations on integer values for simplicity
     A word of caution: when implementing handling of floating point values,
@@ -188,6 +219,7 @@ def auto_binning_generator(field_props) -> Generator[Tuple[int, int, str], None,
     """
 
     c = field_props["config"]
+
     minimum = int(c["minimum"])
     maximum = int(c["maximum"])
     taper_left = int(c["taper_left"])
@@ -212,13 +244,13 @@ def auto_binning_generator(field_props) -> Generator[Tuple[int, int, str], None,
         yield minimum, taper_left, f"< {taper_left}"
 
     for v in range(taper_left, taper_right, bin_size):
-        yield v, v + bin_size, f"{v}-{v + bin_size}"
+        yield v, v + bin_size, f"[{v}, {v + bin_size})"
 
     if maximum != taper_right:
         yield taper_right, maximum, f"≥ {taper_right}"
 
 
-def monthly_generator(start: str, end: str) -> Tuple[int, int]:
+def monthly_generator(start: str, end: str) -> tuple[int, int]:
     """
     generator of tuples (year nb, month nb) from a start date to an end date
     as ISO formated strings `yyyy-mm`
@@ -232,7 +264,7 @@ def monthly_generator(start: str, end: str) -> Tuple[int, int]:
         yield year, month
 
 
-def get_model_and_field(field_id: str) -> Tuple[any, str]:
+def get_model_and_field(field_id: str) -> tuple[any, str]:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
     where the first crumb represents the object in the DB model, and the next ones
@@ -240,15 +272,11 @@ def get_model_and_field(field_id: str) -> Tuple[any, str]:
     Returns a tuple of the model object and the Django string representation of the
     field for this object.
     """
+
     model_name, *field_path = field_id.split("/")
 
-    if model_name == "individual":
-        model = pheno_models.Individual
-    elif model_name == "experiment":
-        model = experiments_models.Experiment
-    elif model_name == "biosample":
-        model = pheno_models.Biosample
-    else:
+    model: Optional[Type[Model]] = MODEL_NAMES_TO_MODEL.get(model_name)
+    if model is None:
         msg = f"Accessing field on model {model_name} not implemented"
         raise NotImplementedError(msg)
 
@@ -275,21 +303,16 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
     annotated_queryset = queryset.values(field).annotate(total=Count("*"))
     num_missing = 0
 
-    stats: Mapping[str, int] = dict()
+    stats: dict[str, int] = dict()
     for item in annotated_queryset:
         key = item[field]
         if key is None:
             num_missing = item["total"]
             continue
 
-        if not isinstance(key, str):
-            key = str(key)
-        else:
-            key = key.strip()
-
+        key = str(key) if not isinstance(key, str) else key.strip()
         if key == "":
             continue
-
         stats[key] = item["total"]
 
     if add_missing:
@@ -308,12 +331,12 @@ def get_field_bins(query_set, field, bin_size):
             F(field) - Func(F(field), bin_size, function="MOD"),
             IntegerField()
         )
-    ).values('binned').annotate(total=Count('binned'))
-    stats = {item['binned']: item['total'] for item in query_set}
+    ).values("binned").annotate(total=Count("binned"))
+    stats = {item["binned"]: item["total"] for item in query_set}
     return stats
 
 
-def compute_binned_ages(individual_queryset, bin_size: int):
+def compute_binned_ages(individual_queryset, bin_size: int) -> list[int]:
     """
     When age_numeric field is not available, use this function to process
     the age field in its various formats.
@@ -323,6 +346,7 @@ def compute_binned_ages(individual_queryset, bin_size: int):
         - bin_size: how many years there is per bin
     Returns a list of values floored to the closest decade (e.g. 25 --> 20)
     """
+
     a = individual_queryset.filter(age_numeric__isnull=True).values('age')
     binned_ages = []
     for r in a.iterator():  # reduce memory footprint (no caching)
@@ -330,10 +354,11 @@ def compute_binned_ages(individual_queryset, bin_size: int):
             continue
         age = parse_individual_age(r["age"])
         binned_ages.append(age - age % bin_size)
+
     return binned_ages
 
 
-def get_age_numeric_binned(individual_queryset, bin_size):
+def get_age_numeric_binned(individual_queryset, bin_size: int) -> dict:
     """
     age_numeric is computed at ingestion time of phenopackets. On some instances
     it might be unavailable and as a fallback must be computed from the age JSON field which
@@ -351,7 +376,7 @@ def get_age_numeric_binned(individual_queryset, bin_size):
     return individuals_age
 
 
-def get_categorical_stats(field_props):
+def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
@@ -359,7 +384,6 @@ def get_categorical_stats(field_props):
     stats = stats_for_field(model, field_name, add_missing=True)
 
     # Enforce values order from config and apply policies
-    threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
     labels: list[str] = field_props["config"]["enum"]
     # Special case: for some fields, values are based on what's present in the
     # dataset. Apply lexical sort, and exclude the "missing" value which will
@@ -369,7 +393,9 @@ def get_categorical_stats(field_props):
             [k for k in stats.keys() if k != "missing"],
             key=lambda x: x.lower()
         )
-    bins = []
+
+    threshold = get_threshold()
+    bins: list[BinWithValue] = []
 
     for category in labels:
         v = stats.get(category, 0)
@@ -383,7 +409,7 @@ def get_categorical_stats(field_props):
     return bins
 
 
-def get_date_stats(field_props):
+def get_date_stats(field_props: dict) -> list[BinWithValue]:
     """
     Fetches statistics for a given date field, fill the gaps in the date range
     and apply privacy policies.
@@ -392,11 +418,9 @@ def get_date_stats(field_props):
     regular fields when needed.
     TODO: for now only dates binned by month are handled
     """
-    LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
-    threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
 
-    if field_props["config"]["bin_by"] != "month":
-        msg = f"Binning dates by `{field_props['config']['bin_by']}` method not implemented"
+    if (bin_by := field_props["config"]["bin_by"]) != "month":
+        msg = f"Binning dates by `{bin_by}` method not implemented"
         raise NotImplementedError(msg)
 
     model, field_name = get_model_and_field(field_props["mapping"])
@@ -405,27 +429,34 @@ def get_date_stats(field_props):
         msg = "Binning date-like fields that are not in extra-properties is not implemented"
         raise NotImplementedError(msg)
 
-    query_set = model.objects.all()\
-        .values(field_name)\
-        .order_by(field_name)\
-        .annotate(total=Count(field_name))   # Note: lexical sort works on ISO dates
+    # Note: lexical sort works on ISO dates
+    query_set = (
+        model.objects.all()
+        .values(field_name)
+        .order_by(field_name)
+        .annotate(total=Count(field_name))
+    )
 
     stats = defaultdict(int)
-    start = end = None
+    start: Optional[str] = None
+    end: Optional[str] = None
     # Key the counts on yyyy-mm combination (aggregate same month counts)
     for item in query_set:
-        key = 'missing' if item[field_name] is None else item[field_name][:LENGTH_Y_M]
+        key = "missing" if item[field_name] is None else item[field_name][:LENGTH_Y_M]
         stats[key] += item["total"]
 
-        if key == 'missing':
+        if key == "missing":
             continue
+
+        # start is set to the first non-missing key processed; end is set to the last one.
         if start:
             end = key
         else:
             start = key
 
     # All the bins between start and end date must be represented
-    bins = []
+    threshold = get_threshold()
+    bins: list[BinWithValue] = []
     if start:   # at least one month
         for year, month in monthly_generator(start, end or start):
             key = f"{year}-{month:02d}"
@@ -437,13 +468,13 @@ def get_date_stats(field_props):
             })
 
     # Append missing items at the end if any
-    if 'missing' in stats:
+    if "missing" in stats:
         bins.append({"label": "missing", "value": stats["missing"]})
 
     return bins
 
 
-def get_month_date_range(field_props):
+def get_month_date_range(field_props: dict) -> tuple[Optional[str], Optional[str]]:
     """
     Get start date and end date from the database
     Note that dates within a JSON are stored as strings, not instances of datetime.
@@ -452,57 +483,60 @@ def get_month_date_range(field_props):
     Implement handling dates as regular fields when needed.
     TODO: for now only dates binned by month are handled.
     """
-    if field_props["config"]["bin_by"] != "month":
-        msg = f"Binning dates by `{field_props['config']['bin_by']}` method not implemented"
-        raise NotImplementedError(msg)
+
+    if (bin_by := field_props["config"]["bin_by"]) != "month":
+        raise NotImplementedError(f"Binning dates by `{bin_by}` method not implemented")
 
     model, field_name = get_model_and_field(field_props["mapping"])
 
     if "extra_properties" not in field_name:
-        msg = "Binning date-like fields that are not in extra-properties is not implemented"
-        raise NotImplementedError(msg)
+        raise NotImplementedError("Binning date-like fields that are not in extra_properties is not implemented")
 
-    LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
     is_not_null_filter = {f"{field_name}__isnull": False}   # property may be missing: avoid handling "None"
 
-    query_set = model.objects\
-        .filter(**is_not_null_filter)\
-        .values(field_name)\
-        .distinct()\
-        .order_by(field_name)   # lexicographic sort is correct with date strings like `2021-03-09`
+    # Note: lexicographic sort is correct with date strings like `2021-03-09`
+    query_set = (
+        model.objects
+        .filter(**is_not_null_filter)
+        .values(field_name)
+        .distinct()
+        .order_by(field_name)
+    )
 
     if query_set.count() == 0:
         return None, None
+
     start = query_set.first()[field_name][:LENGTH_Y_M]
     end = query_set.last()[field_name][:LENGTH_Y_M]
 
     return start, end
 
 
-def get_range_stats(field_props):
-    threshold = settings.CONFIG_PUBLIC["rules"]["count_threshold"]
+def get_range_stats(field_props: dict) -> list[BinWithValue]:
     model, field = get_model_and_field(field_props["mapping"])
 
     # Generate a list of When conditions that return a label for the given bin.
     # This is equivalent to an SQL CASE statement.
     whens = [When(
-                  **{f"{field}__gte": floor} if floor is not None else {},
-                  **{f"{field}__lt": ceil} if ceil is not None else {},
-                  then=Value(label)
-                 )
-             for floor, ceil, label in labelled_range_generator(field_props)]
+        **{f"{field}__gte": floor} if floor is not None else {},
+        **{f"{field}__lt": ceil} if ceil is not None else {},
+        then=Value(label)
+    ) for floor, ceil, label in labelled_range_generator(field_props)]
 
-    query_set = model.objects\
-        .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))\
+    query_set = (
+        model.objects
+        .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))
         .annotate(total=Count("label"))
+    )
 
-    stats: Mapping[str, int] = dict()
+    threshold = get_threshold()  # Maximum number of entries needed to round a count down to 0 (censored discovery)
+    stats: dict[str, int] = dict()
     for item in query_set:
         key = item["label"]
         stats[key] = item["total"] if item["total"] > threshold else 0
 
     # All the bins between start and end must be represented and ordered
-    bins = []
+    bins: list[BinWithValue] = []
     for floor, ceil, label in labelled_range_generator(field_props):
         bins.append({"label": label, "value": stats.get(label, 0)})
 
@@ -512,13 +546,13 @@ def get_range_stats(field_props):
     return bins
 
 
-def get_field_options(field_props):
+def get_field_options(field_props: dict) -> list[Any]:
     """
     Given properties for a public field, return the list of authorized options for
     querying this field.
     """
     if field_props["datatype"] == "string":
-        options = field_props["config"]["enum"]
+        options = field_props["config"].get("enum")
         # Special case: no list of values specified
         if options is None:
             options = get_distinct_field_values(field_props)
@@ -529,10 +563,13 @@ def get_field_options(field_props):
         # using SQL MIN/MAX functions
         start, end = get_month_date_range(field_props)
         options = [f"{month_abbr[m].capitalize()} {y}" for y, m in monthly_generator(start, end)] if start else []
+    else:
+        raise NotImplementedError()
+
     return options
 
 
-def get_distinct_field_values(field_props):
+def get_distinct_field_values(field_props: dict) -> list[Any]:
     model, field = get_model_and_field(field_props["mapping"])
     return model.objects.values_list(field, flat=True).order_by(field).distinct()
 
@@ -547,6 +584,7 @@ def filter_queryset_field_value(qs, field_props, value: str):
     for the necessity of filtering. It is not necessary to specify this when
     the `mapping` value is based on the same model as the queryset.
     """
+
     model, field = get_model_and_field(
         field_props["mapping_for_search_filter"] if "mapping_for_search_filter" in field_props
         else field_props["mapping"]
@@ -555,9 +593,10 @@ def filter_queryset_field_value(qs, field_props, value: str):
     if field_props["datatype"] == "string":
         condition = {f"{field}__iexact": value}
     elif field_props["datatype"] == "number":
-        # values are of the form "50-150", "< 50" or "≥ 800"
-        if "-" in value:
-            [start, end] = [int(v) for v in value.split("-")]
+        # values are of the form "[50, 150)", "< 50" or "≥ 800"
+
+        if value.startswith("["):
+            [start, end] = [int(v) for v in value.lstrip("[").rstrip(")").split(", ")]
             condition = {
                 f"{field}__gte": start,
                 f"{field}__lt": end
@@ -575,6 +614,8 @@ def filter_queryset_field_value(qs, field_props, value: str):
         d = datetime.datetime.strptime(value, "%b %Y")
         val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"
         condition = {f"{field}__startswith": val}
+    else:
+        raise NotImplementedError()
 
     return qs.filter(**condition)
 
@@ -598,8 +639,8 @@ def biosample_tissue_stats(queryset):
     return bento_public_format_count_and_stats_list(b_tissue)
 
 
-def bento_public_format_count_and_stats_list(annotated_queryset):
-    stats_list = []
+def bento_public_format_count_and_stats_list(annotated_queryset) -> tuple[int, list[BinWithValue]]:
+    stats_list: list[BinWithValue] = []
     total = 0
     for q in annotated_queryset:
         label = q["label"]
