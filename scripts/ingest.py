@@ -172,7 +172,7 @@ def ingest_phenopackets(katsu_server_url, table_id, phenopackets_json_location):
         sys.exit()
     else:
         print(
-            """Something else went wrong when ingesting phenopackets, possibly due to duplications.
+            """Something went wrong ingesting phenopackets, possibly due to duplications.
             Check phenopackets_json_location config,
             or remove duplicated individuals from the database and try again."""
         )
