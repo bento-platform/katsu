@@ -13,6 +13,7 @@ def before_first_request_func():
         except_name = type(e).__name__
         print("Error in dev-mode retrieving git folder configuration", except_name)
 
+
 before_first_request_func()
 
 # Service info according to spec https://github.com/ga4gh-discovery/ga4gh-service-info
