@@ -97,14 +97,14 @@ class Specimen(models.Model):
 
 
 class SampleRegistration(models.Model):
-    sample_registration_id = models.CharField(
-        max_length=64, primary_key=True)
-    program_id = models.CharField(
-        max_length=64, null=False, blank=False)
+    sample_registration_id = models.CharField(max_length=64, primary_key=True)
+    program_id = models.CharField(max_length=64, null=False, blank=False)
     submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False)
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
     submitter_specimen_id = models.ForeignKey(
-        Specimen, on_delete=models.CASCADE, null=False, blank=False)
+        Specimen, on_delete=models.CASCADE, null=False, blank=False
+    )
     gender = models.CharField(max_length=32, null=False, blank=False)
     sex_at_birth = models.CharField(max_length=32, null=False, blank=False)
     specimen_tissue_source = models.CharField(max_length=255, null=False, blank=False)
@@ -113,17 +113,20 @@ class SampleRegistration(models.Model):
     sample_type = models.CharField(max_length=128, null=False, blank=False)
 
     def __str__(self):
-        return f'SampleRegistration ID: {self.sample_registration_id}'
-    
-class Treatment (models.Model):
-    submitter_treatment_id = models.CharField(
-        max_length=64, primary_key=True)
+        return f"SampleRegistration ID: {self.sample_registration_id}"
+
+
+class Treatment(models.Model):
+    submitter_treatment_id = models.CharField(max_length=64, primary_key=True)
     program_id = models.ForeignKey(
-        Program, on_delete=models.CASCADE, null=False, blank=False)
+        Program, on_delete=models.CASCADE, null=False, blank=False
+    )
     submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False)
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
     submitter_primary_diagnosis_id = models.ForeignKey(
-        PrimaryDiagnosis, on_delete=models.CASCADE, null=False, blank=False)
+        PrimaryDiagnosis, on_delete=models.CASCADE, null=False, blank=False
+    )
     treatment_type = models.CharField(max_length=255, null=False, blank=False)
     is_primary_treatment = models.CharField(max_length=32, null=False, blank=False)
     treatment_start_date = models.CharField(max_length=32, null=False, blank=False)
@@ -132,20 +135,24 @@ class Treatment (models.Model):
     treatment_intent = models.CharField(max_length=128, null=False, blank=False)
     days_per_cycle = models.IntegerField(blank=True, null=True)
     number_of_cycles = models.IntegerField(blank=True, null=True)
-    response_to_treatment_criteria_method = models.CharField(max_length=255, null=False, blank=False)
+    response_to_treatment_criteria_method = models.CharField(
+        max_length=255, null=False, blank=False
+    )
     response_to_treatment = models.CharField(max_length=255, null=False, blank=False)
 
     def __str__(self):
-        return f'Treatment ID: {self.submitter_treatment_id}'
+        return f"Treatment ID: {self.submitter_treatment_id}"
+
 
 class Chemotherapy(models.Model):
     id = models.AutoField(primary_key=True)
     program_id = models.ForeignKey(
-        Program, on_delete=models.CASCADE, null=False, blank=False)
+        Program, on_delete=models.CASCADE, null=False, blank=False
+    )
     submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False)
-    submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.CASCADE)
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
     drug_name = models.CharField(max_length=255, null=False, blank=False)
     drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
     chemotherapy_dosage_units = models.CharField(max_length=64, null=False, blank=False)
@@ -153,16 +160,18 @@ class Chemotherapy(models.Model):
     cumulative_drug_dosage_actual = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
-        return f'Chemotherapy ID: {self.id}'
-    
+        return f"Chemotherapy ID: {self.id}"
+
+
 class HormoneTherapy(models.Model):
     id = models.AutoField(primary_key=True)
     program_id = models.ForeignKey(
-        Program, on_delete=models.CASCADE, null=False, blank=False)
+        Program, on_delete=models.CASCADE, null=False, blank=False
+    )
     submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False)
-    submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.CASCADE)
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
     drug_name = models.CharField(max_length=255, null=False, blank=False)
     drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
     hormone_drug_dosage_units = models.CharField(max_length=64, null=False, blank=False)
@@ -170,4 +179,4 @@ class HormoneTherapy(models.Model):
     cumulative_drug_dosage_actual = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
-        return f'HormoneTherapy ID: {self.id}'
+        return f"HormoneTherapy ID: {self.id}"
