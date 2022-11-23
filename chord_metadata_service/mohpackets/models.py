@@ -154,3 +154,20 @@ class Chemotherapy(models.Model):
 
     def __str__(self):
         return f'Chemotherapy ID: {self.id}'
+    
+class HormoneTherapy(models.Model):
+    id = models.AutoField(primary_key=True)
+    program_id = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=False, blank=False)
+    submitter_donor_id = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False)
+    submitter_treatment_id = models.ForeignKey(
+        Treatment, on_delete=models.CASCADE)
+    drug_name = models.CharField(max_length=255, null=False, blank=False)
+    drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
+    hormone_drug_dosage_units = models.CharField(max_length=64, null=False, blank=False)
+    cumulative_drug_dosage_prescribed = models.IntegerField(blank=True, null=True)
+    cumulative_drug_dosage_actual = models.IntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return f'HormoneTherapy ID: {self.id}'
