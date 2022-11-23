@@ -27,10 +27,6 @@ logging.getLogger().setLevel(logging.INFO)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-POSTGRES_PASSWORD_FILE = os.environ.get('POSTGRES_PASSWORD_FILE')
-if POSTGRES_PASSWORD_FILE is not None:
-    with open(os.environ.get('POSTGRES_PASSWORD_FILE'), "r") as f:
-        POSTGRES_PASSWORD_FILE = f.read()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -39,7 +35,10 @@ if POSTGRES_PASSWORD_FILE is not None:
 SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk^q*7cb9(cd!wn1&_*osyc')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("CHORD_DEBUG", "true").lower() == "true"
+DEBUG = os.environ.get(
+    "KATSU_DEBUG",
+    os.environ.get("BENTO_DEBUG", os.environ.get("CHORD_DEBUG", "true"))
+).lower() == "true"
 logging.info(f"DEBUG: {DEBUG}")
 
 
@@ -66,8 +65,8 @@ FORCE_SCRIPT_NAME = os.getenv("CHORD_METADATA_SUB_PATH", "")
 
 # Additional allowed hosts, comma-delimited (no spaces!)
 # Use HOST_CONTAINER_NAME as a backup value for backwards compatibility.
-ADDL_ALLOWED_HOSTS = [
-    v for v in os.environ.get("KATSU_ADDL_ALLOWED_HOSTS", os.environ.get("HOST_CONTAINER_NAME", "")).split(",")
+ADDITIONAL_ALLOWED_HOSTS = [
+    v for v in os.environ.get("KATSU_ALLOWED_HOSTS", os.environ.get("HOST_CONTAINER_NAME", "")).split(",")
     if v.strip()
 ]
 
@@ -77,8 +76,8 @@ logging.info(f"CHORD_HOST: {CHORD_HOST}")
 ALLOWED_HOSTS = [CHORD_HOST or "localhost"]
 if DEBUG:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ["localhost", "127.0.0.1", "[::1]"]))
-if ADDL_ALLOWED_HOSTS:
-    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ADDL_ALLOWED_HOSTS))
+if ADDITIONAL_ALLOWED_HOSTS:
+    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ADDITIONAL_ALLOWED_HOSTS))
 if "*" in ALLOWED_HOSTS:
     ALLOWED_HOSTS = ["*"]  # Simplify
 
@@ -88,7 +87,7 @@ APPEND_SLASH = False
 
 # Bento misc. settings
 
-SERVICE_TEMP = os.environ.get("SERVICE_TEMP")
+SERVICE_TEMP = os.environ.get("KATSU_TEMP", os.environ.get("SERVICE_TEMP"))
 
 #  - DRS URL - by default in Bento Singularity context, use internal NGINX DRS (to avoid auth hassles)
 NGINX_INTERNAL_SOCKET = quote(os.environ.get("NGINX_INTERNAL_SOCKET", "/chord/tmp/nginx_internal.sock"), safe="")
@@ -203,8 +202,8 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
 # function to read postgres password file
 def get_secret(path):
     try:
-        with open(path) as f:
-            return f.readline().strip()
+        with open(path) as sf:
+            return sf.readline().strip()
     except BaseException as err:
         logging.error(f"Unexpected {err}, {type(err)}")
         raise
@@ -223,12 +222,14 @@ def get_secret(path):
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get("POSTGRES_DATABASE", 'metadata'),
-        'USER': os.environ.get("POSTGRES_USER", 'admin'),
-        'PASSWORD': get_secret(
-            os.environ["POSTGRES_PASSWORD_FILE"]
-        ) if "POSTGRES_PASSWORD_FILE" in os.environ else os.environ.get("POSTGRES_PASSWORD", "admin"),
+        'ENGINE': "django.db.backends.postgresql",
+        'NAME': os.environ.get("POSTGRES_DATABASE", "metadata"),
+        'USER': os.environ.get("POSTGRES_USER", "admin"),
+        'PASSWORD': (
+            get_secret(os.environ["POSTGRES_PASSWORD_FILE"])
+            if os.environ.get("POSTGRES_PASSWORD_FILE")
+            else os.environ.get("POSTGRES_PASSWORD", "admin")
+        ),
         # Use sockets if we're inside a CHORD container / as a priority
         'HOST': os.environ.get("POSTGRES_SOCKET_DIR", os.environ.get("POSTGRES_HOST", "localhost")),
         'PORT': os.environ.get("POSTGRES_PORT", "5432"),
