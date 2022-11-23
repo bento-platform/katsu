@@ -51,3 +51,4 @@ def service_info_git():
 
 if DEBUG:
     SERVICE_INFO = service_info_git()
+    
