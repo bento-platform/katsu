@@ -1,6 +1,6 @@
 FROM ghcr.io/bento-platform/bento_base_image:python-debian-latest
 
-RUN pip install --no-cache-dir "hypercorn[uvloop]==0.14.3"
+RUN pip install --no-cache-dir "uvicorn[standard]==0.20.0"
 
 # Backwards-compatible with old BentoV2 container layout
 WORKDIR /app
