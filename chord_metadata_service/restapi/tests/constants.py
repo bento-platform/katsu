@@ -209,8 +209,16 @@ VALID_INDIVIDUAL_8 = {
     }
 }
 
-VALID_INDIVIDUALS = [VALID_INDIVIDUAL_1, VALID_INDIVIDUAL_2, VALID_INDIVIDUAL_3, VALID_INDIVIDUAL_4,
-                     VALID_INDIVIDUAL_5, VALID_INDIVIDUAL_6, VALID_INDIVIDUAL_7, VALID_INDIVIDUAL_8]
+VALID_INDIVIDUALS = [
+    VALID_INDIVIDUAL_1,
+    VALID_INDIVIDUAL_2,
+    VALID_INDIVIDUAL_3,
+    VALID_INDIVIDUAL_4,
+    VALID_INDIVIDUAL_5,
+    VALID_INDIVIDUAL_6,
+    VALID_INDIVIDUAL_7,
+    VALID_INDIVIDUAL_8,
+]
 
 
 extra_properties_with_list = {
@@ -260,7 +268,13 @@ CONFIG_PUBLIC_TEST = {
             "charts": [
                 {"field": "date_of_consent", "chart_type": "bar"},
                 {"field": "smoking", "chart_type": "bar"},
-                {"field": "baseline_creatinine", "chart_type": "bar"}
+                {"field": "baseline_creatinine", "chart_type": "bar"},
+            ]
+        },
+        {
+            "section_title": "Third Section",
+            "charts": [
+                {"field": "lab_test_result_value", "chart_type": "bar"},
             ]
         }
     ],

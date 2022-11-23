@@ -379,6 +379,8 @@ def public_overview(_request):
             stats = get_range_stats(field_props)
         elif field_props["datatype"] == "date":
             stats = get_date_stats(field_props)
+        else:
+            raise NotImplementedError()
 
         response["fields"][field] = {
             **field_props,

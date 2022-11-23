@@ -420,7 +420,7 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_range_1(self):
         # extra_properties range search (both min and max ranges, single value)
         response = self.client.get(
-            '/api/public?lab_test_result_value=200-300'
+            '/api/public?lab_test_result_value=[200, 300)'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -433,7 +433,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         if db_count <= self.response_threshold:
             self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
         else:
-            self.assertEqual(db_count, response_obj['count'])
+            self.assertEqual(db_count, response_obj["count"])
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_extra_properties_range_2(self):
@@ -475,7 +475,7 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_wrong_range(self):
         # extra_properties range search, unauthorized range
         response = self.client.get(
-            '/api/public?lab_test_result_value=100-200'
+            '/api/public?lab_test_result_value=[100, 200)'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -525,7 +525,7 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_multiple_ranges_1(self):
         # extra_properties range search (both min and max range, multiple values)
         response = self.client.get(
-            '/api/public?lab_test_result_value=< 200&baseline_creatinine=100-150'
+            '/api/public?lab_test_result_value=< 200&baseline_creatinine=[100, 150)'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -615,7 +615,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_age_range(self):
         # age valid range search
-        response = self.client.get('/api/public?age=20-30')
+        response = self.client.get('/api/public?age=[20, 30)')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.filter(age_numeric__gte=20, age_numeric__lt=30).count()
@@ -628,7 +628,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_age_invalid_range(self):
         # age invalid range max search
-        response = self.client.get('/api/public?age=10-50')
+        response = self.client.get('/api/public?age=[10, 50)')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertEqual(response_obj["code"], 400)
@@ -636,7 +636,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY)
     def test_public_filtering_age_range_min_and_max_no_age_in_config(self):
         # test with config without age field, returns error
-        response = self.client.get('/api/public?age=20-30')
+        response = self.client.get('/api/public?age=[20, 30)')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertEqual(response_obj["code"], 400)
@@ -644,7 +644,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
     @override_settings(CONFIG_PUBLIC={})
     def test_public_filtering_age_range_min_and_max_no_config(self):
         # test when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
-        response = self.client.get('/api/public?age=20-30')
+        response = self.client.get('/api/public?age=[20, 30)')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
