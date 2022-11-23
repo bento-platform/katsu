@@ -23,8 +23,6 @@
         * [Phenopacket Commands](#phenopacket-commands)
      * [Accessing the Django Shell from inside a Bento Container](#accessing-the-django-shell-from-inside-a-bento-container)
   * [Configuring Public overview and public search fields](#configuring-public-overview-and-public-search-fields)
-     * [Config file specification](#config-file-specification)
-     * [Public APIs](#public-apis)
 
 ## License
 
