@@ -1,0 +1,32 @@
+name: Build and push katsu image
+on:
+  release:
+    types: [ published ]
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run Bento build action
+        uses: bento-platform/bento_build_action@v0.6
+        with:
+          registry: ghcr.io
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image-name: ghcr.io/bento-platform/katsu
+          development-dockerfile: bento.dev.Dockerfile
+          dockerfile: bento.Dockerfile
