@@ -5,6 +5,7 @@ import os
 
 path_for_git = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 
+
 def before_first_request_func():
     try:
         subprocess.run(["git", "config", "--global", "--add", "safe.directory", str(path_for_git)])
@@ -30,6 +31,7 @@ SERVICE_INFO = {
     "version": __version__
 }
 
+
 def service_info_git():
     info = {
         **SERVICE_INFO,
@@ -49,6 +51,6 @@ def service_info_git():
 
     return info  # updated service info with the git info
 
+
 if DEBUG:
     SERVICE_INFO = service_info_git()
-    
