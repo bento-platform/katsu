@@ -200,3 +200,17 @@ class Radiation(models.Model):
     def __str__(self):
         return f'Radiation ID: {self.id}'
     
+class Immunotherapy(models.Model):
+    id = models.AutoField(primary_key=True)
+    program_id = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=False, blank=False)
+    submitter_donor_id = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False)
+    submitter_treatment_id = models.ForeignKey(
+        Treatment, on_delete=models.CASCADE)
+    immunotherapy_type = models.CharField(max_length=255, null=False, blank=False)
+    drug_name = models.CharField(max_length=255, null=False, blank=False)
+    drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
+
+    def __str__(self):
+        return f'Immunotherapy ID: {self.id}'
