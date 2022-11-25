@@ -1,0 +1,47 @@
+{
+  "num_rows": 10,
+  "file_format": "json",
+  "name": "Immunotherapy",
+  "array": true,
+  "columns": [
+    {
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_donor_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_treatment_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "immunotherapy_type",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Cell-based\",\n\"Immune checkpoint inhibitors\",\n\"Monoclonal antibodies other than immune checkpoint inhibitors\",\n\"Other immunomodulatory substances\"][random(0,3)]"
+    },
+    {
+      "name": "drug_name",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Pembrolizumab\",\n\"Belantamab\",\n\"Copanlisib\",\n\"Gilteritinib\",\n\"Necitumumab\",\n\"Pexidartinib\",\n\"Selumitinib\"][random(0,6)]\n"
+    },
+    {
+      "name": "drug_rxnormcui",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"239766\",\n\"8836851\",\n\"4459876\",\n\"278936\",\n\"8756456\",\n\"987654\"][random(0,5)]"
+    }
+  ]
+}

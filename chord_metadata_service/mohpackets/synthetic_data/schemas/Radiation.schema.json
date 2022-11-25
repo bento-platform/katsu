@@ -1,0 +1,74 @@
+{
+  "num_rows": 10,
+  "file_format": "json",
+  "name": "Radiation",
+  "array": true,
+  "columns": [
+    {
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_donor_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_treatment_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "radiation_therapy_modality",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Megavoltage radiation therapy using photons (procedure)\",        \n\"Teleradiotherapy using electrons (procedure)\",        \n\"Teleradiotherapy protons (procedure)\",       \n\"Teleradiotherapy neutrons (procedure)\",        \n\"Brachytherapy (procedure)\",\n\"Other\"][random(0,5)]"
+    },
+    {
+      "name": "radiation_therapy_type",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"External\",\n\"Internal\"][random(0,1)]"
+    },
+    {
+      "name": "radiation_therapy_fractions",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"30\",\n\"35\"][random(0,1)]\n"
+    },
+    {
+      "name": "radiation_therapy_dosage",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"66\",\n\"70\"][random(0,1)]"
+    },
+    {
+      "name": "anatomical_site_irradiated",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Chest wall\", \n\"Entire esophagus\", \n\"Stomach\", \n\"Small intestinal\", \n\"Colon\", \n\"Rectum\",\n\"Anal structure\", \t\n\"Liver\",\n\"Biliary tract\", \n\"Gallbladder\",\n\"Pancreas\",  \t\n\"Abdomen\"][random(0,11)]"
+    },
+    {
+      "name": "radiation_boost",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"yes\",\n  \"no\"][random(0,1)]"
+    },
+    {
+      "name": "reference_radiation_treatment_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    }
+  ]
+}

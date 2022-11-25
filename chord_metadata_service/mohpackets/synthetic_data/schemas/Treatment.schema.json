@@ -1,0 +1,110 @@
+{
+  "num_rows": 10,
+  "file_format": "json",
+  "name": "Treatment",
+  "array": true,
+  "columns": [
+    {
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_donor_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_treatment_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_primary_diagnosis_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "treatment_type",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Ablation\",\n\"Bone marrow transplant\",\n\"Chemotherapy\",\n\"Endoscopic therapy\",\n\"Hormonal therapy\",\n\"Immunotherapy\",\n\"No treatment\",\n\"Other targeting molecular therapy\",\n\"Photodynamic therapy\",\n\"Radiation therapy\",\n\"Stem cell transplant\",\n\"Surgery\"][random(0,11)]"
+    },
+    {
+      "name": "is_primary_treatment",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Yes\",\n\"No\",\n\"Unknown\"][random(0,2)]"
+    },
+    {
+      "name": "treatment_start_date",
+      "null_percentage": 0,
+      "type": "Datetime",
+      "min": "01/02/2021",
+      "max": "01/01/2022",
+      "format": "%Y-%m",
+      "formula": null
+    },
+    {
+      "name": "treatment_end_date",
+      "null_percentage": 0,
+      "type": "Datetime",
+      "min": "01/02/2022",
+      "max": "11/17/2022",
+      "format": "%Y-%m",
+      "formula": null
+    },
+    {
+      "name": "treatment_setting",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Adjuvant\",\n\"Advanced/Metastatic\",\n\"Neoadjuvant\",\n\"Not applicable\"][random(0,3)]"
+    },
+    {
+      "name": "treatment_intent",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Curative\",\n\"Palliative\"][random(0,1)]"
+    },
+    {
+      "name": "days_per_cycle",
+      "null_percentage": 0,
+      "type": "Number",
+      "min": 1,
+      "max": 7,
+      "decimals": 0,
+      "formula": null
+    },
+    {
+      "name": "number_of_cycles",
+      "null_percentage": 0,
+      "type": "Number",
+      "min": 3,
+      "max": 5,
+      "decimals": 0,
+      "formula": null
+    },
+    {
+      "name": "response_to_treatment_criteria_ method ",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"RECIST 1.1\",\n\"iRECIST\"\n\"Chesen CLL 2012 Oncology response criteria\",\n\"AML response criteria\"\n\"Physician assed response criteria][random,(0,4)]"
+    },
+    {
+      "name": "response_to_treatment",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Complete response\",\n\"Disease progression\",\n\"NED\",\n\"Partial response\",\n\"Stable disease\"][random(0,4)]"
+    }
+  ]
+}
