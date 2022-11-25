@@ -180,3 +180,75 @@ class HormoneTherapy(models.Model):
 
     def __str__(self):
         return f"HormoneTherapy ID: {self.id}"
+
+
+class Radiation(models.Model):
+    id = models.AutoField(primary_key=True)
+    program_id = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_donor_id = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
+    radiation_therapy_modality = models.CharField(
+        max_length=255, null=False, blank=False
+    )
+    radiation_therapy_type = models.CharField(max_length=64, null=False, blank=False)
+    radiation_therapy_fractions = models.IntegerField()
+    radiation_therapy_dosage = models.IntegerField()
+    anatomical_site_irradiated = models.CharField(
+        max_length=255, null=False, blank=False
+    )
+    radiation_boost = models.BooleanField(null=True)
+    reference_radiation_treatment_id = models.CharField(max_length=64)
+
+    def __str__(self):
+        return f"Radiation ID: {self.id}"
+
+
+class Immunotherapy(models.Model):
+    id = models.AutoField(primary_key=True)
+    program_id = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_donor_id = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
+    immunotherapy_type = models.CharField(max_length=255, null=False, blank=False)
+    drug_name = models.CharField(max_length=255, null=False, blank=False)
+    drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
+
+    def __str__(self):
+        return f"Immunotherapy ID: {self.id}"
+
+
+class Surgery(models.Model):
+    id = models.AutoField(primary_key=True)
+    program_id = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_donor_id = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_specimen_id = models.ForeignKey(
+        Specimen, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
+    surgery_type = models.CharField(max_length=255, null=False, blank=False)
+    surgery_site = models.CharField(max_length=255)
+    surgery_location = models.CharField(max_length=128)
+    tumour_length = models.IntegerField(null=True, blank=True)
+    tumour_width = models.IntegerField(null=True, blank=True)
+    greatest_dimension_tumour = models.IntegerField(null=True, blank=True)
+    tumour_focality = models.CharField(max_length=64)
+    residual_tumour_classification = models.CharField(max_length=64)
+    margin_types_involved = models.CharField(max_length=128)
+    margin_types_not_involved = models.CharField(max_length=128)
+    margin_types_not_assessed = models.CharField(max_length=128)
+    lymphovascular_invasion = models.CharField(max_length=255)
+    perineural_invasion = models.CharField(max_length=128)
+
+    def __str__(self):
+        return f"Surgery ID: {self.id}"
