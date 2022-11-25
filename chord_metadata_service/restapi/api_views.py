@@ -352,6 +352,7 @@ def public_overview(_request):
 
     # Predefined counts
     individuals_count = patients_models.Individual.objects.all().count()
+    biosamples_count = pheno_models.Biosample.objects.all().count()
     experiments_count = experiments_models.Experiment.objects.all().count()
 
     # Early return when there is not enough data
@@ -363,6 +364,7 @@ def public_overview(_request):
         "fields": {},
         "counts": {
             "individuals": individuals_count,
+            "biosamples": biosamples_count,
             "experiments": experiments_count
         },
     }
