@@ -260,9 +260,9 @@ class FollowUp(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False)
     submitter_primary_diagnosis_id = models.ForeignKey(
-        PrimaryDiagnosis, blank=True, null=True)
+        PrimaryDiagnosis, on_delete=models.SET_NULL, blank=True, null=True)
     submitter_treatment_id = models.ForeignKey(
-        Treatment, blank=True, null=True)
+        Treatment, on_delete=models.SET_NULL, blank=True, null=True)
     date_of_followup = models.CharField(max_length=32, null=False, blank=False)
     lost_to_followup = models.BooleanField(null=True)
     lost_to_followup_reason = models.CharField(max_length=255)
@@ -279,3 +279,25 @@ class FollowUp(models.Model):
 
     def __str__(self):
         return f'Follow Up ID: {self.submitter_follow_up_id}'
+    
+class Biomarker(models.Model):
+    id = models.AutoField(primary_key=True)
+    program_id = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=False, blank=False)
+    submitter_donor_id = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False)
+    submitter_specimen_id = models.ForeignKey(
+        Specimen, on_delete=models.SET_NULL, blank=True, null=True)
+    submitter_primary_diagnosis_id = models.ForeignKey(
+        PrimaryDiagnosis, on_delete=models.SET_NULL, blank=True, null=True)
+    submitter_treatment_id = models.ForeignKey(
+        Treatment, on_delete=models.SET_NULL, blank=True, null=True)
+    follow_up_id = models.ForeignKey(
+        FollowUp, on_delete=models.CASCADE)
+    test_interval = models.IntegerField(null=True, blank=True)
+    psa_level = models.IntegerField(null=True, blank=True)
+    ca125 = models.IntegerField(null=True, blank=True)
+    cea = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f'Biomarker ID: {self.id}'
