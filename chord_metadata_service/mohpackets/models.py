@@ -253,20 +253,27 @@ class Surgery(models.Model):
     def __str__(self):
         return f"Surgery ID: {self.id}"
 
+
 class FollowUp(models.Model):
     submitter_follow_up_id = models.CharField(max_length=64, primary_key=True)
     program_id = models.ForeignKey(
-        Program, on_delete=models.CASCADE, null=False, blank=False)
+        Program, on_delete=models.CASCADE, null=False, blank=False
+    )
     submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False)
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
     submitter_primary_diagnosis_id = models.ForeignKey(
-        PrimaryDiagnosis, on_delete=models.SET_NULL, blank=True, null=True)
+        PrimaryDiagnosis, on_delete=models.SET_NULL, blank=True, null=True
+    )
     submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.SET_NULL, blank=True, null=True)
+        Treatment, on_delete=models.SET_NULL, blank=True, null=True
+    )
     date_of_followup = models.CharField(max_length=32, null=False, blank=False)
     lost_to_followup = models.BooleanField(null=True)
     lost_to_followup_reason = models.CharField(max_length=255)
-    disease_status_at_followup = models.CharField(max_length=255, null=False, blank=False)
+    disease_status_at_followup = models.CharField(
+        max_length=255, null=False, blank=False
+    )
     relapse_type = models.CharField(max_length=128)
     date_of_relapse = models.CharField(max_length=32)
     method_of_progression_status = models.CharField(max_length=255)
@@ -278,26 +285,50 @@ class FollowUp(models.Model):
     recurrence_stage_group = models.CharField(max_length=64)
 
     def __str__(self):
-        return f'Follow Up ID: {self.submitter_follow_up_id}'
-    
+        return f"Follow Up ID: {self.submitter_follow_up_id}"
+
+
 class Biomarker(models.Model):
     id = models.AutoField(primary_key=True)
     program_id = models.ForeignKey(
-        Program, on_delete=models.CASCADE, null=False, blank=False)
+        Program, on_delete=models.CASCADE, null=False, blank=False
+    )
     submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False)
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
     submitter_specimen_id = models.ForeignKey(
-        Specimen, on_delete=models.SET_NULL, blank=True, null=True)
+        Specimen, on_delete=models.SET_NULL, blank=True, null=True
+    )
     submitter_primary_diagnosis_id = models.ForeignKey(
-        PrimaryDiagnosis, on_delete=models.SET_NULL, blank=True, null=True)
+        PrimaryDiagnosis, on_delete=models.SET_NULL, blank=True, null=True
+    )
     submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.SET_NULL, blank=True, null=True)
-    follow_up_id = models.ForeignKey(
-        FollowUp, on_delete=models.CASCADE)
+        Treatment, on_delete=models.SET_NULL, blank=True, null=True
+    )
+    follow_up_id = models.ForeignKey(FollowUp, on_delete=models.CASCADE)
     test_interval = models.IntegerField(null=True, blank=True)
     psa_level = models.IntegerField(null=True, blank=True)
     ca125 = models.IntegerField(null=True, blank=True)
     cea = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f'Biomarker ID: {self.id}'
+        return f"Biomarker ID: {self.id}"
+
+
+class Comorbidity(models.Model):
+    id = models.AutoField(primary_key=True)
+    program_id = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_donor_id = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    prior_malignancy = models.CharField(max_length=32)
+    laterality_of_prior_malignancy = models.CharField(max_length=64)
+    age_at_comorbidity_diagnosis = models.IntegerField(null=True, blank=True)
+    comorbidity_type_code = models.CharField(max_length=64)
+    comorbidity_treatment_status = models.CharField(max_length=32)
+    comorbidity_treatment = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"Comorbidity ID: {self.id}"
