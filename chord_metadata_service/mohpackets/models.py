@@ -252,3 +252,30 @@ class Surgery(models.Model):
 
     def __str__(self):
         return f"Surgery ID: {self.id}"
+
+class FollowUp(models.Model):
+    submitter_follow_up_id = models.CharField(max_length=64, primary_key=True)
+    program_id = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=False, blank=False)
+    submitter_donor_id = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False)
+    submitter_primary_diagnosis_id = models.ForeignKey(
+        PrimaryDiagnosis, blank=True, null=True)
+    submitter_treatment_id = models.ForeignKey(
+        Treatment, blank=True, null=True)
+    date_of_followup = models.CharField(max_length=32, null=False, blank=False)
+    lost_to_followup = models.BooleanField(null=True)
+    lost_to_followup_reason = models.CharField(max_length=255)
+    disease_status_at_followup = models.CharField(max_length=255, null=False, blank=False)
+    relapse_type = models.CharField(max_length=128)
+    date_of_relapse = models.CharField(max_length=32)
+    method_of_progression_status = models.CharField(max_length=255)
+    anatomic_site_progression_or_recurrence = models.CharField(max_length=255)
+    recurrence_tumour_staging_system = models.CharField(max_length=255)
+    recurrence_t_category = models.CharField(max_length=32)
+    recurrence_n_category = models.CharField(max_length=32)
+    recurrence_m_category = models.CharField(max_length=32)
+    recurrence_stage_group = models.CharField(max_length=64)
+
+    def __str__(self):
+        return f'Follow Up ID: {self.submitter_follow_up_id}'
