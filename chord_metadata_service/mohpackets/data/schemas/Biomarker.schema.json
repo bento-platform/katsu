@@ -1,0 +1,80 @@
+{
+  "num_rows": 10,
+  "file_format": "json",
+  "name": "Biomarker",
+  "array": true,
+  "columns": [
+    {
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_donor_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_specimen_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_primary_diagnosis_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_treatment_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "submitter_follow_up_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "test_interval",
+      "null_percentage": 0,
+      "type": "Number",
+      "min": 3,
+      "max": 8,
+      "decimals": 0,
+      "formula": null
+    },
+    {
+      "name": "psa_level",
+      "null_percentage": 0,
+      "type": "Number",
+      "min": 200,
+      "max": 400,
+      "decimals": 0,
+      "formula": null
+    },
+    {
+      "name": "ca125",
+      "null_percentage": 0,
+      "type": "Number",
+      "min": 25,
+      "max": 125,
+      "decimals": 0,
+      "formula": null
+    },
+    {
+      "name": "cea",
+      "null_percentage": 0,
+      "type": "Number",
+      "min": 4,
+      "max": 14,
+      "decimals": 0,
+      "formula": null
+    }
+  ]
+}
