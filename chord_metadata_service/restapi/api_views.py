@@ -150,10 +150,7 @@ def search_overview(request):
         - id: a list of patient ids
     """
     individual_id = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
-
-    queryset = patients_models.Individual.objects.all()
-    if len(individual_id) > 0:
-        queryset = queryset.filter(id__in=individual_id)
+    queryset = patients_models.Individual.objects.all().filter(id__in=individual_id)
 
     individuals_count = len(individual_id)
     biosamples_count = queryset.values("phenopackets__biosamples__id").count()
