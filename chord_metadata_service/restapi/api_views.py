@@ -154,11 +154,14 @@ def search_overview(request):
 
     individuals_count = len(individual_id)
     biosamples_count = queryset.values("phenopackets__biosamples__id").count()
-    experiments_count = queryset.values("phenopackets__biosamples__experiment__id").count()
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema
     individuals_sex = queryset_stats_for_field(queryset, "sex")
+
+    # several obvious approaches to experiment counts give incorrect answers
+    experiment_types = queryset_stats_for_field(queryset, "phenopackets__biosamples__experiment__experiment_type")
+    experiments_count = sum(experiment_types.values())
 
     r = {
         "biosamples": {
@@ -182,10 +185,7 @@ def search_overview(request):
         },
         "experiments": {
             "count": experiments_count,
-            "experiment_type": queryset_stats_for_field(
-                queryset,
-                "phenopackets__biosamples__experiment__experiment_type"
-            ),
+            "experiment_type": experiment_types,
         },
     }
     return Response(r)
