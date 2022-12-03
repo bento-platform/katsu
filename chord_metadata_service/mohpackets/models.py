@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 """
     This module contains the models for the Marathon of Hope app.
@@ -14,11 +15,16 @@ from django.db import models
 """
 
 
+class AutoDateTimeField(models.DateTimeField):
+    def pre_save(self, model_instance, add):
+        return timezone.now()
+
+
 class Program(models.Model):
     program_id = models.CharField(max_length=64, primary_key=True)
     name = models.CharField(max_length=255, blank=False, null=False, unique=True)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    created = models.DateField(default=timezone.now)
+    updated = AutoDateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"Program ID: {self.program_id}"
@@ -97,7 +103,7 @@ class Specimen(models.Model):
 
 
 class SampleRegistration(models.Model):
-    sample_registration_id = models.CharField(max_length=64, primary_key=True)
+    submitter_sample_id = models.CharField(max_length=64, primary_key=True)
     program_id = models.CharField(max_length=64, null=False, blank=False)
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
@@ -305,7 +311,9 @@ class Biomarker(models.Model):
     submitter_treatment_id = models.ForeignKey(
         Treatment, on_delete=models.SET_NULL, blank=True, null=True
     )
-    follow_up_id = models.ForeignKey(FollowUp, on_delete=models.CASCADE)
+    submitter_follow_up_id = models.ForeignKey(
+        FollowUp, on_delete=models.SET_NULL, blank=True, null=True
+    )
     test_interval = models.IntegerField(null=True, blank=True)
     psa_level = models.IntegerField(null=True, blank=True)
     ca125 = models.IntegerField(null=True, blank=True)
