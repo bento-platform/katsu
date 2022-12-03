@@ -1,5 +1,6 @@
 {
-  "num_rows": 10,
+  "id": 469105,
+  "num_rows": 2,
   "file_format": "json",
   "name": "Immunotherapy",
   "array": true,
@@ -8,19 +9,19 @@
       "name": "program_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if this + 6 <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end\n"
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + (this + 6).to_s"
     },
     {
       "name": "submitter_treatment_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"TREATMENT_\" + (this + 6).to_s"
     },
     {
       "name": "immunotherapy_type",

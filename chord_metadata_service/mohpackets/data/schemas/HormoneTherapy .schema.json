@@ -1,26 +1,27 @@
 {
-  "num_rows": 10,
+  "id": 469104,
+  "num_rows": 2,
   "file_format": "json",
-  "name": "Hormone Therapy ",
+  "name": "HormoneTherapy ",
   "array": true,
   "columns": [
     {
       "name": "program_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if this + 2 <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + (this + 2).to_s"
     },
     {
       "name": "submitter_treatment_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"TREATMENT_\" + (this + 2).to_s"
     },
     {
       "name": "drug_name",
@@ -40,22 +41,22 @@
       "name": "hormone_drug_dosage_units",
       "null_percentage": 0,
       "type": "Template",
-      "value": "",
-      "formula": "\"mg/m2\"\n"
+      "value": "mg/m2",
+      "formula": ""
     },
     {
-      "name": "commulative_drug_dosage_prescribed",
+      "name": "cumulative_drug_dosage_prescribed",
       "null_percentage": 0,
       "type": "Template",
-      "value": "",
-      "formula": "\"200\""
+      "value": "200",
+      "formula": ""
     },
     {
-      "name": "commulative_drug_dosage_actual",
+      "name": "cumulative_drug_dosage_actual",
       "null_percentage": 0,
       "type": "Template",
-      "value": "",
-      "formula": "\"200\""
+      "value": "200",
+      "formula": ""
     }
   ]
 }

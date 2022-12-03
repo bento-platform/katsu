@@ -1,5 +1,6 @@
 {
-  "num_rows": 10,
+  "id": 469107,
+  "num_rows": 2,
   "file_format": "json",
   "name": "Radiation",
   "array": true,
@@ -8,19 +9,19 @@
       "name": "program_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if this + 4 <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + (this + 4).to_s"
     },
     {
       "name": "submitter_treatment_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"TREATMENT_\" + (this + 4).to_s"
     },
     {
       "name": "radiation_therapy_modality",
@@ -60,15 +61,14 @@
     {
       "name": "radiation_boost",
       "null_percentage": 0,
-      "type": "Template",
-      "value": "",
-      "formula": "[\"yes\",\n  \"no\"][random(0,1)]"
+      "type": "Boolean",
+      "formula": ""
     },
     {
       "name": "reference_radiation_treatment_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if radiation_boost == true\nthen \"REFERENCE_RADIATION_TREATMENT_\" + this.to_s\nelse \"\" end"
     }
   ]
 }

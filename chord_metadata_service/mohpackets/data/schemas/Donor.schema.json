@@ -1,26 +1,27 @@
 {
+  "id": 469102,
   "num_rows": 10,
   "file_format": "json",
   "name": "Donor",
   "array": true,
   "columns": [
     {
-      "name": "program_id",
-      "null_percentage": 0,
-      "type": "Row Number",
-      "formula": null
-    },
-    {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + this.to_s"
     },
     {
-      "name": "is_deseased",
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": "if this <= 5 \nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
+    },
+    {
+      "name": "is_deceased",
       "null_percentage": 0,
       "type": "Boolean",
-      "formula": "[\"yes\",\"No\"][random(0,1)]"
+      "formula": ""
     },
     {
       "name": "cause_of_death",
@@ -35,7 +36,7 @@
       "type": "Datetime",
       "min": "01/01/1960",
       "max": "01/01/2010",
-      "format": "%Y/%m/%d",
+      "format": "%Y-%m-%d",
       "formula": null
     },
     {
@@ -45,7 +46,7 @@
       "min": "01/01/2015",
       "max": "11/16/2022",
       "format": "%Y-%m",
-      "formula": null
+      "formula": "birth_year = year(date_of_birth)\ncurr_year = year(now())\nlife_span = curr_year - birth_year\ndeath_year = date_of_birth + years(random(1, life_span))\n\nif is_deceased == true\nthen death_year\nelse \"\" end"
     },
     {
       "name": "primary_site",
