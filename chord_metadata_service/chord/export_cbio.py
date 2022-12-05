@@ -1,6 +1,8 @@
 import logging
 import csv
 from typing import TextIO, Callable
+import re
+
 from django.db.models import F
 
 from .export_utils import ExportError
@@ -8,6 +10,7 @@ from .export_utils import ExportError
 from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
+from chord_metadata_service.experiments.models import ExperimentResult
 
 __all__ = [
     "study_export",
@@ -21,17 +24,36 @@ SAMPLE_DATA_FILENAME = "data_clinical_sample.txt"
 SAMPLE_META_FILENAME = "meta_clinical_sample.txt"
 PATIENT_DATA_FILENAME = "data_clinical_patient.txt"
 PATIENT_META_FILENAME = "meta_clinical_patient.txt"
+MUTATION_META_FILENAME = "meta_mutation.txt"
+MUTATION_DATA_FILENAME = "data_mutations_extended.txt"   # is generated during workflow from files coming from DRS
+MAF_LIST_FILENAME = 'maf_list.txt'  # Accessory file
+CASE_LIST_SEQUENCED = "case_lists/case_list_sequenced.txt"  # in a subfolder
+
 
 CBIO_FILES_SET = frozenset({
     STUDY_FILENAME,
     SAMPLE_DATA_FILENAME,
     SAMPLE_META_FILENAME,
     PATIENT_DATA_FILENAME,
-    PATIENT_META_FILENAME
+    PATIENT_META_FILENAME,
+    MUTATION_META_FILENAME,
+    # MUTATION_DATA_FILENAME is not part of the files generated here
+    CASE_LIST_SEQUENCED
 })
 
 PATIENT_DATATYPE = 'PATIENT'
 SAMPLE_DATATYPE = 'SAMPLE'
+
+# [     List
+#   ^   not in...
+#   a-z lowercase letter
+#   A-Z uppercase
+#   0-9 digit
+#   _   underscore
+#   \.  dot
+#   \-  hyphen
+# ]     Closing list
+REGEXP_INVALID_FOR_ID = re.compile(r"[^a-zA-Z0-9_\.\-]")
 
 
 def study_export(getPath: Callable[[str], str], dataset_id: str):
@@ -43,26 +65,39 @@ def study_export(getPath: Callable[[str], str], dataset_id: str):
     cbio_study_id = str(dataset.identifier)
 
     # Export study file
-    with open(getPath(STUDY_FILENAME), 'w') as file_study:
+    with open(getPath(STUDY_FILENAME), 'w', newline='\n') as file_study:
         study_export_meta(dataset, file_study)
 
     # Export patients.
-    with open(getPath(PATIENT_DATA_FILENAME), 'w') as file_patient:
+    with open(getPath(PATIENT_DATA_FILENAME), 'w', newline='\n') as file_patient:
         # Note: plural in `phenopackets` is intentional (related_name property in model)
         indiv = Individual.objects.filter(phenopackets__table__ownership_record__dataset_id=dataset.identifier)
         individual_export(indiv, file_patient)
 
-    with open(getPath(PATIENT_META_FILENAME), 'w') as file_patient_meta:
+    with open(getPath(PATIENT_META_FILENAME), 'w', newline='\n') as file_patient_meta:
         clinical_meta_export(cbio_study_id, PATIENT_DATATYPE, file_patient_meta)
 
     # Export samples
-    with open(getPath(SAMPLE_DATA_FILENAME), 'w') as file_sample:
+    with open(getPath(SAMPLE_DATA_FILENAME), 'w', newline='\n') as file_sample:
         sampl = pm.Biosample.objects.filter(phenopacket__table__ownership_record__dataset_id=dataset.identifier)\
             .annotate(phenopacket_subject_id=F("phenopacket__subject"))
         sample_export(sampl, file_sample)
 
-    with open(getPath(SAMPLE_META_FILENAME), 'w') as file_sample_meta:
+    with open(getPath(SAMPLE_META_FILENAME), 'w', newline='\n') as file_sample_meta:
         clinical_meta_export(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
+
+    # .maf files stored
+    with open(getPath(MAF_LIST_FILENAME), 'w', newline='\n') as file_maf_list,\
+         open(getPath(CASE_LIST_SEQUENCED), 'w', newline='\n') as file_case_list:
+        exp_res = ExperimentResult.objects.filter(experiment__table__ownership_record__dataset_id=dataset.identifier) \
+            .filter(file_format='MAF') \
+            .annotate(biosample_id=F("experiment__biosample"))
+
+        maf_list(exp_res, file_maf_list)
+        case_list_export(cbio_study_id, exp_res, file_case_list)
+
+    with open(getPath(MUTATION_META_FILENAME), 'w', newline='\n') as file_mutation_meta:
+        mutation_meta_export(cbio_study_id, file_mutation_meta)
 
 
 def study_export_meta(dataset: Dataset, file_handle: TextIO):
@@ -78,9 +113,9 @@ def study_export_meta(dataset: Dataset, file_handle: TextIO):
     # optional fields
     if len(dataset.primary_publications):
         lines['citation'] = dataset.primary_publications[0]
-    # pmid: unvailable
+    # pmid: unavailable
     # groups: unused for authentication
-    # add_global_case_list: ?
+    lines['add_global_case_list'] = 'true'  # otherwise causes an error at validation
     # tags_file: ?
     # reference_genome: ?
 
@@ -127,7 +162,7 @@ def individual_export(results, file_handle: TextIO):
     individuals = []
     for individual in results:
         ind_obj = {
-            'id': individual.id,
+            'id': sanitize_id(individual.id),
             'sex': individual.sex,
         }
         individuals.append(ind_obj)
@@ -136,7 +171,7 @@ def individual_export(results, file_handle: TextIO):
     headers = individual_to_patient_header(columns)
 
     file_handle.writelines([line + '\n' for line in headers])
-    dict_writer = csv.DictWriter(file_handle, fieldnames=columns, delimiter='\t')
+    dict_writer = csv.DictWriter(file_handle, fieldnames=columns, delimiter='\t', lineterminator='\n')
     dict_writer.writerows(individuals)
 
 
@@ -189,8 +224,8 @@ def sample_export(results, file_handle: TextIO):
             continue
 
         sample_obj = {
-            'individual_id': subject_id,
-            'id': sample.id
+            'individual_id': sanitize_id(subject_id),
+            'id': sanitize_id(sample.id)
         }
         if sample.sampled_tissue:
             sample_obj['tissue_label'] = sample.sampled_tissue.get('label', '')
@@ -201,8 +236,80 @@ def sample_export(results, file_handle: TextIO):
     headers = biosample_to_sample_header(columns)
 
     file_handle.writelines([line + '\n' for line in headers])
-    dict_writer = csv.DictWriter(file_handle, fieldnames=columns, delimiter='\t')
+    dict_writer = csv.DictWriter(file_handle, fieldnames=columns, delimiter='\t', lineterminator='\n')
     dict_writer.writerows(samples)
+
+
+def maf_list(results, file_handle: TextIO):
+    """
+    List of maf files associated with this dataset.
+    """
+    maf_uri = [experiment.extra_properties['uri'] + '\n' for experiment in results]
+    file_handle.writelines(maf_uri)
+
+
+def mutation_meta_export(study_id: str, file_handle: TextIO):
+    """
+    Mutation data, metadata file generation
+
+    specifications:
+    cancer_study_identifier: same value as specified in study meta file
+    genetic_alteration_type: MUTATION_EXTENDED
+    datatype: MAF
+    stable_id: mutations
+    show_profile_in_analysis_tab: true
+    profile_name: A name for the mutation data, e.g., "Mutations".
+    profile_description: A description of the mutation data, e.g., "Mutation data from whole exome sequencing.".
+    data_filename: your data file
+    gene_panel (optional): gene panel stable id. See Gene panels for mutation data.
+    swissprot_identifier (optional): accession or name, indicating the type of identifier in the SWISSPROT column
+    variant_classification_filter (optional): List of Variant_Classifications values to be filtered out.
+    namespaces (optional): Comma-delimited list of namespaces to import.
+    """
+    lines = dict()
+    lines['cancer_study_identifier'] = study_id
+    lines['genetic_alteration_type'] = 'MUTATION_EXTENDED'
+    lines['datatype'] = 'MAF'
+    lines['stable_id'] = 'mutations'
+    lines['show_profile_in_analysis_tab'] = 'true'
+    lines['profile_name'] = 'Mutations'
+    lines['profile_description'] = 'Mutation data from whole exome sequencing'  # TODO: extract from experiments
+    lines['data_filename'] = MUTATION_DATA_FILENAME
+    lines['swissprot_identifier'] = 'name'
+
+    for field, value in lines.items():
+        file_handle.write(f"{field}: {value}\n")
+
+
+def case_list_export(study_id: str, results, file_handle: TextIO):
+    """
+    Case list. For now, sequenced data only.
+
+    Specifications:
+    cancer_study_identifier: same value as specified in study meta file
+    stable_id: it must contain the cancer_study_identifier followed by an underscore.
+        Typically, after this a relevant suffix, e.g., _custom, is added.
+        There are some naming rules to follow if you want the case list to be
+        selected automatically in the query UI base on the selected sample
+        profiles. See subsection below.
+    case_list_name: A name for the patient list, e.g., "All Tumors".
+    case_list_description: A description of the patient list, e.g.,
+        "All tumor samples (825 samples).".
+    case_list_ids: A tab-delimited list of sample ids from the dataset.
+    case_list_category: Optional alternative way of linking your case list to a
+        specific molecular profile. E.g. setting this to all_cases_with_cna_data
+        will signal to the portal that this is the list of samples to be associated
+        with CNA data in some of the analysis.
+    """
+    lines = dict()
+    lines['cancer_study_identifier'] = study_id
+    lines['stable_id'] = f'{study_id}_sequenced'
+    lines['case_list_name'] = 'All samples'
+    lines['case_list_description'] = 'All samples'
+    lines['case_list_ids'] = '\t'.join([sanitize_id(exp_res.biosample_id) for exp_res in results])
+
+    for field, value in lines.items():
+        file_handle.write(f"{field}: {value}\n")
 
 
 class CbioportalClinicalHeaderGenerator():
@@ -284,3 +391,15 @@ def biosample_to_sample_header(fields: list):
 
     cbio_header = CbioportalClinicalHeaderGenerator(fields_mapping)
     return cbio_header.make_header(fields)
+
+
+def sanitize_id(id: str):
+    """Ensure IDs are compatible with cBioPortal specifications
+
+    IDs must contain alphanumeric characters, dot, hyphen or underscore
+    """
+    id = str(id)    # force casting to string
+    if REGEXP_INVALID_FOR_ID.search(id) is None:
+        return id
+
+    return REGEXP_INVALID_FOR_ID.sub('_', id)

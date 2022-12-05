@@ -1,19 +1,21 @@
 import uuid
 
 from django.test import TestCase
+from chord_metadata_service.chord.views_ingest import TABLE_ID_OVERRIDES
 from dateutil.parser import isoparse
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 # noinspection PyProtectedMember
 from chord_metadata_service.chord.ingest import (
+    WORKFLOW_MAF_DERIVED_FROM_VCF_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
     create_phenotypic_feature,
     WORKFLOW_INGEST_FUNCTION_MAP,
     WORKFLOW_EXPERIMENTS_JSON,
     schema_validation
 )
-from chord_metadata_service.phenopackets.models import PhenotypicFeature, Phenopacket
+from chord_metadata_service.phenopackets.models import Biosample, PhenotypicFeature, Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
@@ -23,10 +25,13 @@ from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from .constants import VALID_DATA_USE_1
 from .example_ingest import (
+    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT,
     EXAMPLE_INGEST_PHENOPACKET,
     EXAMPLE_INGEST_OUTPUTS,
     EXAMPLE_INGEST_EXPERIMENT,
     EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
+    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_BAD_BIOSAMPLE,
+    EXAMPLE_INGEST_EXPERIMENT_RESULT,
     EXAMPLE_INGEST_INVALID_PHENOPACKET,
     EXAMPLE_INGEST_MULTIPLE_OUTPUTS,
     EXAMPLE_INGEST_INVALID_EXPERIMENT,
@@ -114,32 +119,64 @@ class IngestTest(TestCase):
         # ingest phenopackets data in order to match to biosample ids
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
         self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
+
         # ingest list of experiments
         experiments = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
             EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.t_exp.identifier
         )
+
         # experiments
         self.assertEqual(len(experiments), Experiment.objects.all().count())
         self.assertEqual(experiments[0].id, EXAMPLE_INGEST_EXPERIMENT["experiments"][0]["id"])
         self.assertEqual(experiments[0].biosample.id, EXAMPLE_INGEST_EXPERIMENT["experiments"][0]["biosample"])
         self.assertEqual(experiments[0].experiment_type, EXAMPLE_INGEST_EXPERIMENT["experiments"][0]["experiment_type"])
+
         # experiment results
         self.assertEqual(experiments[0].experiment_results.count(), ExperimentResult.objects.all().count())
+
         # instrument
         self.assertEqual(Instrument.objects.all().count(), 1)
+
         # resources for experiments
-        # check that experiments resource is in database
+        # - check that experiments resource is in database
         self.assertIn(EXAMPLE_INGEST_EXPERIMENT["resources"][0]["id"], [v["id"] for v in Resource.objects.values("id")])
+
+        # try ingesting the file with an invalid biosample ID
+        with self.assertRaises(Biosample.DoesNotExist):
+            WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
+                EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_BAD_BIOSAMPLE, self.t_exp.identifier
+            )
 
     def test_ingesting_invalid_experiment_json(self):
         # check invalid experiment, must fail validation
         for exp in EXAMPLE_INGEST_INVALID_EXPERIMENT["experiments"]:
             validation = schema_validation(exp, EXPERIMENT_SCHEMA)
             self.assertEqual(validation, False)
+
         # check valid experiment, must pass validation
         for exp in EXAMPLE_INGEST_EXPERIMENT["experiments"]:
             validation_2 = schema_validation(exp, EXPERIMENT_SCHEMA)
             self.assertEqual(validation_2, True)
+
+    def test_ingesting_experiment_results_json(self):
+        # ingest list of experiments
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.t_exp.identifier
+        )
+        # ingest list of experiment results
+        experiment_results = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT, TABLE_ID_OVERRIDES
+        )
+        self.assertEqual(len(experiment_results), len(EXAMPLE_INGEST_EXPERIMENT_RESULT))
+        # check that it has been linked to the same experiment as the file it
+        # has been derived from.
+        related_results = ExperimentResult.objects.filter(
+            experiment__experiment_results__identifier=EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["identifier"])
+        self.assertIn(
+            EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["extra_properties"]["derived_from"],
+            [v["identifier"] for v in related_results.values("identifier")]
+        )
 
 
 class IngestISOAgeToNumberTest(TestCase):
