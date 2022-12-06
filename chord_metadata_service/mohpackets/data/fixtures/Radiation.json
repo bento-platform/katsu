@@ -1,0 +1,32 @@
+[
+    {
+        "model": "mohpackets.radiation",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_5",
+            "submitter_treatment_id": "TREATMENT_5",
+            "radiation_therapy_modality": "Teleradiotherapy neutrons (procedure)",
+            "radiation_therapy_type": "External",
+            "radiation_therapy_fractions": "30",
+            "radiation_therapy_dosage": "66",
+            "anatomical_site_irradiated": "Abdomen",
+            "radiation_boost": true,
+            "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_1"
+        }
+    },
+    {
+        "model": "mohpackets.radiation",
+        "fields": {
+            "program_id": "PROGRAM_2",
+            "submitter_donor_id": "DONOR_6",
+            "submitter_treatment_id": "TREATMENT_6",
+            "radiation_therapy_modality": "Other",
+            "radiation_therapy_type": "Internal",
+            "radiation_therapy_fractions": "30",
+            "radiation_therapy_dosage": "70",
+            "anatomical_site_irradiated": "Anal structure",
+            "radiation_boost": false,
+            "reference_radiation_treatment_id": ""
+        }
+    }
+]

@@ -1,4 +1,5 @@
 {
+  "id": 469111,
   "num_rows": 10,
   "file_format": "json",
   "name": "Treatment",
@@ -8,25 +9,25 @@
       "name": "program_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if this <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + this.to_s"
     },
     {
       "name": "submitter_treatment_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"TREATMENT_\" + this.to_s"
     },
     {
       "name": "submitter_primary_diagnosis_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"PRIMARY_DIAGNOSIS_\" + this.to_s"
     },
     {
       "name": "treatment_type",
@@ -93,11 +94,11 @@
       "formula": null
     },
     {
-      "name": "response_to_treatment_criteria_ method ",
+      "name": "response_to_treatment_criteria_method",
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\"RECIST 1.1\",\n\"iRECIST\"\n\"Chesen CLL 2012 Oncology response criteria\",\n\"AML response criteria\"\n\"Physician assed response criteria][random,(0,4)]"
+      "formula": "[\n\"RECIST 1.1\",\n\"iRECIST\",\n\"Cheson CLL 2012 Oncology Response Criteria\",\n\"Response Assessment in Neuro-Oncology (RANO)\",\n\"AML Response Criteria\",\n\"Physician Assessed Response Criteria\"\n][random(0,5)]"
     },
     {
       "name": "response_to_treatment",

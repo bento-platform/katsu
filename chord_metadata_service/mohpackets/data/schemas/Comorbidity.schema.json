@@ -1,4 +1,5 @@
 {
+  "id": 469101,
   "num_rows": 10,
   "file_format": "json",
   "name": "Comorbidity",
@@ -8,13 +9,13 @@
       "name": "program_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if this <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
     },
     {
-      "name": "Submitter_donor_id",
+      "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + this.to_s"
     },
     {
       "name": "prior_malignancy",

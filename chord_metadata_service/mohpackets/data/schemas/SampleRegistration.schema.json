@@ -1,20 +1,33 @@
 {
+  "id": 469108,
   "num_rows": 10,
   "file_format": "json",
-  "name": "Sample Registration",
+  "name": "SampleRegistration",
   "array": true,
   "columns": [
     {
-      "name": "Program_id",
+      "name": "program_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if this <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + this.to_s"
+    },
+    {
+      "name": "submitter_specimen_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": "\"SPECIMEN_\" + this.to_s"
+    },
+    {
+      "name": "submitter_sample_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": "\"SAMPLE_REG_:\" + this.to_s"
     },
     {
       "name": "gender",
@@ -28,13 +41,7 @@
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\n\"Male\",\n\"Female\",\n\"Other\",\"Unknown\"][random(0,3)]\n\n\n\n\n\n\n\n"
-    },
-    {
-      "name": "submitter_specimen_id",
-      "null_percentage": 0,
-      "type": "Row Number",
-      "formula": null
+      "formula": "[\n\"Male\",\n\"Female\",\n\"Other\",\n\"Unknown\"][random(0,3)]\n\n\n\n\n\n\n\n"
     },
     {
       "name": "specimen_tissue_source",
@@ -47,7 +54,7 @@
       "name": "tumour_normal_designation",
       "null_percentage": 0,
       "type": "Template",
-      "value": "\"[\\\"Normal\\\",\\n\\\"Tumour\\\"][random(0,1)]\"",
+      "value": "",
       "formula": "[\"Normal\",\"Tumour\"][random(0,1)]"
     },
     {
@@ -56,12 +63,6 @@
       "type": "Template",
       "value": "",
       "formula": "[\"Cell line - derived from normal\",\"Cell line - derived from primary tumour\",\"Cell line - derived from metastatic tumour\",\"Cell line - derived from xenograft tumour\",\"Metastatic tumour - additional metastatic\",\"Metastatic tumour - metastasis local to lymph node\",\"Metastatic tumour - metastasis to distant location\",\"Metastatic tumour\",\"Normal - tissue adjacent to primary tumour\",\"Normal\",\"Primary tumour - additional new primary\",\"Primary tumour - adjacent to normal\",\"Primary tumour\",\"Recurrent tumour\",\"Xenograft - derived from primary tumour\",\"Xenograft - derived from metastatic tumour\",\"Xenograft - derived from tumour cell line\"][random(0,16)]"
-    },
-    {
-      "name": "submitter_sample_id",
-      "null_percentage": 0,
-      "type": "Row Number",
-      "formula": null
     },
     {
       "name": "sample_type",

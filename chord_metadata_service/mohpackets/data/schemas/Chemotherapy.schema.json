@@ -1,5 +1,6 @@
 {
-  "num_rows": 10,
+  "id": 469100,
+  "num_rows": 2,
   "file_format": "json",
   "name": "Chemotherapy",
   "array": true,
@@ -8,19 +9,19 @@
       "name": "program_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if this <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + this.to_s"
     },
     {
       "name": "submitter_treatment_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"TREATMENT_\" + this.to_s"
     },
     {
       "name": "drug_name",

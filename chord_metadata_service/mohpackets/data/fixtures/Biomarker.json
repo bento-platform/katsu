@@ -1,0 +1,152 @@
+[
+    {
+        "model": "mohpackets.biomarker",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_1",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
+            "submitter_treatment_id": "TREATMENT_1",
+            "submitter_follow_up_id": "FOLLOW_UP_1",
+            "test_interval": 5,
+            "psa_level": 255,
+            "ca125": 33,
+            "cea": 11
+        }
+    },
+    {
+        "model": "mohpackets.biomarker",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_2",
+            "submitter_specimen_id": "SPECIMEN_2",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
+            "submitter_treatment_id": "TREATMENT_2",
+            "submitter_follow_up_id": "FOLLOW_UP_2",
+            "test_interval": 8,
+            "psa_level": 255,
+            "ca125": 54,
+            "cea": 7
+        }
+    },
+    {
+        "model": "mohpackets.biomarker",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_3",
+            "submitter_specimen_id": "SPECIMEN_3",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
+            "submitter_treatment_id": "TREATMENT_3",
+            "submitter_follow_up_id": "FOLLOW_UP_3",
+            "test_interval": 7,
+            "psa_level": 244,
+            "ca125": 89,
+            "cea": 6
+        }
+    },
+    {
+        "model": "mohpackets.biomarker",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_4",
+            "submitter_specimen_id": "SPECIMEN_4",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
+            "submitter_treatment_id": "TREATMENT_4",
+            "submitter_follow_up_id": "FOLLOW_UP_4",
+            "test_interval": 5,
+            "psa_level": 303,
+            "ca125": 83,
+            "cea": 5
+        }
+    },
+    {
+        "model": "mohpackets.biomarker",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_5",
+            "submitter_specimen_id": "SPECIMEN_5",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5",
+            "submitter_treatment_id": "TREATMENT_5",
+            "submitter_follow_up_id": "FOLLOW_UP_5",
+            "test_interval": 7,
+            "psa_level": 320,
+            "ca125": 113,
+            "cea": 10
+        }
+    },
+    {
+        "model": "mohpackets.biomarker",
+        "fields": {
+            "program_id": "PROGRAM_2",
+            "submitter_donor_id": "DONOR_6",
+            "submitter_specimen_id": "SPECIMEN_6",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6",
+            "submitter_treatment_id": "TREATMENT_6",
+            "submitter_follow_up_id": "FOLLOW_UP_6",
+            "test_interval": 7,
+            "psa_level": 228,
+            "ca125": 82,
+            "cea": 7
+        }
+    },
+    {
+        "model": "mohpackets.biomarker",
+        "fields": {
+            "program_id": "PROGRAM_2",
+            "submitter_donor_id": "DONOR_7",
+            "submitter_specimen_id": "SPECIMEN_7",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7",
+            "submitter_treatment_id": "TREATMENT_7",
+            "submitter_follow_up_id": "FOLLOW_UP_7",
+            "test_interval": 4,
+            "psa_level": 347,
+            "ca125": 26,
+            "cea": 7
+        }
+    },
+    {
+        "model": "mohpackets.biomarker",
+        "fields": {
+            "program_id": "PROGRAM_2",
+            "submitter_donor_id": "DONOR_8",
+            "submitter_specimen_id": "SPECIMEN_8",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8",
+            "submitter_treatment_id": "TREATMENT_8",
+            "submitter_follow_up_id": "FOLLOW_UP_8",
+            "test_interval": 8,
+            "psa_level": 334,
+            "ca125": 29,
+            "cea": 14
+        }
+    },
+    {
+        "model": "mohpackets.biomarker",
+        "fields": {
+            "program_id": "PROGRAM_2",
+            "submitter_donor_id": "DONOR_9",
+            "submitter_specimen_id": "SPECIMEN_9",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9",
+            "submitter_treatment_id": "TREATMENT_9",
+            "submitter_follow_up_id": "FOLLOW_UP_9",
+            "test_interval": 4,
+            "psa_level": 375,
+            "ca125": 107,
+            "cea": 11
+        }
+    },
+    {
+        "model": "mohpackets.biomarker",
+        "fields": {
+            "program_id": "PROGRAM_2",
+            "submitter_donor_id": "DONOR_10",
+            "submitter_specimen_id": "SPECIMEN_10",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10",
+            "submitter_treatment_id": "TREATMENT_10",
+            "submitter_follow_up_id": "FOLLOW_UP_10",
+            "test_interval": 3,
+            "psa_level": 243,
+            "ca125": 96,
+            "cea": 11
+        }
+    }
+]

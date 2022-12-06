@@ -1,4 +1,5 @@
 {
+  "id": 469099,
   "num_rows": 10,
   "file_format": "json",
   "name": "Biomarker",
@@ -8,37 +9,37 @@
       "name": "program_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if this <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + this.to_s\n"
     },
     {
       "name": "submitter_specimen_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"SPECIMEN_\" + this.to_s\n"
     },
     {
       "name": "submitter_primary_diagnosis_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"PRIMARY_DIAGNOSIS_\" + this.to_s"
     },
     {
       "name": "submitter_treatment_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"TREATMENT_\" + this.to_s"
     },
     {
       "name": "submitter_follow_up_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"FOLLOW_UP\" + this.to_s"
     },
     {
       "name": "test_interval",

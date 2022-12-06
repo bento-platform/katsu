@@ -1,4 +1,5 @@
 {
+  "id": 469109,
   "num_rows": 10,
   "file_format": "json",
   "name": "Specimen",
@@ -8,25 +9,25 @@
       "name": "program_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if this <= 5 \nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + this.to_s"
     },
     {
       "name": "submitter_specimen_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"SPECIMEN_\" + this.to_s"
     },
     {
       "name": "submitter_primary_diagnosis_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"PRIMARY_DIAGNOSIS_\" + this.to_s"
     },
     {
       "name": "pathological_tumour_staging_system",
@@ -69,7 +70,7 @@
       "type": "Datetime",
       "min": "01/01/2020",
       "max": "01/10/2022",
-      "format": "%Y/%m/%d",
+      "format": "%Y-%m-%d",
       "formula": null
     },
     {

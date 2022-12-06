@@ -1,26 +1,27 @@
 {
+  "id": 469106,
   "num_rows": 10,
   "file_format": "json",
-  "name": "Primary Diagnosis",
+  "name": "PrimaryDiagnosis",
   "array": true,
   "columns": [
     {
-      "name": "Program_id",
+      "name": "program_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if this <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end\n"
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + this.to_s"
     },
     {
       "name": "submitter_primary_diagnosis_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"PRIMARY_DIAGNOSIS_\" + this.to_s"
     },
     {
       "name": "date_of_diagnosis",

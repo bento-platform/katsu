@@ -1,38 +1,39 @@
 {
+  "id": 469103,
   "num_rows": 10,
   "file_format": "json",
-  "name": "Follow Up",
+  "name": "FollowUp",
   "array": true,
   "columns": [
     {
       "name": "program_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "if this <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"DONOR_\" + this.to_s"
     },
     {
       "name": "submitter_follow_up_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"FOLLOW_UP_\" + this.to_s"
     },
     {
       "name": "submitter_primary_diagnosis_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"PRIMARY_DIAGNOSIS_\" + this.to_s"
     },
     {
       "name": "submitter_treatment_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": null
+      "formula": "\"TREATMENT_\" + this.to_s"
     },
     {
       "name": "date_of_followup",
@@ -47,14 +48,14 @@
       "name": "lost_to_followup",
       "null_percentage": 0,
       "type": "Boolean",
-      "formula": "[\"yes\",\"no\"][random(0,1)]"
+      "formula": ""
     },
     {
       "name": "lost_to_followup_reason",
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\"Completed study\",\n\"Discharged to palliative care\",\n\"Lost contact\",\n\"Not applicable\",\n\"Unknown\",\n\"Withdrew from study\"][random(0,5)]\n"
+      "formula": "reason = [\"Completed study\",\n\"Discharged to palliative care\",\n\"Lost contact\",\n\"Not applicable\",\n\"Unknown\",\n\"Withdrew from study\"][random(0,5)]\n\nif lost_to_followup == true\nthen reason\nelse \"\" end"
     },
     {
       "name": "disease_status_at_followup",
