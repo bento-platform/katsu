@@ -63,6 +63,9 @@ AUTH_OVERRIDE = not CHORD_PERMISSIONS
 # in DRF API discovery pages, or swagger UI)
 FORCE_SCRIPT_NAME = os.getenv("CHORD_METADATA_SUB_PATH", "")
 
+# Human-readable label for phenopacket data type
+KATSU_PHENOPACKET_LABEL = os.getenv("KATSU_PHENOPACKET_LABEL", "Clinical Data")
+
 # Additional allowed hosts, comma-delimited (no spaces!)
 # Use HOST_CONTAINER_NAME as a backup value for backwards compatibility.
 ADDITIONAL_ALLOWED_HOSTS = [
