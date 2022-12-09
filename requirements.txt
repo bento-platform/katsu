@@ -24,7 +24,7 @@ attrs==22.1.0
 # This library is not needed on python 3.10. Requiring it breaks the test on
 # github. Let Django require it conditionnaly where needed.
 # backports.zoneinfo==0.2.1
-certifi==2022.9.14
+certifi==2022.12.7
 chardet==4.0.0
 idna==2.10
 inflection==0.5.1
