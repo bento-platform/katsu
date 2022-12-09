@@ -42,7 +42,6 @@ from ..models import Project, Dataset, TableOwnership, Table
 from ..data_types import (
     DATA_TYPE_EXPERIMENT,
     DATA_TYPE_EXPERIMENT_RESULT,
-    DATA_TYPE_MCODEPACKET,
     DATA_TYPE_PHENOPACKET,
     DATA_TYPE_READSET,
     DATA_TYPES
@@ -59,7 +58,7 @@ class DataTypeTest(APITestCase):
         self.assertEqual(len(c), len(DATA_TYPES))
         ids = [dt["id"] for dt in c]
         self.assertIn(DATA_TYPE_EXPERIMENT, ids)
-        self.assertIn(DATA_TYPE_MCODEPACKET, ids)
+        # self.assertIn(DATA_TYPE_MCODEPACKET, ids)
         self.assertIn(DATA_TYPE_PHENOPACKET, ids)
         self.assertIn(DATA_TYPE_READSET, ids)
         self.assertIn(DATA_TYPE_EXPERIMENT_RESULT, ids)
