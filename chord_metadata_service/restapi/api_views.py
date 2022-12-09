@@ -150,17 +150,18 @@ def search_overview(request):
         - id: a list of patient ids
     """
     individual_id = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
+    queryset = patients_models.Individual.objects.all().filter(id__in=individual_id)
 
-    queryset = patients_models.Individual.objects.all()
-    if len(individual_id) > 0:
-        queryset = queryset.filter(id__in=individual_id)
-
+    individuals_count = len(individual_id)
     biosamples_count = queryset.values("phenopackets__biosamples__id").count()
-    experiments_count = queryset.values("phenopackets__biosamples__experiment__id").count()
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema
     individuals_sex = queryset_stats_for_field(queryset, "sex")
+
+    # several obvious approaches to experiment counts give incorrect answers
+    experiment_types = queryset_stats_for_field(queryset, "phenopackets__biosamples__experiment__experiment_type")
+    experiments_count = sum(experiment_types.values())
 
     r = {
         "biosamples": {
@@ -175,6 +176,7 @@ def search_overview(request):
             "term": queryset_stats_for_field(queryset, "phenopackets__diseases__term__label"),
         },
         "individuals": {
+            "count": individuals_count,
             "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.SEX)},
             "age": get_age_numeric_binned(queryset, OVERVIEW_AGE_BIN_SIZE),
         },
@@ -183,10 +185,7 @@ def search_overview(request):
         },
         "experiments": {
             "count": experiments_count,
-            "experiment_type": queryset_stats_for_field(
-                queryset,
-                "phenopackets__biosamples__experiment__experiment_type"
-            ),
+            "experiment_type": experiment_types,
         },
     }
     return Response(r)
