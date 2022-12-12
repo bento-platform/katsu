@@ -127,6 +127,9 @@ KATSU_DEBUG=true  # or BENTO_DEBUG or CHORD_DEBUG
 # Mandatory for accepting ingests; temporary directory 
 KATSU_TEMP=  # or SERVICE_TEMP
 
+# Configurable human-readable/translatable name for phenopacket data type (e.g. Clinical Data)
+KATSU_PHENOPACKET_LABEL="Clinical Data"
+
 # DRS URL for fetching ingested files
 DRS_URL=
 
