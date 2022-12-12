@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 """
-    This module contains the models for the Marathon of Hope app.
+    This module contains the MODELS for the Marathon of Hope app.
     --------------------------------
     MOHCCN Clinical Data Model V1: Data Standards Sub-Committee (DSC)
     Model Schema (Excel): https://docs.google.com/spreadsheets/d/1pChl2DQiynU0OdueDHW7saJiLliv31GutgNbW8XSfUk/edit#gid=0 # noqa: E501
