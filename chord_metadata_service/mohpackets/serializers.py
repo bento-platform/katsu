@@ -20,13 +20,13 @@ from .models import (
     This module contains the SERIALIZERS for the models in the mohpackets app.
     It converting Python objects or Django model instances into a JSON string,
     and back again for API transmissions.
-    
+
     We use the ModelSerializer class, which provides a way to create a Serializer
-    directly from a Django model. All that needs to be done to create a ModelSerializer 
+    directly from a Django model. All that needs to be done to create a ModelSerializer
     is to specify a model on its Meta attribute. For reference, see:
     https://www.django-rest-framework.org/api-guide/serializers/#modelserializer
-    
-    NOTES: There is no validation in the serializers yet. Currently, it will be 
+
+    NOTES: There is no validation in the serializers yet. Currently, it will be
     handled by the ingest process. Additional validations can be added here if needed.
 """
 
