@@ -135,9 +135,9 @@ MIDDLEWARE = [
 ]
 
 # This middlewares are specific to the CANDIG service
-if os.getenv("INSIDE_CANDIG", ""):
-    MIDDLEWARE.append('chord_metadata_service.restapi.preflight_req_middleware.PreflightRequestMiddleware')
-    MIDDLEWARE.append('chord_metadata_service.restapi.candig_authz_middleware.CandigAuthzMiddleware')
+# if os.getenv("INSIDE_CANDIG", ""):
+#     MIDDLEWARE.append('chord_metadata_service.restapi.preflight_req_middleware.PreflightRequestMiddleware')
+#     MIDDLEWARE.append('chord_metadata_service.restapi.candig_authz_middleware.CandigAuthzMiddleware')
 
 CORS_ALLOWED_ORIGINS = []
 
