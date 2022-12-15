@@ -17,7 +17,7 @@ from .resources import ingest_resource
 from .schema import schema_validation
 from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, workflow_file_output_to_path
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 
 def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
@@ -56,7 +56,7 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
     return pf_obj
 
 
-def validate_phenopacket(phenopacket_data: Dict[str, Any], idx: Optional[int] = None) -> None:
+def validate_phenopacket(phenopacket_data: dict[str, Any], idx: Optional[int] = None) -> None:
     # Validate phenopacket data against phenopackets schema.
     validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
     if not validation:
@@ -66,7 +66,7 @@ def validate_phenopacket(phenopacket_data: Dict[str, Any], idx: Optional[int] = 
             f"(check Katsu logs for more information)")
 
 
-def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str, validate: bool = True,
+def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate: bool = True,
                        idx: Optional[int] = None) -> pm.Phenopacket:
     """Ingests a single phenopacket."""
 
@@ -87,7 +87,7 @@ def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str, validate
     meta_data = phenopacket_data["meta_data"]
 
     if subject:
-        extra_properties: Dict[str, Any] = subject.get("extra_properties", {})
+        extra_properties: dict[str, Any] = subject.get("extra_properties", {})
 
         # Pre-process subject data:    ---------------------------------------------------------------------------------
 
