@@ -9,6 +9,7 @@ from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
+from .exceptions import IngestError
 from .logger import logger
 from .resources import ingest_resource
 from .schema import schema_validation
@@ -53,13 +54,16 @@ def get_or_create_phenotypic_feature(pf):
     return pf_obj
 
 
-def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str) -> Optional[pm.Phenopacket]:
+def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str, idx: Optional[int] = None) -> pm.Phenopacket:
     """Ingests a single phenopacket."""
 
     # validate phenopackets data against phenopacket schema
     validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
     if not validation:
-        return
+        # TODO: Report more precise errors
+        raise IngestError(
+            f"Failed schema validation for phenopacket{(' ' + str(idx)) if idx is not None else ''} "
+            f"(check Katsu logs for more information)")
 
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
 
