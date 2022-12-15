@@ -19,6 +19,8 @@ __all__ = [
     "ingest_maf_derived_from_vcf_workflow",
 ]
 
+from .exceptions import IngestError
+
 
 def create_instrument(instrument):
     instrument_obj, _ = em.Instrument.objects.get_or_create(
@@ -49,13 +51,16 @@ def create_experiment_result(er):
     return er_obj
 
 
-def ingest_experiment(experiment_data, table_id):
+def ingest_experiment(experiment_data, table_id, idx: Optional[int] = None):
     """Ingests a single experiment."""
 
     # validate experiment data against experiments schema
     validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA)
     if not validation:
-        return
+        # TODO: Report more precise errors
+        raise IngestError(
+            f"Failed schema validation for experiment{(' ' + str(idx)) if idx is not None else ''} "
+            f"(check Katsu logs for more information)")
 
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
     study_type = experiment_data.get("study_type")
@@ -129,7 +134,7 @@ def ingest_experiments_workflow(workflow_outputs, table_id):
     for rs in json_data.get("resources", []):
         dataset.additional_resources.add(ingest_resource(rs))
 
-    return [ingest_experiment(exp, table_id) for exp in json_data.get("experiments", [])]
+    return [ingest_experiment(exp, table_id, idx=idx) for idx, exp in enumerate(json_data.get("experiments", []))]
 
 
 def ingest_derived_experiment_results(json_data):
@@ -147,11 +152,13 @@ def ingest_derived_experiment_results(json_data):
     for row in exp.values("id", "experiment_results__identifier"):
         exp_result2exp[row["experiment_results__identifier"]] = row["id"]
 
-    for exp_result in json_data:
+    for idx, exp_result in enumerate(json_data):
         validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
         if not validation:
-            logger.warning(f"Improper schema for experiment result: {json.dumps(exp_result)}")
-            continue
+            # TODO: Report more precise errors
+            raise IngestError(
+                f"Failed schema validation for experiment result {idx} "
+                f"(check Katsu logs for more information)")
 
         derived_identifier = exp_result['extra_properties']['derived_from']
         experiment_id = exp_result2exp.get(derived_identifier, None)

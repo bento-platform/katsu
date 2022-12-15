@@ -30,7 +30,7 @@ WINDOWS_DRIVE_SCHEME = re.compile(r"^[a-zA-Z]$")
 
 def map_if_list(fn: Callable, data: Any, *args) -> Any:
     # TODO: Any sequence?
-    return [fn(d, *args) for d in data] if isinstance(data, list) else fn(data, *args)
+    return [fn(d, *args, idx=idx) for idx, d in enumerate(data)] if isinstance(data, list) else fn(data, *args)
 
 
 def get_output_or_raise(workflow_outputs, key):
