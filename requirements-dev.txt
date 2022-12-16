@@ -1,8 +1,8 @@
 -r requirements.txt
 codecov==2.1.12
-coverage==6.4.4
+coverage==6.5.0
 flake8==5.0.4
-tox==3.26.0
+tox==3.27.0
 
 # frozen dev. dependencies
 distlib==0.3.6
@@ -14,4 +14,4 @@ py==1.11.0
 pycodestyle==2.9.1
 pyflakes==2.5.0
 tomli==2.0.1
-virtualenv==20.16.5
+virtualenv==20.16.6

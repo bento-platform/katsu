@@ -1,5 +1,5 @@
 {
-    "_comment": "This is an example single-phenopacket file",
+    "_comment": "Single-phenopacket file which adds some data from the first one; must be kept relatively in-sync",
     "subject": {
         "id": "patient1",
         "date_of_birth": "1964-03-15T00:00:00Z",
@@ -7,7 +7,8 @@
         "karyotypic_sex": "UNKNOWN_KARYOTYPE",
         "extra_properties": {
             "cool_guy": true,
-            "smoker": false
+            "smoker": false,
+            "music_enjoyer": true
         }
     },
     "phenotypic_features": [

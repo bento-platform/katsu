@@ -6,14 +6,13 @@ from dateutil.parser import isoparse
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
-# noinspection PyProtectedMember
-from chord_metadata_service.chord.ingest import (
+from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
+from chord_metadata_service.chord.ingest.schema import schema_validation
+from chord_metadata_service.chord.ingest.phenopackets import get_or_create_phenotypic_feature
+from chord_metadata_service.chord.workflows.metadata import (
+    WORKFLOW_EXPERIMENTS_JSON,
     WORKFLOW_MAF_DERIVED_FROM_VCF_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
-    create_phenotypic_feature,
-    WORKFLOW_INGEST_FUNCTION_MAP,
-    WORKFLOW_EXPERIMENTS_JSON,
-    schema_validation
 )
 from chord_metadata_service.phenopackets.models import Biosample, PhenotypicFeature, Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
@@ -28,6 +27,7 @@ from .example_ingest import (
     EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT,
     EXAMPLE_INGEST_PHENOPACKET,
     EXAMPLE_INGEST_OUTPUTS,
+    EXAMPLE_INGEST_OUTPUTS_UPDATE,
     EXAMPLE_INGEST_EXPERIMENT,
     EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
     EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_BAD_BIOSAMPLE,
@@ -55,7 +55,7 @@ class IngestTest(TestCase):
         self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
 
     def test_create_pf(self):
-        p1 = create_phenotypic_feature({
+        p1 = get_or_create_phenotypic_feature({
             "description": "test",
             "type": {
                 "id": "HP:0000790",
@@ -69,6 +69,54 @@ class IngestTest(TestCase):
         p2 = PhenotypicFeature.objects.get(description="test")
 
         self.assertEqual(p1.pk, p2.pk)
+
+        # Below is code for if we want to re-use phenotypic features in the future
+        # For now, the lack of a many-to-many relationship doesn't let us do that.
+        #  - David Lougheed, Nov 11 2022
+        # p3 = get_or_create_phenotypic_feature({
+        #     "description": "test",
+        #     "type": {
+        #         "id": "HP:0000790",
+        #         "label": "Hematuria"
+        #     },
+        #     "negated": False,
+        #     "modifier": [],
+        #     "evidence": []
+        # })
+        #
+        # self.assertEqual(p3.pk, p1.pk)
+
+    # Below is code for if we want to re-use phenotypic features in the future
+    # For now, the lack of a many-to-many relationship doesn't let us do that.
+    #  - David Lougheed, Nov 11 2022
+    # def test_create_pf_multi_existing(self):
+    #     common = dict(
+    #         description="test",
+    #         pftype={
+    #             "id": "HP:0000790",
+    #             "label": "Hematuria"
+    #         },
+    #         negated=False,
+    #         modifier=[],
+    #         evidence=None,
+    #         extra_properties={},
+    #     )
+    #
+    #     p1 = PhenotypicFeature(**common)
+    #     p1.save()
+    #     p2 = PhenotypicFeature(**common)
+    #     p2.save()
+    #
+    #     # skipped duplicate check, so should be different entities like Katsu used to make pre version 2.15.
+    #     self.assertNotEqual(p1.pk, p2.pk)
+    #
+    #     common2 = {**common, "type": common["pftype"]}
+    #     del common2["pftype"]
+    #
+    #     p3 = get_or_create_phenotypic_feature(common2)
+    #
+    #     # Now we get to re-use the first one
+    #     self.assertEqual(p3.pk, p1.pk)
 
     def test_ingesting_phenopackets_json(self):
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
@@ -98,10 +146,24 @@ class IngestTest(TestCase):
         self.assertEqual(len(biosamples), 5)
         # TODO: More
 
-        # Test ingesting again
-        p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+    def test_reingesting_updating_phenopackets_json(self):
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS_UPDATE, self.t.identifier)
+
         self.assertNotEqual(p.id, p2.id)
-        # TODO: More
+        self.assertEqual(p.subject.id, p2.subject.id)
+
+        # Check that extra_properties has been replaced/augmented
+        p.refresh_from_db()
+        self.assertTrue(p.subject.extra_properties["music_enjoyer"])
+        self.assertTrue(p2.subject.extra_properties["music_enjoyer"])
+        self.assertTrue(p2.subject.extra_properties["cool_guy"])
+
+        for b1, b2 in zip(p.biosamples.all().order_by("id"), p2.biosamples.all().order_by("id")):
+            self.assertEqual(b1.id, b2.id)
+
+        for m1, m2 in zip(p.meta_data.resources.all().order_by("id"), p2.meta_data.resources.all().order_by("id")):
+            self.assertEqual(m1.id, m2.id)
 
     def test_ingesting_invalid_phenopackets_json(self):
         # check invalid phenopacket, must fail validation

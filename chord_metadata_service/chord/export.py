@@ -1,6 +1,8 @@
 import logging
-from chord_metadata_service.chord.ingest import WORKFLOW_CBIOPORTAL
+
 from chord_metadata_service.chord.models import Dataset, Project, Table
+from chord_metadata_service.chord.workflows.metadata import WORKFLOW_CBIOPORTAL
+
 from .export_cbio import study_export as export_cbioportal_workflow
 
 logger = logging.getLogger(__name__)

@@ -23,8 +23,6 @@
         * [Phenopacket Commands](#phenopacket-commands)
      * [Accessing the Django Shell from inside a Bento Container](#accessing-the-django-shell-from-inside-a-bento-container)
   * [Configuring Public overview and public search fields](#configuring-public-overview-and-public-search-fields)
-     * [Config file specification](#config-file-specification)
-     * [Public APIs](#public-apis)
 
 ## License
 
@@ -113,6 +111,51 @@ python manage.py runserver
 
 Optionally, you may also install standalone Katsu with the Dockerfile provided. If you develop or
 deploy Katsu as part of the Bento platform, you should use Bento's Docker image instead.
+
+
+## Environment Variables
+
+Katsu uses several environment variables to configure relevant settings. Below are some:
+
+```bash
+# Secret key for sessions; use a securely random value in production
+SERVICE_SECRET_KEY=...
+
+# true or false; debug mode enables certain error pages and logging but can leak secrets, DO NOT use in production!
+KATSU_DEBUG=true  # or BENTO_DEBUG or CHORD_DEBUG
+
+# Mandatory for accepting ingests; temporary directory 
+KATSU_TEMP=  # or SERVICE_TEMP
+
+# Configurable human-readable/translatable name for phenopacket data type (e.g. Clinical Data)
+KATSU_PHENOPACKET_LABEL="Clinical Data"
+
+# DRS URL for fetching ingested files
+DRS_URL=
+
+# Database configuration
+POSTGRES_DATABASE=metadata
+POSTGRES_USER=admin
+#  - If set, will be used instead of POSTGRES_PASSWORD to get the database password.
+POSTGRES_PASSWORD_FILE=
+POSTGRES_PASSWORD=admin
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+
+# CHORD/Bento-specific variables:
+#  - If set, used for setting an allowed host & other API-calling purposes
+CHORD_URL=
+#  - If true, will enforce permissions. Do not run with this not set to true in production! 
+#    Defaults to (not DEBUG)
+CHORD_PERMISSIONS=
+
+# CanDIG-specific variables:
+CANDIG_AUTHORIZATION=
+CANDIG_OPA_URL=
+CANDIG_OPA_SECRET=
+CANDIG_OPA_SITE_ADMIN_KEY=
+INSIDE_CANDIG=
+```
 
 
 ## Authentication
