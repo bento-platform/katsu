@@ -17,6 +17,10 @@ from .schema import schema_validation
 from .utils import get_output_or_raise, workflow_file_output_to_path
 
 __all__ = [
+    "create_instrument",
+    "create_experiment_result",
+    "validate_experiment",
+    "ingest_experiment",
     "ingest_experiments_workflow",
     "ingest_maf_derived_from_vcf_workflow",
 ]
