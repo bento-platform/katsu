@@ -16,7 +16,7 @@ Then, generate the data and download it as a JSON file.
 To convert the JSON file to Django fixtures, use the following command from the root folder:
 
 ```
-    python chord_metadata_service/mohpackets/data/convert.py
+python chord_metadata_service/mohpackets/data/convert.py
 ```
 
 To load the fixtures into local database, you can use the following command from the root folder:
@@ -45,5 +45,5 @@ python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Comorb
 *Note:* To clean up data (this will **delete everything** in the database, not just MoH data)
 
 ```
-    python manage.py flush
+python manage.py flush
 ```

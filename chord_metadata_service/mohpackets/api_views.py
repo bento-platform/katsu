@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from chord_metadata_service.mohpackets.filters import (
     ProgramFilter,
@@ -174,3 +175,24 @@ class ComorbidityViewSet(viewsets.ModelViewSet):
     filterset_class = ComorbidityFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Comorbidity.objects.all()
+
+###############################################
+#                                             #
+#           CUSTOM API ENDPOINTS              #
+#                                             #
+###############################################
+
+# TODO: redo this overview endpoint
+def moh_overview(_request):
+    """
+        Return a summary of the statistics for the database:
+        - cohort_count: number of datasets
+        - individual_count: number of individuals
+        - ethnicity: the count of each ethenicity
+        - gender: the count of each gender
+    """
+    return Response({
+        "cohort_count": Program.objects.count(),
+        "individual_count": Donor.objects.count(),
+        # where to get ethnicity and gender?
+    })

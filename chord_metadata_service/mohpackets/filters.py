@@ -32,6 +32,7 @@ from chord_metadata_service.mohpackets.models import (
     
 """
 
+
 class ProgramFilter(filters.FilterSet):
     class Meta:
         model = Program
@@ -41,7 +42,7 @@ class ProgramFilter(filters.FilterSet):
 class DonorFilter(filters.FilterSet):
     class Meta:
         model = Donor
-        fields = '__all__'
+        fields = "__all__"
 
 
 class SpecimenFilter(filters.FilterSet):
