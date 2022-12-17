@@ -91,12 +91,6 @@ class DonorFilter(filters.FilterSet):
         model = Donor
         fields = "__all__"
 
-    # @property
-    # def qs(self):
-    #     parent = super().qs
-    #     authorized_datasets = get_authorized_datasets(self.request)
-    #     return parent.filter(program_id__in=authorized_datasets)
-
 
 class SpecimenFilter(filters.FilterSet):
     class Meta:
