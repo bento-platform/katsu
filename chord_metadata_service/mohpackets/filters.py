@@ -40,9 +40,62 @@ class ProgramFilter(filters.FilterSet):
 
 
 class DonorFilter(filters.FilterSet):
+    # custom filters
+    age = filters.NumberFilter(field_name="date_of_birth", method="filter_age")
+    max_age = filters.NumberFilter(
+        field_name="date_of_birth", method="filter_age__lt", lookup_expr="year__lt"
+    )
+    min_age = filters.NumberFilter(
+        field_name="date_of_birth", method="filter_age__gt", lookup_expr="year__gt"
+    )
+
+    def filter_age(self, queryset, name, value):
+        """
+        Since date_of_birth is a CharField, we can't use the built-in filter.
+        We do it by looking up if date_of_birth contains a particular year. eg 1971
+        """
+        year = datetime.datetime.now().year - int(value)
+        return queryset.filter(date_of_birth__icontains=year)
+
+    def filter_age__lt(self, queryset, name, value):
+        """
+        Since date_of_birth is a CharField, we can't use the built-in filter.
+        We do it by looking up if date_of_birth contains any year in the range
+        from the current year to the specified year. eg [1971,1972,1973,...]
+        """
+        year = datetime.datetime.now().year - int(value)
+        years = [year for year in range(year, datetime.datetime.now().year)]
+        # this is a fancy way to write
+        # Q(name__contains=list[0]) | Q(name__contains=list[1]) | ... | Q(name__contains=list[-1])
+        query = functools.reduce(
+            lambda x, y: x | y, [Q(date_of_birth__icontains=year) for year in years]
+        )
+
+        return queryset.filter(query)
+
+    def filter_age__gt(self, queryset, name, value):
+        """
+        Since date_of_birth is a CharField, we can't use the built-in filter.
+        We do it by looking up if date_of_birth contains any year in the range
+        from 1900 to the specified year. eg [1900,1901,1902,...]
+        """
+        year = datetime.datetime.now().year - int(value)
+        years = [year for year in range(1900, year)]
+        query = functools.reduce(
+            lambda x, y: x | y, [Q(date_of_birth__icontains=year) for year in years]
+        )
+
+        return queryset.filter(query)
+
     class Meta:
         model = Donor
         fields = "__all__"
+
+    # @property
+    # def qs(self):
+    #     parent = super().qs
+    #     authorized_datasets = get_authorized_datasets(self.request)
+    #     return parent.filter(program_id__in=authorized_datasets)
 
 
 class SpecimenFilter(filters.FilterSet):
