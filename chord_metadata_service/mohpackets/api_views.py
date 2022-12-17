@@ -1,6 +1,9 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
+from chord_metadata_service.mohpackets.utils import get_authorized_datasets
+
 from chord_metadata_service.mohpackets.filters import (
     ProgramFilter,
     DonorFilter,
@@ -17,8 +20,6 @@ from chord_metadata_service.mohpackets.filters import (
     BiomarkerFilter,
     ComorbidityFilter,
 )
-from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
-
 from chord_metadata_service.mohpackets.serializers import (
     ProgramSerializer,
     DonorSerializer,
@@ -52,6 +53,7 @@ from chord_metadata_service.mohpackets.models import (
     Comorbidity,
 )
 
+
 """
     This Views module uses ModelViewSet from Django Rest Framework.
 
@@ -63,6 +65,20 @@ from chord_metadata_service.mohpackets.models import (
 
     For more information, see https://www.django-rest-framework.org/api-guide/viewsets/#modelviewset
 """
+
+# ========== HELPER FUNCTIONS ========== #
+def filter_by_authorized_datasets(request, queryset):
+    """
+    Filters by the datasets that the user is authorized to see.
+    For example, if the user is authorized to datasets 1, 2, and 3,
+    then the queryset will only include the results from those datasets.
+    """
+    authorized_datasets = get_authorized_datasets(request)
+    filtered_dataset = queryset.filter(program_id__in=authorized_datasets)
+    return filtered_dataset
+
+
+# ========== HELPER FUNCTIONS END ========== #
 
 
 class ProgramViewSet(viewsets.ModelViewSet):
@@ -79,6 +95,9 @@ class DonorViewSet(viewsets.ModelViewSet):
     filterset_class = DonorFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Donor.objects.all()
+
+    def get_queryset(self):
+        return filter_by_authorized_datasets(self.request, self.queryset)
 
 
 class SpecimenViewSet(viewsets.ModelViewSet):
@@ -176,6 +195,7 @@ class ComorbidityViewSet(viewsets.ModelViewSet):
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Comorbidity.objects.all()
 
+
 ###############################################
 #                                             #
 #           CUSTOM API ENDPOINTS              #
@@ -185,14 +205,16 @@ class ComorbidityViewSet(viewsets.ModelViewSet):
 # TODO: redo this overview endpoint
 def moh_overview(_request):
     """
-        Return a summary of the statistics for the database:
-        - cohort_count: number of datasets
-        - individual_count: number of individuals
-        - ethnicity: the count of each ethenicity
-        - gender: the count of each gender
+    Return a summary of the statistics for the database:
+    - cohort_count: number of datasets
+    - individual_count: number of individuals
+    - ethnicity: the count of each ethenicity
+    - gender: the count of each gender
     """
-    return Response({
-        "cohort_count": Program.objects.count(),
-        "individual_count": Donor.objects.count(),
-        # where to get ethnicity and gender?
-    })
+    return Response(
+        {
+            "cohort_count": Program.objects.count(),
+            "individual_count": Donor.objects.count(),
+            # where to get ethnicity and gender?
+        }
+    )
