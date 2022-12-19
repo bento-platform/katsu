@@ -2,35 +2,11 @@ import requests
 from django.conf import settings
 from authx.auth import get_opa_datasets
 
+from chord_metadata_service.mohpackets.models import Program
+
 """
     This module contains various utility functions.
 """
-
-def get_access_token():
-    """
-    Returns the access token from the request.
-    """
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-    }
-
-    data = {
-        "client_id": "local_candig",
-        "client_secret": "BujuRwQrtEYrqRdncioKsyQekyifeAUm",
-        "grant_type": "password",
-        "username": "user1",
-        "password": "w8yp5YvCuEDMNbSxwEweA",
-        "scope": "openid",
-    }
-
-    response = requests.post(
-        "http://docker.localhost:8080/auth/realms/candig/protocol/openid-connect/token",
-        headers=headers,
-        data=data,
-    )
-
-    token = response.json()["access_token"]
-    return token
 
 
 def get_authorized_datasets(request):
@@ -39,6 +15,10 @@ def get_authorized_datasets(request):
     NOTE: this function required the OPA service to be running, otherwise it will return an empty list.
     """
     if settings.CANDIG_AUTHORIZATION == "OPA":
+        # NOTE: We assume that if OPA is enabled, then the request comes from Tyk and
+        # it should include Authorization header with special path for katsu.
+        # Calling this request with this settings enabled but without the whole stack
+        # will result in error.
         opa_url = settings.CANDIG_OPA_URL
         opa_secret = settings.CANDIG_OPA_SECRET
         try:
@@ -47,25 +27,16 @@ def get_authorized_datasets(request):
             )
             return opa_res_datasets
         except Exception as e:
-            print(e)
-        
-    else:
-        # FOR DEBUG ONLY, REMOVE THIS WHEN DONE
-        opa_url = "http://localhost:8181"
-        opa_secret = "fnMt6IyEFwPxlVYjSjzilA"
-        access_token = get_access_token()
-        # put the access token in the request header
-        request.META["HTTP_AUTHORIZATION"] = "Bearer " + access_token
-        # change the path info to the path of the OPA endpoint
-        request.path = "/katsu/api/mcodepackets"
+            print(f"Error at get_authorized_datasets: {e}")
 
-        try:
-            opa_res_datasets = get_opa_datasets(
-                request, opa_url=opa_url, admin_secret=opa_secret
-            )
-            print(opa_res_datasets)
-            return opa_res_datasets
-        except Exception as e:
-            print(e)
+    elif settings.CANDIG_AUTHORIZATION == "local":
+        # NOTE: this setup is for local development only.
+        # It also make it easier for testing.
+        # We can add some logic to filter out the datasets that
+        # the user is not authorized to see
+        # For example: slice the list in half for testing
+        opa_res_datasets = Program.objects.all().values_list("program_id", flat=True)
+        opa_res_datasets = opa_res_datasets[: len(opa_res_datasets) // 2]
+        return opa_res_datasets
 
     return []
