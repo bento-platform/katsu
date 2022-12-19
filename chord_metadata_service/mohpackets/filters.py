@@ -42,12 +42,45 @@ class ProgramFilter(filters.FilterSet):
 class DonorFilter(filters.FilterSet):
     # custom filters
     age = filters.NumberFilter(field_name="date_of_birth", method="filter_age")
-    max_age = filters.NumberFilter(
-        field_name="date_of_birth", method="filter_age__lt", lookup_expr="year__lt"
-    )
-    min_age = filters.NumberFilter(
-        field_name="date_of_birth", method="filter_age__gt", lookup_expr="year__gt"
-    )
+    max_age = filters.NumberFilter(field_name="date_of_birth", method="filter_age__lt")
+    min_age = filters.NumberFilter(field_name="date_of_birth", method="filter_age__gt")
+    primary_diagnosis = filters.CharFilter(method="filter_primary_diagnosis")
+
+    def filter_primary_diagnosis(self, queryset, name, value):
+        return queryset.filter(primarydiagnosis__pk__iexact=value)
+    
+    def filter_specimen(self, queryset, name, value):
+        return queryset.filter(specimen__pk__iexact=value)
+    
+    def filter_sample_registration(self, queryset, name, value):
+        return queryset.filter(sampleregistration__pk__iexact=value)
+    
+    def filter_treatment(self, queryset, name, value):
+        return queryset.filter(treatment__pk__iexact=value)
+    
+    def filter_chemotherapy(self, queryset, name, value):
+        return queryset.filter(chemotherapy__pk__iexact=value)
+    
+    def filter_hormone_therapy(self, queryset, name, value):
+        return queryset.filter(hormonetherapy__pk__iexact=value)
+    
+    def filter_radiation(self, queryset, name, value):
+        return queryset.filter(radiation__pk__iexact=value)
+    
+    def filter_immunotherapy(self, queryset, name, value):
+        return queryset.filter(immunotherapy__pk__iexact=value)
+    
+    def filter_surgery(self, queryset, name, value):
+        return queryset.filter(surgery__pk__iexact=value)
+    
+    def filter_follow_up(self, queryset, name, value):
+        return queryset.filter(followup__pk__iexact=value)
+    
+    def filter_biomarker(self, queryset, name, value):
+        return queryset.filter(biomarker__pk__iexact=value)
+    
+    def filter_comorbidity(self, queryset, name, value):
+        return queryset.filter(comorbidity__pk__iexact=value)
 
     def filter_age(self, queryset, name, value):
         """
