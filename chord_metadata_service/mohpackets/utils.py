@@ -31,10 +31,9 @@ def get_authorized_datasets(request):
 
     elif settings.CANDIG_AUTHORIZATION == "local":
         # NOTE: this setup is for local development only.
-        # It also makes it easier for testing.
-        # We can add some logic to filter out the datasets that
-        # the user is not authorized to see
-        # For example: slice the list in half for testing
+        # It also makes testing a  bit easier.
+        # We can add some logic to filter out the datasets that not authorized to see
+        # For example: only authorized to see the first half of the datasets.
         opa_res_datasets = Program.objects.all().values_list("program_id", flat=True)
         opa_res_datasets = opa_res_datasets[: len(opa_res_datasets) // 2]
         return opa_res_datasets
