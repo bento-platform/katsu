@@ -44,8 +44,21 @@ class DonorFilter(filters.FilterSet):
     age = filters.NumberFilter(field_name="date_of_birth", method="filter_age")
     max_age = filters.NumberFilter(field_name="date_of_birth", method="filter_age__lt")
     min_age = filters.NumberFilter(field_name="date_of_birth", method="filter_age__gt")
+    donors = filters.CharFilter(method="filter_donors")
     primary_diagnosis = filters.CharFilter(method="filter_primary_diagnosis")
 
+    def filter_donors(self, queryset, name, value):
+        """
+            This function allows us to filter by multiple donors.
+            Since we cannot use "iexact" together with "in" filter, 
+            we have to convert it to a list of Q objects like this:
+            MyModel.objects.filter(Q(name__iexact='Alpha') | Q(name__iexact='bEtA') | ...)
+        """
+        donor_ids_list = [x.strip() for x in value.split(',')]
+        q_list = map(lambda n: Q(pk__iexact=n), donor_ids_list)
+        q_list = functools.reduce(lambda a, b: a | b, q_list)
+        return queryset.filter(q_list)
+    
     def filter_primary_diagnosis(self, queryset, name, value):
         return queryset.filter(primarydiagnosis__pk__iexact=value)
     
