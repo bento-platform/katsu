@@ -66,7 +66,11 @@ from chord_metadata_service.mohpackets.models import (
     For more information, see https://www.django-rest-framework.org/api-guide/viewsets/#modelviewset
 """
 
-# ========== HELPER FUNCTIONS ========== #
+#########################################
+#                                       #
+#           HELPER FUNCTIONS            #
+#                                       #
+#########################################
 def filter_by_authorized_datasets(request, queryset):
     """
     Filters by the datasets that the user is authorized to see.
@@ -78,7 +82,11 @@ def filter_by_authorized_datasets(request, queryset):
     return filtered_dataset
 
 
-# ========== HELPER FUNCTIONS END ========== #
+####################################
+#                                  #
+#            API VIEWS             #
+#                                  #
+####################################
 
 
 class ProgramViewSet(viewsets.ModelViewSet):
