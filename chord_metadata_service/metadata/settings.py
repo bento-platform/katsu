@@ -85,7 +85,7 @@ DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/dr
 
 # Candig-specific settings
 
-CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "")
+CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "local")
 CANDIG_OPA_URL = os.getenv("OPA_URL", "")
 CANDIG_OPA_SECRET = os.getenv("OPA_SECRET", "my-secret-beacon-token")
 CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("OPA_SITE_ADMIN_KEY", "site-admin")
@@ -322,6 +322,10 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': ('Metadata Service provides a phenotypic description of an '
                     'Individual in the context of biomedical research.'),
     'VERSION': '1.0.0',
+    # Mainly used for tag extraction, where paths like '/api/v1/albums' with
+    # a SCHEMA_PATH_PREFIX regex '/api/v[0-9]' would yield the tag 'albums'.
+    'SCHEMA_PATH_PREFIX': r'/api/v[0-9]/moh',
+    # include schema endpoint into schema
     'SERVE_INCLUDE_SCHEMA': False,
     # Filter out the url patterns we don't want documented
     'PREPROCESSING_HOOKS': ['chord_metadata_service.metadata.hooks.preprocessing_filter_path'],
