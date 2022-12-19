@@ -31,7 +31,7 @@ def get_authorized_datasets(request):
 
     elif settings.CANDIG_AUTHORIZATION == "local":
         # NOTE: this setup is for local development only.
-        # It also make it easier for testing.
+        # It also makes it easier for testing.
         # We can add some logic to filter out the datasets that
         # the user is not authorized to see
         # For example: slice the list in half for testing
