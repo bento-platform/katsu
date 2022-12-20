@@ -49,7 +49,7 @@ class DonorFilter(filters.FilterSet):
 
     def filter_donors(self, queryset, name, value):
         """
-            This function allows us to filter by multiple donors.
+            This function allows us to filter by multiple donor ids.
             Since we cannot use "iexact" together with "in" filter, 
             we have to convert it to a list of Q objects like this:
             MyModel.objects.filter(Q(name__iexact='Alpha') | Q(name__iexact='bEtA') | ...)
