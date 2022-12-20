@@ -45,6 +45,17 @@ class DonorFilter(filters.FilterSet):
     min_age = filters.NumberFilter(field_name="date_of_birth", method="filter_age__gt")
     donors = filters.CharFilter(method="filter_donors")
     primary_diagnosis = filters.CharFilter(method="filter_primary_diagnosis")
+    speciman = filters.CharFilter(method="filter_specimen")
+    sample_registration = filters.CharFilter(method="filter_sample_registration")
+    treatment = filters.CharFilter(method="filter_treatment")
+    chemotherapy = filters.CharFilter(method="filter_chemotherapy")
+    hormone_therapy = filters.CharFilter(method="filter_hormone_therapy")
+    radiation = filters.CharFilter(method="filter_radiation")
+    immunotherapy = filters.CharFilter(method="filter_immunotherapy")
+    surgery = filters.CharFilter(method="filter_surgery")
+    follow_up = filters.CharFilter(method="filter_follow_up")
+    biomarker = filters.CharFilter(method="filter_biomarker")
+    comorbidity = filters.CharFilter(method="filter_comorbidity")
 
     def filter_donors(self, queryset, name, value):
         """
