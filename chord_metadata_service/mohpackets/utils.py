@@ -1,4 +1,3 @@
-import requests
 from django.conf import settings
 from authx.auth import get_opa_datasets
 

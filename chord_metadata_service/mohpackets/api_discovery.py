@@ -111,7 +111,7 @@ class DiscoverySampleRegistrationViewSet(
     filterset_class = SampleRegistrationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = SampleRegistration.objects.all()
-    
+
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -122,7 +122,7 @@ class DiscoveryPrimaryDiagnosisViewSet(mixins.ListModelMixin, viewsets.GenericVi
     filterset_class = PrimaryDiagnosisFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = PrimaryDiagnosis.objects.all()
-    
+
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -133,7 +133,7 @@ class DiscoveryTreatmentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filterset_class = TreatmentFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Treatment.objects.all()
-    
+
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -144,7 +144,7 @@ class DiscoveryChemotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewSe
     filterset_class = ChemotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Chemotherapy.objects.all()
-    
+
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -155,7 +155,7 @@ class DiscoveryHormoneTherapyViewSet(mixins.ListModelMixin, viewsets.GenericView
     filterset_class = HormoneTherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = HormoneTherapy.objects.all()
-    
+
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -166,7 +166,7 @@ class DiscoveryRadiationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filterset_class = RadiationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Radiation.objects.all()
-    
+
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -177,7 +177,7 @@ class DiscoveryImmunotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewS
     filterset_class = ImmunotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Immunotherapy.objects.all()
-    
+
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -188,7 +188,7 @@ class DiscoverySurgeryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filterset_class = SurgeryFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Surgery.objects.all()
-    
+
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -199,7 +199,7 @@ class DiscoveryFollowUpViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filterset_class = FollowUpFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = FollowUp.objects.all()
-    
+
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -210,7 +210,7 @@ class DiscoveryBiomarkerViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filterset_class = BiomarkerFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Biomarker.objects.all()
-    
+
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -221,6 +221,6 @@ class DiscoveryComorbidityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet
     filterset_class = ComorbidityFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Comorbidity.objects.all()
-    
+
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)

@@ -22,14 +22,13 @@ from chord_metadata_service.mohpackets.models import (
 
 """
     This module contains the FILTERS for the models in the mohpackets app.
-    Filtering data changes queryset that is used to build a custom API response. 
+    Filtering data changes queryset that is used to build a custom API response.
     For example, we can filter the results by "male" or "female".
-    
+
     We use the FilterSet class, which can automatically pick up fields from
-    a model and allow simple equality-based filtering, and we can add custom 
+    a model and allow simple equality-based filtering, and we can add custom
     fields with more complex rules. For reference, see:
     https://django-filter.readthedocs.io/en/stable/ref/filterset.html
-    
 """
 
 
@@ -49,49 +48,49 @@ class DonorFilter(filters.FilterSet):
 
     def filter_donors(self, queryset, name, value):
         """
-            This function allows us to filter by multiple donor ids.
-            Since we cannot use "iexact" together with "in" filter, 
-            we have to convert it to a list of Q objects like this:
-            MyModel.objects.filter(Q(name__iexact='Alpha') | Q(name__iexact='bEtA') | ...)
+        This function allows us to filter by multiple donor ids.
+        Since we cannot use "iexact" together with "in" filter,
+        we have to convert it to a list of Q objects like this:
+        MyModel.objects.filter(Q(name__iexact='Alpha') | Q(name__iexact='bEtA') | ...)
         """
-        donor_ids_list = [x.strip() for x in value.split(',')]
+        donor_ids_list = [x.strip() for x in value.split(",")]
         q_list = map(lambda n: Q(pk__iexact=n), donor_ids_list)
         q_list = functools.reduce(lambda a, b: a | b, q_list)
         return queryset.filter(q_list)
-    
+
     def filter_primary_diagnosis(self, queryset, name, value):
         return queryset.filter(primarydiagnosis__pk__iexact=value)
-    
+
     def filter_specimen(self, queryset, name, value):
         return queryset.filter(specimen__pk__iexact=value)
-    
+
     def filter_sample_registration(self, queryset, name, value):
         return queryset.filter(sampleregistration__pk__iexact=value)
-    
+
     def filter_treatment(self, queryset, name, value):
         return queryset.filter(treatment__pk__iexact=value)
-    
+
     def filter_chemotherapy(self, queryset, name, value):
         return queryset.filter(chemotherapy__pk__iexact=value)
-    
+
     def filter_hormone_therapy(self, queryset, name, value):
         return queryset.filter(hormonetherapy__pk__iexact=value)
-    
+
     def filter_radiation(self, queryset, name, value):
         return queryset.filter(radiation__pk__iexact=value)
-    
+
     def filter_immunotherapy(self, queryset, name, value):
         return queryset.filter(immunotherapy__pk__iexact=value)
-    
+
     def filter_surgery(self, queryset, name, value):
         return queryset.filter(surgery__pk__iexact=value)
-    
+
     def filter_follow_up(self, queryset, name, value):
         return queryset.filter(followup__pk__iexact=value)
-    
+
     def filter_biomarker(self, queryset, name, value):
         return queryset.filter(biomarker__pk__iexact=value)
-    
+
     def filter_comorbidity(self, queryset, name, value):
         return queryset.filter(comorbidity__pk__iexact=value)
 
