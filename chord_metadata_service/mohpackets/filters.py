@@ -40,6 +40,11 @@ class ProgramFilter(filters.FilterSet):
 
 class DonorFilter(filters.FilterSet):
     # custom filters
+    # NOTE: DonorFilter class is a special case that is allowed to be filtered by multiple ids
+    # with case-insensitive matching since most of the queries happen here.
+    # For example, writing either ID TREATMENT_1 or treatment_1 is acceptable.
+    # Other class filters are not allowed to do this.
+    
     age = filters.NumberFilter(field_name="date_of_birth", method="filter_age")
     max_age = filters.NumberFilter(field_name="date_of_birth", method="filter_age__lt")
     min_age = filters.NumberFilter(field_name="date_of_birth", method="filter_age__gt")
