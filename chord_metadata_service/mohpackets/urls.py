@@ -15,6 +15,7 @@ from chord_metadata_service.mohpackets.api_views import (
     FollowUpViewSet,
     BiomarkerViewSet,
     ComorbidityViewSet,
+    moh_overview,
 )
 from chord_metadata_service.mohpackets.api_discovery import (
     DiscoveryDonorViewSet,
@@ -69,4 +70,5 @@ discovery_router.register(r"comorbidities", DiscoveryComorbidityViewSet)
 urlpatterns = [
     path("moh/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
+    path('discovery/overview', moh_overview)
 ]
