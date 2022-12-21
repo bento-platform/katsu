@@ -26,7 +26,8 @@ def get_authorized_datasets(request):
         except Exception as e:
             print(f"Error at get_authorized_datasets: {e}")
 
-    elif settings.CANDIG_AUTHORIZATION == "local":
+    # elif settings.CANDIG_AUTHORIZATION == "local":
+    else:
         # NOTE: this setup is for local development only.
         # It also makes testing a  bit easier.
         # We can add some logic to filter out the datasets that not authorized to see
