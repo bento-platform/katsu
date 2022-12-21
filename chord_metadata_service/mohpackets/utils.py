@@ -13,11 +13,9 @@ def get_authorized_datasets(request):
     Returns a list of datasets that the user is authorized to see.
     NOTE: this function required the OPA service to be running, otherwise it will return an empty list.
     """
-    if settings.CANDIG_AUTHORIZATION == "OPA":
-        # NOTE: We assume that if OPA is enabled, then the request comes from Tyk and
-        # it should include Authorization header with special path for katsu.
-        # Calling this request with this settings enabled but without the whole stack
-        # will result in error.
+    if settings.CANDIG_AUTHORIZATION == "OPA" and "Authorization" in request.headers:
+        # NOTE: We assume the request comes from Tyk and it should include 
+        # Authorization header with special path for katsu.
         opa_url = settings.CANDIG_OPA_URL
         opa_secret = settings.CANDIG_OPA_SECRET
         try:
