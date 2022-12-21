@@ -3,6 +3,9 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
 from chord_metadata_service.mohpackets.utils import get_authorized_datasets
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
+from rest_framework.decorators import api_view
 
 from chord_metadata_service.mohpackets.filters import (
     ProgramFilter,
@@ -249,6 +252,19 @@ class ComorbidityViewSet(viewsets.ModelViewSet):
 ###############################################
 
 # TODO: redo this overview endpoint
+@extend_schema(
+    description="MoH Overview schema",
+    responses={
+        200: inline_serializer(
+            name='moh_overview_schema_response',
+            fields={
+                'cohort_count': serializers.IntegerField(),
+                'individual_count': serializers.IntegerField(),
+            }
+        )
+    }
+)
+@api_view(["GET"])
 def moh_overview(_request):
     """
     Return a summary of the statistics for the database:
@@ -264,3 +280,6 @@ def moh_overview(_request):
             # where to get ethnicity and gender?
         }
     )
+
+
+    
