@@ -4,10 +4,10 @@ on:
     types: [ published ]
   pull_request:
     branches:
-      - master
+      - develop
   push:
     branches:
-      - master
+      - develop
 
 jobs:
   build-push:
@@ -24,7 +24,7 @@ jobs:
           submodules: "recursive"
 
       - name: Run Bento build action
-        uses: bento-platform/bento_build_action@v0.6
+        uses: bento-platform/bento_build_action@v0.9.3
         with:
           registry: ghcr.io
           registry-username: ${{ github.actor }}
