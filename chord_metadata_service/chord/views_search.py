@@ -50,7 +50,7 @@ logger.setLevel(logging.DEBUG if DEBUG else logging.INFO)
 @permission_classes([AllowAny])
 def data_type_list(_request):
     return Response(sorted(
-        ({"id": k, "schema": dt["schema"]} for k, dt in DATA_TYPES.items()),
+        ({"id": k, "label": dt["label"], "schema": dt["schema"]} for k, dt in DATA_TYPES.items()),
         key=lambda dt: dt["id"]
     ))
 
