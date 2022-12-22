@@ -7,8 +7,17 @@ from dateutil.parser import isoparse
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
+from chord_metadata_service.chord.ingest.exceptions import IngestError
+from chord_metadata_service.chord.ingest.experiments import (
+    validate_experiment,
+    ingest_experiment,
+)
 from chord_metadata_service.chord.ingest.schema import schema_validation
-from chord_metadata_service.chord.ingest.phenopackets import get_or_create_phenotypic_feature
+from chord_metadata_service.chord.ingest.phenopackets import (
+    get_or_create_phenotypic_feature,
+    validate_phenopacket,
+    ingest_phenopacket,
+)
 from chord_metadata_service.chord.workflows.metadata import (
     WORKFLOW_EXPERIMENTS_JSON,
     WORKFLOW_MAF_DERIVED_FROM_VCF_JSON,
@@ -165,13 +174,21 @@ class IngestTest(TestCase):
         for m1, m2 in zip(p.meta_data.resources.all().order_by("id"), p2.meta_data.resources.all().order_by("id")):
             self.assertEqual(m1.id, m2.id)
 
-    def test_ingesting_invalid_phenopackets_json(self):
-        # check invalid phenopacket, must fail validation
+    def test_phenopackets_validation(self):
+        # check invalid phenopacket, must fail validation & validate_phenopacket must raise
+
         validation = schema_validation(EXAMPLE_INGEST_INVALID_PHENOPACKET, PHENOPACKET_SCHEMA)
         self.assertEqual(validation, False)
-        # valid phenopacket passes validation
+        with self.assertRaises(IngestError):
+            validate_phenopacket(EXAMPLE_INGEST_INVALID_PHENOPACKET)
+        with self.assertRaises(IngestError):
+            ingest_phenopacket(EXAMPLE_INGEST_INVALID_PHENOPACKET, "dummy", validate=True)
+
+        # valid phenopacket passes validation & doesn't raise
         validation_2 = schema_validation(EXAMPLE_INGEST_PHENOPACKET, PHENOPACKET_SCHEMA)
         self.assertEqual(validation_2, True)
+        validate_phenopacket(EXAMPLE_INGEST_PHENOPACKET)
+
         # valid experiments pass validation
         for exp in EXAMPLE_INGEST_EXPERIMENT["experiments"]:
             validation_3 = schema_validation(exp, EXPERIMENT_SCHEMA)
@@ -214,6 +231,10 @@ class IngestTest(TestCase):
         for exp in EXAMPLE_INGEST_INVALID_EXPERIMENT["experiments"]:
             validation = schema_validation(exp, EXPERIMENT_SCHEMA)
             self.assertEqual(validation, False)
+            with self.assertRaises(IngestError):
+                validate_experiment(exp)
+            with self.assertRaises(IngestError):
+                ingest_experiment(exp, "dummy", validate=True)
 
         # check valid experiment, must pass validation
         for exp in EXAMPLE_INGEST_EXPERIMENT["experiments"]:

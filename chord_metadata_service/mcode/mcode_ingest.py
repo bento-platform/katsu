@@ -4,6 +4,8 @@ from chord_metadata_service.phenopackets.models import Gene
 from . import models as m
 from django.utils import timezone
 
+from typing import Optional
+
 logger = logging.getLogger("mcode_ingest")
 logger.setLevel(logging.INFO)
 
@@ -15,7 +17,7 @@ def _logger_message(created, obj):
         logger.info(f"Existing {obj.__class__.__name__} {obj.id} retrieved")
 
 
-def ingest_mcodepacket(mcodepacket_data, table_id):
+def ingest_mcodepacket(mcodepacket_data, table_id, idx: Optional[int] = None):
     """ Ingests a single mcodepacket in mcode app and patients' metadata into patients app."""
 
     new_mcodepacket = {"id": mcodepacket_data["id"]}
@@ -274,7 +276,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id):
         updated=timezone.now()
     )
     mcodepacket.save()
-    logger.info(f"New Mcodepacket {mcodepacket.id} created")
+    logger.info(f"New Mcodepacket {mcodepacket.id} created (idx={idx})")
     if crprocedures:
         mcodepacket.cancer_related_procedures.set(crprocedures)
     if medication_statements:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import uuid
 
@@ -9,15 +11,16 @@ from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
+from .exceptions import IngestError
 from .logger import logger
 from .resources import ingest_resource
 from .schema import schema_validation
 from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, workflow_file_output_to_path
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional, Union
 
 
-def get_or_create_phenotypic_feature(pf):
+def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
     # Below is code for if we want to re-use phenotypic features in the future
     # For now, the lack of a many-to-many relationship doesn't let us do that.
     #  - David Lougheed, Nov 11 2022
@@ -53,13 +56,24 @@ def get_or_create_phenotypic_feature(pf):
     return pf_obj
 
 
-def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str) -> Optional[pm.Phenopacket]:
-    """Ingests a single phenopacket."""
-
-    # validate phenopackets data against phenopacket schema
+def validate_phenopacket(phenopacket_data: dict[str, Any], idx: Optional[int] = None) -> None:
+    # Validate phenopacket data against phenopackets schema.
     validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
     if not validation:
-        return
+        # TODO: Report more precise errors
+        raise IngestError(
+            f"Failed schema validation for phenopacket{(' ' + str(idx)) if idx is not None else ''} "
+            f"(check Katsu logs for more information)")
+
+
+def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate: bool = True,
+                       idx: Optional[int] = None) -> pm.Phenopacket:
+    """Ingests a single phenopacket."""
+
+    if validate:
+        # Validate phenopacket data against phenopackets schema prior to ingestion, if specified.
+        # `validate` may be false if the phenopacket has already been validated.
+        validate_phenopacket(phenopacket_data, idx)
 
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
 
@@ -73,7 +87,7 @@ def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str) -> Optio
     meta_data = phenopacket_data["meta_data"]
 
     if subject:
-        extra_properties: Dict[str, Any] = subject.get("extra_properties", {})
+        extra_properties: dict[str, Any] = subject.get("extra_properties", {})
 
         # Pre-process subject data:    ---------------------------------------------------------------------------------
 
@@ -229,10 +243,14 @@ def ingest_phenopacket(phenopacket_data: Dict[str, Any], table_id: str) -> Optio
     return new_phenopacket
 
 
-def ingest_phenopacket_workflow(workflow_outputs, table_id):
+def ingest_phenopacket_workflow(workflow_outputs, table_id) -> Union[list[pm.Phenopacket], pm.Phenopacket]:
     with workflow_file_output_to_path(get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
         logger.info(f"Attempting ingestion of phenopackets from path: {json_doc_path}")
         with open(json_doc_path, "r") as jf:
             json_data = json.load(jf)
 
-    return map_if_list(ingest_phenopacket, json_data, table_id)
+    # First, validate all phenopackets
+    map_if_list(validate_phenopacket, json_data)
+
+    # Then, actually try to ingest them (if the validation passes); we don't need to re-do validation here.
+    return map_if_list(ingest_phenopacket, json_data, table_id, validate=False)
