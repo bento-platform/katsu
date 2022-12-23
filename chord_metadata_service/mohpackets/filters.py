@@ -22,14 +22,13 @@ from chord_metadata_service.mohpackets.models import (
 
 """
     This module contains the FILTERS for the models in the mohpackets app.
-    Filtering data changes queryset that is used to build a custom API response. 
+    Filtering data changes queryset that is used to build a custom API response.
     For example, we can filter the results by "male" or "female".
-    
+
     We use the FilterSet class, which can automatically pick up fields from
-    a model and allow simple equality-based filtering, and we can add custom 
+    a model and allow simple equality-based filtering, and we can add custom
     fields with more complex rules. For reference, see:
     https://django-filter.readthedocs.io/en/stable/ref/filterset.html
-    
 """
 
 
@@ -41,13 +40,75 @@ class ProgramFilter(filters.FilterSet):
 
 class DonorFilter(filters.FilterSet):
     # custom filters
+    # NOTE: DonorFilter class is a special case that is allowed to be filtered by multiple ids
+    # with case-insensitive matching since most of the queries happen here.
+    # For example, writing either ID TREATMENT_1 or treatment_1 is acceptable.
+    # Other class filters are not allowed to do this.
+    
     age = filters.NumberFilter(field_name="date_of_birth", method="filter_age")
-    max_age = filters.NumberFilter(
-        field_name="date_of_birth", method="filter_age__lt", lookup_expr="year__lt"
-    )
-    min_age = filters.NumberFilter(
-        field_name="date_of_birth", method="filter_age__gt", lookup_expr="year__gt"
-    )
+    max_age = filters.NumberFilter(field_name="date_of_birth", method="filter_age__lt")
+    min_age = filters.NumberFilter(field_name="date_of_birth", method="filter_age__gt")
+    donors = filters.CharFilter(method="filter_donors")
+    primary_diagnosis = filters.CharFilter(method="filter_primary_diagnosis")
+    speciman = filters.CharFilter(method="filter_specimen")
+    sample_registration = filters.CharFilter(method="filter_sample_registration")
+    treatment = filters.CharFilter(method="filter_treatment")
+    chemotherapy = filters.CharFilter(method="filter_chemotherapy")
+    hormone_therapy = filters.CharFilter(method="filter_hormone_therapy")
+    radiation = filters.CharFilter(method="filter_radiation")
+    immunotherapy = filters.CharFilter(method="filter_immunotherapy")
+    surgery = filters.CharFilter(method="filter_surgery")
+    follow_up = filters.CharFilter(method="filter_follow_up")
+    biomarker = filters.CharFilter(method="filter_biomarker")
+    comorbidity = filters.CharFilter(method="filter_comorbidity")
+
+    def filter_donors(self, queryset, name, value):
+        """
+        This function allows us to filter by multiple donor ids.
+        Since we cannot use "iexact" together with "in" filter,
+        we have to convert it to a list of Q objects like this:
+        MyModel.objects.filter(Q(name__iexact='Alpha') | Q(name__iexact='bEtA') | ...)
+        """
+        donor_ids_list = [x.strip() for x in value.split(",")]
+        q_list = map(lambda n: Q(pk__iexact=n), donor_ids_list)
+        q_list = functools.reduce(lambda a, b: a | b, q_list)
+        return queryset.filter(q_list)
+
+    def filter_primary_diagnosis(self, queryset, name, value):
+        return queryset.filter(primarydiagnosis__pk__iexact=value)
+
+    def filter_specimen(self, queryset, name, value):
+        return queryset.filter(specimen__pk__iexact=value)
+
+    def filter_sample_registration(self, queryset, name, value):
+        return queryset.filter(sampleregistration__pk__iexact=value)
+
+    def filter_treatment(self, queryset, name, value):
+        return queryset.filter(treatment__pk__iexact=value)
+
+    def filter_chemotherapy(self, queryset, name, value):
+        return queryset.filter(chemotherapy__pk__iexact=value)
+
+    def filter_hormone_therapy(self, queryset, name, value):
+        return queryset.filter(hormonetherapy__pk__iexact=value)
+
+    def filter_radiation(self, queryset, name, value):
+        return queryset.filter(radiation__pk__iexact=value)
+
+    def filter_immunotherapy(self, queryset, name, value):
+        return queryset.filter(immunotherapy__pk__iexact=value)
+
+    def filter_surgery(self, queryset, name, value):
+        return queryset.filter(surgery__pk__iexact=value)
+
+    def filter_follow_up(self, queryset, name, value):
+        return queryset.filter(followup__pk__iexact=value)
+
+    def filter_biomarker(self, queryset, name, value):
+        return queryset.filter(biomarker__pk__iexact=value)
+
+    def filter_comorbidity(self, queryset, name, value):
+        return queryset.filter(comorbidity__pk__iexact=value)
 
     def filter_age(self, queryset, name, value):
         """
