@@ -239,7 +239,7 @@ ELASTICSEARCH = False
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'bento_lib.auth.django_remote_user.BentoRemoteUserAuthentication'
+        # 'bento_lib.auth.django_remote_user.BentoRemoteUserAuthentication'
     ],
     'DEFAULT_PARSER_CLASSES': (
         # allows serializers to use snake_case field names, but parse incoming data as camelCase
@@ -247,7 +247,8 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
-    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
+    # 'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
+    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.mohpackets.permissions.CanDIGAdminOrReadOnly'],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }

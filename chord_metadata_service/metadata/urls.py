@@ -18,20 +18,21 @@ from django.urls import path, include
 from chord_metadata_service.restapi import api_views, urls as restapi_urls
 from chord_metadata_service.chord import urls as chord_urls
 from chord_metadata_service.mohpackets import urls as moh_urls
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 # TODO: django.conf.settings breaks reverse(), how to import properly?
 from .settings import DEBUG
 
 urlpatterns = [
     # ==== NON CANDIG API ====
-    path("api/", include(restapi_urls)),
-    path("service-info", api_views.service_info, name="service-info"),
-    *chord_urls.urlpatterns,  # TODO: Use include? can we double up?
-    *([path("admin/", admin.site.urls)] if DEBUG else []),
+    # path("api/", include(restapi_urls)),
+    # path("service-info", api_views.service_info, name="service-info"),
+    # *chord_urls.urlpatterns,  # TODO: Use include? can we double up?
+    # *([path("admin/", admin.site.urls)] if DEBUG else []),
     # ==== NON CANDIG API END ====
     path("api/v1/", include(moh_urls)),
     # OpenAPI 3 documentation with Swagger UI
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("", SpectacularSwaggerView.as_view(), name="swagger-ui"),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
