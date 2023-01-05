@@ -10,8 +10,12 @@ from django.utils import timezone
     ER Diagram: https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/mohccn_data_standard_er_diagram_endorsed6oct22.pdf?Status=Master&sfvrsn=dd57a75e_5 # noqa: E501
     Schema last updated: September 2022
     --------------------------------
-    NOTES: Permissible values are not enforced in the model.
-    They are checked in the serializer and ingest process.
+    NOTES: 
+    - Permissible values are not enforced in the model.
+        They are checked in the serializer and ingest process.
+
+    - It is important to have a __str__ method to return just the ID as
+        the validator regex relies on this for primary key validation.
 """
 
 
@@ -27,7 +31,7 @@ class Program(models.Model):
     updated = AutoDateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"Program ID: {self.program_id}"
+        return f"{self.program_id}"
 
 
 class Donor(models.Model):
@@ -42,7 +46,7 @@ class Donor(models.Model):
     primary_site = models.CharField(max_length=255, null=False, blank=False)
 
     def __str__(self):
-        return f"Donor ID: {self.submitter_donor_id}"
+        return f"{self.submitter_donor_id}"
 
 
 class PrimaryDiagnosis(models.Model):
@@ -68,7 +72,7 @@ class PrimaryDiagnosis(models.Model):
     clinical_stage_group = models.CharField(max_length=64)
 
     def __str__(self):
-        return f"PrimaryDiagnosis ID: {self.submitter_primary_diagnosis_id}"
+        return f"{self.submitter_primary_diagnosis_id}"
 
 
 class Specimen(models.Model):
@@ -99,7 +103,7 @@ class Specimen(models.Model):
     percent_tumour_cells_measurement_method = models.CharField(max_length=64)
 
     def __str__(self):
-        return f"Specimen ID: {self.submitter_specimen_id}"
+        return f"{self.submitter_specimen_id}"
 
 
 class SampleRegistration(models.Model):
@@ -119,7 +123,7 @@ class SampleRegistration(models.Model):
     sample_type = models.CharField(max_length=128, null=False, blank=False)
 
     def __str__(self):
-        return f"SampleRegistration ID: {self.submitter_sample_id}"
+        return f"{self.submitter_sample_id}"
 
 
 class Treatment(models.Model):
@@ -147,7 +151,7 @@ class Treatment(models.Model):
     response_to_treatment = models.CharField(max_length=255, null=False, blank=False)
 
     def __str__(self):
-        return f"Treatment ID: {self.submitter_treatment_id}"
+        return f"{self.submitter_treatment_id}"
 
 
 class Chemotherapy(models.Model):
@@ -166,7 +170,7 @@ class Chemotherapy(models.Model):
     cumulative_drug_dosage_actual = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
-        return f"Chemotherapy ID: {self.id}"
+        return f"{self.id}"
 
 
 class HormoneTherapy(models.Model):
@@ -185,7 +189,7 @@ class HormoneTherapy(models.Model):
     cumulative_drug_dosage_actual = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
-        return f"HormoneTherapy ID: {self.id}"
+        return f"{self.id}"
 
 
 class Radiation(models.Model):
@@ -210,7 +214,7 @@ class Radiation(models.Model):
     reference_radiation_treatment_id = models.CharField(max_length=64)
 
     def __str__(self):
-        return f"Radiation ID: {self.id}"
+        return f"{self.id}"
 
 
 class Immunotherapy(models.Model):
@@ -227,7 +231,7 @@ class Immunotherapy(models.Model):
     drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
 
     def __str__(self):
-        return f"Immunotherapy ID: {self.id}"
+        return f"{self.id}"
 
 
 class Surgery(models.Model):
@@ -257,7 +261,7 @@ class Surgery(models.Model):
     perineural_invasion = models.CharField(max_length=128)
 
     def __str__(self):
-        return f"Surgery ID: {self.id}"
+        return f"{self.id}"
 
 
 class FollowUp(models.Model):
@@ -291,7 +295,7 @@ class FollowUp(models.Model):
     recurrence_stage_group = models.CharField(max_length=64)
 
     def __str__(self):
-        return f"Follow Up ID: {self.submitter_follow_up_id}"
+        return f"{self.submitter_follow_up_id}"
 
 
 class Biomarker(models.Model):
@@ -320,7 +324,7 @@ class Biomarker(models.Model):
     cea = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"Biomarker ID: {self.id}"
+        return f"{self.id}"
 
 
 class Comorbidity(models.Model):
@@ -339,4 +343,4 @@ class Comorbidity(models.Model):
     comorbidity_treatment = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"Comorbidity ID: {self.id}"
+        return f"{self.id}"
