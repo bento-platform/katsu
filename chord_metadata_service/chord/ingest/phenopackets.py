@@ -87,6 +87,7 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     # --------------------------------------------------------------------------------------------------------------
 
     # Check if subject already exists
+    existing_extra_properties: dict[str, Any]
     try:
         existing_subject = pm.Individual.objects.get(id=subject["id"])
         existing_extra_properties = existing_subject.extra_properties
