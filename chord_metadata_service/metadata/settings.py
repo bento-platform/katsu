@@ -16,6 +16,7 @@ import logging
 import json
 from os.path import exists
 
+from bento_lib.types import GA4GHServiceType
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
@@ -52,7 +53,7 @@ CHORD_PERMISSIONS = os.environ.get("CHORD_PERMISSIONS", str(not DEBUG)).lower() 
 
 CHORD_SERVICE_ARTIFACT = "metadata"
 CHORD_SERVICE_TYPE_NO_VER = f"ca.c3g.bento:{CHORD_SERVICE_ARTIFACT}"
-CHORD_SERVICE_TYPE = {
+CHORD_SERVICE_TYPE: GA4GHServiceType = {
     "group": "ca.c3g.bento",
     "artifact": CHORD_SERVICE_ARTIFACT,
     "version": __version__,
