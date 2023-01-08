@@ -51,8 +51,12 @@ CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for runn
 CHORD_PERMISSIONS = os.environ.get("CHORD_PERMISSIONS", str(not DEBUG)).lower() == "true"
 
 CHORD_SERVICE_ARTIFACT = "metadata"
-CHORD_SERVICE_TYPE_NO_VER = f"ca.c3g.chord:{CHORD_SERVICE_ARTIFACT}"
-CHORD_SERVICE_TYPE = f"{CHORD_SERVICE_TYPE_NO_VER}:{__version__}"
+CHORD_SERVICE_TYPE_NO_VER = f"ca.c3g.bento:{CHORD_SERVICE_ARTIFACT}"
+CHORD_SERVICE_TYPE = {
+    "group": "ca.c3g.bento",
+    "artifact": CHORD_SERVICE_ARTIFACT,
+    "version": __version__,
+}
 CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE_NO_VER)
 
 # SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
