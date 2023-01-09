@@ -10,6 +10,7 @@ from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Table
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
+from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from .exceptions import IngestError
@@ -111,7 +112,7 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     subject_obj, subject_obj_created = pm.Individual.objects.get_or_create(
         id=subject["id"],
         # if left out/null, karyotypic_sex defaults to UNKNOWN_KARYOTYPE
-        karyotypic_sex=subject.get("karyotypic_sex") or pm.Individual.KS_UNKNOWN_KARYOTYPE,
+        karyotypic_sex=subject.get("karyotypic_sex") or KaryotypicSex.UNKNOWN_KARYOTYPE,
         race=subject.get("race", ""),
         ethnicity=subject.get("ethnicity", ""),
         age_numeric=age_numeric_value,
