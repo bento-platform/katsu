@@ -1,4 +1,8 @@
 from rest_framework import serializers
+
+from chord_metadata_service.mohpackets.validators import ID_VALIDATOR
+
+
 from .models import (
     Program,
     Donor,
@@ -16,6 +20,7 @@ from .models import (
     Comorbidity,
 )
 
+
 """
     This module contains the SERIALIZERS for the models in the mohpackets app.
     It converting Python objects or Django model instances into a JSON string,
@@ -32,6 +37,9 @@ from .models import (
 
 
 class ProgramSerializer(serializers.ModelSerializer):
+    program_id = serializers.PrimaryKeyRelatedField(
+        queryset=Program.objects.all(), validators=[ID_VALIDATOR]
+    )
     class Meta:
         model = Program
         fields = "__all__"
