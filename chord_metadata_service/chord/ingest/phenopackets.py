@@ -4,6 +4,7 @@ import json
 import uuid
 
 from dateutil.parser import isoparse
+from decimal import Decimal
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Table
@@ -74,12 +75,12 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     # - Be a bit flexible with the subject date_of_birth field for Signature; convert blank strings to None.
     subject["date_of_birth"] = subject.get("date_of_birth") or None
     subject_query = query_and_check_nulls(subject, "date_of_birth", transform=isoparse)
-    for k in ("alternate_ids", "age", "sex", "karyotypic_sex", "taxonomy"):
+    for k in ("alternate_ids", "age", "sex", "taxonomy"):
         subject_query.update(query_and_check_nulls(subject, k))
 
     # - Check if age is represented as a duration string (vs. age range values) and convert it to years
-    age_numeric_value = None
-    age_unit_value = None
+    age_numeric_value: Optional[Decimal] = None
+    age_unit_value: Optional[str] = None
     if "age" in subject:
         if "age" in subject["age"]:
             age_numeric_value, age_unit_value = iso_duration_to_years(subject["age"]["age"])
@@ -109,6 +110,8 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     ))
     subject_obj, subject_obj_created = pm.Individual.objects.get_or_create(
         id=subject["id"],
+        # if left out/null, karyotypic_sex defaults to UNKNOWN_KARYOTYPE
+        karyotypic_sex=subject.get("karyotypic_sex") or pm.Individual.KS_UNKNOWN_KARYOTYPE,
         race=subject.get("race", ""),
         ethnicity=subject.get("ethnicity", ""),
         age_numeric=age_numeric_value,

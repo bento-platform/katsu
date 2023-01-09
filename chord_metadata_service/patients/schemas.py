@@ -2,6 +2,7 @@ from chord_metadata_service.restapi.schema_utils import customize_schema, tag_id
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, AGE_OR_AGE_RANGE, EXTRA_PROPERTIES_SCHEMA
 
 from .descriptions import INDIVIDUAL
+from .models import Individual
 
 
 COMORBID_CONDITION = customize_schema(
@@ -38,24 +39,12 @@ INDIVIDUAL_SCHEMA = tag_ids_and_describe({
         "age": AGE_OR_AGE_RANGE,
         "sex": {
             "type": "string",
-            "enum": ["UNKNOWN_SEX", "FEMALE", "MALE", "OTHER_SEX"],
+            "enum": [s[0] for s in Individual.SEX],
             "description": "An individual's phenotypic sex.",
         },
         "karyotypic_sex": {
             "type": "string",
-            "enum": [
-                "UNKNOWN_KARYOTYPE",
-                "XX",
-                "XY",
-                "XO",
-                "XXY",
-                "XXX",
-                "XXYY",
-                "XXXY",
-                "XXXX",
-                "XYY",
-                "OTHER_KARYOTYPE"
-            ],
+            "enum": [k[0] for k in Individual.KARYOTYPIC_SEX],
             "description": "An individual's karyotypic sex.",
         },
         "taxonomy": ONTOLOGY_CLASS,

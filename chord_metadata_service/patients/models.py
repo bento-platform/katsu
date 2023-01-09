@@ -16,8 +16,9 @@ class Individual(models.Model, IndexableMixin):
         ('OTHER_SEX', 'OTHER_SEX')
     )
 
+    KS_UNKNOWN_KARYOTYPE = 'UNKNOWN_KARYOTYPE'
     KARYOTYPIC_SEX = (
-        ('UNKNOWN_KARYOTYPE', 'UNKNOWN_KARYOTYPE'),
+        (KS_UNKNOWN_KARYOTYPE, KS_UNKNOWN_KARYOTYPE),
         ('XX', 'XX'),
         ('XY', 'XY'),
         ('XO', 'XO'),
@@ -43,7 +44,7 @@ class Individual(models.Model, IndexableMixin):
     age_unit = models.CharField(max_length=50, blank=True, help_text='The unit for measuring age.')
     sex = models.CharField(choices=SEX, max_length=200,  blank=True, null=True,
                            help_text='Observed apparent sex of the individual.')
-    karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200, default='UNKNOWN_KARYOTYPE',
+    karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200, default=KS_UNKNOWN_KARYOTYPE,
                                       help_text='The karyotypic sex of the individual.')
     taxonomy = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text='Ontology resource representing the species (e.g., NCBITaxon:9615).')
