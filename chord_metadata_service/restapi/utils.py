@@ -5,6 +5,7 @@ import datetime
 
 from collections import defaultdict, Counter
 from calendar import month_abbr
+from decimal import Decimal, ROUND_HALF_EVEN
 from typing import Any, Optional, Type, TypedDict, Mapping, Generator
 
 from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value
@@ -116,7 +117,11 @@ def parse_individual_age(age_obj: dict) -> int:
     raise ValueError(f"Error: {age_obj} format not supported")
 
 
-def iso_duration_to_years(iso_age_duration: str, unit: str = "years") -> tuple[Optional[float], Optional[str]]:
+def _round_decimal_two_places(d: float) -> Decimal:
+    return Decimal(d).quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
+
+
+def iso_duration_to_years(iso_age_duration: str, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
     """
     This function takes ISO8601 Duration string in the format e.g 'P20Y6M4D' and converts it to years.
     """
@@ -130,14 +135,14 @@ def iso_duration_to_years(iso_age_duration: str, unit: str = "years") -> tuple[O
         days_to_seconds = days * 24 * 60 * 60
         # 365.25 average days in a year (including leap year)
         years = (days_to_seconds / 60 / 60 / 24 / 365.25) + float(duration.years)
-        return (round(years, 2)), unit
+        return _round_decimal_two_places(years), unit
 
     # if duration string contains only days then the instance is of type datetime.timedelta
     if not isinstance(duration, isodate.Duration) and isinstance(duration, datetime.timedelta):
         if duration.days is not None:
             days_to_seconds = duration.days * 24 * 60 * 60
             years = days_to_seconds / 60 / 60 / 24 / 365.25
-            return (round(years, 2)), unit
+            return _round_decimal_two_places(years), unit
 
     return None, None
 

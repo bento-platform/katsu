@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import uuid
 
@@ -15,12 +17,18 @@ from .schema import schema_validation
 from .utils import get_output_or_raise, workflow_file_output_to_path
 
 __all__ = [
+    "create_instrument",
+    "create_experiment_result",
+    "validate_experiment",
+    "ingest_experiment",
     "ingest_experiments_workflow",
     "ingest_maf_derived_from_vcf_workflow",
 ]
 
+from .exceptions import IngestError
 
-def create_instrument(instrument):
+
+def create_instrument(instrument: dict) -> em.Instrument:
     instrument_obj, _ = em.Instrument.objects.get_or_create(
         identifier=instrument.get("identifier", str(uuid.uuid4()))
     )
@@ -32,7 +40,7 @@ def create_instrument(instrument):
     return instrument_obj
 
 
-def create_experiment_result(er):
+def create_experiment_result(er: dict) -> em.ExperimentResult:
     er_obj = em.ExperimentResult(
         identifier=er.get("identifier"),
         description=er.get("description"),
@@ -49,13 +57,28 @@ def create_experiment_result(er):
     return er_obj
 
 
-def ingest_experiment(experiment_data, table_id):
-    """Ingests a single experiment."""
-
-    # validate experiment data against experiments schema
+def validate_experiment(experiment_data, idx: Optional[int] = None) -> None:
+    # Validate experiment data against experiments schema.
     validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA)
     if not validation:
-        return
+        # TODO: Report more precise errors
+        raise IngestError(
+            f"Failed schema validation for experiment{(' ' + str(idx)) if idx is not None else ''} "
+            f"(check Katsu logs for more information)")
+
+
+def ingest_experiment(
+    experiment_data: dict,
+    table_id: str,
+    validate: bool = True,
+    idx: Optional[int] = None,
+) -> em.Experiment:
+    """Ingests a single experiment."""
+
+    if validate:
+        # Validate experiment data against experiments schema prior to ingestion, if specified.
+        # `validate` may be false if the experiment has already been validated.
+        validate_experiment(experiment_data, idx)
 
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
     study_type = experiment_data.get("study_type")
@@ -118,28 +141,47 @@ def ingest_experiment(experiment_data, table_id):
     return new_experiment
 
 
-def ingest_experiments_workflow(workflow_outputs, table_id):
+def ingest_experiments_workflow(workflow_outputs, table_id: str) -> list[em.Experiment]:
     with workflow_file_output_to_path(get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
         logger.info(f"Attempting ingestion of experiments from path: {json_doc_path}")
         with open(json_doc_path, "r") as jf:
-            json_data = json.load(jf)
+            json_data: dict = json.load(jf)
 
     dataset = TableOwnership.objects.get(table_id=table_id).dataset
 
     for rs in json_data.get("resources", []):
         dataset.additional_resources.add(ingest_resource(rs))
 
-    return [ingest_experiment(exp, table_id) for exp in json_data.get("experiments", [])]
+    exps = json_data.get("experiments", [])
+
+    # First, validate all experiments with the schema before creating anything in the database.
+    for idx, exp in enumerate(exps):
+        validate_experiment(exp, idx)
+
+    # Then, if everything passes, ingest the experiments. Don't re-do the validation in this case.
+    return [ingest_experiment(exp, table_id, validate=False) for exp in exps]
 
 
-def ingest_derived_experiment_results(json_data):
+def ingest_derived_experiment_results(json_data: list[dict]) -> list[em.ExperimentResult]:
     """ Reads a JSON file containing a list of experiment results and adds them
         to the database.
         The linkage to experiments is inferred from the `derived_from` category
         in `extra_properties`
     """
 
-    exp_res_list = []
+    # First, validate all experiment results with the schema before creating anything in the database.
+
+    for idx, exp_result in enumerate(json_data):
+        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
+        if not validation:
+            # TODO: Report more precise errors
+            raise IngestError(
+                f"Failed schema validation for experiment result {idx} "
+                f"(check Katsu logs for more information)")
+
+    # If everything passes, perform the actual ingestion next.
+
+    exp_res_list: list[em.ExperimentResult] = []
     # Create a map of experiment results identifier to experiment id.
     # Prefetch results due to the many-to-many relationship
     exp = em.Experiment.objects.all().prefetch_related("experiment_results")
@@ -147,12 +189,7 @@ def ingest_derived_experiment_results(json_data):
     for row in exp.values("id", "experiment_results__identifier"):
         exp_result2exp[row["experiment_results__identifier"]] = row["id"]
 
-    for exp_result in json_data:
-        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
-        if not validation:
-            logger.warning(f"Improper schema for experiment result: {json.dumps(exp_result)}")
-            continue
-
+    for idx, exp_result in enumerate(json_data):
         derived_identifier = exp_result['extra_properties']['derived_from']
         experiment_id = exp_result2exp.get(derived_identifier, None)
         if experiment_id is None:
@@ -175,7 +212,7 @@ def ingest_derived_experiment_results(json_data):
 # The table_id is required to fit the bento_ingest.schema.json in bento_lib,
 # but it is unused. It can be set to any valid table_id or to one of the override
 # values defined in view_ingest.py
-def ingest_maf_derived_from_vcf_workflow(workflow_outputs, table_id):
+def ingest_maf_derived_from_vcf_workflow(workflow_outputs, table_id: str) -> list[em.ExperimentResult]:
     with workflow_file_output_to_path(get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
         logger.info(f"Attempting ingestion of MAF-derived-from-VCF JSON from path: {json_doc_path}")
         with open(json_doc_path, "r") as fh:
