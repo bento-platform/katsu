@@ -93,22 +93,12 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     try:
         existing_subject = pm.Individual.objects.get(id=subject["id"])
         existing_extra_properties = existing_subject.extra_properties
-        print(dict(existing_subject.__dict__))
     except pm.Individual.DoesNotExist:
         existing_extra_properties = extra_properties
         pass
 
     # --------------------------------------------------------------------------------------------------------------
 
-    print(dict(
-        id=subject["id"],
-        race=subject.get("race", ""),
-        ethnicity=subject.get("ethnicity", ""),
-        age_numeric=age_numeric_value,
-        age_unit=age_unit_value if age_unit_value else "",
-        extra_properties=existing_extra_properties,
-        **subject_query
-    ))
     subject_obj, subject_obj_created = pm.Individual.objects.get_or_create(
         id=subject["id"],
         # if left out/null, karyotypic_sex defaults to UNKNOWN_KARYOTYPE
