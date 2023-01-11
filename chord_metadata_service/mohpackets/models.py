@@ -10,7 +10,7 @@ from django.utils import timezone
     ER Diagram: https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/mohccn_data_standard_er_diagram_endorsed6oct22.pdf?Status=Master&sfvrsn=dd57a75e_5 # noqa: E501
     Schema last updated: September 2022
     --------------------------------
-    NOTES: 
+    NOTES:
     - Permissible values are not enforced in the model.
         They are checked in the serializer and ingest process.
 

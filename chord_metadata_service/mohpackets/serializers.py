@@ -40,6 +40,7 @@ class ProgramSerializer(serializers.ModelSerializer):
     program_id = serializers.PrimaryKeyRelatedField(
         queryset=Program.objects.all(), validators=[ID_VALIDATOR]
     )
+
     class Meta:
         model = Program
         fields = "__all__"
