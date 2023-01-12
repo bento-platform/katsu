@@ -1,16 +1,494 @@
+---
+title: Metadata Service API v1.0.0
+language_tabs:
+  - shell: Shell
+  - http: HTTP
+  - javascript: JavaScript
+  - ruby: Ruby
+  - python: Python
+  - php: PHP
+  - java: Java
+  - go: Go
+toc_footers: []
+includes: []
+search: true
+highlight_theme: darkula
+headingLevel: 2
+
+---
+
 <h1 id="metadata-service-api">Metadata Service API v1.0.0</h1>
 
 Metadata Service provides a phenotypic description of an Individual in the context of biomedical research.
 
-<h1 id="metadata-service-api-api">api</h1>
+<h1 id="metadata-service-api-discovery">discovery</h1>
 
-## api_v1_discovery_biomarkers_list
+## discovery_biomarkers_list
 
-<a id="opIdapi_v1_discovery_biomarkers_list"></a>
+<a id="opIddiscovery_biomarkers_list"></a>
 
 `GET /api/v1/discovery/biomarkers/`
 
-<h3 id="api_v1_discovery_biomarkers_list-parameters">Parameters</h3>
+<h3 id="discovery_biomarkers_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_specimen_id|query|string|false|none|
+|submitter_primary_diagnosis_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|submitter_follow_up_id|query|string|false|none|
+|test_interval|query|integer|false|none|
+|psa_level|query|integer|false|none|
+|ca125|query|integer|false|none|
+|cea|query|integer|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_chemotherapies_list
+
+<a id="opIddiscovery_chemotherapies_list"></a>
+
+`GET /api/v1/discovery/chemotherapies/`
+
+<h3 id="discovery_chemotherapies_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|drug_name|query|string|false|none|
+|drug_rxnormcui|query|string|false|none|
+|chemotherapy_dosage_units|query|string|false|none|
+|cumulative_drug_dosage_prescribed|query|integer|false|none|
+|cumulative_drug_dosage_actual|query|integer|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_comorbidities_list
+
+<a id="opIddiscovery_comorbidities_list"></a>
+
+`GET /api/v1/discovery/comorbidities/`
+
+<h3 id="discovery_comorbidities_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|prior_malignancy|query|string|false|none|
+|laterality_of_prior_malignancy|query|string|false|none|
+|age_at_comorbidity_diagnosis|query|integer|false|none|
+|comorbidity_type_code|query|string|false|none|
+|comorbidity_treatment_status|query|string|false|none|
+|comorbidity_treatment|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_donors_list
+
+<a id="opIddiscovery_donors_list"></a>
+
+`GET /api/v1/discovery/donors/`
+
+<h3 id="discovery_donors_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_donor_id|query|string|false|none|
+|program_id|query|string|false|none|
+|is_deceased|query|boolean|false|none|
+|cause_of_death|query|string|false|none|
+|date_of_birth|query|string|false|none|
+|date_of_death|query|string|false|none|
+|primary_site|query|string|false|none|
+|age|query|number|false|none|
+|max_age|query|number|false|none|
+|min_age|query|number|false|none|
+|donors|query|string|false|none|
+|primary_diagnosis|query|string|false|none|
+|speciman|query|string|false|none|
+|sample_registration|query|string|false|none|
+|treatment|query|string|false|none|
+|chemotherapy|query|string|false|none|
+|hormone_therapy|query|string|false|none|
+|radiation|query|string|false|none|
+|immunotherapy|query|string|false|none|
+|surgery|query|string|false|none|
+|follow_up|query|string|false|none|
+|biomarker|query|string|false|none|
+|comorbidity|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_follow_ups_list
+
+<a id="opIddiscovery_follow_ups_list"></a>
+
+`GET /api/v1/discovery/follow_ups/`
+
+<h3 id="discovery_follow_ups_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_follow_up_id|query|string|false|none|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_primary_diagnosis_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|date_of_followup|query|string|false|none|
+|lost_to_followup|query|boolean|false|none|
+|lost_to_followup_reason|query|string|false|none|
+|disease_status_at_followup|query|string|false|none|
+|relapse_type|query|string|false|none|
+|date_of_relapse|query|string|false|none|
+|method_of_progression_status|query|string|false|none|
+|anatomic_site_progression_or_recurrence|query|string|false|none|
+|recurrence_tumour_staging_system|query|string|false|none|
+|recurrence_t_category|query|string|false|none|
+|recurrence_n_category|query|string|false|none|
+|recurrence_m_category|query|string|false|none|
+|recurrence_stage_group|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_hormone_therapies_list
+
+<a id="opIddiscovery_hormone_therapies_list"></a>
+
+`GET /api/v1/discovery/hormone_therapies/`
+
+<h3 id="discovery_hormone_therapies_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|drug_name|query|string|false|none|
+|drug_rxnormcui|query|string|false|none|
+|hormone_drug_dosage_units|query|string|false|none|
+|cumulative_drug_dosage_prescribed|query|integer|false|none|
+|cumulative_drug_dosage_actual|query|integer|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_immunotherapies_list
+
+<a id="opIddiscovery_immunotherapies_list"></a>
+
+`GET /api/v1/discovery/immunotherapies/`
+
+<h3 id="discovery_immunotherapies_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|immunotherapy_type|query|string|false|none|
+|drug_name|query|string|false|none|
+|drug_rxnormcui|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_overview_retrieve
+
+<a id="opIddiscovery_overview_retrieve"></a>
+
+`GET /api/v1/discovery/overview`
+
+MoH Overview schema
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "cohort_count": 0,
+  "individual_count": 0
+}
+```
+
+## discovery_primary_diagnoses_list
+
+<a id="opIddiscovery_primary_diagnoses_list"></a>
+
+`GET /api/v1/discovery/primary_diagnoses/`
+
+<h3 id="discovery_primary_diagnoses_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_primary_diagnosis_id|query|string|false|none|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|date_of_diagnosis|query|string|false|none|
+|cancer_type_code|query|string|false|none|
+|basis_of_diagnosis|query|string|false|none|
+|lymph_nodes_examined_status|query|string|false|none|
+|lymph_nodes_examined_method|query|string|false|none|
+|number_lymph_nodes_positive|query|integer|false|none|
+|clinical_tumour_staging_system|query|string|false|none|
+|clinical_t_category|query|string|false|none|
+|clinical_n_category|query|string|false|none|
+|clinical_m_category|query|string|false|none|
+|clinical_stage_group|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_radiations_list
+
+<a id="opIddiscovery_radiations_list"></a>
+
+`GET /api/v1/discovery/radiations/`
+
+<h3 id="discovery_radiations_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|radiation_therapy_modality|query|string|false|none|
+|radiation_therapy_type|query|string|false|none|
+|radiation_therapy_fractions|query|integer|false|none|
+|radiation_therapy_dosage|query|integer|false|none|
+|anatomical_site_irradiated|query|string|false|none|
+|radiation_boost|query|boolean|false|none|
+|reference_radiation_treatment_id|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_sample_registrations_list
+
+<a id="opIddiscovery_sample_registrations_list"></a>
+
+`GET /api/v1/discovery/sample_registrations/`
+
+<h3 id="discovery_sample_registrations_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_sample_id|query|string|false|none|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_specimen_id|query|string|false|none|
+|gender|query|string|false|none|
+|sex_at_birth|query|string|false|none|
+|specimen_tissue_source|query|string|false|none|
+|tumour_normal_designation|query|string|false|none|
+|specimen_type|query|string|false|none|
+|sample_type|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_specimens_list
+
+<a id="opIddiscovery_specimens_list"></a>
+
+`GET /api/v1/discovery/specimens/`
+
+<h3 id="discovery_specimens_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_specimen_id|query|string|false|none|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_primary_diagnosis_id|query|string|false|none|
+|pathological_tumour_staging_system|query|string|false|none|
+|pathological_t_category|query|string|false|none|
+|pathological_n_category|query|string|false|none|
+|pathological_m_category|query|string|false|none|
+|pathological_stage_group|query|string|false|none|
+|specimen_collection_date|query|string|false|none|
+|specimen_storage|query|string|false|none|
+|tumour_histological_type|query|string|false|none|
+|specimen_anatomic_location|query|string|false|none|
+|reference_pathology_confirmed_diagnosis|query|string|false|none|
+|reference_pathology_confirmed_tumour_presence|query|string|false|none|
+|tumour_grading_system|query|string|false|none|
+|tumour_grade|query|string|false|none|
+|percent_tumour_cells_range|query|string|false|none|
+|percent_tumour_cells_measurement_method|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_surgeries_list
+
+<a id="opIddiscovery_surgeries_list"></a>
+
+`GET /api/v1/discovery/surgeries/`
+
+<h3 id="discovery_surgeries_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_specimen_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|surgery_type|query|string|false|none|
+|surgery_site|query|string|false|none|
+|surgery_location|query|string|false|none|
+|tumour_length|query|integer|false|none|
+|tumour_width|query|integer|false|none|
+|greatest_dimension_tumour|query|integer|false|none|
+|tumour_focality|query|string|false|none|
+|residual_tumour_classification|query|string|false|none|
+|margin_types_involved|query|string|false|none|
+|margin_types_not_involved|query|string|false|none|
+|margin_types_not_assessed|query|string|false|none|
+|lymphovascular_invasion|query|string|false|none|
+|perineural_invasion|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+## discovery_treatments_list
+
+<a id="opIddiscovery_treatments_list"></a>
+
+`GET /api/v1/discovery/treatments/`
+
+<h3 id="discovery_treatments_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_treatment_id|query|string|false|none|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_primary_diagnosis_id|query|string|false|none|
+|treatment_type|query|string|false|none|
+|is_primary_treatment|query|string|false|none|
+|treatment_start_date|query|string|false|none|
+|treatment_end_date|query|string|false|none|
+|treatment_setting|query|string|false|none|
+|treatment_intent|query|string|false|none|
+|days_per_cycle|query|integer|false|none|
+|number_of_cycles|query|integer|false|none|
+|response_to_treatment_criteria_method|query|string|false|none|
+|response_to_treatment|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_count": 0
+}
+```
+
+<h1 id="metadata-service-api-moh">moh</h1>
+
+## moh_biomarkers_list
+
+<a id="opIdmoh_biomarkers_list"></a>
+
+`GET /api/v1/moh/biomarkers/`
+
+<h3 id="moh_biomarkers_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -47,13 +525,155 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 ]
 ```
 
-## api_v1_discovery_chemotherapies_list
+## moh_biomarkers_create
 
-<a id="opIdapi_v1_discovery_chemotherapies_list"></a>
+<a id="opIdmoh_biomarkers_create"></a>
 
-`GET /api/v1/discovery/chemotherapies/`
+`POST /api/v1/moh/biomarkers/`
 
-<h3 id="api_v1_discovery_chemotherapies_list-parameters">Parameters</h3>
+<h3 id="moh_biomarkers_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[BiomarkerRequest](#schemabiomarkerrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "id": 0,
+  "test_interval": 32767,
+  "psa_level": 32767,
+  "ca125": 32767,
+  "cea": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string",
+  "submitter_primary_diagnosis_id": "string",
+  "submitter_treatment_id": "string",
+  "submitter_follow_up_id": "string"
+}
+```
+
+## moh_biomarkers_retrieve
+
+<a id="opIdmoh_biomarkers_retrieve"></a>
+
+`GET /api/v1/moh/biomarkers/{id}/`
+
+<h3 id="moh_biomarkers_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this biomarker.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "test_interval": 32767,
+  "psa_level": 32767,
+  "ca125": 32767,
+  "cea": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string",
+  "submitter_primary_diagnosis_id": "string",
+  "submitter_treatment_id": "string",
+  "submitter_follow_up_id": "string"
+}
+```
+
+## moh_biomarkers_update
+
+<a id="opIdmoh_biomarkers_update"></a>
+
+`PUT /api/v1/moh/biomarkers/{id}/`
+
+<h3 id="moh_biomarkers_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this biomarker.|
+|body|body|[BiomarkerRequest](#schemabiomarkerrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "test_interval": 32767,
+  "psa_level": 32767,
+  "ca125": 32767,
+  "cea": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string",
+  "submitter_primary_diagnosis_id": "string",
+  "submitter_treatment_id": "string",
+  "submitter_follow_up_id": "string"
+}
+```
+
+## moh_biomarkers_partial_update
+
+<a id="opIdmoh_biomarkers_partial_update"></a>
+
+`PATCH /api/v1/moh/biomarkers/{id}/`
+
+<h3 id="moh_biomarkers_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this biomarker.|
+|body|body|[PatchedBiomarkerRequest](#schemapatchedbiomarkerrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "test_interval": 32767,
+  "psa_level": 32767,
+  "ca125": 32767,
+  "cea": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string",
+  "submitter_primary_diagnosis_id": "string",
+  "submitter_treatment_id": "string",
+  "submitter_follow_up_id": "string"
+}
+```
+
+## moh_biomarkers_destroy
+
+<a id="opIdmoh_biomarkers_destroy"></a>
+
+`DELETE /api/v1/moh/biomarkers/{id}/`
+
+<h3 id="moh_biomarkers_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this biomarker.|
+
+## moh_chemotherapies_list
+
+<a id="opIdmoh_chemotherapies_list"></a>
+
+`GET /api/v1/moh/chemotherapies/`
+
+<h3 id="moh_chemotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -86,13 +706,147 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 ]
 ```
 
-## api_v1_discovery_comorbidities_list
+## moh_chemotherapies_create
 
-<a id="opIdapi_v1_discovery_comorbidities_list"></a>
+<a id="opIdmoh_chemotherapies_create"></a>
 
-`GET /api/v1/discovery/comorbidities/`
+`POST /api/v1/moh/chemotherapies/`
 
-<h3 id="api_v1_discovery_comorbidities_list-parameters">Parameters</h3>
+<h3 id="moh_chemotherapies_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[ChemotherapyRequest](#schemachemotherapyrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "id": 0,
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "chemotherapy_dosage_units": "string",
+  "cumulative_drug_dosage_prescribed": 32767,
+  "cumulative_drug_dosage_actual": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_chemotherapies_retrieve
+
+<a id="opIdmoh_chemotherapies_retrieve"></a>
+
+`GET /api/v1/moh/chemotherapies/{id}/`
+
+<h3 id="moh_chemotherapies_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this chemotherapy.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "chemotherapy_dosage_units": "string",
+  "cumulative_drug_dosage_prescribed": 32767,
+  "cumulative_drug_dosage_actual": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_chemotherapies_update
+
+<a id="opIdmoh_chemotherapies_update"></a>
+
+`PUT /api/v1/moh/chemotherapies/{id}/`
+
+<h3 id="moh_chemotherapies_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this chemotherapy.|
+|body|body|[ChemotherapyRequest](#schemachemotherapyrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "chemotherapy_dosage_units": "string",
+  "cumulative_drug_dosage_prescribed": 32767,
+  "cumulative_drug_dosage_actual": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_chemotherapies_partial_update
+
+<a id="opIdmoh_chemotherapies_partial_update"></a>
+
+`PATCH /api/v1/moh/chemotherapies/{id}/`
+
+<h3 id="moh_chemotherapies_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this chemotherapy.|
+|body|body|[PatchedChemotherapyRequest](#schemapatchedchemotherapyrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "chemotherapy_dosage_units": "string",
+  "cumulative_drug_dosage_prescribed": 32767,
+  "cumulative_drug_dosage_actual": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_chemotherapies_destroy
+
+<a id="opIdmoh_chemotherapies_destroy"></a>
+
+`DELETE /api/v1/moh/chemotherapies/{id}/`
+
+<h3 id="moh_chemotherapies_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this chemotherapy.|
+
+## moh_comorbidities_list
+
+<a id="opIdmoh_comorbidities_list"></a>
+
+`GET /api/v1/moh/comorbidities/`
+
+<h3 id="moh_comorbidities_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -125,13 +879,147 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 ]
 ```
 
-## api_v1_discovery_donors_list
+## moh_comorbidities_create
 
-<a id="opIdapi_v1_discovery_donors_list"></a>
+<a id="opIdmoh_comorbidities_create"></a>
 
-`GET /api/v1/discovery/donors/`
+`POST /api/v1/moh/comorbidities/`
 
-<h3 id="api_v1_discovery_donors_list-parameters">Parameters</h3>
+<h3 id="moh_comorbidities_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[ComorbidityRequest](#schemacomorbidityrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "id": 0,
+  "prior_malignancy": "string",
+  "laterality_of_prior_malignancy": "string",
+  "age_at_comorbidity_diagnosis": 32767,
+  "comorbidity_type_code": "string",
+  "comorbidity_treatment_status": "string",
+  "comorbidity_treatment": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string"
+}
+```
+
+## moh_comorbidities_retrieve
+
+<a id="opIdmoh_comorbidities_retrieve"></a>
+
+`GET /api/v1/moh/comorbidities/{id}/`
+
+<h3 id="moh_comorbidities_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this comorbidity.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "prior_malignancy": "string",
+  "laterality_of_prior_malignancy": "string",
+  "age_at_comorbidity_diagnosis": 32767,
+  "comorbidity_type_code": "string",
+  "comorbidity_treatment_status": "string",
+  "comorbidity_treatment": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string"
+}
+```
+
+## moh_comorbidities_update
+
+<a id="opIdmoh_comorbidities_update"></a>
+
+`PUT /api/v1/moh/comorbidities/{id}/`
+
+<h3 id="moh_comorbidities_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this comorbidity.|
+|body|body|[ComorbidityRequest](#schemacomorbidityrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "prior_malignancy": "string",
+  "laterality_of_prior_malignancy": "string",
+  "age_at_comorbidity_diagnosis": 32767,
+  "comorbidity_type_code": "string",
+  "comorbidity_treatment_status": "string",
+  "comorbidity_treatment": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string"
+}
+```
+
+## moh_comorbidities_partial_update
+
+<a id="opIdmoh_comorbidities_partial_update"></a>
+
+`PATCH /api/v1/moh/comorbidities/{id}/`
+
+<h3 id="moh_comorbidities_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this comorbidity.|
+|body|body|[PatchedComorbidityRequest](#schemapatchedcomorbidityrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "prior_malignancy": "string",
+  "laterality_of_prior_malignancy": "string",
+  "age_at_comorbidity_diagnosis": 32767,
+  "comorbidity_type_code": "string",
+  "comorbidity_treatment_status": "string",
+  "comorbidity_treatment": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string"
+}
+```
+
+## moh_comorbidities_destroy
+
+<a id="opIdmoh_comorbidities_destroy"></a>
+
+`DELETE /api/v1/moh/comorbidities/{id}/`
+
+<h3 id="moh_comorbidities_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this comorbidity.|
+
+## moh_donors_list
+
+<a id="opIdmoh_donors_list"></a>
+
+`GET /api/v1/moh/donors/`
+
+<h3 id="moh_donors_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -177,13 +1065,139 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 ]
 ```
 
-## api_v1_discovery_follow_ups_list
+## moh_donors_create
 
-<a id="opIdapi_v1_discovery_follow_ups_list"></a>
+<a id="opIdmoh_donors_create"></a>
 
-`GET /api/v1/discovery/follow_ups/`
+`POST /api/v1/moh/donors/`
 
-<h3 id="api_v1_discovery_follow_ups_list-parameters">Parameters</h3>
+<h3 id="moh_donors_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[DonorRequest](#schemadonorrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "submitter_donor_id": "string",
+  "is_deceased": true,
+  "cause_of_death": "string",
+  "date_of_birth": "string",
+  "date_of_death": "string",
+  "primary_site": "string",
+  "program_id": "string"
+}
+```
+
+## moh_donors_retrieve
+
+<a id="opIdmoh_donors_retrieve"></a>
+
+`GET /api/v1/moh/donors/{submitter_donor_id}/`
+
+<h3 id="moh_donors_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_donor_id|path|string|true|A unique value identifying this donor.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_donor_id": "string",
+  "is_deceased": true,
+  "cause_of_death": "string",
+  "date_of_birth": "string",
+  "date_of_death": "string",
+  "primary_site": "string",
+  "program_id": "string"
+}
+```
+
+## moh_donors_update
+
+<a id="opIdmoh_donors_update"></a>
+
+`PUT /api/v1/moh/donors/{submitter_donor_id}/`
+
+<h3 id="moh_donors_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_donor_id|path|string|true|A unique value identifying this donor.|
+|body|body|[DonorRequest](#schemadonorrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_donor_id": "string",
+  "is_deceased": true,
+  "cause_of_death": "string",
+  "date_of_birth": "string",
+  "date_of_death": "string",
+  "primary_site": "string",
+  "program_id": "string"
+}
+```
+
+## moh_donors_partial_update
+
+<a id="opIdmoh_donors_partial_update"></a>
+
+`PATCH /api/v1/moh/donors/{submitter_donor_id}/`
+
+<h3 id="moh_donors_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_donor_id|path|string|true|A unique value identifying this donor.|
+|body|body|[PatchedDonorRequest](#schemapatcheddonorrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_donor_id": "string",
+  "is_deceased": true,
+  "cause_of_death": "string",
+  "date_of_birth": "string",
+  "date_of_death": "string",
+  "primary_site": "string",
+  "program_id": "string"
+}
+```
+
+## moh_donors_destroy
+
+<a id="opIdmoh_donors_destroy"></a>
+
+`DELETE /api/v1/moh/donors/{submitter_donor_id}/`
+
+<h3 id="moh_donors_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_donor_id|path|string|true|A unique value identifying this donor.|
+
+## moh_follow_ups_list
+
+<a id="opIdmoh_follow_ups_list"></a>
+
+`GET /api/v1/moh/follow_ups/`
+
+<h3 id="moh_follow_ups_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -235,13 +1249,183 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 ]
 ```
 
-## api_v1_discovery_hormone_therapies_list
+## moh_follow_ups_create
 
-<a id="opIdapi_v1_discovery_hormone_therapies_list"></a>
+<a id="opIdmoh_follow_ups_create"></a>
 
-`GET /api/v1/discovery/hormone_therapies/`
+`POST /api/v1/moh/follow_ups/`
 
-<h3 id="api_v1_discovery_hormone_therapies_list-parameters">Parameters</h3>
+<h3 id="moh_follow_ups_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[FollowUpRequest](#schemafollowuprequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "submitter_follow_up_id": "string",
+  "date_of_followup": "string",
+  "lost_to_followup": true,
+  "lost_to_followup_reason": "string",
+  "disease_status_at_followup": "string",
+  "relapse_type": "string",
+  "date_of_relapse": "string",
+  "method_of_progression_status": "string",
+  "anatomic_site_progression_or_recurrence": "string",
+  "recurrence_tumour_staging_system": "string",
+  "recurrence_t_category": "string",
+  "recurrence_n_category": "string",
+  "recurrence_m_category": "string",
+  "recurrence_stage_group": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_primary_diagnosis_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_follow_ups_retrieve
+
+<a id="opIdmoh_follow_ups_retrieve"></a>
+
+`GET /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
+
+<h3 id="moh_follow_ups_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_follow_up_id": "string",
+  "date_of_followup": "string",
+  "lost_to_followup": true,
+  "lost_to_followup_reason": "string",
+  "disease_status_at_followup": "string",
+  "relapse_type": "string",
+  "date_of_relapse": "string",
+  "method_of_progression_status": "string",
+  "anatomic_site_progression_or_recurrence": "string",
+  "recurrence_tumour_staging_system": "string",
+  "recurrence_t_category": "string",
+  "recurrence_n_category": "string",
+  "recurrence_m_category": "string",
+  "recurrence_stage_group": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_primary_diagnosis_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_follow_ups_update
+
+<a id="opIdmoh_follow_ups_update"></a>
+
+`PUT /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
+
+<h3 id="moh_follow_ups_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
+|body|body|[FollowUpRequest](#schemafollowuprequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_follow_up_id": "string",
+  "date_of_followup": "string",
+  "lost_to_followup": true,
+  "lost_to_followup_reason": "string",
+  "disease_status_at_followup": "string",
+  "relapse_type": "string",
+  "date_of_relapse": "string",
+  "method_of_progression_status": "string",
+  "anatomic_site_progression_or_recurrence": "string",
+  "recurrence_tumour_staging_system": "string",
+  "recurrence_t_category": "string",
+  "recurrence_n_category": "string",
+  "recurrence_m_category": "string",
+  "recurrence_stage_group": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_primary_diagnosis_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_follow_ups_partial_update
+
+<a id="opIdmoh_follow_ups_partial_update"></a>
+
+`PATCH /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
+
+<h3 id="moh_follow_ups_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
+|body|body|[PatchedFollowUpRequest](#schemapatchedfollowuprequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_follow_up_id": "string",
+  "date_of_followup": "string",
+  "lost_to_followup": true,
+  "lost_to_followup_reason": "string",
+  "disease_status_at_followup": "string",
+  "relapse_type": "string",
+  "date_of_relapse": "string",
+  "method_of_progression_status": "string",
+  "anatomic_site_progression_or_recurrence": "string",
+  "recurrence_tumour_staging_system": "string",
+  "recurrence_t_category": "string",
+  "recurrence_n_category": "string",
+  "recurrence_m_category": "string",
+  "recurrence_stage_group": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_primary_diagnosis_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_follow_ups_destroy
+
+<a id="opIdmoh_follow_ups_destroy"></a>
+
+`DELETE /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
+
+<h3 id="moh_follow_ups_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
+
+## moh_hormone_therapies_list
+
+<a id="opIdmoh_hormone_therapies_list"></a>
+
+`GET /api/v1/moh/hormone_therapies/`
+
+<h3 id="moh_hormone_therapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -274,13 +1458,147 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 ]
 ```
 
-## api_v1_discovery_immunotherapies_list
+## moh_hormone_therapies_create
 
-<a id="opIdapi_v1_discovery_immunotherapies_list"></a>
+<a id="opIdmoh_hormone_therapies_create"></a>
 
-`GET /api/v1/discovery/immunotherapies/`
+`POST /api/v1/moh/hormone_therapies/`
 
-<h3 id="api_v1_discovery_immunotherapies_list-parameters">Parameters</h3>
+<h3 id="moh_hormone_therapies_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[HormoneTherapyRequest](#schemahormonetherapyrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "id": 0,
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "hormone_drug_dosage_units": "string",
+  "cumulative_drug_dosage_prescribed": 32767,
+  "cumulative_drug_dosage_actual": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_hormone_therapies_retrieve
+
+<a id="opIdmoh_hormone_therapies_retrieve"></a>
+
+`GET /api/v1/moh/hormone_therapies/{id}/`
+
+<h3 id="moh_hormone_therapies_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this hormone therapy.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "hormone_drug_dosage_units": "string",
+  "cumulative_drug_dosage_prescribed": 32767,
+  "cumulative_drug_dosage_actual": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_hormone_therapies_update
+
+<a id="opIdmoh_hormone_therapies_update"></a>
+
+`PUT /api/v1/moh/hormone_therapies/{id}/`
+
+<h3 id="moh_hormone_therapies_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this hormone therapy.|
+|body|body|[HormoneTherapyRequest](#schemahormonetherapyrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "hormone_drug_dosage_units": "string",
+  "cumulative_drug_dosage_prescribed": 32767,
+  "cumulative_drug_dosage_actual": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_hormone_therapies_partial_update
+
+<a id="opIdmoh_hormone_therapies_partial_update"></a>
+
+`PATCH /api/v1/moh/hormone_therapies/{id}/`
+
+<h3 id="moh_hormone_therapies_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this hormone therapy.|
+|body|body|[PatchedHormoneTherapyRequest](#schemapatchedhormonetherapyrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "hormone_drug_dosage_units": "string",
+  "cumulative_drug_dosage_prescribed": 32767,
+  "cumulative_drug_dosage_actual": 32767,
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_hormone_therapies_destroy
+
+<a id="opIdmoh_hormone_therapies_destroy"></a>
+
+`DELETE /api/v1/moh/hormone_therapies/{id}/`
+
+<h3 id="moh_hormone_therapies_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this hormone therapy.|
+
+## moh_immunotherapies_list
+
+<a id="opIdmoh_immunotherapies_list"></a>
+
+`GET /api/v1/moh/immunotherapies/`
+
+<h3 id="moh_immunotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -309,13 +1627,45 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 ]
 ```
 
-## api_v1_discovery_overview_retrieve
+## moh_immunotherapies_create
 
-<a id="opIdapi_v1_discovery_overview_retrieve"></a>
+<a id="opIdmoh_immunotherapies_create"></a>
 
-`GET /api/v1/discovery/overview`
+`POST /api/v1/moh/immunotherapies/`
 
-MoH Overview schema
+<h3 id="moh_immunotherapies_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[ImmunotherapyRequest](#schemaimmunotherapyrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "id": 0,
+  "immunotherapy_type": "string",
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_immunotherapies_retrieve
+
+<a id="opIdmoh_immunotherapies_retrieve"></a>
+
+`GET /api/v1/moh/immunotherapies/{id}/`
+
+<h3 id="moh_immunotherapies_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this immunotherapy.|
 
 > Example responses
 
@@ -323,18 +1673,93 @@ MoH Overview schema
 
 ```json
 {
-  "cohort_count": 0,
-  "individual_count": 0
+  "id": 0,
+  "immunotherapy_type": "string",
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
 }
 ```
 
-## api_v1_discovery_primary_diagnoses_list
+## moh_immunotherapies_update
 
-<a id="opIdapi_v1_discovery_primary_diagnoses_list"></a>
+<a id="opIdmoh_immunotherapies_update"></a>
 
-`GET /api/v1/discovery/primary_diagnoses/`
+`PUT /api/v1/moh/immunotherapies/{id}/`
 
-<h3 id="api_v1_discovery_primary_diagnoses_list-parameters">Parameters</h3>
+<h3 id="moh_immunotherapies_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this immunotherapy.|
+|body|body|[ImmunotherapyRequest](#schemaimmunotherapyrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "immunotherapy_type": "string",
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_immunotherapies_partial_update
+
+<a id="opIdmoh_immunotherapies_partial_update"></a>
+
+`PATCH /api/v1/moh/immunotherapies/{id}/`
+
+<h3 id="moh_immunotherapies_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this immunotherapy.|
+|body|body|[PatchedImmunotherapyRequest](#schemapatchedimmunotherapyrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "immunotherapy_type": "string",
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_immunotherapies_destroy
+
+<a id="opIdmoh_immunotherapies_destroy"></a>
+
+`DELETE /api/v1/moh/immunotherapies/{id}/`
+
+<h3 id="moh_immunotherapies_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this immunotherapy.|
+
+## moh_primary_diagnoses_list
+
+<a id="opIdmoh_primary_diagnoses_list"></a>
+
+`GET /api/v1/moh/primary_diagnoses/`
+
+<h3 id="moh_primary_diagnoses_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -378,13 +1803,311 @@ MoH Overview schema
 ]
 ```
 
-## api_v1_discovery_radiations_list
+## moh_primary_diagnoses_create
 
-<a id="opIdapi_v1_discovery_radiations_list"></a>
+<a id="opIdmoh_primary_diagnoses_create"></a>
 
-`GET /api/v1/discovery/radiations/`
+`POST /api/v1/moh/primary_diagnoses/`
 
-<h3 id="api_v1_discovery_radiations_list-parameters">Parameters</h3>
+<h3 id="moh_primary_diagnoses_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[PrimaryDiagnosisRequest](#schemaprimarydiagnosisrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "submitter_primary_diagnosis_id": "string",
+  "date_of_diagnosis": "string",
+  "cancer_type_code": "string",
+  "basis_of_diagnosis": "string",
+  "lymph_nodes_examined_status": "string",
+  "lymph_nodes_examined_method": "string",
+  "number_lymph_nodes_positive": 32767,
+  "clinical_tumour_staging_system": "string",
+  "clinical_t_category": "string",
+  "clinical_n_category": "string",
+  "clinical_m_category": "string",
+  "clinical_stage_group": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string"
+}
+```
+
+## moh_primary_diagnoses_retrieve
+
+<a id="opIdmoh_primary_diagnoses_retrieve"></a>
+
+`GET /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
+
+<h3 id="moh_primary_diagnoses_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_primary_diagnosis_id": "string",
+  "date_of_diagnosis": "string",
+  "cancer_type_code": "string",
+  "basis_of_diagnosis": "string",
+  "lymph_nodes_examined_status": "string",
+  "lymph_nodes_examined_method": "string",
+  "number_lymph_nodes_positive": 32767,
+  "clinical_tumour_staging_system": "string",
+  "clinical_t_category": "string",
+  "clinical_n_category": "string",
+  "clinical_m_category": "string",
+  "clinical_stage_group": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string"
+}
+```
+
+## moh_primary_diagnoses_update
+
+<a id="opIdmoh_primary_diagnoses_update"></a>
+
+`PUT /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
+
+<h3 id="moh_primary_diagnoses_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
+|body|body|[PrimaryDiagnosisRequest](#schemaprimarydiagnosisrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_primary_diagnosis_id": "string",
+  "date_of_diagnosis": "string",
+  "cancer_type_code": "string",
+  "basis_of_diagnosis": "string",
+  "lymph_nodes_examined_status": "string",
+  "lymph_nodes_examined_method": "string",
+  "number_lymph_nodes_positive": 32767,
+  "clinical_tumour_staging_system": "string",
+  "clinical_t_category": "string",
+  "clinical_n_category": "string",
+  "clinical_m_category": "string",
+  "clinical_stage_group": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string"
+}
+```
+
+## moh_primary_diagnoses_partial_update
+
+<a id="opIdmoh_primary_diagnoses_partial_update"></a>
+
+`PATCH /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
+
+<h3 id="moh_primary_diagnoses_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
+|body|body|[PatchedPrimaryDiagnosisRequest](#schemapatchedprimarydiagnosisrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_primary_diagnosis_id": "string",
+  "date_of_diagnosis": "string",
+  "cancer_type_code": "string",
+  "basis_of_diagnosis": "string",
+  "lymph_nodes_examined_status": "string",
+  "lymph_nodes_examined_method": "string",
+  "number_lymph_nodes_positive": 32767,
+  "clinical_tumour_staging_system": "string",
+  "clinical_t_category": "string",
+  "clinical_n_category": "string",
+  "clinical_m_category": "string",
+  "clinical_stage_group": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string"
+}
+```
+
+## moh_primary_diagnoses_destroy
+
+<a id="opIdmoh_primary_diagnoses_destroy"></a>
+
+`DELETE /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
+
+<h3 id="moh_primary_diagnoses_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
+
+## moh_programs_list
+
+<a id="opIdmoh_programs_list"></a>
+
+`GET /api/v1/moh/programs/`
+
+<h3 id="moh_programs_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|name|query|string|false|none|
+|created|query|string(date)|false|none|
+|updated|query|string(date-time)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+[
+  {
+    "program_id": "string",
+    "name": "string",
+    "created": "2019-08-24",
+    "updated": "2019-08-24T14:15:22Z"
+  }
+]
+```
+
+## moh_programs_create
+
+<a id="opIdmoh_programs_create"></a>
+
+`POST /api/v1/moh/programs/`
+
+<h3 id="moh_programs_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[ProgramRequest](#schemaprogramrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "program_id": "string",
+  "name": "string",
+  "created": "2019-08-24",
+  "updated": "2019-08-24T14:15:22Z"
+}
+```
+
+## moh_programs_retrieve
+
+<a id="opIdmoh_programs_retrieve"></a>
+
+`GET /api/v1/moh/programs/{program_id}/`
+
+<h3 id="moh_programs_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|path|string|true|A unique value identifying this program.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "program_id": "string",
+  "name": "string",
+  "created": "2019-08-24",
+  "updated": "2019-08-24T14:15:22Z"
+}
+```
+
+## moh_programs_update
+
+<a id="opIdmoh_programs_update"></a>
+
+`PUT /api/v1/moh/programs/{program_id}/`
+
+<h3 id="moh_programs_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|path|string|true|A unique value identifying this program.|
+|body|body|[ProgramRequest](#schemaprogramrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "program_id": "string",
+  "name": "string",
+  "created": "2019-08-24",
+  "updated": "2019-08-24T14:15:22Z"
+}
+```
+
+## moh_programs_partial_update
+
+<a id="opIdmoh_programs_partial_update"></a>
+
+`PATCH /api/v1/moh/programs/{program_id}/`
+
+<h3 id="moh_programs_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|path|string|true|A unique value identifying this program.|
+|body|body|[PatchedProgramRequest](#schemapatchedprogramrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "program_id": "string",
+  "name": "string",
+  "created": "2019-08-24",
+  "updated": "2019-08-24T14:15:22Z"
+}
+```
+
+## moh_programs_destroy
+
+<a id="opIdmoh_programs_destroy"></a>
+
+`DELETE /api/v1/moh/programs/{program_id}/`
+
+<h3 id="moh_programs_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|path|string|true|A unique value identifying this program.|
+
+## moh_radiations_list
+
+<a id="opIdmoh_radiations_list"></a>
+
+`GET /api/v1/moh/radiations/`
+
+<h3 id="moh_radiations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -421,13 +2144,155 @@ MoH Overview schema
 ]
 ```
 
-## api_v1_discovery_sample_registrations_list
+## moh_radiations_create
 
-<a id="opIdapi_v1_discovery_sample_registrations_list"></a>
+<a id="opIdmoh_radiations_create"></a>
 
-`GET /api/v1/discovery/sample_registrations/`
+`POST /api/v1/moh/radiations/`
 
-<h3 id="api_v1_discovery_sample_registrations_list-parameters">Parameters</h3>
+<h3 id="moh_radiations_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[RadiationRequest](#schemaradiationrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "id": 0,
+  "radiation_therapy_modality": "string",
+  "radiation_therapy_type": "string",
+  "radiation_therapy_fractions": 32767,
+  "radiation_therapy_dosage": 32767,
+  "anatomical_site_irradiated": "string",
+  "radiation_boost": true,
+  "reference_radiation_treatment_id": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_radiations_retrieve
+
+<a id="opIdmoh_radiations_retrieve"></a>
+
+`GET /api/v1/moh/radiations/{id}/`
+
+<h3 id="moh_radiations_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this radiation.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "radiation_therapy_modality": "string",
+  "radiation_therapy_type": "string",
+  "radiation_therapy_fractions": 32767,
+  "radiation_therapy_dosage": 32767,
+  "anatomical_site_irradiated": "string",
+  "radiation_boost": true,
+  "reference_radiation_treatment_id": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_radiations_update
+
+<a id="opIdmoh_radiations_update"></a>
+
+`PUT /api/v1/moh/radiations/{id}/`
+
+<h3 id="moh_radiations_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this radiation.|
+|body|body|[RadiationRequest](#schemaradiationrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "radiation_therapy_modality": "string",
+  "radiation_therapy_type": "string",
+  "radiation_therapy_fractions": 32767,
+  "radiation_therapy_dosage": 32767,
+  "anatomical_site_irradiated": "string",
+  "radiation_boost": true,
+  "reference_radiation_treatment_id": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_radiations_partial_update
+
+<a id="opIdmoh_radiations_partial_update"></a>
+
+`PATCH /api/v1/moh/radiations/{id}/`
+
+<h3 id="moh_radiations_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this radiation.|
+|body|body|[PatchedRadiationRequest](#schemapatchedradiationrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "radiation_therapy_modality": "string",
+  "radiation_therapy_type": "string",
+  "radiation_therapy_fractions": 32767,
+  "radiation_therapy_dosage": 32767,
+  "anatomical_site_irradiated": "string",
+  "radiation_boost": true,
+  "reference_radiation_treatment_id": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_radiations_destroy
+
+<a id="opIdmoh_radiations_destroy"></a>
+
+`DELETE /api/v1/moh/radiations/{id}/`
+
+<h3 id="moh_radiations_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this radiation.|
+
+## moh_sample_registrations_list
+
+<a id="opIdmoh_sample_registrations_list"></a>
+
+`GET /api/v1/moh/sample_registrations/`
+
+<h3 id="moh_sample_registrations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -463,13 +2328,151 @@ MoH Overview schema
 ]
 ```
 
-## api_v1_discovery_specimens_list
+## moh_sample_registrations_create
 
-<a id="opIdapi_v1_discovery_specimens_list"></a>
+<a id="opIdmoh_sample_registrations_create"></a>
 
-`GET /api/v1/discovery/specimens/`
+`POST /api/v1/moh/sample_registrations/`
 
-<h3 id="api_v1_discovery_specimens_list-parameters">Parameters</h3>
+<h3 id="moh_sample_registrations_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[SampleRegistrationRequest](#schemasampleregistrationrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "submitter_sample_id": "string",
+  "program_id": "string",
+  "gender": "string",
+  "sex_at_birth": "string",
+  "specimen_tissue_source": "string",
+  "tumour_normal_designation": "string",
+  "specimen_type": "string",
+  "sample_type": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string"
+}
+```
+
+## moh_sample_registrations_retrieve
+
+<a id="opIdmoh_sample_registrations_retrieve"></a>
+
+`GET /api/v1/moh/sample_registrations/{submitter_sample_id}/`
+
+<h3 id="moh_sample_registrations_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_sample_id": "string",
+  "program_id": "string",
+  "gender": "string",
+  "sex_at_birth": "string",
+  "specimen_tissue_source": "string",
+  "tumour_normal_designation": "string",
+  "specimen_type": "string",
+  "sample_type": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string"
+}
+```
+
+## moh_sample_registrations_update
+
+<a id="opIdmoh_sample_registrations_update"></a>
+
+`PUT /api/v1/moh/sample_registrations/{submitter_sample_id}/`
+
+<h3 id="moh_sample_registrations_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
+|body|body|[SampleRegistrationRequest](#schemasampleregistrationrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_sample_id": "string",
+  "program_id": "string",
+  "gender": "string",
+  "sex_at_birth": "string",
+  "specimen_tissue_source": "string",
+  "tumour_normal_designation": "string",
+  "specimen_type": "string",
+  "sample_type": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string"
+}
+```
+
+## moh_sample_registrations_partial_update
+
+<a id="opIdmoh_sample_registrations_partial_update"></a>
+
+`PATCH /api/v1/moh/sample_registrations/{submitter_sample_id}/`
+
+<h3 id="moh_sample_registrations_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
+|body|body|[PatchedSampleRegistrationRequest](#schemapatchedsampleregistrationrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_sample_id": "string",
+  "program_id": "string",
+  "gender": "string",
+  "sex_at_birth": "string",
+  "specimen_tissue_source": "string",
+  "tumour_normal_designation": "string",
+  "specimen_type": "string",
+  "sample_type": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string"
+}
+```
+
+## moh_sample_registrations_destroy
+
+<a id="opIdmoh_sample_registrations_destroy"></a>
+
+`DELETE /api/v1/moh/sample_registrations/{submitter_sample_id}/`
+
+<h3 id="moh_sample_registrations_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
+
+## moh_specimens_list
+
+<a id="opIdmoh_specimens_list"></a>
+
+`GET /api/v1/moh/specimens/`
+
+<h3 id="moh_specimens_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -523,13 +2526,187 @@ MoH Overview schema
 ]
 ```
 
-## api_v1_discovery_surgeries_list
+## moh_specimens_create
 
-<a id="opIdapi_v1_discovery_surgeries_list"></a>
+<a id="opIdmoh_specimens_create"></a>
 
-`GET /api/v1/discovery/surgeries/`
+`POST /api/v1/moh/specimens/`
 
-<h3 id="api_v1_discovery_surgeries_list-parameters">Parameters</h3>
+<h3 id="moh_specimens_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[SpecimenRequest](#schemaspecimenrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "submitter_specimen_id": "string",
+  "pathological_tumour_staging_system": "string",
+  "pathological_t_category": "string",
+  "pathological_n_category": "string",
+  "pathological_m_category": "string",
+  "pathological_stage_group": "string",
+  "specimen_collection_date": "string",
+  "specimen_storage": "string",
+  "tumour_histological_type": "string",
+  "specimen_anatomic_location": "string",
+  "reference_pathology_confirmed_diagnosis": "string",
+  "reference_pathology_confirmed_tumour_presence": "string",
+  "tumour_grading_system": "string",
+  "tumour_grade": "string",
+  "percent_tumour_cells_range": "string",
+  "percent_tumour_cells_measurement_method": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_primary_diagnosis_id": "string"
+}
+```
+
+## moh_specimens_retrieve
+
+<a id="opIdmoh_specimens_retrieve"></a>
+
+`GET /api/v1/moh/specimens/{submitter_specimen_id}/`
+
+<h3 id="moh_specimens_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_specimen_id": "string",
+  "pathological_tumour_staging_system": "string",
+  "pathological_t_category": "string",
+  "pathological_n_category": "string",
+  "pathological_m_category": "string",
+  "pathological_stage_group": "string",
+  "specimen_collection_date": "string",
+  "specimen_storage": "string",
+  "tumour_histological_type": "string",
+  "specimen_anatomic_location": "string",
+  "reference_pathology_confirmed_diagnosis": "string",
+  "reference_pathology_confirmed_tumour_presence": "string",
+  "tumour_grading_system": "string",
+  "tumour_grade": "string",
+  "percent_tumour_cells_range": "string",
+  "percent_tumour_cells_measurement_method": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_primary_diagnosis_id": "string"
+}
+```
+
+## moh_specimens_update
+
+<a id="opIdmoh_specimens_update"></a>
+
+`PUT /api/v1/moh/specimens/{submitter_specimen_id}/`
+
+<h3 id="moh_specimens_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
+|body|body|[SpecimenRequest](#schemaspecimenrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_specimen_id": "string",
+  "pathological_tumour_staging_system": "string",
+  "pathological_t_category": "string",
+  "pathological_n_category": "string",
+  "pathological_m_category": "string",
+  "pathological_stage_group": "string",
+  "specimen_collection_date": "string",
+  "specimen_storage": "string",
+  "tumour_histological_type": "string",
+  "specimen_anatomic_location": "string",
+  "reference_pathology_confirmed_diagnosis": "string",
+  "reference_pathology_confirmed_tumour_presence": "string",
+  "tumour_grading_system": "string",
+  "tumour_grade": "string",
+  "percent_tumour_cells_range": "string",
+  "percent_tumour_cells_measurement_method": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_primary_diagnosis_id": "string"
+}
+```
+
+## moh_specimens_partial_update
+
+<a id="opIdmoh_specimens_partial_update"></a>
+
+`PATCH /api/v1/moh/specimens/{submitter_specimen_id}/`
+
+<h3 id="moh_specimens_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
+|body|body|[PatchedSpecimenRequest](#schemapatchedspecimenrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "submitter_specimen_id": "string",
+  "pathological_tumour_staging_system": "string",
+  "pathological_t_category": "string",
+  "pathological_n_category": "string",
+  "pathological_m_category": "string",
+  "pathological_stage_group": "string",
+  "specimen_collection_date": "string",
+  "specimen_storage": "string",
+  "tumour_histological_type": "string",
+  "specimen_anatomic_location": "string",
+  "reference_pathology_confirmed_diagnosis": "string",
+  "reference_pathology_confirmed_tumour_presence": "string",
+  "tumour_grading_system": "string",
+  "tumour_grade": "string",
+  "percent_tumour_cells_range": "string",
+  "percent_tumour_cells_measurement_method": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_primary_diagnosis_id": "string"
+}
+```
+
+## moh_specimens_destroy
+
+<a id="opIdmoh_specimens_destroy"></a>
+
+`DELETE /api/v1/moh/specimens/{submitter_specimen_id}/`
+
+<h3 id="moh_specimens_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
+
+## moh_surgeries_list
+
+<a id="opIdmoh_surgeries_list"></a>
+
+`GET /api/v1/moh/surgeries/`
+
+<h3 id="moh_surgeries_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -580,13 +2757,183 @@ MoH Overview schema
 ]
 ```
 
-## api_v1_discovery_treatments_list
+## moh_surgeries_create
 
-<a id="opIdapi_v1_discovery_treatments_list"></a>
+<a id="opIdmoh_surgeries_create"></a>
 
-`GET /api/v1/discovery/treatments/`
+`POST /api/v1/moh/surgeries/`
 
-<h3 id="api_v1_discovery_treatments_list-parameters">Parameters</h3>
+<h3 id="moh_surgeries_create-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[SurgeryRequest](#schemasurgeryrequest)|true|none|
+
+> Example responses
+
+> 201 Response
+
+```json
+{
+  "id": 0,
+  "surgery_type": "string",
+  "surgery_site": "string",
+  "surgery_location": "string",
+  "tumour_length": 32767,
+  "tumour_width": 32767,
+  "greatest_dimension_tumour": 32767,
+  "tumour_focality": "string",
+  "residual_tumour_classification": "string",
+  "margin_types_involved": "string",
+  "margin_types_not_involved": "string",
+  "margin_types_not_assessed": "string",
+  "lymphovascular_invasion": "string",
+  "perineural_invasion": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_surgeries_retrieve
+
+<a id="opIdmoh_surgeries_retrieve"></a>
+
+`GET /api/v1/moh/surgeries/{id}/`
+
+<h3 id="moh_surgeries_retrieve-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this surgery.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "surgery_type": "string",
+  "surgery_site": "string",
+  "surgery_location": "string",
+  "tumour_length": 32767,
+  "tumour_width": 32767,
+  "greatest_dimension_tumour": 32767,
+  "tumour_focality": "string",
+  "residual_tumour_classification": "string",
+  "margin_types_involved": "string",
+  "margin_types_not_involved": "string",
+  "margin_types_not_assessed": "string",
+  "lymphovascular_invasion": "string",
+  "perineural_invasion": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_surgeries_update
+
+<a id="opIdmoh_surgeries_update"></a>
+
+`PUT /api/v1/moh/surgeries/{id}/`
+
+<h3 id="moh_surgeries_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this surgery.|
+|body|body|[SurgeryRequest](#schemasurgeryrequest)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "surgery_type": "string",
+  "surgery_site": "string",
+  "surgery_location": "string",
+  "tumour_length": 32767,
+  "tumour_width": 32767,
+  "greatest_dimension_tumour": 32767,
+  "tumour_focality": "string",
+  "residual_tumour_classification": "string",
+  "margin_types_involved": "string",
+  "margin_types_not_involved": "string",
+  "margin_types_not_assessed": "string",
+  "lymphovascular_invasion": "string",
+  "perineural_invasion": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_surgeries_partial_update
+
+<a id="opIdmoh_surgeries_partial_update"></a>
+
+`PATCH /api/v1/moh/surgeries/{id}/`
+
+<h3 id="moh_surgeries_partial_update-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this surgery.|
+|body|body|[PatchedSurgeryRequest](#schemapatchedsurgeryrequest)|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": 0,
+  "surgery_type": "string",
+  "surgery_site": "string",
+  "surgery_location": "string",
+  "tumour_length": 32767,
+  "tumour_width": 32767,
+  "greatest_dimension_tumour": 32767,
+  "tumour_focality": "string",
+  "residual_tumour_classification": "string",
+  "margin_types_involved": "string",
+  "margin_types_not_involved": "string",
+  "margin_types_not_assessed": "string",
+  "lymphovascular_invasion": "string",
+  "perineural_invasion": "string",
+  "program_id": "string",
+  "submitter_donor_id": "string",
+  "submitter_specimen_id": "string",
+  "submitter_treatment_id": "string"
+}
+```
+
+## moh_surgeries_destroy
+
+<a id="opIdmoh_surgeries_destroy"></a>
+
+`DELETE /api/v1/moh/surgeries/{id}/`
+
+<h3 id="moh_surgeries_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|A unique integer value identifying this surgery.|
+
+## moh_treatments_list
+
+<a id="opIdmoh_treatments_list"></a>
+
+`GET /api/v1/moh/treatments/`
+
+<h3 id="moh_treatments_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -630,2634 +2977,13 @@ MoH Overview schema
 ]
 ```
 
-<h1 id="metadata-service-api-biomarkers">biomarkers</h1>
+## moh_treatments_create
 
-## biomarkers_list
-
-<a id="opIdbiomarkers_list"></a>
-
-`GET /api/v1/moh/biomarkers/`
-
-<h3 id="biomarkers_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_specimen_id|query|string|false|none|
-|submitter_primary_diagnosis_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|submitter_follow_up_id|query|string|false|none|
-|test_interval|query|integer|false|none|
-|psa_level|query|integer|false|none|
-|ca125|query|integer|false|none|
-|cea|query|integer|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string",
-      "submitter_follow_up_id": "string"
-    }
-  ]
-}
-```
-
-## biomarkers_create
-
-<a id="opIdbiomarkers_create"></a>
-
-`POST /api/v1/moh/biomarkers/`
-
-<h3 id="biomarkers_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[BiomarkerRequest](#schemabiomarkerrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "test_interval": 32767,
-  "psa_level": 32767,
-  "ca125": 32767,
-  "cea": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string",
-  "submitter_follow_up_id": "string"
-}
-```
-
-## biomarkers_retrieve
-
-<a id="opIdbiomarkers_retrieve"></a>
-
-`GET /api/v1/moh/biomarkers/{id}/`
-
-<h3 id="biomarkers_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this biomarker.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "test_interval": 32767,
-  "psa_level": 32767,
-  "ca125": 32767,
-  "cea": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string",
-  "submitter_follow_up_id": "string"
-}
-```
-
-## biomarkers_update
-
-<a id="opIdbiomarkers_update"></a>
-
-`PUT /api/v1/moh/biomarkers/{id}/`
-
-<h3 id="biomarkers_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this biomarker.|
-|body|body|[BiomarkerRequest](#schemabiomarkerrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "test_interval": 32767,
-  "psa_level": 32767,
-  "ca125": 32767,
-  "cea": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string",
-  "submitter_follow_up_id": "string"
-}
-```
-
-## biomarkers_partial_update
-
-<a id="opIdbiomarkers_partial_update"></a>
-
-`PATCH /api/v1/moh/biomarkers/{id}/`
-
-<h3 id="biomarkers_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this biomarker.|
-|body|body|[PatchedBiomarkerRequest](#schemapatchedbiomarkerrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "test_interval": 32767,
-  "psa_level": 32767,
-  "ca125": 32767,
-  "cea": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string",
-  "submitter_follow_up_id": "string"
-}
-```
-
-## biomarkers_destroy
-
-<a id="opIdbiomarkers_destroy"></a>
-
-`DELETE /api/v1/moh/biomarkers/{id}/`
-
-<h3 id="biomarkers_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this biomarker.|
-
-<h1 id="metadata-service-api-chemotherapies">chemotherapies</h1>
-
-## chemotherapies_list
-
-<a id="opIdchemotherapies_list"></a>
-
-`GET /api/v1/moh/chemotherapies/`
-
-<h3 id="chemotherapies_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|drug_name|query|string|false|none|
-|drug_rxnormcui|query|string|false|none|
-|chemotherapy_dosage_units|query|string|false|none|
-|cumulative_drug_dosage_prescribed|query|integer|false|none|
-|cumulative_drug_dosage_actual|query|integer|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "chemotherapy_dosage_units": "string",
-      "cumulative_drug_dosage_prescribed": 32767,
-      "cumulative_drug_dosage_actual": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-```
-
-## chemotherapies_create
-
-<a id="opIdchemotherapies_create"></a>
-
-`POST /api/v1/moh/chemotherapies/`
-
-<h3 id="chemotherapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[ChemotherapyRequest](#schemachemotherapyrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "chemotherapy_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## chemotherapies_retrieve
-
-<a id="opIdchemotherapies_retrieve"></a>
-
-`GET /api/v1/moh/chemotherapies/{id}/`
-
-<h3 id="chemotherapies_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this chemotherapy.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "chemotherapy_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## chemotherapies_update
-
-<a id="opIdchemotherapies_update"></a>
-
-`PUT /api/v1/moh/chemotherapies/{id}/`
-
-<h3 id="chemotherapies_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this chemotherapy.|
-|body|body|[ChemotherapyRequest](#schemachemotherapyrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "chemotherapy_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## chemotherapies_partial_update
-
-<a id="opIdchemotherapies_partial_update"></a>
-
-`PATCH /api/v1/moh/chemotherapies/{id}/`
-
-<h3 id="chemotherapies_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this chemotherapy.|
-|body|body|[PatchedChemotherapyRequest](#schemapatchedchemotherapyrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "chemotherapy_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## chemotherapies_destroy
-
-<a id="opIdchemotherapies_destroy"></a>
-
-`DELETE /api/v1/moh/chemotherapies/{id}/`
-
-<h3 id="chemotherapies_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this chemotherapy.|
-
-<h1 id="metadata-service-api-comorbidities">comorbidities</h1>
-
-## comorbidities_list
-
-<a id="opIdcomorbidities_list"></a>
-
-`GET /api/v1/moh/comorbidities/`
-
-<h3 id="comorbidities_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|prior_malignancy|query|string|false|none|
-|laterality_of_prior_malignancy|query|string|false|none|
-|age_at_comorbidity_diagnosis|query|integer|false|none|
-|comorbidity_type_code|query|string|false|none|
-|comorbidity_treatment_status|query|string|false|none|
-|comorbidity_treatment|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "prior_malignancy": "string",
-      "laterality_of_prior_malignancy": "string",
-      "age_at_comorbidity_diagnosis": 32767,
-      "comorbidity_type_code": "string",
-      "comorbidity_treatment_status": "string",
-      "comorbidity_treatment": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ]
-}
-```
-
-## comorbidities_create
-
-<a id="opIdcomorbidities_create"></a>
-
-`POST /api/v1/moh/comorbidities/`
-
-<h3 id="comorbidities_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[ComorbidityRequest](#schemacomorbidityrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "prior_malignancy": "string",
-  "laterality_of_prior_malignancy": "string",
-  "age_at_comorbidity_diagnosis": 32767,
-  "comorbidity_type_code": "string",
-  "comorbidity_treatment_status": "string",
-  "comorbidity_treatment": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## comorbidities_retrieve
-
-<a id="opIdcomorbidities_retrieve"></a>
-
-`GET /api/v1/moh/comorbidities/{id}/`
-
-<h3 id="comorbidities_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this comorbidity.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "prior_malignancy": "string",
-  "laterality_of_prior_malignancy": "string",
-  "age_at_comorbidity_diagnosis": 32767,
-  "comorbidity_type_code": "string",
-  "comorbidity_treatment_status": "string",
-  "comorbidity_treatment": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## comorbidities_update
-
-<a id="opIdcomorbidities_update"></a>
-
-`PUT /api/v1/moh/comorbidities/{id}/`
-
-<h3 id="comorbidities_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this comorbidity.|
-|body|body|[ComorbidityRequest](#schemacomorbidityrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "prior_malignancy": "string",
-  "laterality_of_prior_malignancy": "string",
-  "age_at_comorbidity_diagnosis": 32767,
-  "comorbidity_type_code": "string",
-  "comorbidity_treatment_status": "string",
-  "comorbidity_treatment": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## comorbidities_partial_update
-
-<a id="opIdcomorbidities_partial_update"></a>
-
-`PATCH /api/v1/moh/comorbidities/{id}/`
-
-<h3 id="comorbidities_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this comorbidity.|
-|body|body|[PatchedComorbidityRequest](#schemapatchedcomorbidityrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "prior_malignancy": "string",
-  "laterality_of_prior_malignancy": "string",
-  "age_at_comorbidity_diagnosis": 32767,
-  "comorbidity_type_code": "string",
-  "comorbidity_treatment_status": "string",
-  "comorbidity_treatment": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## comorbidities_destroy
-
-<a id="opIdcomorbidities_destroy"></a>
-
-`DELETE /api/v1/moh/comorbidities/{id}/`
-
-<h3 id="comorbidities_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this comorbidity.|
-
-<h1 id="metadata-service-api-donors">donors</h1>
-
-## donors_list
-
-<a id="opIddonors_list"></a>
-
-`GET /api/v1/moh/donors/`
-
-<h3 id="donors_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_donor_id|query|string|false|none|
-|program_id|query|string|false|none|
-|is_deceased|query|boolean|false|none|
-|cause_of_death|query|string|false|none|
-|date_of_birth|query|string|false|none|
-|date_of_death|query|string|false|none|
-|primary_site|query|string|false|none|
-|age|query|number|false|none|
-|max_age|query|number|false|none|
-|min_age|query|number|false|none|
-|donors|query|string|false|none|
-|primary_diagnosis|query|string|false|none|
-|speciman|query|string|false|none|
-|sample_registration|query|string|false|none|
-|treatment|query|string|false|none|
-|chemotherapy|query|string|false|none|
-|hormone_therapy|query|string|false|none|
-|radiation|query|string|false|none|
-|immunotherapy|query|string|false|none|
-|surgery|query|string|false|none|
-|follow_up|query|string|false|none|
-|biomarker|query|string|false|none|
-|comorbidity|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_donor_id": "string",
-      "is_deceased": true,
-      "cause_of_death": "string",
-      "date_of_birth": "string",
-      "date_of_death": "string",
-      "primary_site": "string",
-      "program_id": "string"
-    }
-  ]
-}
-```
-
-## donors_create
-
-<a id="opIddonors_create"></a>
-
-`POST /api/v1/moh/donors/`
-
-<h3 id="donors_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[DonorRequest](#schemadonorrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "submitter_donor_id": "string",
-  "is_deceased": true,
-  "cause_of_death": "string",
-  "date_of_birth": "string",
-  "date_of_death": "string",
-  "primary_site": "string",
-  "program_id": "string"
-}
-```
-
-## donors_retrieve
-
-<a id="opIddonors_retrieve"></a>
-
-`GET /api/v1/moh/donors/{submitter_donor_id}/`
-
-<h3 id="donors_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_donor_id|path|string|true|A unique value identifying this donor.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_donor_id": "string",
-  "is_deceased": true,
-  "cause_of_death": "string",
-  "date_of_birth": "string",
-  "date_of_death": "string",
-  "primary_site": "string",
-  "program_id": "string"
-}
-```
-
-## donors_update
-
-<a id="opIddonors_update"></a>
-
-`PUT /api/v1/moh/donors/{submitter_donor_id}/`
-
-<h3 id="donors_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_donor_id|path|string|true|A unique value identifying this donor.|
-|body|body|[DonorRequest](#schemadonorrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_donor_id": "string",
-  "is_deceased": true,
-  "cause_of_death": "string",
-  "date_of_birth": "string",
-  "date_of_death": "string",
-  "primary_site": "string",
-  "program_id": "string"
-}
-```
-
-## donors_partial_update
-
-<a id="opIddonors_partial_update"></a>
-
-`PATCH /api/v1/moh/donors/{submitter_donor_id}/`
-
-<h3 id="donors_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_donor_id|path|string|true|A unique value identifying this donor.|
-|body|body|[PatchedDonorRequest](#schemapatcheddonorrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_donor_id": "string",
-  "is_deceased": true,
-  "cause_of_death": "string",
-  "date_of_birth": "string",
-  "date_of_death": "string",
-  "primary_site": "string",
-  "program_id": "string"
-}
-```
-
-## donors_destroy
-
-<a id="opIddonors_destroy"></a>
-
-`DELETE /api/v1/moh/donors/{submitter_donor_id}/`
-
-<h3 id="donors_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_donor_id|path|string|true|A unique value identifying this donor.|
-
-<h1 id="metadata-service-api-follow_ups">follow_ups</h1>
-
-## follow_ups_list
-
-<a id="opIdfollow_ups_list"></a>
-
-`GET /api/v1/moh/follow_ups/`
-
-<h3 id="follow_ups_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|query|string|false|none|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_primary_diagnosis_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|date_of_followup|query|string|false|none|
-|lost_to_followup|query|boolean|false|none|
-|lost_to_followup_reason|query|string|false|none|
-|disease_status_at_followup|query|string|false|none|
-|relapse_type|query|string|false|none|
-|date_of_relapse|query|string|false|none|
-|method_of_progression_status|query|string|false|none|
-|anatomic_site_progression_or_recurrence|query|string|false|none|
-|recurrence_tumour_staging_system|query|string|false|none|
-|recurrence_t_category|query|string|false|none|
-|recurrence_n_category|query|string|false|none|
-|recurrence_m_category|query|string|false|none|
-|recurrence_stage_group|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_follow_up_id": "string",
-      "date_of_followup": "string",
-      "lost_to_followup": true,
-      "lost_to_followup_reason": "string",
-      "disease_status_at_followup": "string",
-      "relapse_type": "string",
-      "date_of_relapse": "string",
-      "method_of_progression_status": "string",
-      "anatomic_site_progression_or_recurrence": "string",
-      "recurrence_tumour_staging_system": "string",
-      "recurrence_t_category": "string",
-      "recurrence_n_category": "string",
-      "recurrence_m_category": "string",
-      "recurrence_stage_group": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-```
-
-## follow_ups_create
-
-<a id="opIdfollow_ups_create"></a>
-
-`POST /api/v1/moh/follow_ups/`
-
-<h3 id="follow_ups_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[FollowUpRequest](#schemafollowuprequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "submitter_follow_up_id": "string",
-  "date_of_followup": "string",
-  "lost_to_followup": true,
-  "lost_to_followup_reason": "string",
-  "disease_status_at_followup": "string",
-  "relapse_type": "string",
-  "date_of_relapse": "string",
-  "method_of_progression_status": "string",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": "string",
-  "recurrence_t_category": "string",
-  "recurrence_n_category": "string",
-  "recurrence_m_category": "string",
-  "recurrence_stage_group": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## follow_ups_retrieve
-
-<a id="opIdfollow_ups_retrieve"></a>
-
-`GET /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
-
-<h3 id="follow_ups_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_follow_up_id": "string",
-  "date_of_followup": "string",
-  "lost_to_followup": true,
-  "lost_to_followup_reason": "string",
-  "disease_status_at_followup": "string",
-  "relapse_type": "string",
-  "date_of_relapse": "string",
-  "method_of_progression_status": "string",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": "string",
-  "recurrence_t_category": "string",
-  "recurrence_n_category": "string",
-  "recurrence_m_category": "string",
-  "recurrence_stage_group": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## follow_ups_update
-
-<a id="opIdfollow_ups_update"></a>
-
-`PUT /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
-
-<h3 id="follow_ups_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
-|body|body|[FollowUpRequest](#schemafollowuprequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_follow_up_id": "string",
-  "date_of_followup": "string",
-  "lost_to_followup": true,
-  "lost_to_followup_reason": "string",
-  "disease_status_at_followup": "string",
-  "relapse_type": "string",
-  "date_of_relapse": "string",
-  "method_of_progression_status": "string",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": "string",
-  "recurrence_t_category": "string",
-  "recurrence_n_category": "string",
-  "recurrence_m_category": "string",
-  "recurrence_stage_group": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## follow_ups_partial_update
-
-<a id="opIdfollow_ups_partial_update"></a>
-
-`PATCH /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
-
-<h3 id="follow_ups_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
-|body|body|[PatchedFollowUpRequest](#schemapatchedfollowuprequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_follow_up_id": "string",
-  "date_of_followup": "string",
-  "lost_to_followup": true,
-  "lost_to_followup_reason": "string",
-  "disease_status_at_followup": "string",
-  "relapse_type": "string",
-  "date_of_relapse": "string",
-  "method_of_progression_status": "string",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": "string",
-  "recurrence_t_category": "string",
-  "recurrence_n_category": "string",
-  "recurrence_m_category": "string",
-  "recurrence_stage_group": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## follow_ups_destroy
-
-<a id="opIdfollow_ups_destroy"></a>
-
-`DELETE /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
-
-<h3 id="follow_ups_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
-
-<h1 id="metadata-service-api-hormone_therapies">hormone_therapies</h1>
-
-## hormone_therapies_list
-
-<a id="opIdhormone_therapies_list"></a>
-
-`GET /api/v1/moh/hormone_therapies/`
-
-<h3 id="hormone_therapies_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|drug_name|query|string|false|none|
-|drug_rxnormcui|query|string|false|none|
-|hormone_drug_dosage_units|query|string|false|none|
-|cumulative_drug_dosage_prescribed|query|integer|false|none|
-|cumulative_drug_dosage_actual|query|integer|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "hormone_drug_dosage_units": "string",
-      "cumulative_drug_dosage_prescribed": 32767,
-      "cumulative_drug_dosage_actual": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-```
-
-## hormone_therapies_create
-
-<a id="opIdhormone_therapies_create"></a>
-
-`POST /api/v1/moh/hormone_therapies/`
-
-<h3 id="hormone_therapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[HormoneTherapyRequest](#schemahormonetherapyrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## hormone_therapies_retrieve
-
-<a id="opIdhormone_therapies_retrieve"></a>
-
-`GET /api/v1/moh/hormone_therapies/{id}/`
-
-<h3 id="hormone_therapies_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this hormone therapy.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## hormone_therapies_update
-
-<a id="opIdhormone_therapies_update"></a>
-
-`PUT /api/v1/moh/hormone_therapies/{id}/`
-
-<h3 id="hormone_therapies_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this hormone therapy.|
-|body|body|[HormoneTherapyRequest](#schemahormonetherapyrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## hormone_therapies_partial_update
-
-<a id="opIdhormone_therapies_partial_update"></a>
-
-`PATCH /api/v1/moh/hormone_therapies/{id}/`
-
-<h3 id="hormone_therapies_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this hormone therapy.|
-|body|body|[PatchedHormoneTherapyRequest](#schemapatchedhormonetherapyrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## hormone_therapies_destroy
-
-<a id="opIdhormone_therapies_destroy"></a>
-
-`DELETE /api/v1/moh/hormone_therapies/{id}/`
-
-<h3 id="hormone_therapies_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this hormone therapy.|
-
-<h1 id="metadata-service-api-immunotherapies">immunotherapies</h1>
-
-## immunotherapies_list
-
-<a id="opIdimmunotherapies_list"></a>
-
-`GET /api/v1/moh/immunotherapies/`
-
-<h3 id="immunotherapies_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|immunotherapy_type|query|string|false|none|
-|drug_name|query|string|false|none|
-|drug_rxnormcui|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "immunotherapy_type": "string",
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-```
-
-## immunotherapies_create
-
-<a id="opIdimmunotherapies_create"></a>
-
-`POST /api/v1/moh/immunotherapies/`
-
-<h3 id="immunotherapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[ImmunotherapyRequest](#schemaimmunotherapyrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "immunotherapy_type": "string",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## immunotherapies_retrieve
-
-<a id="opIdimmunotherapies_retrieve"></a>
-
-`GET /api/v1/moh/immunotherapies/{id}/`
-
-<h3 id="immunotherapies_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this immunotherapy.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "immunotherapy_type": "string",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## immunotherapies_update
-
-<a id="opIdimmunotherapies_update"></a>
-
-`PUT /api/v1/moh/immunotherapies/{id}/`
-
-<h3 id="immunotherapies_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this immunotherapy.|
-|body|body|[ImmunotherapyRequest](#schemaimmunotherapyrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "immunotherapy_type": "string",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## immunotherapies_partial_update
-
-<a id="opIdimmunotherapies_partial_update"></a>
-
-`PATCH /api/v1/moh/immunotherapies/{id}/`
-
-<h3 id="immunotherapies_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this immunotherapy.|
-|body|body|[PatchedImmunotherapyRequest](#schemapatchedimmunotherapyrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "immunotherapy_type": "string",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## immunotherapies_destroy
-
-<a id="opIdimmunotherapies_destroy"></a>
-
-`DELETE /api/v1/moh/immunotherapies/{id}/`
-
-<h3 id="immunotherapies_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this immunotherapy.|
-
-<h1 id="metadata-service-api-primary_diagnoses">primary_diagnoses</h1>
-
-## primary_diagnoses_list
-
-<a id="opIdprimary_diagnoses_list"></a>
-
-`GET /api/v1/moh/primary_diagnoses/`
-
-<h3 id="primary_diagnoses_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|query|string|false|none|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|date_of_diagnosis|query|string|false|none|
-|cancer_type_code|query|string|false|none|
-|basis_of_diagnosis|query|string|false|none|
-|lymph_nodes_examined_status|query|string|false|none|
-|lymph_nodes_examined_method|query|string|false|none|
-|number_lymph_nodes_positive|query|integer|false|none|
-|clinical_tumour_staging_system|query|string|false|none|
-|clinical_t_category|query|string|false|none|
-|clinical_n_category|query|string|false|none|
-|clinical_m_category|query|string|false|none|
-|clinical_stage_group|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_primary_diagnosis_id": "string",
-      "date_of_diagnosis": "string",
-      "cancer_type_code": "string",
-      "basis_of_diagnosis": "string",
-      "lymph_nodes_examined_status": "string",
-      "lymph_nodes_examined_method": "string",
-      "number_lymph_nodes_positive": 32767,
-      "clinical_tumour_staging_system": "string",
-      "clinical_t_category": "string",
-      "clinical_n_category": "string",
-      "clinical_m_category": "string",
-      "clinical_stage_group": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ]
-}
-```
-
-## primary_diagnoses_create
-
-<a id="opIdprimary_diagnoses_create"></a>
-
-`POST /api/v1/moh/primary_diagnoses/`
-
-<h3 id="primary_diagnoses_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[PrimaryDiagnosisRequest](#schemaprimarydiagnosisrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "submitter_primary_diagnosis_id": "string",
-  "date_of_diagnosis": "string",
-  "cancer_type_code": "string",
-  "basis_of_diagnosis": "string",
-  "lymph_nodes_examined_status": "string",
-  "lymph_nodes_examined_method": "string",
-  "number_lymph_nodes_positive": 32767,
-  "clinical_tumour_staging_system": "string",
-  "clinical_t_category": "string",
-  "clinical_n_category": "string",
-  "clinical_m_category": "string",
-  "clinical_stage_group": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## primary_diagnoses_retrieve
-
-<a id="opIdprimary_diagnoses_retrieve"></a>
-
-`GET /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
-
-<h3 id="primary_diagnoses_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_primary_diagnosis_id": "string",
-  "date_of_diagnosis": "string",
-  "cancer_type_code": "string",
-  "basis_of_diagnosis": "string",
-  "lymph_nodes_examined_status": "string",
-  "lymph_nodes_examined_method": "string",
-  "number_lymph_nodes_positive": 32767,
-  "clinical_tumour_staging_system": "string",
-  "clinical_t_category": "string",
-  "clinical_n_category": "string",
-  "clinical_m_category": "string",
-  "clinical_stage_group": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## primary_diagnoses_update
-
-<a id="opIdprimary_diagnoses_update"></a>
-
-`PUT /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
-
-<h3 id="primary_diagnoses_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
-|body|body|[PrimaryDiagnosisRequest](#schemaprimarydiagnosisrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_primary_diagnosis_id": "string",
-  "date_of_diagnosis": "string",
-  "cancer_type_code": "string",
-  "basis_of_diagnosis": "string",
-  "lymph_nodes_examined_status": "string",
-  "lymph_nodes_examined_method": "string",
-  "number_lymph_nodes_positive": 32767,
-  "clinical_tumour_staging_system": "string",
-  "clinical_t_category": "string",
-  "clinical_n_category": "string",
-  "clinical_m_category": "string",
-  "clinical_stage_group": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## primary_diagnoses_partial_update
-
-<a id="opIdprimary_diagnoses_partial_update"></a>
-
-`PATCH /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
-
-<h3 id="primary_diagnoses_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
-|body|body|[PatchedPrimaryDiagnosisRequest](#schemapatchedprimarydiagnosisrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_primary_diagnosis_id": "string",
-  "date_of_diagnosis": "string",
-  "cancer_type_code": "string",
-  "basis_of_diagnosis": "string",
-  "lymph_nodes_examined_status": "string",
-  "lymph_nodes_examined_method": "string",
-  "number_lymph_nodes_positive": 32767,
-  "clinical_tumour_staging_system": "string",
-  "clinical_t_category": "string",
-  "clinical_n_category": "string",
-  "clinical_m_category": "string",
-  "clinical_stage_group": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## primary_diagnoses_destroy
-
-<a id="opIdprimary_diagnoses_destroy"></a>
-
-`DELETE /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
-
-<h3 id="primary_diagnoses_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
-
-<h1 id="metadata-service-api-programs">programs</h1>
-
-## programs_list
-
-<a id="opIdprograms_list"></a>
-
-`GET /api/v1/moh/programs/`
-
-<h3 id="programs_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|name|query|string|false|none|
-|created|query|string(date-time)|false|none|
-|updated|query|string(date-time)|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "program_id": "string",
-      "name": "string",
-      "created": "2019-08-24T14:15:22Z",
-      "updated": "2019-08-24T14:15:22Z"
-    }
-  ]
-}
-```
-
-## programs_create
-
-<a id="opIdprograms_create"></a>
-
-`POST /api/v1/moh/programs/`
-
-<h3 id="programs_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[ProgramRequest](#schemaprogramrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "program_id": "string",
-  "name": "string",
-  "created": "2019-08-24T14:15:22Z",
-  "updated": "2019-08-24T14:15:22Z"
-}
-```
-
-## programs_retrieve
-
-<a id="opIdprograms_retrieve"></a>
-
-`GET /api/v1/moh/programs/{program_id}/`
-
-<h3 id="programs_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|path|string|true|A unique value identifying this program.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "program_id": "string",
-  "name": "string",
-  "created": "2019-08-24T14:15:22Z",
-  "updated": "2019-08-24T14:15:22Z"
-}
-```
-
-## programs_update
-
-<a id="opIdprograms_update"></a>
-
-`PUT /api/v1/moh/programs/{program_id}/`
-
-<h3 id="programs_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|path|string|true|A unique value identifying this program.|
-|body|body|[ProgramRequest](#schemaprogramrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "program_id": "string",
-  "name": "string",
-  "created": "2019-08-24T14:15:22Z",
-  "updated": "2019-08-24T14:15:22Z"
-}
-```
-
-## programs_partial_update
-
-<a id="opIdprograms_partial_update"></a>
-
-`PATCH /api/v1/moh/programs/{program_id}/`
-
-<h3 id="programs_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|path|string|true|A unique value identifying this program.|
-|body|body|[PatchedProgramRequest](#schemapatchedprogramrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "program_id": "string",
-  "name": "string",
-  "created": "2019-08-24T14:15:22Z",
-  "updated": "2019-08-24T14:15:22Z"
-}
-```
-
-## programs_destroy
-
-<a id="opIdprograms_destroy"></a>
-
-`DELETE /api/v1/moh/programs/{program_id}/`
-
-<h3 id="programs_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|path|string|true|A unique value identifying this program.|
-
-<h1 id="metadata-service-api-radiations">radiations</h1>
-
-## radiations_list
-
-<a id="opIdradiations_list"></a>
-
-`GET /api/v1/moh/radiations/`
-
-<h3 id="radiations_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|radiation_therapy_modality|query|string|false|none|
-|radiation_therapy_type|query|string|false|none|
-|radiation_therapy_fractions|query|integer|false|none|
-|radiation_therapy_dosage|query|integer|false|none|
-|anatomical_site_irradiated|query|string|false|none|
-|radiation_boost|query|boolean|false|none|
-|reference_radiation_treatment_id|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "radiation_therapy_modality": "string",
-      "radiation_therapy_type": "string",
-      "radiation_therapy_fractions": 32767,
-      "radiation_therapy_dosage": 32767,
-      "anatomical_site_irradiated": "string",
-      "radiation_boost": true,
-      "reference_radiation_treatment_id": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-```
-
-## radiations_create
-
-<a id="opIdradiations_create"></a>
-
-`POST /api/v1/moh/radiations/`
-
-<h3 id="radiations_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[RadiationRequest](#schemaradiationrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "radiation_therapy_modality": "string",
-  "radiation_therapy_type": "string",
-  "radiation_therapy_fractions": 32767,
-  "radiation_therapy_dosage": 32767,
-  "anatomical_site_irradiated": "string",
-  "radiation_boost": true,
-  "reference_radiation_treatment_id": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## radiations_retrieve
-
-<a id="opIdradiations_retrieve"></a>
-
-`GET /api/v1/moh/radiations/{id}/`
-
-<h3 id="radiations_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this radiation.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "radiation_therapy_modality": "string",
-  "radiation_therapy_type": "string",
-  "radiation_therapy_fractions": 32767,
-  "radiation_therapy_dosage": 32767,
-  "anatomical_site_irradiated": "string",
-  "radiation_boost": true,
-  "reference_radiation_treatment_id": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## radiations_update
-
-<a id="opIdradiations_update"></a>
-
-`PUT /api/v1/moh/radiations/{id}/`
-
-<h3 id="radiations_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this radiation.|
-|body|body|[RadiationRequest](#schemaradiationrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "radiation_therapy_modality": "string",
-  "radiation_therapy_type": "string",
-  "radiation_therapy_fractions": 32767,
-  "radiation_therapy_dosage": 32767,
-  "anatomical_site_irradiated": "string",
-  "radiation_boost": true,
-  "reference_radiation_treatment_id": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## radiations_partial_update
-
-<a id="opIdradiations_partial_update"></a>
-
-`PATCH /api/v1/moh/radiations/{id}/`
-
-<h3 id="radiations_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this radiation.|
-|body|body|[PatchedRadiationRequest](#schemapatchedradiationrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "radiation_therapy_modality": "string",
-  "radiation_therapy_type": "string",
-  "radiation_therapy_fractions": 32767,
-  "radiation_therapy_dosage": 32767,
-  "anatomical_site_irradiated": "string",
-  "radiation_boost": true,
-  "reference_radiation_treatment_id": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## radiations_destroy
-
-<a id="opIdradiations_destroy"></a>
-
-`DELETE /api/v1/moh/radiations/{id}/`
-
-<h3 id="radiations_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this radiation.|
-
-<h1 id="metadata-service-api-sample_registrations">sample_registrations</h1>
-
-## sample_registrations_list
-
-<a id="opIdsample_registrations_list"></a>
-
-`GET /api/v1/moh/sample_registrations/`
-
-<h3 id="sample_registrations_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_sample_id|query|string|false|none|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_specimen_id|query|string|false|none|
-|gender|query|string|false|none|
-|sex_at_birth|query|string|false|none|
-|specimen_tissue_source|query|string|false|none|
-|tumour_normal_designation|query|string|false|none|
-|specimen_type|query|string|false|none|
-|sample_type|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_sample_id": "string",
-      "program_id": "string",
-      "gender": "string",
-      "sex_at_birth": "string",
-      "specimen_tissue_source": "string",
-      "tumour_normal_designation": "string",
-      "specimen_type": "string",
-      "sample_type": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string"
-    }
-  ]
-}
-```
-
-## sample_registrations_create
-
-<a id="opIdsample_registrations_create"></a>
-
-`POST /api/v1/moh/sample_registrations/`
-
-<h3 id="sample_registrations_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[SampleRegistrationRequest](#schemasampleregistrationrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "submitter_sample_id": "string",
-  "program_id": "string",
-  "gender": "string",
-  "sex_at_birth": "string",
-  "specimen_tissue_source": "string",
-  "tumour_normal_designation": "string",
-  "specimen_type": "string",
-  "sample_type": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string"
-}
-```
-
-## sample_registrations_retrieve
-
-<a id="opIdsample_registrations_retrieve"></a>
-
-`GET /api/v1/moh/sample_registrations/{submitter_sample_id}/`
-
-<h3 id="sample_registrations_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_sample_id": "string",
-  "program_id": "string",
-  "gender": "string",
-  "sex_at_birth": "string",
-  "specimen_tissue_source": "string",
-  "tumour_normal_designation": "string",
-  "specimen_type": "string",
-  "sample_type": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string"
-}
-```
-
-## sample_registrations_update
-
-<a id="opIdsample_registrations_update"></a>
-
-`PUT /api/v1/moh/sample_registrations/{submitter_sample_id}/`
-
-<h3 id="sample_registrations_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
-|body|body|[SampleRegistrationRequest](#schemasampleregistrationrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_sample_id": "string",
-  "program_id": "string",
-  "gender": "string",
-  "sex_at_birth": "string",
-  "specimen_tissue_source": "string",
-  "tumour_normal_designation": "string",
-  "specimen_type": "string",
-  "sample_type": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string"
-}
-```
-
-## sample_registrations_partial_update
-
-<a id="opIdsample_registrations_partial_update"></a>
-
-`PATCH /api/v1/moh/sample_registrations/{submitter_sample_id}/`
-
-<h3 id="sample_registrations_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
-|body|body|[PatchedSampleRegistrationRequest](#schemapatchedsampleregistrationrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_sample_id": "string",
-  "program_id": "string",
-  "gender": "string",
-  "sex_at_birth": "string",
-  "specimen_tissue_source": "string",
-  "tumour_normal_designation": "string",
-  "specimen_type": "string",
-  "sample_type": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string"
-}
-```
-
-## sample_registrations_destroy
-
-<a id="opIdsample_registrations_destroy"></a>
-
-`DELETE /api/v1/moh/sample_registrations/{submitter_sample_id}/`
-
-<h3 id="sample_registrations_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
-
-<h1 id="metadata-service-api-specimens">specimens</h1>
-
-## specimens_list
-
-<a id="opIdspecimens_list"></a>
-
-`GET /api/v1/moh/specimens/`
-
-<h3 id="specimens_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|query|string|false|none|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_primary_diagnosis_id|query|string|false|none|
-|pathological_tumour_staging_system|query|string|false|none|
-|pathological_t_category|query|string|false|none|
-|pathological_n_category|query|string|false|none|
-|pathological_m_category|query|string|false|none|
-|pathological_stage_group|query|string|false|none|
-|specimen_collection_date|query|string|false|none|
-|specimen_storage|query|string|false|none|
-|tumour_histological_type|query|string|false|none|
-|specimen_anatomic_location|query|string|false|none|
-|reference_pathology_confirmed_diagnosis|query|string|false|none|
-|reference_pathology_confirmed_tumour_presence|query|string|false|none|
-|tumour_grading_system|query|string|false|none|
-|tumour_grade|query|string|false|none|
-|percent_tumour_cells_range|query|string|false|none|
-|percent_tumour_cells_measurement_method|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_specimen_id": "string",
-      "pathological_tumour_staging_system": "string",
-      "pathological_t_category": "string",
-      "pathological_n_category": "string",
-      "pathological_m_category": "string",
-      "pathological_stage_group": "string",
-      "specimen_collection_date": "string",
-      "specimen_storage": "string",
-      "tumour_histological_type": "string",
-      "specimen_anatomic_location": "string",
-      "reference_pathology_confirmed_diagnosis": "string",
-      "reference_pathology_confirmed_tumour_presence": "string",
-      "tumour_grading_system": "string",
-      "tumour_grade": "string",
-      "percent_tumour_cells_range": "string",
-      "percent_tumour_cells_measurement_method": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
-    }
-  ]
-}
-```
-
-## specimens_create
-
-<a id="opIdspecimens_create"></a>
-
-`POST /api/v1/moh/specimens/`
-
-<h3 id="specimens_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[SpecimenRequest](#schemaspecimenrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "submitter_specimen_id": "string",
-  "pathological_tumour_staging_system": "string",
-  "pathological_t_category": "string",
-  "pathological_n_category": "string",
-  "pathological_m_category": "string",
-  "pathological_stage_group": "string",
-  "specimen_collection_date": "string",
-  "specimen_storage": "string",
-  "tumour_histological_type": "string",
-  "specimen_anatomic_location": "string",
-  "reference_pathology_confirmed_diagnosis": "string",
-  "reference_pathology_confirmed_tumour_presence": "string",
-  "tumour_grading_system": "string",
-  "tumour_grade": "string",
-  "percent_tumour_cells_range": "string",
-  "percent_tumour_cells_measurement_method": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-```
-
-## specimens_retrieve
-
-<a id="opIdspecimens_retrieve"></a>
-
-`GET /api/v1/moh/specimens/{submitter_specimen_id}/`
-
-<h3 id="specimens_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_specimen_id": "string",
-  "pathological_tumour_staging_system": "string",
-  "pathological_t_category": "string",
-  "pathological_n_category": "string",
-  "pathological_m_category": "string",
-  "pathological_stage_group": "string",
-  "specimen_collection_date": "string",
-  "specimen_storage": "string",
-  "tumour_histological_type": "string",
-  "specimen_anatomic_location": "string",
-  "reference_pathology_confirmed_diagnosis": "string",
-  "reference_pathology_confirmed_tumour_presence": "string",
-  "tumour_grading_system": "string",
-  "tumour_grade": "string",
-  "percent_tumour_cells_range": "string",
-  "percent_tumour_cells_measurement_method": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-```
-
-## specimens_update
-
-<a id="opIdspecimens_update"></a>
-
-`PUT /api/v1/moh/specimens/{submitter_specimen_id}/`
-
-<h3 id="specimens_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
-|body|body|[SpecimenRequest](#schemaspecimenrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_specimen_id": "string",
-  "pathological_tumour_staging_system": "string",
-  "pathological_t_category": "string",
-  "pathological_n_category": "string",
-  "pathological_m_category": "string",
-  "pathological_stage_group": "string",
-  "specimen_collection_date": "string",
-  "specimen_storage": "string",
-  "tumour_histological_type": "string",
-  "specimen_anatomic_location": "string",
-  "reference_pathology_confirmed_diagnosis": "string",
-  "reference_pathology_confirmed_tumour_presence": "string",
-  "tumour_grading_system": "string",
-  "tumour_grade": "string",
-  "percent_tumour_cells_range": "string",
-  "percent_tumour_cells_measurement_method": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-```
-
-## specimens_partial_update
-
-<a id="opIdspecimens_partial_update"></a>
-
-`PATCH /api/v1/moh/specimens/{submitter_specimen_id}/`
-
-<h3 id="specimens_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
-|body|body|[PatchedSpecimenRequest](#schemapatchedspecimenrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_specimen_id": "string",
-  "pathological_tumour_staging_system": "string",
-  "pathological_t_category": "string",
-  "pathological_n_category": "string",
-  "pathological_m_category": "string",
-  "pathological_stage_group": "string",
-  "specimen_collection_date": "string",
-  "specimen_storage": "string",
-  "tumour_histological_type": "string",
-  "specimen_anatomic_location": "string",
-  "reference_pathology_confirmed_diagnosis": "string",
-  "reference_pathology_confirmed_tumour_presence": "string",
-  "tumour_grading_system": "string",
-  "tumour_grade": "string",
-  "percent_tumour_cells_range": "string",
-  "percent_tumour_cells_measurement_method": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-```
-
-## specimens_destroy
-
-<a id="opIdspecimens_destroy"></a>
-
-`DELETE /api/v1/moh/specimens/{submitter_specimen_id}/`
-
-<h3 id="specimens_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
-
-<h1 id="metadata-service-api-surgeries">surgeries</h1>
-
-## surgeries_list
-
-<a id="opIdsurgeries_list"></a>
-
-`GET /api/v1/moh/surgeries/`
-
-<h3 id="surgeries_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_specimen_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|surgery_type|query|string|false|none|
-|surgery_site|query|string|false|none|
-|surgery_location|query|string|false|none|
-|tumour_length|query|integer|false|none|
-|tumour_width|query|integer|false|none|
-|greatest_dimension_tumour|query|integer|false|none|
-|tumour_focality|query|string|false|none|
-|residual_tumour_classification|query|string|false|none|
-|margin_types_involved|query|string|false|none|
-|margin_types_not_involved|query|string|false|none|
-|margin_types_not_assessed|query|string|false|none|
-|lymphovascular_invasion|query|string|false|none|
-|perineural_invasion|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "surgery_type": "string",
-      "surgery_site": "string",
-      "surgery_location": "string",
-      "tumour_length": 32767,
-      "tumour_width": 32767,
-      "greatest_dimension_tumour": 32767,
-      "tumour_focality": "string",
-      "residual_tumour_classification": "string",
-      "margin_types_involved": "string",
-      "margin_types_not_involved": "string",
-      "margin_types_not_assessed": "string",
-      "lymphovascular_invasion": "string",
-      "perineural_invasion": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-```
-
-## surgeries_create
-
-<a id="opIdsurgeries_create"></a>
-
-`POST /api/v1/moh/surgeries/`
-
-<h3 id="surgeries_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[SurgeryRequest](#schemasurgeryrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "surgery_type": "string",
-  "surgery_site": "string",
-  "surgery_location": "string",
-  "tumour_length": 32767,
-  "tumour_width": 32767,
-  "greatest_dimension_tumour": 32767,
-  "tumour_focality": "string",
-  "residual_tumour_classification": "string",
-  "margin_types_involved": "string",
-  "margin_types_not_involved": "string",
-  "margin_types_not_assessed": "string",
-  "lymphovascular_invasion": "string",
-  "perineural_invasion": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## surgeries_retrieve
-
-<a id="opIdsurgeries_retrieve"></a>
-
-`GET /api/v1/moh/surgeries/{id}/`
-
-<h3 id="surgeries_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this surgery.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "surgery_type": "string",
-  "surgery_site": "string",
-  "surgery_location": "string",
-  "tumour_length": 32767,
-  "tumour_width": 32767,
-  "greatest_dimension_tumour": 32767,
-  "tumour_focality": "string",
-  "residual_tumour_classification": "string",
-  "margin_types_involved": "string",
-  "margin_types_not_involved": "string",
-  "margin_types_not_assessed": "string",
-  "lymphovascular_invasion": "string",
-  "perineural_invasion": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## surgeries_update
-
-<a id="opIdsurgeries_update"></a>
-
-`PUT /api/v1/moh/surgeries/{id}/`
-
-<h3 id="surgeries_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this surgery.|
-|body|body|[SurgeryRequest](#schemasurgeryrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "surgery_type": "string",
-  "surgery_site": "string",
-  "surgery_location": "string",
-  "tumour_length": 32767,
-  "tumour_width": 32767,
-  "greatest_dimension_tumour": 32767,
-  "tumour_focality": "string",
-  "residual_tumour_classification": "string",
-  "margin_types_involved": "string",
-  "margin_types_not_involved": "string",
-  "margin_types_not_assessed": "string",
-  "lymphovascular_invasion": "string",
-  "perineural_invasion": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## surgeries_partial_update
-
-<a id="opIdsurgeries_partial_update"></a>
-
-`PATCH /api/v1/moh/surgeries/{id}/`
-
-<h3 id="surgeries_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this surgery.|
-|body|body|[PatchedSurgeryRequest](#schemapatchedsurgeryrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "surgery_type": "string",
-  "surgery_site": "string",
-  "surgery_location": "string",
-  "tumour_length": 32767,
-  "tumour_width": 32767,
-  "greatest_dimension_tumour": 32767,
-  "tumour_focality": "string",
-  "residual_tumour_classification": "string",
-  "margin_types_involved": "string",
-  "margin_types_not_involved": "string",
-  "margin_types_not_assessed": "string",
-  "lymphovascular_invasion": "string",
-  "perineural_invasion": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## surgeries_destroy
-
-<a id="opIdsurgeries_destroy"></a>
-
-`DELETE /api/v1/moh/surgeries/{id}/`
-
-<h3 id="surgeries_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this surgery.|
-
-<h1 id="metadata-service-api-treatments">treatments</h1>
-
-## treatments_list
-
-<a id="opIdtreatments_list"></a>
-
-`GET /api/v1/moh/treatments/`
-
-<h3 id="treatments_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_treatment_id|query|string|false|none|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_primary_diagnosis_id|query|string|false|none|
-|treatment_type|query|string|false|none|
-|is_primary_treatment|query|string|false|none|
-|treatment_start_date|query|string|false|none|
-|treatment_end_date|query|string|false|none|
-|treatment_setting|query|string|false|none|
-|treatment_intent|query|string|false|none|
-|days_per_cycle|query|integer|false|none|
-|number_of_cycles|query|integer|false|none|
-|response_to_treatment_criteria_method|query|string|false|none|
-|response_to_treatment|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_treatment_id": "string",
-      "treatment_type": "string",
-      "is_primary_treatment": "string",
-      "treatment_start_date": "string",
-      "treatment_end_date": "string",
-      "treatment_setting": "string",
-      "treatment_intent": "string",
-      "days_per_cycle": 32767,
-      "number_of_cycles": 32767,
-      "response_to_treatment_criteria_method": "string",
-      "response_to_treatment": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
-    }
-  ]
-}
-```
-
-## treatments_create
-
-<a id="opIdtreatments_create"></a>
+<a id="opIdmoh_treatments_create"></a>
 
 `POST /api/v1/moh/treatments/`
 
-<h3 id="treatments_create-parameters">Parameters</h3>
+<h3 id="moh_treatments_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3286,13 +3012,13 @@ MoH Overview schema
 }
 ```
 
-## treatments_retrieve
+## moh_treatments_retrieve
 
-<a id="opIdtreatments_retrieve"></a>
+<a id="opIdmoh_treatments_retrieve"></a>
 
 `GET /api/v1/moh/treatments/{submitter_treatment_id}/`
 
-<h3 id="treatments_retrieve-parameters">Parameters</h3>
+<h3 id="moh_treatments_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3321,13 +3047,13 @@ MoH Overview schema
 }
 ```
 
-## treatments_update
+## moh_treatments_update
 
-<a id="opIdtreatments_update"></a>
+<a id="opIdmoh_treatments_update"></a>
 
 `PUT /api/v1/moh/treatments/{submitter_treatment_id}/`
 
-<h3 id="treatments_update-parameters">Parameters</h3>
+<h3 id="moh_treatments_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3357,13 +3083,13 @@ MoH Overview schema
 }
 ```
 
-## treatments_partial_update
+## moh_treatments_partial_update
 
-<a id="opIdtreatments_partial_update"></a>
+<a id="opIdmoh_treatments_partial_update"></a>
 
 `PATCH /api/v1/moh/treatments/{submitter_treatment_id}/`
 
-<h3 id="treatments_partial_update-parameters">Parameters</h3>
+<h3 id="moh_treatments_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3393,13 +3119,13 @@ MoH Overview schema
 }
 ```
 
-## treatments_destroy
+## moh_treatments_destroy
 
-<a id="opIdtreatments_destroy"></a>
+<a id="opIdmoh_treatments_destroy"></a>
 
 `DELETE /api/v1/moh/treatments/{submitter_treatment_id}/`
 
-<h3 id="treatments_destroy-parameters">Parameters</h3>
+<h3 id="moh_treatments_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3624,6 +3350,29 @@ MoH Overview schema
 |comorbidity_treatment|string|true|none|none|
 |program_id|string|true|none|none|
 |submitter_donor_id|string|true|none|none|
+
+<h2 id="tocS_Discovery">Discovery</h2>
+
+<a id="schemadiscovery"></a>
+<a id="schema_Discovery"></a>
+<a id="tocSdiscovery"></a>
+<a id="tocsdiscovery"></a>
+
+```json
+{
+  "discovery_count": 0
+}
+
+```
+
+This serializer is used to return the discovery_count.
+It also override the list serializer to a single object
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|discovery_count|integer|true|none|none|
 
 <h2 id="tocS_Donor">Donor</h2>
 
@@ -3928,572 +3677,6 @@ MoH Overview schema
 |program_id|string|true|none|none|
 |submitter_donor_id|string|true|none|none|
 |submitter_treatment_id|string|true|none|none|
-
-<h2 id="tocS_PaginatedBiomarkerList">PaginatedBiomarkerList</h2>
-
-<a id="schemapaginatedbiomarkerlist"></a>
-<a id="schema_PaginatedBiomarkerList"></a>
-<a id="tocSpaginatedbiomarkerlist"></a>
-<a id="tocspaginatedbiomarkerlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string",
-      "submitter_follow_up_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Biomarker](#schemabiomarker)]|false|none|none|
-
-<h2 id="tocS_PaginatedChemotherapyList">PaginatedChemotherapyList</h2>
-
-<a id="schemapaginatedchemotherapylist"></a>
-<a id="schema_PaginatedChemotherapyList"></a>
-<a id="tocSpaginatedchemotherapylist"></a>
-<a id="tocspaginatedchemotherapylist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "chemotherapy_dosage_units": "string",
-      "cumulative_drug_dosage_prescribed": 32767,
-      "cumulative_drug_dosage_actual": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Chemotherapy](#schemachemotherapy)]|false|none|none|
-
-<h2 id="tocS_PaginatedComorbidityList">PaginatedComorbidityList</h2>
-
-<a id="schemapaginatedcomorbiditylist"></a>
-<a id="schema_PaginatedComorbidityList"></a>
-<a id="tocSpaginatedcomorbiditylist"></a>
-<a id="tocspaginatedcomorbiditylist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "prior_malignancy": "string",
-      "laterality_of_prior_malignancy": "string",
-      "age_at_comorbidity_diagnosis": 32767,
-      "comorbidity_type_code": "string",
-      "comorbidity_treatment_status": "string",
-      "comorbidity_treatment": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Comorbidity](#schemacomorbidity)]|false|none|none|
-
-<h2 id="tocS_PaginatedDonorList">PaginatedDonorList</h2>
-
-<a id="schemapaginateddonorlist"></a>
-<a id="schema_PaginatedDonorList"></a>
-<a id="tocSpaginateddonorlist"></a>
-<a id="tocspaginateddonorlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_donor_id": "string",
-      "is_deceased": true,
-      "cause_of_death": "string",
-      "date_of_birth": "string",
-      "date_of_death": "string",
-      "primary_site": "string",
-      "program_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Donor](#schemadonor)]|false|none|none|
-
-<h2 id="tocS_PaginatedFollowUpList">PaginatedFollowUpList</h2>
-
-<a id="schemapaginatedfollowuplist"></a>
-<a id="schema_PaginatedFollowUpList"></a>
-<a id="tocSpaginatedfollowuplist"></a>
-<a id="tocspaginatedfollowuplist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_follow_up_id": "string",
-      "date_of_followup": "string",
-      "lost_to_followup": true,
-      "lost_to_followup_reason": "string",
-      "disease_status_at_followup": "string",
-      "relapse_type": "string",
-      "date_of_relapse": "string",
-      "method_of_progression_status": "string",
-      "anatomic_site_progression_or_recurrence": "string",
-      "recurrence_tumour_staging_system": "string",
-      "recurrence_t_category": "string",
-      "recurrence_n_category": "string",
-      "recurrence_m_category": "string",
-      "recurrence_stage_group": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[FollowUp](#schemafollowup)]|false|none|none|
-
-<h2 id="tocS_PaginatedHormoneTherapyList">PaginatedHormoneTherapyList</h2>
-
-<a id="schemapaginatedhormonetherapylist"></a>
-<a id="schema_PaginatedHormoneTherapyList"></a>
-<a id="tocSpaginatedhormonetherapylist"></a>
-<a id="tocspaginatedhormonetherapylist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "hormone_drug_dosage_units": "string",
-      "cumulative_drug_dosage_prescribed": 32767,
-      "cumulative_drug_dosage_actual": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[HormoneTherapy](#schemahormonetherapy)]|false|none|none|
-
-<h2 id="tocS_PaginatedImmunotherapyList">PaginatedImmunotherapyList</h2>
-
-<a id="schemapaginatedimmunotherapylist"></a>
-<a id="schema_PaginatedImmunotherapyList"></a>
-<a id="tocSpaginatedimmunotherapylist"></a>
-<a id="tocspaginatedimmunotherapylist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "immunotherapy_type": "string",
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Immunotherapy](#schemaimmunotherapy)]|false|none|none|
-
-<h2 id="tocS_PaginatedPrimaryDiagnosisList">PaginatedPrimaryDiagnosisList</h2>
-
-<a id="schemapaginatedprimarydiagnosislist"></a>
-<a id="schema_PaginatedPrimaryDiagnosisList"></a>
-<a id="tocSpaginatedprimarydiagnosislist"></a>
-<a id="tocspaginatedprimarydiagnosislist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_primary_diagnosis_id": "string",
-      "date_of_diagnosis": "string",
-      "cancer_type_code": "string",
-      "basis_of_diagnosis": "string",
-      "lymph_nodes_examined_status": "string",
-      "lymph_nodes_examined_method": "string",
-      "number_lymph_nodes_positive": 32767,
-      "clinical_tumour_staging_system": "string",
-      "clinical_t_category": "string",
-      "clinical_n_category": "string",
-      "clinical_m_category": "string",
-      "clinical_stage_group": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[PrimaryDiagnosis](#schemaprimarydiagnosis)]|false|none|none|
-
-<h2 id="tocS_PaginatedProgramList">PaginatedProgramList</h2>
-
-<a id="schemapaginatedprogramlist"></a>
-<a id="schema_PaginatedProgramList"></a>
-<a id="tocSpaginatedprogramlist"></a>
-<a id="tocspaginatedprogramlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "program_id": "string",
-      "name": "string",
-      "created": "2019-08-24T14:15:22Z",
-      "updated": "2019-08-24T14:15:22Z"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Program](#schemaprogram)]|false|none|none|
-
-<h2 id="tocS_PaginatedRadiationList">PaginatedRadiationList</h2>
-
-<a id="schemapaginatedradiationlist"></a>
-<a id="schema_PaginatedRadiationList"></a>
-<a id="tocSpaginatedradiationlist"></a>
-<a id="tocspaginatedradiationlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "radiation_therapy_modality": "string",
-      "radiation_therapy_type": "string",
-      "radiation_therapy_fractions": 32767,
-      "radiation_therapy_dosage": 32767,
-      "anatomical_site_irradiated": "string",
-      "radiation_boost": true,
-      "reference_radiation_treatment_id": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Radiation](#schemaradiation)]|false|none|none|
-
-<h2 id="tocS_PaginatedSampleRegistrationList">PaginatedSampleRegistrationList</h2>
-
-<a id="schemapaginatedsampleregistrationlist"></a>
-<a id="schema_PaginatedSampleRegistrationList"></a>
-<a id="tocSpaginatedsampleregistrationlist"></a>
-<a id="tocspaginatedsampleregistrationlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_sample_id": "string",
-      "program_id": "string",
-      "gender": "string",
-      "sex_at_birth": "string",
-      "specimen_tissue_source": "string",
-      "tumour_normal_designation": "string",
-      "specimen_type": "string",
-      "sample_type": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[SampleRegistration](#schemasampleregistration)]|false|none|none|
-
-<h2 id="tocS_PaginatedSpecimenList">PaginatedSpecimenList</h2>
-
-<a id="schemapaginatedspecimenlist"></a>
-<a id="schema_PaginatedSpecimenList"></a>
-<a id="tocSpaginatedspecimenlist"></a>
-<a id="tocspaginatedspecimenlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_specimen_id": "string",
-      "pathological_tumour_staging_system": "string",
-      "pathological_t_category": "string",
-      "pathological_n_category": "string",
-      "pathological_m_category": "string",
-      "pathological_stage_group": "string",
-      "specimen_collection_date": "string",
-      "specimen_storage": "string",
-      "tumour_histological_type": "string",
-      "specimen_anatomic_location": "string",
-      "reference_pathology_confirmed_diagnosis": "string",
-      "reference_pathology_confirmed_tumour_presence": "string",
-      "tumour_grading_system": "string",
-      "tumour_grade": "string",
-      "percent_tumour_cells_range": "string",
-      "percent_tumour_cells_measurement_method": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Specimen](#schemaspecimen)]|false|none|none|
-
-<h2 id="tocS_PaginatedSurgeryList">PaginatedSurgeryList</h2>
-
-<a id="schemapaginatedsurgerylist"></a>
-<a id="schema_PaginatedSurgeryList"></a>
-<a id="tocSpaginatedsurgerylist"></a>
-<a id="tocspaginatedsurgerylist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "surgery_type": "string",
-      "surgery_site": "string",
-      "surgery_location": "string",
-      "tumour_length": 32767,
-      "tumour_width": 32767,
-      "greatest_dimension_tumour": 32767,
-      "tumour_focality": "string",
-      "residual_tumour_classification": "string",
-      "margin_types_involved": "string",
-      "margin_types_not_involved": "string",
-      "margin_types_not_assessed": "string",
-      "lymphovascular_invasion": "string",
-      "perineural_invasion": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Surgery](#schemasurgery)]|false|none|none|
-
-<h2 id="tocS_PaginatedTreatmentList">PaginatedTreatmentList</h2>
-
-<a id="schemapaginatedtreatmentlist"></a>
-<a id="schema_PaginatedTreatmentList"></a>
-<a id="tocSpaginatedtreatmentlist"></a>
-<a id="tocspaginatedtreatmentlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_treatment_id": "string",
-      "treatment_type": "string",
-      "is_primary_treatment": "string",
-      "treatment_start_date": "string",
-      "treatment_end_date": "string",
-      "treatment_setting": "string",
-      "treatment_intent": "string",
-      "days_per_cycle": 32767,
-      "number_of_cycles": 32767,
-      "response_to_treatment_criteria_method": "string",
-      "response_to_treatment": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Treatment](#schematreatment)]|false|none|none|
 
 <h2 id="tocS_PatchedBiomarkerRequest">PatchedBiomarkerRequest</h2>
 
@@ -4808,7 +3991,7 @@ MoH Overview schema
 {
   "program_id": "string",
   "name": "string",
-  "created": "2019-08-24T14:15:22Z",
+  "created": "2019-08-24",
   "updated": "2019-08-24T14:15:22Z"
 }
 
@@ -4820,7 +4003,7 @@ MoH Overview schema
 |---|---|---|---|---|
 |program_id|string|false|none|none|
 |name|string|false|none|none|
-|created|string(date-time)|false|none|none|
+|created|string(date)|false|none|none|
 |updated|string(date-time)|false|none|none|
 
 <h2 id="tocS_PatchedRadiationRequest">PatchedRadiationRequest</h2>
@@ -5156,7 +4339,7 @@ MoH Overview schema
 {
   "program_id": "string",
   "name": "string",
-  "created": "2019-08-24T14:15:22Z",
+  "created": "2019-08-24",
   "updated": "2019-08-24T14:15:22Z"
 }
 
@@ -5168,7 +4351,7 @@ MoH Overview schema
 |---|---|---|---|---|
 |program_id|string|true|none|none|
 |name|string|true|none|none|
-|created|string(date-time)|false|none|none|
+|created|string(date)|false|none|none|
 |updated|string(date-time)|false|none|none|
 
 <h2 id="tocS_ProgramRequest">ProgramRequest</h2>
@@ -5182,7 +4365,7 @@ MoH Overview schema
 {
   "program_id": "string",
   "name": "string",
-  "created": "2019-08-24T14:15:22Z",
+  "created": "2019-08-24",
   "updated": "2019-08-24T14:15:22Z"
 }
 
@@ -5194,7 +4377,7 @@ MoH Overview schema
 |---|---|---|---|---|
 |program_id|string|true|none|none|
 |name|string|true|none|none|
-|created|string(date-time)|false|none|none|
+|created|string(date)|false|none|none|
 |updated|string(date-time)|false|none|none|
 
 <h2 id="tocS_Radiation">Radiation</h2>
