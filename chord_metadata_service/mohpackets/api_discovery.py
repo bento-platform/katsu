@@ -2,6 +2,11 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_serializer,
+)
+from rest_framework import serializers
 from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
 from chord_metadata_service.mohpackets.filters import (
     DonorFilter,
@@ -57,11 +62,22 @@ from chord_metadata_service.mohpackets.models import (
     NOTE: This is a temporary solution until we implement Beacon discovery features.
 """
 
+
 ##########################################
 #                                        #
 #           HELPER FUNCTIONS             #
 #                                        #
 ##########################################
+
+
+
+@extend_schema_serializer(many=False)
+class DiscoverySerializer(serializers.Serializer):
+    """
+    This serializer is used to return the discovery_count.
+    It also override the list serializer to a single object
+    """
+    discovery_count = serializers.IntegerField()
 
 
 def get_discovery_response(self):
@@ -88,6 +104,7 @@ class DiscoveryDonorViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Donor.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -99,6 +116,7 @@ class DiscoverySpecimenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Specimen.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -112,6 +130,7 @@ class DiscoverySampleRegistrationViewSet(
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = SampleRegistration.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -123,6 +142,7 @@ class DiscoveryPrimaryDiagnosisViewSet(mixins.ListModelMixin, viewsets.GenericVi
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = PrimaryDiagnosis.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -134,6 +154,7 @@ class DiscoveryTreatmentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Treatment.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -145,6 +166,7 @@ class DiscoveryChemotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewSe
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Chemotherapy.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -156,6 +178,7 @@ class DiscoveryHormoneTherapyViewSet(mixins.ListModelMixin, viewsets.GenericView
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = HormoneTherapy.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -167,6 +190,7 @@ class DiscoveryRadiationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Radiation.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -178,6 +202,7 @@ class DiscoveryImmunotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewS
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Immunotherapy.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -189,6 +214,7 @@ class DiscoverySurgeryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Surgery.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -200,8 +226,10 @@ class DiscoveryFollowUpViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = FollowUp.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
+
 
 
 class DiscoveryBiomarkerViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -211,6 +239,7 @@ class DiscoveryBiomarkerViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Biomarker.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
 
@@ -222,5 +251,6 @@ class DiscoveryComorbidityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet
     permission_classes = [CanDIGAdminOrReadOnly]
     queryset = Comorbidity.objects.all()
 
+    @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
