@@ -7,7 +7,7 @@ info:
 paths:
   /api/v1/discovery/biomarkers/:
     get:
-      operationId: api_v1_discovery_biomarkers_list
+      operationId: discovery_biomarkers_list
       parameters:
       - in: query
         name: program_id
@@ -50,19 +50,17 @@ paths:
         schema:
           type: integer
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Biomarker'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/chemotherapies/:
     get:
-      operationId: api_v1_discovery_chemotherapies_list
+      operationId: discovery_chemotherapies_list
       parameters:
       - in: query
         name: program_id
@@ -97,19 +95,17 @@ paths:
         schema:
           type: integer
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Chemotherapy'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/comorbidities/:
     get:
-      operationId: api_v1_discovery_comorbidities_list
+      operationId: discovery_comorbidities_list
       parameters:
       - in: query
         name: program_id
@@ -144,19 +140,17 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Comorbidity'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/donors/:
     get:
-      operationId: api_v1_discovery_donors_list
+      operationId: discovery_donors_list
       parameters:
       - in: query
         name: submitter_donor_id
@@ -251,19 +245,17 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Donor'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/follow_ups/:
     get:
-      operationId: api_v1_discovery_follow_ups_list
+      operationId: discovery_follow_ups_list
       parameters:
       - in: query
         name: submitter_follow_up_id
@@ -338,19 +330,17 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/FollowUp'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/hormone_therapies/:
     get:
-      operationId: api_v1_discovery_hormone_therapies_list
+      operationId: discovery_hormone_therapies_list
       parameters:
       - in: query
         name: program_id
@@ -385,19 +375,17 @@ paths:
         schema:
           type: integer
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/HormoneTherapy'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/immunotherapies/:
     get:
-      operationId: api_v1_discovery_immunotherapies_list
+      operationId: discovery_immunotherapies_list
       parameters:
       - in: query
         name: program_id
@@ -424,22 +412,20 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Immunotherapy'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/overview:
     get:
-      operationId: api_v1_discovery_overview_retrieve
+      operationId: discovery_overview_retrieve
       description: MoH Overview schema
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
@@ -449,7 +435,7 @@ paths:
           description: ''
   /api/v1/discovery/primary_diagnoses/:
     get:
-      operationId: api_v1_discovery_primary_diagnoses_list
+      operationId: discovery_primary_diagnoses_list
       parameters:
       - in: query
         name: submitter_primary_diagnosis_id
@@ -508,19 +494,17 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PrimaryDiagnosis'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/radiations/:
     get:
-      operationId: api_v1_discovery_radiations_list
+      operationId: discovery_radiations_list
       parameters:
       - in: query
         name: program_id
@@ -563,19 +547,17 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Radiation'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/sample_registrations/:
     get:
-      operationId: api_v1_discovery_sample_registrations_list
+      operationId: discovery_sample_registrations_list
       parameters:
       - in: query
         name: submitter_sample_id
@@ -618,19 +600,17 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SampleRegistration'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/specimens/:
     get:
-      operationId: api_v1_discovery_specimens_list
+      operationId: discovery_specimens_list
       parameters:
       - in: query
         name: submitter_specimen_id
@@ -709,19 +689,17 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Specimen'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/surgeries/:
     get:
-      operationId: api_v1_discovery_surgeries_list
+      operationId: discovery_surgeries_list
       parameters:
       - in: query
         name: program_id
@@ -792,19 +770,17 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Surgery'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/discovery/treatments/:
     get:
-      operationId: api_v1_discovery_treatments_list
+      operationId: discovery_treatments_list
       parameters:
       - in: query
         name: submitter_treatment_id
@@ -863,19 +839,17 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Treatment'
+                $ref: '#/components/schemas/Discovery'
           description: ''
   /api/v1/moh/biomarkers/:
     get:
-      operationId: biomarkers_list
+      operationId: moh_biomarkers_list
       parameters:
       - in: query
         name: program_id
@@ -917,31 +891,21 @@ paths:
         name: cea
         schema:
           type: integer
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - biomarkers
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedBiomarkerList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Biomarker'
           description: ''
     post:
-      operationId: biomarkers_create
+      operationId: moh_biomarkers_create
       tags:
-      - biomarkers
+      - moh
       requestBody:
         content:
           application/json:
@@ -963,7 +927,7 @@ paths:
           description: ''
   /api/v1/moh/biomarkers/{id}/:
     get:
-      operationId: biomarkers_retrieve
+      operationId: moh_biomarkers_retrieve
       parameters:
       - in: path
         name: id
@@ -972,7 +936,7 @@ paths:
         description: A unique integer value identifying this biomarker.
         required: true
       tags:
-      - biomarkers
+      - moh
       responses:
         '200':
           content:
@@ -981,7 +945,7 @@ paths:
                 $ref: '#/components/schemas/Biomarker'
           description: ''
     put:
-      operationId: biomarkers_update
+      operationId: moh_biomarkers_update
       parameters:
       - in: path
         name: id
@@ -990,7 +954,7 @@ paths:
         description: A unique integer value identifying this biomarker.
         required: true
       tags:
-      - biomarkers
+      - moh
       requestBody:
         content:
           application/json:
@@ -1011,7 +975,7 @@ paths:
                 $ref: '#/components/schemas/Biomarker'
           description: ''
     patch:
-      operationId: biomarkers_partial_update
+      operationId: moh_biomarkers_partial_update
       parameters:
       - in: path
         name: id
@@ -1020,7 +984,7 @@ paths:
         description: A unique integer value identifying this biomarker.
         required: true
       tags:
-      - biomarkers
+      - moh
       requestBody:
         content:
           application/json:
@@ -1040,7 +1004,7 @@ paths:
                 $ref: '#/components/schemas/Biomarker'
           description: ''
     delete:
-      operationId: biomarkers_destroy
+      operationId: moh_biomarkers_destroy
       parameters:
       - in: path
         name: id
@@ -1049,13 +1013,13 @@ paths:
         description: A unique integer value identifying this biomarker.
         required: true
       tags:
-      - biomarkers
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/chemotherapies/:
     get:
-      operationId: chemotherapies_list
+      operationId: moh_chemotherapies_list
       parameters:
       - in: query
         name: program_id
@@ -1089,31 +1053,21 @@ paths:
         name: cumulative_drug_dosage_actual
         schema:
           type: integer
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - chemotherapies
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedChemotherapyList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chemotherapy'
           description: ''
     post:
-      operationId: chemotherapies_create
+      operationId: moh_chemotherapies_create
       tags:
-      - chemotherapies
+      - moh
       requestBody:
         content:
           application/json:
@@ -1135,7 +1089,7 @@ paths:
           description: ''
   /api/v1/moh/chemotherapies/{id}/:
     get:
-      operationId: chemotherapies_retrieve
+      operationId: moh_chemotherapies_retrieve
       parameters:
       - in: path
         name: id
@@ -1144,7 +1098,7 @@ paths:
         description: A unique integer value identifying this chemotherapy.
         required: true
       tags:
-      - chemotherapies
+      - moh
       responses:
         '200':
           content:
@@ -1153,7 +1107,7 @@ paths:
                 $ref: '#/components/schemas/Chemotherapy'
           description: ''
     put:
-      operationId: chemotherapies_update
+      operationId: moh_chemotherapies_update
       parameters:
       - in: path
         name: id
@@ -1162,7 +1116,7 @@ paths:
         description: A unique integer value identifying this chemotherapy.
         required: true
       tags:
-      - chemotherapies
+      - moh
       requestBody:
         content:
           application/json:
@@ -1183,7 +1137,7 @@ paths:
                 $ref: '#/components/schemas/Chemotherapy'
           description: ''
     patch:
-      operationId: chemotherapies_partial_update
+      operationId: moh_chemotherapies_partial_update
       parameters:
       - in: path
         name: id
@@ -1192,7 +1146,7 @@ paths:
         description: A unique integer value identifying this chemotherapy.
         required: true
       tags:
-      - chemotherapies
+      - moh
       requestBody:
         content:
           application/json:
@@ -1212,7 +1166,7 @@ paths:
                 $ref: '#/components/schemas/Chemotherapy'
           description: ''
     delete:
-      operationId: chemotherapies_destroy
+      operationId: moh_chemotherapies_destroy
       parameters:
       - in: path
         name: id
@@ -1221,13 +1175,13 @@ paths:
         description: A unique integer value identifying this chemotherapy.
         required: true
       tags:
-      - chemotherapies
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/comorbidities/:
     get:
-      operationId: comorbidities_list
+      operationId: moh_comorbidities_list
       parameters:
       - in: query
         name: program_id
@@ -1261,31 +1215,21 @@ paths:
         name: comorbidity_treatment
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - comorbidities
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedComorbidityList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comorbidity'
           description: ''
     post:
-      operationId: comorbidities_create
+      operationId: moh_comorbidities_create
       tags:
-      - comorbidities
+      - moh
       requestBody:
         content:
           application/json:
@@ -1307,7 +1251,7 @@ paths:
           description: ''
   /api/v1/moh/comorbidities/{id}/:
     get:
-      operationId: comorbidities_retrieve
+      operationId: moh_comorbidities_retrieve
       parameters:
       - in: path
         name: id
@@ -1316,7 +1260,7 @@ paths:
         description: A unique integer value identifying this comorbidity.
         required: true
       tags:
-      - comorbidities
+      - moh
       responses:
         '200':
           content:
@@ -1325,7 +1269,7 @@ paths:
                 $ref: '#/components/schemas/Comorbidity'
           description: ''
     put:
-      operationId: comorbidities_update
+      operationId: moh_comorbidities_update
       parameters:
       - in: path
         name: id
@@ -1334,7 +1278,7 @@ paths:
         description: A unique integer value identifying this comorbidity.
         required: true
       tags:
-      - comorbidities
+      - moh
       requestBody:
         content:
           application/json:
@@ -1355,7 +1299,7 @@ paths:
                 $ref: '#/components/schemas/Comorbidity'
           description: ''
     patch:
-      operationId: comorbidities_partial_update
+      operationId: moh_comorbidities_partial_update
       parameters:
       - in: path
         name: id
@@ -1364,7 +1308,7 @@ paths:
         description: A unique integer value identifying this comorbidity.
         required: true
       tags:
-      - comorbidities
+      - moh
       requestBody:
         content:
           application/json:
@@ -1384,7 +1328,7 @@ paths:
                 $ref: '#/components/schemas/Comorbidity'
           description: ''
     delete:
-      operationId: comorbidities_destroy
+      operationId: moh_comorbidities_destroy
       parameters:
       - in: path
         name: id
@@ -1393,13 +1337,13 @@ paths:
         description: A unique integer value identifying this comorbidity.
         required: true
       tags:
-      - comorbidities
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/donors/:
     get:
-      operationId: donors_list
+      operationId: moh_donors_list
       parameters:
       - in: query
         name: submitter_donor_id
@@ -1493,31 +1437,21 @@ paths:
         name: comorbidity
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - donors
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedDonorList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Donor'
           description: ''
     post:
-      operationId: donors_create
+      operationId: moh_donors_create
       tags:
-      - donors
+      - moh
       requestBody:
         content:
           application/json:
@@ -1539,7 +1473,7 @@ paths:
           description: ''
   /api/v1/moh/donors/{submitter_donor_id}/:
     get:
-      operationId: donors_retrieve
+      operationId: moh_donors_retrieve
       parameters:
       - in: path
         name: submitter_donor_id
@@ -1548,7 +1482,7 @@ paths:
         description: A unique value identifying this donor.
         required: true
       tags:
-      - donors
+      - moh
       responses:
         '200':
           content:
@@ -1557,7 +1491,7 @@ paths:
                 $ref: '#/components/schemas/Donor'
           description: ''
     put:
-      operationId: donors_update
+      operationId: moh_donors_update
       parameters:
       - in: path
         name: submitter_donor_id
@@ -1566,7 +1500,7 @@ paths:
         description: A unique value identifying this donor.
         required: true
       tags:
-      - donors
+      - moh
       requestBody:
         content:
           application/json:
@@ -1587,7 +1521,7 @@ paths:
                 $ref: '#/components/schemas/Donor'
           description: ''
     patch:
-      operationId: donors_partial_update
+      operationId: moh_donors_partial_update
       parameters:
       - in: path
         name: submitter_donor_id
@@ -1596,7 +1530,7 @@ paths:
         description: A unique value identifying this donor.
         required: true
       tags:
-      - donors
+      - moh
       requestBody:
         content:
           application/json:
@@ -1616,7 +1550,7 @@ paths:
                 $ref: '#/components/schemas/Donor'
           description: ''
     delete:
-      operationId: donors_destroy
+      operationId: moh_donors_destroy
       parameters:
       - in: path
         name: submitter_donor_id
@@ -1625,13 +1559,13 @@ paths:
         description: A unique value identifying this donor.
         required: true
       tags:
-      - donors
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/follow_ups/:
     get:
-      operationId: follow_ups_list
+      operationId: moh_follow_ups_list
       parameters:
       - in: query
         name: submitter_follow_up_id
@@ -1705,31 +1639,21 @@ paths:
         name: recurrence_stage_group
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - follow_ups
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedFollowUpList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/FollowUp'
           description: ''
     post:
-      operationId: follow_ups_create
+      operationId: moh_follow_ups_create
       tags:
-      - follow_ups
+      - moh
       requestBody:
         content:
           application/json:
@@ -1751,7 +1675,7 @@ paths:
           description: ''
   /api/v1/moh/follow_ups/{submitter_follow_up_id}/:
     get:
-      operationId: follow_ups_retrieve
+      operationId: moh_follow_ups_retrieve
       parameters:
       - in: path
         name: submitter_follow_up_id
@@ -1760,7 +1684,7 @@ paths:
         description: A unique value identifying this follow up.
         required: true
       tags:
-      - follow_ups
+      - moh
       responses:
         '200':
           content:
@@ -1769,7 +1693,7 @@ paths:
                 $ref: '#/components/schemas/FollowUp'
           description: ''
     put:
-      operationId: follow_ups_update
+      operationId: moh_follow_ups_update
       parameters:
       - in: path
         name: submitter_follow_up_id
@@ -1778,7 +1702,7 @@ paths:
         description: A unique value identifying this follow up.
         required: true
       tags:
-      - follow_ups
+      - moh
       requestBody:
         content:
           application/json:
@@ -1799,7 +1723,7 @@ paths:
                 $ref: '#/components/schemas/FollowUp'
           description: ''
     patch:
-      operationId: follow_ups_partial_update
+      operationId: moh_follow_ups_partial_update
       parameters:
       - in: path
         name: submitter_follow_up_id
@@ -1808,7 +1732,7 @@ paths:
         description: A unique value identifying this follow up.
         required: true
       tags:
-      - follow_ups
+      - moh
       requestBody:
         content:
           application/json:
@@ -1828,7 +1752,7 @@ paths:
                 $ref: '#/components/schemas/FollowUp'
           description: ''
     delete:
-      operationId: follow_ups_destroy
+      operationId: moh_follow_ups_destroy
       parameters:
       - in: path
         name: submitter_follow_up_id
@@ -1837,13 +1761,13 @@ paths:
         description: A unique value identifying this follow up.
         required: true
       tags:
-      - follow_ups
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/hormone_therapies/:
     get:
-      operationId: hormone_therapies_list
+      operationId: moh_hormone_therapies_list
       parameters:
       - in: query
         name: program_id
@@ -1877,31 +1801,21 @@ paths:
         name: cumulative_drug_dosage_actual
         schema:
           type: integer
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - hormone_therapies
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedHormoneTherapyList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/HormoneTherapy'
           description: ''
     post:
-      operationId: hormone_therapies_create
+      operationId: moh_hormone_therapies_create
       tags:
-      - hormone_therapies
+      - moh
       requestBody:
         content:
           application/json:
@@ -1923,7 +1837,7 @@ paths:
           description: ''
   /api/v1/moh/hormone_therapies/{id}/:
     get:
-      operationId: hormone_therapies_retrieve
+      operationId: moh_hormone_therapies_retrieve
       parameters:
       - in: path
         name: id
@@ -1932,7 +1846,7 @@ paths:
         description: A unique integer value identifying this hormone therapy.
         required: true
       tags:
-      - hormone_therapies
+      - moh
       responses:
         '200':
           content:
@@ -1941,7 +1855,7 @@ paths:
                 $ref: '#/components/schemas/HormoneTherapy'
           description: ''
     put:
-      operationId: hormone_therapies_update
+      operationId: moh_hormone_therapies_update
       parameters:
       - in: path
         name: id
@@ -1950,7 +1864,7 @@ paths:
         description: A unique integer value identifying this hormone therapy.
         required: true
       tags:
-      - hormone_therapies
+      - moh
       requestBody:
         content:
           application/json:
@@ -1971,7 +1885,7 @@ paths:
                 $ref: '#/components/schemas/HormoneTherapy'
           description: ''
     patch:
-      operationId: hormone_therapies_partial_update
+      operationId: moh_hormone_therapies_partial_update
       parameters:
       - in: path
         name: id
@@ -1980,7 +1894,7 @@ paths:
         description: A unique integer value identifying this hormone therapy.
         required: true
       tags:
-      - hormone_therapies
+      - moh
       requestBody:
         content:
           application/json:
@@ -2000,7 +1914,7 @@ paths:
                 $ref: '#/components/schemas/HormoneTherapy'
           description: ''
     delete:
-      operationId: hormone_therapies_destroy
+      operationId: moh_hormone_therapies_destroy
       parameters:
       - in: path
         name: id
@@ -2009,13 +1923,13 @@ paths:
         description: A unique integer value identifying this hormone therapy.
         required: true
       tags:
-      - hormone_therapies
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/immunotherapies/:
     get:
-      operationId: immunotherapies_list
+      operationId: moh_immunotherapies_list
       parameters:
       - in: query
         name: program_id
@@ -2041,31 +1955,21 @@ paths:
         name: drug_rxnormcui
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - immunotherapies
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedImmunotherapyList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Immunotherapy'
           description: ''
     post:
-      operationId: immunotherapies_create
+      operationId: moh_immunotherapies_create
       tags:
-      - immunotherapies
+      - moh
       requestBody:
         content:
           application/json:
@@ -2087,7 +1991,7 @@ paths:
           description: ''
   /api/v1/moh/immunotherapies/{id}/:
     get:
-      operationId: immunotherapies_retrieve
+      operationId: moh_immunotherapies_retrieve
       parameters:
       - in: path
         name: id
@@ -2096,7 +2000,7 @@ paths:
         description: A unique integer value identifying this immunotherapy.
         required: true
       tags:
-      - immunotherapies
+      - moh
       responses:
         '200':
           content:
@@ -2105,7 +2009,7 @@ paths:
                 $ref: '#/components/schemas/Immunotherapy'
           description: ''
     put:
-      operationId: immunotherapies_update
+      operationId: moh_immunotherapies_update
       parameters:
       - in: path
         name: id
@@ -2114,7 +2018,7 @@ paths:
         description: A unique integer value identifying this immunotherapy.
         required: true
       tags:
-      - immunotherapies
+      - moh
       requestBody:
         content:
           application/json:
@@ -2135,7 +2039,7 @@ paths:
                 $ref: '#/components/schemas/Immunotherapy'
           description: ''
     patch:
-      operationId: immunotherapies_partial_update
+      operationId: moh_immunotherapies_partial_update
       parameters:
       - in: path
         name: id
@@ -2144,7 +2048,7 @@ paths:
         description: A unique integer value identifying this immunotherapy.
         required: true
       tags:
-      - immunotherapies
+      - moh
       requestBody:
         content:
           application/json:
@@ -2164,7 +2068,7 @@ paths:
                 $ref: '#/components/schemas/Immunotherapy'
           description: ''
     delete:
-      operationId: immunotherapies_destroy
+      operationId: moh_immunotherapies_destroy
       parameters:
       - in: path
         name: id
@@ -2173,13 +2077,13 @@ paths:
         description: A unique integer value identifying this immunotherapy.
         required: true
       tags:
-      - immunotherapies
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/primary_diagnoses/:
     get:
-      operationId: primary_diagnoses_list
+      operationId: moh_primary_diagnoses_list
       parameters:
       - in: query
         name: submitter_primary_diagnosis_id
@@ -2237,31 +2141,21 @@ paths:
         name: clinical_stage_group
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - primary_diagnoses
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedPrimaryDiagnosisList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrimaryDiagnosis'
           description: ''
     post:
-      operationId: primary_diagnoses_create
+      operationId: moh_primary_diagnoses_create
       tags:
-      - primary_diagnoses
+      - moh
       requestBody:
         content:
           application/json:
@@ -2283,7 +2177,7 @@ paths:
           description: ''
   /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/:
     get:
-      operationId: primary_diagnoses_retrieve
+      operationId: moh_primary_diagnoses_retrieve
       parameters:
       - in: path
         name: submitter_primary_diagnosis_id
@@ -2292,7 +2186,7 @@ paths:
         description: A unique value identifying this primary diagnosis.
         required: true
       tags:
-      - primary_diagnoses
+      - moh
       responses:
         '200':
           content:
@@ -2301,7 +2195,7 @@ paths:
                 $ref: '#/components/schemas/PrimaryDiagnosis'
           description: ''
     put:
-      operationId: primary_diagnoses_update
+      operationId: moh_primary_diagnoses_update
       parameters:
       - in: path
         name: submitter_primary_diagnosis_id
@@ -2310,7 +2204,7 @@ paths:
         description: A unique value identifying this primary diagnosis.
         required: true
       tags:
-      - primary_diagnoses
+      - moh
       requestBody:
         content:
           application/json:
@@ -2331,7 +2225,7 @@ paths:
                 $ref: '#/components/schemas/PrimaryDiagnosis'
           description: ''
     patch:
-      operationId: primary_diagnoses_partial_update
+      operationId: moh_primary_diagnoses_partial_update
       parameters:
       - in: path
         name: submitter_primary_diagnosis_id
@@ -2340,7 +2234,7 @@ paths:
         description: A unique value identifying this primary diagnosis.
         required: true
       tags:
-      - primary_diagnoses
+      - moh
       requestBody:
         content:
           application/json:
@@ -2360,7 +2254,7 @@ paths:
                 $ref: '#/components/schemas/PrimaryDiagnosis'
           description: ''
     delete:
-      operationId: primary_diagnoses_destroy
+      operationId: moh_primary_diagnoses_destroy
       parameters:
       - in: path
         name: submitter_primary_diagnosis_id
@@ -2369,13 +2263,13 @@ paths:
         description: A unique value identifying this primary diagnosis.
         required: true
       tags:
-      - primary_diagnoses
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/programs/:
     get:
-      operationId: programs_list
+      operationId: moh_programs_list
       parameters:
       - in: query
         name: program_id
@@ -2389,37 +2283,27 @@ paths:
         name: created
         schema:
           type: string
-          format: date-time
+          format: date
       - in: query
         name: updated
         schema:
           type: string
           format: date-time
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - programs
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedProgramList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Program'
           description: ''
     post:
-      operationId: programs_create
+      operationId: moh_programs_create
       tags:
-      - programs
+      - moh
       requestBody:
         content:
           application/json:
@@ -2441,7 +2325,7 @@ paths:
           description: ''
   /api/v1/moh/programs/{program_id}/:
     get:
-      operationId: programs_retrieve
+      operationId: moh_programs_retrieve
       parameters:
       - in: path
         name: program_id
@@ -2450,7 +2334,7 @@ paths:
         description: A unique value identifying this program.
         required: true
       tags:
-      - programs
+      - moh
       responses:
         '200':
           content:
@@ -2459,7 +2343,7 @@ paths:
                 $ref: '#/components/schemas/Program'
           description: ''
     put:
-      operationId: programs_update
+      operationId: moh_programs_update
       parameters:
       - in: path
         name: program_id
@@ -2468,7 +2352,7 @@ paths:
         description: A unique value identifying this program.
         required: true
       tags:
-      - programs
+      - moh
       requestBody:
         content:
           application/json:
@@ -2489,7 +2373,7 @@ paths:
                 $ref: '#/components/schemas/Program'
           description: ''
     patch:
-      operationId: programs_partial_update
+      operationId: moh_programs_partial_update
       parameters:
       - in: path
         name: program_id
@@ -2498,7 +2382,7 @@ paths:
         description: A unique value identifying this program.
         required: true
       tags:
-      - programs
+      - moh
       requestBody:
         content:
           application/json:
@@ -2518,7 +2402,7 @@ paths:
                 $ref: '#/components/schemas/Program'
           description: ''
     delete:
-      operationId: programs_destroy
+      operationId: moh_programs_destroy
       parameters:
       - in: path
         name: program_id
@@ -2527,13 +2411,13 @@ paths:
         description: A unique value identifying this program.
         required: true
       tags:
-      - programs
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/radiations/:
     get:
-      operationId: radiations_list
+      operationId: moh_radiations_list
       parameters:
       - in: query
         name: program_id
@@ -2575,31 +2459,21 @@ paths:
         name: reference_radiation_treatment_id
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - radiations
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedRadiationList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Radiation'
           description: ''
     post:
-      operationId: radiations_create
+      operationId: moh_radiations_create
       tags:
-      - radiations
+      - moh
       requestBody:
         content:
           application/json:
@@ -2621,7 +2495,7 @@ paths:
           description: ''
   /api/v1/moh/radiations/{id}/:
     get:
-      operationId: radiations_retrieve
+      operationId: moh_radiations_retrieve
       parameters:
       - in: path
         name: id
@@ -2630,7 +2504,7 @@ paths:
         description: A unique integer value identifying this radiation.
         required: true
       tags:
-      - radiations
+      - moh
       responses:
         '200':
           content:
@@ -2639,7 +2513,7 @@ paths:
                 $ref: '#/components/schemas/Radiation'
           description: ''
     put:
-      operationId: radiations_update
+      operationId: moh_radiations_update
       parameters:
       - in: path
         name: id
@@ -2648,7 +2522,7 @@ paths:
         description: A unique integer value identifying this radiation.
         required: true
       tags:
-      - radiations
+      - moh
       requestBody:
         content:
           application/json:
@@ -2669,7 +2543,7 @@ paths:
                 $ref: '#/components/schemas/Radiation'
           description: ''
     patch:
-      operationId: radiations_partial_update
+      operationId: moh_radiations_partial_update
       parameters:
       - in: path
         name: id
@@ -2678,7 +2552,7 @@ paths:
         description: A unique integer value identifying this radiation.
         required: true
       tags:
-      - radiations
+      - moh
       requestBody:
         content:
           application/json:
@@ -2698,7 +2572,7 @@ paths:
                 $ref: '#/components/schemas/Radiation'
           description: ''
     delete:
-      operationId: radiations_destroy
+      operationId: moh_radiations_destroy
       parameters:
       - in: path
         name: id
@@ -2707,13 +2581,13 @@ paths:
         description: A unique integer value identifying this radiation.
         required: true
       tags:
-      - radiations
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/sample_registrations/:
     get:
-      operationId: sample_registrations_list
+      operationId: moh_sample_registrations_list
       parameters:
       - in: query
         name: submitter_sample_id
@@ -2755,31 +2629,21 @@ paths:
         name: sample_type
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - sample_registrations
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSampleRegistrationList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/SampleRegistration'
           description: ''
     post:
-      operationId: sample_registrations_create
+      operationId: moh_sample_registrations_create
       tags:
-      - sample_registrations
+      - moh
       requestBody:
         content:
           application/json:
@@ -2801,7 +2665,7 @@ paths:
           description: ''
   /api/v1/moh/sample_registrations/{submitter_sample_id}/:
     get:
-      operationId: sample_registrations_retrieve
+      operationId: moh_sample_registrations_retrieve
       parameters:
       - in: path
         name: submitter_sample_id
@@ -2810,7 +2674,7 @@ paths:
         description: A unique value identifying this sample registration.
         required: true
       tags:
-      - sample_registrations
+      - moh
       responses:
         '200':
           content:
@@ -2819,7 +2683,7 @@ paths:
                 $ref: '#/components/schemas/SampleRegistration'
           description: ''
     put:
-      operationId: sample_registrations_update
+      operationId: moh_sample_registrations_update
       parameters:
       - in: path
         name: submitter_sample_id
@@ -2828,7 +2692,7 @@ paths:
         description: A unique value identifying this sample registration.
         required: true
       tags:
-      - sample_registrations
+      - moh
       requestBody:
         content:
           application/json:
@@ -2849,7 +2713,7 @@ paths:
                 $ref: '#/components/schemas/SampleRegistration'
           description: ''
     patch:
-      operationId: sample_registrations_partial_update
+      operationId: moh_sample_registrations_partial_update
       parameters:
       - in: path
         name: submitter_sample_id
@@ -2858,7 +2722,7 @@ paths:
         description: A unique value identifying this sample registration.
         required: true
       tags:
-      - sample_registrations
+      - moh
       requestBody:
         content:
           application/json:
@@ -2878,7 +2742,7 @@ paths:
                 $ref: '#/components/schemas/SampleRegistration'
           description: ''
     delete:
-      operationId: sample_registrations_destroy
+      operationId: moh_sample_registrations_destroy
       parameters:
       - in: path
         name: submitter_sample_id
@@ -2887,13 +2751,13 @@ paths:
         description: A unique value identifying this sample registration.
         required: true
       tags:
-      - sample_registrations
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/specimens/:
     get:
-      operationId: specimens_list
+      operationId: moh_specimens_list
       parameters:
       - in: query
         name: submitter_specimen_id
@@ -2971,31 +2835,21 @@ paths:
         name: percent_tumour_cells_measurement_method
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - specimens
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSpecimenList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Specimen'
           description: ''
     post:
-      operationId: specimens_create
+      operationId: moh_specimens_create
       tags:
-      - specimens
+      - moh
       requestBody:
         content:
           application/json:
@@ -3017,7 +2871,7 @@ paths:
           description: ''
   /api/v1/moh/specimens/{submitter_specimen_id}/:
     get:
-      operationId: specimens_retrieve
+      operationId: moh_specimens_retrieve
       parameters:
       - in: path
         name: submitter_specimen_id
@@ -3026,7 +2880,7 @@ paths:
         description: A unique value identifying this specimen.
         required: true
       tags:
-      - specimens
+      - moh
       responses:
         '200':
           content:
@@ -3035,7 +2889,7 @@ paths:
                 $ref: '#/components/schemas/Specimen'
           description: ''
     put:
-      operationId: specimens_update
+      operationId: moh_specimens_update
       parameters:
       - in: path
         name: submitter_specimen_id
@@ -3044,7 +2898,7 @@ paths:
         description: A unique value identifying this specimen.
         required: true
       tags:
-      - specimens
+      - moh
       requestBody:
         content:
           application/json:
@@ -3065,7 +2919,7 @@ paths:
                 $ref: '#/components/schemas/Specimen'
           description: ''
     patch:
-      operationId: specimens_partial_update
+      operationId: moh_specimens_partial_update
       parameters:
       - in: path
         name: submitter_specimen_id
@@ -3074,7 +2928,7 @@ paths:
         description: A unique value identifying this specimen.
         required: true
       tags:
-      - specimens
+      - moh
       requestBody:
         content:
           application/json:
@@ -3094,7 +2948,7 @@ paths:
                 $ref: '#/components/schemas/Specimen'
           description: ''
     delete:
-      operationId: specimens_destroy
+      operationId: moh_specimens_destroy
       parameters:
       - in: path
         name: submitter_specimen_id
@@ -3103,13 +2957,13 @@ paths:
         description: A unique value identifying this specimen.
         required: true
       tags:
-      - specimens
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/surgeries/:
     get:
-      operationId: surgeries_list
+      operationId: moh_surgeries_list
       parameters:
       - in: query
         name: program_id
@@ -3179,31 +3033,21 @@ paths:
         name: perineural_invasion
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - surgeries
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSurgeryList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Surgery'
           description: ''
     post:
-      operationId: surgeries_create
+      operationId: moh_surgeries_create
       tags:
-      - surgeries
+      - moh
       requestBody:
         content:
           application/json:
@@ -3225,7 +3069,7 @@ paths:
           description: ''
   /api/v1/moh/surgeries/{id}/:
     get:
-      operationId: surgeries_retrieve
+      operationId: moh_surgeries_retrieve
       parameters:
       - in: path
         name: id
@@ -3234,7 +3078,7 @@ paths:
         description: A unique integer value identifying this surgery.
         required: true
       tags:
-      - surgeries
+      - moh
       responses:
         '200':
           content:
@@ -3243,7 +3087,7 @@ paths:
                 $ref: '#/components/schemas/Surgery'
           description: ''
     put:
-      operationId: surgeries_update
+      operationId: moh_surgeries_update
       parameters:
       - in: path
         name: id
@@ -3252,7 +3096,7 @@ paths:
         description: A unique integer value identifying this surgery.
         required: true
       tags:
-      - surgeries
+      - moh
       requestBody:
         content:
           application/json:
@@ -3273,7 +3117,7 @@ paths:
                 $ref: '#/components/schemas/Surgery'
           description: ''
     patch:
-      operationId: surgeries_partial_update
+      operationId: moh_surgeries_partial_update
       parameters:
       - in: path
         name: id
@@ -3282,7 +3126,7 @@ paths:
         description: A unique integer value identifying this surgery.
         required: true
       tags:
-      - surgeries
+      - moh
       requestBody:
         content:
           application/json:
@@ -3302,7 +3146,7 @@ paths:
                 $ref: '#/components/schemas/Surgery'
           description: ''
     delete:
-      operationId: surgeries_destroy
+      operationId: moh_surgeries_destroy
       parameters:
       - in: path
         name: id
@@ -3311,13 +3155,13 @@ paths:
         description: A unique integer value identifying this surgery.
         required: true
       tags:
-      - surgeries
+      - moh
       responses:
         '204':
           description: No response body
   /api/v1/moh/treatments/:
     get:
-      operationId: treatments_list
+      operationId: moh_treatments_list
       parameters:
       - in: query
         name: submitter_treatment_id
@@ -3375,31 +3219,21 @@ paths:
         name: response_to_treatment
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
-      - treatments
+      - moh
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedTreatmentList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Treatment'
           description: ''
     post:
-      operationId: treatments_create
+      operationId: moh_treatments_create
       tags:
-      - treatments
+      - moh
       requestBody:
         content:
           application/json:
@@ -3421,7 +3255,7 @@ paths:
           description: ''
   /api/v1/moh/treatments/{submitter_treatment_id}/:
     get:
-      operationId: treatments_retrieve
+      operationId: moh_treatments_retrieve
       parameters:
       - in: path
         name: submitter_treatment_id
@@ -3430,7 +3264,7 @@ paths:
         description: A unique value identifying this treatment.
         required: true
       tags:
-      - treatments
+      - moh
       responses:
         '200':
           content:
@@ -3439,7 +3273,7 @@ paths:
                 $ref: '#/components/schemas/Treatment'
           description: ''
     put:
-      operationId: treatments_update
+      operationId: moh_treatments_update
       parameters:
       - in: path
         name: submitter_treatment_id
@@ -3448,7 +3282,7 @@ paths:
         description: A unique value identifying this treatment.
         required: true
       tags:
-      - treatments
+      - moh
       requestBody:
         content:
           application/json:
@@ -3469,7 +3303,7 @@ paths:
                 $ref: '#/components/schemas/Treatment'
           description: ''
     patch:
-      operationId: treatments_partial_update
+      operationId: moh_treatments_partial_update
       parameters:
       - in: path
         name: submitter_treatment_id
@@ -3478,7 +3312,7 @@ paths:
         description: A unique value identifying this treatment.
         required: true
       tags:
-      - treatments
+      - moh
       requestBody:
         content:
           application/json:
@@ -3498,7 +3332,7 @@ paths:
                 $ref: '#/components/schemas/Treatment'
           description: ''
     delete:
-      operationId: treatments_destroy
+      operationId: moh_treatments_destroy
       parameters:
       - in: path
         name: submitter_treatment_id
@@ -3507,7 +3341,7 @@ paths:
         description: A unique value identifying this treatment.
         required: true
       tags:
-      - treatments
+      - moh
       responses:
         '204':
           description: No response body
@@ -3765,6 +3599,16 @@ components:
       - prior_malignancy
       - program_id
       - submitter_donor_id
+    Discovery:
+      type: object
+      description: |-
+        This serializer is used to return the discovery_count.
+        It also override the list serializer to a single object
+      properties:
+        discovery_count:
+          type: integer
+      required:
+      - discovery_count
     Donor:
       type: object
       properties:
@@ -4128,286 +3972,6 @@ components:
       - program_id
       - submitter_donor_id
       - submitter_treatment_id
-    PaginatedBiomarkerList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Biomarker'
-    PaginatedChemotherapyList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Chemotherapy'
-    PaginatedComorbidityList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Comorbidity'
-    PaginatedDonorList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Donor'
-    PaginatedFollowUpList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/FollowUp'
-    PaginatedHormoneTherapyList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/HormoneTherapy'
-    PaginatedImmunotherapyList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Immunotherapy'
-    PaginatedPrimaryDiagnosisList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/PrimaryDiagnosis'
-    PaginatedProgramList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Program'
-    PaginatedRadiationList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Radiation'
-    PaginatedSampleRegistrationList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/SampleRegistration'
-    PaginatedSpecimenList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Specimen'
-    PaginatedSurgeryList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Surgery'
-    PaginatedTreatmentList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Treatment'
     PatchedBiomarkerRequest:
       type: object
       properties:
@@ -4750,7 +4314,7 @@ components:
           maxLength: 255
         created:
           type: string
-          format: date-time
+          format: date
         updated:
           type: string
           format: date-time
@@ -5180,7 +4744,7 @@ components:
           maxLength: 255
         created:
           type: string
-          format: date-time
+          format: date
         updated:
           type: string
           format: date-time
@@ -5200,7 +4764,7 @@ components:
           maxLength: 255
         created:
           type: string
-          format: date-time
+          format: date
         updated:
           type: string
           format: date-time
