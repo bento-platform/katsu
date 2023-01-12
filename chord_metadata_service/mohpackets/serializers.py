@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from chord_metadata_service.mohpackets.validators import ID_VALIDATOR
-from drf_spectacular.utils import extend_schema_serializer
 
 from .models import (
     Program,
@@ -112,9 +111,7 @@ class FollowUpSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-
 class BiomarkerSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Biomarker
         fields = "__all__"
@@ -124,5 +121,3 @@ class ComorbiditySerializer(serializers.ModelSerializer):
     class Meta:
         model = Comorbidity
         fields = "__all__"
-
-

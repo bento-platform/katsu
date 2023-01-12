@@ -70,13 +70,13 @@ from chord_metadata_service.mohpackets.models import (
 ##########################################
 
 
-
 @extend_schema_serializer(many=False)
 class DiscoverySerializer(serializers.Serializer):
     """
     This serializer is used to return the discovery_count.
     It also override the list serializer to a single object
     """
+
     discovery_count = serializers.IntegerField()
 
 
@@ -229,7 +229,6 @@ class DiscoveryFollowUpViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         return get_discovery_response(self)
-
 
 
 class DiscoveryBiomarkerViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
