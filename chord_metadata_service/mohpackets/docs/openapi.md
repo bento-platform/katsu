@@ -1,22 +1,3 @@
----
-title: Metadata Service API v1.0.0
-language_tabs:
-  - shell: Shell
-  - http: HTTP
-  - javascript: JavaScript
-  - ruby: Ruby
-  - python: Python
-  - php: PHP
-  - java: Java
-  - go: Go
-toc_footers: []
-includes: []
-search: true
-highlight_theme: darkula
-headingLevel: 2
-
----
-
 <h1 id="metadata-service-api">Metadata Service API v1.0.0</h1>
 
 Metadata Service provides a phenotypic description of an Individual in the context of biomedical research.
