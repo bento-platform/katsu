@@ -2,7 +2,7 @@
 
 This folder contains the schema and documentation for **MoH models**
 
-To view the API documentation, you can simply open openapi.md. If you need to generate the `schema.yml` file, run the command below:
+To view the API documentation, you can simply open [openapi.md](openapi.md). If you need to generate the `schema.yml` file, run the command below:
 
 ```
 python manage.py spectacular --file ./chord_metadata_service/mohpackets/docs/schema.yml --validate --fail-on-warn
