@@ -10,7 +10,7 @@ from django.utils import timezone
     ER Diagram: https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/mohccn_data_standard_er_diagram_endorsed6oct22.pdf?Status=Master&sfvrsn=dd57a75e_5 # noqa: E501
     Schema last updated: September 2022
     --------------------------------
-    NOTES: 
+    NOTES:
     - Permissible values are not enforced in the model.
         They are checked in the serializer and ingest process.
 
@@ -20,6 +20,10 @@ from django.utils import timezone
 
 
 class AutoDateTimeField(models.DateTimeField):
+    """
+        This function provides the timefield when the model is saved.
+        Without this, the updated field will be empty and failed on update.
+    """
     def pre_save(self, model_instance, add):
         return timezone.now()
 
@@ -27,7 +31,7 @@ class AutoDateTimeField(models.DateTimeField):
 class Program(models.Model):
     program_id = models.CharField(max_length=64, primary_key=True)
     name = models.CharField(max_length=255, blank=False, null=False, unique=True)
-    created = models.DateField(default=timezone.now)
+    created = models.DateTimeField(default=timezone.now)
     updated = AutoDateTimeField(default=timezone.now)
 
     def __str__(self):

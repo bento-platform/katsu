@@ -1,11 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
 from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
 from chord_metadata_service.mohpackets.utils import get_authorized_datasets
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework.decorators import api_view
+
 
 from chord_metadata_service.mohpackets.filters import (
     ProgramFilter,
@@ -99,6 +101,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProgramFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = Program.objects.all()
 
 
@@ -107,6 +110,7 @@ class DonorViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = DonorFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = Donor.objects.all()
 
     def get_queryset(self):
@@ -118,6 +122,7 @@ class SpecimenViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = SpecimenFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = Specimen.objects.all()
 
     def get_queryset(self):
@@ -129,6 +134,7 @@ class SampleRegistrationViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = SampleRegistrationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = SampleRegistration.objects.all()
 
     def get_queryset(self):
@@ -140,6 +146,7 @@ class PrimaryDiagnosisViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = PrimaryDiagnosisFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = PrimaryDiagnosis.objects.all()
 
     def get_queryset(self):
@@ -151,6 +158,7 @@ class TreatmentViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = TreatmentFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = Treatment.objects.all()
 
     def get_queryset(self):
@@ -162,6 +170,7 @@ class ChemotherapyViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ChemotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = Chemotherapy.objects.all()
 
     def get_queryset(self):
@@ -173,6 +182,7 @@ class HormoneTherapyViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = HormoneTherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = HormoneTherapy.objects.all()
 
     def get_queryset(self):
@@ -184,6 +194,7 @@ class RadiationViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = RadiationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = Radiation.objects.all()
 
     def get_queryset(self):
@@ -195,6 +206,7 @@ class ImmunotherapyViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ImmunotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = Immunotherapy.objects.all()
 
     def get_queryset(self):
@@ -206,6 +218,7 @@ class SurgeryViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = SurgeryFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = Surgery.objects.all()
 
     def get_queryset(self):
@@ -217,6 +230,7 @@ class FollowUpViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = FollowUpFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = FollowUp.objects.all()
 
     def get_queryset(self):
@@ -228,6 +242,7 @@ class BiomarkerViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = BiomarkerFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = Biomarker.objects.all()
 
     def get_queryset(self):
@@ -239,6 +254,7 @@ class ComorbidityViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ComorbidityFilter
     permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
     queryset = Comorbidity.objects.all()
 
     def get_queryset(self):
@@ -256,13 +272,13 @@ class ComorbidityViewSet(viewsets.ModelViewSet):
     description="MoH Overview schema",
     responses={
         200: inline_serializer(
-            name='moh_overview_schema_response',
+            name="moh_overview_schema_response",
             fields={
-                'cohort_count': serializers.IntegerField(),
-                'individual_count': serializers.IntegerField(),
-            }
+                "cohort_count": serializers.IntegerField(),
+                "individual_count": serializers.IntegerField(),
+            },
         )
-    }
+    },
 )
 @api_view(["GET"])
 def moh_overview(_request):
@@ -280,6 +296,3 @@ def moh_overview(_request):
             # where to get ethnicity and gender?
         }
     )
-
-
-    
