@@ -11,7 +11,7 @@ python manage.py spectacular --file ./chord_metadata_service/mohpackets/docs/sch
 For the `openapi.md` file, you'll need to install `widdershins` first and then run the following command:
 
 ```bash
-widdershins ./chord_metadata_service/mohpackets/docs/schema.yml -o ./chord_metadata_service/mohpackets/docs/openapi.md -c true -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3
+widdershins ./chord_metadata_service/mohpackets/docs/schema.yml -o ./chord_metadata_service/mohpackets/docs/openapi.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true
 ```
 
 Alternatively, you can also view the documentation in Redoc by using the following Docker command:
