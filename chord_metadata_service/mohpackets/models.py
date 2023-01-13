@@ -21,9 +21,10 @@ from django.utils import timezone
 
 class AutoDateTimeField(models.DateTimeField):
     """
-        This function provides the timefield when the model is saved.
-        Without this, the updated field will be empty and failed on update.
+    This function provides the timefield when the model is saved.
+    Without this, the updated field will be empty and failed on update.
     """
+
     def pre_save(self, model_instance, add):
         return timezone.now()
 
@@ -35,7 +36,8 @@ class Program(models.Model):
     updated = AutoDateTimeField(default=timezone.now)
 
     class Meta:
-        ordering = ['program_id']
+        ordering = ["program_id"]
+
     def __str__(self):
         return f"{self.program_id}"
 
@@ -52,8 +54,8 @@ class Donor(models.Model):
     primary_site = models.CharField(max_length=255, null=False, blank=False)
 
     class Meta:
-        ordering = ['submitter_donor_id']
-        
+        ordering = ["submitter_donor_id"]
+
     def __str__(self):
         return f"{self.submitter_donor_id}"
 
@@ -73,7 +75,9 @@ class PrimaryDiagnosis(models.Model):
         max_length=128, null=False, blank=False
     )
     lymph_nodes_examined_method = models.CharField(max_length=64)
-    number_lymph_nodes_positive = models.PositiveSmallIntegerField(blank=True, null=True)
+    number_lymph_nodes_positive = models.PositiveSmallIntegerField(
+        blank=True, null=True
+    )
     clinical_tumour_staging_system = models.CharField(max_length=128)
     clinical_t_category = models.CharField(max_length=64)
     clinical_n_category = models.CharField(max_length=64)
@@ -81,8 +85,8 @@ class PrimaryDiagnosis(models.Model):
     clinical_stage_group = models.CharField(max_length=64)
 
     class Meta:
-        ordering = ['submitter_primary_diagnosis_id']
-        
+        ordering = ["submitter_primary_diagnosis_id"]
+
     def __str__(self):
         return f"{self.submitter_primary_diagnosis_id}"
 
@@ -115,8 +119,8 @@ class Specimen(models.Model):
     percent_tumour_cells_measurement_method = models.CharField(max_length=64)
 
     class Meta:
-        ordering= ['submitter_specimen_id']
-        
+        ordering = ["submitter_specimen_id"]
+
     def __str__(self):
         return f"{self.submitter_specimen_id}"
 
@@ -138,8 +142,8 @@ class SampleRegistration(models.Model):
     sample_type = models.CharField(max_length=128, null=False, blank=False)
 
     class Meta:
-        ordering = ['submitter_sample_id']
-         
+        ordering = ["submitter_sample_id"]
+
     def __str__(self):
         return f"{self.submitter_sample_id}"
 
@@ -169,8 +173,8 @@ class Treatment(models.Model):
     response_to_treatment = models.CharField(max_length=255, null=False, blank=False)
 
     class Meta:
-        ordering = ['submitter_treatment_id']
-        
+        ordering = ["submitter_treatment_id"]
+
     def __str__(self):
         return f"{self.submitter_treatment_id}"
 
@@ -187,12 +191,16 @@ class Chemotherapy(models.Model):
     drug_name = models.CharField(max_length=255, null=False, blank=False)
     drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
     chemotherapy_dosage_units = models.CharField(max_length=64, null=False, blank=False)
-    cumulative_drug_dosage_prescribed = models.PositiveSmallIntegerField(blank=True, null=True)
-    cumulative_drug_dosage_actual = models.PositiveSmallIntegerField(blank=True, null=True)
+    cumulative_drug_dosage_prescribed = models.PositiveSmallIntegerField(
+        blank=True, null=True
+    )
+    cumulative_drug_dosage_actual = models.PositiveSmallIntegerField(
+        blank=True, null=True
+    )
 
     class Meta:
-        ordering = ['id']
-        
+        ordering = ["id"]
+
     def __str__(self):
         return f"{self.id}"
 
@@ -209,12 +217,16 @@ class HormoneTherapy(models.Model):
     drug_name = models.CharField(max_length=255, null=False, blank=False)
     drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
     hormone_drug_dosage_units = models.CharField(max_length=64, null=False, blank=False)
-    cumulative_drug_dosage_prescribed = models.PositiveSmallIntegerField(blank=True, null=True)
-    cumulative_drug_dosage_actual = models.PositiveSmallIntegerField(blank=True, null=True)
+    cumulative_drug_dosage_prescribed = models.PositiveSmallIntegerField(
+        blank=True, null=True
+    )
+    cumulative_drug_dosage_actual = models.PositiveSmallIntegerField(
+        blank=True, null=True
+    )
 
     class Meta:
-        ordering = ['id']
-        
+        ordering = ["id"]
+
     def __str__(self):
         return f"{self.id}"
 
@@ -241,8 +253,8 @@ class Radiation(models.Model):
     reference_radiation_treatment_id = models.CharField(max_length=64)
 
     class Meta:
-        ordering = ['id']
-        
+        ordering = ["id"]
+
     def __str__(self):
         return f"{self.id}"
 
@@ -259,9 +271,10 @@ class Immunotherapy(models.Model):
     immunotherapy_type = models.CharField(max_length=255, null=False, blank=False)
     drug_name = models.CharField(max_length=255, null=False, blank=False)
     drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
+
     class Meta:
-        ordering = ['id']
-        
+        ordering = ["id"]
+
     def __str__(self):
         return f"{self.id}"
 
@@ -293,8 +306,8 @@ class Surgery(models.Model):
     perineural_invasion = models.CharField(max_length=128)
 
     class Meta:
-        ordering = ['id']
-        
+        ordering = ["id"]
+
     def __str__(self):
         return f"{self.id}"
 
@@ -330,8 +343,8 @@ class FollowUp(models.Model):
     recurrence_stage_group = models.CharField(max_length=64)
 
     class Meta:
-        ordering = ['submitter_follow_up_id']
-        
+        ordering = ["submitter_follow_up_id"]
+
     def __str__(self):
         return f"{self.submitter_follow_up_id}"
 
@@ -362,11 +375,10 @@ class Biomarker(models.Model):
     cea = models.PositiveSmallIntegerField(null=True, blank=True)
 
     class Meta:
-        ordering = ['id']
-        
+        ordering = ["id"]
+
     def __str__(self):
         return f"{self.id}"
-    
 
 
 class Comorbidity(models.Model):
@@ -379,13 +391,15 @@ class Comorbidity(models.Model):
     )
     prior_malignancy = models.CharField(max_length=32)
     laterality_of_prior_malignancy = models.CharField(max_length=64)
-    age_at_comorbidity_diagnosis = models.PositiveSmallIntegerField(null=True, blank=True)
+    age_at_comorbidity_diagnosis = models.PositiveSmallIntegerField(
+        null=True, blank=True
+    )
     comorbidity_type_code = models.CharField(max_length=64)
     comorbidity_treatment_status = models.CharField(max_length=32)
     comorbidity_treatment = models.CharField(max_length=255)
 
     class Meta:
-        ordering = ['id']
-        
+        ordering = ["id"]
+
     def __str__(self):
         return f"{self.id}"
