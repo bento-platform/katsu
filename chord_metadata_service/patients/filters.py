@@ -46,13 +46,6 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         ).distinct()
         return qs
 
-    def filter_on_cancer_condition_name(self, qs, name, value):
-        qs = qs.filter(mcodepacket__cancer_condition__body_site__icontains=value).distinct()
-        return qs
-
-    def filter_on_treatment_name(self, qs, name, value):
-        qs = qs.filter(mcodepacket__cancer_related_procedures__code__icontains=value).distinct()
-        return qs
 
     def filter_disease(self, qs, name, value):
         qs = qs.filter(
