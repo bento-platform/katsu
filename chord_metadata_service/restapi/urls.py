@@ -60,7 +60,7 @@ urlpatterns = [
     path('experiment_schema', experiment_views.get_experiment_schema,
          name="experiment-schema"),
     # overview
-    path('overview', overview, name="overview"),POSTGRES_PASSWORD
+    path('overview', overview, name="overview"),
     # autocomplete URLs
     path('disease_term_autocomplete', DiseaseTermAutocomplete.as_view(), name='disease-term-autocomplete',),
     path('phenotypic_feature_type_autocomplete', PhenotypicFeatureTypeAutocomplete.as_view(),
