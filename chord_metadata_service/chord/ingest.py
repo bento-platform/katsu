@@ -19,7 +19,7 @@ from django.conf import settings
 from bento_lib.drs.utils import get_access_method_of_type, fetch_drs_record_by_uri
 
 from chord_metadata_service.chord.data_types import (
-    DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET, DATA_TYPE_READSET
+    DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_READSET
 )
 from chord_metadata_service.chord.models import Table, TableOwnership
 from chord_metadata_service.experiments import models as em
@@ -31,8 +31,6 @@ from chord_metadata_service.restapi.fhir_ingest import (
     ingest_conditions,
     ingest_specimens
 )
-from chord_metadata_service.mcode.parse_fhir_mcode import parse_bundle
-from chord_metadata_service.mcode.mcode_ingest import ingest_mcodepacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
 from chord_metadata_service.restapi.utils import iso_duration_to_years
@@ -54,8 +52,6 @@ logger = logging.getLogger(__name__)
 WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
-WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
-WORKFLOW_MCODE_JSON = "mcode_json"
 WORKFLOW_READSET = "readset"
 WORKFLOW_CBIOPORTAL = "cbioportal"
 
@@ -173,51 +169,7 @@ METADATA_WORKFLOWS = {
 
             ]
         },
-        WORKFLOW_MCODE_FHIR_JSON: {
-            "name": "MCODE FHIR Resources JSON",
-            "description": "This ingestion workflow will validate and import a mCODE FHIR 4.0. schema-compatible "
-                           "JSON document, and convert it to the Bento metadata service's internal mCODE-based "
-                           "data model.",
-            "data_type": DATA_TYPE_MCODEPACKET,
-            "file": "mcode_fhir_json.wdl",
-            "inputs": [
-                {
-                    "id": "json_document",
-                    "type": "file",
-                    "required": True,
-                    "extensions": [".json"]
-                }
-            ],
-            "outputs": [
-                {
-                    "id": "json_document",
-                    "type": "file",
-                    "value": "{json_document}"
-                }
-            ]
-        },
-        WORKFLOW_MCODE_JSON: {
-            "name": "MCODE Resources JSON",
-            "description": "This ingestion workflow will validate and import the Bento metadata service's "
-                           "internal mCODE-based JSON document",
-            "data_type": DATA_TYPE_MCODEPACKET,
-            "file": "mcode_json.wdl",
-            "inputs": [
-                {
-                    "id": "json_document",
-                    "type": "file",
-                    "required": True,
-                    "extensions": [".json"]
-                }
-            ],
-            "outputs": [
-                {
-                    "id": "json_document",
-                    "type": "file",
-                    "value": "{json_document}"
-                }
-            ]
-        },
+        
         WORKFLOW_READSET: {
             "name": "Readset",
             "description": "This workflow will copy readset files over to DRS.",
@@ -726,27 +678,6 @@ def ingest_fhir_workflow(workflow_outputs, table_id):
                 ingest_specimens(phenopacket_ids, specimens_data)
 
 
-def ingest_mcode_fhir_workflow(workflow_outputs, table_id):
-    with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
-        logger.info(f"Attempting ingestion of MCODE FIHR from path: {json_doc_path}")
-        with open(json_doc_path, "r") as jf:
-            json_data = json.load(jf)
-            mcodepacket = parse_bundle(json_data)
-            ingest_mcodepacket(mcodepacket, table_id)
-
-
-def ingest_mcode_workflow(workflow_outputs, table_id):
-    with _workflow_file_output_to_path(_get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
-        logger.info(f"Attempting ingestion of MCODE from path: {json_doc_path}")
-        with open(json_doc_path, "r") as jf:
-            json_data = json.load(jf)
-            if isinstance(json_data, list):
-                for mcodepacket in json_data:
-                    ingest_mcodepacket(mcodepacket, table_id)
-            else:
-                ingest_mcodepacket(json_data, table_id)
-
-
 # the table_id is required to fit the bento_ingest.schema.json in bento_lib
 # it can be any existing table_id which can be validated
 # the workflow only performs copying files over to the DRS
@@ -761,7 +692,5 @@ WORKFLOW_INGEST_FUNCTION_MAP = {
     WORKFLOW_EXPERIMENTS_JSON: ingest_experiments_workflow,
     WORKFLOW_PHENOPACKETS_JSON: ingest_phenopacket_workflow,
     WORKFLOW_FHIR_JSON: ingest_fhir_workflow,
-    WORKFLOW_MCODE_FHIR_JSON: ingest_mcode_fhir_workflow,
-    WORKFLOW_MCODE_JSON: ingest_mcode_workflow,
     WORKFLOW_READSET: ingest_readset_workflow,
 }
