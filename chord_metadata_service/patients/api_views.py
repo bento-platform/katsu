@@ -17,7 +17,6 @@ from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer,
     PhenopacketsRenderer,
     IndividualCSVRenderer,
-    ARGORenderer,
 )
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.utils import (
@@ -41,7 +40,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
-                        PhenopacketsRenderer, IndividualCSVRenderer, ARGORenderer)
+                        PhenopacketsRenderer, IndividualCSVRenderer)
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = IndividualFilter
     ordering_fields = ["id"]
@@ -71,7 +70,7 @@ class IndividualBatchViewSet(BatchViewSet):
     serializer_class = IndividualSerializer
     pagination_class = BatchResultsSetPagination
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
-                        PhenopacketsRenderer, IndividualCSVRenderer, ARGORenderer)
+                        PhenopacketsRenderer, IndividualCSVRenderer)
     # Override to infer the renderer based on a `format` argument from the POST request body
     content_negotiation_class = FormatInPostContentNegotiation
 
