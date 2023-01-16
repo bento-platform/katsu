@@ -20,9 +20,6 @@ from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, 
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
 
-from chord_metadata_service.mcode.models import MCodePacket
-from chord_metadata_service.mcode.serializers import MCodePacketSerializer
-
 from chord_metadata_service.metadata.elastic import es
 from chord_metadata_service.metadata.settings import DEBUG, CHORD_SERVICE_ARTIFACT, CHORD_SERVICE_ID
 
@@ -32,7 +29,7 @@ from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
-from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
+from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset, TableOwnership, Table
 from .permissions import ReadOnly, OverrideOrSuperUserOnly
 
@@ -163,15 +160,6 @@ def experiment_table_summary(table):
     })
 
 
-def mcodepacket_table_summary(table):
-    mcodepackets = MCodePacket.objects.filter(table=table)  # TODO
-
-    return Response({
-        "count": mcodepackets.count(),
-        "data_type_specific": {},  # TODO
-    })
-
-
 def phenopacket_table_summary(table):
     phenopackets = Phenopacket.objects.filter(table=table)  # TODO
 
@@ -241,7 +229,6 @@ def phenopacket_table_summary(table):
 
 SUMMARY_HANDLERS: Dict[str, Callable[[Any], Response]] = {
     DATA_TYPE_EXPERIMENT: experiment_table_summary,
-    DATA_TYPE_MCODEPACKET: mcodepacket_table_summary,
     DATA_TYPE_PHENOPACKET: phenopacket_table_summary,
 }
 
@@ -279,14 +266,6 @@ def experiment_query_results(query, params):
         .prefetch_related(*EXPERIMENT_PREFETCH)
 
 
-def mcodepacket_query_results(query, params):
-    # TODO: possibly a quite inefficient way of doing things...
-    # TODO: select_related / prefetch_related for instant performance boost!
-    return MCodePacket.objects.filter(
-        id__in=data_type_results(query, params, "id")
-    )
-
-
 def phenopacket_query_results(query, params):
     # TODO: possibly a quite inefficient way of doing things...
     # To expand further on this query : the select_related call
@@ -302,13 +281,11 @@ def phenopacket_query_results(query, params):
 
 QUERY_RESULTS_FN: Dict[str, Callable] = {
     DATA_TYPE_EXPERIMENT: experiment_query_results,
-    DATA_TYPE_MCODEPACKET: mcodepacket_query_results,
     DATA_TYPE_PHENOPACKET: phenopacket_query_results,
 }
 
 QUERY_RESULT_SERIALIZERS = {
     DATA_TYPE_EXPERIMENT: ExperimentSerializer,
-    DATA_TYPE_MCODEPACKET: MCodePacketSerializer,
     DATA_TYPE_PHENOPACKET: PhenopacketSerializer,
 }
 

@@ -27,28 +27,6 @@ INDIVIDUAL = {
             "description": "Whether a patient is deceased.",
             "help": "FHIR-specific property."
         },
-
-        # mCode-specific
-        "race": {
-            "description": "A code for a person's race (mCode).",
-            "help": "mCode-specific property."
-        },
-        "ethnicity": {
-            "description": "A code for a person's ethnicity (mCode).",
-            "help": "mCode-specific property."
-        },
-        "comorbid_condition": {
-            "description": "One or more conditions that occur with primary condition.",
-            "help": "mCode-specific property."
-        },
-        "ecog_performance_status": {
-            "description": "Value representing the Eastern Cooperative Oncology Group performance status.",
-            "help": "mCode-specific property."
-        },
-        "karnofsky": {
-            "description": "Value representing the Karnofsky Performance status.",
-            "help": "mCode-specific property."
-        },
         **EXTRA_PROPERTIES
     }
 }
