@@ -4,11 +4,13 @@ import json
 import uuid
 
 from dateutil.parser import isoparse
+from decimal import Decimal
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Table
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
+from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from .exceptions import IngestError
@@ -66,6 +68,134 @@ def validate_phenopacket(phenopacket_data: dict[str, Any], idx: Optional[int] = 
             f"(check Katsu logs for more information)")
 
 
+def update_or_create_subject(subject: dict) -> pm.Individual:
+    extra_properties: dict[str, Any] = subject.get("extra_properties", {})
+
+    # Pre-process subject data:    ---------------------------------------------------------------------------------
+
+    # - Be a bit flexible with the subject date_of_birth field for Signature; convert blank strings to None.
+    subject["date_of_birth"] = subject.get("date_of_birth") or None
+    subject_query = query_and_check_nulls(subject, "date_of_birth", transform=isoparse)
+    for k in ("alternate_ids", "age", "sex", "taxonomy"):
+        subject_query.update(query_and_check_nulls(subject, k))
+
+    # - Check if age is represented as a duration string (vs. age range values) and convert it to years
+    age_numeric_value: Optional[Decimal] = None
+    age_unit_value: Optional[str] = None
+    if "age" in subject:
+        if "age" in subject["age"]:
+            age_numeric_value, age_unit_value = iso_duration_to_years(subject["age"]["age"])
+
+    # --------------------------------------------------------------------------------------------------------------
+
+    # Check if subject already exists
+    existing_extra_properties: dict[str, Any]
+    try:
+        existing_subject = pm.Individual.objects.get(id=subject["id"])
+        existing_extra_properties = existing_subject.extra_properties
+    except pm.Individual.DoesNotExist:
+        existing_extra_properties = extra_properties
+        pass
+
+    # --------------------------------------------------------------------------------------------------------------
+
+    subject_obj, subject_obj_created = pm.Individual.objects.get_or_create(
+        id=subject["id"],
+        # if left out/null, karyotypic_sex defaults to UNKNOWN_KARYOTYPE
+        karyotypic_sex=subject.get("karyotypic_sex") or KaryotypicSex.UNKNOWN_KARYOTYPE,
+        race=subject.get("race", ""),
+        ethnicity=subject.get("ethnicity", ""),
+        age_numeric=age_numeric_value,
+        age_unit=age_unit_value if age_unit_value else "",
+        extra_properties=existing_extra_properties,
+        **subject_query
+    )
+
+    if not subject_obj_created:
+        # Add any new extra properties to subject if they already exist
+        subject_obj.extra_properties = extra_properties
+        subject_obj.save()
+
+    return subject_obj
+
+
+def get_or_create_biosample(bs: dict) -> pm.Biosample:
+    # TODO: This should probably be a JSON field, or compound key with code/body_site
+    procedure, _ = pm.Procedure.objects.get_or_create(**bs["procedure"])
+
+    bs_query = query_and_check_nulls(bs, "individual_id", lambda i: pm.Individual.objects.get(id=i))
+    for k in ("sampled_tissue", "taxonomy", "individual_age_at_collection", "histological_diagnosis",
+              "tumor_progression", "tumor_grade"):
+        bs_query.update(query_and_check_nulls(bs, k))
+
+    bs_obj, bs_created = pm.Biosample.objects.get_or_create(
+        id=bs["id"],
+        description=bs.get("description", ""),
+        procedure=procedure,
+        is_control_sample=bs.get("is_control_sample", False),
+        diagnostic_markers=bs.get("diagnostic_markers", []),
+        extra_properties=bs.get("extra_properties", {}),
+        **bs_query
+    )
+
+    variants_db = []
+    if "variants" in bs:
+        for variant in bs["variants"]:
+            variant_obj, _ = pm.Variant.objects.get_or_create(
+                allele_type=variant["allele_type"],
+                allele=variant["allele"],
+                zygosity=variant.get("zygosity", {}),
+                extra_properties=variant.get("extra_properties", {})
+            )
+            variants_db.append(variant_obj)
+
+    if bs_created:
+        bs_pfs = [get_or_create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
+        bs_obj.phenotypic_features.set(bs_pfs)
+
+        if variants_db:
+            bs_obj.variants.set(variants_db)
+
+    # TODO: Update phenotypic features otherwise?
+
+    return bs_obj
+
+
+def get_or_create_gene(g: dict) -> pm.Gene:
+    # TODO: Validate CURIE
+    # TODO: Rename alternate_id
+    g_obj, _ = pm.Gene.objects.get_or_create(
+        id=g["id"],
+        alternate_ids=g.get("alternate_ids", []),
+        symbol=g["symbol"],
+        extra_properties=g.get("extra_properties", {})
+    )
+    return g_obj
+
+
+def get_or_create_disease(disease) -> pm.Disease:
+    d_obj, _ = pm.Disease.objects.get_or_create(
+        term=disease["term"],
+        disease_stage=disease.get("disease_stage", []),
+        tnm_finding=disease.get("tnm_finding", []),
+        extra_properties=disease.get("extra_properties", {}),
+        **query_and_check_nulls(disease, "onset")
+    )
+    return d_obj
+
+
+def get_or_create_hts_file(hts_file) -> pm.HtsFile:
+    htsf_obj, _ = pm.HtsFile.objects.get_or_create(
+        uri=hts_file["uri"],
+        description=hts_file.get("description", None),
+        hts_format=hts_file["hts_format"],
+        genome_assembly=hts_file["genome_assembly"],
+        individual_to_sample_identifiers=hts_file.get("individual_to_sample_identifiers", None),
+        extra_properties=hts_file.get("extra_properties", {})
+    )
+    return hts_file
+
+
 def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate: bool = True,
                        idx: Optional[int] = None) -> pm.Phenopacket:
     """Ingests a single phenopacket."""
@@ -75,165 +205,77 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
         # `validate` may be false if the phenopacket has already been validated.
         validate_phenopacket(phenopacket_data, idx)
 
+    # Rough phenopackets structure:
+    #  id: ...
+    #  subject: {...}
+    #  phenotypic_features: [...]
+    #  biosamples: [...]
+    #  genes: [...]
+    #  diseases: [...]
+    #  hts_files: [...]
+    #  meta_data: {..., resources: [...]}
+
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
 
-    subject = phenopacket_data.get("subject")
-    subject_obj: Optional[pm.Individual] = None
     phenotypic_features = phenopacket_data.get("phenotypic_features", [])
     biosamples = phenopacket_data.get("biosamples", [])
     genes = phenopacket_data.get("genes", [])
     diseases = phenopacket_data.get("diseases", [])
     hts_files = phenopacket_data.get("hts_files", [])
-    meta_data = phenopacket_data["meta_data"]
+    meta_data = phenopacket_data["meta_data"]  # required to be present, so no .get()
+    resources = meta_data.get("resources", [])
 
-    if subject:
-        extra_properties: dict[str, Any] = subject.get("extra_properties", {})
+    # If there's a subject attached to the phenopacket, create it
+    # - or, if it already exists, *update* the extra properties if needed.
+    #   This is one of the few cases of 'updating' something that exists in Katsu.
+    subject_obj: Optional[pm.Individual] = None
+    if subject := phenopacket_data.get("subject"):  # we have a dictionary of subject data in the phenopacket
+        subject_obj = update_or_create_subject(subject)
 
-        # Pre-process subject data:    ---------------------------------------------------------------------------------
-
-        # - Be a bit flexible with the subject date_of_birth field for Signature; convert blank strings to None.
-        subject["date_of_birth"] = subject.get("date_of_birth") or None
-        subject_query = query_and_check_nulls(subject, "date_of_birth", transform=isoparse)
-        for k in ("alternate_ids", "age", "sex", "karyotypic_sex", "taxonomy"):
-            subject_query.update(query_and_check_nulls(subject, k))
-
-        # - Check if age is represented as a duration string (vs. age range values) and convert it to years
-        age_numeric_value = None
-        age_unit_value = None
-        if "age" in subject:
-            if "age" in subject["age"]:
-                age_numeric_value, age_unit_value = iso_duration_to_years(subject["age"]["age"])
-
-        # --------------------------------------------------------------------------------------------------------------
-
-        # Check if subject already exists
-        try:
-            existing_subject = pm.Individual.objects.get(id=subject["id"])
-            existing_extra_properties = existing_subject.extra_properties
-        except pm.Individual.DoesNotExist:
-            existing_extra_properties = extra_properties
-            pass
-
-        # --------------------------------------------------------------------------------------------------------------
-
-        subject_obj, subject_obj_created = pm.Individual.objects.get_or_create(
-            id=subject["id"],
-            race=subject.get("race", ""),
-            ethnicity=subject.get("ethnicity", ""),
-            age_numeric=age_numeric_value,
-            age_unit=age_unit_value if age_unit_value else "",
-            extra_properties=existing_extra_properties,
-            **subject_query
-        )
-
-        if not subject_obj_created:
-            # Add any new extra properties to subject if they already exist
-            subject_obj.extra_properties = extra_properties
-            subject_obj.save()
-
+    # Get or create all phenotypic features in the phenopacket
     phenotypic_features_db = [get_or_create_phenotypic_feature(pf) for pf in phenotypic_features]
 
-    biosamples_db = []
-    for bs in biosamples:
-        # TODO: This should probably be a JSON field, or compound key with code/body_site
-        procedure, _ = pm.Procedure.objects.get_or_create(**bs["procedure"])
+    # Get or create all biosamples in the phenopacket
+    biosamples_db = [get_or_create_biosample(bs) for bs in biosamples]
 
-        bs_query = query_and_check_nulls(bs, "individual_id", lambda i: pm.Individual.objects.get(id=i))
-        for k in ("sampled_tissue", "taxonomy", "individual_age_at_collection", "histological_diagnosis",
-                  "tumor_progression", "tumor_grade"):
-            bs_query.update(query_and_check_nulls(bs, k))
-
-        bs_obj, bs_created = pm.Biosample.objects.get_or_create(
-            id=bs["id"],
-            description=bs.get("description", ""),
-            procedure=procedure,
-            is_control_sample=bs.get("is_control_sample", False),
-            diagnostic_markers=bs.get("diagnostic_markers", []),
-            extra_properties=bs.get("extra_properties", {}),
-            **bs_query
-        )
-
-        variants_db = []
-        if "variants" in bs:
-            for variant in bs["variants"]:
-                variant_obj, _ = pm.Variant.objects.get_or_create(
-                    allele_type=variant["allele_type"],
-                    allele=variant["allele"],
-                    zygosity=variant.get("zygosity", {}),
-                    extra_properties=variant.get("extra_properties", {})
-                )
-                variants_db.append(variant_obj)
-
-        if bs_created:
-            bs_pfs = [get_or_create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
-            bs_obj.phenotypic_features.set(bs_pfs)
-
-            if variants_db:
-                bs_obj.variants.set(variants_db)
-
-        # TODO: Update phenotypic features otherwise?
-
-        biosamples_db.append(bs_obj)
-
+    # Get or create all genes in the phenopacket
     # TODO: May want to augment alternate_ids
-    genes_db = []
-    for g in genes:
-        # TODO: Validate CURIE
-        # TODO: Rename alternate_id
-        g_obj, _ = pm.Gene.objects.get_or_create(
-            id=g["id"],
-            alternate_ids=g.get("alternate_ids", []),
-            symbol=g["symbol"],
-            extra_properties=g.get("extra_properties", {})
-        )
-        genes_db.append(g_obj)
+    genes_db = [get_or_create_gene(g) for g in genes]
 
-    diseases_db = []
-    for disease in diseases:
-        # TODO: Primary key, should this be a model?
-        d_obj, _ = pm.Disease.objects.get_or_create(
-            term=disease["term"],
-            disease_stage=disease.get("disease_stage", []),
-            tnm_finding=disease.get("tnm_finding", []),
-            extra_properties=disease.get("extra_properties", {}),
-            **query_and_check_nulls(disease, "onset")
-        )
-        diseases_db.append(d_obj.id)
+    # Get or create all diseases in the phenopacket
+    diseases_db = [get_or_create_disease(disease) for disease in diseases]
 
-    hts_files_db = []
-    for htsfile in hts_files:
-        htsf_obj, _ = pm.HtsFile.objects.get_or_create(
-            uri=htsfile["uri"],
-            description=htsfile.get("description", None),
-            hts_format=htsfile["hts_format"],
-            genome_assembly=htsfile["genome_assembly"],
-            individual_to_sample_identifiers=htsfile.get("individual_to_sample_identifiers", None),
-            extra_properties=htsfile.get("extra_properties", {})
-        )
-        hts_files_db.append(htsf_obj)
+    # Get or create all manually-specified HTS files in the phenopacket
+    hts_files_db = [get_or_create_hts_file(hts_file) for hts_file in hts_files]
 
-    resources_db = [ingest_resource(rs) for rs in meta_data.get("resources", [])]
+    # Get or create all resources (ontologies, etc.) in the phenopacket
+    resources_db = [ingest_resource(rs) for rs in resources]
 
+    # Create phenopacket metadata object
     meta_data_obj = pm.MetaData(
         created_by=meta_data["created_by"],
         submitted_by=meta_data.get("submitted_by"),
         phenopacket_schema_version="1.0.0-RC3",
         external_references=meta_data.get("external_references", []),
-        extra_properties=meta_data.get("extra_properties", {})
+        extra_properties=meta_data.get("extra_properties", {}),
     )
     meta_data_obj.save()
 
+    # Attach resources to the metadata object
     meta_data_obj.resources.set(resources_db)
 
+    # Create the phenopacket object...
     new_phenopacket = pm.Phenopacket(
         id=new_phenopacket_id,
         subject=subject_obj,
         meta_data=meta_data_obj,
-        table=Table.objects.get(ownership_record_id=table_id, data_type=DATA_TYPE_PHENOPACKET)
+        table=Table.objects.get(ownership_record_id=table_id, data_type=DATA_TYPE_PHENOPACKET),
     )
 
+    # ... save it to the database...
     new_phenopacket.save()
 
+    # ... and attach all the other objects to it.
     new_phenopacket.phenotypic_features.set(phenotypic_features_db)
     new_phenopacket.biosamples.set(biosamples_db)
     new_phenopacket.genes.set(genes_db)

@@ -3,32 +3,15 @@ from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.validators import ontology_validator, age_or_age_range_validator
+from .values import Sex, KaryotypicSex
 from .validators import comorbid_condition_validator
 
 
 class Individual(models.Model, IndexableMixin):
     """ Class to store demographic information about an Individual (Patient) """
 
-    SEX = (
-        ('UNKNOWN_SEX', 'UNKNOWN_SEX'),
-        ('FEMALE', 'FEMALE'),
-        ('MALE', 'MALE'),
-        ('OTHER_SEX', 'OTHER_SEX')
-    )
-
-    KARYOTYPIC_SEX = (
-        ('UNKNOWN_KARYOTYPE', 'UNKNOWN_KARYOTYPE'),
-        ('XX', 'XX'),
-        ('XY', 'XY'),
-        ('XO', 'XO'),
-        ('XXY', 'XXY'),
-        ('XXX', 'XXX'),
-        ('XXYY', 'XXYY'),
-        ('XXXY', 'XXXY'),
-        ('XXXX', 'XXXX'),
-        ('XYY', 'XYY'),
-        ('OTHER_KARYOTYPE', 'OTHER_KARYOTYPE'),
-    )
+    SEX = Sex.as_django_values()
+    KARYOTYPIC_SEX = KaryotypicSex.as_django_values()
 
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for the individual.')
     # TODO check for CURIE
@@ -43,7 +26,7 @@ class Individual(models.Model, IndexableMixin):
     age_unit = models.CharField(max_length=50, blank=True, help_text='The unit for measuring age.')
     sex = models.CharField(choices=SEX, max_length=200,  blank=True, null=True,
                            help_text='Observed apparent sex of the individual.')
-    karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200, default='UNKNOWN_KARYOTYPE',
+    karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200, default=KaryotypicSex.UNKNOWN_KARYOTYPE,
                                       help_text='The karyotypic sex of the individual.')
     taxonomy = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text='Ontology resource representing the species (e.g., NCBITaxon:9615).')
