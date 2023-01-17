@@ -6,7 +6,7 @@ workflow phenopackets_json {
     }
 
     output {
-        File json_document = identity_task.json_document
+        File json_document_out = identity_task.json_document
     }
 }
 
