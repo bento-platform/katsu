@@ -1,0 +1,6054 @@
+openapi: 3.0.3
+info:
+  title: Metadata Service API
+  version: 1.0.0
+  description: Metadata Service provides a phenotypic description of an Individual
+    in the context of biomedical research.
+paths:
+  /api/v1/discovery/biomarkers/:
+    get:
+      operationId: api_v1_discovery_biomarkers_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_follow_up_id
+        schema:
+          type: string
+      - in: query
+        name: test_interval
+        schema:
+          type: integer
+      - in: query
+        name: psa_level
+        schema:
+          type: integer
+      - in: query
+        name: ca125
+        schema:
+          type: integer
+      - in: query
+        name: cea
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/chemotherapies/:
+    get:
+      operationId: api_v1_discovery_chemotherapies_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy_dosage_units
+        schema:
+          type: string
+      - in: query
+        name: cumulative_drug_dosage_prescribed
+        schema:
+          type: integer
+      - in: query
+        name: cumulative_drug_dosage_actual
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/comorbidities/:
+    get:
+      operationId: api_v1_discovery_comorbidities_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: prior_malignancy
+        schema:
+          type: string
+      - in: query
+        name: laterality_of_prior_malignancy
+        schema:
+          type: string
+      - in: query
+        name: age_at_comorbidity_diagnosis
+        schema:
+          type: integer
+      - in: query
+        name: comorbidity_type_code
+        schema:
+          type: string
+      - in: query
+        name: comorbidity_treatment_status
+        schema:
+          type: string
+      - in: query
+        name: comorbidity_treatment
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/donors/:
+    get:
+      operationId: api_v1_discovery_donors_list
+      parameters:
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: is_deceased
+        schema:
+          type: boolean
+      - in: query
+        name: cause_of_death
+        schema:
+          type: string
+      - in: query
+        name: date_of_birth
+        schema:
+          type: string
+      - in: query
+        name: date_of_death
+        schema:
+          type: string
+      - in: query
+        name: primary_site
+        schema:
+          type: string
+      - in: query
+        name: age
+        schema:
+          type: number
+      - in: query
+        name: max_age
+        schema:
+          type: number
+      - in: query
+        name: min_age
+        schema:
+          type: number
+      - in: query
+        name: donors
+        schema:
+          type: string
+      - in: query
+        name: primary_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: speciman
+        schema:
+          type: string
+      - in: query
+        name: sample_registration
+        schema:
+          type: string
+      - in: query
+        name: treatment
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy
+        schema:
+          type: string
+      - in: query
+        name: hormone_therapy
+        schema:
+          type: string
+      - in: query
+        name: radiation
+        schema:
+          type: string
+      - in: query
+        name: immunotherapy
+        schema:
+          type: string
+      - in: query
+        name: surgery
+        schema:
+          type: string
+      - in: query
+        name: follow_up
+        schema:
+          type: string
+      - in: query
+        name: biomarker
+        schema:
+          type: string
+      - in: query
+        name: comorbidity
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/follow_ups/:
+    get:
+      operationId: api_v1_discovery_follow_ups_list
+      parameters:
+      - in: query
+        name: submitter_follow_up_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: date_of_followup
+        schema:
+          type: string
+      - in: query
+        name: lost_to_followup
+        schema:
+          type: boolean
+      - in: query
+        name: lost_to_followup_reason
+        schema:
+          type: string
+      - in: query
+        name: disease_status_at_followup
+        schema:
+          type: string
+      - in: query
+        name: relapse_type
+        schema:
+          type: string
+      - in: query
+        name: date_of_relapse
+        schema:
+          type: string
+      - in: query
+        name: method_of_progression_status
+        schema:
+          type: string
+      - in: query
+        name: anatomic_site_progression_or_recurrence
+        schema:
+          type: string
+      - in: query
+        name: recurrence_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: recurrence_t_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_n_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_m_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_stage_group
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/hormone_therapies/:
+    get:
+      operationId: api_v1_discovery_hormone_therapies_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - in: query
+        name: hormone_drug_dosage_units
+        schema:
+          type: string
+      - in: query
+        name: cumulative_drug_dosage_prescribed
+        schema:
+          type: integer
+      - in: query
+        name: cumulative_drug_dosage_actual
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/immunotherapies/:
+    get:
+      operationId: api_v1_discovery_immunotherapies_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: immunotherapy_type
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/overview:
+    get:
+      operationId: api_v1_discovery_overview_retrieve
+      description: MoH Overview schema
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moh_overview_schema_response'
+          description: ''
+  /api/v1/discovery/primary_diagnoses/:
+    get:
+      operationId: api_v1_discovery_primary_diagnoses_list
+      parameters:
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: date_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: cancer_type_code
+        schema:
+          type: string
+      - in: query
+        name: basis_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: lymph_nodes_examined_status
+        schema:
+          type: string
+      - in: query
+        name: lymph_nodes_examined_method
+        schema:
+          type: string
+      - in: query
+        name: number_lymph_nodes_positive
+        schema:
+          type: integer
+      - in: query
+        name: clinical_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: clinical_t_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_n_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_m_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_stage_group
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/radiations/:
+    get:
+      operationId: api_v1_discovery_radiations_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_modality
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_type
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_fractions
+        schema:
+          type: integer
+      - in: query
+        name: radiation_therapy_dosage
+        schema:
+          type: integer
+      - in: query
+        name: anatomical_site_irradiated
+        schema:
+          type: string
+      - in: query
+        name: radiation_boost
+        schema:
+          type: boolean
+      - in: query
+        name: reference_radiation_treatment_id
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/sample_registrations/:
+    get:
+      operationId: api_v1_discovery_sample_registrations_list
+      parameters:
+      - in: query
+        name: submitter_sample_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: gender
+        schema:
+          type: string
+      - in: query
+        name: sex_at_birth
+        schema:
+          type: string
+      - in: query
+        name: specimen_tissue_source
+        schema:
+          type: string
+      - in: query
+        name: tumour_normal_designation
+        schema:
+          type: string
+      - in: query
+        name: specimen_type
+        schema:
+          type: string
+      - in: query
+        name: sample_type
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/specimens/:
+    get:
+      operationId: api_v1_discovery_specimens_list
+      parameters:
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: pathological_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: pathological_t_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_n_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_m_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_stage_group
+        schema:
+          type: string
+      - in: query
+        name: specimen_collection_date
+        schema:
+          type: string
+      - in: query
+        name: specimen_storage
+        schema:
+          type: string
+      - in: query
+        name: tumour_histological_type
+        schema:
+          type: string
+      - in: query
+        name: specimen_anatomic_location
+        schema:
+          type: string
+      - in: query
+        name: reference_pathology_confirmed_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: reference_pathology_confirmed_tumour_presence
+        schema:
+          type: string
+      - in: query
+        name: tumour_grading_system
+        schema:
+          type: string
+      - in: query
+        name: tumour_grade
+        schema:
+          type: string
+      - in: query
+        name: percent_tumour_cells_range
+        schema:
+          type: string
+      - in: query
+        name: percent_tumour_cells_measurement_method
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/surgeries/:
+    get:
+      operationId: api_v1_discovery_surgeries_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: surgery_type
+        schema:
+          type: string
+      - in: query
+        name: surgery_site
+        schema:
+          type: string
+      - in: query
+        name: surgery_location
+        schema:
+          type: string
+      - in: query
+        name: tumour_length
+        schema:
+          type: integer
+      - in: query
+        name: tumour_width
+        schema:
+          type: integer
+      - in: query
+        name: greatest_dimension_tumour
+        schema:
+          type: integer
+      - in: query
+        name: tumour_focality
+        schema:
+          type: string
+      - in: query
+        name: residual_tumour_classification
+        schema:
+          type: string
+      - in: query
+        name: margin_types_involved
+        schema:
+          type: string
+      - in: query
+        name: margin_types_not_involved
+        schema:
+          type: string
+      - in: query
+        name: margin_types_not_assessed
+        schema:
+          type: string
+      - in: query
+        name: lymphovascular_invasion
+        schema:
+          type: string
+      - in: query
+        name: perineural_invasion
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/discovery/treatments/:
+    get:
+      operationId: api_v1_discovery_treatments_list
+      parameters:
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: treatment_type
+        schema:
+          type: string
+      - in: query
+        name: is_primary_treatment
+        schema:
+          type: string
+      - in: query
+        name: treatment_start_date
+        schema:
+          type: string
+      - in: query
+        name: treatment_end_date
+        schema:
+          type: string
+      - in: query
+        name: treatment_setting
+        schema:
+          type: string
+      - in: query
+        name: treatment_intent
+        schema:
+          type: string
+      - in: query
+        name: days_per_cycle
+        schema:
+          type: integer
+      - in: query
+        name: number_of_cycles
+        schema:
+          type: integer
+      - in: query
+        name: response_to_treatment_criteria_method
+        schema:
+          type: string
+      - in: query
+        name: response_to_treatment
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /api/v1/moh/biomarkers/:
+    get:
+      operationId: biomarkers_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_follow_up_id
+        schema:
+          type: string
+      - in: query
+        name: test_interval
+        schema:
+          type: integer
+      - in: query
+        name: psa_level
+        schema:
+          type: integer
+      - in: query
+        name: ca125
+        schema:
+          type: integer
+      - in: query
+        name: cea
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - biomarkers
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBiomarkerList'
+          description: ''
+    post:
+      operationId: biomarkers_create
+      tags:
+      - biomarkers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BiomarkerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BiomarkerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BiomarkerRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Biomarker'
+          description: ''
+  /api/v1/moh/biomarkers/{id}/:
+    get:
+      operationId: biomarkers_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this biomarker.
+        required: true
+      tags:
+      - biomarkers
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Biomarker'
+          description: ''
+    put:
+      operationId: biomarkers_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this biomarker.
+        required: true
+      tags:
+      - biomarkers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BiomarkerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BiomarkerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BiomarkerRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Biomarker'
+          description: ''
+    patch:
+      operationId: biomarkers_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this biomarker.
+        required: true
+      tags:
+      - biomarkers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBiomarkerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBiomarkerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBiomarkerRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Biomarker'
+          description: ''
+    delete:
+      operationId: biomarkers_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this biomarker.
+        required: true
+      tags:
+      - biomarkers
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/chemotherapies/:
+    get:
+      operationId: chemotherapies_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy_dosage_units
+        schema:
+          type: string
+      - in: query
+        name: cumulative_drug_dosage_prescribed
+        schema:
+          type: integer
+      - in: query
+        name: cumulative_drug_dosage_actual
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - chemotherapies
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChemotherapyList'
+          description: ''
+    post:
+      operationId: chemotherapies_create
+      tags:
+      - chemotherapies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChemotherapyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChemotherapyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChemotherapyRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chemotherapy'
+          description: ''
+  /api/v1/moh/chemotherapies/{id}/:
+    get:
+      operationId: chemotherapies_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this chemotherapy.
+        required: true
+      tags:
+      - chemotherapies
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chemotherapy'
+          description: ''
+    put:
+      operationId: chemotherapies_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this chemotherapy.
+        required: true
+      tags:
+      - chemotherapies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChemotherapyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChemotherapyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChemotherapyRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chemotherapy'
+          description: ''
+    patch:
+      operationId: chemotherapies_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this chemotherapy.
+        required: true
+      tags:
+      - chemotherapies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedChemotherapyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedChemotherapyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedChemotherapyRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chemotherapy'
+          description: ''
+    delete:
+      operationId: chemotherapies_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this chemotherapy.
+        required: true
+      tags:
+      - chemotherapies
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/comorbidities/:
+    get:
+      operationId: comorbidities_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: prior_malignancy
+        schema:
+          type: string
+      - in: query
+        name: laterality_of_prior_malignancy
+        schema:
+          type: string
+      - in: query
+        name: age_at_comorbidity_diagnosis
+        schema:
+          type: integer
+      - in: query
+        name: comorbidity_type_code
+        schema:
+          type: string
+      - in: query
+        name: comorbidity_treatment_status
+        schema:
+          type: string
+      - in: query
+        name: comorbidity_treatment
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - comorbidities
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedComorbidityList'
+          description: ''
+    post:
+      operationId: comorbidities_create
+      tags:
+      - comorbidities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComorbidityRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ComorbidityRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ComorbidityRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comorbidity'
+          description: ''
+  /api/v1/moh/comorbidities/{id}/:
+    get:
+      operationId: comorbidities_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this comorbidity.
+        required: true
+      tags:
+      - comorbidities
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comorbidity'
+          description: ''
+    put:
+      operationId: comorbidities_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this comorbidity.
+        required: true
+      tags:
+      - comorbidities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComorbidityRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ComorbidityRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ComorbidityRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comorbidity'
+          description: ''
+    patch:
+      operationId: comorbidities_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this comorbidity.
+        required: true
+      tags:
+      - comorbidities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedComorbidityRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedComorbidityRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedComorbidityRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comorbidity'
+          description: ''
+    delete:
+      operationId: comorbidities_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this comorbidity.
+        required: true
+      tags:
+      - comorbidities
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/donors/:
+    get:
+      operationId: donors_list
+      parameters:
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: is_deceased
+        schema:
+          type: boolean
+      - in: query
+        name: cause_of_death
+        schema:
+          type: string
+      - in: query
+        name: date_of_birth
+        schema:
+          type: string
+      - in: query
+        name: date_of_death
+        schema:
+          type: string
+      - in: query
+        name: primary_site
+        schema:
+          type: string
+      - in: query
+        name: age
+        schema:
+          type: number
+      - in: query
+        name: max_age
+        schema:
+          type: number
+      - in: query
+        name: min_age
+        schema:
+          type: number
+      - in: query
+        name: donors
+        schema:
+          type: string
+      - in: query
+        name: primary_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: speciman
+        schema:
+          type: string
+      - in: query
+        name: sample_registration
+        schema:
+          type: string
+      - in: query
+        name: treatment
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy
+        schema:
+          type: string
+      - in: query
+        name: hormone_therapy
+        schema:
+          type: string
+      - in: query
+        name: radiation
+        schema:
+          type: string
+      - in: query
+        name: immunotherapy
+        schema:
+          type: string
+      - in: query
+        name: surgery
+        schema:
+          type: string
+      - in: query
+        name: follow_up
+        schema:
+          type: string
+      - in: query
+        name: biomarker
+        schema:
+          type: string
+      - in: query
+        name: comorbidity
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - donors
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDonorList'
+          description: ''
+    post:
+      operationId: donors_create
+      tags:
+      - donors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DonorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DonorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DonorRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Donor'
+          description: ''
+  /api/v1/moh/donors/{submitter_donor_id}/:
+    get:
+      operationId: donors_retrieve
+      parameters:
+      - in: path
+        name: submitter_donor_id
+        schema:
+          type: string
+        description: A unique value identifying this donor.
+        required: true
+      tags:
+      - donors
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Donor'
+          description: ''
+    put:
+      operationId: donors_update
+      parameters:
+      - in: path
+        name: submitter_donor_id
+        schema:
+          type: string
+        description: A unique value identifying this donor.
+        required: true
+      tags:
+      - donors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DonorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DonorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DonorRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Donor'
+          description: ''
+    patch:
+      operationId: donors_partial_update
+      parameters:
+      - in: path
+        name: submitter_donor_id
+        schema:
+          type: string
+        description: A unique value identifying this donor.
+        required: true
+      tags:
+      - donors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDonorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDonorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDonorRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Donor'
+          description: ''
+    delete:
+      operationId: donors_destroy
+      parameters:
+      - in: path
+        name: submitter_donor_id
+        schema:
+          type: string
+        description: A unique value identifying this donor.
+        required: true
+      tags:
+      - donors
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/follow_ups/:
+    get:
+      operationId: follow_ups_list
+      parameters:
+      - in: query
+        name: submitter_follow_up_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: date_of_followup
+        schema:
+          type: string
+      - in: query
+        name: lost_to_followup
+        schema:
+          type: boolean
+      - in: query
+        name: lost_to_followup_reason
+        schema:
+          type: string
+      - in: query
+        name: disease_status_at_followup
+        schema:
+          type: string
+      - in: query
+        name: relapse_type
+        schema:
+          type: string
+      - in: query
+        name: date_of_relapse
+        schema:
+          type: string
+      - in: query
+        name: method_of_progression_status
+        schema:
+          type: string
+      - in: query
+        name: anatomic_site_progression_or_recurrence
+        schema:
+          type: string
+      - in: query
+        name: recurrence_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: recurrence_t_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_n_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_m_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_stage_group
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - follow_ups
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFollowUpList'
+          description: ''
+    post:
+      operationId: follow_ups_create
+      tags:
+      - follow_ups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FollowUpRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FollowUpRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FollowUpRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUp'
+          description: ''
+  /api/v1/moh/follow_ups/{submitter_follow_up_id}/:
+    get:
+      operationId: follow_ups_retrieve
+      parameters:
+      - in: path
+        name: submitter_follow_up_id
+        schema:
+          type: string
+        description: A unique value identifying this follow up.
+        required: true
+      tags:
+      - follow_ups
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUp'
+          description: ''
+    put:
+      operationId: follow_ups_update
+      parameters:
+      - in: path
+        name: submitter_follow_up_id
+        schema:
+          type: string
+        description: A unique value identifying this follow up.
+        required: true
+      tags:
+      - follow_ups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FollowUpRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FollowUpRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FollowUpRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUp'
+          description: ''
+    patch:
+      operationId: follow_ups_partial_update
+      parameters:
+      - in: path
+        name: submitter_follow_up_id
+        schema:
+          type: string
+        description: A unique value identifying this follow up.
+        required: true
+      tags:
+      - follow_ups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFollowUpRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFollowUpRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFollowUpRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUp'
+          description: ''
+    delete:
+      operationId: follow_ups_destroy
+      parameters:
+      - in: path
+        name: submitter_follow_up_id
+        schema:
+          type: string
+        description: A unique value identifying this follow up.
+        required: true
+      tags:
+      - follow_ups
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/hormone_therapies/:
+    get:
+      operationId: hormone_therapies_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - in: query
+        name: hormone_drug_dosage_units
+        schema:
+          type: string
+      - in: query
+        name: cumulative_drug_dosage_prescribed
+        schema:
+          type: integer
+      - in: query
+        name: cumulative_drug_dosage_actual
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - hormone_therapies
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedHormoneTherapyList'
+          description: ''
+    post:
+      operationId: hormone_therapies_create
+      tags:
+      - hormone_therapies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HormoneTherapyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HormoneTherapyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HormoneTherapyRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HormoneTherapy'
+          description: ''
+  /api/v1/moh/hormone_therapies/{id}/:
+    get:
+      operationId: hormone_therapies_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this hormone therapy.
+        required: true
+      tags:
+      - hormone_therapies
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HormoneTherapy'
+          description: ''
+    put:
+      operationId: hormone_therapies_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this hormone therapy.
+        required: true
+      tags:
+      - hormone_therapies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HormoneTherapyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HormoneTherapyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HormoneTherapyRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HormoneTherapy'
+          description: ''
+    patch:
+      operationId: hormone_therapies_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this hormone therapy.
+        required: true
+      tags:
+      - hormone_therapies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedHormoneTherapyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedHormoneTherapyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedHormoneTherapyRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HormoneTherapy'
+          description: ''
+    delete:
+      operationId: hormone_therapies_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this hormone therapy.
+        required: true
+      tags:
+      - hormone_therapies
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/immunotherapies/:
+    get:
+      operationId: immunotherapies_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: immunotherapy_type
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - immunotherapies
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedImmunotherapyList'
+          description: ''
+    post:
+      operationId: immunotherapies_create
+      tags:
+      - immunotherapies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImmunotherapyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ImmunotherapyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImmunotherapyRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Immunotherapy'
+          description: ''
+  /api/v1/moh/immunotherapies/{id}/:
+    get:
+      operationId: immunotherapies_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this immunotherapy.
+        required: true
+      tags:
+      - immunotherapies
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Immunotherapy'
+          description: ''
+    put:
+      operationId: immunotherapies_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this immunotherapy.
+        required: true
+      tags:
+      - immunotherapies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImmunotherapyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ImmunotherapyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImmunotherapyRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Immunotherapy'
+          description: ''
+    patch:
+      operationId: immunotherapies_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this immunotherapy.
+        required: true
+      tags:
+      - immunotherapies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedImmunotherapyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedImmunotherapyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedImmunotherapyRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Immunotherapy'
+          description: ''
+    delete:
+      operationId: immunotherapies_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this immunotherapy.
+        required: true
+      tags:
+      - immunotherapies
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/primary_diagnoses/:
+    get:
+      operationId: primary_diagnoses_list
+      parameters:
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: date_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: cancer_type_code
+        schema:
+          type: string
+      - in: query
+        name: basis_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: lymph_nodes_examined_status
+        schema:
+          type: string
+      - in: query
+        name: lymph_nodes_examined_method
+        schema:
+          type: string
+      - in: query
+        name: number_lymph_nodes_positive
+        schema:
+          type: integer
+      - in: query
+        name: clinical_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: clinical_t_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_n_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_m_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_stage_group
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - primary_diagnoses
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPrimaryDiagnosisList'
+          description: ''
+    post:
+      operationId: primary_diagnoses_create
+      tags:
+      - primary_diagnoses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrimaryDiagnosis'
+          description: ''
+  /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/:
+    get:
+      operationId: primary_diagnoses_retrieve
+      parameters:
+      - in: path
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+        description: A unique value identifying this primary diagnosis.
+        required: true
+      tags:
+      - primary_diagnoses
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrimaryDiagnosis'
+          description: ''
+    put:
+      operationId: primary_diagnoses_update
+      parameters:
+      - in: path
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+        description: A unique value identifying this primary diagnosis.
+        required: true
+      tags:
+      - primary_diagnoses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrimaryDiagnosis'
+          description: ''
+    patch:
+      operationId: primary_diagnoses_partial_update
+      parameters:
+      - in: path
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+        description: A unique value identifying this primary diagnosis.
+        required: true
+      tags:
+      - primary_diagnoses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPrimaryDiagnosisRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPrimaryDiagnosisRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPrimaryDiagnosisRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrimaryDiagnosis'
+          description: ''
+    delete:
+      operationId: primary_diagnoses_destroy
+      parameters:
+      - in: path
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+        description: A unique value identifying this primary diagnosis.
+        required: true
+      tags:
+      - primary_diagnoses
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/programs/:
+    get:
+      operationId: programs_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: created
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: updated
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - programs
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProgramList'
+          description: ''
+    post:
+      operationId: programs_create
+      tags:
+      - programs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProgramRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProgramRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProgramRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Program'
+          description: ''
+  /api/v1/moh/programs/{program_id}/:
+    get:
+      operationId: programs_retrieve
+      parameters:
+      - in: path
+        name: program_id
+        schema:
+          type: string
+        description: A unique value identifying this program.
+        required: true
+      tags:
+      - programs
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Program'
+          description: ''
+    put:
+      operationId: programs_update
+      parameters:
+      - in: path
+        name: program_id
+        schema:
+          type: string
+        description: A unique value identifying this program.
+        required: true
+      tags:
+      - programs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProgramRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProgramRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProgramRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Program'
+          description: ''
+    patch:
+      operationId: programs_partial_update
+      parameters:
+      - in: path
+        name: program_id
+        schema:
+          type: string
+        description: A unique value identifying this program.
+        required: true
+      tags:
+      - programs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProgramRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProgramRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProgramRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Program'
+          description: ''
+    delete:
+      operationId: programs_destroy
+      parameters:
+      - in: path
+        name: program_id
+        schema:
+          type: string
+        description: A unique value identifying this program.
+        required: true
+      tags:
+      - programs
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/radiations/:
+    get:
+      operationId: radiations_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_modality
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_type
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_fractions
+        schema:
+          type: integer
+      - in: query
+        name: radiation_therapy_dosage
+        schema:
+          type: integer
+      - in: query
+        name: anatomical_site_irradiated
+        schema:
+          type: string
+      - in: query
+        name: radiation_boost
+        schema:
+          type: boolean
+      - in: query
+        name: reference_radiation_treatment_id
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - radiations
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRadiationList'
+          description: ''
+    post:
+      operationId: radiations_create
+      tags:
+      - radiations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RadiationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RadiationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RadiationRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Radiation'
+          description: ''
+  /api/v1/moh/radiations/{id}/:
+    get:
+      operationId: radiations_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this radiation.
+        required: true
+      tags:
+      - radiations
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Radiation'
+          description: ''
+    put:
+      operationId: radiations_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this radiation.
+        required: true
+      tags:
+      - radiations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RadiationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RadiationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RadiationRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Radiation'
+          description: ''
+    patch:
+      operationId: radiations_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this radiation.
+        required: true
+      tags:
+      - radiations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRadiationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRadiationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRadiationRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Radiation'
+          description: ''
+    delete:
+      operationId: radiations_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this radiation.
+        required: true
+      tags:
+      - radiations
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/sample_registrations/:
+    get:
+      operationId: sample_registrations_list
+      parameters:
+      - in: query
+        name: submitter_sample_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: gender
+        schema:
+          type: string
+      - in: query
+        name: sex_at_birth
+        schema:
+          type: string
+      - in: query
+        name: specimen_tissue_source
+        schema:
+          type: string
+      - in: query
+        name: tumour_normal_designation
+        schema:
+          type: string
+      - in: query
+        name: specimen_type
+        schema:
+          type: string
+      - in: query
+        name: sample_type
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - sample_registrations
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSampleRegistrationList'
+          description: ''
+    post:
+      operationId: sample_registrations_create
+      tags:
+      - sample_registrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SampleRegistrationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SampleRegistrationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SampleRegistrationRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SampleRegistration'
+          description: ''
+  /api/v1/moh/sample_registrations/{submitter_sample_id}/:
+    get:
+      operationId: sample_registrations_retrieve
+      parameters:
+      - in: path
+        name: submitter_sample_id
+        schema:
+          type: string
+        description: A unique value identifying this sample registration.
+        required: true
+      tags:
+      - sample_registrations
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SampleRegistration'
+          description: ''
+    put:
+      operationId: sample_registrations_update
+      parameters:
+      - in: path
+        name: submitter_sample_id
+        schema:
+          type: string
+        description: A unique value identifying this sample registration.
+        required: true
+      tags:
+      - sample_registrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SampleRegistrationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SampleRegistrationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SampleRegistrationRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SampleRegistration'
+          description: ''
+    patch:
+      operationId: sample_registrations_partial_update
+      parameters:
+      - in: path
+        name: submitter_sample_id
+        schema:
+          type: string
+        description: A unique value identifying this sample registration.
+        required: true
+      tags:
+      - sample_registrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSampleRegistrationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSampleRegistrationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSampleRegistrationRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SampleRegistration'
+          description: ''
+    delete:
+      operationId: sample_registrations_destroy
+      parameters:
+      - in: path
+        name: submitter_sample_id
+        schema:
+          type: string
+        description: A unique value identifying this sample registration.
+        required: true
+      tags:
+      - sample_registrations
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/specimens/:
+    get:
+      operationId: specimens_list
+      parameters:
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: pathological_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: pathological_t_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_n_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_m_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_stage_group
+        schema:
+          type: string
+      - in: query
+        name: specimen_collection_date
+        schema:
+          type: string
+      - in: query
+        name: specimen_storage
+        schema:
+          type: string
+      - in: query
+        name: tumour_histological_type
+        schema:
+          type: string
+      - in: query
+        name: specimen_anatomic_location
+        schema:
+          type: string
+      - in: query
+        name: reference_pathology_confirmed_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: reference_pathology_confirmed_tumour_presence
+        schema:
+          type: string
+      - in: query
+        name: tumour_grading_system
+        schema:
+          type: string
+      - in: query
+        name: tumour_grade
+        schema:
+          type: string
+      - in: query
+        name: percent_tumour_cells_range
+        schema:
+          type: string
+      - in: query
+        name: percent_tumour_cells_measurement_method
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - specimens
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSpecimenList'
+          description: ''
+    post:
+      operationId: specimens_create
+      tags:
+      - specimens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecimenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SpecimenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SpecimenRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Specimen'
+          description: ''
+  /api/v1/moh/specimens/{submitter_specimen_id}/:
+    get:
+      operationId: specimens_retrieve
+      parameters:
+      - in: path
+        name: submitter_specimen_id
+        schema:
+          type: string
+        description: A unique value identifying this specimen.
+        required: true
+      tags:
+      - specimens
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Specimen'
+          description: ''
+    put:
+      operationId: specimens_update
+      parameters:
+      - in: path
+        name: submitter_specimen_id
+        schema:
+          type: string
+        description: A unique value identifying this specimen.
+        required: true
+      tags:
+      - specimens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecimenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SpecimenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SpecimenRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Specimen'
+          description: ''
+    patch:
+      operationId: specimens_partial_update
+      parameters:
+      - in: path
+        name: submitter_specimen_id
+        schema:
+          type: string
+        description: A unique value identifying this specimen.
+        required: true
+      tags:
+      - specimens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSpecimenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSpecimenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSpecimenRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Specimen'
+          description: ''
+    delete:
+      operationId: specimens_destroy
+      parameters:
+      - in: path
+        name: submitter_specimen_id
+        schema:
+          type: string
+        description: A unique value identifying this specimen.
+        required: true
+      tags:
+      - specimens
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/surgeries/:
+    get:
+      operationId: surgeries_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: surgery_type
+        schema:
+          type: string
+      - in: query
+        name: surgery_site
+        schema:
+          type: string
+      - in: query
+        name: surgery_location
+        schema:
+          type: string
+      - in: query
+        name: tumour_length
+        schema:
+          type: integer
+      - in: query
+        name: tumour_width
+        schema:
+          type: integer
+      - in: query
+        name: greatest_dimension_tumour
+        schema:
+          type: integer
+      - in: query
+        name: tumour_focality
+        schema:
+          type: string
+      - in: query
+        name: residual_tumour_classification
+        schema:
+          type: string
+      - in: query
+        name: margin_types_involved
+        schema:
+          type: string
+      - in: query
+        name: margin_types_not_involved
+        schema:
+          type: string
+      - in: query
+        name: margin_types_not_assessed
+        schema:
+          type: string
+      - in: query
+        name: lymphovascular_invasion
+        schema:
+          type: string
+      - in: query
+        name: perineural_invasion
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - surgeries
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSurgeryList'
+          description: ''
+    post:
+      operationId: surgeries_create
+      tags:
+      - surgeries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurgeryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SurgeryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SurgeryRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Surgery'
+          description: ''
+  /api/v1/moh/surgeries/{id}/:
+    get:
+      operationId: surgeries_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this surgery.
+        required: true
+      tags:
+      - surgeries
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Surgery'
+          description: ''
+    put:
+      operationId: surgeries_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this surgery.
+        required: true
+      tags:
+      - surgeries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurgeryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SurgeryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SurgeryRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Surgery'
+          description: ''
+    patch:
+      operationId: surgeries_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this surgery.
+        required: true
+      tags:
+      - surgeries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSurgeryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSurgeryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSurgeryRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Surgery'
+          description: ''
+    delete:
+      operationId: surgeries_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this surgery.
+        required: true
+      tags:
+      - surgeries
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/moh/treatments/:
+    get:
+      operationId: treatments_list
+      parameters:
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: treatment_type
+        schema:
+          type: string
+      - in: query
+        name: is_primary_treatment
+        schema:
+          type: string
+      - in: query
+        name: treatment_start_date
+        schema:
+          type: string
+      - in: query
+        name: treatment_end_date
+        schema:
+          type: string
+      - in: query
+        name: treatment_setting
+        schema:
+          type: string
+      - in: query
+        name: treatment_intent
+        schema:
+          type: string
+      - in: query
+        name: days_per_cycle
+        schema:
+          type: integer
+      - in: query
+        name: number_of_cycles
+        schema:
+          type: integer
+      - in: query
+        name: response_to_treatment_criteria_method
+        schema:
+          type: string
+      - in: query
+        name: response_to_treatment
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - treatments
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTreatmentList'
+          description: ''
+    post:
+      operationId: treatments_create
+      tags:
+      - treatments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TreatmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TreatmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TreatmentRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Treatment'
+          description: ''
+  /api/v1/moh/treatments/{submitter_treatment_id}/:
+    get:
+      operationId: treatments_retrieve
+      parameters:
+      - in: path
+        name: submitter_treatment_id
+        schema:
+          type: string
+        description: A unique value identifying this treatment.
+        required: true
+      tags:
+      - treatments
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Treatment'
+          description: ''
+    put:
+      operationId: treatments_update
+      parameters:
+      - in: path
+        name: submitter_treatment_id
+        schema:
+          type: string
+        description: A unique value identifying this treatment.
+        required: true
+      tags:
+      - treatments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TreatmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TreatmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TreatmentRequest'
+        required: true
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Treatment'
+          description: ''
+    patch:
+      operationId: treatments_partial_update
+      parameters:
+      - in: path
+        name: submitter_treatment_id
+        schema:
+          type: string
+        description: A unique value identifying this treatment.
+        required: true
+      tags:
+      - treatments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTreatmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTreatmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTreatmentRequest'
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Treatment'
+          description: ''
+    delete:
+      operationId: treatments_destroy
+      parameters:
+      - in: path
+        name: submitter_treatment_id
+        schema:
+          type: string
+        description: A unique value identifying this treatment.
+        required: true
+      tags:
+      - treatments
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Biomarker:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        test_interval:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        psa_level:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        ca125:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cea:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_specimen_id:
+          type: string
+          nullable: true
+        submitter_primary_diagnosis_id:
+          type: string
+          nullable: true
+        submitter_treatment_id:
+          type: string
+          nullable: true
+        submitter_follow_up_id:
+          type: string
+          nullable: true
+      required:
+      - program_id
+      - submitter_donor_id
+    BiomarkerRequest:
+      type: object
+      properties:
+        test_interval:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        psa_level:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        ca125:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cea:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_specimen_id:
+          type: string
+          minLength: 1
+          nullable: true
+        submitter_primary_diagnosis_id:
+          type: string
+          minLength: 1
+          nullable: true
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+          nullable: true
+        submitter_follow_up_id:
+          type: string
+          minLength: 1
+          nullable: true
+      required:
+      - program_id
+      - submitter_donor_id
+    Chemotherapy:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        drug_name:
+          type: string
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          maxLength: 64
+        chemotherapy_dosage_units:
+          type: string
+          maxLength: 64
+        cumulative_drug_dosage_prescribed:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cumulative_drug_dosage_actual:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_treatment_id:
+          type: string
+      required:
+      - chemotherapy_dosage_units
+      - drug_name
+      - drug_rxnormcui
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+    ChemotherapyRequest:
+      type: object
+      properties:
+        drug_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          minLength: 1
+          maxLength: 64
+        chemotherapy_dosage_units:
+          type: string
+          minLength: 1
+          maxLength: 64
+        cumulative_drug_dosage_prescribed:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cumulative_drug_dosage_actual:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+      required:
+      - chemotherapy_dosage_units
+      - drug_name
+      - drug_rxnormcui
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+    Comorbidity:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        prior_malignancy:
+          type: string
+          maxLength: 32
+        laterality_of_prior_malignancy:
+          type: string
+          maxLength: 64
+        age_at_comorbidity_diagnosis:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        comorbidity_type_code:
+          type: string
+          maxLength: 64
+        comorbidity_treatment_status:
+          type: string
+          maxLength: 32
+        comorbidity_treatment:
+          type: string
+          maxLength: 255
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+      required:
+      - comorbidity_treatment
+      - comorbidity_treatment_status
+      - comorbidity_type_code
+      - laterality_of_prior_malignancy
+      - prior_malignancy
+      - program_id
+      - submitter_donor_id
+    ComorbidityRequest:
+      type: object
+      properties:
+        prior_malignancy:
+          type: string
+          minLength: 1
+          maxLength: 32
+        laterality_of_prior_malignancy:
+          type: string
+          minLength: 1
+          maxLength: 64
+        age_at_comorbidity_diagnosis:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        comorbidity_type_code:
+          type: string
+          minLength: 1
+          maxLength: 64
+        comorbidity_treatment_status:
+          type: string
+          minLength: 1
+          maxLength: 32
+        comorbidity_treatment:
+          type: string
+          minLength: 1
+          maxLength: 255
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+      required:
+      - comorbidity_treatment
+      - comorbidity_treatment_status
+      - comorbidity_type_code
+      - laterality_of_prior_malignancy
+      - prior_malignancy
+      - program_id
+      - submitter_donor_id
+    Discovery:
+      type: object
+      description: |-
+        This serializer is used to return the discovery_count.
+        It also override the list serializer to a single object
+      properties:
+        discovery_count:
+          type: integer
+      required:
+      - discovery_count
+    Donor:
+      type: object
+      properties:
+        submitter_donor_id:
+          type: string
+          maxLength: 64
+        is_deceased:
+          type: boolean
+        cause_of_death:
+          type: string
+          maxLength: 255
+        date_of_birth:
+          type: string
+          maxLength: 32
+        date_of_death:
+          type: string
+          maxLength: 32
+        primary_site:
+          type: string
+          maxLength: 255
+        program_id:
+          type: string
+      required:
+      - cause_of_death
+      - date_of_birth
+      - date_of_death
+      - is_deceased
+      - primary_site
+      - program_id
+      - submitter_donor_id
+    DonorRequest:
+      type: object
+      properties:
+        submitter_donor_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        is_deceased:
+          type: boolean
+        cause_of_death:
+          type: string
+          minLength: 1
+          maxLength: 255
+        date_of_birth:
+          type: string
+          minLength: 1
+          maxLength: 32
+        date_of_death:
+          type: string
+          minLength: 1
+          maxLength: 32
+        primary_site:
+          type: string
+          minLength: 1
+          maxLength: 255
+        program_id:
+          type: string
+          minLength: 1
+      required:
+      - cause_of_death
+      - date_of_birth
+      - date_of_death
+      - is_deceased
+      - primary_site
+      - program_id
+      - submitter_donor_id
+    FollowUp:
+      type: object
+      properties:
+        submitter_follow_up_id:
+          type: string
+          maxLength: 64
+        date_of_followup:
+          type: string
+          maxLength: 32
+        lost_to_followup:
+          type: boolean
+          nullable: true
+        lost_to_followup_reason:
+          type: string
+          maxLength: 255
+        disease_status_at_followup:
+          type: string
+          maxLength: 255
+        relapse_type:
+          type: string
+          maxLength: 128
+        date_of_relapse:
+          type: string
+          maxLength: 32
+        method_of_progression_status:
+          type: string
+          maxLength: 255
+        anatomic_site_progression_or_recurrence:
+          type: string
+          maxLength: 255
+        recurrence_tumour_staging_system:
+          type: string
+          maxLength: 255
+        recurrence_t_category:
+          type: string
+          maxLength: 32
+        recurrence_n_category:
+          type: string
+          maxLength: 32
+        recurrence_m_category:
+          type: string
+          maxLength: 32
+        recurrence_stage_group:
+          type: string
+          maxLength: 64
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_primary_diagnosis_id:
+          type: string
+          nullable: true
+        submitter_treatment_id:
+          type: string
+          nullable: true
+      required:
+      - anatomic_site_progression_or_recurrence
+      - date_of_followup
+      - date_of_relapse
+      - disease_status_at_followup
+      - lost_to_followup_reason
+      - method_of_progression_status
+      - program_id
+      - recurrence_m_category
+      - recurrence_n_category
+      - recurrence_stage_group
+      - recurrence_t_category
+      - recurrence_tumour_staging_system
+      - relapse_type
+      - submitter_donor_id
+      - submitter_follow_up_id
+    FollowUpRequest:
+      type: object
+      properties:
+        submitter_follow_up_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        date_of_followup:
+          type: string
+          minLength: 1
+          maxLength: 32
+        lost_to_followup:
+          type: boolean
+          nullable: true
+        lost_to_followup_reason:
+          type: string
+          minLength: 1
+          maxLength: 255
+        disease_status_at_followup:
+          type: string
+          minLength: 1
+          maxLength: 255
+        relapse_type:
+          type: string
+          minLength: 1
+          maxLength: 128
+        date_of_relapse:
+          type: string
+          minLength: 1
+          maxLength: 32
+        method_of_progression_status:
+          type: string
+          minLength: 1
+          maxLength: 255
+        anatomic_site_progression_or_recurrence:
+          type: string
+          minLength: 1
+          maxLength: 255
+        recurrence_tumour_staging_system:
+          type: string
+          minLength: 1
+          maxLength: 255
+        recurrence_t_category:
+          type: string
+          minLength: 1
+          maxLength: 32
+        recurrence_n_category:
+          type: string
+          minLength: 1
+          maxLength: 32
+        recurrence_m_category:
+          type: string
+          minLength: 1
+          maxLength: 32
+        recurrence_stage_group:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_primary_diagnosis_id:
+          type: string
+          minLength: 1
+          nullable: true
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+          nullable: true
+      required:
+      - anatomic_site_progression_or_recurrence
+      - date_of_followup
+      - date_of_relapse
+      - disease_status_at_followup
+      - lost_to_followup_reason
+      - method_of_progression_status
+      - program_id
+      - recurrence_m_category
+      - recurrence_n_category
+      - recurrence_stage_group
+      - recurrence_t_category
+      - recurrence_tumour_staging_system
+      - relapse_type
+      - submitter_donor_id
+      - submitter_follow_up_id
+    HormoneTherapy:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        drug_name:
+          type: string
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          maxLength: 64
+        hormone_drug_dosage_units:
+          type: string
+          maxLength: 64
+        cumulative_drug_dosage_prescribed:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cumulative_drug_dosage_actual:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_treatment_id:
+          type: string
+      required:
+      - drug_name
+      - drug_rxnormcui
+      - hormone_drug_dosage_units
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+    HormoneTherapyRequest:
+      type: object
+      properties:
+        drug_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          minLength: 1
+          maxLength: 64
+        hormone_drug_dosage_units:
+          type: string
+          minLength: 1
+          maxLength: 64
+        cumulative_drug_dosage_prescribed:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cumulative_drug_dosage_actual:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+      required:
+      - drug_name
+      - drug_rxnormcui
+      - hormone_drug_dosage_units
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+    Immunotherapy:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        immunotherapy_type:
+          type: string
+          maxLength: 255
+        drug_name:
+          type: string
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          maxLength: 64
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_treatment_id:
+          type: string
+      required:
+      - drug_name
+      - drug_rxnormcui
+      - immunotherapy_type
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+    ImmunotherapyRequest:
+      type: object
+      properties:
+        immunotherapy_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        drug_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+      required:
+      - drug_name
+      - drug_rxnormcui
+      - immunotherapy_type
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+    PaginatedBiomarkerList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Biomarker'
+    PaginatedChemotherapyList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chemotherapy'
+    PaginatedComorbidityList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comorbidity'
+    PaginatedDonorList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Donor'
+    PaginatedFollowUpList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FollowUp'
+    PaginatedHormoneTherapyList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/HormoneTherapy'
+    PaginatedImmunotherapyList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Immunotherapy'
+    PaginatedPrimaryDiagnosisList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrimaryDiagnosis'
+    PaginatedProgramList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Program'
+    PaginatedRadiationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Radiation'
+    PaginatedSampleRegistrationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SampleRegistration'
+    PaginatedSpecimenList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Specimen'
+    PaginatedSurgeryList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Surgery'
+    PaginatedTreatmentList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Treatment'
+    PatchedBiomarkerRequest:
+      type: object
+      properties:
+        test_interval:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        psa_level:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        ca125:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cea:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_specimen_id:
+          type: string
+          minLength: 1
+          nullable: true
+        submitter_primary_diagnosis_id:
+          type: string
+          minLength: 1
+          nullable: true
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+          nullable: true
+        submitter_follow_up_id:
+          type: string
+          minLength: 1
+          nullable: true
+    PatchedChemotherapyRequest:
+      type: object
+      properties:
+        drug_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          minLength: 1
+          maxLength: 64
+        chemotherapy_dosage_units:
+          type: string
+          minLength: 1
+          maxLength: 64
+        cumulative_drug_dosage_prescribed:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cumulative_drug_dosage_actual:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+    PatchedComorbidityRequest:
+      type: object
+      properties:
+        prior_malignancy:
+          type: string
+          minLength: 1
+          maxLength: 32
+        laterality_of_prior_malignancy:
+          type: string
+          minLength: 1
+          maxLength: 64
+        age_at_comorbidity_diagnosis:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        comorbidity_type_code:
+          type: string
+          minLength: 1
+          maxLength: 64
+        comorbidity_treatment_status:
+          type: string
+          minLength: 1
+          maxLength: 32
+        comorbidity_treatment:
+          type: string
+          minLength: 1
+          maxLength: 255
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+    PatchedDonorRequest:
+      type: object
+      properties:
+        submitter_donor_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        is_deceased:
+          type: boolean
+        cause_of_death:
+          type: string
+          minLength: 1
+          maxLength: 255
+        date_of_birth:
+          type: string
+          minLength: 1
+          maxLength: 32
+        date_of_death:
+          type: string
+          minLength: 1
+          maxLength: 32
+        primary_site:
+          type: string
+          minLength: 1
+          maxLength: 255
+        program_id:
+          type: string
+          minLength: 1
+    PatchedFollowUpRequest:
+      type: object
+      properties:
+        submitter_follow_up_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        date_of_followup:
+          type: string
+          minLength: 1
+          maxLength: 32
+        lost_to_followup:
+          type: boolean
+          nullable: true
+        lost_to_followup_reason:
+          type: string
+          minLength: 1
+          maxLength: 255
+        disease_status_at_followup:
+          type: string
+          minLength: 1
+          maxLength: 255
+        relapse_type:
+          type: string
+          minLength: 1
+          maxLength: 128
+        date_of_relapse:
+          type: string
+          minLength: 1
+          maxLength: 32
+        method_of_progression_status:
+          type: string
+          minLength: 1
+          maxLength: 255
+        anatomic_site_progression_or_recurrence:
+          type: string
+          minLength: 1
+          maxLength: 255
+        recurrence_tumour_staging_system:
+          type: string
+          minLength: 1
+          maxLength: 255
+        recurrence_t_category:
+          type: string
+          minLength: 1
+          maxLength: 32
+        recurrence_n_category:
+          type: string
+          minLength: 1
+          maxLength: 32
+        recurrence_m_category:
+          type: string
+          minLength: 1
+          maxLength: 32
+        recurrence_stage_group:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_primary_diagnosis_id:
+          type: string
+          minLength: 1
+          nullable: true
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+          nullable: true
+    PatchedHormoneTherapyRequest:
+      type: object
+      properties:
+        drug_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          minLength: 1
+          maxLength: 64
+        hormone_drug_dosage_units:
+          type: string
+          minLength: 1
+          maxLength: 64
+        cumulative_drug_dosage_prescribed:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cumulative_drug_dosage_actual:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+    PatchedImmunotherapyRequest:
+      type: object
+      properties:
+        immunotherapy_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        drug_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+    PatchedPrimaryDiagnosisRequest:
+      type: object
+      properties:
+        submitter_primary_diagnosis_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        date_of_diagnosis:
+          type: string
+          minLength: 1
+          maxLength: 32
+        cancer_type_code:
+          type: string
+          minLength: 1
+          maxLength: 64
+        basis_of_diagnosis:
+          type: string
+          minLength: 1
+          maxLength: 128
+        lymph_nodes_examined_status:
+          type: string
+          minLength: 1
+          maxLength: 128
+        lymph_nodes_examined_method:
+          type: string
+          minLength: 1
+          maxLength: 64
+        number_lymph_nodes_positive:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        clinical_tumour_staging_system:
+          type: string
+          minLength: 1
+          maxLength: 128
+        clinical_t_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        clinical_n_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        clinical_m_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        clinical_stage_group:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+    PatchedProgramRequest:
+      type: object
+      properties:
+        program_id:
+          type: string
+          minLength: 1
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+    PatchedRadiationRequest:
+      type: object
+      properties:
+        radiation_therapy_modality:
+          type: string
+          minLength: 1
+          maxLength: 255
+        radiation_therapy_type:
+          type: string
+          minLength: 1
+          maxLength: 64
+        radiation_therapy_fractions:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        radiation_therapy_dosage:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        anatomical_site_irradiated:
+          type: string
+          minLength: 1
+          maxLength: 255
+        radiation_boost:
+          type: boolean
+          nullable: true
+        reference_radiation_treatment_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+    PatchedSampleRegistrationRequest:
+      type: object
+      properties:
+        submitter_sample_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        gender:
+          type: string
+          minLength: 1
+          maxLength: 32
+        sex_at_birth:
+          type: string
+          minLength: 1
+          maxLength: 32
+        specimen_tissue_source:
+          type: string
+          minLength: 1
+          maxLength: 255
+        tumour_normal_designation:
+          type: string
+          minLength: 1
+          maxLength: 32
+        specimen_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        sample_type:
+          type: string
+          minLength: 1
+          maxLength: 128
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_specimen_id:
+          type: string
+          minLength: 1
+    PatchedSpecimenRequest:
+      type: object
+      properties:
+        submitter_specimen_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        pathological_tumour_staging_system:
+          type: string
+          minLength: 1
+          maxLength: 255
+        pathological_t_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        pathological_n_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        pathological_m_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        pathological_stage_group:
+          type: string
+          minLength: 1
+          maxLength: 64
+        specimen_collection_date:
+          type: string
+          minLength: 1
+          maxLength: 32
+        specimen_storage:
+          type: string
+          minLength: 1
+          maxLength: 64
+        tumour_histological_type:
+          type: string
+          minLength: 1
+          maxLength: 128
+        specimen_anatomic_location:
+          type: string
+          minLength: 1
+          maxLength: 32
+        reference_pathology_confirmed_diagnosis:
+          type: string
+          minLength: 1
+          maxLength: 32
+        reference_pathology_confirmed_tumour_presence:
+          type: string
+          minLength: 1
+          maxLength: 32
+        tumour_grading_system:
+          type: string
+          minLength: 1
+          maxLength: 128
+        tumour_grade:
+          type: string
+          minLength: 1
+          maxLength: 64
+        percent_tumour_cells_range:
+          type: string
+          minLength: 1
+          maxLength: 64
+        percent_tumour_cells_measurement_method:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_primary_diagnosis_id:
+          type: string
+          minLength: 1
+    PatchedSurgeryRequest:
+      type: object
+      properties:
+        surgery_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        surgery_site:
+          type: string
+          minLength: 1
+          maxLength: 255
+        surgery_location:
+          type: string
+          minLength: 1
+          maxLength: 128
+        tumour_length:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        tumour_width:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        greatest_dimension_tumour:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        tumour_focality:
+          type: string
+          minLength: 1
+          maxLength: 64
+        residual_tumour_classification:
+          type: string
+          minLength: 1
+          maxLength: 64
+        margin_types_involved:
+          type: string
+          minLength: 1
+          maxLength: 128
+        margin_types_not_involved:
+          type: string
+          minLength: 1
+          maxLength: 128
+        margin_types_not_assessed:
+          type: string
+          minLength: 1
+          maxLength: 128
+        lymphovascular_invasion:
+          type: string
+          minLength: 1
+          maxLength: 255
+        perineural_invasion:
+          type: string
+          minLength: 1
+          maxLength: 128
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_specimen_id:
+          type: string
+          minLength: 1
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+    PatchedTreatmentRequest:
+      type: object
+      properties:
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        treatment_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        is_primary_treatment:
+          type: string
+          minLength: 1
+          maxLength: 32
+        treatment_start_date:
+          type: string
+          minLength: 1
+          maxLength: 32
+        treatment_end_date:
+          type: string
+          minLength: 1
+          maxLength: 32
+        treatment_setting:
+          type: string
+          minLength: 1
+          maxLength: 128
+        treatment_intent:
+          type: string
+          minLength: 1
+          maxLength: 128
+        days_per_cycle:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        number_of_cycles:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        response_to_treatment_criteria_method:
+          type: string
+          minLength: 1
+          maxLength: 255
+        response_to_treatment:
+          type: string
+          minLength: 1
+          maxLength: 255
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_primary_diagnosis_id:
+          type: string
+          minLength: 1
+    PrimaryDiagnosis:
+      type: object
+      properties:
+        submitter_primary_diagnosis_id:
+          type: string
+          maxLength: 64
+        date_of_diagnosis:
+          type: string
+          maxLength: 32
+        cancer_type_code:
+          type: string
+          maxLength: 64
+        basis_of_diagnosis:
+          type: string
+          maxLength: 128
+        lymph_nodes_examined_status:
+          type: string
+          maxLength: 128
+        lymph_nodes_examined_method:
+          type: string
+          maxLength: 64
+        number_lymph_nodes_positive:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        clinical_tumour_staging_system:
+          type: string
+          maxLength: 128
+        clinical_t_category:
+          type: string
+          maxLength: 64
+        clinical_n_category:
+          type: string
+          maxLength: 64
+        clinical_m_category:
+          type: string
+          maxLength: 64
+        clinical_stage_group:
+          type: string
+          maxLength: 64
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+      required:
+      - basis_of_diagnosis
+      - cancer_type_code
+      - clinical_m_category
+      - clinical_n_category
+      - clinical_stage_group
+      - clinical_t_category
+      - clinical_tumour_staging_system
+      - date_of_diagnosis
+      - lymph_nodes_examined_method
+      - lymph_nodes_examined_status
+      - program_id
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+    PrimaryDiagnosisRequest:
+      type: object
+      properties:
+        submitter_primary_diagnosis_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        date_of_diagnosis:
+          type: string
+          minLength: 1
+          maxLength: 32
+        cancer_type_code:
+          type: string
+          minLength: 1
+          maxLength: 64
+        basis_of_diagnosis:
+          type: string
+          minLength: 1
+          maxLength: 128
+        lymph_nodes_examined_status:
+          type: string
+          minLength: 1
+          maxLength: 128
+        lymph_nodes_examined_method:
+          type: string
+          minLength: 1
+          maxLength: 64
+        number_lymph_nodes_positive:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        clinical_tumour_staging_system:
+          type: string
+          minLength: 1
+          maxLength: 128
+        clinical_t_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        clinical_n_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        clinical_m_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        clinical_stage_group:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+      required:
+      - basis_of_diagnosis
+      - cancer_type_code
+      - clinical_m_category
+      - clinical_n_category
+      - clinical_stage_group
+      - clinical_t_category
+      - clinical_tumour_staging_system
+      - date_of_diagnosis
+      - lymph_nodes_examined_method
+      - lymph_nodes_examined_status
+      - program_id
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+    Program:
+      type: object
+      properties:
+        program_id:
+          type: string
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        name:
+          type: string
+          maxLength: 255
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+      required:
+      - name
+      - program_id
+    ProgramRequest:
+      type: object
+      properties:
+        program_id:
+          type: string
+          minLength: 1
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+      required:
+      - name
+      - program_id
+    Radiation:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        radiation_therapy_modality:
+          type: string
+          maxLength: 255
+        radiation_therapy_type:
+          type: string
+          maxLength: 64
+        radiation_therapy_fractions:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        radiation_therapy_dosage:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        anatomical_site_irradiated:
+          type: string
+          maxLength: 255
+        radiation_boost:
+          type: boolean
+          nullable: true
+        reference_radiation_treatment_id:
+          type: string
+          maxLength: 64
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_treatment_id:
+          type: string
+      required:
+      - anatomical_site_irradiated
+      - program_id
+      - radiation_therapy_dosage
+      - radiation_therapy_fractions
+      - radiation_therapy_modality
+      - radiation_therapy_type
+      - reference_radiation_treatment_id
+      - submitter_donor_id
+      - submitter_treatment_id
+    RadiationRequest:
+      type: object
+      properties:
+        radiation_therapy_modality:
+          type: string
+          minLength: 1
+          maxLength: 255
+        radiation_therapy_type:
+          type: string
+          minLength: 1
+          maxLength: 64
+        radiation_therapy_fractions:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        radiation_therapy_dosage:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        anatomical_site_irradiated:
+          type: string
+          minLength: 1
+          maxLength: 255
+        radiation_boost:
+          type: boolean
+          nullable: true
+        reference_radiation_treatment_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+      required:
+      - anatomical_site_irradiated
+      - program_id
+      - radiation_therapy_dosage
+      - radiation_therapy_fractions
+      - radiation_therapy_modality
+      - radiation_therapy_type
+      - reference_radiation_treatment_id
+      - submitter_donor_id
+      - submitter_treatment_id
+    SampleRegistration:
+      type: object
+      properties:
+        submitter_sample_id:
+          type: string
+          maxLength: 64
+        program_id:
+          type: string
+          maxLength: 64
+        gender:
+          type: string
+          maxLength: 32
+        sex_at_birth:
+          type: string
+          maxLength: 32
+        specimen_tissue_source:
+          type: string
+          maxLength: 255
+        tumour_normal_designation:
+          type: string
+          maxLength: 32
+        specimen_type:
+          type: string
+          maxLength: 255
+        sample_type:
+          type: string
+          maxLength: 128
+        submitter_donor_id:
+          type: string
+        submitter_specimen_id:
+          type: string
+      required:
+      - gender
+      - program_id
+      - sample_type
+      - sex_at_birth
+      - specimen_tissue_source
+      - specimen_type
+      - submitter_donor_id
+      - submitter_sample_id
+      - submitter_specimen_id
+      - tumour_normal_designation
+    SampleRegistrationRequest:
+      type: object
+      properties:
+        submitter_sample_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        gender:
+          type: string
+          minLength: 1
+          maxLength: 32
+        sex_at_birth:
+          type: string
+          minLength: 1
+          maxLength: 32
+        specimen_tissue_source:
+          type: string
+          minLength: 1
+          maxLength: 255
+        tumour_normal_designation:
+          type: string
+          minLength: 1
+          maxLength: 32
+        specimen_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        sample_type:
+          type: string
+          minLength: 1
+          maxLength: 128
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_specimen_id:
+          type: string
+          minLength: 1
+      required:
+      - gender
+      - program_id
+      - sample_type
+      - sex_at_birth
+      - specimen_tissue_source
+      - specimen_type
+      - submitter_donor_id
+      - submitter_sample_id
+      - submitter_specimen_id
+      - tumour_normal_designation
+    Specimen:
+      type: object
+      properties:
+        submitter_specimen_id:
+          type: string
+          maxLength: 64
+        pathological_tumour_staging_system:
+          type: string
+          maxLength: 255
+        pathological_t_category:
+          type: string
+          maxLength: 64
+        pathological_n_category:
+          type: string
+          maxLength: 64
+        pathological_m_category:
+          type: string
+          maxLength: 64
+        pathological_stage_group:
+          type: string
+          maxLength: 64
+        specimen_collection_date:
+          type: string
+          maxLength: 32
+        specimen_storage:
+          type: string
+          maxLength: 64
+        tumour_histological_type:
+          type: string
+          maxLength: 128
+        specimen_anatomic_location:
+          type: string
+          maxLength: 32
+        reference_pathology_confirmed_diagnosis:
+          type: string
+          maxLength: 32
+        reference_pathology_confirmed_tumour_presence:
+          type: string
+          maxLength: 32
+        tumour_grading_system:
+          type: string
+          maxLength: 128
+        tumour_grade:
+          type: string
+          maxLength: 64
+        percent_tumour_cells_range:
+          type: string
+          maxLength: 64
+        percent_tumour_cells_measurement_method:
+          type: string
+          maxLength: 64
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_primary_diagnosis_id:
+          type: string
+      required:
+      - pathological_m_category
+      - pathological_n_category
+      - pathological_stage_group
+      - pathological_t_category
+      - pathological_tumour_staging_system
+      - percent_tumour_cells_measurement_method
+      - percent_tumour_cells_range
+      - program_id
+      - reference_pathology_confirmed_diagnosis
+      - reference_pathology_confirmed_tumour_presence
+      - specimen_anatomic_location
+      - specimen_collection_date
+      - specimen_storage
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+      - submitter_specimen_id
+      - tumour_grade
+      - tumour_grading_system
+      - tumour_histological_type
+    SpecimenRequest:
+      type: object
+      properties:
+        submitter_specimen_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        pathological_tumour_staging_system:
+          type: string
+          minLength: 1
+          maxLength: 255
+        pathological_t_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        pathological_n_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        pathological_m_category:
+          type: string
+          minLength: 1
+          maxLength: 64
+        pathological_stage_group:
+          type: string
+          minLength: 1
+          maxLength: 64
+        specimen_collection_date:
+          type: string
+          minLength: 1
+          maxLength: 32
+        specimen_storage:
+          type: string
+          minLength: 1
+          maxLength: 64
+        tumour_histological_type:
+          type: string
+          minLength: 1
+          maxLength: 128
+        specimen_anatomic_location:
+          type: string
+          minLength: 1
+          maxLength: 32
+        reference_pathology_confirmed_diagnosis:
+          type: string
+          minLength: 1
+          maxLength: 32
+        reference_pathology_confirmed_tumour_presence:
+          type: string
+          minLength: 1
+          maxLength: 32
+        tumour_grading_system:
+          type: string
+          minLength: 1
+          maxLength: 128
+        tumour_grade:
+          type: string
+          minLength: 1
+          maxLength: 64
+        percent_tumour_cells_range:
+          type: string
+          minLength: 1
+          maxLength: 64
+        percent_tumour_cells_measurement_method:
+          type: string
+          minLength: 1
+          maxLength: 64
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_primary_diagnosis_id:
+          type: string
+          minLength: 1
+      required:
+      - pathological_m_category
+      - pathological_n_category
+      - pathological_stage_group
+      - pathological_t_category
+      - pathological_tumour_staging_system
+      - percent_tumour_cells_measurement_method
+      - percent_tumour_cells_range
+      - program_id
+      - reference_pathology_confirmed_diagnosis
+      - reference_pathology_confirmed_tumour_presence
+      - specimen_anatomic_location
+      - specimen_collection_date
+      - specimen_storage
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+      - submitter_specimen_id
+      - tumour_grade
+      - tumour_grading_system
+      - tumour_histological_type
+    Surgery:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        surgery_type:
+          type: string
+          maxLength: 255
+        surgery_site:
+          type: string
+          maxLength: 255
+        surgery_location:
+          type: string
+          maxLength: 128
+        tumour_length:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        tumour_width:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        greatest_dimension_tumour:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        tumour_focality:
+          type: string
+          maxLength: 64
+        residual_tumour_classification:
+          type: string
+          maxLength: 64
+        margin_types_involved:
+          type: string
+          maxLength: 128
+        margin_types_not_involved:
+          type: string
+          maxLength: 128
+        margin_types_not_assessed:
+          type: string
+          maxLength: 128
+        lymphovascular_invasion:
+          type: string
+          maxLength: 255
+        perineural_invasion:
+          type: string
+          maxLength: 128
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_specimen_id:
+          type: string
+        submitter_treatment_id:
+          type: string
+      required:
+      - lymphovascular_invasion
+      - margin_types_involved
+      - margin_types_not_assessed
+      - margin_types_not_involved
+      - perineural_invasion
+      - program_id
+      - residual_tumour_classification
+      - submitter_donor_id
+      - submitter_specimen_id
+      - submitter_treatment_id
+      - surgery_location
+      - surgery_site
+      - surgery_type
+      - tumour_focality
+    SurgeryRequest:
+      type: object
+      properties:
+        surgery_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        surgery_site:
+          type: string
+          minLength: 1
+          maxLength: 255
+        surgery_location:
+          type: string
+          minLength: 1
+          maxLength: 128
+        tumour_length:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        tumour_width:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        greatest_dimension_tumour:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        tumour_focality:
+          type: string
+          minLength: 1
+          maxLength: 64
+        residual_tumour_classification:
+          type: string
+          minLength: 1
+          maxLength: 64
+        margin_types_involved:
+          type: string
+          minLength: 1
+          maxLength: 128
+        margin_types_not_involved:
+          type: string
+          minLength: 1
+          maxLength: 128
+        margin_types_not_assessed:
+          type: string
+          minLength: 1
+          maxLength: 128
+        lymphovascular_invasion:
+          type: string
+          minLength: 1
+          maxLength: 255
+        perineural_invasion:
+          type: string
+          minLength: 1
+          maxLength: 128
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_specimen_id:
+          type: string
+          minLength: 1
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+      required:
+      - lymphovascular_invasion
+      - margin_types_involved
+      - margin_types_not_assessed
+      - margin_types_not_involved
+      - perineural_invasion
+      - program_id
+      - residual_tumour_classification
+      - submitter_donor_id
+      - submitter_specimen_id
+      - submitter_treatment_id
+      - surgery_location
+      - surgery_site
+      - surgery_type
+      - tumour_focality
+    Treatment:
+      type: object
+      properties:
+        submitter_treatment_id:
+          type: string
+          maxLength: 64
+        treatment_type:
+          type: string
+          maxLength: 255
+        is_primary_treatment:
+          type: string
+          maxLength: 32
+        treatment_start_date:
+          type: string
+          maxLength: 32
+        treatment_end_date:
+          type: string
+          maxLength: 32
+        treatment_setting:
+          type: string
+          maxLength: 128
+        treatment_intent:
+          type: string
+          maxLength: 128
+        days_per_cycle:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        number_of_cycles:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        response_to_treatment_criteria_method:
+          type: string
+          maxLength: 255
+        response_to_treatment:
+          type: string
+          maxLength: 255
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_primary_diagnosis_id:
+          type: string
+      required:
+      - is_primary_treatment
+      - program_id
+      - response_to_treatment
+      - response_to_treatment_criteria_method
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+      - submitter_treatment_id
+      - treatment_end_date
+      - treatment_intent
+      - treatment_setting
+      - treatment_start_date
+      - treatment_type
+    TreatmentRequest:
+      type: object
+      properties:
+        submitter_treatment_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        treatment_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        is_primary_treatment:
+          type: string
+          minLength: 1
+          maxLength: 32
+        treatment_start_date:
+          type: string
+          minLength: 1
+          maxLength: 32
+        treatment_end_date:
+          type: string
+          minLength: 1
+          maxLength: 32
+        treatment_setting:
+          type: string
+          minLength: 1
+          maxLength: 128
+        treatment_intent:
+          type: string
+          minLength: 1
+          maxLength: 128
+        days_per_cycle:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        number_of_cycles:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        response_to_treatment_criteria_method:
+          type: string
+          minLength: 1
+          maxLength: 255
+        response_to_treatment:
+          type: string
+          minLength: 1
+          maxLength: 255
+        program_id:
+          type: string
+          minLength: 1
+        submitter_donor_id:
+          type: string
+          minLength: 1
+        submitter_primary_diagnosis_id:
+          type: string
+          minLength: 1
+      required:
+      - is_primary_treatment
+      - program_id
+      - response_to_treatment
+      - response_to_treatment_criteria_method
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+      - submitter_treatment_id
+      - treatment_end_date
+      - treatment_intent
+      - treatment_setting
+      - treatment_start_date
+      - treatment_type
+    moh_overview_schema_response:
+      type: object
+      properties:
+        cohort_count:
+          type: integer
+        individual_count:
+          type: integer
+      required:
+      - cohort_count
+      - individual_count
+  securitySchemes:
+    BentoRemoteUserAuthentication:
+      type: apiKey
+      in: header
+      name: api_key

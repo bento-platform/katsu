@@ -68,7 +68,7 @@ class PrimaryDiagnosis(models.Model):
         max_length=128, null=False, blank=False
     )
     lymph_nodes_examined_method = models.CharField(max_length=64)
-    number_lymph_nodes_positive = models.IntegerField(blank=True, null=True)
+    number_lymph_nodes_positive = models.PositiveSmallIntegerField(blank=True, null=True)
     clinical_tumour_staging_system = models.CharField(max_length=128)
     clinical_t_category = models.CharField(max_length=64)
     clinical_n_category = models.CharField(max_length=64)
@@ -147,8 +147,8 @@ class Treatment(models.Model):
     treatment_end_date = models.CharField(max_length=32, null=False, blank=False)
     treatment_setting = models.CharField(max_length=128, null=False, blank=False)
     treatment_intent = models.CharField(max_length=128, null=False, blank=False)
-    days_per_cycle = models.IntegerField(blank=True, null=True)
-    number_of_cycles = models.IntegerField(blank=True, null=True)
+    days_per_cycle = models.PositiveSmallIntegerField(blank=True, null=True)
+    number_of_cycles = models.PositiveSmallIntegerField(blank=True, null=True)
     response_to_treatment_criteria_method = models.CharField(
         max_length=255, null=False, blank=False
     )
@@ -170,8 +170,8 @@ class Chemotherapy(models.Model):
     drug_name = models.CharField(max_length=255, null=False, blank=False)
     drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
     chemotherapy_dosage_units = models.CharField(max_length=64, null=False, blank=False)
-    cumulative_drug_dosage_prescribed = models.IntegerField(blank=True, null=True)
-    cumulative_drug_dosage_actual = models.IntegerField(blank=True, null=True)
+    cumulative_drug_dosage_prescribed = models.PositiveSmallIntegerField(blank=True, null=True)
+    cumulative_drug_dosage_actual = models.PositiveSmallIntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.id}"
@@ -189,8 +189,8 @@ class HormoneTherapy(models.Model):
     drug_name = models.CharField(max_length=255, null=False, blank=False)
     drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
     hormone_drug_dosage_units = models.CharField(max_length=64, null=False, blank=False)
-    cumulative_drug_dosage_prescribed = models.IntegerField(blank=True, null=True)
-    cumulative_drug_dosage_actual = models.IntegerField(blank=True, null=True)
+    cumulative_drug_dosage_prescribed = models.PositiveSmallIntegerField(blank=True, null=True)
+    cumulative_drug_dosage_actual = models.PositiveSmallIntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.id}"
@@ -209,8 +209,8 @@ class Radiation(models.Model):
         max_length=255, null=False, blank=False
     )
     radiation_therapy_type = models.CharField(max_length=64, null=False, blank=False)
-    radiation_therapy_fractions = models.IntegerField()
-    radiation_therapy_dosage = models.IntegerField()
+    radiation_therapy_fractions = models.PositiveSmallIntegerField()
+    radiation_therapy_dosage = models.PositiveSmallIntegerField()
     anatomical_site_irradiated = models.CharField(
         max_length=255, null=False, blank=False
     )
@@ -253,9 +253,9 @@ class Surgery(models.Model):
     surgery_type = models.CharField(max_length=255, null=False, blank=False)
     surgery_site = models.CharField(max_length=255)
     surgery_location = models.CharField(max_length=128)
-    tumour_length = models.IntegerField(null=True, blank=True)
-    tumour_width = models.IntegerField(null=True, blank=True)
-    greatest_dimension_tumour = models.IntegerField(null=True, blank=True)
+    tumour_length = models.PositiveSmallIntegerField(null=True, blank=True)
+    tumour_width = models.PositiveSmallIntegerField(null=True, blank=True)
+    greatest_dimension_tumour = models.PositiveSmallIntegerField(null=True, blank=True)
     tumour_focality = models.CharField(max_length=64)
     residual_tumour_classification = models.CharField(max_length=64)
     margin_types_involved = models.CharField(max_length=128)
@@ -322,10 +322,10 @@ class Biomarker(models.Model):
     submitter_follow_up_id = models.ForeignKey(
         FollowUp, on_delete=models.SET_NULL, blank=True, null=True
     )
-    test_interval = models.IntegerField(null=True, blank=True)
-    psa_level = models.IntegerField(null=True, blank=True)
-    ca125 = models.IntegerField(null=True, blank=True)
-    cea = models.IntegerField(null=True, blank=True)
+    test_interval = models.PositiveSmallIntegerField(null=True, blank=True)
+    psa_level = models.PositiveSmallIntegerField(null=True, blank=True)
+    ca125 = models.PositiveSmallIntegerField(null=True, blank=True)
+    cea = models.PositiveSmallIntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.id}"
@@ -341,7 +341,7 @@ class Comorbidity(models.Model):
     )
     prior_malignancy = models.CharField(max_length=32)
     laterality_of_prior_malignancy = models.CharField(max_length=64)
-    age_at_comorbidity_diagnosis = models.IntegerField(null=True, blank=True)
+    age_at_comorbidity_diagnosis = models.PositiveSmallIntegerField(null=True, blank=True)
     comorbidity_type_code = models.CharField(max_length=64)
     comorbidity_treatment_status = models.CharField(max_length=32)
     comorbidity_treatment = models.CharField(max_length=255)
