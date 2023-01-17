@@ -1,4 +1,4 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-latest
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2023.01.17
 
 # Install Postgres client for checking if database is ready
 # Install uvicorn to serve the API
