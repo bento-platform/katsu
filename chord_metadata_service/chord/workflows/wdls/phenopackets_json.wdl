@@ -4,6 +4,10 @@ workflow phenopackets_json {
     call identity_task {
         input: json_document_in = json_document
     }
+
+    output {
+        File json_document = identity_task.json_document
+    }
 }
 
 task identity_task {
