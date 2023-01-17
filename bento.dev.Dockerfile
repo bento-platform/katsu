@@ -1,5 +1,9 @@
 FROM ghcr.io/bento-platform/bento_base_image:python-debian-latest
 
+# Install Postgres client for checking if database is ready
+RUN apt-get update -y && \
+    apt-get install -y postgresql-client
+
 # Backwards-compatible with old BentoV2 container layout
 WORKDIR /app
 
@@ -9,10 +13,7 @@ COPY requirements-dev.txt requirements-dev.txt
 # Install production dependencies
 RUN pip install --no-cache-dir -r requirements-dev.txt
 
-# Copy all application code
-COPY . .
-
 # Create temporary directory for downloading files etc.
 RUN mkdir -p tmp
 
-CMD [ "sh", "./entrypoint.dev.sh" ]
+CMD [ "bash", "./entrypoint.dev.bash" ]

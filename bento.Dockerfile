@@ -1,6 +1,10 @@
 FROM ghcr.io/bento-platform/bento_base_image:python-debian-latest
 
-RUN pip install --no-cache-dir "uvicorn[standard]==0.20.0"
+# Install Postgres client for checking if database is ready
+# Install uvicorn to serve the API
+RUN apt-get update -y && \
+    apt-get install -y postgresql-client && \
+    pip install --no-cache-dir "uvicorn[standard]==0.20.0"
 
 # Backwards-compatible with old BentoV2 container layout
 WORKDIR /app
@@ -16,4 +20,4 @@ COPY . .
 # Create temporary directory for downloading files etc.
 RUN mkdir -p tmp
 
-CMD [ "sh", "./entrypoint.sh" ]
+CMD [ "bash", "./entrypoint.bash" ]
