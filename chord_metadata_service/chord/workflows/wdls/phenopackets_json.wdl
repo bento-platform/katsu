@@ -1,19 +1,19 @@
 workflow phenopackets_json {
     File json_document
 
-    call identity_task {
+    call copy_task {
         input: json_document_in = json_document
     }
 
     output {
-        File json_document_out = identity_task.json_document
+        File json_document_out = copy_task.json_document
     }
 }
 
-task identity_task {
+task copy_task {
     File json_document_in
     command {
-        true
+        cp "${json_document_in}" phenopacket_ingest.json
     }
     output {
         File json_document = "${json_document_in}"
