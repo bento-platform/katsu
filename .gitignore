@@ -14,6 +14,7 @@ passwords.txt
 # virtualenv
 env/
 .env
+.venv/
 
 # IDE related (intelliJ, vim files)
 .idea/
