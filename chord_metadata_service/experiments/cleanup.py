@@ -24,7 +24,7 @@ def clean_experiment_results() -> int:
 
     if n_to_remove:
         logger.info(f"Automatically cleaning up {len(results_to_remove)} experiment results: {str(results_to_remove)}")
-        ExperimentResult.objects.filter(id__in=results_to_remove)
+        ExperimentResult.objects.filter(id__in=results_to_remove).delete()
     else:
         logger.info("No experiment results set for auto-removal")
 
@@ -44,7 +44,7 @@ def clean_instruments() -> int:
 
     if instruments_to_remove:
         logger.info(f"Automatically cleaning up {len(instruments_to_remove)} instruments: {str(instruments_to_remove)}")
-        Instrument.objects.filter(id__in=instruments_to_remove)
+        Instrument.objects.filter(id__in=instruments_to_remove).delete()
     else:
         logger.info("No instruments set for auto-removal")
 

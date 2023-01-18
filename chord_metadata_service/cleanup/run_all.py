@@ -12,7 +12,7 @@ def run_all_cleanup() -> int:
 
     n_removed: int = 0
 
-    # Phenopacket artifacts
+    # Phenopacket artifacts - biosamples
     n_removed += clean_biosamples()
 
     # Experiment artifacts
