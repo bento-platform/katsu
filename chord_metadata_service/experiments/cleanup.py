@@ -11,7 +11,7 @@ __all__ = [
 
 
 # TODO: Remove this when we have one-to-many ?
-def clean_experiment_results():
+def clean_experiment_results() -> int:
     results_referenced = set()
 
     # Collect references to results from experiments
@@ -20,14 +20,18 @@ def clean_experiment_results():
     # Remove experiment results NOT in set
     results_to_remove = set(
         map(dict_first_val, ExperimentResult.objects.exclude(id__in=results_referenced).values_list("id")))
-    if results_to_remove:
+    n_to_remove = len(results_to_remove)
+
+    if n_to_remove:
         logger.info(f"Automatically cleaning up {len(results_to_remove)} experiment results: {str(results_to_remove)}")
         ExperimentResult.objects.filter(id__in=results_to_remove)
     else:
         logger.info("No experiment results set for auto-removal")
 
+    return n_to_remove
 
-def clean_instruments():
+
+def clean_instruments() -> int:
     instruments_referenced = set()
 
     # Collect references to results from experiments
@@ -36,8 +40,12 @@ def clean_instruments():
     # Remove experiment results NOT in set
     instruments_to_remove = set(
         map(dict_first_val, Instrument.objects.exclude(id__in=instruments_referenced).values_list("id")))
+    n_to_remove = len(instruments_to_remove)
+
     if instruments_to_remove:
         logger.info(f"Automatically cleaning up {len(instruments_to_remove)} instruments: {str(instruments_to_remove)}")
         Instrument.objects.filter(id__in=instruments_to_remove)
     else:
         logger.info("No instruments set for auto-removal")
+
+    return n_to_remove

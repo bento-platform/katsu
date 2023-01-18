@@ -6,7 +6,7 @@ from chord_metadata_service.utils import dict_first_val
 from .models import Individual
 
 
-def clean_individuals():
+def clean_individuals() -> int:
     """
     Deletes all individuals which aren't referenced anywhere in the application.
     Phenopackets/biosamples should be cleaned BEFORE running this.
@@ -26,10 +26,15 @@ def clean_individuals():
     individuals_referenced.discard(None)
 
     # Remove individuals NOT in set
+
     individuals_to_remove = set(
         map(dict_first_val, Individual.objects.exclude(id__in=individuals_referenced).values_list("id")))
-    if individuals_to_remove:
-        logger.info(f"Automatically cleaning up {len(individuals_to_remove)} individuals: {str(individuals_to_remove)}")
+    n_to_remove = len(individuals_to_remove)
+
+    if n_to_remove:
+        logger.info(f"Automatically cleaning up {n_to_remove} individuals: {str(individuals_to_remove)}")
         Individual.objects.filter(id__in=individuals_to_remove)
     else:
         logger.info("No individuals set for auto-removal")
+
+    return n_to_remove

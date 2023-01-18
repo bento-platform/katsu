@@ -6,7 +6,7 @@ from chord_metadata_service.utils import dict_first_val
 from .models import Biosample
 
 
-def clean_biosamples():
+def clean_biosamples() -> int:
     """
     Deletes all biosamples which aren't referenced anywhere in the application.
     Phenopackets and Experiments model tables should be deleted in the database
@@ -27,8 +27,12 @@ def clean_biosamples():
     # Remove individuals NOT in set
     biosamples_to_remove = set(
         map(dict_first_val, Biosample.objects.exclude(id__in=biosamples_referenced).values_list("id")))
+    n_to_remove = len(biosamples_to_remove)
+
     if biosamples_to_remove:
         logger.info(f"Automatically cleaning up {len(biosamples_to_remove)} biosamples: {str(biosamples_to_remove)}")
         Biosample.objects.filter(id__in=biosamples_to_remove)
     else:
         logger.info("No biosamples set for auto-removal")
+
+    return n_to_remove
