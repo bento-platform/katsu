@@ -202,6 +202,10 @@ LOGGING = {
             'level': 'INFO',
             'handlers': ['console'],
         },
+        'chord_metadata_service.logger': {
+            'level': 'INFO',
+            'handlers': ['console'],
+        },
     },
 }
 
