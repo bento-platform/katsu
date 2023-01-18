@@ -16,6 +16,7 @@ from chord_metadata_service.chord.tests.constants import (
     VALID_PROJECT_1,
     valid_dataset_1,
     valid_table_1,
+    valid_phenotypic_feature,
 )
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 
@@ -51,9 +52,9 @@ class CleanUpIndividualsTestCase(APITestCase):
 
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
-        # self.phenotypic_feature = PhenotypicFeature.objects.create(
-        #     **valid_phenotypic_feature(phenopacket=self.phenopacket)
-        # )
+        self.phenotypic_feature = PhenotypicFeature.objects.create(
+            **valid_phenotypic_feature(phenopacket=self.phenopacket)
+        )
 
         # # table for experiments metadata
         # to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
