@@ -5,6 +5,7 @@ import uuid
 
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response, postgres
+
 from datetime import datetime
 from django.db import connection
 from django.db.models import Count, F, Q
@@ -13,11 +14,15 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
 from django.views.decorators.cache import cache_page
 from psycopg2 import sql
-from chord_metadata_service.restapi.utils import get_field_bins, queryset_stats_for_field
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+
 from typing import Any, Callable, Dict, Optional, Tuple, Union
+
+from chord_metadata_service.cleanup import run_all_cleanup
+from chord_metadata_service.logger import logger
+from chord_metadata_service.restapi.utils import get_field_bins, queryset_stats_for_field
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
@@ -27,7 +32,7 @@ from chord_metadata_service.mcode.models import MCodePacket
 from chord_metadata_service.mcode.serializers import MCodePacketSerializer
 
 from chord_metadata_service.metadata.elastic import es
-from chord_metadata_service.metadata.settings import DEBUG, CHORD_SERVICE_ARTIFACT, CHORD_SERVICE_ID
+from chord_metadata_service.metadata.settings import CHORD_SERVICE_ARTIFACT, CHORD_SERVICE_ID
 
 from chord_metadata_service.patients.models import Individual
 
@@ -41,9 +46,6 @@ from .permissions import ReadOnly, OverrideOrSuperUserOnly
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if DEBUG else logging.INFO)
 
 
 @api_view(["GET"])
@@ -149,11 +151,21 @@ def table_detail(request, table_id):  # pragma: no cover
     #  Or just always use owner...
     try:
         table = Table.objects.get(ownership_record_id=table_id)
+        table_ownership = TableOwnership.objects.get(table_id=table_id)
     except Table.DoesNotExist:
         return Response(errors.not_found_error(f"Table with ID {table_id} not found"), status=404)
+    except TableOwnership.DoesNotExist:
+        return Response(
+            errors.not_found_error(f"Table ownership record for table with ID {table_id} not found"), status=404)
 
     if request.method == "DELETE":
-        table.delete()
+        # First, delete the table record itself - use the cascade from the ownership record
+        table_ownership.delete()  # also deletes table
+
+        # Then, run cleanup
+        logger.info(f"Running cleanup after deleting table {table_id}")
+        run_all_cleanup()
+
         return Response(status=204)
 
     # GET
