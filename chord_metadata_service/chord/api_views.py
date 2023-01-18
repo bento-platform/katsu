@@ -1,15 +1,20 @@
-from rest_framework import viewsets
+import logging
+
+from rest_framework import status, viewsets
 from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
+from django_filters.rest_framework import DjangoFilterBackend
+
+from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
+
 from .models import Project, Dataset, TableOwnership, Table
 from .permissions import OverrideOrSuperUserOnly
 from .serializers import ProjectSerializer, DatasetSerializer, TableOwnershipSerializer, TableSerializer
 from .filters import AuthorizedDatasetFilter
-from django_filters.rest_framework import DjangoFilterBackend
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -89,3 +94,18 @@ class TableViewSet(CHORDPublicModelViewSet):
 
     queryset = Table.objects.all().prefetch_related("ownership_record").order_by("ownership_record_id")
     serializer_class = TableSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        # First, delete the table record itself
+        # - use the cascade from the ownership record rather than the default DRF behaviour
+        table = self.get_object()
+        table_id = table.ownership_record_id
+        table.ownership_record.delete()
+        table.delete()
+
+        # Then, run cleanup
+        logger.info(f"Running cleanup after deleting table {table_id}")
+        n_removed = run_all_cleanup()
+        logger.info(f"Cleanup: removed {n_removed} objects in total")
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
