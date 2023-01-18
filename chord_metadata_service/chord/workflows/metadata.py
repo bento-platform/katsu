@@ -16,6 +16,8 @@ __all__ = [
     "WORKFLOWS_PATH",
 ]
 
+from typing import Optional
+
 from chord_metadata_service.chord.data_types import (
     DATA_TYPE_EXPERIMENT,
     DATA_TYPE_EXPERIMENT_RESULT,
@@ -46,11 +48,11 @@ def json_file_input(id_: str, required: bool = True):
     }
 
 
-def json_file_output(id_: str):
+def json_file_output(id_: str, output_name: Optional[str] = None):
     return {
         "id": id_,
         "type": "file",
-        "value": f"{{{id_}}}",
+        "value": output_name or f"{{{id_}}}",
     }
 
 
@@ -63,7 +65,7 @@ METADATA_WORKFLOWS = {
             "data_type": DATA_TYPE_PHENOPACKET,
             "file": "phenopackets_json.wdl",
             "inputs": [json_file_input("json_document")],
-            "outputs": [json_file_output("json_document")],
+            "outputs": [json_file_output("json_document", "ingest.json")],
         },
         WORKFLOW_EXPERIMENTS_JSON: {
             "name": "Bento Experiments JSON",
@@ -72,7 +74,7 @@ METADATA_WORKFLOWS = {
             "data_type": DATA_TYPE_EXPERIMENT,
             "file": "experiments_json.wdl",
             "inputs": [json_file_input("json_document")],
-            "outputs": [json_file_output("json_document")]
+            "outputs": [json_file_output("json_document", "ingest.json")]
         },
         WORKFLOW_FHIR_JSON: {
             "name": "FHIR Resources JSON",
@@ -94,10 +96,10 @@ METADATA_WORKFLOWS = {
 
             ],
             "outputs": [
-                json_file_output("patients"),
-                json_file_output("observations"),
-                json_file_output("conditions"),
-                json_file_output("specimens"),
+                json_file_output("patients", "patients.json"),
+                json_file_output("observations", "observations.json"),
+                json_file_output("conditions", "conditions.json"),
+                json_file_output("specimens", "specimens.json"),
                 {
                     "id": "created_by",
                     "type": "string",
@@ -114,7 +116,7 @@ METADATA_WORKFLOWS = {
             "data_type": DATA_TYPE_MCODEPACKET,
             "file": "mcode_fhir_json.wdl",
             "inputs": [json_file_input("json_document")],
-            "outputs": [json_file_output("json_document")],
+            "outputs": [json_file_output("json_document", "ingest.json")],
         },
         WORKFLOW_MCODE_JSON: {
             "name": "MCODE Resources JSON",
@@ -123,7 +125,7 @@ METADATA_WORKFLOWS = {
             "data_type": DATA_TYPE_MCODEPACKET,
             "file": "mcode_json.wdl",
             "inputs": [json_file_input("json_document")],
-            "outputs": [json_file_output("json_document")],
+            "outputs": [json_file_output("json_document", "ingest.json")],
         },
         WORKFLOW_READSET: {
             "name": "Readset",
@@ -154,7 +156,7 @@ METADATA_WORKFLOWS = {
             "data_type": DATA_TYPE_EXPERIMENT_RESULT,
             "file": "maf_derived_from_vcf_json.wdl",
             "inputs": [json_file_input("json_document")],
-            "outputs": [json_file_output("json_document")],
+            "outputs": [json_file_output("json_document", "ingest.json")],
         },
     },
     "analysis": {

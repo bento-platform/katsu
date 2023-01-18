@@ -13,9 +13,9 @@ workflow phenopackets_json {
 task copy_task {
     File json_document_in
     command {
-        cp "${json_document_in}" phenopacket_ingest.json
+        cp "${json_document_in}" ingest.json
     }
     output {
-        File json_document = "${json_document_in}"
+        File json_document = "ingest.json"
     }
 }
