@@ -1,6 +1,3 @@
-import json
-import uuid
-
 from rest_framework.test import APITestCase
 
 from django.urls import reverse
@@ -9,27 +6,18 @@ from chord_metadata_service.patients.cleanup import clean_individuals
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.cleanup import clean_biosamples
 from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, Procedure, PhenotypicFeature
-from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
 from chord_metadata_service.phenopackets.tests.constants import (
     VALID_PROCEDURE_1,
     valid_biosample_1,
     valid_biosample_2,
     VALID_META_DATA_1,
 )
-from chord_metadata_service.experiments.tests.constants import (
-    valid_experiment, valid_experiment_result, valid_instrument
-)
-
 from chord_metadata_service.chord.tests.constants import (
     VALID_PROJECT_1,
     valid_dataset_1,
     valid_table_1,
-    valid_phenotypic_feature,
 )
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
-from chord_metadata_service.chord.data_types import (
-    DATA_TYPE_EXPERIMENT,
-)
 
 
 class CleanUpIndividualsTestCase(APITestCase):
