@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from chord_metadata_service.patients.cleanup import clean_individuals
 from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.phenopackets.cleanup import clean_biosamples
 from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, Procedure, PhenotypicFeature
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
 from chord_metadata_service.phenopackets.tests.constants import (
@@ -31,7 +32,7 @@ from chord_metadata_service.chord.data_types import (
 )
 
 
-class CleanupTestCase(APITestCase):
+class CleanUpIndividualsTestCase(APITestCase):
     def setUp(self):
         # Copied from test_api_search
 
@@ -62,28 +63,69 @@ class CleanupTestCase(APITestCase):
 
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
-        self.phenotypic_feature = PhenotypicFeature.objects.create(
-            **valid_phenotypic_feature(phenopacket=self.phenopacket)
-        )
+        # self.phenotypic_feature = PhenotypicFeature.objects.create(
+        #     **valid_phenotypic_feature(phenopacket=self.phenopacket)
+        # )
 
-        # table for experiments metadata
-        to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
-                                               service_artifact="experiments", dataset=self.dataset)
-        self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
-
-        # add Experiments metadata and link to self.biosample_1
-        self.instrument = Instrument.objects.create(**valid_instrument())
-        self.experiment_result = ExperimentResult.objects.create(**valid_experiment_result())
-        self.experiment = Experiment.objects.create(**valid_experiment(
-            biosample=self.biosample_1, instrument=self.instrument, table=self.t_exp))
-        self.experiment.experiment_results.set([self.experiment_result])
+        # # table for experiments metadata
+        # to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
+        #                                        service_artifact="experiments", dataset=self.dataset)
+        # self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
+        #
+        # # add Experiments metadata and link to self.biosample_1
+        # self.instrument = Instrument.objects.create(**valid_instrument())
+        # self.experiment_result = ExperimentResult.objects.create(**valid_experiment_result())
+        # self.experiment = Experiment.objects.create(**valid_experiment(
+        #     biosample=self.biosample_1, instrument=self.instrument, table=self.t_exp))
+        # self.experiment.experiment_results.set([self.experiment_result])
 
     def test_biosamples_cleanup(self):
         pass  # TODO
 
-    def test_individuals_cleanup(self):
-        r = self.client.delete(reverse("table-detail", kwargs={"table_id": self.table.id}))
+    def test_individuals_cleanup_api_table_delete(self):
+        # Check individual exists pre-table-delete
+        Individual.objects.get(id="patient:1")
+
+        # Check we can run clean_biosamples and clean_individuals with nothing lost (in order),
+        # since the individual is referenced by the phenopacket and the biosample is in use.
+        self.assertEqual(clean_biosamples(), 0)
+        self.assertEqual(clean_individuals(), 0)
+
+        # This reverse points to the API table delete, not the /tables/<...> delete in views_search
+        r = self.client.delete(reverse("table-detail", args=[self.table.ownership_record_id]))
         assert r.status_code == 204
+
+        with self.assertRaises(Table.DoesNotExist):  # Table successfully deleted
+            self.table.refresh_from_db()
+
+        self.assertEqual(clean_biosamples(), 0)
+        self.assertEqual(clean_individuals(), 0)
+
+        with self.assertRaises(Individual.DoesNotExist):
+            Individual.objects.get(id="patient:1")
+
+        # Check we can run it again with no change...
+        self.assertEqual(clean_individuals(), 0)
+
+    def test_individuals_cleanup_chord_table_delete(self):
+        # Check individual exists pre-table-delete
+        Individual.objects.get(id="patient:1")
+
+        # Check we can run clean_biosamples and clean_individuals with nothing lost (in order),
+        # since the individual is referenced by the phenopacket and the biosample is in use.
+        self.assertEqual(clean_biosamples(), 0)
+        self.assertEqual(clean_individuals(), 0)
+
+        # !!! THIS IS THE PART THAT IS DIFFERENT VS. ABOVE - different table delete endpoint
+        # This reverse points to the API table delete, not the /tables/<...> delete in views_search
+        r = self.client.delete(f"/tables/{self.table.ownership_record_id}")
+        assert r.status_code == 204
+
+        with self.assertRaises(Table.DoesNotExist):  # Table successfully deleted
+            self.table.refresh_from_db()
+
+        self.assertEqual(clean_biosamples(), 0)
+        self.assertEqual(clean_individuals(), 0)
 
         with self.assertRaises(Individual.DoesNotExist):
             Individual.objects.get(id="patient:1")
