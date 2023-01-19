@@ -1,6 +1,6 @@
 from chord_metadata_service.experiments.cleanup import clean_experiment_results, clean_instruments
 from chord_metadata_service.patients.cleanup import clean_individuals
-from chord_metadata_service.phenopackets.cleanup import clean_biosamples, clean_phenotypic_features
+from chord_metadata_service.phenopackets.cleanup import clean_biosamples, clean_phenotypic_features, clean_procedures
 
 __all__ = [
     "run_all_cleanup",
@@ -12,9 +12,10 @@ def run_all_cleanup() -> int:
 
     n_removed: int = 0
 
-    # Phenopacket artifacts - biosamples + phenotypic features
+    # Phenopacket artifacts - biosamples + phenotypic features + procedures (order matters!)
     n_removed += clean_biosamples()
     n_removed += clean_phenotypic_features()
+    n_removed += clean_procedures()
 
     # Experiment artifacts
     n_removed += clean_experiment_results()

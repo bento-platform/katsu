@@ -3,11 +3,11 @@ import chord_metadata_service.phenopackets.models as pm
 
 from chord_metadata_service.logger import logger
 from chord_metadata_service.utils import dict_first_val
-from .models import Biosample, PhenotypicFeature
 
 __all__ = [
     "clean_biosamples",
     "clean_phenotypic_features",
+    "clean_procedures",
 ]
 
 
@@ -29,14 +29,14 @@ def clean_biosamples() -> int:
     # Remove null from set
     biosamples_referenced.discard(None)
 
-    # Remove individuals NOT in set
+    # Remove biosamples NOT in set
     biosamples_to_remove = set(
-        map(dict_first_val, Biosample.objects.exclude(id__in=biosamples_referenced).values("id")))
+        map(dict_first_val, pm.Biosample.objects.exclude(id__in=biosamples_referenced).values("id")))
     n_to_remove = len(biosamples_to_remove)
 
     if n_to_remove:
         logger.info(f"Automatically cleaning up {n_to_remove} biosamples: {str(biosamples_to_remove)}")
-        Biosample.objects.filter(id__in=biosamples_to_remove).delete()
+        pm.Biosample.objects.filter(id__in=biosamples_to_remove).delete()
     else:
         logger.info("No biosamples set for auto-removal")
 
@@ -51,7 +51,7 @@ def clean_phenotypic_features() -> int:
     however, for Bento's purposes, if this is called, we clean those up.
     """
 
-    pf_to_remove_qs = PhenotypicFeature.objects.filter(
+    pf_to_remove_qs = pm.PhenotypicFeature.objects.filter(
         biosample__isnull=True,
         phenopacket__isnull=True,
     )
@@ -64,5 +64,33 @@ def clean_phenotypic_features() -> int:
         pf_to_remove_qs.delete()
     else:
         logger.info("No phenotypic features set for auto-removal")
+
+    return n_to_remove
+
+
+def clean_procedures() -> int:
+    """
+    Deletes all procedures which aren't pointed to by at least one biosample, since
+    there is a many biosample -> one procedure style relationship currently (2023-01-19).
+    """
+
+    procedures_referenced = set()
+
+    # Collect references to procedures in biosamples
+    procedures_referenced.update(map(dict_first_val, pm.Biosample.objects.values("procedure_id")))
+
+    # Remove null from set
+    procedures_referenced.discard(None)
+
+    # Remove procedures NOT in set
+    procedures_referenced = set(
+        map(dict_first_val, pm.Procedure.objects.exclude(id__in=procedures_referenced).values("id")))
+    n_to_remove = len(procedures_referenced)
+
+    if n_to_remove:
+        logger.info(f"Automatically cleaning up {n_to_remove} procedures: {str(procedures_referenced)}")
+        pm.Procedure.objects.filter(id__in=procedures_referenced).delete()
+    else:
+        logger.info("No procedures set for auto-removal")
 
     return n_to_remove

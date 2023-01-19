@@ -5,7 +5,7 @@ from django.urls import reverse
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.patients.cleanup import clean_individuals
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets.cleanup import clean_biosamples, clean_phenotypic_features
+from chord_metadata_service.phenopackets import cleanup as pc
 from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, Procedure, PhenotypicFeature
 from chord_metadata_service.phenopackets.tests.constants import (
     VALID_PROCEDURE_1,
@@ -69,17 +69,15 @@ class CleanUpIndividualsTestCase(APITestCase):
         #     biosample=self.biosample_1, instrument=self.instrument, table=self.t_exp))
         # self.experiment.experiment_results.set([self.experiment_result])
 
-    def test_biosamples_cleanup(self):
-        pass  # TODO
-
     def _check_table_delete(self, delete_url: str):
         # Check individual exists pre-table-delete
         Individual.objects.get(id="patient:1")
 
         # Check we can run clean_biosamples and clean_individuals with nothing lost (in order),
         # since the individual is referenced by the phenopacket and the biosample is in use.
-        self.assertEqual(clean_biosamples(), 0)
-        self.assertEqual(clean_phenotypic_features(), 0)
+        self.assertEqual(pc.clean_biosamples(), 0)
+        self.assertEqual(pc.clean_phenotypic_features(), 0)
+        self.assertEqual(pc.clean_procedures(), 0)
         self.assertEqual(clean_individuals(), 0)
 
         # This reverse points to the API table delete, not the /tables/<...> delete in views_search
@@ -92,8 +90,9 @@ class CleanUpIndividualsTestCase(APITestCase):
         with self.assertRaises(PhenotypicFeature.DoesNotExist):  # PhenotypicFeature successfully deleted
             self.phenotypic_feature.refresh_from_db()
 
-        self.assertEqual(clean_biosamples(), 0)
-        self.assertEqual(clean_phenotypic_features(), 0)
+        self.assertEqual(pc.clean_biosamples(), 0)
+        self.assertEqual(pc.clean_phenotypic_features(), 0)
+        self.assertEqual(pc.clean_procedures(), 0)
         self.assertEqual(clean_individuals(), 0)
 
         with self.assertRaises(Individual.DoesNotExist):
@@ -101,6 +100,27 @@ class CleanUpIndividualsTestCase(APITestCase):
 
         # Check we can run all cleaning again with no change...
         self.assertEqual(run_all_cleanup(), 0)
+
+    def test_no_cleanup(self):
+        # No cleanup should occur without removing the table/phenopacket first
+        self.assertEqual(run_all_cleanup(), 0)
+
+    def test_cleanup_basic(self):
+        # Delete table to remove the parent phenopacket
+        self.table.ownership_record.delete()
+
+        # 2 biosamples +
+        # 1 procedure +
+        # 0 phenotypic feature (removed via cascade with v2.17.0 database changes) +
+        # 1 individual +
+        # 0 experiment results +
+        # 0 instruments
+        # = 4 objects total
+        self.assertEqual(run_all_cleanup(), 4)
+
+        # Should have been removed via cascade with v2.17.0 database changes
+        with self.assertRaises(PhenotypicFeature.DoesNotExist):
+            self.phenotypic_feature.refresh_from_db()
 
     def test_cleanup_api_table_delete(self):
         self._check_table_delete(reverse("table-detail", args=[self.table.ownership_record_id]))
