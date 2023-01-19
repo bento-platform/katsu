@@ -163,7 +163,7 @@ def table_detail(request, table_id):  # pragma: no cover
         table_ownership.delete()  # also deletes table
 
         # Then, run cleanup
-        logger.info(f"Running cleanup after deleting table {table_id}")
+        logger.info(f"Running cleanup after deleting table {table_id} via /tables Bento data service endpoint")
         n_removed = run_all_cleanup()
         logger.info(f"Cleanup: removed {n_removed} objects in total")
 

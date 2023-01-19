@@ -199,10 +199,6 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'level': 'INFO',
-            'handlers': ['console'],
-        },
-        'chord_metadata_service.logger': {
             'level': 'DEBUG' if DEBUG else 'INFO',
             'handlers': ['console'],
         },

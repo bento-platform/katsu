@@ -104,7 +104,7 @@ class TableViewSet(CHORDPublicModelViewSet):
         table.delete()
 
         # Then, run cleanup
-        logger.info(f"Running cleanup after deleting table {table_id}")
+        logger.info(f"Running cleanup after deleting table {table_id} via DRF API")
         n_removed = run_all_cleanup()
         logger.info(f"Cleanup: removed {n_removed} objects in total")
 
