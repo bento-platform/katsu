@@ -22,7 +22,7 @@ from chord_metadata_service.chord.tests.constants import (
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 
 
-class CleanUpIndividualsTestCase(APITestCase):
+class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
     def setUp(self):
         # Copied from test_api_search
 
@@ -57,6 +57,10 @@ class CleanUpIndividualsTestCase(APITestCase):
             **valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
 
+        self.unlinked_phenotypic_feature = PhenotypicFeature.objects.create(
+            **valid_phenotypic_feature(phenopacket=None)
+        )
+
         # # table for experiments metadata
         # to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
         #                                        service_artifact="experiments", dataset=self.dataset)
@@ -74,9 +78,10 @@ class CleanUpIndividualsTestCase(APITestCase):
         Individual.objects.get(id="patient:1")
 
         # Check we can run clean_biosamples and clean_individuals with nothing lost (in order),
+        # except the unlinked phenotypic feature,
         # since the individual is referenced by the phenopacket and the biosample is in use.
         self.assertEqual(pc.clean_biosamples(), 0)
-        self.assertEqual(pc.clean_phenotypic_features(), 0)
+        self.assertEqual(pc.clean_phenotypic_features(), 1)
         self.assertEqual(pc.clean_procedures(), 0)
         self.assertEqual(clean_individuals(), 0)
 
@@ -90,6 +95,9 @@ class CleanUpIndividualsTestCase(APITestCase):
         with self.assertRaises(PhenotypicFeature.DoesNotExist):  # PhenotypicFeature successfully deleted
             self.phenotypic_feature.refresh_from_db()
 
+        with self.assertRaises(PhenotypicFeature.DoesNotExist):  # PhenotypicFeature successfully deleted
+            self.unlinked_phenotypic_feature.refresh_from_db()
+
         self.assertEqual(pc.clean_biosamples(), 0)
         self.assertEqual(pc.clean_phenotypic_features(), 0)
         self.assertEqual(pc.clean_procedures(), 0)
@@ -102,8 +110,13 @@ class CleanUpIndividualsTestCase(APITestCase):
         self.assertEqual(run_all_cleanup(), 0)
 
     def test_no_cleanup(self):
-        # No cleanup should occur without removing the table/phenopacket first
-        self.assertEqual(run_all_cleanup(), 0)
+        self.unlinked_phenotypic_feature.refresh_from_db()
+
+        # No cleanup except the unlinked phenotypic feature should occur without removing the table/phenopacket first
+        self.assertEqual(run_all_cleanup(), 1)
+
+        with self.assertRaises(PhenotypicFeature.DoesNotExist):
+            self.unlinked_phenotypic_feature.refresh_from_db()
 
     def test_cleanup_basic(self):
         # Delete table to remove the parent phenopacket
@@ -111,12 +124,13 @@ class CleanUpIndividualsTestCase(APITestCase):
 
         # 2 biosamples +
         # 1 procedure +
-        # 0 phenotypic feature (removed via cascade with v2.17.0 database changes) +
+        # 0 linked phenotypic feature (removed via cascade with v2.17.0 database changes) +
+        # 1 unlinked phenotypic feature (pretend left-over from pre v2.17.0 or created manually) +
         # 1 individual +
         # 0 experiment results +
         # 0 instruments
         # = 4 objects total
-        self.assertEqual(run_all_cleanup(), 4)
+        self.assertEqual(run_all_cleanup(), 5)
 
         # Should have been removed via cascade with v2.17.0 database changes
         with self.assertRaises(PhenotypicFeature.DoesNotExist):
