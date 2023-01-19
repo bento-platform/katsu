@@ -2,9 +2,10 @@ from rest_framework.test import APITestCase
 
 from django.urls import reverse
 
+from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.patients.cleanup import clean_individuals
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets.cleanup import clean_biosamples
+from chord_metadata_service.phenopackets.cleanup import clean_biosamples, clean_phenotypic_features
 from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, Procedure, PhenotypicFeature
 from chord_metadata_service.phenopackets.tests.constants import (
     VALID_PROCEDURE_1,
@@ -71,56 +72,38 @@ class CleanUpIndividualsTestCase(APITestCase):
     def test_biosamples_cleanup(self):
         pass  # TODO
 
-    def test_individuals_cleanup_api_table_delete(self):
+    def _check_table_delete(self, delete_url: str):
         # Check individual exists pre-table-delete
         Individual.objects.get(id="patient:1")
 
         # Check we can run clean_biosamples and clean_individuals with nothing lost (in order),
         # since the individual is referenced by the phenopacket and the biosample is in use.
         self.assertEqual(clean_biosamples(), 0)
+        self.assertEqual(clean_phenotypic_features(), 0)
         self.assertEqual(clean_individuals(), 0)
 
         # This reverse points to the API table delete, not the /tables/<...> delete in views_search
-        r = self.client.delete(reverse("table-detail", args=[self.table.ownership_record_id]))
+        r = self.client.delete(delete_url)
         assert r.status_code == 204
 
         with self.assertRaises(Table.DoesNotExist):  # Table successfully deleted
             self.table.refresh_from_db()
 
+        with self.assertRaises(PhenotypicFeature.DoesNotExist):  # PhenotypicFeature successfully deleted
+            self.phenotypic_feature.refresh_from_db()
+
         self.assertEqual(clean_biosamples(), 0)
+        self.assertEqual(clean_phenotypic_features(), 0)
         self.assertEqual(clean_individuals(), 0)
 
         with self.assertRaises(Individual.DoesNotExist):
             Individual.objects.get(id="patient:1")
 
-        # Check we can run it again with no change...
-        self.assertEqual(clean_individuals(), 0)
+        # Check we can run all cleaning again with no change...
+        self.assertEqual(run_all_cleanup(), 0)
 
-    def test_individuals_cleanup_chord_table_delete(self):
-        # Check individual exists pre-table-delete
-        Individual.objects.get(id="patient:1")
+    def test_cleanup_api_table_delete(self):
+        self._check_table_delete(reverse("table-detail", args=[self.table.ownership_record_id]))
 
-        # Check we can run clean_biosamples and clean_individuals with nothing lost (in order),
-        # since the individual is referenced by the phenopacket and the biosample is in use.
-        self.assertEqual(clean_biosamples(), 0)
-        self.assertEqual(clean_individuals(), 0)
-
-        # !!! THIS IS THE PART THAT IS DIFFERENT VS. ABOVE - different table delete endpoint
-        # This reverse points to the API table delete, not the /tables/<...> delete in views_search
-        r = self.client.delete(f"/tables/{self.table.ownership_record_id}")
-        assert r.status_code == 204
-
-        with self.assertRaises(Table.DoesNotExist):  # Table successfully deleted
-            self.table.refresh_from_db()
-
-        self.assertEqual(clean_biosamples(), 0)
-        self.assertEqual(clean_individuals(), 0)
-
-        with self.assertRaises(Individual.DoesNotExist):
-            Individual.objects.get(id="patient:1")
-
-        # Check we can run it again with no change...
-        self.assertEqual(clean_individuals(), 0)
-
-    def test_experiments_cleanup(self):
-        pass  # TODO
+    def test_cleanup_chord_table_delete(self):
+        self._check_table_delete(f"/tables/{self.table.ownership_record_id}")
