@@ -52,6 +52,10 @@ def json_file_output(id_: str, output_name: Optional[str] = None):
     return {
         "id": id_,
         "type": "file",
+
+        # this triple {} abomination, with e.g. id_=json_document, turns into the string '{json_document}'
+        # the 'output_name or' part is a bit of a hack until we move to a new ingest system which can actually read
+        # Cromwell output JSON to grab the right files or something.
         "value": output_name or f"{{{id_}}}",
     }
 
