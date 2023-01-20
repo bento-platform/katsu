@@ -81,13 +81,17 @@ class ExperimentResultTest(TestCase):
     """ Test module for ExperimentResult model """
 
     def setUp(self):
-        ExperimentResult.objects.create(**valid_experiment_result())
+        self.exp_res = ExperimentResult.objects.create(**valid_experiment_result())
 
     @staticmethod
     def create(**kwargs):
         e = ExperimentResult(**kwargs)
         e.full_clean()
         e.save()
+
+    # TODO: Fix the mess
+    # def test_str_rep(self):
+    #     self.assertEqual(str(self.exp_res), self.exp_res.id)
 
     def test_validation(self):
         self.assertEqual(ExperimentResult.objects.count(), 1)
