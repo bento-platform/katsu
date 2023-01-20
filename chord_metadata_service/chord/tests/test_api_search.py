@@ -49,6 +49,8 @@ from ..data_types import (
 
 POST_GET = ("POST", "GET")
 
+DATA_TYPE_NOT_REAL = "not_a_real_data_type"
+
 
 class DataTypeTest(APITestCase):
     def test_data_type_list(self):
@@ -72,17 +74,32 @@ class DataTypeTest(APITestCase):
             **DATA_TYPES[DATA_TYPE_PHENOPACKET],
         })
 
+    def test_data_type_detail_404(self):
+        r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_NOT_REAL}))
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+        r.json()  # assert json response
+
     def test_data_type_schema(self):
         r = self.client.get(reverse("data-type-schema", kwargs={"data_type": DATA_TYPE_PHENOPACKET}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
         self.assertDictEqual(c, DATA_TYPES[DATA_TYPE_PHENOPACKET]["schema"])
 
+    def test_data_type_schema_404(self):
+        r = self.client.get(reverse("data-type-schema", kwargs={"data_type": DATA_TYPE_NOT_REAL}))
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+        r.json()  # assert json response
+
     def test_data_type_metadata_schema(self):
         r = self.client.get(reverse("data-type-metadata-schema", kwargs={"data_type": DATA_TYPE_PHENOPACKET}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
         self.assertDictEqual(c, DATA_TYPES[DATA_TYPE_PHENOPACKET]["metadata_schema"])
+
+    def test_data_type_metadata_schema_404(self):
+        r = self.client.get(reverse("data-type-metadata-schema", kwargs={"data_type": DATA_TYPE_NOT_REAL}))
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+        r.json()  # assert json response
 
 
 class TableTest(APITestCase):
