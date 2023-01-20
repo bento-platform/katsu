@@ -19,13 +19,16 @@ class ExperimentTest(TestCase):
         i = Individual.objects.create(**VALID_INDIVIDUAL_1)
         p = Procedure.objects.create(**VALID_PROCEDURE_1)
         self.biosample = Biosample.objects.create(**valid_biosample_1(i, p))
-        Experiment.objects.create(**valid_experiment(self.biosample))
+        self.experiment = Experiment.objects.create(**valid_experiment(self.biosample))
 
     @staticmethod
     def create(**kwargs):
         e = Experiment(id="experiment:2", **kwargs)
         e.full_clean()
         e.save()
+
+    def test_str_rep(self):
+        self.assertEqual(str(self.experiment), self.experiment.id)
 
     def test_validation(self):
         # Invalid experiment_ontology
