@@ -1,7 +1,7 @@
 import chord_metadata_service.mcode.models as mm
 import chord_metadata_service.phenopackets.models as pm
 
-from chord_metadata_service.logger import logger
+from chord_metadata_service.cleanup.remove import remove_not_referenced
 from chord_metadata_service.utils import dict_first_val
 from .models import Individual
 
@@ -26,19 +26,5 @@ def clean_individuals() -> int:
     individuals_referenced.update(map(dict_first_val, pm.Biosample.objects.values("individual_id")))
     individuals_referenced.update(map(dict_first_val, pm.Phenopacket.objects.values("subject_id")))
 
-    # Remove null from set
-    individuals_referenced.discard(None)
-
-    # Remove individuals NOT in set
-
-    individuals_to_remove = set(
-        map(dict_first_val, Individual.objects.exclude(id__in=individuals_referenced).values("id")))
-    n_to_remove = len(individuals_to_remove)
-
-    if n_to_remove:
-        logger.info(f"Automatically cleaning up {n_to_remove} individuals: {str(individuals_to_remove)}")
-        Individual.objects.filter(id__in=individuals_to_remove).delete()
-    else:
-        logger.info("No individuals set for auto-removal")
-
-    return n_to_remove
+    # Remove individuals not collected above
+    return remove_not_referenced(Individual, individuals_referenced, "individuals")

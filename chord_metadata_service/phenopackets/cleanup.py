@@ -1,14 +1,28 @@
 import chord_metadata_service.experiments.models as em
 import chord_metadata_service.phenopackets.models as pm
 
-from chord_metadata_service.logger import logger
+from chord_metadata_service.cleanup.remove import remove_items, remove_not_referenced
 from chord_metadata_service.utils import dict_first_val
 
 __all__ = [
+    "clean_meta_data",
     "clean_biosamples",
     "clean_phenotypic_features",
     "clean_procedures",
 ]
+
+
+def clean_meta_data() -> int:
+    """
+    Deletes orphan MetaData objects where the parent phenopacket has been deleted.
+    TODO: This should be handled by a OneToOne relationship rather than this hack.
+    """
+
+    # Collect references to meta data
+    meta_data_referenced = set(map(dict_first_val, pm.Phenopacket.objects.values("meta_data_id")))
+
+    # Remove metadata not referenced
+    return remove_not_referenced(pm.MetaData, meta_data_referenced, "metadata objects")
 
 
 def clean_biosamples() -> int:
@@ -26,21 +40,7 @@ def clean_biosamples() -> int:
     # Explicitly don't check for phenotypic features here - they are attached to biosamples/phenopackets,
     #   and we want to delete them if the biosamples are otherwised not referenced elsewhere.
 
-    # Remove null from set
-    biosamples_referenced.discard(None)
-
-    # Remove biosamples NOT in set
-    biosamples_to_remove = set(
-        map(dict_first_val, pm.Biosample.objects.exclude(id__in=biosamples_referenced).values("id")))
-    n_to_remove = len(biosamples_to_remove)
-
-    if n_to_remove:
-        logger.info(f"Automatically cleaning up {n_to_remove} biosamples: {str(biosamples_to_remove)}")
-        pm.Biosample.objects.filter(id__in=biosamples_to_remove).delete()
-    else:
-        logger.info("No biosamples set for auto-removal")
-
-    return n_to_remove
+    return remove_not_referenced(pm.Biosample, biosamples_referenced, "biosamples")
 
 
 def clean_phenotypic_features() -> int:
@@ -51,21 +51,14 @@ def clean_phenotypic_features() -> int:
     however, for Bento's purposes, if this is called, we clean those up.
     """
 
+    # We can skip some steps and collect only those not used directly here.
+
     pf_to_remove_qs = pm.PhenotypicFeature.objects.filter(
         biosample__isnull=True,
         phenopacket__isnull=True,
     )
-
     pf_to_remove = set(map(dict_first_val, pf_to_remove_qs.values("id")))
-    n_to_remove = len(pf_to_remove)
-
-    if n_to_remove:
-        logger.info(f"Automatically cleaning up {n_to_remove} phenotypic features: {str(pf_to_remove)}")
-        pf_to_remove_qs.delete()
-    else:
-        logger.info("No phenotypic features set for auto-removal")
-
-    return n_to_remove
+    return remove_items(pm.PhenotypicFeature, pf_to_remove, "phenotypic features")
 
 
 def clean_procedures() -> int:
@@ -79,18 +72,4 @@ def clean_procedures() -> int:
     # Collect references to procedures in biosamples
     procedures_referenced.update(map(dict_first_val, pm.Biosample.objects.values("procedure_id")))
 
-    # Remove null from set
-    procedures_referenced.discard(None)
-
-    # Remove procedures NOT in set
-    procedures_referenced = set(
-        map(dict_first_val, pm.Procedure.objects.exclude(id__in=procedures_referenced).values("id")))
-    n_to_remove = len(procedures_referenced)
-
-    if n_to_remove:
-        logger.info(f"Automatically cleaning up {n_to_remove} procedures: {str(procedures_referenced)}")
-        pm.Procedure.objects.filter(id__in=procedures_referenced).delete()
-    else:
-        logger.info("No procedures set for auto-removal")
-
-    return n_to_remove
+    return remove_not_referenced(pm.Procedure, procedures_referenced, "procedures")

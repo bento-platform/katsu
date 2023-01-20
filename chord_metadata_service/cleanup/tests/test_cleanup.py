@@ -13,6 +13,9 @@ from chord_metadata_service.phenopackets.tests.constants import (
     valid_biosample_2,
     VALID_META_DATA_1,
 )
+from chord_metadata_service.resources.cleanup import clean_resources
+from chord_metadata_service.resources.models import Resource
+from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1
 from chord_metadata_service.chord.tests.constants import (
     VALID_PROJECT_1,
     valid_dataset_1,
@@ -42,7 +45,10 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual, self.procedure))
         self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, self.procedure))
 
+        self.resource = Resource.objects.create(**VALID_RESOURCE_1)
+
         self.meta_data = MetaData.objects.create(**VALID_META_DATA_1)
+        self.meta_data.resources.set([self.resource])
 
         self.phenopacket = Phenopacket.objects.create(
             id="phenopacket_id:1",
@@ -84,6 +90,7 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         self.assertEqual(pc.clean_phenotypic_features(), 1)
         self.assertEqual(pc.clean_procedures(), 0)
         self.assertEqual(clean_individuals(), 0)
+        self.assertEqual(clean_resources(), 0)
 
         # This reverse points to the API table delete, not the /tables/<...> delete in views_search
         r = self.client.delete(delete_url)
@@ -102,6 +109,7 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         self.assertEqual(pc.clean_phenotypic_features(), 0)
         self.assertEqual(pc.clean_procedures(), 0)
         self.assertEqual(clean_individuals(), 0)
+        self.assertEqual(clean_resources(), 0)
 
         with self.assertRaises(Individual.DoesNotExist):
             Individual.objects.get(id="patient:1")
@@ -122,15 +130,17 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         # Delete table to remove the parent phenopacket
         self.table.ownership_record.delete()
 
+        # 1 metadata object +
         # 2 biosamples +
         # 1 procedure +
         # 0 linked phenotypic feature (removed via cascade with v2.17.0 database changes) +
         # 1 unlinked phenotypic feature (pretend left-over from pre v2.17.0 or created manually) +
         # 1 individual +
         # 0 experiment results +
-        # 0 instruments
-        # = 4 objects total
-        self.assertEqual(run_all_cleanup(), 5)
+        # 0 instruments +
+        # 1 resource
+        # = 7 objects total
+        self.assertEqual(run_all_cleanup(), 7)
 
         # Should have been removed via cascade with v2.17.0 database changes
         with self.assertRaises(PhenotypicFeature.DoesNotExist):
