@@ -112,7 +112,9 @@ class Specimen(models.Model):
 
 class SampleRegistration(models.Model):
     submitter_sample_id = models.CharField(max_length=64, primary_key=True)
-    program_id = models.CharField(max_length=64, null=False, blank=False)
+    program_id = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=False, blank=False
+    )
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
