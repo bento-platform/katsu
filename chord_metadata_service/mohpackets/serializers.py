@@ -1,24 +1,24 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from chord_metadata_service.mohpackets.validators import ID_VALIDATOR
 
 from .models import (
-    Program,
-    Donor,
-    Specimen,
-    SampleRegistration,
-    PrimaryDiagnosis,
-    Treatment,
-    Chemotherapy,
-    HormoneTherapy,
-    Radiation,
-    Immunotherapy,
-    Surgery,
-    FollowUp,
     Biomarker,
+    Chemotherapy,
     Comorbidity,
+    Donor,
+    FollowUp,
+    HormoneTherapy,
+    Immunotherapy,
+    PrimaryDiagnosis,
+    Program,
+    Radiation,
+    SampleRegistration,
+    Specimen,
+    Surgery,
+    Treatment,
 )
-
 
 """
     This module contains the SERIALIZERS for the models in the mohpackets app.
@@ -36,8 +36,9 @@ from .models import (
 
 
 class ProgramSerializer(serializers.ModelSerializer):
-    program_id = serializers.PrimaryKeyRelatedField(
-        queryset=Program.objects.all(), validators=[ID_VALIDATOR]
+    program_id = serializers.CharField(
+        max_length=64,
+        validators=[UniqueValidator(queryset=Program.objects.all()), ID_VALIDATOR],
     )
 
     class Meta:

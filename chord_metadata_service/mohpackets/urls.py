@@ -1,37 +1,39 @@
+from django.urls import include, path
 from rest_framework import routers
-from django.urls import path, include
+
+from chord_metadata_service.mohpackets.api_discovery import (
+    DiscoveryBiomarkerViewSet,
+    DiscoveryChemotherapyViewSet,
+    DiscoveryComorbidityViewSet,
+    DiscoveryDonorViewSet,
+    DiscoveryFollowUpViewSet,
+    DiscoveryHormoneTherapyViewSet,
+    DiscoveryImmunotherapyViewSet,
+    DiscoveryPrimaryDiagnosisViewSet,
+    DiscoveryRadiationViewSet,
+    DiscoverySampleRegistrationViewSet,
+    DiscoverySpecimenViewSet,
+    DiscoverySurgeryViewSet,
+    DiscoveryTreatmentViewSet,
+)
 from chord_metadata_service.mohpackets.api_views import (
-    ProgramViewSet,
-    DonorViewSet,
-    SpecimenViewSet,
-    SampleRegistrationViewSet,
-    PrimaryDiagnosisViewSet,
-    TreatmentViewSet,
-    ChemotherapyViewSet,
-    HormoneTherapyViewSet,
-    RadiationViewSet,
-    ImmunotherapyViewSet,
-    SurgeryViewSet,
-    FollowUpViewSet,
     BiomarkerViewSet,
+    ChemotherapyViewSet,
     ComorbidityViewSet,
+    DonorViewSet,
+    FollowUpViewSet,
+    HormoneTherapyViewSet,
+    ImmunotherapyViewSet,
+    PrimaryDiagnosisViewSet,
+    ProgramViewSet,
+    RadiationViewSet,
+    SampleRegistrationViewSet,
+    SpecimenViewSet,
+    SurgeryViewSet,
+    TreatmentViewSet,
     moh_overview,
 )
-from chord_metadata_service.mohpackets.api_discovery import (
-    DiscoveryDonorViewSet,
-    DiscoverySpecimenViewSet,
-    DiscoverySampleRegistrationViewSet,
-    DiscoveryPrimaryDiagnosisViewSet,
-    DiscoveryTreatmentViewSet,
-    DiscoveryChemotherapyViewSet,
-    DiscoveryHormoneTherapyViewSet,
-    DiscoveryRadiationViewSet,
-    DiscoveryImmunotherapyViewSet,
-    DiscoverySurgeryViewSet,
-    DiscoveryFollowUpViewSet,
-    DiscoveryBiomarkerViewSet,
-    DiscoveryComorbidityViewSet,
-)
+from chord_metadata_service.mohpackets.ingest import create_bulk_programs, ingest_data
 
 # ================== MOH API ================== #
 router = routers.SimpleRouter()
@@ -70,5 +72,6 @@ discovery_router.register(r"comorbidities", DiscoveryComorbidityViewSet)
 urlpatterns = [
     path("moh/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
-    path('discovery/overview', moh_overview)
+    path("discovery/overview", moh_overview),
+    path("ingest/all", ingest_data),
 ]

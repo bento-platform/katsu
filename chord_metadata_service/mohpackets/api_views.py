@@ -1,64 +1,62 @@
-from rest_framework import viewsets
-from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
-from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
-from chord_metadata_service.mohpackets.utils import get_authorized_datasets
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
+from rest_framework import serializers, viewsets
 from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
-from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 
 from chord_metadata_service.mohpackets.filters import (
-    ProgramFilter,
-    DonorFilter,
-    SpecimenFilter,
-    SampleRegistrationFilter,
-    PrimaryDiagnosisFilter,
-    TreatmentFilter,
-    ChemotherapyFilter,
-    HormoneTherapyFilter,
-    RadiationFilter,
-    ImmunotherapyFilter,
-    SurgeryFilter,
-    FollowUpFilter,
     BiomarkerFilter,
+    ChemotherapyFilter,
     ComorbidityFilter,
-)
-from chord_metadata_service.mohpackets.serializers import (
-    ProgramSerializer,
-    DonorSerializer,
-    SpecimenSerializer,
-    SampleRegistrationSerializer,
-    PrimaryDiagnosisSerializer,
-    TreatmentSerializer,
-    ChemotherapySerializer,
-    HormoneTherapySerializer,
-    RadiationSerializer,
-    ImmunotherapySerializer,
-    SurgerySerializer,
-    FollowUpSerializer,
-    BiomarkerSerializer,
-    ComorbiditySerializer,
+    DonorFilter,
+    FollowUpFilter,
+    HormoneTherapyFilter,
+    ImmunotherapyFilter,
+    PrimaryDiagnosisFilter,
+    ProgramFilter,
+    RadiationFilter,
+    SampleRegistrationFilter,
+    SpecimenFilter,
+    SurgeryFilter,
+    TreatmentFilter,
 )
 from chord_metadata_service.mohpackets.models import (
-    Program,
-    Donor,
-    Specimen,
-    SampleRegistration,
-    PrimaryDiagnosis,
-    Treatment,
-    Chemotherapy,
-    HormoneTherapy,
-    Radiation,
-    Immunotherapy,
-    Surgery,
-    FollowUp,
     Biomarker,
+    Chemotherapy,
     Comorbidity,
+    Donor,
+    FollowUp,
+    HormoneTherapy,
+    Immunotherapy,
+    PrimaryDiagnosis,
+    Program,
+    Radiation,
+    SampleRegistration,
+    Specimen,
+    Surgery,
+    Treatment,
 )
-
+from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
+from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
+from chord_metadata_service.mohpackets.serializers import (
+    BiomarkerSerializer,
+    ChemotherapySerializer,
+    ComorbiditySerializer,
+    DonorSerializer,
+    FollowUpSerializer,
+    HormoneTherapySerializer,
+    ImmunotherapySerializer,
+    PrimaryDiagnosisSerializer,
+    ProgramSerializer,
+    RadiationSerializer,
+    SampleRegistrationSerializer,
+    SpecimenSerializer,
+    SurgerySerializer,
+    TreatmentSerializer,
+)
+from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
+from chord_metadata_service.mohpackets.utils import get_authorized_datasets
 
 """
     This Views module uses ModelViewSet from Django Rest Framework.
@@ -101,7 +99,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
     serializer_class = ProgramSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProgramFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "moh_rate_limit"
