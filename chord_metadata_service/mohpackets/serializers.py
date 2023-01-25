@@ -1,6 +1,14 @@
 from rest_framework import serializers
 
-import chord_metadata_service.mohpackets.validators as val
+import chord_metadata_service.mohpackets.permissible_values as val
+
+from .validators import (
+    positive_int,
+    ChoicesValidator,
+    ID,
+    DATE,
+    TOPOGRAPHY,
+)
 
 from .models import (
     Program,
@@ -38,14 +46,14 @@ from .models import (
 class ProgramSerializer(serializers.ModelSerializer):
     program_id = serializers.CharField(
         max_length=64, 
-        validators=[val.ID]
+        validators=[ID]
     )
     name = serializers.CharField(
         max_length=255, 
-        validators=[val.ID]
+        validators=[ID]
         )
-    created = serializers.DateTimeField(validators=[val.DATE])  # TODO: ask Son (date format)
-    updated = serializers.DateTimeField(validators=[val.DATE])  # TODO: ask Son
+    created = serializers.DateTimeField(validators=[DATE])  # TODO: ask Son (date format)
+    updated = serializers.DateTimeField(validators=[DATE])  # TODO: ask Son
 
     class Meta:
         model = Program
@@ -55,25 +63,25 @@ class ProgramSerializer(serializers.ModelSerializer):
 class DonorSerializer(serializers.ModelSerializer):
     submitter_donor_id = serializers.CharField(
         max_length=64,
-        validators=[val.ID],
+        validators=[ID],
     )
     is_deceased = serializers.BooleanField(
-        validators=[val.BOOLEAN])
+        validators=[ChoicesValidator(["Yes", "No"])])
     cause_of_death = serializers.CharField(
         max_length=255,
-        validators=[val.CAUSE_OF_DEATH]
+        validators=[ChoicesValidator(choices=val.CAUSE_OF_DEATH)]
     )
     date_of_birth = serializers.CharField(
         max_length=32,
-        validators=[val.DATE]
+        validators=[DATE]
     )
     date_of_death = serializers.CharField(
         max_length=32,
-        validators=[val.DATE]
+        validators=[DATE]
     )
     primary_site = serializers.CharField(
         max_length=255,
-        validators=[val.PRIMARY_SITE]
+        validators=[ChoicesValidator(val.PRIMARY_SITE)]
     )
 
     class Meta:
@@ -84,61 +92,61 @@ class DonorSerializer(serializers.ModelSerializer):
 class SpecimenSerializer(serializers.ModelSerializer):
     submitter_specimen_id = serializers.CharField(  # TODO: confirm regex
         max_length=64,
-        validators=[val.ID]
+        validators=[ID]
     )
     pathological_tumour_staging_system = serializers.CharField(
         max_length=255,
-        validators=[val.TUMOUR_STAGING_SYSTEM]
+        validators=[ChoicesValidator(val.TUMOUR_STAGING_SYSTEM)]
     )
     pathological_t_category = serializers.CharField(
         max_length=255,
-        validators=[val.T_CATEGORY]
+        validators=[ChoicesValidator(val.T_CATEGORY)]
     )
     pathological_n_category = serializers.CharField(
         max_length=64,
-        validators=[val.N_CATEGORY]
+        validators=[ChoicesValidator(val.N_CATEGORY)]
     )
     pathological_m_category = serializers.CharField(
         max_length=64,
-        validators=[val.M_CATEGORY]
+        validators=[ChoicesValidator(val.M_CATEGORY)]
     )
     pathological_stage_group = serializers.CharField(
         max_length=64,
-        validators=[val.STAGE_GROUP]
+        validators=[ChoicesValidator(val.STAGE_GROUP)]
     )
     specimen_collection_date = serializers.CharField(
         max_length=32,
-        validators=[val.DATE]
+        validators=[DATE]
     )
     specimen_storage = serializers.CharField(
         max_length=64,
-        validators=[val.STORAGE]
+        validators=[ChoicesValidator(val.STORAGE)]
     )
     # tumour_histological_type = serializers.CharField(validators=[val.MORPHOLOGY])  # TODO: Write validator
-    specimen_anatomic_location = serializers.CharField(validators=[val.TOPOGRAPHY])
+    specimen_anatomic_location = serializers.CharField(validators=[TOPOGRAPHY])
     reference_pathology_confirmed_diagnosis = serializers.CharField(
         max_length=32,
-        validators=[val.CONFIRMED_DIAGNOSIS_TUMOUR]
+        validators=[ChoicesValidator(val.CONFIRMED_DIAGNOSIS_TUMOUR)]
     )
     reference_pathology_confirmed_tumour_presence = serializers.CharField(
         max_length=32,
-        validators=[val.CONFIRMED_DIAGNOSIS_TUMOUR]
+        validators=[ChoicesValidator(val.CONFIRMED_DIAGNOSIS_TUMOUR)]
     )
     tumour_grading_system = serializers.CharField(
         max_length=128,
-        validators=[val.TUMOUR_GRADING_SYSTEM]
+        validators=[ChoicesValidator(val.TUMOUR_GRADING_SYSTEM)]
     )
     tumour_grade = serializers.CharField(
         max_length=64,
-        validators=[val.TUMOUR_GRADE]
+        validators=[ChoicesValidator(val.TUMOUR_GRADE)]
     )
     percent_tumour_cells_range = serializers.CharField(
         max_length=64,
-        validators=[val.PERCENT_CELLS_RANGE]
+        validators=[ChoicesValidator(val.PERCENT_CELLS_RANGE)]
     )
     percent_tumour_cells_measurement_method = serializers.CharField(
         max_length=64,
-        validators=[val.CELLS_MEASUREMENT_METHOD]
+        validators=[ChoicesValidator(val.CELLS_MEASURE_METHOD)]
     )
 
     class Meta:
@@ -149,28 +157,32 @@ class SpecimenSerializer(serializers.ModelSerializer):
 class SampleRegistrationSerializer(serializers.ModelSerializer):
     submitter_sample_id = serializers.CharField(
         max_length=64,
-        validators=[val.ID]
+        validators=[ID]
     )  # TODO: check regex
     gender = serializers.CharField(
         max_length=32,
-        validators=[val.GENDER])
+        validators=[ChoicesValidator(val.GENDER)]
+    )
     sex_at_birth = serializers.CharField(
         max_length=32,
-        validators=[val.SEX_AT_BIRTH])
+        validators=[ChoicesValidator(val.SEX_AT_BIRTH)]
+    )
     specimen_tissue_source = serializers.CharField(
         max_length=255,
-        validators=[val.SPECIMEN_TISSUE_SOURCE]
+        validators=[ChoicesValidator(val.SPECIMEN_TISSUE_SOURCE)]
     )
     tumour_normal_designation = serializers.CharField(
         max_length=32,
-        validators=[val.TUMOUR_DESIGNATION]
+        validators=[ChoicesValidator(["Normal", "Tumour"])]
     )
     specimen_type = serializers.CharField(
         max_length=255,
-        validators=[val.SPECIMEN_TYPE])
+        validators=[ChoicesValidator(val.SPECIMEN_TYPE)]
+    )
     sample_type = serializers.CharField(
         max_length=128,
-        validators=[val.SAMPLE_TYPE])
+        validators=[ChoicesValidator(val.SAMPLE_TYPE)]
+    )
 
     class Meta:
         model = SampleRegistration
@@ -180,47 +192,47 @@ class SampleRegistrationSerializer(serializers.ModelSerializer):
 class PrimaryDiagnosisSerializer(serializers.ModelSerializer):
     submitter_primary_diagnosis_id = serializers.CharField(
         max_length=64,
-        validators=[val.ID]
+        validators=[ID]
     )  # TODO: check regex
     date_of_diagnosis = serializers.CharField(
         max_length=32,
-        validators=[val.DATE]
+        validators=[DATE]
     )
     # cancer_type_code = serializers.CharField()  # TODO: write validator
     basis_of_diagnosis = serializers.CharField(
         max_length=128,
-        validators=[val.BASIS_OF_DIAGNOSIS]
+        validators=[ChoicesValidator(val.BASIS_OF_DIAGNOSIS)]
     )
     lymph_nodes_examined_status = serializers.CharField(
         max_length=128,
-        validators=[val.LYMPH_NODE_STATUS]
+        validators=[ChoicesValidator(val.LYMPH_NODE_STATUS)]
     )
     lymph_nodes_examined_method = serializers.CharField(
         max_length=64,
-        validators=[val.LYMPH_NODE_METHOD]
+        validators=[ChoicesValidator(val.LYMPH_NODE_METHOD)]
     )
     number_lymph_nodes_positive = serializers.IntegerField(
-        validators=[val.validate_positive_int]
+        validators=[positive_int]
     )
     clinical_tumour_staging_system = serializers.CharField(
         max_length=128,
-        validators=[val.TUMOUR_STAGING_SYSTEM]
+        validators=[ChoicesValidator(val.TUMOUR_STAGING_SYSTEM)]
     )
     clinical_t_category = serializers.CharField(
         max_length=64,
-        validators=[val.T_CATEGORY]
+        validators=[ChoicesValidator(val.T_CATEGORY)]
     )
     clinical_n_category = serializers.CharField(
         max_length=64,
-        validators=[val.N_CATEGORY]
+        validators=[ChoicesValidator(val.N_CATEGORY)]
     )
     clinical_m_category = serializers.CharField(
         max_length=64,
-        validators=[val.M_CATEGORY]
+        validators=[ChoicesValidator(val.M_CATEGORY)]
     )
     clinical_stage_group = serializers.CharField(
         max_length=64,
-        validators=[val.STAGE_GROUP]
+        validators=[ChoicesValidator(val.STAGE_GROUP)]
     )
 
     class Meta:
@@ -231,35 +243,46 @@ class PrimaryDiagnosisSerializer(serializers.ModelSerializer):
 class TreatmentSerializer(serializers.ModelSerializer):
     submitter_treatment_id = serializers.CharField(
         max_length=64,
-        validators=[val.ID]
+        validators=[ID]
     )
     treatment_type = serializers.CharField(
         max_length=255,
-        validators=[val.TRE]
+        validators=[ChoicesValidator(val.TREATMENT_TYPE)]
     )
     is_primary_treatment = serializers.CharField(
-        max_length=32
+        max_length=32,
+        validators=[ChoicesValidator(["Yes", "No", "Unknown"])]
     )
     treatment_start_date = serializers.CharField(
-        max_length=32
+        max_length=32,
+        validators=[DATE]
     )
     treatment_end_date = serializers.CharField(
-        max_length=32
+        max_length=32,
+        validators=[DATE]
     )
     treatment_setting = serializers.CharField(
-        max_length=128
+        max_length=128,
+        validators=[ChoicesValidator(val.TREATMENT_SETTING)]
     )
     treatment_intent = serializers.CharField(
-        max_length=128
+        max_length=128,
+        validators=[ChoicesValidator(["Curative", "Palliative"])]
     )
     days_per_cycle = serializers.IntegerField(
-
+        validators=[positive_int]        
     )
-    number_of_cycles = serializers.IntegerField(blank=True, null=True)
+    number_of_cycles = serializers.IntegerField(
+        validators=[positive_int]
+    )
     response_to_treatment_criteria_method = serializers.CharField(
-        max_length=255, null=False, blank=False
+        max_length=255,
+        validators=[ChoicesValidator(val.TREATMENT_RESPONSE_METHOD)]
     )
-    response_to_treatment = serializers.CharField(max_length=255, null=False, blank=False)
+    response_to_treatment = serializers.CharField(
+        max_length=255,
+        validators=[ChoicesValidator(val.TREATMENT_RESPONSE)]
+    )
 
     class Meta:
         model = Treatment
