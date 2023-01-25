@@ -1,4 +1,5 @@
 import os
+from jsonschema.validators import Draft7Validator
 from uuid import uuid4
 
 from rest_framework import status
@@ -50,6 +51,12 @@ class GetExperimentsAppApisTest(APITestCase):
         response_data = response.json()
         self.assertEqual(response_data["count"], 2)
         self.assertEqual(len(response_data["results"]), 2)
+
+    def test_get_experiment_schema(self):
+        response = self.client.get('/api/experiment_schema')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        Draft7Validator.check_schema(response_data)
 
     def test_filter_experiments(self):
         response = self.client.get('/api/experiments?study_type=epigenetics')
