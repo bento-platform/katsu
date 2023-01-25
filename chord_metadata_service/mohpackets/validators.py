@@ -15,28 +15,38 @@ class ChoicesValidator:
 
     def __call__(self, value):
         multiple = False
-        if "|" in value: # Check for multiple entries
-            value = value.split("|")
+        if "|" in value:  # Check for multiple entries
+            values = value.split("|")
             multiple = True
         else:
-            value = [value]
-    
-        for v in value:
-            if v not in self.choices:
+            values = [value]
+
+        for value in values:
+            if value not in self.choices:
                 message = f"All values must be one of {self.choices}" if multiple \
                 else f"The value must be one of {self.choices}"
-                
+
                 raise ValidationError(message)
 
-# Boolean format
+
+def validate_positive_int(value):
+    """"Checks the value is a positive integer"""
+    if not isinstance(value, int):
+        raise ValidationError(f"{value} is not an integer")
+    if value < 1:
+        raise ValidationError(f"{value} must be positive.")
+
+
 # A true/false field (Yes/No in MoH model)
 BOOLEAN = ChoicesValidator(choices=["Yes", "No"])
 
+U_BOOLEAN = ChoicesValidator(["Yes", "NO", "UNKNOWN"])
+
 CAUSE_OF_DEATH = ChoicesValidator(choices=v.CAUSE_OF_DEATH)
 
-PRIMARY_SITE = ChoicesValidator(choices=v.PRIMARY_SITE)
+PRIMARY_SITE = ChoicesValidator(v.PRIMARY_SITE)
 
-TUMOUR_STAGING_SYSTEM = ChoicesValidator(choices=v.TUMOUR_STAGING_SYSTEM)
+TUMOUR_STAGING_SYSTEM = ChoicesValidator(v.TUMOUR_STAGING_SYSTEM)
 
 T_CATEGORY = ChoicesValidator(v.T_CATEGORY)
 
@@ -57,6 +67,33 @@ TUMOUR_GRADE = ChoicesValidator(v.TUMOUR_GRADE)
 PERCENT_CELLS_RANGE = ChoicesValidator(v.PERCENT_CELLS_RANGE)
 
 CELLS_MEASUREMENT_METHOD = ChoicesValidator(v.CELLS_MEASURE_METHOD)
+
+GENDER = ChoicesValidator(v.GENDER)
+
+SEX_AT_BIRTH = ChoicesValidator(v.SEX_AT_BIRTH)
+
+SPECIMEN_TISSUE_SOURCE = ChoicesValidator(v.SPECIMEN_TISSUE_SOURCE)
+
+SPECIMEN_TYPE = ChoicesValidator(v.SPECIMEN_TYPE)
+
+TUMOUR_DESIGNATION = ChoicesValidator(["Normal", "Tumour"])
+
+SAMPLE_TYPE = ChoicesValidator(v.SAMPLE_TYPE)
+
+BASIS_OF_DIAGNOSIS = ChoicesValidator(v.BASIS_OF_DIAGNOSIS)
+
+LYMPH_NODE_STATUS = ChoicesValidator(v.LYMPH_NODE_STATUS)
+
+LYMPH_NODE_METHOD = ChoicesValidator(v.LYMPH_NODE_METHOD)
+
+TREATMENT_TYPE =
+
+IS_PRIMARY_TREATMENT =
+
+TREATMENT_SETTING =
+
+TREATMENT_INTENT = 
+
 
 # ID format.
 # Examples: 90234, BLD_donor_89, AML-90

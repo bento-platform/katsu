@@ -1,6 +1,6 @@
 """
-These lists contain the permissive values to their respective fields 
-and are used for validation during serialization.
+These lists contain the permissible values for their respective
+MoH model fields and are used for validation during serialization.
 """
 
 CAUSE_OF_DEATH = [
@@ -355,4 +355,164 @@ CELLS_MEASURE_METHOD = [
     "Image analysis",
     "Pathology estimate by percent nuclei",
     "Unknown"
+]
+
+GENDER = [
+    "Man",
+    "Woman",
+    "Non-binary"
+]
+
+SEX_AT_BIRTH = [
+    "Male",
+    "Female",
+    "Other",
+    "Unknown"
+]
+
+SPECIMEN_TISSUE_SOURCE = [
+    "Amniotic fluid",
+    "Bile Fluid",
+    "Whole blood",
+    "Blood arterial",
+    "Cord blood",
+    "Blood venous",
+    "Bone",
+    "Serum, Convalescent",
+    "Cerebral spinal fluid",
+    "Cervical Mucus",
+    "Duodenal fluid",
+    "Blood, Fetal",
+    "Fluid, Abdomen",
+    "Genital vaginal",
+    "Fluid, Hydrocele",
+    "Fluid, Joint",
+    "Fluid, Kidney",
+    "Fluid, Lumbar Sac",
+    "Marrow",
+    "Pancreatic fluid",
+    "Fluid, Pericardial",
+    "Placenta",
+    "Pleural fluid (thoracentesis fluid)",
+    "Saliva",
+    "Skin",
+    "Seminal fluid",
+    "Fluid, synovial (Joint fluid)",
+    "Sputum",
+    "Tissue",
+    "Vitreous Fluid",
+    "Wound"
+]
+
+SPECIMEN_TYPE = [
+    "Cell line - derived from normal",
+    "Cell line - derived from metastatic tumour",
+    "Cell line - derived from primary tumour",
+    "Cell line - derived from xenograft tumour",
+    "Metastatic tumour - additional metastatic",
+    "Metastatic tumour - metastasis local to lymph node",
+    "Metastatic tumour - metastasis to distant location",
+    "Metastatic tumour",
+    "Normal - tissue adjacent to primary tumour",
+    "Normal",
+    "Primary tumour - additional new primary",
+    "Primary tumour - adjacent to normal",
+    "Primary tumour",
+    "Recurrent tumour",
+    "Xenograft - derived from primary tumour",
+    "Xenograft - derived from metastatic tumour",
+    "Xenograft - derived from tumour cell line",
+]
+
+SAMPLE_TYPE = [
+    "Amplified DNA",
+    "ctDNA",
+    "Other DNA enrichments",
+    "Other RNA fractions",
+    "polyA+ RNA",
+    "Protein",
+    "rRNA-depleted RNA",
+    "Total DNA",
+    "Total RNA"
+]
+
+BASIS_OF_DIAGNOSIS = [
+    "Clinical investigation",
+    "Clinical",
+    "Cytology",
+    "Death certificate only",
+    "Histology of a metastasis",
+    "Histology of a primary tumour",
+    "Specific tumour markers",
+    "Unknown"
+]
+
+LYMPH_NODE_STATUS = [
+    "Cannot be determined",
+    "No",
+    "No lymph nodes found in resected specimen",
+    "Not applicable",
+    "Yes"
+]
+
+LYMPH_NODE_METHOD = [
+    "Imaging",
+    "Lymph node dissection/pathological exam",
+    "Physical palpation of patient"
+]
+
+TREATMENT_TYPE = [
+    "Ablation",
+    "Bone marrow transplant",
+    "Chemotherapy",
+    "Endoscopic therapy",
+    "Hormonal therapy",
+    "Immunotherapy",
+    "No treatment",
+    "Other targeting molecular therapy",
+    "Photodynamic therapy",
+    "Radiation therapy",
+    "Stem cell transplant",
+    "Surgery"
+]
+
+TREATMENT_SETTING = [
+    "Adjuvant",
+    "Advanced/Metastatic",
+    "Neoadjuvant",
+    "Not applicable"
+]
+
+TREATMENT_RESPONSE_METHOD = [
+    "RECIST 1.1",
+    "iRECIST",
+    "Cheson CLL 2012 Oncology Response Criteria",
+    "Response Assessment in Neuro-Oncology (RANO)",
+    "AML Response Criteria",
+    "Physician Assessed Response Criteria"
+]
+
+TREATMENT_RESPONSE = [
+    "Complete response",
+    "Partial response",
+    "Progressive disease",
+    "Stable disease",
+    "Immune complete response (iCR)",
+    "Immune partial response (iPR)",
+    "Immune uncomfirmed progressive disease (iUPD)",
+    "Immune confirmed progressive disease (iCPD)",
+    "Immune stable disease (iSD)",
+    "Complete remission",
+    "Partial remission",
+    "Minor response",
+    "Complete remission without measurable residual disease (CR MRD-)",
+    "Complete remission with incomplete hematologic recovery (CRi)",
+    "Morphologic leukemia-free state",
+    "Primary refractory disease",
+    "Hematologic relapse (after CR MRD-, CR, CRi)",
+    "Molecular relapse (after CR MRD-)",
+    "Physician assessed complete response",
+    "Physician assessed partial response",
+    "Physician assessed stable disease",
+    "No evidence of disease (NED)"
 ]
