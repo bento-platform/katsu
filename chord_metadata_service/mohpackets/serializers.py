@@ -290,30 +290,152 @@ class TreatmentSerializer(serializers.ModelSerializer):
 
 
 class ChemotherapySerializer(serializers.ModelSerializer):
+    # drug_name =  serializers.Charfield(
+    #     max_length=255,
+    #     validators=[ChoicesValidator]
+    # )
+    # drug_rxnormcui =  serializers.Charfield(
+    #     max_length=64,
+    #     validators=[ChoicesValidator]
+    # )
+    chemotherapy_dosage_units = serializers.CharField(
+        max_length=64,
+        validators=[ChoicesValidator(val.DOSAGE_UNITS)]
+    )
+    cumulative_drug_dosage_prescribed = serializers.IntegerField(
+        validators=[positive_int]
+    )
+    cumulative_drug_dosage_actual = serializers.IntegerField(
+        validators=[positive_int]
+    )
     class Meta:
         model = Chemotherapy
         fields = "__all__"
 
 
 class HormoneTherapySerializer(serializers.ModelSerializer):
+    # drug_name =  serializers.Charfield(
+    #     max_length=255,
+    #     validators=[ChoicesValidator]
+    # )
+    # drug_rxnormcui =  serializers.Charfield(
+    #     max_length=64,
+    #     validators=[ChoicesValidator]
+    # )
+    chemotherapy_dosage_units = serializers.CharField(
+        max_length=64,
+        validators=[ChoicesValidator(val.DOSAGE_UNITS)]
+    )
+    cumulative_drug_dosage_prescribed = serializers.IntegerField(
+        validators=[positive_int]
+    )
+    cumulative_drug_dosage_actual = serializers.IntegerField(
+        validators=[positive_int]
+    )
     class Meta:
         model = HormoneTherapy
         fields = "__all__"
 
 
 class RadiationSerializer(serializers.ModelSerializer):
+    radiation_therapy_modality = serializers.CharField(
+        max_length=255,
+        validators=[ChoicesValidator(val.RADIATION_THERAPY_MODALITY)]
+    )
+    radiation_therapy_type = serializers.CharField(
+        max_length=64,
+        validators=[ChoicesValidator(["External", "Internal"])]
+    )
+    radiation_therapy_fractions = serializers.IntegerField(
+        validators=[positive_int]
+    )
+    radiation_therapy_dosage = serializers.IntegerField(
+        validators=[positive_int]
+    )
+    anatomical_site_irradiated = serializers.CharField(
+        max_length=255,
+        validators=[ChoicesValidator(val.RADIATION_ANATOMICAL_SITE)]
+    )
+    radiation_boost = serializers.BooleanField(
+        validators=[ChoicesValidator(["Yes", "No"])]
+    )
+    reference_radiation_treatment_id = serializers.CharField(
+        max_length=64
+    )
     class Meta:
         model = Radiation
         fields = "__all__"
 
 
 class ImmunotherapySerializer(serializers.ModelSerializer):
+    immunotherapy_type = serializers.CharField(
+        max_length=255,
+        validators=[ChoicesValidator(val.IMMUNOTHERAPY_TYPE)]
+    )
+    # drug_name =  serializers.Charfield(
+    #     max_length=255,
+    #     validators=[ChoicesValidator]
+    # )
+    # drug_rxnormcui =  serializers.Charfield(
+    #     max_length=64,
+    #     validators=[ChoicesValidator]
+    # )
     class Meta:
         model = Immunotherapy
         fields = "__all__"
 
 
 class SurgerySerializer(serializers.ModelSerializer):
+    surgery_type = serializers.CharField(
+        max_length=255,
+        validators=[ChoicesValidator(val.SURGERY_TYPE)]
+    )
+    surgery_site = serializers.CharField(
+        max_length=255,
+        validators=[TOPOGRAPHY]
+    )
+    surgery_location = serializers.CharField(
+        max_length=128,
+        validators=[ChoicesValidator(val.SURGERY_LOCATION)]
+    )
+    tumour_length = serializers.IntegerField(
+        validators=[positive_int]
+    )
+    tumour_width = serializers.IntegerField(
+        validators=[positive_int]
+    )
+    greatest_dimension_tumour = serializers.IntegerField(
+        validators=[positive_int]
+    )
+    tumour_focality = serializers.CharField(
+        max_length=64,
+        validators=[ChoicesValidator(val.TUMOUR_FOCALITY)]
+    )
+    residual_tumour_classification = serializers.CharField(
+        max_length=64,
+        validators=[ChoicesValidator(val.TUMOUR_CLASSIFICATION)]
+    )
+    margin_types_involved = serializers.CharField(
+        max_length=128,
+        validators=[ChoicesValidator(val.MARGIN_TYPES)]
+    )
+    margin_types_not_involved = serializers.CharField(
+        max_length=128,
+        validators=[ChoicesValidator(val.MARGIN_TYPES)]
+    )
+    margin_types_not_assessed = serializers.CharField(
+        max_length=128,
+        validators=[ChoicesValidator(val.MARGIN_TYPES)]
+    )
+    lymphovascular_invasion = serializers.CharField(
+        max_length=255,
+        validators=[ChoicesValidator(val.LYMPHOVACULAR_INVASION)]
+    )
+    perineural_invasion = serializers.CharField(
+        max_length=128,
+        validators=[ChoicesValidator(val.PERINEURAL_INVASION)]
+    )
+    
     class Meta:
         model = Surgery
         fields = "__all__"
@@ -332,6 +454,18 @@ class BiomarkerSerializer(serializers.ModelSerializer):
 
 
 class ComorbiditySerializer(serializers.ModelSerializer):
+    prior_malignancy = serializers.CharField(
+        max_length=32,
+        validators=[ChoicesValidator("Yes", "No", "Unknown")]
+    )
+    laterality_of_prior_malignancy = serializers.CharField(
+        max_length=64,
+
+    )
+    age_at_comorbidity_diagnosis = serializers.IntegerField(null=True, blank=True)
+    comorbidity_type_code = serializers.CharField(max_length=64)
+    comorbidity_treatment_status = serializers.CharField(max_length=32)
+    comorbidity_treatment = serializers.CharField(max_length=255)
     class Meta:
         model = Comorbidity
         fields = "__all__"

@@ -516,3 +516,202 @@ TREATMENT_RESPONSE = [
     "Physician assessed stable disease",
     "No evidence of disease (NED)"
 ]
+
+DOSAGE_UNITS = [
+    "mg/m2",
+    "IU/m2",
+    "ug/m2",
+    "g/m2",
+    "mg/kg"
+]
+
+RADIATION_THERAPY_MODALITY = [
+    "Megavoltage radiation therapy using photons (procedure)",
+    "Teleradiotherapy using electrons (procedure)",
+    "Teleradiotherapy protons (procedure)",
+    "Teleradiotherapy neutrons (procedure)",
+    "Brachytherapy (procedure)",
+    "Other"
+]
+
+RADIATION_ANATOMICAL_SITE = [
+    "Cervical lymph node group",
+    "Entire lymph node of thorax",
+    "Cervical lymph node group",
+    "Entire lymph node of thorax",
+    "Axillary lymph node group",
+    "Supraclavicular lymph node group",
+    "Internal mammary lymph node group",
+    "Abdominal lymph node group",
+    "Pelvic lymph node group",
+    "Abdominal lymph node group",
+    "Pelvic lymph node group",
+    "Structure of lymph node",
+    "Entire eye",
+    "Pituitary structure",
+    "Brain structure",
+    "Brain part",
+    "Spinal cord structure",
+    "Nasopharyngeal structure",
+    "Oral cavity structure",
+    "Oropharyngeal structure",
+    "Laryngeal structure",
+    "Hypopharyngeal structure",
+    "Nasal sinus structure",
+    "Salivary gland structure",
+    "Thyroid structure",
+    "Entire head and neck",
+    "Entire lung",
+    "Mesothelium structure",
+    "Entire thorax",
+    "Entire breast",
+    "Breast part",
+    "Chest wall structure",
+    "Entire esophagus",
+    "Stomach structure",
+    "Small intestinal structure",
+    "Colon structure",
+    "Rectum structure",
+    "Anal structure",
+    "Liver structure",
+    "Biliary tract structure",
+    "Gallbladder structure",
+    "Pancreatic structure",
+    "Abdominal structure",
+    "Entire urinary bladder",
+    "Bladder part",
+    "Kidney structure",
+    "Ureteric structure",
+    "Entire prostate",
+    "Prostate part",
+    "Urethral structure",
+    "Penile structure",
+    "Testis structure",
+    "Scrotal structure",
+    "Ovarian structure",
+    "Fallopian tube structure",
+    "Uterine structure",
+    "Cervix uteri structure",
+    "Vaginal structure",
+    "Vulval structure",
+    "Bone structure of cranium",
+    "Entire vertebral column",
+    "Shoulder region structure",
+    "Bone structure of rib",
+    "Hip region structure",
+    "Entire bony pelvis",
+    "Pelvic structure",
+    "Bone structure of extremity",
+    "Skin structure",
+    "Soft tissues",
+    "Entire body as a whole"
+]
+
+IMMUNOTHERAPY_TYPE = [
+    "Cell-based",
+    "Immune checkpoint inhibitors",
+    "Monoclonal antibodies other than immune checkpoint inhibitors",
+    "Other immunomodulatory substances"
+]
+
+SURGERY_TYPE = [
+    "Axillary Clearance",
+    "Axillary lymph nodes sampling",
+    "Biopsy",
+    "Bypass Gastrojejunostomy",
+    "Cholecystectomy",
+    "Cholecystojejunostomy",
+    "Completion gastrectomy",
+    "Debridement of pancreatic and peripancreatic necrosis",
+    "Debulking",
+    "Distal subtotal pancreatectomy",
+    "Drainage of abscess",
+    "Duodenal preserving pancreatic head resection",
+    "Endoscopic biopsy",
+    "Endoscopic brushings of GIT",
+    "Enucleation",
+    "Esophageal bypass surgery/jejunostomy only",
+    "Exploratory laparotomy",
+    "Fine needle aspiration biopsy",
+    "Gastric Antrectomy",
+    "Hepaticojejunostomy",
+    "Ivor Lewis subtotal esophagectomy",
+    "Laparotomy (Open and Shut)",
+    "Left thoracoabdominal incision",
+    "Lobectomy",
+    "Mammoplasty",
+    "Mastectomy",
+    "McKeown esophagectomy",
+    "Merendino procedure",
+    "Minimally invasive esophagectomy",
+    "Pancreaticoduodenectomy",
+    "Pancreaticojejunostomy, side-to-side anastomosis",
+    "Pneumonectomy",
+    "Proximal subtotal gastrectomy",
+    "Pylorus-sparing Whipple operation",
+    "Radical pancreaticoduodenectomy",
+    "Reexcision",
+    "Segmentectomy",
+    "Sentinal Lymph Node Biopsy",
+    "Spleen preserving distal pancreatectomy",
+    "Splenectomy",
+    "Subtotal pancreatectomy",
+    "Thoracotomy (Open & Shut)",
+    "Total gastrectomy",
+    "Total gastrectomy with extended lymphadenectomy",
+    "Total pancreatectomy",
+    "Transhiatal esophagectomy",
+    "Triple bypass of pancreas",
+    "Wedge/localised gastric resection",
+    "Wide Local Excision"
+]
+
+SURGERY_LOCATION = [
+    "Local recurrence",
+    "Metastatic",
+    "Primary"
+]
+
+TUMOUR_FOCALITY = [
+    "Cannot be assessed",
+    "Multifocal",
+    "Not applicable",
+    "Unifocal",
+    "Unknown"
+]
+
+TUMOUR_CLASSIFICATION = [
+    "Not applicable",
+    "RX",
+    "R0",
+    "R1",
+    "R2",
+    "Unknown"
+]
+
+MARGIN_TYPES = [
+    "Circumferential resection margin",
+    "Common bile duct margin",
+    "Distal margin",
+    "Not applicable",
+    "Proximal margin",
+    "Unknown"
+]
+
+LYMPHOVACULAR_INVASION = [
+    "Absent",
+    "Both lymphatic and small vessel and venous (large vessel) invasion",
+    "Lymphatic and small vessel invasion only",
+    "Not applicable",
+    "Present",
+    "Venous (large vessel) invasion only",
+    "Unknown"
+]
+
+PERINEURAL_INVASION = [
+    "Absent",
+    "Cannot be assessed",
+    "Not applicable",
+    "Present",
+    "Unknown"
+]

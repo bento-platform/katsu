@@ -5,8 +5,6 @@ from django.core.validators import (
 
 from rest_framework.validators import ValidationError
 
-import chord_metadata_service.mohpackets.permissible_values as v
-
 
 class ChoicesValidator:
     """Creates a validator that checks permissible values (choices)."""
@@ -34,9 +32,8 @@ def positive_int(value):
     if not isinstance(value, int):
         raise ValidationError(f"{value} is not an integer")
     if value < 1:
-        raise ValidationError(f"{value} must be positive.")
-
-U_BOOLEAN = ChoicesValidator(["Yes", "No", "Unknown"])
+        raise ValidationError("The value must be positive.")
+        
 
 # ID format.
 # Examples: 90234, BLD_donor_89, AML-90
