@@ -34,6 +34,12 @@ from .models import (
     handled by the ingest process. Additional validations can be added here if needed.
 """
 
+##########################################
+#                                        #
+#           MODEL SERIALIZERS            #
+#                                        #
+##########################################
+
 
 class ProgramSerializer(serializers.ModelSerializer):
     program_id = serializers.CharField(
@@ -122,3 +128,12 @@ class ComorbiditySerializer(serializers.ModelSerializer):
     class Meta:
         model = Comorbidity
         fields = "__all__"
+
+
+##########################################
+#                                        #
+#           CUSTOM SERIALIZERS           #
+#                                        #
+##########################################
+class IngestRequestSerializer(serializers.Serializer):
+    data = serializers.ListField(child=serializers.JSONField())
