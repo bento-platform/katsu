@@ -344,7 +344,7 @@ class FollowUp(models.Model):
     )
     date_of_followup = models.CharField(max_length=32, null=False, blank=False)
     lost_to_followup = models.BooleanField(null=True)
-    lost_to_followup_reason = models.CharField(max_length=255)
+    lost_to_followup_reason = models.CharField(max_length=255, blank=True, default="")
     disease_status_at_followup = models.CharField(
         max_length=255, null=False, blank=False
     )
