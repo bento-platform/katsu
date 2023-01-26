@@ -33,7 +33,7 @@ from chord_metadata_service.mohpackets.api_views import (
     TreatmentViewSet,
     moh_overview,
 )
-from chord_metadata_service.mohpackets.ingest import create_bulk_programs, ingest_data
+from chord_metadata_service.mohpackets.ingest import ingest_programs
 
 # ================== MOH API ================== #
 router = routers.SimpleRouter()
@@ -73,5 +73,5 @@ urlpatterns = [
     path("moh/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
     path("discovery/overview", moh_overview),
-    path("ingest/all", ingest_data),
+    path("ingest/programs", ingest_programs),
 ]
