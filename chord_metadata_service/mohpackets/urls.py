@@ -85,25 +85,26 @@ discovery_router.register(r"biomarkers", DiscoveryBiomarkerViewSet)
 discovery_router.register(r"comorbidities", DiscoveryComorbidityViewSet)
 
 # ================== INGEST API ================== #
-ingest_router = routers.SimpleRouter()
-ingest_router.register(r"programs", ingest_programs)
-ingest_router.register(r"donors", ingest_donors)
-ingest_router.register(r"specimens", ingest_specimens)
-ingest_router.register(r"sample_registrations", ingest_sample_registrations)
-ingest_router.register(r"primary_diagnoses", ingest_primary_diagnosises)
-ingest_router.register(r"treatments", ingest_treatments)
-ingest_router.register(r"chemotherapies", ingest_chemotherapies)
-ingest_router.register(r"hormone_therapies", ingest_hormonetherapies)
-ingest_router.register(r"radiations", ingest_radiations)
-ingest_router.register(r"immunotherapies", ingest_immunotherapies)
-ingest_router.register(r"surgeries", ingest_surgeries)
-ingest_router.register(r"follow_ups", ingest_followups)
-ingest_router.register(r"biomarkers", ingest_biomarkers)
-ingest_router.register(r"comorbidities", ingest_comorbidities)
+ingest_patterns = [
+    path("programs", ingest_programs),
+    path("donors", ingest_donors),
+    path("specimens", ingest_specimens),
+    path("sample_registrations", ingest_sample_registrations),
+    path("primary_diagnoses", ingest_primary_diagnosises),
+    path("treatments", ingest_treatments),
+    path("chemotherapies", ingest_chemotherapies),
+    path("hormone_therapies", ingest_hormonetherapies),
+    path("radiations", ingest_radiations),
+    path("immunotherapies", ingest_immunotherapies),
+    path("surgeries", ingest_surgeries),
+    path("follow_ups", ingest_followups),
+    path("biomarkers", ingest_biomarkers),
+    path("comorbidities", ingest_comorbidities),
+]
 
 urlpatterns = [
     path("moh/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
-    path("ingest/", include(ingest_router.urls)),
+    path("ingest/", include(ingest_patterns)),
     path("discovery/overview", moh_overview),
 ]
