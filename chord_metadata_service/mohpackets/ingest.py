@@ -62,7 +62,7 @@ from chord_metadata_service.mohpackets.serializers import (
 ##########################################
 
 
-def create_bulk_objects(model, serializer_class, data: dict):
+def create_bulk_objects(serializer_class, data: dict):
     """Create a list of objects in bulk using a list of JSON strings.
 
     This function uses the provided serializer class to validate the input data before
@@ -70,8 +70,6 @@ def create_bulk_objects(model, serializer_class, data: dict):
 
     Parameters
     ----------
-    model : class
-        The model class for the objects to be created.
     data : dict
         A JSON object representing the objects to be created.
     serializer_class: class
@@ -85,11 +83,8 @@ def create_bulk_objects(model, serializer_class, data: dict):
     # Use the serializer to validate the input data
     serializer = serializer_class(data=data_list, many=True)
     serializer.is_valid(raise_exception=True)
-
-    # Create the objects in bulk
-    with transaction.atomic():
-        objects = [model(**item) for item in data_list]
-        objs = model.objects.bulk_create(objects)
+    # Note: bulk_create() would be faster but it requires to append the _id to the foreign keys
+    objs = serializer.save()
 
     return objs
 
@@ -109,11 +104,10 @@ def create_bulk_objects(model, serializer_class, data: dict):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_programs(request):
-    model = Program
     serializer = ProgramSerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -135,11 +129,10 @@ def ingest_programs(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_donors(request):
-    model = Donor
     serializer = DonorSerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -161,11 +154,10 @@ def ingest_donors(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_primary_diagnosises(request):
-    model = PrimaryDiagnosis
     serializer = PrimaryDiagnosisSerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -187,11 +179,10 @@ def ingest_primary_diagnosises(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_specimens(request):
-    model = Specimen
     serializer = SpecimenSerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -213,11 +204,10 @@ def ingest_specimens(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_sample_registrations(request):
-    model = SampleRegistration
     serializer = SampleRegistrationSerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -239,11 +229,10 @@ def ingest_sample_registrations(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_treatments(request):
-    model = Treatment
     serializer = TreatmentSerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -265,11 +254,10 @@ def ingest_treatments(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_chemotherapies(request):
-    model = Chemotherapy
     serializer = ChemotherapySerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -291,11 +279,10 @@ def ingest_chemotherapies(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_radiations(request):
-    model = Radiation
     serializer = RadiationSerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -317,11 +304,10 @@ def ingest_radiations(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_surgeries(request):
-    model = Surgery
     serializer = SurgerySerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -343,11 +329,10 @@ def ingest_surgeries(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_hormonetherapies(request):
-    model = HormoneTherapy
     serializer = HormoneTherapySerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -369,11 +354,10 @@ def ingest_hormonetherapies(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_immunotherapies(request):
-    model = Immunotherapy
     serializer = ImmunotherapySerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -395,11 +379,10 @@ def ingest_immunotherapies(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_followups(request):
-    model = FollowUp
     serializer = FollowUpSerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -421,11 +404,10 @@ def ingest_followups(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_biomarkers(request):
-    model = Biomarker
     serializer = BiomarkerSerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -447,11 +429,10 @@ def ingest_biomarkers(request):
 @api_view(["POST"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_comorbidities(request):
-    model = Comorbidity
     serializer = ComorbiditySerializer
     data = request.data
     try:
-        objs = create_bulk_objects(model, serializer, data)
+        objs = create_bulk_objects(serializer, data)
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -462,3 +443,6 @@ def ingest_comorbidities(request):
         status=status.HTTP_201_CREATED,
         data={f"Ingestion Successful! {len(objs)} comorbidities were created."},
     )
+
+
+# TODO: provide a check function before ingest
