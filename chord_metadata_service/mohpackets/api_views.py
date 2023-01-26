@@ -38,7 +38,6 @@ from chord_metadata_service.mohpackets.models import (
     Treatment,
 )
 from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
-from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
 from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
     ChemotherapySerializer,

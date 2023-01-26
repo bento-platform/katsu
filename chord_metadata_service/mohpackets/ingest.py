@@ -1,32 +1,9 @@
-import json
-import time
-from typing import List
-
-from django.apps import apps
-from django.db import transaction
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers, status
-from rest_framework.decorators import api_view, permission_classes
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from chord_metadata_service.mohpackets.models import (
-    Biomarker,
-    Chemotherapy,
-    Comorbidity,
-    Donor,
-    FollowUp,
-    HormoneTherapy,
-    Immunotherapy,
-    PrimaryDiagnosis,
-    Program,
-    Radiation,
-    SampleRegistration,
-    Specimen,
-    Surgery,
-    Treatment,
-)
-from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
 from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
     ChemotherapySerializer,
