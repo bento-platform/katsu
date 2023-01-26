@@ -61,6 +61,7 @@ CHORD_SERVICE_TYPE: GA4GHServiceType = {
     "version": __version__,
 }
 CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE_NO_VER)
+BENTO_SERVICE_KIND = "metadata"
 
 # SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
 AUTH_OVERRIDE = not CHORD_PERMISSIONS
@@ -198,7 +199,7 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'level': 'INFO',
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'handlers': ['console'],
         },
     },

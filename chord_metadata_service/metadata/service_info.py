@@ -1,5 +1,5 @@
 from .. import __version__
-from .settings import CHORD_SERVICE_TYPE, CHORD_SERVICE_ID, DEBUG
+from .settings import BENTO_SERVICE_KIND, CHORD_SERVICE_TYPE, CHORD_SERVICE_ID, DEBUG
 import subprocess
 import os
 
@@ -20,16 +20,19 @@ before_first_request_func()
 
 SERVICE_INFO = {
     "id": CHORD_SERVICE_ID,
-    "name": "Metadata Service",  # TODO: Globally unique?
+    "name": "Katsu",  # TODO: Globally unique?
     "type": CHORD_SERVICE_TYPE,
     "environment": "prod",
-    "description": "Metadata service implementation based on Phenopackets schema",
+    "description": "Clinical and phenotypic metadata service implementation based on Phenopackets schema.",
     "organization": {
         "name": "C3G",
-        "url": "http://www.computationalgenomics.ca"
+        "url": "https://www.computationalgenomics.ca"
     },
-    "contactUrl": "mailto:ksenia.zaytseva@mcgill.ca",
-    "version": __version__
+    "contactUrl": "mailto:info@c3g.ca",
+    "version": __version__,
+    "bento": {
+        "serviceKind": BENTO_SERVICE_KIND,
+    },
 }
 
 
@@ -39,12 +42,14 @@ def service_info_git():
         "environment": "dev",
     }
     try:
-        res_tag = subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"])
-        if res_tag:
-            info["git_tag"] = res_tag.decode().rstrip()
-        res_branch = subprocess.check_output(["git", "branch", "--show-current"])
-        if res_branch:
-            info["git_branch"] = res_branch.decode().rstrip()
+        if res_tag := subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"]):
+            res_tag_str: str = res_tag.decode().rstrip()
+            info["git_tag"] = res_tag_str
+            info["bento"]["gitTag"] = res_tag_str
+        if res_branch := subprocess.check_output(["git", "branch", "--show-current"]):
+            res_branch_str: str = res_branch.decode().rstrip()
+            info["git_branch"] = res_branch_str
+            info["bento"]["gitBranch"] = res_branch_str
 
     except Exception as e:
         except_name = type(e).__name__
