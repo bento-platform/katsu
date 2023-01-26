@@ -7,7 +7,7 @@ from django.db import transaction
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from chord_metadata_service.mohpackets.models import (
@@ -26,6 +26,7 @@ from chord_metadata_service.mohpackets.models import (
     Surgery,
     Treatment,
 )
+from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
 from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
     ChemotherapySerializer,
@@ -47,7 +48,11 @@ from chord_metadata_service.mohpackets.serializers import (
 """
     This module contains the API endpoints for ingesting bulk data into the database.
     It take a JSON object with a "data" key and a list of JSON objects as the value.
-    It then uses the serializer class to validate the input data before creating the objects in bulk.  
+    It then uses the serializer class to validate the input data before creating the objects in bulk.
+    The function has some decorators:
+    - @extend_schema: document the API endpoint using OpenAPI.
+    - @api_view: specify the HTTP methods that the endpoint accepts.
+    - @permission_classes: specify the permissions required to access the endpoint.
 """
 
 ##########################################
@@ -102,6 +107,7 @@ def create_bulk_objects(model, serializer_class, data: dict):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_programs(request):
     model = Program
     serializer = ProgramSerializer
@@ -127,6 +133,7 @@ def ingest_programs(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_donors(request):
     model = Donor
     serializer = DonorSerializer
@@ -152,6 +159,7 @@ def ingest_donors(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_primary_diagnosises(request):
     model = PrimaryDiagnosis
     serializer = PrimaryDiagnosisSerializer
@@ -177,6 +185,7 @@ def ingest_primary_diagnosises(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_specimens(request):
     model = Specimen
     serializer = SpecimenSerializer
@@ -202,6 +211,7 @@ def ingest_specimens(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_sample_registrations(request):
     model = SampleRegistration
     serializer = SampleRegistrationSerializer
@@ -227,6 +237,7 @@ def ingest_sample_registrations(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_treatments(request):
     model = Treatment
     serializer = TreatmentSerializer
@@ -252,6 +263,7 @@ def ingest_treatments(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_chemotherapies(request):
     model = Chemotherapy
     serializer = ChemotherapySerializer
@@ -277,6 +289,7 @@ def ingest_chemotherapies(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_radiations(request):
     model = Radiation
     serializer = RadiationSerializer
@@ -302,6 +315,7 @@ def ingest_radiations(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_surgeries(request):
     model = Surgery
     serializer = SurgerySerializer
@@ -327,6 +341,7 @@ def ingest_surgeries(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_hormonetherapies(request):
     model = HormoneTherapy
     serializer = HormoneTherapySerializer
@@ -352,6 +367,7 @@ def ingest_hormonetherapies(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_immunotherapies(request):
     model = Immunotherapy
     serializer = ImmunotherapySerializer
@@ -377,6 +393,7 @@ def ingest_immunotherapies(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_followups(request):
     model = FollowUp
     serializer = FollowUpSerializer
@@ -402,6 +419,7 @@ def ingest_followups(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_biomarkers(request):
     model = Biomarker
     serializer = BiomarkerSerializer
@@ -427,6 +445,7 @@ def ingest_biomarkers(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
+# @permission_classes([CanDIGAdminOrReadOnly])
 def ingest_comorbidities(request):
     model = Comorbidity
     serializer = ComorbiditySerializer
