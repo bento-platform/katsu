@@ -715,3 +715,50 @@ PERINEURAL_INVASION = [
     "Present",
     "Unknown"
 ]
+
+LOST_FOLLOW_UP_REASON = [
+    "Completed study",
+    "Discharged to palliative care",
+    "Lost contact",
+    "Not applicable",
+    "Unknown",
+    "Withdrew from study"
+]
+
+DISEASE_STATUS_FOLLOWUP = [
+    "Complete remission",
+    "Distant progression",
+    "Loco-regional progression",
+    "No evidence of disease",
+    "Partial remission",
+    "Progression NOS",
+    "Relapse or recurrence",
+    "Stable"    
+]
+
+RELAPSE_TYPE = [
+    "Distant recurrence/metastasis",
+    "Local recurrence",
+    "Local recurrence and distant metastasis",
+    "Progression (liquid tumours)",
+    "Biochemical progression"
+]
+
+PROGRESSION_STATUS_METHOD = [
+    "Imaging (procedure)"
+    "Histopathology test (procedure)"
+    "Assessment of symptom control (procedure)"
+    "Physical examination procedure (procedure)"
+    "Tumor marker measurement (procedure)"
+    "Laboratory data interpretation (procedure)"
+]
+
+MALIGNANCY_LATERALITY =[
+    "Bilateral",
+    "Left",
+    "Midline",
+    "Not applicable",
+    "Right",
+    "Unilateral, Side not specified",
+    "Unknown"
+]

@@ -442,6 +442,57 @@ class SurgerySerializer(serializers.ModelSerializer):
 
 
 class FollowUpSerializer(serializers.ModelSerializer):
+    date_of_followup = serializers.CharField(
+        max_length=32,
+        validators=[DATE]
+    )
+    lost_to_followup = serializers.BooleanField(
+        validators=[ChoicesValidator(["Yes", "No"])]
+    )
+    lost_to_followup_reason = serializers.CharField(
+        max_length=255,
+        validators=[ChoicesValidator(val.LOST_FOLLOW_UP_REASON)]
+    )
+    disease_status_at_followup = serializers.CharField(
+        max_length=255,
+        validators=[ChoicesValidator(val.DISEASE_STATUS_FOLLOWUP)]
+    )
+    relapse_type = serializers.CharField(
+        max_length=128,
+        validators=[ChoicesValidator(val.RELAPSE_TYPE)]
+    )    
+    date_of_relapse = serializers.CharField(
+        max_length=32,
+        validators=[DATE]
+    )
+    method_of_progression_status = serializers.CharField(
+        max_length=255,
+        validators=[ChoicesValidator(val.PROGRESSION_STATUS_METHOD)]
+    )
+    anatomic_site_progression_or_recurrence = serializers.CharField(
+        max_length=255,
+        validators=[TOPOGRAPHY]
+    )
+    recurrence_tumour_staging_system = serializers.CharField(
+        max_length=255,
+        validators=[ChoicesValidator(val.TUMOUR_STAGING_SYSTEM)]
+    )
+    recurrence_t_category = serializers.CharField(
+        max_length=32,
+        validators=[ChoicesValidator(val.T_CATEGORY)]
+    )
+    recurrence_n_category = serializers.CharField(
+        max_length=32,
+        validators=[ChoicesValidator(val.N_CATEGORY)]
+    )
+    recurrence_m_category = serializers.CharField(
+        max_length=32,
+        validators=[ChoicesValidator(val.M_CATEGORY)]
+    )
+    recurrence_stage_group = serializers.CharField(
+        max_length=64,
+        validators=[ChoicesValidator(val.STAGE_GROUP)]
+    )
     class Meta:
         model = FollowUp
         fields = "__all__"
@@ -456,16 +507,23 @@ class BiomarkerSerializer(serializers.ModelSerializer):
 class ComorbiditySerializer(serializers.ModelSerializer):
     prior_malignancy = serializers.CharField(
         max_length=32,
-        validators=[ChoicesValidator("Yes", "No", "Unknown")]
+        validators=[ChoicesValidator(["Yes", "No", "Unknown"])]
     )
     laterality_of_prior_malignancy = serializers.CharField(
         max_length=64,
-
+        validators=[ChoicesValidator(val.MALIGNANCY_LATERALITY)]
     )
-    age_at_comorbidity_diagnosis = serializers.IntegerField(null=True, blank=True)
-    comorbidity_type_code = serializers.CharField(max_length=64)
-    comorbidity_treatment_status = serializers.CharField(max_length=32)
-    comorbidity_treatment = serializers.CharField(max_length=255)
+    comorbidity_type_code = serializers.CharField(
+        max_length=64
+        # validators=  # TODO: write regex
+    )
+    comorbidity_treatment_status = serializers.CharField(
+        max_length=32,
+        validators=[ChoicesValidator(["Yes", "No", "Unknown"])]
+    )
+    comorbidity_treatment = serializers.CharField(
+        max_length=255
+    )
     class Meta:
         model = Comorbidity
         fields = "__all__"
