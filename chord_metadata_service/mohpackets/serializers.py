@@ -42,9 +42,10 @@ from .models import (
 
 
 class ProgramSerializer(serializers.ModelSerializer):
-    program_id = serializers.CharField(
+    program_id = serializers.RegexField(
+        regex=r"^[A-Za-z0-9\-\._]{1,64}",
         max_length=64,
-        validators=[UniqueValidator(queryset=Program.objects.all()), ID_VALIDATOR],
+        validators=[UniqueValidator(queryset=Program.objects.all())],
     )
 
     class Meta:
