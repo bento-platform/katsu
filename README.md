@@ -6,23 +6,30 @@
 
 ## Table of Contents
 
-  * [License](#license)
-  * [Funding](#funding)
-  * [Architecture](#architecture)
-  * [REST API Highlights](#rest-api-highlights)
-  * [Install](#install)
-  * [Authentication](#authentication)
-     * [Note on Permissions](#note-on-permissions)
-     * [Authorization inside CanDIG](#authorization-inside-candig)
-  * [Developing](#developing)
-     * [Branching](#branching)
-     * [Tests](#tests)
-     * [Terminal Commands](#terminal-commands)
-        * [Project/Dataset/Table/Ingestion Commands](#projectdatasettableingestion-commands)
-        * [Patient Commands](#patient-commands)
-        * [Phenopacket Commands](#phenopacket-commands)
-     * [Accessing the Django Shell from inside a Bento Container](#accessing-the-django-shell-from-inside-a-bento-container)
-  * [Configuring Public overview and public search fields](#configuring-public-overview-and-public-search-fields)
+- [Katsu Metadata Service](#katsu-metadata-service)
+  - [Table of Contents](#table-of-contents)
+  - [License](#license)
+  - [Funding](#funding)
+  - [Architecture](#architecture)
+  - [REST API highlights](#rest-api-highlights)
+  - [Install](#install)
+    - [Install via Docker](#install-via-docker)
+  - [Environment Variables](#environment-variables)
+  - [Standalone PostGres db and AdMiner](#standalone-postgres-db-and-adminer)
+  - [Authentication](#authentication)
+    - [Note on Permissions](#note-on-permissions)
+    - [Authorization inside CanDIG](#authorization-inside-candig)
+  - [Developing](#developing)
+    - [Branching](#branching)
+    - [Tests](#tests)
+    - [Terminal Commands](#terminal-commands)
+      - [Project/Dataset/Table/Ingestion Commands](#projectdatasettableingestion-commands)
+      - [Patient Commands](#patient-commands)
+      - [Phenopacket Commands](#phenopacket-commands)
+    - [Accessing the Django Shell from inside a Bento Container](#accessing-the-django-shell-from-inside-a-bento-container)
+      - [When running Katsu with `bentoV2`:](#when-running-katsu-with-bentov2)
+      - [When running Katsu with `chord_singularity` (DEPRECATED)](#when-running-katsu-with-chord_singularity-deprecated)
+  - [Configuring public overview and public search fields](#configuring-public-overview-and-public-search-fields)
 
 ## License
 
@@ -109,8 +116,8 @@ python manage.py runserver
 
 ### Install via Docker
 
-Optionally, you may also install standalone Katsu with the Dockerfile provided. If you develop or
-deploy Katsu as part of the Bento platform, you should use Bento's Docker image instead.
+Optionally, you may also install standalone Katsu with the Dockerfile provided. If you develop or deploy Katsu as part of the Bento platform, you should use Bento's Docker [image](https://github.com/bento-platform/katsu/pkgs/container/katsu) instead.
+
 
 
 ## Environment Variables
@@ -157,6 +164,25 @@ CANDIG_OPA_SITE_ADMIN_KEY=
 INSIDE_CANDIG=
 ```
 
+## Standalone PostGres db and AdMiner
+
+For local development, you can quickly deploy a local database server (postgres) and management tool (adminer) with `docker-compose`. Make sure your postgres env variables are set in `.env` before running:
+
+```
+# Start docker-compose containers
+docker-compose -f docker-compose.dev.yaml up -d
+
+# Stop and remove docker-compose containers
+docker-compose -f docker-compose.dev.yaml down
+```
+
+You can now use the katsu-db container (`localhost:5432`) as your database for standalone katsu development and explore the database tables with adminer (`localhost:8080`). Login to adminer by specifying the following on the login page:
+
+- **System**: `PostgreSQL`
+- **Server** `katsu-db` (host and port are resolved by Docker with the container name)
+- **Username**: `POSTGRES_USER`
+- **Password**: `POSTGRES_PASSWORD`
+- **Database**: `POSTGRES_DATABASE`
 
 ## Authentication
 
