@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from chord_metadata_service.mohpackets.validators import ID_VALIDATOR
-
 from .models import (
     Biomarker,
     Chemotherapy,
