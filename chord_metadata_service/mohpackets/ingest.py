@@ -1,3 +1,4 @@
+from django.db import transaction
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -61,7 +62,8 @@ def create_bulk_objects(serializer_class, data: dict):
     serializer = serializer_class(data=data_list, many=True)
     serializer.is_valid(raise_exception=True)
     # Note: bulk_create() would be faster but it requires to append the _id to the foreign keys
-    objs = serializer.save()
+    with transaction.atomic():
+        objs = serializer.save()
 
     return objs
 
