@@ -1,24 +1,22 @@
 from rest_framework import serializers
-
-from chord_metadata_service.mohpackets.validators import ID_VALIDATOR
+from rest_framework.validators import UniqueValidator
 
 from .models import (
-    Program,
-    Donor,
-    Specimen,
-    SampleRegistration,
-    PrimaryDiagnosis,
-    Treatment,
-    Chemotherapy,
-    HormoneTherapy,
-    Radiation,
-    Immunotherapy,
-    Surgery,
-    FollowUp,
     Biomarker,
+    Chemotherapy,
     Comorbidity,
+    Donor,
+    FollowUp,
+    HormoneTherapy,
+    Immunotherapy,
+    PrimaryDiagnosis,
+    Program,
+    Radiation,
+    SampleRegistration,
+    Specimen,
+    Surgery,
+    Treatment,
 )
-
 
 """
     This module contains the SERIALIZERS for the models in the mohpackets app.
@@ -34,10 +32,18 @@ from .models import (
     handled by the ingest process. Additional validations can be added here if needed.
 """
 
+##########################################
+#                                        #
+#           MODEL SERIALIZERS            #
+#                                        #
+##########################################
+
 
 class ProgramSerializer(serializers.ModelSerializer):
-    program_id = serializers.PrimaryKeyRelatedField(
-        queryset=Program.objects.all(), validators=[ID_VALIDATOR]
+    program_id = serializers.RegexField(
+        regex=r"^[A-Za-z0-9\-\._]{1,64}",
+        max_length=64,
+        validators=[UniqueValidator(queryset=Program.objects.all())],
     )
 
     class Meta:
@@ -121,3 +127,12 @@ class ComorbiditySerializer(serializers.ModelSerializer):
     class Meta:
         model = Comorbidity
         fields = "__all__"
+
+
+##########################################
+#                                        #
+#           CUSTOM SERIALIZERS           #
+#                                        #
+##########################################
+class IngestRequestSerializer(serializers.Serializer):
+    data = serializers.ListField(child=serializers.JSONField())
