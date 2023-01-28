@@ -1,7 +1,5 @@
+from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
-from django.core.validators import (
-    RegexValidator,
-)
 
 from rest_framework.validators import ValidationError
 
@@ -39,7 +37,7 @@ def positive_int(value):
 # Examples: 90234, BLD_donor_89, AML-90
 ID = RegexValidator(
     regex=r"^[A-Za-z0-9\-\._]{1,64}",
-    message=_("The value does not fit the pattern [A-Za-z0-9\-\._]{1,64}"), # noqa
+    message=_("The value does not fit the pattern [A-Za-z0-9\-\._]{1,64}"),  # noqa
     code="invalid",
 )
 

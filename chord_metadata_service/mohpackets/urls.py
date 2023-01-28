@@ -1,36 +1,53 @@
+from django.urls import include, path
 from rest_framework import routers
-from django.urls import path, include
+
+from chord_metadata_service.mohpackets.api_discovery import (
+    DiscoveryBiomarkerViewSet,
+    DiscoveryChemotherapyViewSet,
+    DiscoveryComorbidityViewSet,
+    DiscoveryDonorViewSet,
+    DiscoveryFollowUpViewSet,
+    DiscoveryHormoneTherapyViewSet,
+    DiscoveryImmunotherapyViewSet,
+    DiscoveryPrimaryDiagnosisViewSet,
+    DiscoveryRadiationViewSet,
+    DiscoverySampleRegistrationViewSet,
+    DiscoverySpecimenViewSet,
+    DiscoverySurgeryViewSet,
+    DiscoveryTreatmentViewSet,
+)
 from chord_metadata_service.mohpackets.api_views import (
-    ProgramViewSet,
-    DonorViewSet,
-    SpecimenViewSet,
-    SampleRegistrationViewSet,
-    PrimaryDiagnosisViewSet,
-    TreatmentViewSet,
-    ChemotherapyViewSet,
-    HormoneTherapyViewSet,
-    RadiationViewSet,
-    ImmunotherapyViewSet,
-    SurgeryViewSet,
-    FollowUpViewSet,
     BiomarkerViewSet,
+    ChemotherapyViewSet,
     ComorbidityViewSet,
+    DonorViewSet,
+    FollowUpViewSet,
+    HormoneTherapyViewSet,
+    ImmunotherapyViewSet,
+    PrimaryDiagnosisViewSet,
+    ProgramViewSet,
+    RadiationViewSet,
+    SampleRegistrationViewSet,
+    SpecimenViewSet,
+    SurgeryViewSet,
+    TreatmentViewSet,
     moh_overview,
 )
-from chord_metadata_service.mohpackets.api_discovery import (
-    DiscoveryDonorViewSet,
-    DiscoverySpecimenViewSet,
-    DiscoverySampleRegistrationViewSet,
-    DiscoveryPrimaryDiagnosisViewSet,
-    DiscoveryTreatmentViewSet,
-    DiscoveryChemotherapyViewSet,
-    DiscoveryHormoneTherapyViewSet,
-    DiscoveryRadiationViewSet,
-    DiscoveryImmunotherapyViewSet,
-    DiscoverySurgeryViewSet,
-    DiscoveryFollowUpViewSet,
-    DiscoveryBiomarkerViewSet,
-    DiscoveryComorbidityViewSet,
+from chord_metadata_service.mohpackets.ingest import (
+    ingest_biomarkers,
+    ingest_chemotherapies,
+    ingest_comorbidities,
+    ingest_donors,
+    ingest_followups,
+    ingest_hormonetherapies,
+    ingest_immunotherapies,
+    ingest_primary_diagnosises,
+    ingest_programs,
+    ingest_radiations,
+    ingest_sample_registrations,
+    ingest_specimens,
+    ingest_surgeries,
+    ingest_treatments,
 )
 
 # ================== MOH API ================== #
@@ -67,8 +84,27 @@ discovery_router.register(r"follow_ups", DiscoveryFollowUpViewSet)
 discovery_router.register(r"biomarkers", DiscoveryBiomarkerViewSet)
 discovery_router.register(r"comorbidities", DiscoveryComorbidityViewSet)
 
+# ================== INGEST API ================== #
+ingest_patterns = [
+    path("programs", ingest_programs),
+    path("donors", ingest_donors),
+    path("specimens", ingest_specimens),
+    path("sample_registrations", ingest_sample_registrations),
+    path("primary_diagnoses", ingest_primary_diagnosises),
+    path("treatments", ingest_treatments),
+    path("chemotherapies", ingest_chemotherapies),
+    path("hormone_therapies", ingest_hormonetherapies),
+    path("radiations", ingest_radiations),
+    path("immunotherapies", ingest_immunotherapies),
+    path("surgeries", ingest_surgeries),
+    path("follow_ups", ingest_followups),
+    path("biomarkers", ingest_biomarkers),
+    path("comorbidities", ingest_comorbidities),
+]
+
 urlpatterns = [
     path("moh/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
-    path('discovery/overview', moh_overview)
+    path("ingest/", include(ingest_patterns)),
+    path("discovery/overview", moh_overview),
 ]

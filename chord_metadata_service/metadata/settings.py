@@ -10,13 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
+import json
+import logging
 import os
 import sys
-import logging
-import json
 from os.path import exists
-
 from urllib.parse import quote
+
 from dotenv import load_dotenv
 
 from .. import __version__
@@ -257,6 +257,12 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.ScopedRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "moh_rate_limit": "60/minute",
+    },
 }
 
 # Password validation

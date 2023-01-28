@@ -875,6 +875,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
+  /api/v1/ingest/all:
+    get:
+      operationId: api_v1_ingest_all_retrieve
+      description: data ngest
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/data_ingest'
+          description: ''
   /api/v1/moh/biomarkers/:
     get:
       operationId: biomarkers_list
@@ -4923,7 +4938,8 @@ components:
         program_id:
           type: string
           minLength: 1
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
+          pattern: ^[A-Za-z0-9\-\._]{1,64}$
+          maxLength: 64
         name:
           type: string
           minLength: 1
@@ -5354,7 +5370,8 @@ components:
       properties:
         program_id:
           type: string
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
+          pattern: ^[A-Za-z0-9\-\._]{1,64}$
+          maxLength: 64
         name:
           type: string
           maxLength: 255
@@ -5373,7 +5390,8 @@ components:
         program_id:
           type: string
           minLength: 1
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
+          pattern: ^[A-Za-z0-9\-\._]{1,64}$
+          maxLength: 64
         name:
           type: string
           minLength: 1
@@ -6037,6 +6055,13 @@ components:
       - treatment_setting
       - treatment_start_date
       - treatment_type
+    data_ingest:
+      type: object
+      properties:
+        ingest:
+          type: integer
+      required:
+      - ingest
     moh_overview_schema_response:
       type: object
       properties:

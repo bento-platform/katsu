@@ -1,63 +1,61 @@
-from rest_framework import viewsets
-from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
-from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
-from chord_metadata_service.mohpackets.utils import get_authorized_datasets
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
-from rest_framework.decorators import api_view
-
+from rest_framework import serializers, viewsets
+from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 
 from chord_metadata_service.mohpackets.filters import (
-    ProgramFilter,
-    DonorFilter,
-    SpecimenFilter,
-    SampleRegistrationFilter,
-    PrimaryDiagnosisFilter,
-    TreatmentFilter,
-    ChemotherapyFilter,
-    HormoneTherapyFilter,
-    RadiationFilter,
-    ImmunotherapyFilter,
-    SurgeryFilter,
-    FollowUpFilter,
     BiomarkerFilter,
+    ChemotherapyFilter,
     ComorbidityFilter,
-)
-from chord_metadata_service.mohpackets.serializers import (
-    ProgramSerializer,
-    DonorSerializer,
-    SpecimenSerializer,
-    SampleRegistrationSerializer,
-    PrimaryDiagnosisSerializer,
-    TreatmentSerializer,
-    ChemotherapySerializer,
-    HormoneTherapySerializer,
-    RadiationSerializer,
-    ImmunotherapySerializer,
-    SurgerySerializer,
-    FollowUpSerializer,
-    BiomarkerSerializer,
-    ComorbiditySerializer,
+    DonorFilter,
+    FollowUpFilter,
+    HormoneTherapyFilter,
+    ImmunotherapyFilter,
+    PrimaryDiagnosisFilter,
+    ProgramFilter,
+    RadiationFilter,
+    SampleRegistrationFilter,
+    SpecimenFilter,
+    SurgeryFilter,
+    TreatmentFilter,
 )
 from chord_metadata_service.mohpackets.models import (
-    Program,
-    Donor,
-    Specimen,
-    SampleRegistration,
-    PrimaryDiagnosis,
-    Treatment,
-    Chemotherapy,
-    HormoneTherapy,
-    Radiation,
-    Immunotherapy,
-    Surgery,
-    FollowUp,
     Biomarker,
+    Chemotherapy,
     Comorbidity,
+    Donor,
+    FollowUp,
+    HormoneTherapy,
+    Immunotherapy,
+    PrimaryDiagnosis,
+    Program,
+    Radiation,
+    SampleRegistration,
+    Specimen,
+    Surgery,
+    Treatment,
 )
-
+from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
+from chord_metadata_service.mohpackets.serializers import (
+    BiomarkerSerializer,
+    ChemotherapySerializer,
+    ComorbiditySerializer,
+    DonorSerializer,
+    FollowUpSerializer,
+    HormoneTherapySerializer,
+    ImmunotherapySerializer,
+    PrimaryDiagnosisSerializer,
+    ProgramSerializer,
+    RadiationSerializer,
+    SampleRegistrationSerializer,
+    SpecimenSerializer,
+    SurgerySerializer,
+    TreatmentSerializer,
+)
+from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
+from chord_metadata_service.mohpackets.utils import get_authorized_datasets
 
 """
     This Views module uses ModelViewSet from Django Rest Framework.
@@ -100,8 +98,10 @@ class ProgramViewSet(viewsets.ModelViewSet):
     serializer_class = ProgramSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProgramFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = Program.objects.all()
 
 
@@ -109,8 +109,10 @@ class DonorViewSet(viewsets.ModelViewSet):
     serializer_class = DonorSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = DonorFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = Donor.objects.all()
 
     def get_queryset(self):
@@ -121,8 +123,10 @@ class SpecimenViewSet(viewsets.ModelViewSet):
     serializer_class = SpecimenSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = SpecimenFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = Specimen.objects.all()
 
     def get_queryset(self):
@@ -133,8 +137,10 @@ class SampleRegistrationViewSet(viewsets.ModelViewSet):
     serializer_class = SampleRegistrationSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = SampleRegistrationFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = SampleRegistration.objects.all()
 
     def get_queryset(self):
@@ -145,8 +151,10 @@ class PrimaryDiagnosisViewSet(viewsets.ModelViewSet):
     serializer_class = PrimaryDiagnosisSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = PrimaryDiagnosisFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = PrimaryDiagnosis.objects.all()
 
     def get_queryset(self):
@@ -157,8 +165,10 @@ class TreatmentViewSet(viewsets.ModelViewSet):
     serializer_class = TreatmentSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = TreatmentFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = Treatment.objects.all()
 
     def get_queryset(self):
@@ -169,8 +179,10 @@ class ChemotherapyViewSet(viewsets.ModelViewSet):
     serializer_class = ChemotherapySerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = ChemotherapyFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = Chemotherapy.objects.all()
 
     def get_queryset(self):
@@ -181,8 +193,10 @@ class HormoneTherapyViewSet(viewsets.ModelViewSet):
     serializer_class = HormoneTherapySerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = HormoneTherapyFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = HormoneTherapy.objects.all()
 
     def get_queryset(self):
@@ -193,8 +207,10 @@ class RadiationViewSet(viewsets.ModelViewSet):
     serializer_class = RadiationSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = RadiationFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = Radiation.objects.all()
 
     def get_queryset(self):
@@ -205,8 +221,10 @@ class ImmunotherapyViewSet(viewsets.ModelViewSet):
     serializer_class = ImmunotherapySerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = ImmunotherapyFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = Immunotherapy.objects.all()
 
     def get_queryset(self):
@@ -217,8 +235,10 @@ class SurgeryViewSet(viewsets.ModelViewSet):
     serializer_class = SurgerySerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = SurgeryFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = Surgery.objects.all()
 
     def get_queryset(self):
@@ -229,8 +249,10 @@ class FollowUpViewSet(viewsets.ModelViewSet):
     serializer_class = FollowUpSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = FollowUpFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = FollowUp.objects.all()
 
     def get_queryset(self):
@@ -241,8 +263,10 @@ class BiomarkerViewSet(viewsets.ModelViewSet):
     serializer_class = BiomarkerSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = BiomarkerFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = Biomarker.objects.all()
 
     def get_queryset(self):
@@ -253,8 +277,10 @@ class ComorbidityViewSet(viewsets.ModelViewSet):
     serializer_class = ComorbiditySerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = ComorbidityFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "moh_rate_limit"
     queryset = Comorbidity.objects.all()
 
     def get_queryset(self):
@@ -281,6 +307,7 @@ class ComorbidityViewSet(viewsets.ModelViewSet):
     },
 )
 @api_view(["GET"])
+@throttle_classes([MoHRateThrottle])
 def moh_overview(_request):
     """
     Return a summary of the statistics for the database:
