@@ -2,8 +2,8 @@ from rest_framework.throttling import SimpleRateThrottle
 
 """
     This module contains the custom throttling class for the MOH API.
-    Most class-based API will use the built-in ScopedRateThrottle class, but
-    the function-based API will use this custom throttling class.
+    The cache key is set to the endpoint name, so that each endpoint
+    would have its own rate limit.
 """
 
 
