@@ -136,6 +136,7 @@ PROCEDURE = {
         "code": ontology_class("that represents a clinical procedure performed on a subject"),
         "body_site": ontology_class("that is specified when it is not possible to represent the procedure with a "
                                     "single ontology class"),
+        "performed": "Age/time when the procedure was performed",
         **EXTRA_PROPERTIES
     }
 }
@@ -268,6 +269,16 @@ BIOSAMPLE = {
     }
 }
 
+MEASUREMENT = {
+    "description": "The measurement element is used to record individual measurements. "
+                    "It can capture quantitative, ordinal (e.g., absent/present), or categorical measurements.",
+    "properties": {
+        "assay": "OntologyClass that describes the assay used to produce the measurement. REQUIRED.",
+        "measurement_value": "Result of the measurement",
+        "time_observed": "Time at which measurement was performed. RECOMMENDED.",
+        "procedure": "Clinical procdure performed to acquire the sample used for the measurement"
+    }
+}
 
 PHENOPACKET = {
     "description": "An anonymous phenotypic description of an individual or biosample with potential genes of interest "
@@ -298,6 +309,10 @@ PHENOPACKET = {
         "hts_files": {
             "description": "A list of HTS files derived from the individual.",
             "items": HTS_FILE
+        },
+        "measurements": {
+            "description": "Measurements performed in the proband",
+            "items": MEASUREMENT
         },
         "meta_data": META_DATA,
         **EXTRA_PROPERTIES

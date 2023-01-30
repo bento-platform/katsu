@@ -9,7 +9,7 @@ from decimal import Decimal
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Table
 from chord_metadata_service.phenopackets import models as pm
-from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, PHENOPACKET_V2_SCHEMA
 from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
@@ -60,7 +60,8 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
 
 def validate_phenopacket(phenopacket_data: dict[str, Any], idx: Optional[int] = None) -> None:
     # Validate phenopacket data against phenopackets schema.
-    validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
+    # validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
+    validation = schema_validation(phenopacket_data, PHENOPACKET_V2_SCHEMA)
     if not validation:
         # TODO: Report more precise errors
         raise IngestError(

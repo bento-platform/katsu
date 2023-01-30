@@ -109,6 +109,29 @@ AGE_OR_AGE_RANGE = {
     ]
 }
 
+ 
+TIME_INTERVAL = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:common:time_interval",
+    "title": "Age schema",
+    "description": "An age object describing the age of the individual at the time of collection of biospecimens or "
+                   "phenotypic observations.",
+    "type": "object",
+    "properties": {
+        "start": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "end": {
+            "type": "string",
+            "format": "date-time"
+        }
+    },
+    "additionalProperties": False,
+    "required": ["start", "end"]
+}
+
+
 DISEASE_ONSET = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:common:disease_onset",
