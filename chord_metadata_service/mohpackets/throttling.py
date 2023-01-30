@@ -4,6 +4,7 @@ from rest_framework.throttling import SimpleRateThrottle
     This module contains the custom throttling class for the MOH API.
     The cache key is set to the endpoint name, so that each endpoint
     would have its own rate limit.
+    The throttle limit is set to 60 requests per minute in the settings.
 """
 
 
