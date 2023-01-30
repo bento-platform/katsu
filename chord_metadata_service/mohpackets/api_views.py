@@ -100,8 +100,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
     filterset_class = ProgramFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Program.objects.all()
 
 
@@ -111,8 +110,7 @@ class DonorViewSet(viewsets.ModelViewSet):
     filterset_class = DonorFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Donor.objects.all()
 
     def get_queryset(self):
@@ -125,8 +123,7 @@ class SpecimenViewSet(viewsets.ModelViewSet):
     filterset_class = SpecimenFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Specimen.objects.all()
 
     def get_queryset(self):
@@ -139,8 +136,7 @@ class SampleRegistrationViewSet(viewsets.ModelViewSet):
     filterset_class = SampleRegistrationFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = SampleRegistration.objects.all()
 
     def get_queryset(self):
@@ -153,8 +149,7 @@ class PrimaryDiagnosisViewSet(viewsets.ModelViewSet):
     filterset_class = PrimaryDiagnosisFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = PrimaryDiagnosis.objects.all()
 
     def get_queryset(self):
@@ -167,8 +162,7 @@ class TreatmentViewSet(viewsets.ModelViewSet):
     filterset_class = TreatmentFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Treatment.objects.all()
 
     def get_queryset(self):
@@ -181,8 +175,7 @@ class ChemotherapyViewSet(viewsets.ModelViewSet):
     filterset_class = ChemotherapyFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Chemotherapy.objects.all()
 
     def get_queryset(self):
@@ -195,8 +188,7 @@ class HormoneTherapyViewSet(viewsets.ModelViewSet):
     filterset_class = HormoneTherapyFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = HormoneTherapy.objects.all()
 
     def get_queryset(self):
@@ -209,8 +201,7 @@ class RadiationViewSet(viewsets.ModelViewSet):
     filterset_class = RadiationFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Radiation.objects.all()
 
     def get_queryset(self):
@@ -223,8 +214,7 @@ class ImmunotherapyViewSet(viewsets.ModelViewSet):
     filterset_class = ImmunotherapyFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Immunotherapy.objects.all()
 
     def get_queryset(self):
@@ -237,8 +227,7 @@ class SurgeryViewSet(viewsets.ModelViewSet):
     filterset_class = SurgeryFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Surgery.objects.all()
 
     def get_queryset(self):
@@ -251,8 +240,7 @@ class FollowUpViewSet(viewsets.ModelViewSet):
     filterset_class = FollowUpFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = FollowUp.objects.all()
 
     def get_queryset(self):
@@ -265,8 +253,7 @@ class BiomarkerViewSet(viewsets.ModelViewSet):
     filterset_class = BiomarkerFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Biomarker.objects.all()
 
     def get_queryset(self):
@@ -279,8 +266,7 @@ class ComorbidityViewSet(viewsets.ModelViewSet):
     filterset_class = ComorbidityFilter
     # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Comorbidity.objects.all()
 
     def get_queryset(self):

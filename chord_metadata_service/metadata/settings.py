@@ -260,9 +260,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.ScopedRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {
-        "moh_rate_limit": "60/minute",
-    },
+    "DEFAULT_THROTTLE_RATES": {"moh_rate_limit": "60/minute"},
 }
 
 # Password validation
