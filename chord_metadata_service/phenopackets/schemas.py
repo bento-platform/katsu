@@ -1,6 +1,5 @@
 # Individual schemas for validation of JSONField values
 
-from chord_metadata_service.mcode.schemas import QUANTITY
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.schemas import RESOURCE_SCHEMA
 from chord_metadata_service.restapi.schemas import (
@@ -263,7 +262,7 @@ GESTATIONAL_AGE = tag_ids_and_describe({
 }, {}) #TODO: description
 
 
-PHENOPACKET_TIME_ELEMENT_SCHEMA = ({
+PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:time_element",
     "title": "Measurement schema",
@@ -279,7 +278,7 @@ PHENOPACKET_TIME_ELEMENT_SCHEMA = ({
         },
         TIME_INTERVAL
     ],
-}, {}) #TODO: description
+}, descriptions.TIME_ELEMENT) #TODO: description
 
 
 PHENOPACKET_PROCEDURE_SCHEMA = tag_ids_and_describe({
@@ -304,7 +303,7 @@ PHENOPACKET_MEASUREMENT_SCHEMA = tag_ids_and_describe({
     "properties": {
         "description": {"type": "string"},
         "assay": ONTOLOGY_CLASS,
-        "measurement_value": QUANTITY, # TODO: one of Value | ComplexValue
+        # "measurement_value": QUANTITY, # TODO: one of Value | ComplexValue
         "time_observed": PHENOPACKET_TIME_ELEMENT_SCHEMA,
         "procedure": PHENOPACKET_PROCEDURE_SCHEMA
     },
