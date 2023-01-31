@@ -1,7 +1,10 @@
-from .. import __version__
-from .settings import BENTO_SERVICE_KIND, CHORD_SERVICE_TYPE, CHORD_SERVICE_ID, DEBUG
 import subprocess
 import os
+
+from bento_lib.types import GA4GHServiceInfo
+
+from .. import __version__
+from .settings import BENTO_SERVICE_KIND, CHORD_SERVICE_TYPE, CHORD_SERVICE_ID, DEBUG
 
 path_for_git = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 
@@ -18,7 +21,7 @@ before_first_request_func()
 
 # Service info according to spec https://github.com/ga4gh-discovery/ga4gh-service-info
 
-SERVICE_INFO = {
+SERVICE_INFO: GA4GHServiceInfo = {
     "id": CHORD_SERVICE_ID,
     "name": "Katsu",  # TODO: Globally unique?
     "type": CHORD_SERVICE_TYPE,
@@ -32,15 +35,17 @@ SERVICE_INFO = {
     "version": __version__,
     "bento": {
         "serviceKind": BENTO_SERVICE_KIND,
+        "dataService": True,
     },
 }
 
 
-def service_info_git():
-    info = {
+def service_info_git() -> GA4GHServiceInfo:
+    info: GA4GHServiceInfo = GA4GHServiceInfo(**{  # Shouldn't need the coercing, but PyCharm is complaining
         **SERVICE_INFO,
         "environment": "dev",
-    }
+    })
+
     try:
         if res_tag := subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"]):
             res_tag_str: str = res_tag.decode().rstrip()
@@ -50,6 +55,9 @@ def service_info_git():
             res_branch_str: str = res_branch.decode().rstrip()
             info["git_branch"] = res_branch_str
             info["bento"]["gitBranch"] = res_branch_str
+        if res_commit := subprocess.check_output(["git", "rev-parse", "HEAD"]):
+            res_commit_str: str = res_commit.decode().rstrip()
+            info["bento"]["gitCommit"] = res_commit_str
 
     except Exception as e:
         except_name = type(e).__name__
