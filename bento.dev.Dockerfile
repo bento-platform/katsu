@@ -1,17 +1,20 @@
 FROM ghcr.io/bento-platform/bento_base_image:python-debian-2023.01.17
 
 # Install Postgres client for checking if database is ready
+# Install Poetry for dependency management
 RUN apt-get update -y && \
-    apt-get install -y postgresql-client
+    apt-get install -y postgresql-client && \
+    pip install --no-cache-dir "poetry==1.3.2"
 
 # Backwards-compatible with old BentoV2 container layout
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
-COPY requirements-dev.txt requirements-dev.txt
+COPY pyproject.toml .
+COPY poetry.lock .
+COPY poetry.toml .
 
-# Install production dependencies
-RUN pip install --no-cache-dir -r requirements-dev.txt
+# Install production + development dependencies
+RUN poetry install --no-root
 
 # Create temporary directory for downloading files etc.
 RUN mkdir -p tmp

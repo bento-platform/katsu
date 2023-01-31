@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Install the package / any dependency changes
+poetry install
+
 # Wait for database to start
 ./wait_for_db.bash
 
