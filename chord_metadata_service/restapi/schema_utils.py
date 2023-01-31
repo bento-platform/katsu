@@ -1,3 +1,4 @@
+from bento_lib.search import queries as q
 from typing import List, Optional
 
 from .description_utils import describe_schema
@@ -38,11 +39,17 @@ def _searchable_field(operations: List[str], order: int, queryable: str = "all",
 
 
 def search_optional_eq(order: int, queryable: str = "all"):
-    return _searchable_field(["eq", "in"], order, queryable, multiple=False)
+    return _searchable_field([q.SEARCH_OP_EQ, q.SEARCH_OP_IN], order, queryable, multiple=False)
 
 
 def search_optional_str(order: int, queryable: str = "all", multiple: bool = False):
-    return _searchable_field(["eq", "ico", "in"], order, queryable, multiple)
+    return _searchable_field([
+        q.SEARCH_OP_EQ,
+        q.SEARCH_OP_ICO,
+        q.SEARCH_OP_IN,
+        q.SEARCH_OP_ISW,
+        q.SEARCH_OP_IEW,
+    ], order, queryable, multiple)
 
 
 def tag_schema_with_search_properties(schema, search_descriptions: Optional[dict]):
