@@ -10,7 +10,7 @@ __all__ = [
     "name",
     "__version__",
     "metadata",
-    "experiments",
+    "patients",
 ]
 
 name = __package__
