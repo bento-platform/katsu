@@ -21,6 +21,8 @@ from dotenv import load_dotenv
 
 from .. import __version__
 
+import chord_metadata_service.mohpackets.permissible_values as val
+
 load_dotenv()
 
 logging.getLogger().setLevel(logging.INFO)
@@ -366,4 +368,16 @@ SPECTACULAR_SETTINGS = {
     "SWAGGER_UI_SETTINGS": {
         "docExpansion": "none",  # collapse all endpoints by default
     },
+    # Specify Enum names for choices used by multiple fields
+    "ENUM_NAME_OVERRIDES": {
+        "BooleanEnum" :  ["Yes", "No", "Unknown"],
+        "TCategoryEnum": val.T_CATEGORY,
+        "NCategoryEnum": val.N_CATEGORY,
+        "MCategoryEnum": val.M_CATEGORY,
+        "StageGroupEnum": val.STAGE_GROUP,
+        "StagingSystemEnum": val.TUMOUR_STAGING_SYSTEM,
+        "ReferencePathologyEnum": val.CONFIRMED_DIAGNOSIS_TUMOUR,
+        "MarginTypesEnum": val.MARGIN_TYPES
+    }
+
 }
