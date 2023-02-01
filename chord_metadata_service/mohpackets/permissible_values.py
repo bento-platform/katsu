@@ -3,11 +3,16 @@ These lists contain the permissible values for their respective
 MoH model fields and are used for validation during serialization.
 """
 
+BOOLEAN = [
+    "Yes",
+    "No",
+    "Unknown"
+]
+
 CAUSE_OF_DEATH = [
     "Died of cancer",
     "Died of other reasons",
-    "Unknown",
-    ""
+    "Unknown"
 ]
 
 PRIMARY_SITE = [
@@ -95,8 +100,7 @@ TUMOUR_STAGING_SYSTEM = [
     "Rai staging system",
     "Revised International staging system (RISS)",
     "SEER staging system",
-    "St Jude staging system",
-    ""
+    "St Jude staging system"
 ]
 
 T_CATEGORY = [
@@ -151,8 +155,7 @@ T_CATEGORY = [
     "Tis(Paget’s)",
     "Tis pu",
     "Tis pd",
-    "TX",
-    ""
+    "TX"
 ]
 
 N_CATEGORY = [
@@ -182,7 +185,6 @@ N_CATEGORY = [
     "N3c",
     "N4",
     "NX",
-    ""
 ]
 
 M_CATEGORY = [
@@ -202,8 +204,7 @@ M_CATEGORY = [
     "M1d(0)",
     "M1d(1)",
     "M1e",
-    "MX",
-    ""
+    "MX"
 ]
 
 STAGE_GROUP = [
@@ -292,8 +293,7 @@ STAGE_GROUP = [
     "In situ",
     "Localized",
     "Regionalized",
-    "Distant",
-    ""
+    "Distant"
 ]
 
 STORAGE = [
@@ -312,8 +312,7 @@ CONFIRMED_DIAGNOSIS_TUMOUR = [
     "Yes",
     "No",
     "Not done",
-    "Unknown",
-    ""
+    "Unknown"
 ]
 
 TUMOUR_GRADING_SYSTEM = [
@@ -327,8 +326,7 @@ TUMOUR_GRADING_SYSTEM = [
     "Scarff-Bloom-Richardson grading system",
     "Three-tier grading system",
     "Two-tier grading system",
-    "WHO grading system for CNS tumours",
-    ""
+    "WHO grading system for CNS tumours"
 ]
 
 TUMOUR_GRADE = [
@@ -349,23 +347,20 @@ TUMOUR_GRADE = [
     "Grade Group 2",
     "Grade Group 3",
     "Grade Group 4",
-    "Grade Group 5",
-    ""
+    "Grade Group 5"
 ]
 
 PERCENT_CELLS_RANGE = [
     "0-19%",
     "20-50%",
-    "51-100%",
-    ""
+    "51-100%"
 ]
 
 CELLS_MEASURE_METHOD = [
     "Genomics",
     "Image analysis",
     "Pathology estimate by percent nuclei",
-    "Unknown",
-    ""
+    "Unknown"
 ]
 
 GENDER = [
@@ -680,8 +675,7 @@ SURGERY_TYPE = [
 SURGERY_LOCATION = [
     "Local recurrence",
     "Metastatic",
-    "Primary",
-    ""
+    "Primary"
 ]
 
 TUMOUR_FOCALITY = [
@@ -689,8 +683,7 @@ TUMOUR_FOCALITY = [
     "Multifocal",
     "Not applicable",
     "Unifocal",
-    "Unknown",
-    ""
+    "Unknown"
 ]
 
 TUMOUR_CLASSIFICATION = [
@@ -699,8 +692,7 @@ TUMOUR_CLASSIFICATION = [
     "R0",
     "R1",
     "R2",
-    "Unknown",
-    ""
+    "Unknown"
 ]
 
 MARGIN_TYPES = [
@@ -709,8 +701,7 @@ MARGIN_TYPES = [
     "Distal margin",
     "Not applicable",
     "Proximal margin",
-    "Unknown",
-    ""
+    "Unknown"
 ]
 
 LYMPHOVACULAR_INVASION = [
@@ -720,8 +711,7 @@ LYMPHOVACULAR_INVASION = [
     "Not applicable",
     "Present",
     "Venous (large vessel) invasion only",
-    "Unknown",
-    ""
+    "Unknown"
 ]
 
 PERINEURAL_INVASION = [
@@ -729,8 +719,7 @@ PERINEURAL_INVASION = [
     "Cannot be assessed",
     "Not applicable",
     "Present",
-    "Unknown",
-    ""
+    "Unknown"
 ]
 
 LOST_FOLLOW_UP_REASON = [
@@ -739,8 +728,7 @@ LOST_FOLLOW_UP_REASON = [
     "Lost contact",
     "Not applicable",
     "Unknown",
-    "Withdrew from study",
-    ""
+    "Withdrew from study"
 ]
 
 DISEASE_STATUS_FOLLOWUP = [
@@ -759,8 +747,7 @@ RELAPSE_TYPE = [
     "Local recurrence",
     "Local recurrence and distant metastasis",
     "Progression (liquid tumours)",
-    "Biochemical progression",
-    ""
+    "Biochemical progression"
 ]
 
 PROGRESSION_STATUS_METHOD = [
@@ -769,8 +756,7 @@ PROGRESSION_STATUS_METHOD = [
     "Assessment of symptom control (procedure)"
     "Physical examination procedure (procedure)"
     "Tumor marker measurement (procedure)"
-    "Laboratory data interpretation (procedure)",
-    ""
+    "Laboratory data interpretation (procedure)"
 ]
 
 MALIGNANCY_LATERALITY = [
@@ -780,8 +766,7 @@ MALIGNANCY_LATERALITY = [
     "Not applicable",
     "Right",
     "Unilateral, Side not specified",
-    "Unknown",
-    ""
+    "Unknown"
 ]
 
 REGEX_PATTERNS = {
