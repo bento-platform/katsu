@@ -6,7 +6,7 @@ MoH model fields and are used for validation during serialization.
 CAUSE_OF_DEATH = [
     "Died of cancer",
     "Died of other reasons",
-    "Unknown"
+    "Unknown",
 ]
 
 PRIMARY_SITE = [
@@ -762,3 +762,27 @@ MALIGNANCY_LATERALITY =[
     "Unilateral, Side not specified",
     "Unknown"
 ]
+
+REGEX_PATTERNS = {
+    # ID format
+    # Examples: 90234, BLD_donor_89, AML-90
+    "ID": r"^[A-Za-z0-9\-\._]{1,64}",
+    
+    # Date format
+    # A date, or partial date (e.g. just year or year + month) as used in
+    # human communication. The format is YYYY, YYYY-MM, or YYYY-MM-DD,
+    # e.g. 2018, 1973-06, or 1905-08-23. There SHALL be no time zone.
+    "DATE": r"^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
+    
+    # ICD-O-3 morphology codes
+    # Examples: 8260/3, 9691/36
+    "MORPHOLOGY": r"^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$",
+    
+    # ICD-O-3 topography codes
+    # Examples: C50.1, C18
+    "TOPOGRAPHY": r"^[C][0-9]{2}(.[0-9]{1})?$",
+
+    # WHO ICD-10 codes
+    # Examples: E10, C50.1, I11, M06
+    "COMORBIDITY": r"^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$"
+}
