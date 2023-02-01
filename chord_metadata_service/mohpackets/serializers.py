@@ -60,9 +60,6 @@ class DonorSerializer(serializers.ModelSerializer):
         max_length=64,
         validators=[UniqueValidator(queryset=Donor.objects.all())]
     )
-    is_deceased = serializers.ChoiceField(
-        choices=["Yes", "No"]
-    )
     cause_of_death = serializers.ChoiceField(
         choices=val.CAUSE_OF_DEATH
     )
@@ -280,9 +277,6 @@ class RadiationSerializer(serializers.ModelSerializer):
     anatomical_site_irradiated = serializers.ChoiceField(
         choices=val.RADIATION_ANATOMICAL_SITE
     )
-    radiation_boost = serializers.ChoiceField(
-        choices=["Yes", "No"]
-    )
     reference_radiation_treatment_id = serializers.CharField(  # TODO: write validator
         max_length=64
     )
@@ -343,9 +337,6 @@ class FollowUpSerializer(serializers.ModelSerializer):
     date_of_followup = serializers.RegexField(
         regex=regex["DATE"],
         max_length=32
-    )
-    lost_to_followup = serializers.ChoiceField(
-        choices=["Yes", "No"]
     )
     lost_to_followup_reason = serializers.ChoiceField(
         choices=val.LOST_FOLLOW_UP_REASON
