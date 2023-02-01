@@ -1,16 +1,8 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 import chord_metadata_service.mohpackets.permissible_values as val
 from chord_metadata_service.mohpackets.permissible_values import REGEX_PATTERNS as regex
-
-from .validators import (
-    positive_int,
-    ChoicesValidator,
-    ID,
-    DATE,
-    TOPOGRAPHY,
-)
-from rest_framework.validators import UniqueValidator
 
 from .models import (
     Biomarker,
@@ -56,12 +48,6 @@ class ProgramSerializer(serializers.ModelSerializer):
         max_length=64,
         validators=[UniqueValidator(queryset=Program.objects.all())],
     )
-    name = serializers.CharField(
-        max_length=255, 
-        validators=[ID]
-        )
-    created = serializers.DateTimeField(validators=[DATE])  # TODO: ask Son (date format)
-    updated = serializers.DateTimeField(validators=[DATE])  # TODO: ask Son
 
     class Meta:
         model = Program
@@ -206,9 +192,6 @@ class PrimaryDiagnosisSerializer(serializers.ModelSerializer):
     lymph_nodes_examined_method = serializers.ChoiceField(
         choices=val.LYMPH_NODE_METHOD
     )
-    # number_lymph_nodes_positive = serializers.IntegerField(
-    #     validators=[positive_int]
-    # )
     clinical_tumour_staging_system = serializers.ChoiceField(
         choices=val.TUMOUR_STAGING_SYSTEM
     )
@@ -255,12 +238,6 @@ class TreatmentSerializer(serializers.ModelSerializer):
     treatment_intent = serializers.ChoiceField(
         choices=["Curative", "Palliative"]
     )
-    days_per_cycle = serializers.IntegerField(
-        validators=[positive_int]        
-    )
-    number_of_cycles = serializers.IntegerField(
-        validators=[positive_int]
-    )
     response_to_treatment_criteria_method = serializers.ChoiceField(
         choices=val.TREATMENT_RESPONSE_METHOD
     )
@@ -277,12 +254,7 @@ class ChemotherapySerializer(serializers.ModelSerializer):
     chemotherapy_dosage_units = serializers.ChoiceField(
         choices=val.DOSAGE_UNITS
     )
-    cumulative_drug_dosage_prescribed = serializers.IntegerField(
-        validators=[positive_int]
-    )
-    cumulative_drug_dosage_actual = serializers.IntegerField(
-        validators=[positive_int]
-    )
+
     class Meta:
         model = Chemotherapy
         fields = "__all__"
@@ -292,12 +264,7 @@ class HormoneTherapySerializer(serializers.ModelSerializer):
     chemotherapy_dosage_units = serializers.ChoiceField(
         choices=val.DOSAGE_UNITS
     )
-    cumulative_drug_dosage_prescribed = serializers.IntegerField(
-        validators=[positive_int]
-    )
-    cumulative_drug_dosage_actual = serializers.IntegerField(
-        validators=[positive_int]
-    )
+
     class Meta:
         model = HormoneTherapy
         fields = "__all__"
@@ -310,12 +277,6 @@ class RadiationSerializer(serializers.ModelSerializer):
     radiation_therapy_type = serializers.ChoiceField(
         choices=["External", "Internal"]
     )
-    radiation_therapy_fractions = serializers.IntegerField(
-        validators=[positive_int]
-    )
-    radiation_therapy_dosage = serializers.IntegerField(
-        validators=[positive_int]
-    )
     anatomical_site_irradiated = serializers.ChoiceField(
         choices=val.RADIATION_ANATOMICAL_SITE
     )
@@ -325,6 +286,7 @@ class RadiationSerializer(serializers.ModelSerializer):
     reference_radiation_treatment_id = serializers.CharField(  # TODO: write validator
         max_length=64
     )
+
     class Meta:
         model = Radiation
         fields = "__all__"
@@ -334,6 +296,7 @@ class ImmunotherapySerializer(serializers.ModelSerializer):
     immunotherapy_type = serializers.ChoiceField(
         choices=val.IMMUNOTHERAPY_TYPE
     )
+
     class Meta:
         model = Immunotherapy
         fields = "__all__"
@@ -348,15 +311,6 @@ class SurgerySerializer(serializers.ModelSerializer):
     )
     surgery_location = serializers.ChoiceField(
         choices=val.SURGERY_LOCATION
-    )
-    tumour_length = serializers.IntegerField(
-        validators=[positive_int]
-    )
-    tumour_width = serializers.IntegerField(
-        validators=[positive_int]
-    )
-    greatest_dimension_tumour = serializers.IntegerField(
-        validators=[positive_int]
     )
     tumour_focality = serializers.ChoiceField(
         choices=val.TUMOUR_FOCALITY
@@ -379,16 +333,16 @@ class SurgerySerializer(serializers.ModelSerializer):
     perineural_invasion = serializers.ChoiceField(
         choices=val.PERINEURAL_INVASION
     )
-    
+
     class Meta:
         model = Surgery
         fields = "__all__"
 
 
 class FollowUpSerializer(serializers.ModelSerializer):
-    date_of_followup = serializers.CharField(
-        max_length=32,
-        validators=[DATE]
+    date_of_followup = serializers.RegexField(
+        regex=regex["DATE"],
+        max_length=32
     )
     lost_to_followup = serializers.ChoiceField(
         choices=["Yes", "No"]
@@ -401,7 +355,7 @@ class FollowUpSerializer(serializers.ModelSerializer):
     )
     relapse_type = serializers.ChoiceField(
         choices=val.RELAPSE_TYPE
-    )    
+    )
     date_of_relapse = serializers.RegexField(
         regex=regex["DATE"],
         max_length=32
@@ -428,6 +382,7 @@ class FollowUpSerializer(serializers.ModelSerializer):
     recurrence_stage_group = serializers.ChoiceField(
         choices=val.STAGE_GROUP
     )
+
     class Meta:
         model = FollowUp
         fields = "__all__"
@@ -456,6 +411,7 @@ class ComorbiditySerializer(serializers.ModelSerializer):
     comorbidity_treatment = serializers.CharField(
         max_length=255
     )
+
     class Meta:
         model = Comorbidity
         fields = "__all__"
