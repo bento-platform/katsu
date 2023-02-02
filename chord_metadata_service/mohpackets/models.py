@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils import timezone
 
@@ -51,7 +52,7 @@ class Donor(models.Model):
     cause_of_death = models.CharField(max_length=255, blank=True, default="")
     date_of_birth = models.CharField(max_length=32, null=False, blank=False)
     date_of_death = models.CharField(max_length=32, blank=True, default="")
-    primary_site = models.CharField(max_length=255, null=False, blank=False)
+    primary_site = ArrayField(models.CharField(max_length=255, blank=False, null=False))
 
     class Meta:
         ordering = ["submitter_donor_id"]
@@ -171,7 +172,9 @@ class Treatment(models.Model):
     submitter_primary_diagnosis_id = models.ForeignKey(
         PrimaryDiagnosis, on_delete=models.CASCADE, null=False, blank=False
     )
-    treatment_type = models.CharField(max_length=255, null=False, blank=False)
+    treatment_type = ArrayField(
+        models.CharField(max_length=255), null=False, blank=False
+    )
     is_primary_treatment = models.CharField(max_length=32, null=False, blank=False)
     treatment_start_date = models.CharField(max_length=32, null=False, blank=False)
     treatment_end_date = models.CharField(max_length=32, null=False, blank=False)
@@ -315,9 +318,15 @@ class Surgery(models.Model):
     residual_tumour_classification = models.CharField(
         max_length=64, blank=True, default=""
     )
-    margin_types_involved = models.CharField(max_length=128, blank=True, default="")
-    margin_types_not_involved = models.CharField(max_length=128, blank=True, default="")
-    margin_types_not_assessed = models.CharField(max_length=128, blank=True, default="")
+    margin_types_involved = ArrayField(
+        models.CharField(max_length=128, blank=True, default="")
+    )
+    margin_types_not_involved = ArrayField(
+        models.CharField(max_length=128, blank=True, default="")
+    )
+    margin_types_not_assessed = ArrayField(
+        models.CharField(max_length=128, blank=True, default="")
+    )
     lymphovascular_invasion = models.CharField(max_length=255, blank=True, default="")
     perineural_invasion = models.CharField(max_length=128, blank=True, default="")
 
