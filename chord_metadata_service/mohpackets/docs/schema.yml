@@ -5400,7 +5400,7 @@ paths:
       - in: query
         name: is_deceased
         schema:
-          type: string
+          type: boolean
       - in: query
         name: cause_of_death
         schema:
@@ -5523,7 +5523,7 @@ paths:
       - in: query
         name: lost_to_followup
         schema:
-          type: string
+          type: boolean
       - in: query
         name: lost_to_followup_reason
         schema:
@@ -5790,7 +5790,7 @@ paths:
       - in: query
         name: radiation_boost
         schema:
-          type: string
+          type: boolean
       - in: query
         name: reference_radiation_treatment_id
         schema:
@@ -7045,7 +7045,7 @@ paths:
       - in: query
         name: is_deceased
         schema:
-          type: string
+          type: boolean
       - in: query
         name: cause_of_death
         schema:
@@ -7305,7 +7305,7 @@ paths:
       - in: query
         name: lost_to_followup
         schema:
-          type: string
+          type: boolean
       - in: query
         name: lost_to_followup_reason
         schema:
@@ -8275,7 +8275,7 @@ paths:
       - in: query
         name: radiation_boost
         schema:
-          type: string
+          type: boolean
       - in: query
         name: reference_radiation_treatment_id
         schema:
@@ -9903,6 +9903,12 @@ components:
     BlankEnum:
       enum:
       - ''
+    BooleanEnum:
+      enum:
+      - 'Yes'
+      - 'No'
+      - Unknown
+      type: string
     CauseOfDeathEnum:
       enum:
       - Died of cancer
@@ -10000,7 +10006,7 @@ components:
           type: integer
           readOnly: true
         prior_malignancy:
-          $ref: '#/components/schemas/IsPrimaryTreatmentEnum'
+          $ref: '#/components/schemas/BooleanEnum'
         laterality_of_prior_malignancy:
           oneOf:
           - $ref: '#/components/schemas/LateralityOfPriorMalignancyEnum'
@@ -10010,7 +10016,9 @@ components:
           maxLength: 64
           pattern: ^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$
         comorbidity_treatment_status:
-          $ref: '#/components/schemas/IsPrimaryTreatmentEnum'
+          oneOf:
+          - $ref: '#/components/schemas/BooleanEnum'
+          - $ref: '#/components/schemas/BlankEnum'
         comorbidity_treatment:
           type: string
           maxLength: 255
@@ -10035,21 +10043,21 @@ components:
       type: object
       properties:
         prior_malignancy:
-          $ref: '#/components/schemas/IsPrimaryTreatmentEnum'
+          $ref: '#/components/schemas/BooleanEnum'
         laterality_of_prior_malignancy:
           oneOf:
           - $ref: '#/components/schemas/LateralityOfPriorMalignancyEnum'
           - $ref: '#/components/schemas/BlankEnum'
         comorbidity_type_code:
           type: string
-          minLength: 1
           maxLength: 64
           pattern: ^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$
         comorbidity_treatment_status:
-          $ref: '#/components/schemas/IsPrimaryTreatmentEnum'
+          oneOf:
+          - $ref: '#/components/schemas/BooleanEnum'
+          - $ref: '#/components/schemas/BlankEnum'
         comorbidity_treatment:
           type: string
-          minLength: 1
           maxLength: 255
         age_at_comorbidity_diagnosis:
           type: integer
@@ -10551,8 +10559,6 @@ components:
           type: string
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
-        is_deceased:
-          $ref: '#/components/schemas/RadiationBoostEnum'
         cause_of_death:
           oneOf:
           - $ref: '#/components/schemas/CauseOfDeathEnum'
@@ -10567,6 +10573,8 @@ components:
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         primary_site:
           $ref: '#/components/schemas/PrimarySiteEnum'
+        is_deceased:
+          type: boolean
         program_id:
           type: string
       required:
@@ -10585,8 +10593,6 @@ components:
           minLength: 1
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
-        is_deceased:
-          $ref: '#/components/schemas/RadiationBoostEnum'
         cause_of_death:
           oneOf:
           - $ref: '#/components/schemas/CauseOfDeathEnum'
@@ -10598,11 +10604,12 @@ components:
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         date_of_death:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         primary_site:
           $ref: '#/components/schemas/PrimarySiteEnum'
+        is_deceased:
+          type: boolean
         program_id:
           type: string
           minLength: 1
@@ -10961,8 +10968,6 @@ components:
           type: string
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        lost_to_followup:
-          $ref: '#/components/schemas/RadiationBoostEnum'
         lost_to_followup_reason:
           oneOf:
           - $ref: '#/components/schemas/LostToFollowupReasonEnum'
@@ -10987,24 +10992,26 @@ components:
           pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         recurrence_tumour_staging_system:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTumourStagingSystemEnum'
+          - $ref: '#/components/schemas/StagingSystemEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_t_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTCategoryEnum'
+          - $ref: '#/components/schemas/TCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_n_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalNCategoryEnum'
+          - $ref: '#/components/schemas/NCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_m_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalMCategoryEnum'
+          - $ref: '#/components/schemas/MCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_stage_group:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalStageGroupEnum'
+          - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
+        lost_to_followup:
+          type: boolean
         program_id:
           type: string
         submitter_donor_id:
@@ -11044,8 +11051,6 @@ components:
           minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        lost_to_followup:
-          $ref: '#/components/schemas/RadiationBoostEnum'
         lost_to_followup_reason:
           oneOf:
           - $ref: '#/components/schemas/LostToFollowupReasonEnum'
@@ -11058,7 +11063,6 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
         date_of_relapse:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         method_of_progression_status:
@@ -11067,29 +11071,30 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
         anatomic_site_progression_or_recurrence:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         recurrence_tumour_staging_system:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTumourStagingSystemEnum'
+          - $ref: '#/components/schemas/StagingSystemEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_t_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTCategoryEnum'
+          - $ref: '#/components/schemas/TCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_n_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalNCategoryEnum'
+          - $ref: '#/components/schemas/NCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_m_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalMCategoryEnum'
+          - $ref: '#/components/schemas/MCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_stage_group:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalStageGroupEnum'
+          - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
+        lost_to_followup:
+          type: boolean
         program_id:
           type: string
           minLength: 1
@@ -11844,12 +11849,6 @@ components:
       - id
       - meta_data
       - phenopacket
-    IsPrimaryTreatmentEnum:
-      enum:
-      - 'Yes'
-      - 'No'
-      - Unknown
-      type: string
     KaryotypicSexEnum:
       enum:
       - UNKNOWN_KARYOTYPE
@@ -11907,7 +11906,27 @@ components:
       - Venous (large vessel) invasion only
       - Unknown
       type: string
-    MarginTypesNotAssessedEnum:
+    MCategoryEnum:
+      enum:
+      - M0
+      - M0(i+)
+      - M1
+      - M1a
+      - M1a(0)
+      - M1a(1)
+      - M1b
+      - M1b(0)
+      - M1b(1)
+      - M1c
+      - M1c(0)
+      - M1c(1)
+      - M1d
+      - M1d(0)
+      - M1d(1)
+      - M1e
+      - MX
+      type: string
+    MarginTypesEnum:
       enum:
       - Circumferential resection margin
       - Common bile duct margin
@@ -12008,6 +12027,35 @@ components:
       - Imaging (procedure)Histopathology test (procedure)Assessment of symptom control
         (procedure)Physical examination procedure (procedure)Tumor marker measurement
         (procedure)Laboratory data interpretation (procedure)
+      type: string
+    NCategoryEnum:
+      enum:
+      - N0
+      - N0a
+      - N0a (biopsy)
+      - N0b
+      - N0b (no biopsy)
+      - N0(i+)
+      - N0(i-)
+      - N0(mol+)
+      - N0(mol-)
+      - N1
+      - N1a
+      - N1a(sn)
+      - N1b
+      - N1c
+      - N1mi
+      - N2
+      - N2a
+      - N2b
+      - N2c
+      - N2mi
+      - N3
+      - N3a
+      - N3b
+      - N3c
+      - N4
+      - NX
       type: string
     NullEnum:
       enum:
@@ -12852,21 +12900,21 @@ components:
       type: object
       properties:
         prior_malignancy:
-          $ref: '#/components/schemas/IsPrimaryTreatmentEnum'
+          $ref: '#/components/schemas/BooleanEnum'
         laterality_of_prior_malignancy:
           oneOf:
           - $ref: '#/components/schemas/LateralityOfPriorMalignancyEnum'
           - $ref: '#/components/schemas/BlankEnum'
         comorbidity_type_code:
           type: string
-          minLength: 1
           maxLength: 64
           pattern: ^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$
         comorbidity_treatment_status:
-          $ref: '#/components/schemas/IsPrimaryTreatmentEnum'
+          oneOf:
+          - $ref: '#/components/schemas/BooleanEnum'
+          - $ref: '#/components/schemas/BlankEnum'
         comorbidity_treatment:
           type: string
-          minLength: 1
           maxLength: 255
         age_at_comorbidity_diagnosis:
           type: integer
@@ -13083,8 +13131,6 @@ components:
           minLength: 1
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
-        is_deceased:
-          $ref: '#/components/schemas/RadiationBoostEnum'
         cause_of_death:
           oneOf:
           - $ref: '#/components/schemas/CauseOfDeathEnum'
@@ -13096,11 +13142,12 @@ components:
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         date_of_death:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         primary_site:
           $ref: '#/components/schemas/PrimarySiteEnum'
+        is_deceased:
+          type: boolean
         program_id:
           type: string
           minLength: 1
@@ -13270,8 +13317,6 @@ components:
           minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        lost_to_followup:
-          $ref: '#/components/schemas/RadiationBoostEnum'
         lost_to_followup_reason:
           oneOf:
           - $ref: '#/components/schemas/LostToFollowupReasonEnum'
@@ -13284,7 +13329,6 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
         date_of_relapse:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         method_of_progression_status:
@@ -13293,29 +13337,30 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
         anatomic_site_progression_or_recurrence:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         recurrence_tumour_staging_system:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTumourStagingSystemEnum'
+          - $ref: '#/components/schemas/StagingSystemEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_t_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTCategoryEnum'
+          - $ref: '#/components/schemas/TCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_n_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalNCategoryEnum'
+          - $ref: '#/components/schemas/NCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_m_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalMCategoryEnum'
+          - $ref: '#/components/schemas/MCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         recurrence_stage_group:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalStageGroupEnum'
+          - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
+        lost_to_followup:
+          type: boolean
         program_id:
           type: string
           minLength: 1
@@ -13761,23 +13806,23 @@ components:
           $ref: '#/components/schemas/LymphNodesExaminedMethodEnum'
         clinical_tumour_staging_system:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTumourStagingSystemEnum'
+          - $ref: '#/components/schemas/StagingSystemEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_t_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTCategoryEnum'
+          - $ref: '#/components/schemas/TCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_n_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalNCategoryEnum'
+          - $ref: '#/components/schemas/NCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_m_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalMCategoryEnum'
+          - $ref: '#/components/schemas/MCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_stage_group:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalStageGroupEnum'
+          - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
         cancer_type_code:
           type: string
@@ -13850,12 +13895,6 @@ components:
           $ref: '#/components/schemas/RadiationTherapyTypeEnum'
         anatomical_site_irradiated:
           $ref: '#/components/schemas/AnatomicalSiteIrradiatedEnum'
-        radiation_boost:
-          $ref: '#/components/schemas/RadiationBoostEnum'
-        reference_radiation_treatment_id:
-          type: string
-          minLength: 1
-          maxLength: 64
         radiation_therapy_fractions:
           type: integer
           maximum: 32767
@@ -13864,6 +13903,11 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
+        radiation_boost:
+          type: boolean
+        reference_radiation_treatment_id:
+          type: string
+          maxLength: 64
         program_id:
           type: string
           minLength: 1
@@ -13960,23 +14004,23 @@ components:
           pattern: ^[A-Za-z0-9\-\._]{1,64}
         pathological_tumour_staging_system:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTumourStagingSystemEnum'
+          - $ref: '#/components/schemas/StagingSystemEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_t_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTCategoryEnum'
+          - $ref: '#/components/schemas/TCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_n_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalNCategoryEnum'
+          - $ref: '#/components/schemas/NCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_m_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalMCategoryEnum'
+          - $ref: '#/components/schemas/MCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_stage_group:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalStageGroupEnum'
+          - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
         specimen_collection_date:
           type: string
@@ -13987,21 +14031,19 @@ components:
           $ref: '#/components/schemas/SpecimenStorageEnum'
         tumour_histological_type:
           type: string
-          minLength: 1
           maxLength: 128
           pattern: ^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$
         specimen_anatomic_location:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         reference_pathology_confirmed_diagnosis:
           oneOf:
-          - $ref: '#/components/schemas/ReferencePathologyConfirmedDiagnosisEnum'
+          - $ref: '#/components/schemas/ReferencePathologyEnum'
           - $ref: '#/components/schemas/BlankEnum'
         reference_pathology_confirmed_tumour_presence:
           oneOf:
-          - $ref: '#/components/schemas/ReferencePathologyConfirmedTumourPresenceEnum'
+          - $ref: '#/components/schemas/ReferencePathologyEnum'
           - $ref: '#/components/schemas/BlankEnum'
         tumour_grading_system:
           oneOf:
@@ -14035,8 +14077,8 @@ components:
           $ref: '#/components/schemas/SurgeryTypeEnum'
         surgery_site:
           type: string
-          minLength: 1
           maxLength: 255
+          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         surgery_location:
           oneOf:
           - $ref: '#/components/schemas/SurgeryLocationEnum'
@@ -14051,15 +14093,15 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_involved:
           oneOf:
-          - $ref: '#/components/schemas/MarginTypesNotAssessedEnum'
+          - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_involved:
           oneOf:
-          - $ref: '#/components/schemas/MarginTypesNotAssessedEnum'
+          - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_assessed:
           oneOf:
-          - $ref: '#/components/schemas/MarginTypesNotAssessedEnum'
+          - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         lymphovascular_invasion:
           oneOf:
@@ -14139,7 +14181,7 @@ components:
         treatment_type:
           $ref: '#/components/schemas/TreatmentTypeEnum'
         is_primary_treatment:
-          $ref: '#/components/schemas/IsPrimaryTreatmentEnum'
+          $ref: '#/components/schemas/BooleanEnum'
         treatment_start_date:
           type: string
           minLength: 1
@@ -14200,214 +14242,6 @@ components:
           additionalProperties: {}
           nullable: true
           description: Extra properties that are not supported by current schema.
-    PathologicalMCategoryEnum:
-      enum:
-      - M0
-      - M0(i+)
-      - M1
-      - M1a
-      - M1a(0)
-      - M1a(1)
-      - M1b
-      - M1b(0)
-      - M1b(1)
-      - M1c
-      - M1c(0)
-      - M1c(1)
-      - M1d
-      - M1d(0)
-      - M1d(1)
-      - M1e
-      - MX
-      type: string
-    PathologicalNCategoryEnum:
-      enum:
-      - N0
-      - N0a
-      - N0a (biopsy)
-      - N0b
-      - N0b (no biopsy)
-      - N0(i+)
-      - N0(i-)
-      - N0(mol+)
-      - N0(mol-)
-      - N1
-      - N1a
-      - N1a(sn)
-      - N1b
-      - N1c
-      - N1mi
-      - N2
-      - N2a
-      - N2b
-      - N2c
-      - N2mi
-      - N3
-      - N3a
-      - N3b
-      - N3c
-      - N4
-      - NX
-      type: string
-    PathologicalStageGroupEnum:
-      enum:
-      - Occult Carcinoma
-      - Stage 0
-      - Stage 0a
-      - Stage 0is
-      - Stage 1
-      - Stage 1A
-      - Stage 1B
-      - Stage A
-      - Stage B
-      - Stage C
-      - Stage I
-      - Stage IA
-      - Stage IA1
-      - Stage IA2
-      - Stage IA3
-      - Stage IAB
-      - Stage IAE
-      - Stage IAES
-      - Stage IAS
-      - Stage IB
-      - Stage IB1
-      - Stage IB2
-      - Stage IBE
-      - Stage IBES
-      - Stage IBS
-      - Stage IC
-      - Stage IE
-      - Stage IEA
-      - Stage IEB
-      - Stage IES
-      - Stage II
-      - Stage II bulky
-      - Stage IIA
-      - Stage IIA1
-      - Stage IIA2
-      - Stage IIAE
-      - Stage IIAES
-      - Stage IIAS
-      - Stage IIB
-      - Stage IIBE
-      - Stage IIBES
-      - Stage IIBS
-      - Stage IIC
-      - Stage IIE
-      - Stage IIEA
-      - Stage IIEB
-      - Stage IIES
-      - Stage III
-      - Stage IIIA
-      - Stage IIIA1
-      - Stage IIIA2
-      - Stage IIIAE
-      - Stage IIIAES
-      - Stage IIIAS
-      - Stage IIIB
-      - Stage IIIBE
-      - Stage IIIBES
-      - Stage IIIBS
-      - Stage IIIC
-      - Stage IIIC1
-      - Stage IIIC2
-      - Stage IIID
-      - Stage IIIE
-      - Stage IIIES
-      - Stage IIIS
-      - Stage IIS
-      - Stage IS
-      - Stage IV
-      - Stage IVA
-      - Stage IVA1
-      - Stage IVA2
-      - Stage IVAE
-      - Stage IVAES
-      - Stage IVAS
-      - Stage IVB
-      - Stage IVBE
-      - Stage IVBES
-      - Stage IVBS
-      - Stage IVC
-      - Stage IVE
-      - Stage IVES
-      - Stage IVS
-      - In situ
-      - Localized
-      - Regionalized
-      - Distant
-      type: string
-    PathologicalTCategoryEnum:
-      enum:
-      - T0
-      - T1
-      - T1a
-      - T1a1
-      - T1a2
-      - T1a(s)
-      - T1a(m)
-      - T1b
-      - T1b1
-      - T1b2
-      - T1b(s)
-      - T1b(m)
-      - T1c
-      - T1d
-      - T1mi
-      - T2
-      - T2(s)
-      - T2(m)
-      - T2a
-      - T2a1
-      - T2a2
-      - T2b
-      - T2c
-      - T2d
-      - T3
-      - T3(s)
-      - T3(m)
-      - T3a
-      - T3b
-      - T3c
-      - T3d
-      - T3e
-      - T4
-      - T4a
-      - T4a(s)
-      - T4a(m)
-      - T4b
-      - T4b(s)
-      - T4b(m)
-      - T4c
-      - T4d
-      - T4e
-      - Ta
-      - Tis
-      - Tis(DCIS)
-      - Tis(LAMN)
-      - Tis(LCIS)
-      - Tis(Paget)
-      - Tis(Paget’s)
-      - Tis pu
-      - Tis pd
-      - TX
-      type: string
-    PathologicalTumourStagingSystemEnum:
-      enum:
-      - AJCC 8th edition
-      - AJCC 7th edition
-      - AJCC 6th edition
-      - Ann Arbor staging system
-      - Binet staging system
-      - Durie-Salmon staging system
-      - FIGO staging system
-      - Lugano staging system
-      - Rai staging system
-      - Revised International staging system (RISS)
-      - SEER staging system
-      - St Jude staging system
-      type: string
     PercentTumourCellsMeasurementMethodEnum:
       enum:
       - Genomics
@@ -14690,23 +14524,23 @@ components:
           $ref: '#/components/schemas/LymphNodesExaminedMethodEnum'
         clinical_tumour_staging_system:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTumourStagingSystemEnum'
+          - $ref: '#/components/schemas/StagingSystemEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_t_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTCategoryEnum'
+          - $ref: '#/components/schemas/TCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_n_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalNCategoryEnum'
+          - $ref: '#/components/schemas/NCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_m_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalMCategoryEnum'
+          - $ref: '#/components/schemas/MCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_stage_group:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalStageGroupEnum'
+          - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
         cancer_type_code:
           type: string
@@ -14755,23 +14589,23 @@ components:
           $ref: '#/components/schemas/LymphNodesExaminedMethodEnum'
         clinical_tumour_staging_system:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTumourStagingSystemEnum'
+          - $ref: '#/components/schemas/StagingSystemEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_t_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTCategoryEnum'
+          - $ref: '#/components/schemas/TCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_n_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalNCategoryEnum'
+          - $ref: '#/components/schemas/NCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_m_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalMCategoryEnum'
+          - $ref: '#/components/schemas/MCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         clinical_stage_group:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalStageGroupEnum'
+          - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
         cancer_type_code:
           type: string
@@ -15025,11 +14859,6 @@ components:
           $ref: '#/components/schemas/RadiationTherapyTypeEnum'
         anatomical_site_irradiated:
           $ref: '#/components/schemas/AnatomicalSiteIrradiatedEnum'
-        radiation_boost:
-          $ref: '#/components/schemas/RadiationBoostEnum'
-        reference_radiation_treatment_id:
-          type: string
-          maxLength: 64
         radiation_therapy_fractions:
           type: integer
           maximum: 32767
@@ -15038,6 +14867,11 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
+        radiation_boost:
+          type: boolean
+        reference_radiation_treatment_id:
+          type: string
+          maxLength: 64
         program_id:
           type: string
         submitter_donor_id:
@@ -15052,14 +14886,8 @@ components:
       - radiation_therapy_fractions
       - radiation_therapy_modality
       - radiation_therapy_type
-      - reference_radiation_treatment_id
       - submitter_donor_id
       - submitter_treatment_id
-    RadiationBoostEnum:
-      enum:
-      - 'Yes'
-      - 'No'
-      type: string
     RadiationRequest:
       type: object
       properties:
@@ -15069,12 +14897,6 @@ components:
           $ref: '#/components/schemas/RadiationTherapyTypeEnum'
         anatomical_site_irradiated:
           $ref: '#/components/schemas/AnatomicalSiteIrradiatedEnum'
-        radiation_boost:
-          $ref: '#/components/schemas/RadiationBoostEnum'
-        reference_radiation_treatment_id:
-          type: string
-          minLength: 1
-          maxLength: 64
         radiation_therapy_fractions:
           type: integer
           maximum: 32767
@@ -15083,6 +14905,11 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
+        radiation_boost:
+          type: boolean
+        reference_radiation_treatment_id:
+          type: string
+          maxLength: 64
         program_id:
           type: string
           minLength: 1
@@ -15100,7 +14927,6 @@ components:
       - radiation_therapy_fractions
       - radiation_therapy_modality
       - radiation_therapy_type
-      - reference_radiation_treatment_id
       - submitter_donor_id
       - submitter_treatment_id
     RadiationTherapyModalityEnum:
@@ -15117,14 +14943,7 @@ components:
       - External
       - Internal
       type: string
-    ReferencePathologyConfirmedDiagnosisEnum:
-      enum:
-      - 'Yes'
-      - 'No'
-      - Not done
-      - Unknown
-      type: string
-    ReferencePathologyConfirmedTumourPresenceEnum:
+    ReferencePathologyEnum:
       enum:
       - 'Yes'
       - 'No'
@@ -15530,23 +15349,23 @@ components:
           pattern: ^[A-Za-z0-9\-\._]{1,64}
         pathological_tumour_staging_system:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTumourStagingSystemEnum'
+          - $ref: '#/components/schemas/StagingSystemEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_t_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTCategoryEnum'
+          - $ref: '#/components/schemas/TCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_n_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalNCategoryEnum'
+          - $ref: '#/components/schemas/NCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_m_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalMCategoryEnum'
+          - $ref: '#/components/schemas/MCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_stage_group:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalStageGroupEnum'
+          - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
         specimen_collection_date:
           type: string
@@ -15564,11 +15383,11 @@ components:
           pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         reference_pathology_confirmed_diagnosis:
           oneOf:
-          - $ref: '#/components/schemas/ReferencePathologyConfirmedDiagnosisEnum'
+          - $ref: '#/components/schemas/ReferencePathologyEnum'
           - $ref: '#/components/schemas/BlankEnum'
         reference_pathology_confirmed_tumour_presence:
           oneOf:
-          - $ref: '#/components/schemas/ReferencePathologyConfirmedTumourPresenceEnum'
+          - $ref: '#/components/schemas/ReferencePathologyEnum'
           - $ref: '#/components/schemas/BlankEnum'
         tumour_grading_system:
           oneOf:
@@ -15622,23 +15441,23 @@ components:
           pattern: ^[A-Za-z0-9\-\._]{1,64}
         pathological_tumour_staging_system:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTumourStagingSystemEnum'
+          - $ref: '#/components/schemas/StagingSystemEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_t_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalTCategoryEnum'
+          - $ref: '#/components/schemas/TCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_n_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalNCategoryEnum'
+          - $ref: '#/components/schemas/NCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_m_category:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalMCategoryEnum'
+          - $ref: '#/components/schemas/MCategoryEnum'
           - $ref: '#/components/schemas/BlankEnum'
         pathological_stage_group:
           oneOf:
-          - $ref: '#/components/schemas/PathologicalStageGroupEnum'
+          - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
         specimen_collection_date:
           type: string
@@ -15649,21 +15468,19 @@ components:
           $ref: '#/components/schemas/SpecimenStorageEnum'
         tumour_histological_type:
           type: string
-          minLength: 1
           maxLength: 128
           pattern: ^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$
         specimen_anatomic_location:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         reference_pathology_confirmed_diagnosis:
           oneOf:
-          - $ref: '#/components/schemas/ReferencePathologyConfirmedDiagnosisEnum'
+          - $ref: '#/components/schemas/ReferencePathologyEnum'
           - $ref: '#/components/schemas/BlankEnum'
         reference_pathology_confirmed_tumour_presence:
           oneOf:
-          - $ref: '#/components/schemas/ReferencePathologyConfirmedTumourPresenceEnum'
+          - $ref: '#/components/schemas/ReferencePathologyEnum'
           - $ref: '#/components/schemas/BlankEnum'
         tumour_grading_system:
           oneOf:
@@ -15776,6 +15593,110 @@ components:
       - Xenograft - derived from metastatic tumour
       - Xenograft - derived from tumour cell line
       type: string
+    StageGroupEnum:
+      enum:
+      - Occult Carcinoma
+      - Stage 0
+      - Stage 0a
+      - Stage 0is
+      - Stage 1
+      - Stage 1A
+      - Stage 1B
+      - Stage A
+      - Stage B
+      - Stage C
+      - Stage I
+      - Stage IA
+      - Stage IA1
+      - Stage IA2
+      - Stage IA3
+      - Stage IAB
+      - Stage IAE
+      - Stage IAES
+      - Stage IAS
+      - Stage IB
+      - Stage IB1
+      - Stage IB2
+      - Stage IBE
+      - Stage IBES
+      - Stage IBS
+      - Stage IC
+      - Stage IE
+      - Stage IEA
+      - Stage IEB
+      - Stage IES
+      - Stage II
+      - Stage II bulky
+      - Stage IIA
+      - Stage IIA1
+      - Stage IIA2
+      - Stage IIAE
+      - Stage IIAES
+      - Stage IIAS
+      - Stage IIB
+      - Stage IIBE
+      - Stage IIBES
+      - Stage IIBS
+      - Stage IIC
+      - Stage IIE
+      - Stage IIEA
+      - Stage IIEB
+      - Stage IIES
+      - Stage III
+      - Stage IIIA
+      - Stage IIIA1
+      - Stage IIIA2
+      - Stage IIIAE
+      - Stage IIIAES
+      - Stage IIIAS
+      - Stage IIIB
+      - Stage IIIBE
+      - Stage IIIBES
+      - Stage IIIBS
+      - Stage IIIC
+      - Stage IIIC1
+      - Stage IIIC2
+      - Stage IIID
+      - Stage IIIE
+      - Stage IIIES
+      - Stage IIIS
+      - Stage IIS
+      - Stage IS
+      - Stage IV
+      - Stage IVA
+      - Stage IVA1
+      - Stage IVA2
+      - Stage IVAE
+      - Stage IVAES
+      - Stage IVAS
+      - Stage IVB
+      - Stage IVBE
+      - Stage IVBES
+      - Stage IVBS
+      - Stage IVC
+      - Stage IVE
+      - Stage IVES
+      - Stage IVS
+      - In situ
+      - Localized
+      - Regionalized
+      - Distant
+      type: string
+    StagingSystemEnum:
+      enum:
+      - AJCC 8th edition
+      - AJCC 7th edition
+      - AJCC 6th edition
+      - Ann Arbor staging system
+      - Binet staging system
+      - Durie-Salmon staging system
+      - FIGO staging system
+      - Lugano staging system
+      - Rai staging system
+      - Revised International staging system (RISS)
+      - SEER staging system
+      - St Jude staging system
+      type: string
     StatusEnum:
       enum:
       - UNKNOWN
@@ -15794,6 +15715,7 @@ components:
         surgery_site:
           type: string
           maxLength: 255
+          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         surgery_location:
           oneOf:
           - $ref: '#/components/schemas/SurgeryLocationEnum'
@@ -15808,15 +15730,15 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_involved:
           oneOf:
-          - $ref: '#/components/schemas/MarginTypesNotAssessedEnum'
+          - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_involved:
           oneOf:
-          - $ref: '#/components/schemas/MarginTypesNotAssessedEnum'
+          - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_assessed:
           oneOf:
-          - $ref: '#/components/schemas/MarginTypesNotAssessedEnum'
+          - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         lymphovascular_invasion:
           oneOf:
@@ -15877,8 +15799,8 @@ components:
           $ref: '#/components/schemas/SurgeryTypeEnum'
         surgery_site:
           type: string
-          minLength: 1
           maxLength: 255
+          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         surgery_location:
           oneOf:
           - $ref: '#/components/schemas/SurgeryLocationEnum'
@@ -15893,15 +15815,15 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_involved:
           oneOf:
-          - $ref: '#/components/schemas/MarginTypesNotAssessedEnum'
+          - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_involved:
           oneOf:
-          - $ref: '#/components/schemas/MarginTypesNotAssessedEnum'
+          - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_assessed:
           oneOf:
-          - $ref: '#/components/schemas/MarginTypesNotAssessedEnum'
+          - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         lymphovascular_invasion:
           oneOf:
@@ -16005,6 +15927,61 @@ components:
       - Wedge/localised gastric resection
       - Wide Local Excision
       type: string
+    TCategoryEnum:
+      enum:
+      - T0
+      - T1
+      - T1a
+      - T1a1
+      - T1a2
+      - T1a(s)
+      - T1a(m)
+      - T1b
+      - T1b1
+      - T1b2
+      - T1b(s)
+      - T1b(m)
+      - T1c
+      - T1d
+      - T1mi
+      - T2
+      - T2(s)
+      - T2(m)
+      - T2a
+      - T2a1
+      - T2a2
+      - T2b
+      - T2c
+      - T2d
+      - T3
+      - T3(s)
+      - T3(m)
+      - T3a
+      - T3b
+      - T3c
+      - T3d
+      - T3e
+      - T4
+      - T4a
+      - T4a(s)
+      - T4a(m)
+      - T4b
+      - T4b(s)
+      - T4b(m)
+      - T4c
+      - T4d
+      - T4e
+      - Ta
+      - Tis
+      - Tis(DCIS)
+      - Tis(LAMN)
+      - Tis(LCIS)
+      - Tis(Paget)
+      - Tis(Paget’s)
+      - Tis pu
+      - Tis pd
+      - TX
+      type: string
     Table:
       type: object
       description: Subclass of ModelSerializer
@@ -16097,7 +16074,7 @@ components:
         treatment_type:
           $ref: '#/components/schemas/TreatmentTypeEnum'
         is_primary_treatment:
-          $ref: '#/components/schemas/IsPrimaryTreatmentEnum'
+          $ref: '#/components/schemas/BooleanEnum'
         treatment_start_date:
           type: string
           maxLength: 32
@@ -16159,7 +16136,7 @@ components:
         treatment_type:
           $ref: '#/components/schemas/TreatmentTypeEnum'
         is_primary_treatment:
-          $ref: '#/components/schemas/IsPrimaryTreatmentEnum'
+          $ref: '#/components/schemas/BooleanEnum'
         treatment_start_date:
           type: string
           minLength: 1
