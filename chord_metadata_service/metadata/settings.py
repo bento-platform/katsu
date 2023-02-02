@@ -366,4 +366,16 @@ SPECTACULAR_SETTINGS = {
     "SWAGGER_UI_SETTINGS": {
         "docExpansion": "none",  # collapse all endpoints by default
     },
+    # Specify Enum names for choices used by multiple fields
+    "ENUM_NAME_OVERRIDES": {
+            "uBooleanEnum": "chord_metadata_service.mohpackets.permissible_values.UBOOLEAN",
+            "TCategoryEnum": "chord_metadata_service.mohpackets.permissible_values.T_CATEGORY",
+            "NCategoryEnum": "chord_metadata_service.mohpackets.permissible_values.N_CATEGORY",
+            "MCategoryEnum": "chord_metadata_service.mohpackets.permissible_values.M_CATEGORY",
+            "StageGroupEnum": "chord_metadata_service.mohpackets.permissible_values.STAGE_GROUP",
+            "StagingSystemEnum": "chord_metadata_service.mohpackets.permissible_values.TUMOUR_STAGING_SYSTEM",
+            "ReferencePathologyEnum": "chord_metadata_service.mohpackets.permissible_values.CONFIRMED_DIAGNOSIS_TUMOUR",
+            "MarginTypesEnum": "chord_metadata_service.mohpackets.permissible_values.MARGIN_TYPES",
+        }
+
 }
