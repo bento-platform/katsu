@@ -21,8 +21,6 @@ from dotenv import load_dotenv
 
 from .. import __version__
 
-import chord_metadata_service.mohpackets.permissible_values as val
-
 load_dotenv()
 
 logging.getLogger().setLevel(logging.INFO)
@@ -370,14 +368,14 @@ SPECTACULAR_SETTINGS = {
     },
     # Specify Enum names for choices used by multiple fields
     "ENUM_NAME_OVERRIDES": {
-        "BooleanEnum":  val.UBOOLEAN,
-        "TCategoryEnum": val.T_CATEGORY,
-        "NCategoryEnum": val.N_CATEGORY,
-        "MCategoryEnum": val.M_CATEGORY,
-        "StageGroupEnum": val.STAGE_GROUP,
-        "StagingSystemEnum": val.TUMOUR_STAGING_SYSTEM,
-        "ReferencePathologyEnum": val.CONFIRMED_DIAGNOSIS_TUMOUR,
-        "MarginTypesEnum": val.MARGIN_TYPES
-    }
+            "uBooleanEnum": "chord_metadata_service.mohpackets.permissible_values.UBOOLEAN",
+            "TCategoryEnum": "chord_metadata_service.mohpackets.permissible_values.T_CATEGORY",
+            "NCategoryEnum": "chord_metadata_service.mohpackets.permissible_values.N_CATEGORY",
+            "MCategoryEnum": "chord_metadata_service.mohpackets.permissible_values.M_CATEGORY",
+            "StageGroupEnum": "chord_metadata_service.mohpackets.permissible_values.STAGE_GROUP",
+            "StagingSystemEnum": "chord_metadata_service.mohpackets.permissible_values.TUMOUR_STAGING_SYSTEM",
+            "ReferencePathologyEnum": "chord_metadata_service.mohpackets.permissible_values.CONFIRMED_DIAGNOSIS_TUMOUR",
+            "MarginTypesEnum": "chord_metadata_service.mohpackets.permissible_values.MARGIN_TYPES",
+        }
 
 }
