@@ -370,7 +370,7 @@ SPECTACULAR_SETTINGS = {
     },
     # Specify Enum names for choices used by multiple fields
     "ENUM_NAME_OVERRIDES": {
-        "BooleanEnum" :  val.BOOLEAN,
+        "BooleanEnum":  val.BOOLEAN,
         "TCategoryEnum": val.T_CATEGORY,
         "NCategoryEnum": val.N_CATEGORY,
         "MCategoryEnum": val.M_CATEGORY,

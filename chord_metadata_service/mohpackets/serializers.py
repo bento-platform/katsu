@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -35,6 +37,26 @@ from .models import (
     handled by the ingest process. Additional validations can be added here if needed.
 """
 
+
+class CustomChoiceField(serializers.ChoiceField):
+    """Custom ChoiceField that prints permissible choices when an exception is raised."""
+    default_error_messages = {
+        "invalid_choice": _(
+            '"{input}" is not a valid choice. The valid choices are: [{choices}]'
+        )
+    }
+
+    def to_internal_value(self, data):
+        if data == "" and self.allow_blank:
+            return ""
+
+        try:
+            return self.choice_strings_to_values[str(data)]
+        except KeyError:
+            choices = [c for c in self.choices]
+            self.fail("invalid_choice", input=data, choices=choices)
+
+
 ##########################################
 #                                        #
 #           MODEL SERIALIZERS            #
@@ -60,7 +82,7 @@ class DonorSerializer(serializers.ModelSerializer):
         max_length=64,
         validators=[UniqueValidator(queryset=Donor.objects.all())]
     )
-    cause_of_death = serializers.ChoiceField(
+    cause_of_death = CustomChoiceField(
         choices=val.CAUSE_OF_DEATH,
         allow_blank=True
     )
@@ -71,9 +93,9 @@ class DonorSerializer(serializers.ModelSerializer):
     date_of_death = serializers.RegexField(
         regex=regex["DATE"],
         max_length=32,
-        allow_blank = True
+        allow_blank=True
     )
-    primary_site = serializers.ChoiceField(
+    primary_site = CustomChoiceField(
         choices=val.PRIMARY_SITE
     )
 
@@ -88,23 +110,23 @@ class SpecimenSerializer(serializers.ModelSerializer):
         max_length=64,
         validators=[UniqueValidator(queryset=Specimen.objects.all())]
     )
-    pathological_tumour_staging_system = serializers.ChoiceField(
+    pathological_tumour_staging_system = CustomChoiceField(
         choices=val.TUMOUR_STAGING_SYSTEM,
         allow_blank=True
     )
-    pathological_t_category = serializers.ChoiceField(
+    pathological_t_category = CustomChoiceField(
         choices=val.T_CATEGORY,
         allow_blank=True
     )
-    pathological_n_category = serializers.ChoiceField(
+    pathological_n_category = CustomChoiceField(
         choices=val.N_CATEGORY,
         allow_blank=True
     )
-    pathological_m_category = serializers.ChoiceField(
+    pathological_m_category = CustomChoiceField(
         choices=val.M_CATEGORY,
         allow_blank=True
     )
-    pathological_stage_group = serializers.ChoiceField(
+    pathological_stage_group = CustomChoiceField(
         choices=val.STAGE_GROUP,
         allow_blank=True
     )
@@ -112,7 +134,7 @@ class SpecimenSerializer(serializers.ModelSerializer):
         regex=regex["DATE"],
         max_length=32
     )
-    specimen_storage = serializers.ChoiceField(
+    specimen_storage = CustomChoiceField(
         choices=val.STORAGE
     )
     tumour_histological_type = serializers.RegexField(
@@ -125,27 +147,27 @@ class SpecimenSerializer(serializers.ModelSerializer):
         regex=regex["TOPOGRAPHY"],
         allow_blank=True
     )
-    reference_pathology_confirmed_diagnosis = serializers.ChoiceField(
+    reference_pathology_confirmed_diagnosis = CustomChoiceField(
         choices=val.CONFIRMED_DIAGNOSIS_TUMOUR,
         allow_blank=True
     )
-    reference_pathology_confirmed_tumour_presence = serializers.ChoiceField(
+    reference_pathology_confirmed_tumour_presence = CustomChoiceField(
         choices=val.CONFIRMED_DIAGNOSIS_TUMOUR,
         allow_blank=True
     )
-    tumour_grading_system = serializers.ChoiceField(
+    tumour_grading_system = CustomChoiceField(
         choices=val.TUMOUR_GRADING_SYSTEM,
         allow_blank=True
     )
-    tumour_grade = serializers.ChoiceField(
+    tumour_grade = CustomChoiceField(
         choices=val.TUMOUR_GRADE,
         allow_blank=True
     )
-    percent_tumour_cells_range = serializers.ChoiceField(
+    percent_tumour_cells_range = CustomChoiceField(
         choices=val.PERCENT_CELLS_RANGE,
         allow_blank=True
     )
-    percent_tumour_cells_measurement_method = serializers.ChoiceField(
+    percent_tumour_cells_measurement_method = CustomChoiceField(
         choices=val.CELLS_MEASURE_METHOD,
         allow_blank=True
     )
@@ -161,22 +183,22 @@ class SampleRegistrationSerializer(serializers.ModelSerializer):
         max_length=64,
         validators=[UniqueValidator(queryset=SampleRegistration.objects.all())],
     )
-    gender = serializers.ChoiceField(
+    gender = CustomChoiceField(
         choices=val.GENDER
     )
-    sex_at_birth = serializers.ChoiceField(
+    sex_at_birth = CustomChoiceField(
         choices=val.SEX_AT_BIRTH
     )
-    specimen_tissue_source = serializers.ChoiceField(
+    specimen_tissue_source = CustomChoiceField(
         choices=val.SPECIMEN_TISSUE_SOURCE
     )
-    tumour_normal_designation = serializers.ChoiceField(
+    tumour_normal_designation = CustomChoiceField(
         choices=["Normal", "Tumour"]
     )
-    specimen_type = serializers.ChoiceField(
+    specimen_type = CustomChoiceField(
         choices=val.SPECIMEN_TYPE
     )
-    sample_type = serializers.ChoiceField(
+    sample_type = CustomChoiceField(
         choices=val.SAMPLE_TYPE
     )
 
@@ -195,32 +217,32 @@ class PrimaryDiagnosisSerializer(serializers.ModelSerializer):
         max_length=32
     )
     # cancer_type_code = serializers.CharField()  # TODO: write regex
-    basis_of_diagnosis = serializers.ChoiceField(
+    basis_of_diagnosis = CustomChoiceField(
         choices=val.BASIS_OF_DIAGNOSIS
     )
-    lymph_nodes_examined_status = serializers.ChoiceField(
+    lymph_nodes_examined_status = CustomChoiceField(
         choices=val.LYMPH_NODE_STATUS
     )
-    lymph_nodes_examined_method = serializers.ChoiceField(
+    lymph_nodes_examined_method = CustomChoiceField(
         choices=val.LYMPH_NODE_METHOD
     )
-    clinical_tumour_staging_system = serializers.ChoiceField(
+    clinical_tumour_staging_system = CustomChoiceField(
         choices=val.TUMOUR_STAGING_SYSTEM,
         allow_blank=True
     )
-    clinical_t_category = serializers.ChoiceField(
+    clinical_t_category = CustomChoiceField(
         choices=val.T_CATEGORY,
         allow_blank=True
     )
-    clinical_n_category = serializers.ChoiceField(
+    clinical_n_category = CustomChoiceField(
         choices=val.N_CATEGORY,
         allow_blank=True
     )
-    clinical_m_category = serializers.ChoiceField(
+    clinical_m_category = CustomChoiceField(
         choices=val.M_CATEGORY,
         allow_blank=True
     )
-    clinical_stage_group = serializers.ChoiceField(
+    clinical_stage_group = CustomChoiceField(
         choices=val.STAGE_GROUP,
         allow_blank=True
     )
@@ -235,10 +257,10 @@ class TreatmentSerializer(serializers.ModelSerializer):
         regex=regex["ID"],
         max_length=64
     )
-    treatment_type = serializers.ChoiceField(
+    treatment_type = CustomChoiceField(
         choices=val.TREATMENT_TYPE
     )
-    is_primary_treatment = serializers.ChoiceField(
+    is_primary_treatment = CustomChoiceField(
         choices=val.BOOLEAN
     )
     treatment_start_date = serializers.RegexField(
@@ -249,16 +271,16 @@ class TreatmentSerializer(serializers.ModelSerializer):
         regex=regex["DATE"],
         max_length=32
     )
-    treatment_setting = serializers.ChoiceField(
+    treatment_setting = CustomChoiceField(
         choices=val.TREATMENT_SETTING
     )
-    treatment_intent = serializers.ChoiceField(
+    treatment_intent = CustomChoiceField(
         choices=["Curative", "Palliative"]
     )
-    response_to_treatment_criteria_method = serializers.ChoiceField(
+    response_to_treatment_criteria_method = CustomChoiceField(
         choices=val.TREATMENT_RESPONSE_METHOD
     )
-    response_to_treatment = serializers.ChoiceField(
+    response_to_treatment = CustomChoiceField(
         choices=val.TREATMENT_RESPONSE
     )
 
@@ -268,7 +290,7 @@ class TreatmentSerializer(serializers.ModelSerializer):
 
 
 class ChemotherapySerializer(serializers.ModelSerializer):
-    chemotherapy_dosage_units = serializers.ChoiceField(
+    chemotherapy_dosage_units = CustomChoiceField(
         choices=val.DOSAGE_UNITS
     )
 
@@ -278,7 +300,7 @@ class ChemotherapySerializer(serializers.ModelSerializer):
 
 
 class HormoneTherapySerializer(serializers.ModelSerializer):
-    chemotherapy_dosage_units = serializers.ChoiceField(
+    chemotherapy_dosage_units = CustomChoiceField(
         choices=val.DOSAGE_UNITS
     )
 
@@ -288,13 +310,13 @@ class HormoneTherapySerializer(serializers.ModelSerializer):
 
 
 class RadiationSerializer(serializers.ModelSerializer):
-    radiation_therapy_modality = serializers.ChoiceField(
+    radiation_therapy_modality = CustomChoiceField(
         choices=val.RADIATION_THERAPY_MODALITY
     )
-    radiation_therapy_type = serializers.ChoiceField(
+    radiation_therapy_type = CustomChoiceField(
         choices=["External", "Internal"]
     )
-    anatomical_site_irradiated = serializers.ChoiceField(
+    anatomical_site_irradiated = CustomChoiceField(
         choices=val.RADIATION_ANATOMICAL_SITE
     )
 
@@ -304,7 +326,7 @@ class RadiationSerializer(serializers.ModelSerializer):
 
 
 class ImmunotherapySerializer(serializers.ModelSerializer):
-    immunotherapy_type = serializers.ChoiceField(
+    immunotherapy_type = CustomChoiceField(
         choices=val.IMMUNOTHERAPY_TYPE
     )
 
@@ -314,7 +336,7 @@ class ImmunotherapySerializer(serializers.ModelSerializer):
 
 
 class SurgerySerializer(serializers.ModelSerializer):
-    surgery_type = serializers.ChoiceField(
+    surgery_type = CustomChoiceField(
         choices=val.SURGERY_TYPE
     )
     surgery_site = serializers.RegexField(
@@ -322,35 +344,35 @@ class SurgerySerializer(serializers.ModelSerializer):
         max_length=255,
         allow_blank=True
     )
-    surgery_location = serializers.ChoiceField(
+    surgery_location = CustomChoiceField(
         choices=val.SURGERY_LOCATION,
         allow_blank=True
     )
-    tumour_focality = serializers.ChoiceField(
+    tumour_focality = CustomChoiceField(
         choices=val.TUMOUR_FOCALITY,
         allow_blank=True
     )
-    residual_tumour_classification = serializers.ChoiceField(
+    residual_tumour_classification = CustomChoiceField(
         choices=val.TUMOUR_CLASSIFICATION,
         allow_blank=True
     )
-    margin_types_involved = serializers.ChoiceField(
+    margin_types_involved = CustomChoiceField(
         choices=val.MARGIN_TYPES,
         allow_blank=True
     )
-    margin_types_not_involved = serializers.ChoiceField(
+    margin_types_not_involved = CustomChoiceField(
         choices=val.MARGIN_TYPES,
         allow_blank=True
     )
-    margin_types_not_assessed = serializers.ChoiceField(
+    margin_types_not_assessed = CustomChoiceField(
         choices=val.MARGIN_TYPES,
         allow_blank=True
     )
-    lymphovascular_invasion = serializers.ChoiceField(
+    lymphovascular_invasion = CustomChoiceField(
         choices=val.LYMPHOVACULAR_INVASION,
         allow_blank=True
     )
-    perineural_invasion = serializers.ChoiceField(
+    perineural_invasion = CustomChoiceField(
         choices=val.PERINEURAL_INVASION,
         allow_blank=True
     )
@@ -365,14 +387,14 @@ class FollowUpSerializer(serializers.ModelSerializer):
         regex=regex["DATE"],
         max_length=32
     )
-    lost_to_followup_reason = serializers.ChoiceField(
+    lost_to_followup_reason = CustomChoiceField(
         choices=val.LOST_FOLLOW_UP_REASON,
         allow_blank=True
     )
-    disease_status_at_followup = serializers.ChoiceField(
+    disease_status_at_followup = CustomChoiceField(
         choices=val.DISEASE_STATUS_FOLLOWUP
     )
-    relapse_type = serializers.ChoiceField(
+    relapse_type = CustomChoiceField(
         choices=val.RELAPSE_TYPE,
         allow_blank=True
     )
@@ -381,7 +403,7 @@ class FollowUpSerializer(serializers.ModelSerializer):
         max_length=32,
         allow_blank=True
     )
-    method_of_progression_status = serializers.ChoiceField(
+    method_of_progression_status = CustomChoiceField(
         choices=val.PROGRESSION_STATUS_METHOD,
         allow_blank=True
     )
@@ -390,23 +412,23 @@ class FollowUpSerializer(serializers.ModelSerializer):
         regex=regex["TOPOGRAPHY"],
         allow_blank=True
     )
-    recurrence_tumour_staging_system = serializers.ChoiceField(
+    recurrence_tumour_staging_system = CustomChoiceField(
         choices=val.TUMOUR_STAGING_SYSTEM,
         allow_blank=True
     )
-    recurrence_t_category = serializers.ChoiceField(
+    recurrence_t_category = CustomChoiceField(
         choices=val.T_CATEGORY,
         allow_blank=True
     )
-    recurrence_n_category = serializers.ChoiceField(
+    recurrence_n_category = CustomChoiceField(
         choices=val.N_CATEGORY,
         allow_blank=True
     )
-    recurrence_m_category = serializers.ChoiceField(
+    recurrence_m_category = CustomChoiceField(
         choices=val.M_CATEGORY,
         allow_blank=True
     )
-    recurrence_stage_group = serializers.ChoiceField(
+    recurrence_stage_group = CustomChoiceField(
         choices=val.STAGE_GROUP,
         allow_blank=True
     )
@@ -424,10 +446,10 @@ class BiomarkerSerializer(serializers.ModelSerializer):
 
 
 class ComorbiditySerializer(serializers.ModelSerializer):
-    prior_malignancy = serializers.ChoiceField(
+    prior_malignancy = CustomChoiceField(
         choices=val.BOOLEAN
     )
-    laterality_of_prior_malignancy = serializers.ChoiceField(
+    laterality_of_prior_malignancy = CustomChoiceField(
         choices=val.MALIGNANCY_LATERALITY,
         allow_blank=True
     )
@@ -436,7 +458,7 @@ class ComorbiditySerializer(serializers.ModelSerializer):
         max_length=64,
         allow_blank=True
     )
-    comorbidity_treatment_status = serializers.ChoiceField(
+    comorbidity_treatment_status = CustomChoiceField(
         choices=val.BOOLEAN,
         allow_blank=True
     )
