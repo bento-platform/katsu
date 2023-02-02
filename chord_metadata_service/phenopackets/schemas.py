@@ -29,6 +29,19 @@ __all__ = [
     "PHENOPACKET_DISEASE_ONSET_SCHEMA",
     "PHENOPACKET_DISEASE_SCHEMA",
     "PHENOPACKET_SCHEMA",
+    "PHENOPACKET_GESTATIONAL_AGE",
+    "PHENOPACKET_TIME_ELEMENT_SCHEMA",
+    "PHENOPACKET_PROCEDURE_SCHEMA",
+    "PHENOPACKET_QUANTITY_SCHEMA",
+    "PHENOPACKET_TYPED_QUANTITY_SCHEMA",
+    "PHENOPACKET_VALUE_SCHEMA",
+    "PHENOPACKET_COMPLEX_VALUE_SCHEMA",
+    "PHENOPACKET_MEASUREMENT_VALUE_SCHEMA",
+    "PHENOPACKET_MEASUREMENT_SCHEMA",
+    "PHENOPACKET_TREATMENT",
+    "PHENOPACKET_RADIATION_THERAPY",
+    "PHENOPACKET_THERAPEUTIC_REGIMEN",
+    "PHENOPACKET_MEDICAL_ACTION_SCHEMA"
 ]
 
 
@@ -181,7 +194,6 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = tag_ids_and_describe({
     },
 }, descriptions.PHENOTYPIC_FEATURE)
 
-
 # TODO: search
 PHENOPACKET_GENE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -204,7 +216,6 @@ PHENOPACKET_GENE_SCHEMA = tag_ids_and_describe({
     },
     "required": ["id", "symbol"]
 }, descriptions.GENE)
-
 
 PHENOPACKET_HTS_FILE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -231,7 +242,6 @@ PHENOPACKET_HTS_FILE_SCHEMA = tag_ids_and_describe({
     }
 }, descriptions.HTS_FILE)
 
-
 # TODO: search??
 PHENOPACKET_VARIANT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -244,8 +254,7 @@ PHENOPACKET_VARIANT_SCHEMA = tag_ids_and_describe({
     }
 }, descriptions.VARIANT)
 
-
-GESTATIONAL_AGE = tag_ids_and_describe({
+PHENOPACKET_GESTATIONAL_AGE = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:gestational_age",
     "title": "Gestational age schema",
@@ -261,14 +270,13 @@ GESTATIONAL_AGE = tag_ids_and_describe({
     "required": ["weeks"]
 }, {}) #TODO: description
 
-
 PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:time_element",
     "title": "Measurement schema",
     "type": "object",
     "oneOf": [
-        GESTATIONAL_AGE,
+        PHENOPACKET_GESTATIONAL_AGE,
         AGE,
         AGE_RANGE,
         ONTOLOGY_CLASS,
@@ -278,8 +286,8 @@ PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
         },
         TIME_INTERVAL
     ],
-}, descriptions.TIME_ELEMENT) #TODO: description
-
+    "required": ["oneOf"]
+}, {}) #TODO: description
 
 PHENOPACKET_PROCEDURE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -294,8 +302,80 @@ PHENOPACKET_PROCEDURE_SCHEMA = tag_ids_and_describe({
     "required": ["code"],
 }, descriptions=descriptions.PROCEDURE)
 
+PHENOPACKET_QUANTITY_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:quantity",
+    "title": "Quantity schema",
+    "type": "object",
+    "properties": {
+        "unit": ONTOLOGY_CLASS,
+        "value": {
+            "type": "number"
+        },
+        "reference_range": {
+            "unit": ONTOLOGY_CLASS,
+            "low": {
+                "type": "number"
+            },
+            "high": {
+                "type": "number"
+            }
+        }
+    },
+    "required": ["unit", "value"]
+}
 
-PHENOPACKET_MEASUREMENT_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_TYPED_QUANTITY_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:typed-quantity",
+    "title": "Quantity schema",
+    "type": "object",
+    "properties": {
+        "type": ONTOLOGY_CLASS,
+        "quantity": PHENOPACKET_QUANTITY_SCHEMA
+    },
+    "required": ["type", "quantity"]
+}
+
+PHENOPACKET_VALUE_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:value",
+    "title": "Value schema",
+    "type": "object",
+    "oneOf": [
+        PHENOPACKET_QUANTITY_SCHEMA,
+        ONTOLOGY_CLASS
+    ],
+    "required": ["oneOf"]
+}
+
+PHENOPACKET_COMPLEX_VALUE_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:complex_value",
+    "title": "Measurement schema",
+    "type": "object",
+    "properties": {
+        "typed_quantities": {
+            "type": "array",
+            "items": PHENOPACKET_TYPED_QUANTITY_SCHEMA
+        }
+    },
+    "required": ["typed_quantities"]
+}
+
+PHENOPACKET_MEASUREMENT_VALUE_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:measurement:measurement_value",
+    "title": "Measurement schema",
+    "type": "object",
+    "oneOf": [
+        PHENOPACKET_VALUE_SCHEMA,
+        PHENOPACKET_COMPLEX_VALUE_SCHEMA
+    ],
+    "required": ["oneOf"]
+}
+
+PHENOPACKET_MEASUREMENT_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:measurement",
     "title": "Measurement schema",
@@ -303,12 +383,12 @@ PHENOPACKET_MEASUREMENT_SCHEMA = tag_ids_and_describe({
     "properties": {
         "description": {"type": "string"},
         "assay": ONTOLOGY_CLASS,
-        # "measurement_value": QUANTITY, # TODO: one of Value | ComplexValue
+        "measurement_value": PHENOPACKET_MEASUREMENT_VALUE_SCHEMA,
         "time_observed": PHENOPACKET_TIME_ELEMENT_SCHEMA,
         "procedure": PHENOPACKET_PROCEDURE_SCHEMA
     },
     "required": ["assay", "measurement_value"]
-}, descriptions=descriptions.MEASUREMENT),
+}
 
 # noinspection PyProtectedMember
 PHENOPACKET_BIOSAMPLE_SCHEMA = tag_ids_and_describe({
@@ -404,48 +484,48 @@ PHENOPACKET_DISEASE_SCHEMA = tag_ids_and_describe({
 
 # Deduplicate with other phenopacket representations
 # noinspection PyProtectedMember
-PHENOPACKET_SCHEMA = tag_ids_and_describe({
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:phenopackets:phenopacket",
-    "title": "Phenopacket schema",
-    "description": "Schema for metadata service datasets",
-    "type": "object",
-    "properties": {
-        "id": {
-            "type": "string",
-        },
-        "subject": INDIVIDUAL_SCHEMA,
-        "phenotypic_features": {
-            "type": "array",
-            "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA
-        },
-        "biosamples": {
-            "type": "array",
-            "items": PHENOPACKET_BIOSAMPLE_SCHEMA
-        },
-        "genes": {
-            "type": "array",
-            "items": PHENOPACKET_GENE_SCHEMA
-        },
-        "variants": {
-            "type": "array",
-            "items": PHENOPACKET_VARIANT_SCHEMA
-        },
-        "diseases": {  # TODO: Too sensitive for search?
-            "type": "array",
-            "items": PHENOPACKET_DISEASE_SCHEMA,
-        },  # TODO
-        "hts_files": {
-            "type": "array",
-            "items": PHENOPACKET_HTS_FILE_SCHEMA  # TODO
-        },
-        "meta_data": PHENOPACKET_META_DATA_SCHEMA,
-        "extra_properties": EXTRA_PROPERTIES_SCHEMA
-    },
-    "required": ["meta_data"],
-}, descriptions.PHENOPACKET)
+# PHENOPACKET_SCHEMA = tag_ids_and_describe({
+#     "$schema": "http://json-schema.org/draft-07/schema#",
+#     "$id": "katsu:phenopackets:phenopacket",
+#     "title": "Phenopacket schema",
+#     "description": "Schema for metadata service datasets",
+#     "type": "object",
+#     "properties": {
+#         "id": {
+#             "type": "string",
+#         },
+#         "subject": INDIVIDUAL_SCHEMA,
+#         "phenotypic_features": {
+#             "type": "array",
+#             "items": PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA
+#         },
+#         "biosamples": {
+#             "type": "array",
+#             "items": PHENOPACKET_BIOSAMPLE_SCHEMA
+#         },
+#         "genes": {
+#             "type": "array",
+#             "items": PHENOPACKET_GENE_SCHEMA
+#         },
+#         "variants": {
+#             "type": "array",
+#             "items": PHENOPACKET_VARIANT_SCHEMA
+#         },
+#         "diseases": {  # TODO: Too sensitive for search?
+#             "type": "array",
+#             "items": PHENOPACKET_DISEASE_SCHEMA,
+#         },  # TODO
+#         "hts_files": {
+#             "type": "array",
+#             "items": PHENOPACKET_HTS_FILE_SCHEMA  # TODO
+#         },
+#         "meta_data": PHENOPACKET_META_DATA_SCHEMA,
+#         "extra_properties": EXTRA_PROPERTIES_SCHEMA
+#     },
+#     "required": ["meta_data"],
+# }, descriptions.PHENOPACKET)
 
-TREATMENT = tag_ids_and_describe({
+PHENOPACKET_TREATMENT = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:treatment",
     "title": "Phenopacket treatment",
@@ -456,12 +536,52 @@ TREATMENT = tag_ids_and_describe({
         "route_of_administration": ONTOLOGY_CLASS,
         "dose_intervals": {
             "type": "array",
-            "items": "" #TODO: complete
+            "items": {
+                "quantity": PHENOPACKET_QUANTITY_SCHEMA,
+                "schedule_frequency": ONTOLOGY_CLASS,
+                "interval": TIME_INTERVAL
+            }
         }
     }
 }, {})
-RADIATION_THERAPY = tag_ids_and_describe({}, {})
-THERAPEUTIC_REGIMEN = tag_ids_and_describe({}, {})
+
+PHENOPACKET_RADIATION_THERAPY = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:radiation_therapy",
+    "title": "Phenopacket radiation therapy",
+    "description": "Radiation therapy (or radiotherapy) uses ionizing radiation, generally as part of cancer treatment to control or kill malignant cells.",
+    "type": "object",
+    "properties": {
+        "modality": ONTOLOGY_CLASS,
+        "body_site": ONTOLOGY_CLASS,
+        "dosage": { "type": "integer" },
+        "fractions": { "type": "integer" }
+    },
+    "required": ["modality", "body_site", "dosage", "fractions"]
+}, {})
+
+PHENOPACKET_THERAPEUTIC_REGIMEN = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:therapeutic_regimen",
+    "title": "Phenopacket therapeutic regimen",
+    "description": "This element represents a therapeutic regimen which will involve a specified set of treatments for a particular condition.",
+    "type": "object",
+    "properties": {
+        "identifier": {
+            "oneOf": [
+                ONTOLOGY_CLASS,
+                PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
+            ]
+        },
+        "start_time": PHENOPACKET_TIME_ELEMENT_SCHEMA,
+        "end_time": PHENOPACKET_TIME_ELEMENT_SCHEMA,
+        "status": { 
+            "enum": ["UNKNOWN_STATUS", "STARTED", "COMPLETED", "DISCONTINUED"]
+        }
+    },
+    "required": ["identifier", "status"]
+}, {})
+
 ONE_OF_MEDICAL_ACTION = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:one_of_medical_actions",
@@ -470,10 +590,11 @@ ONE_OF_MEDICAL_ACTION = tag_ids_and_describe({
     "type": "object",
     "oneOf": [
         PHENOPACKET_PROCEDURE_SCHEMA,
-        TREATMENT,
-        RADIATION_THERAPY,
-        THERAPEUTIC_REGIMEN
-    ]
+        PHENOPACKET_TREATMENT,
+        PHENOPACKET_RADIATION_THERAPY,
+        PHENOPACKET_THERAPEUTIC_REGIMEN
+    ],
+    "required": ["oneOf"]
 }, {}) #TODO: describe
 
 PHENOPACKET_MEDICAL_ACTION_SCHEMA = tag_ids_and_describe({
@@ -496,7 +617,7 @@ PHENOPACKET_MEDICAL_ACTION_SCHEMA = tag_ids_and_describe({
     "required": ["action"]
 }, {})
 
-PHENOPACKET_V2_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:phenopacket",
     "title": "Phenopacket schema",

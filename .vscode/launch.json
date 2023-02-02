@@ -10,9 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "${fileBasenameNoExtension}",
-                "40e5be6c-2a13-48c4-85fc-9e33fc63b533",
-                "./examples/pheno-v2/covid19_samples.json"
+                "makemigrations"
             ],
             "django": true,
         },

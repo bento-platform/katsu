@@ -319,6 +319,9 @@ PHENOPACKET = {
     }
 }
 
+TIME_ELEMENT = {
+    "description": "This element intends to bundle all of the various ways of denoting time or age in phenopackets schema."
+}
 # TODO: Mutually recursive, use functions
 # DIAGNOSIS
 # GENOMIC_INTERPRETATION

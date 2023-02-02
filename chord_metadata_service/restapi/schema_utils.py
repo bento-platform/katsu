@@ -94,7 +94,7 @@ def tag_schema_with_nested_ids(schema: dict):
                 for k, v in schema["properties"].items()
             },
         } if "properties" in schema else schema
-
+    
     if schema_type == "array":
         return {
             **schema,
