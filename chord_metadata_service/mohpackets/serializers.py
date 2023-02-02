@@ -261,7 +261,7 @@ class TreatmentSerializer(serializers.ModelSerializer):
         choices=val.TREATMENT_TYPE
     )
     is_primary_treatment = CustomChoiceField(
-        choices=val.BOOLEAN
+        choices=val.UBOOLEAN
     )
     treatment_start_date = serializers.RegexField(
         regex=regex["DATE"],
@@ -447,7 +447,7 @@ class BiomarkerSerializer(serializers.ModelSerializer):
 
 class ComorbiditySerializer(serializers.ModelSerializer):
     prior_malignancy = CustomChoiceField(
-        choices=val.BOOLEAN
+        choices=val.UBOOLEAN
     )
     laterality_of_prior_malignancy = CustomChoiceField(
         choices=val.MALIGNANCY_LATERALITY,
@@ -459,7 +459,7 @@ class ComorbiditySerializer(serializers.ModelSerializer):
         allow_blank=True
     )
     comorbidity_treatment_status = CustomChoiceField(
-        choices=val.BOOLEAN,
+        choices=val.UBOOLEAN,
         allow_blank=True
     )
     comorbidity_treatment = serializers.CharField(

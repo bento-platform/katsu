@@ -3,7 +3,8 @@ These lists contain the permissible values for their respective
 MoH model fields and are used for validation during serialization.
 """
 
-BOOLEAN = [
+# Unknown + Boolean
+UBOOLEAN = [
     "Yes",
     "No",
     "Unknown"
