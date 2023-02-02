@@ -261,7 +261,7 @@ class Radiation(models.Model):
     anatomical_site_irradiated = models.CharField(
         max_length=255, null=False, blank=False
     )
-    radiation_boost = models.BooleanField()
+    radiation_boost = models.BooleanField(null=True)
     reference_radiation_treatment_id = models.CharField(
         max_length=64, blank=True, default=""
     )
@@ -343,7 +343,7 @@ class FollowUp(models.Model):
         Treatment, on_delete=models.SET_NULL, blank=True, null=True
     )
     date_of_followup = models.CharField(max_length=32, null=False, blank=False)
-    lost_to_followup = models.BooleanField()
+    lost_to_followup = models.BooleanField(null=True)
     lost_to_followup_reason = models.CharField(max_length=255, blank=True, default="")
     disease_status_at_followup = models.CharField(
         max_length=255, null=False, blank=False
