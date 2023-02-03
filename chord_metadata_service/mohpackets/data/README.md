@@ -50,21 +50,93 @@ python manage.py flush
 
 ## Small dataset data:
  - 2 Programs
- - 10 Donors (6 program_1, 4 program_2)
- - 15 PrimaryDiagnosis (donor_1_2 have 3, donor_3_4 has 2, donor_5_to_10 have 1)
- - 20 Specimen (primary_diagnosis_1_2 have 3, primary_diagnosis_3_4 have 2, primary_diagnosis_5_to_15 have 1)
- - 25 SampleRegistration (specimen_1_2 has 3, specimen_3_4 have 2, specimen_5_to_20 have 1)
- - 20 Treatment (primary_diagnosis_1_2 have 3, primary_diagnosis_3_4 have 2, primary_diagnosis_5_to_15 have 1)
- - 7 Chemotherapy (treatment_1 has 3, treatment_2 has 2, treatment_3_4 has 1)
- - 7 HormoneTherapy (treatment_5 has 3, treatment_6 has 2, treatment_7_8 has 1)
- - 7 Radiation (treatment_9 has 3, treatment_10 has 2, treatment_11_12 has 1)
- - 7 Immunotherapy (treatment_13 has 3, treatment_14 has 2, treatment_15_16 has 1)
- - 7 Surgery (treatment_17 has 3, treatment_18 has 2, treatment_19_20 has 1)
- - 25 FollowUp (treatment_1_2 have 3, treatment_3_4 have 2, treatment_5_to_20 have 1)
- - 30 Biomarker (follow_up_1_2 have 3, follow_up_3_4 have 2, follow_up_5_to_25 have 1)
- - 15 Comorbidity (donor_1_2 have 3, donor_3_4 has 2, donor_5_to_10 have 1)
+ - 10 Donors
+   - 1-6: program_1
+   - 7-10: program_2
+ - 16 PrimaryDiagnosis
+   - 1-3: donor_1 | program_1
+   - 4-6: donor_2 | program_1
+   - 7-8: donor_3 | program_1
+   - 9-10: donor_4 | program_1
+   - 11-12: donor_5_6 | program_1
+   - 13-16: donor_7_8_9_10 | program_2
+ - 22 Specimen
+   - 1-3: primary_diagnosis_1 | donor_1 | program_1
+   - 4-6: primary_diagnosis_2 | donor_1 | program_1
+   - 7-8: primary_diagnosis_3 | donor_1 | program_1
+   - 9-10: primary_diagnosis_4 | donor_2 | program_1
+   - 11-12: primary_diagnosis_5_6 | donor_2 | program_1
+   - 13-14: primary_diagnosis_7_8 | donor_3 | program_1
+   - 15-16: primary_diagnosis_9_10 | donor_4 | program_1
+   - 17-18: primary_diagnosis_11_12 | donor_5_6 | program_1
+   - 19-22: primary_diagnosis_13_14_15_16 | donor_7_8_9_10 | program_2
+   
+ - 28 SampleRegistration
+   - 1-3: specimen_1 | primary_diagnosis_1 | donor_1 | program_1
+   - 4-6: specimen_2 | primary_diagnosis_1 | donor_1 | program_1
+   - 7-8: specimen_3 | primary_diagnosis_1 | donor_1 | program_1
+   - 9-10: specimen_4 | primary_diagnosis_2 | donor_1 | program_1
+   - 11-12: specimen_5_6 | primary_diagnosis_2 | donor_1 | program_1
+   - 13-14: specimen_7_8 | primary_diagnosis_3 | donor_1 | program_1
+   - 15-16: specimen_9_10 | primary_diagnosis_4 | donor_2 | program_1
+   - 17-18: specimen_11_12 | primary_diagnosis_5_6 | donor_2 | program_1
+   - 19-20: specimen_13_14 | primary_diagnosis_7_8 | donor_3 | program_1
+   - 21-22: specimen_15_16 | primary_diagnosis_9_10 | donor_4 | program_1
+   - 23-24: specimen_17_18 | primary_diagnosis_11_12 | donor_5_6 | program_1
+   - 25-28: specimen_19_20_21_22 | primary_diagnosis_13_14_15_16 | donor_7_8_9_10 | program_2
+ - 22 Treatment
+    - 1-3: primary_diagnosis_1 | donor_1 | program_1
+    - 4-6: primary_diagnosis_2 | donor_1 | program_1
+    - 7-8: primary_diagnosis_3 | donor_1 | program_1
+    - 9-10: primary_diagnosis_4 | donor_2 | program_1
+    - 11-12: primary_diagnosis_5_6 | donor_2 | program_1
+    - 13-14: primary_diagnosis_7_8 | donor_3 | program_1
+    - 15-16: primary_diagnosis_9_10 | donor_4 | program_1
+    - 17-18: primary_diagnosis_11_12 | donor_5_6 | program_1
+    - 19-22: primary_diagnosis_13_14_15_16 | donor_7_8_9_10 | program_2
+ - 7 Chemotherapy
+    - 1-3: treatment_1 | primary_diagnosis_1 | donor_1 | program_1
+    - 4-5: treatment_2 | primary_diagnosis_1 | donor_1 | program_1
+    - 6-7: treatment_3_4 | primary_diagnosis_1_2 | donor_1 | program_1
+ - 7 HormoneTherapy
+   - 1-3: treatment_5 | primary_diagnosis_2 | donor_1 | program_1
+   - 4-5: treatment_6 | primary_diagnosis_2 | donor_1 | program_1
+   - 6-7: treatment_7_8 | primary_diagnosis_3 | donor_1 | program_1
+ - 5 Radiation
+   - 1-2: treatment_9_10 | primary_diagnosis_4 | donor_2 | program_1
+   - 3-4: treatment_11_12 | primary_diagnosis_5_6 | donor_2 | program_1
+   - 5: treatment_13 | primary_diagnosis_7 | donor_3 | program_1
+ - 7 Immunotherapy
+    - 1-3: treatment_14 | primary_diagnosis_8 | donor_3 | program_1
+    - 4-5: treatment_15 | primary_diagnosis_9 | donor_4 | program_1
+    - 6-7: treatment_16_17 | primary_diagnosis_10_11 | donor_4_5 | program_1
+ - 5 Surgery (treatment_17_18_19_20 has 1, specimen_1_2 has 1)
+   - 1: treatment_18 | primary_diagnosis_12 | donor_5 | program_1
+   - 2-5: treatment_19_22 | primary_diagnosis_13_14_15_16 | donor_7_8_9_10 | program_2
+ - 28 FollowUp
+    - 1-3: treatment_1 | primary_diagnosis_1 | donor_1 | program_1
+    - 4-6: treatment_2 | primary_diagnosis_1 | donor_1 | program_1
+    - 7-8: treatment_3 | primary_diagnosis_1 | donor_1 | program_1
+    - 9-10: treatment_4 | primary_diagnosis_2 | donor_1 | program_1
+    - 11-12: treatment_5_6 | primary_diagnosis_2 | donor_1 | program_1
+    - 13-14: treatment_7_8 | primary_diagnosis_3 | donor_1 | program_1
+    - 15-16: treatment_9_10 | primary_diagnosis_4 | donor_2 | program_1
+    - 17-18: treatment_11_12 | primary_diagnosis_5_6 | donor_2 | program_1
 
-Question:
- - Should program and donor be linked to each other? (e.g donor_1 only go with program_1). If this is true, then we should put the program FK in donor only.
- - Similarly, should primary_diagnosis be linked to donor? (e.g primary_diagnosis_1 only go with donor_1 and program_1). If this is true, then we should put the donor FK in primary_diagnosis only.
- - Same for the rest of the models.
+    - 19-20: treatment_13_14: primary_diagnosis_7_8 | donor_3 | program_1
+    - 21-22: treatment_15_16: primary_diagnosis_9_10 | donor_4 | program_1
+    - 23-24: treatment_17_18: primary_diagnosis_11_12 | donor_5_6 | program_1
+    - 25-28: treatment_19_22: primary_diagnosis_13_14_15_16 | donor_7_8_9_10 | program_2
+ - 12 Biomarker
+   - 1-3: follow_up_1 | treatment_1 | primary_diagnosis_1 | donor_1 | program_1
+   - 4-6: follow_up_2 | treatment_1 | primary_diagnosis_1 | donor_1 | program_1
+   - 7-8: follow_up_3 | treatment_1 | primary_diagnosis_1 | donor_1 | program_1
+   - 9-10: follow_up_4 | treatment_2 | primary_diagnosis_1 | donor_1 | program_1
+   - 11-12: follow_up_5_6 | treatment_2 | primary_diagnosis_1 | donor_1 | program_1
+ - 14 Comorbidity
+    - 1-3: donor_1 | program_1
+    - 4-6: donor_2 | program_1
+    - 7-8: donor_3 | program_1
+    - 9-10: donor_4 | program_1
+    - 11-12: donor_5_6 | program_1
+    - 13-14: donor_7_8 | program_2
