@@ -416,12 +416,11 @@ def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
 
         # Censor small counts by rounding them to 0
         if v <= threshold:
-            v = 0
-
             # We cannot append 0-counts for derived labels, since that indicates
             # there is a non-0 count for this label in the database.
             if derived_labels:
                 continue
+            v = 0  # Otherwise (pre-made labels, so we aren't leaking anything), censor the small count
 
         bins.append({"label": category, "value": v})
 
