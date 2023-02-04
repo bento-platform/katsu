@@ -33,6 +33,6 @@ jobs:
       - name: Update schema.yml in repo
         uses: test-room-7/action-update-file@v1
         with: 
-          file-path: ./chord_metadata_service/mohpackets/docs/schema.yml
+          file-path: chord_metadata_service/mohpackets/docs/schema.yml
           commit-msg: Updated schema.yml
           github-token: ${{ secrets.GITHUB_TOKEN }}
