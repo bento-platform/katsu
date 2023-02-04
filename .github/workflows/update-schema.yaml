@@ -10,8 +10,8 @@ on:
       - develop
 
 jobs:
-  update_schema:
-    Generate OpenAPI schema using the current MoH model
+  generate-moh-schema:
+    name: Generate OpenAPI schema using the current MoH model
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@v3
