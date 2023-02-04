@@ -14096,9 +14096,7 @@ components:
           - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_assessed:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          $ref: '#/components/schemas/MarginTypesEnum'
         lymphovascular_invasion:
           oneOf:
           - $ref: '#/components/schemas/LymphovascularInvasionEnum'
@@ -15733,9 +15731,7 @@ components:
           - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_assessed:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          $ref: '#/components/schemas/MarginTypesEnum'
         lymphovascular_invasion:
           oneOf:
           - $ref: '#/components/schemas/LymphovascularInvasionEnum'
@@ -15818,9 +15814,7 @@ components:
           - $ref: '#/components/schemas/MarginTypesEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_assessed:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          $ref: '#/components/schemas/MarginTypesEnum'
         lymphovascular_invasion:
           oneOf:
           - $ref: '#/components/schemas/LymphovascularInvasionEnum'
