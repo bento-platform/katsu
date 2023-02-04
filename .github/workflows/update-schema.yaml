@@ -1,0 +1,22 @@
+name: Update MoH schema
+
+on:
+  push:
+    branches:
+      - develop
+      - auto_generate_schema
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  update_schema:
+    Generate OpenAPI schema using the current MoH model
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v3
+        - uses: actions/setup-python@v4
+          with:
+            python-version: '3.10' 
+        - uses: python -m pip install -r requirements.txt
+        - run: python manage.py spectacular --file ./chord_metadata_service/mohpackets/docs/schema.yml --validate --fail-on-warn
