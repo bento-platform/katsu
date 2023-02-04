@@ -366,6 +366,7 @@ class SurgerySerializer(serializers.ModelSerializer):
     )
     margin_types_not_assessed = CustomChoiceField(
         choices=val.MARGIN_TYPES,
+        allow_blank=True
     )
     lymphovascular_invasion = CustomChoiceField(
         choices=val.LYMPHOVACULAR_INVASION,
