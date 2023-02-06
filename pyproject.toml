@@ -34,7 +34,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
-bento-lib = {extras = ["django"], version = "^5.4.0"}
+bento-lib = {version = "5.4.0", extras = ["django"]}
 Django = "^4.1.5"
 django-autocomplete-light = "^3.9.4"
 django-cors-headers = "^3.13.0"
