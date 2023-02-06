@@ -7,7 +7,7 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.models import IndexableMixin
-from chord_metadata_service.restapi.schema_utils import schema_list
+from chord_metadata_service.restapi.schema_utils import validation_schema_list
 from chord_metadata_service.restapi.validators import (
     JsonSchemaValidator,
     age_or_age_range_validator,
@@ -17,9 +17,11 @@ from chord_metadata_service.restapi.validators import (
 from . import descriptions as d
 from .schemas import (
     ALLELE_SCHEMA,
+    ONE_OF_MEDICAL_ACTION,
     PHENOPACKET_DISEASE_ONSET_SCHEMA,
     PHENOPACKET_EVIDENCE_SCHEMA,
     PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA,
+    PHENOPACKET_MEASUREMENT_VALUE_SCHEMA,
     PHENOPACKET_TIME_ELEMENT_SCHEMA,
     PHENOPACKET_UPDATE_SCHEMA,
 )
@@ -57,12 +59,12 @@ class MetaData(models.Model):
     submitted_by = models.CharField(max_length=200, blank=True, help_text=rec_help(d.META_DATA, "submitted_by"))
     resources = models.ManyToManyField(Resource, help_text=rec_help(d.META_DATA, "resources"))
     updates = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(
-                        schema=schema_list(PHENOPACKET_UPDATE_SCHEMA), formats=['date-time'])],
+                        schema=validation_schema_list(PHENOPACKET_UPDATE_SCHEMA), formats=['date-time'])],
                         help_text=rec_help(d.META_DATA, "updates"))
     phenopacket_schema_version = models.CharField(max_length=200, blank=True,
                                                   help_text='Schema version of the current phenopacket.')
     external_references = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(
-                                    schema=schema_list(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA))],
+                                    schema=validation_schema_list(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA))],
                                     help_text=rec_help(d.META_DATA, "external_references"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.META_DATA, "extra_properties"))
     updated = models.DateTimeField(auto_now_add=True)
@@ -131,6 +133,25 @@ class Procedure(models.Model):
     def __str__(self):
         return str(self.id)
 
+class Measurement(models.Model):
+    id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for a given measurement')
+    description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.MEASUREMENT, "description"))
+    assay = JSONField(verbose_name='assay', validators=[ontology_validator],
+                       help_text=rec_help(d.MEASUREMENT, "assay"))
+    measurement_value = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_MEASUREMENT_VALUE_SCHEMA)])
+    time_observed = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+    procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, help_text='Clinical procdure performed to acquire the sample used for the measurement')
+    def __str__(self):
+        return str(self.id)
+
+class MedicalAction(models.Model):
+    id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for a medical action')
+    action = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(ONE_OF_MEDICAL_ACTION)])
+    treatment_target = models.JSONField(validators=[ontology_validator])
+    treatment_intent = models.JSONField(validators=[ontology_validator])
+    response_to_treatment = models.JSONField(validators=[ontology_validator])
+    adverse_events = models.JSONField(validators=[ontology_list_validator])
+    treatment_termination_reason = models.JSONField(validators=[ontology_validator])
 
 class HtsFile(BaseTimeStamp, IndexableMixin):
     """
@@ -305,10 +326,12 @@ class Phenopacket(BaseTimeStamp, IndexableMixin):
     # PhenotypicFeatures are present in Biosample, so can be accessed via Biosample instance
     # phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
     #   help_text='Phenotypic features observed in the proband.')
+    measurements = models.ManyToManyField(Measurement, blank=True)
     biosamples = models.ManyToManyField(Biosample, blank=True, help_text=rec_help(d.PHENOPACKET, "biosamples"))
     genes = models.ManyToManyField(Gene, blank=True, help_text=rec_help(d.PHENOPACKET, "genes"))
     variants = models.ManyToManyField(Variant, blank=True, help_text=rec_help(d.PHENOPACKET, "variants"))
     diseases = models.ManyToManyField(Disease, blank=True, help_text=rec_help(d.PHENOPACKET, "diseases"))
+    medical_actions = models.ManyToManyField(MedicalAction, blank=True)
     hts_files = models.ManyToManyField(HtsFile, blank=True, help_text=rec_help(d.PHENOPACKET, "hts_files"))
     # TODO OneToOneField
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
@@ -405,24 +428,5 @@ class Interpretation(BaseTimeStamp):
 
     def __str__(self):
         return str(self.id)
-
-class Measurement(models.Model):
-    id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for a given measurement')
-    description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.MEASUREMENT, "description"))
-    assay = JSONField(verbose_name='assay', validators=[ontology_validator],
-                       help_text=rec_help(d.MEASUREMENT, "assay"))
-    measurement_value = models.JSONField()
-    time_observed = models.JSONField()
-    procedure = models.JSONField()
-    def __str__(self):
-        return str(self.id)
-
-class MedicalAction(models.Model):
-    action = models.JSONField()
-    treatment_target = models.JSONField()
-    treatment_intent = models.JSONField()
-    response_to_treatment = models.JSONField()
-    adverse_events = models.JSONField()
-    treatment_termination_reason = models.JSONField()
 
 # TODO: Should TIME_ELEMENT be a table?

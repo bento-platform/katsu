@@ -10,7 +10,7 @@ from chord_metadata_service.restapi.schemas import (
     ONTOLOGY_CLASS,
     TIME_INTERVAL,
 )
-from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe
+from chord_metadata_service.restapi.schema_utils import array_of, base_type, tag_ids_and_describe
 
 from . import descriptions
 
@@ -44,6 +44,7 @@ __all__ = [
     "PHENOPACKET_MEDICAL_ACTION_SCHEMA"
 ]
 
+_STRING_FIELD = {"type": "string"}
 
 ALLELE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -661,3 +662,33 @@ PHENOPACKET_SCHEMA = tag_ids_and_describe({
     },
     "required": ["metaData"],
 }, descriptions.PHENOPACKET)
+
+GENE_DESCRIPTOR = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:gene_descriptor",
+    "title": "Gene descriptor schema",
+    "description": "Schema used to describe genes",
+    "type": "object",
+    "properties": {
+        "value_id": base_type("string"),
+        "symbol": base_type("string"),
+        "description": base_type("string"),
+        "alternate_ids": array_of(base_type("string")),
+        "xrefs": array_of(base_type("string")),
+        "alternate_symbols": array_of(base_type("string"))
+    },
+    "required": ["id", "symbol"]
+}, {})
+
+VARIANT_DESCRIPTOR = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:gene_descriptor",
+    "title": "Variant descriptor schema",
+    "description": "Schema used to describe variants",
+    "type": "object",
+    "properties": {
+        "id": base_type("string"),
+        "variation": "", #TODO
+        
+    }
+}, {})

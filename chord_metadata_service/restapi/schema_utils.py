@@ -10,7 +10,8 @@ __all__ = [
     "tag_schema_with_nested_ids",
     "tag_ids_and_describe",
     "customize_schema",
-    "schema_list",
+    "validation_schema_list",
+    "array_of"
 ]
 
 
@@ -130,7 +131,7 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
     }
 
 
-def schema_list(schema):
+def validation_schema_list(schema):
     """ Schema to validate JSON array values. """
 
     return {
@@ -140,3 +141,23 @@ def schema_list(schema):
         "type": "array",
         "items": schema
     }
+
+
+def array_of(schema):
+    """
+    Simple array schema with items schema specified by argument.
+    Use to simplify/shorthen json-schema writing.
+    """
+    return {
+        "type": "array",
+        "items": schema
+    }
+
+
+def base_type(type: str):
+    """
+    Creates a basic type schema
+    """
+    if type not in ["string", "number", "integer", "boolean"]:
+        raise ValueError(f"Type {type} cannot be used here.")
+    return {"type": type}
