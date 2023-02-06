@@ -9,13 +9,14 @@ on:
     branches:
       - develop
 
+env:
+  CANDIG: TRUE
+
 jobs:
   generate-moh-schema:
     name: Update OpenAPI schema using current MoH model
     runs-on: ubuntu-latest
     steps:
-      - run: export CANDIG=TRUE
-
       - name: Check out repo
         uses: actions/checkout@v3
         with:
