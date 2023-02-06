@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - auto-generate-schema
   pull_request:
     branches:
       - develop
@@ -14,7 +13,7 @@ jobs:
     name: Update OpenAPI schema using current MoH model
     runs-on: ubuntu-latest
     steps:
-      - name: Set 
+      - name: Set env variable to skip Bento endpoints
         run: echo "CANDIG=TRUE" >> $GITHUB_ENV
       
       - name: Check out repo
