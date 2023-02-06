@@ -26,6 +26,8 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
       
+      - run: export CANDIG=TRUE
+
       - name: Generate new schema.yml
         run: python manage.py spectacular --file ./chord_metadata_service/mohpackets/docs/schema.yml --validate --fail-on-warn
       
