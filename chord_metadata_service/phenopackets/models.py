@@ -20,6 +20,7 @@ from .schemas import (
     PHENOPACKET_DISEASE_ONSET_SCHEMA,
     PHENOPACKET_EVIDENCE_SCHEMA,
     PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA,
+    PHENOPACKET_TIME_ELEMENT_SCHEMA,
     PHENOPACKET_UPDATE_SCHEMA,
 )
 
@@ -30,6 +31,18 @@ from .schemas import (
 #                                                           #
 #############################################################
 
+class BaseTimeStamp(models.Model):
+    """
+    Abstract django model class for tables that should have
+    columns for 'created' and 'updated' timestamps.
+    Use in inheritance.
+    """
+    created = models.DateTimeField(auto_now=True)
+    updated = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Abstract prevents the creation of a _TimeStamp table
+        abstract = True
 
 class MetaData(models.Model):
     """
@@ -68,7 +81,7 @@ class MetaData(models.Model):
 #############################################################
 
 
-class PhenotypicFeature(models.Model, IndexableMixin):
+class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
     """
     Class to describe a phenotype of an Individual
 
@@ -78,13 +91,14 @@ class PhenotypicFeature(models.Model, IndexableMixin):
     description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "description"))
     pftype = JSONField(verbose_name='type', validators=[ontology_validator],
                        help_text=rec_help(d.PHENOTYPIC_FEATURE, "type"))
-    negated = models.BooleanField(default=False, help_text=rec_help(d.PHENOTYPIC_FEATURE, "negated"))
+    excluded = models.BooleanField(default=False, help_text=rec_help(d.PHENOTYPIC_FEATURE, "negated"))
     severity = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "severity"))
     modifier = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "modifier"))
-    onset = JSONField(blank=True, null=True, validators=[ontology_validator],
-                      help_text=rec_help(d.PHENOTYPIC_FEATURE, "onset"))
+    onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+    resolution = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+
     # evidence can stay here because evidence is given for an observation of PF
     # JSON schema to check evidence_code is present
     # FHIR: Condition.evidence
@@ -95,8 +109,6 @@ class PhenotypicFeature(models.Model, IndexableMixin):
     phenopacket = models.ForeignKey(
         "Phenopacket", on_delete=models.SET_NULL, blank=True, null=True, related_name='phenotypic_features')
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "extra_properties"))
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.id)
@@ -114,14 +126,13 @@ class Procedure(models.Model):
     body_site = JSONField(blank=True, null=True, validators=[ontology_validator],
                           help_text=rec_help(d.PROCEDURE, "body_site"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "extra_properties"))
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    performed = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
 
     def __str__(self):
         return str(self.id)
 
 
-class HtsFile(models.Model, IndexableMixin):
+class HtsFile(BaseTimeStamp, IndexableMixin):
     """
     Class to link HTC files with data
 
@@ -148,14 +159,12 @@ class HtsFile(models.Model, IndexableMixin):
     individual_to_sample_identifiers = JSONField(
         blank=True, null=True, help_text=rec_help(d.HTS_FILE, "individual_to_sample_identifiers"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.HTS_FILE, "extra_properties"))
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.uri)
 
 
-class Gene(models.Model):
+class Gene(BaseTimeStamp):
     """
     Class to represent an identifier for a gene
 
@@ -171,14 +180,12 @@ class Gene(models.Model):
                                help_text=rec_help(d.GENE, "alternate_ids"))
     symbol = models.CharField(max_length=200, help_text=rec_help(d.GENE, "symbol"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.GENE, "extra_properties"))
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.id)
 
 
-class Variant(models.Model):
+class Variant(BaseTimeStamp):
     """
     Class to describe Individual variants or diagnosed causative variants
 
@@ -198,14 +205,12 @@ class Variant(models.Model):
     zygosity = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text=rec_help(d.VARIANT, "zygosity"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT, "extra_properties"))
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
+    
     def __str__(self):
         return str(self.id)
 
 
-class Disease(models.Model, IndexableMixin):
+class Disease(BaseTimeStamp, IndexableMixin):
     """
     Class to represent a diagnosis and inference or hypothesis about the cause
     underlying the observed phenotypic abnormalities
@@ -222,21 +227,18 @@ class Disease(models.Model, IndexableMixin):
     # "id": "HP:0003581",
     # "label": "Adult onset"
     # }
-    onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_DISEASE_ONSET_SCHEMA)],
-                      help_text=rec_help(d.DISEASE, "onset"))
+    onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
     disease_stage = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                               help_text=rec_help(d.DISEASE, "disease_stage"))
     tnm_finding = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                             help_text=rec_help(d.DISEASE, "tnm_finding"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.DISEASE, "extra_properties"))
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
 
 
-class Biosample(models.Model, IndexableMixin):
+class Biosample(BaseTimeStamp, IndexableMixin):
     """
     Class to describe a unit of biological material
 
@@ -274,8 +276,6 @@ class Biosample(models.Model, IndexableMixin):
     variants = models.ManyToManyField(Variant, blank=True, help_text=rec_help(d.BIOSAMPLE, "variants"))
     is_control_sample = models.BooleanField(default=False, help_text=rec_help(d.BIOSAMPLE, "is_control_sample"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "extra_properties"))
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
@@ -289,7 +289,7 @@ class Biosample(models.Model, IndexableMixin):
         }
 
 
-class Phenopacket(models.Model, IndexableMixin):
+class Phenopacket(BaseTimeStamp, IndexableMixin):
     """
     Class to aggregate Individual's experiments data
 
@@ -314,8 +314,6 @@ class Phenopacket(models.Model, IndexableMixin):
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
     table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOPACKET, "extra_properties"))
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
@@ -328,7 +326,7 @@ class Phenopacket(models.Model, IndexableMixin):
 #############################################################
 
 
-class GenomicInterpretation(models.Model):
+class GenomicInterpretation(BaseTimeStamp):
     """
     Class to represent a statement about the contribution
     of a genomic element towards the observed phenotype
@@ -350,8 +348,6 @@ class GenomicInterpretation(models.Model):
                                 blank=True, null=True, help_text='The variant contributing to the diagnosis.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
 
     def clean(self):
         if not (self.gene or self.variant):
@@ -361,7 +357,7 @@ class GenomicInterpretation(models.Model):
         return str(self.id)
 
 
-class Diagnosis(models.Model):
+class Diagnosis(BaseTimeStamp):
     """
     Class to refer to disease that is present in the individual analyzed
 
@@ -375,14 +371,12 @@ class Diagnosis(models.Model):
         help_text='The genomic elements assessed as being responsible for the disease.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
 
 
-class Interpretation(models.Model):
+class Interpretation(BaseTimeStamp):
     """
     Class to represent the interpretation of a genomic analysis
 
@@ -408,8 +402,27 @@ class Interpretation(models.Model):
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text='Metadata about this interpretation.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)
+
+class Measurement(models.Model):
+    id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for a given measurement')
+    description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.MEASUREMENT, "description"))
+    assay = JSONField(verbose_name='assay', validators=[ontology_validator],
+                       help_text=rec_help(d.MEASUREMENT, "assay"))
+    measurement_value = models.JSONField()
+    time_observed = models.JSONField()
+    procedure = models.JSONField()
+    def __str__(self):
+        return str(self.id)
+
+class MedicalAction(models.Model):
+    action = models.JSONField()
+    treatment_target = models.JSONField()
+    treatment_intent = models.JSONField()
+    response_to_treatment = models.JSONField()
+    adverse_events = models.JSONField()
+    treatment_termination_reason = models.JSONField()
+
+# TODO: Should TIME_ELEMENT be a table?

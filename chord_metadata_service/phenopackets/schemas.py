@@ -273,7 +273,7 @@ PHENOPACKET_GESTATIONAL_AGE = tag_ids_and_describe({
 PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:time_element",
-    "title": "Measurement schema",
+    "title": "Time element schema",
     "type": "object",
     "oneOf": [
         PHENOPACKET_GESTATIONAL_AGE,
@@ -292,7 +292,7 @@ PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
 PHENOPACKET_PROCEDURE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:procedure",
-    "title": "Measurement schema",
+    "title": "Procedure schema",
     "type": "object",
     "properties": {
         "code": ONTOLOGY_CLASS,
@@ -352,7 +352,7 @@ PHENOPACKET_VALUE_SCHEMA = {
 PHENOPACKET_COMPLEX_VALUE_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:complex_value",
-    "title": "Measurement schema",
+    "title": "Complex value schema",
     "type": "object",
     "properties": {
         "typed_quantities": {
@@ -366,7 +366,7 @@ PHENOPACKET_COMPLEX_VALUE_SCHEMA = {
 PHENOPACKET_MEASUREMENT_VALUE_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:measurement:measurement_value",
-    "title": "Measurement schema",
+    "title": "Measurement value schema",
     "type": "object",
     "oneOf": [
         PHENOPACKET_VALUE_SCHEMA,
