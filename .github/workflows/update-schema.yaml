@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - auto-generate-schema
   pull_request:
     branches:
       - develop
@@ -13,6 +14,8 @@ jobs:
     name: Update OpenAPI schema using current MoH model
     runs-on: ubuntu-latest
     steps:
+      - run: export CANDIG=TRUE
+
       - name: Check out repo
         uses: actions/checkout@v3
         with:
@@ -25,8 +28,6 @@ jobs:
       
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
-      
-      - run: export CANDIG=TRUE
 
       - name: Generate new schema.yml
         run: python manage.py spectacular --file ./chord_metadata_service/mohpackets/docs/schema.yml --validate --fail-on-warn
