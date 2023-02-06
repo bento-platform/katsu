@@ -16,6 +16,23 @@ from chord_metadata_service.mohpackets.api_discovery import (
     DiscoverySurgeryViewSet,
     DiscoveryTreatmentViewSet,
 )
+from chord_metadata_service.mohpackets.api_ingest import (
+    delete_all,
+    ingest_biomarkers,
+    ingest_chemotherapies,
+    ingest_comorbidities,
+    ingest_donors,
+    ingest_followups,
+    ingest_hormonetherapies,
+    ingest_immunotherapies,
+    ingest_primary_diagnosises,
+    ingest_programs,
+    ingest_radiations,
+    ingest_sample_registrations,
+    ingest_specimens,
+    ingest_surgeries,
+    ingest_treatments,
+)
 from chord_metadata_service.mohpackets.api_views import (
     BiomarkerViewSet,
     ChemotherapyViewSet,
@@ -32,22 +49,6 @@ from chord_metadata_service.mohpackets.api_views import (
     SurgeryViewSet,
     TreatmentViewSet,
     moh_overview,
-)
-from chord_metadata_service.mohpackets.ingest import (
-    ingest_biomarkers,
-    ingest_chemotherapies,
-    ingest_comorbidities,
-    ingest_donors,
-    ingest_followups,
-    ingest_hormonetherapies,
-    ingest_immunotherapies,
-    ingest_primary_diagnosises,
-    ingest_programs,
-    ingest_radiations,
-    ingest_sample_registrations,
-    ingest_specimens,
-    ingest_surgeries,
-    ingest_treatments,
 )
 
 # ================== MOH API ================== #
@@ -106,5 +107,6 @@ urlpatterns = [
     path("moh/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
     path("ingest/", include(ingest_patterns)),
+    path("delete/all", delete_all),
     path("discovery/overview", moh_overview),
 ]
