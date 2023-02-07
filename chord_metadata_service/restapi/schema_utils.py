@@ -161,13 +161,19 @@ def enum_of(values: List[str]):
         "enum": values
     }
 
-def base_type(type: str):
+class SCHEMA_TYPES(Enum):
+    STRING = "string"
+    INTEGER = "integer"
+    NUMBER = "number"
+    BOOLEAN = "boolean"
+    OBJECT = "object"
+    NULL = "null"
+
+def base_type(type: SCHEMA_TYPES):
     """
     Creates a basic type schema
     """
-    if type not in ["string", "number", "integer", "boolean", "object"]:
-        raise ValueError(f"Type {type} cannot be used here.")
-    return {"type": type}
+    return {"type": type.value}
 
 def string_with_pattern(pattern: str):
     """
@@ -178,7 +184,7 @@ def string_with_pattern(pattern: str):
         "pattern": pattern
     }
 
-class STRING_FORMATS(Enum):
+class SCHEMA_STRING_FORMATS(Enum):
     """
     Json-schema supported string formats as enums
     See: https://json-schema.org/understanding-json-schema/reference/string.html#format
@@ -199,11 +205,11 @@ class STRING_FORMATS(Enum):
     IRI = "iri"
     IRI_REFERENCE = "iri-reference"
 
-def string_with_format(format: STRING_FORMATS):
+def string_with_format(format: SCHEMA_STRING_FORMATS):
     return {
         "type": "string",
         "format": format.value
     }
 
-DATE_TIME = string_with_format(STRING_FORMATS.DATE_TIME)
+DATE_TIME = string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME)
 

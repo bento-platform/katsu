@@ -1,6 +1,6 @@
 from . import descriptions
 from .description_utils import EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
-from .schema_utils import tag_ids_and_describe, tag_schema_with_nested_ids
+from .schema_utils import DATE_TIME, SCHEMA_TYPES, base_type, tag_ids_and_describe, tag_schema_with_nested_ids
 
 # Individual schemas for validation of JSONField values
 
@@ -27,8 +27,8 @@ ONTOLOGY_CLASS = tag_ids_and_describe({
     "title": "Ontology class schema",
     "type": "object",
     "properties": {
-        "id": {"type": "string"},
-        "label": {"type": "string"}
+        "id": base_type(SCHEMA_TYPES.STRING),
+        "label": base_type(SCHEMA_TYPES.STRING)
     },
     "additionalProperties": False,
     "required": ["id", "label"]
@@ -118,14 +118,8 @@ TIME_INTERVAL = {
                    "phenotypic observations.",
     "type": "object",
     "properties": {
-        "start": {
-            "type": "string",
-            "format": "date-time"
-        },
-        "end": {
-            "type": "string",
-            "format": "date-time"
-        }
+        "start": DATE_TIME,
+        "end": DATE_TIME
     },
     "additionalProperties": False,
     "required": ["start", "end"]

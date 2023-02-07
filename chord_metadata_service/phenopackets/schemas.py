@@ -10,7 +10,7 @@ from chord_metadata_service.restapi.schemas import (
     ONTOLOGY_CLASS,
     TIME_INTERVAL,
 )
-from chord_metadata_service.restapi.schema_utils import DATE_TIME, STRING_FORMATS, array_of, base_type, enum_of, string_with_format, string_with_pattern, tag_ids_and_describe
+from chord_metadata_service.restapi.schema_utils import DATE_TIME, SCHEMA_STRING_FORMATS, SCHEMA_TYPES, array_of, base_type, enum_of, string_with_format, string_with_pattern, tag_ids_and_describe
 
 from . import descriptions
 
@@ -52,23 +52,23 @@ ALLELE_SCHEMA = tag_ids_and_describe({
     "description": "Variant allele types",
     "type": "object",
     "properties": {
-        "id": base_type("string"),
+        "id": base_type(SCHEMA_TYPES.STRING),
 
-        "hgvs": base_type("string"),
+        "hgvs": base_type(SCHEMA_TYPES.STRING),
 
-        "genome_assembly": base_type("string"),
-        "chr": base_type("string"),
-        "pos": base_type("integer"),
-        "ref": base_type("string"),
-        "alt": base_type("string"),
-        "info": base_type("string"),
+        "genome_assembly": base_type(SCHEMA_TYPES.STRING),
+        "chr": base_type(SCHEMA_TYPES.STRING),
+        "pos": base_type(SCHEMA_TYPES.INTEGER),
+        "ref": base_type(SCHEMA_TYPES.STRING),
+        "alt": base_type(SCHEMA_TYPES.STRING),
+        "info": base_type(SCHEMA_TYPES.STRING),
 
-        "seq_id": base_type("string"),
-        "position": base_type("integer"),
-        "deleted_sequence": base_type("string"),
-        "inserted_sequence": base_type("string"),
+        "seq_id": base_type(SCHEMA_TYPES.STRING),
+        "position": base_type(SCHEMA_TYPES.INTEGER),
+        "deleted_sequence": base_type(SCHEMA_TYPES.STRING),
+        "inserted_sequence": base_type(SCHEMA_TYPES.STRING),
 
-        "iscn": base_type("string")
+        "iscn": base_type(SCHEMA_TYPES.STRING)
     },
     "additionalProperties": False,
     "oneOf": [
@@ -90,8 +90,8 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = tag_ids_and_describe({
     "title": "External reference schema",
     "type": "object",
     "properties": {
-        "id": base_type("string"),
-        "description": base_type("string")
+        "id": base_type(SCHEMA_TYPES.STRING),
+        "description": base_type(SCHEMA_TYPES.STRING)
     },
     "required": ["id"]
 }, descriptions.EXTERNAL_REFERENCE)
@@ -104,8 +104,8 @@ PHENOPACKET_UPDATE_SCHEMA = tag_ids_and_describe({
     "type": "object",
     "properties": {
         "timestamp": DATE_TIME,
-        "updated_by": base_type("string"),
-        "comment": base_type("string")
+        "updated_by": base_type(SCHEMA_TYPES.STRING),
+        "comment": base_type(SCHEMA_TYPES.STRING)
     },
     "additionalProperties": False,
     "required": ["timestamp", "comment"],
@@ -119,11 +119,11 @@ PHENOPACKET_META_DATA_SCHEMA = tag_ids_and_describe({
     "type": "object",
     "properties": {
         "created": DATE_TIME,
-        "created_by": base_type("string"),
-        "submitted_by": base_type("string"),
+        "created_by": base_type(SCHEMA_TYPES.STRING),
+        "submitted_by": base_type(SCHEMA_TYPES.STRING),
         "resources": array_of(RESOURCE_SCHEMA),
         "updates": array_of(PHENOPACKET_UPDATE_SCHEMA),
-        "phenopacket_schema_version": base_type("string"),
+        "phenopacket_schema_version": base_type(SCHEMA_TYPES.STRING),
         "external_references": array_of(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
@@ -147,7 +147,7 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = tag_ids_and_describe({
     "$id": "katsu:phenopackets:phenotypic_feature",
     "type": "object",
     "properties": {
-        "description": base_type("string"),
+        "description": base_type(SCHEMA_TYPES.STRING),
         "type": ONTOLOGY_CLASS,
         "negated": base_type("boolean"),
         "severity": ONTOLOGY_CLASS,
@@ -164,9 +164,9 @@ PHENOPACKET_GENE_SCHEMA = tag_ids_and_describe({
     "$id": "katsu:phenopackets:gene",
     "type": "object",
     "properties": {
-        "id": base_type("string"),
-        "alternate_ids": array_of(base_type("string")),
-        "symbol": base_type("string"),
+        "id": base_type(SCHEMA_TYPES.STRING),
+        "alternate_ids": array_of(base_type(SCHEMA_TYPES.STRING)),
+        "symbol": base_type(SCHEMA_TYPES.STRING),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "symbol"]
@@ -177,10 +177,10 @@ PHENOPACKET_HTS_FILE_SCHEMA = tag_ids_and_describe({
     "$id": "katsu:phenopackets:hts_file",
     "type": "object",
     "properties": {
-        "uri": string_with_format(STRING_FORMATS.URI),
-        "description": base_type("string"),
+        "uri": string_with_format(SCHEMA_STRING_FORMATS.URI),
+        "description": base_type(SCHEMA_TYPES.STRING),
         "hts_format": enum_of(["SAM", "BAM", "CRAM", "VCF", "BCF", "GVCF", "FASTQ", "UNKNOWN"]),
-        "genome_assembly": base_type("string"),
+        "genome_assembly": base_type(SCHEMA_TYPES.STRING),
         "individual_to_sample_identifiers": base_type("object"),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     }
@@ -204,8 +204,8 @@ PHENOPACKET_GESTATIONAL_AGE = tag_ids_and_describe({
     "title": "Gestational age schema",
     "type": "object",
     "properties": {
-        "weeks": base_type("integer"),
-        "days": base_type("integer")
+        "weeks": base_type(SCHEMA_TYPES.INTEGER),
+        "days": base_type(SCHEMA_TYPES.INTEGER)
     },
     "required": ["weeks"]
 }, {}) #TODO: description
@@ -220,7 +220,7 @@ PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
         AGE,
         AGE_RANGE,
         ONTOLOGY_CLASS,
-        string_with_format(STRING_FORMATS.DATE_TIME),
+        string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME),
         TIME_INTERVAL
     ],
     "required": ["oneOf"]
@@ -246,11 +246,11 @@ PHENOPACKET_QUANTITY_SCHEMA = {
     "type": "object",
     "properties": {
         "unit": ONTOLOGY_CLASS,
-        "value": base_type("number"),
+        "value": base_type(SCHEMA_TYPES.NUMBER),
         "reference_range": {
             "unit": ONTOLOGY_CLASS,
-            "low": base_type("number"),
-            "high": base_type("number")
+            "low": base_type(SCHEMA_TYPES.NUMBER),
+            "high": base_type(SCHEMA_TYPES.NUMBER)
         }
     },
     "required": ["unit", "value"]
@@ -309,7 +309,7 @@ PHENOPACKET_MEASUREMENT_SCHEMA = {
     "title": "Measurement schema",
     "type": "object",
     "properties": {
-        "description": {"type": "string"},
+        "description": {"type": SCHEMA_TYPES.STRING},
         "assay": ONTOLOGY_CLASS,
         "measurement_value": PHENOPACKET_MEASUREMENT_VALUE_SCHEMA,
         "time_observed": PHENOPACKET_TIME_ELEMENT_SCHEMA,
@@ -324,9 +324,9 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = tag_ids_and_describe({
     "$id": "katsu:phenopackets:biosample",
     "type": "object",
     "properties": {
-        "id": base_type("string"),
-        "individual_id": base_type("string"),
-        "description": base_type("string"),
+        "id": base_type(SCHEMA_TYPES.STRING),
+        "individual_id": base_type(SCHEMA_TYPES.STRING),
+        "description": base_type(SCHEMA_TYPES.STRING),
         "sampled_tissue": ONTOLOGY_CLASS,
         "phenotypic_features": array_of(PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA),
         "taxonomy": ONTOLOGY_CLASS,
@@ -410,8 +410,8 @@ PHENOPACKET_RADIATION_THERAPY = tag_ids_and_describe({
     "properties": {
         "modality": ONTOLOGY_CLASS,
         "body_site": ONTOLOGY_CLASS,
-        "dosage": base_type("integer"),
-        "fractions": base_type("integer")
+        "dosage": base_type(SCHEMA_TYPES.INTEGER),
+        "fractions": base_type(SCHEMA_TYPES.INTEGER)
     },
     "required": ["modality", "body_site", "dosage", "fractions"]
 }, {})
@@ -476,7 +476,7 @@ FILE_SCHEMA = tag_ids_and_describe({
         + "contains to external files which can be used to inform analyses.",
     "type": "object",
     "properties": {
-        "uri": base_type("string"),
+        "uri": base_type(SCHEMA_TYPES.STRING),
         "undividual_to_file_identifiers": base_type("object"),
         "file_attributes": base_type("object")
     }
@@ -489,12 +489,12 @@ GENE_DESCRIPTOR = tag_ids_and_describe({
     "description": "Schema used to describe genes",
     "type": "object",
     "properties": {
-        "value_id": base_type("string"),
-        "symbol": base_type("string"),
-        "description": base_type("string"),
-        "alternate_ids": array_of(base_type("string")),
-        "xrefs": array_of(base_type("string")),
-        "alternate_symbols": array_of(base_type("string"))
+        "value_id": base_type(SCHEMA_TYPES.STRING),
+        "symbol": base_type(SCHEMA_TYPES.STRING),
+        "description": base_type(SCHEMA_TYPES.STRING),
+        "alternate_ids": array_of(base_type(SCHEMA_TYPES.STRING)),
+        "xrefs": array_of(base_type(SCHEMA_TYPES.STRING)),
+        "alternate_symbols": array_of(base_type(SCHEMA_TYPES.STRING))
     },
     "required": ["id", "symbol"]
 }, {})
@@ -507,7 +507,7 @@ VRS_VARIATION_SCHEMA = tag_ids_and_describe({
     "type": "object",
     "properties": {
         "_id": string_with_pattern("^[a-z0-9]+:[A-Za-z0-9.\-:]+$"), # Regex that matches 'prefix:reference' CURIE notation
-        "type": base_type("string")
+        "type": base_type(SCHEMA_TYPES.STRING)
     },
     "required": []
 }, {})
@@ -520,9 +520,9 @@ EXPRESSION_SCHEMA = tag_ids_and_describe({
     "description": "Enables description of an object based on a nomenclature",
     "type": "object",
     "properties": {
-        "syntax": base_type("string"),
-        "value": base_type("string"),
-        "version": base_type("string")
+        "syntax": base_type(SCHEMA_TYPES.STRING),
+        "value": base_type(SCHEMA_TYPES.STRING),
+        "version": base_type(SCHEMA_TYPES.STRING)
     }
 }, {})
 
@@ -534,8 +534,8 @@ EXTENSION_SCHEMA = tag_ids_and_describe({
     "description": "The Extension class provides a means to extend descriptions with other attributes unique to a content provider",
     "type": "object",
     "properties": {
-        "name": base_type("string"),
-        "value": base_type("string")
+        "name": base_type(SCHEMA_TYPES.STRING),
+        "value": base_type(SCHEMA_TYPES.STRING)
     },
     "required": ["name", "value"]
 }, {})
@@ -547,15 +547,15 @@ VCF_RECORD_SCHEMA = tag_ids_and_describe({
     "description": "This element is used to describe variants using the Variant Call Format.",
     "type": "object",
     "properties": {
-        "genome_assembly": base_type("string"),
-        "chrom": base_type("string"),
-        "pos": base_type("integer"),
-        "id": base_type("string"),
-        "ref": base_type("string"),
-        "alt": base_type("string"),
-        "qual": base_type("string"),
-        "filter": base_type("string"),
-        "info": base_type("string")
+        "genome_assembly": base_type(SCHEMA_TYPES.STRING),
+        "chrom": base_type(SCHEMA_TYPES.STRING),
+        "pos": base_type(SCHEMA_TYPES.INTEGER),
+        "id": base_type(SCHEMA_TYPES.STRING),
+        "ref": base_type(SCHEMA_TYPES.STRING),
+        "alt": base_type(SCHEMA_TYPES.STRING),
+        "qual": base_type(SCHEMA_TYPES.STRING),
+        "filter": base_type(SCHEMA_TYPES.STRING),
+        "info": base_type(SCHEMA_TYPES.STRING)
     },
 }, {})
 
@@ -567,23 +567,23 @@ VARIANT_DESCRIPTOR = tag_ids_and_describe({
     "description": "Schema used to describe variants",
     "type": "object",
     "properties": {
-        "id": base_type("string"),
+        "id": base_type(SCHEMA_TYPES.STRING),
         "variation": VRS_VARIATION_SCHEMA,
-        "label": base_type("string"),
-        "description": base_type("string"),
+        "label": base_type(SCHEMA_TYPES.STRING),
+        "description": base_type(SCHEMA_TYPES.STRING),
         "gene_descriptor": GENE_DESCRIPTOR,
         "expressions": array_of(EXPRESSION_SCHEMA),
         "vcf_record": VCF_RECORD_SCHEMA,
-        "xrefs": array_of(base_type("string")),
-        "alternate_labels": array_of(base_type("string")),
+        "xrefs": array_of(base_type(SCHEMA_TYPES.STRING)),
+        "alternate_labels": array_of(base_type(SCHEMA_TYPES.STRING)),
         "extensions": array_of(EXTENSION_SCHEMA),
         "molecule_context": {
-            "type": "string",
+            "type": SCHEMA_TYPES.STRING,
             "default": "unspecified_molecule_context",
             "description": "The molecular context of the variant."
         },
         "structural_type": ONTOLOGY_CLASS,
-        "vrs_ref_allele_seq": base_type("string"),
+        "vrs_ref_allele_seq": base_type(SCHEMA_TYPES.STRING),
         "allelic_state": ONTOLOGY_CLASS
     }
 }, {})
@@ -610,7 +610,7 @@ PHENOPACKET_GENOMIC_INTERPRETATION = tag_ids_and_describe({
     "description": "Describes the interpretation for an individual variant or gene",
     "type": "object",
     "properties": {
-        "subject_or_biosample_id": base_type("string"),
+        "subject_or_biosample_id": base_type(SCHEMA_TYPES.STRING),
         "interpretation_status": enum_of(["UNKNOWN_STATUS", "REJECTED", "CANDIDATE", "CONTRIBUTORY", "CAUSATIVE"]),
         "call": {
             "oneOf": [GENE_DESCRIPTOR, PHENOPACKET_VARIANT_INTERPRETATION]
@@ -627,7 +627,7 @@ PHENOPACKET_INTERPRETATION_SCHEMA = tag_ids_and_describe({
     "description": "This message intends to represent the interpretation of a genomic analysis, such as the report from a diagnostic laboratory.",
     "type": "object",
     "properties": {
-        "id": base_type("string"),
+        "id": base_type(SCHEMA_TYPES.STRING),
         "progress_status": enum_of(["UNKNOWN_PROGRESS", "IN_PROGRESS", "COMPLETED", "SOLVED", "UNSOLVED"]),
         "diagnosis": {
             "type": "object",
@@ -636,7 +636,7 @@ PHENOPACKET_INTERPRETATION_SCHEMA = tag_ids_and_describe({
                 "genomic_interpretations": array_of(PHENOPACKET_GENOMIC_INTERPRETATION)
             }
         },
-        "summary": base_type("string")
+        "summary": base_type(SCHEMA_TYPES.STRING)
     }
 }, {})
 
@@ -647,7 +647,7 @@ PHENOPACKET_SCHEMA = tag_ids_and_describe({
     "description": "Schema for metadata service datasets",
     "type": "object",
     "properties": {
-        "id": base_type("string"),
+        "id": base_type(SCHEMA_TYPES.STRING),
         "subject": INDIVIDUAL_SCHEMA,
         "phenotypic_features": array_of(PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA),
         "measurements": array_of(PHENOPACKET_MEASUREMENT_SCHEMA),
