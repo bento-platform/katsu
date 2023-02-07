@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List, Optional
 
 from .description_utils import describe_schema
@@ -14,6 +15,7 @@ __all__ = [
     "array_of"
 ]
 
+DRAF_7 = "http://json-schema.org/draft-07/schema#"
 
 def merge_schema_dictionaries(dict1: dict, dict2: dict):
     """
@@ -153,11 +155,55 @@ def array_of(schema):
         "items": schema
     }
 
+def enum_of(values: List[str]):
+    return {
+        "type": "string",
+        "enum": values
+    }
 
 def base_type(type: str):
     """
     Creates a basic type schema
     """
-    if type not in ["string", "number", "integer", "boolean"]:
+    if type not in ["string", "number", "integer", "boolean", "object"]:
         raise ValueError(f"Type {type} cannot be used here.")
     return {"type": type}
+
+def string_with_pattern(pattern: str):
+    """
+    Creates a regex formated string schema
+    """
+    return {
+        "type": "string",
+        "pattern": pattern
+    }
+
+class STRING_FORMATS(Enum):
+    """
+    Json-schema supported string formats as enums
+    See: https://json-schema.org/understanding-json-schema/reference/string.html#format
+    """
+    DATE_TIME = "date-time"
+    TIME = "time"
+    DATE = "date"
+    DURATION = "duration"
+    EMAIL = "email"
+    IDN_EMAIL = "idn-email"
+    HOSTNAME = "hostname"
+    IDN_HOSTNAME = "idn-hostname"
+    IPV4 = "ipv4"
+    IPV6 = "ipv6"
+    UUID = "uuid"
+    URI = "uri"
+    URI_REFERENCE = "uri-reference"
+    IRI = "iri"
+    IRI_REFERENCE = "iri-reference"
+
+def string_with_format(format: STRING_FORMATS):
+    return {
+        "type": "string",
+        "format": format.value
+    }
+
+DATE_TIME = string_with_format(STRING_FORMATS.DATE_TIME)
+
