@@ -270,13 +270,15 @@ BIOSAMPLE = {
 }
 
 MEASUREMENT = {
-    "description": "The measurement element is used to record individual measurements. "
-                    "It can capture quantitative, ordinal (e.g., absent/present), or categorical measurements.",
+    "description": ("The measurement element is used to record individual measurements. "
+                    "It can capture quantitative, ordinal (e.g., absent/present), or categorical measurements."),
     "properties": {
         "assay": "OntologyClass that describes the assay used to produce the measurement. REQUIRED.",
+        "description": "Human-readable, unstructured text describing the measurement or providing additional information.",
         "measurement_value": "Result of the measurement",
         "time_observed": "Time at which measurement was performed. RECOMMENDED.",
-        "procedure": "Clinical procdure performed to acquire the sample used for the measurement"
+        "procedure": "Clinical procdure performed to acquire the sample used for the measurement",
+        **EXTRA_PROPERTIES
     }
 }
 

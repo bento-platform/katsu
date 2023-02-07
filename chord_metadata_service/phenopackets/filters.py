@@ -123,7 +123,7 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.PhenotypicFeature
-        fields = ["id", "negated", "biosample", "phenopacket"]
+        fields = ["id", "excluded", "biosample", "phenopacket"]
 
     def filter_evidence(self, qs, name, value):
         """
