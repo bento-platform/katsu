@@ -1,23 +1,24 @@
 import datetime
-from django_filters import rest_framework as filters
 import functools
+
 from django.db.models import Q
+from django_filters import rest_framework as filters
 
 from chord_metadata_service.mohpackets.models import (
-    Program,
-    Donor,
-    Specimen,
-    SampleRegistration,
-    PrimaryDiagnosis,
-    Treatment,
-    Chemotherapy,
-    HormoneTherapy,
-    Radiation,
-    Immunotherapy,
-    Surgery,
-    FollowUp,
     Biomarker,
+    Chemotherapy,
     Comorbidity,
+    Donor,
+    FollowUp,
+    HormoneTherapy,
+    Immunotherapy,
+    PrimaryDiagnosis,
+    Program,
+    Radiation,
+    SampleRegistration,
+    Specimen,
+    Surgery,
+    Treatment,
 )
 
 """
@@ -45,6 +46,7 @@ class DonorFilter(filters.FilterSet):
     # For example, writing either ID TREATMENT_1 or treatment_1 is acceptable.
     # Other class filters are not allowed to do this.
 
+    primary_site = filters.CharFilter(lookup_expr="icontains")
     age = filters.NumberFilter(field_name="date_of_birth", method="filter_age")
     max_age = filters.NumberFilter(field_name="date_of_birth", method="filter_age__lt")
     min_age = filters.NumberFilter(field_name="date_of_birth", method="filter_age__gt")
@@ -172,6 +174,8 @@ class PrimaryDiagnosisFilter(filters.FilterSet):
 
 
 class TreatmentFilter(filters.FilterSet):
+    treatment_type = filters.CharFilter(lookup_expr="icontains")
+
     class Meta:
         model = Treatment
         fields = "__all__"
@@ -202,6 +206,10 @@ class ImmunotherapyFilter(filters.FilterSet):
 
 
 class SurgeryFilter(filters.FilterSet):
+    margin_types_involved = filters.CharFilter(lookup_expr="icontains")
+    margin_types_not_involved = filters.CharFilter(lookup_expr="icontains")
+    margin_types_not_assessed = filters.CharFilter(lookup_expr="icontains")
+
     class Meta:
         model = Surgery
         fields = "__all__"

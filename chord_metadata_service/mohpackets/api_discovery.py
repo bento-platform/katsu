@@ -1,59 +1,55 @@
-from rest_framework import viewsets
-from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins
-from drf_spectacular.utils import (
-    extend_schema,
-    extend_schema_serializer,
-)
-from rest_framework import serializers
-from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
-from rest_framework.throttling import ScopedRateThrottle
+from drf_spectacular.utils import extend_schema, extend_schema_serializer
+from rest_framework import mixins, serializers, viewsets
+from rest_framework.response import Response
+
 from chord_metadata_service.mohpackets.filters import (
-    DonorFilter,
-    SpecimenFilter,
-    SampleRegistrationFilter,
-    PrimaryDiagnosisFilter,
-    TreatmentFilter,
-    ChemotherapyFilter,
-    HormoneTherapyFilter,
-    RadiationFilter,
-    ImmunotherapyFilter,
-    SurgeryFilter,
-    FollowUpFilter,
     BiomarkerFilter,
+    ChemotherapyFilter,
     ComorbidityFilter,
-)
-from chord_metadata_service.mohpackets.serializers import (
-    DonorSerializer,
-    SpecimenSerializer,
-    SampleRegistrationSerializer,
-    PrimaryDiagnosisSerializer,
-    TreatmentSerializer,
-    ChemotherapySerializer,
-    HormoneTherapySerializer,
-    RadiationSerializer,
-    ImmunotherapySerializer,
-    SurgerySerializer,
-    FollowUpSerializer,
-    BiomarkerSerializer,
-    ComorbiditySerializer,
+    DonorFilter,
+    FollowUpFilter,
+    HormoneTherapyFilter,
+    ImmunotherapyFilter,
+    PrimaryDiagnosisFilter,
+    RadiationFilter,
+    SampleRegistrationFilter,
+    SpecimenFilter,
+    SurgeryFilter,
+    TreatmentFilter,
 )
 from chord_metadata_service.mohpackets.models import (
-    Donor,
-    Specimen,
-    SampleRegistration,
-    PrimaryDiagnosis,
-    Treatment,
-    Chemotherapy,
-    HormoneTherapy,
-    Radiation,
-    Immunotherapy,
-    Surgery,
-    FollowUp,
     Biomarker,
+    Chemotherapy,
     Comorbidity,
+    Donor,
+    FollowUp,
+    HormoneTherapy,
+    Immunotherapy,
+    PrimaryDiagnosis,
+    Radiation,
+    SampleRegistration,
+    Specimen,
+    Surgery,
+    Treatment,
 )
+from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
+from chord_metadata_service.mohpackets.serializers import (
+    BiomarkerSerializer,
+    ChemotherapySerializer,
+    ComorbiditySerializer,
+    DonorSerializer,
+    FollowUpSerializer,
+    HormoneTherapySerializer,
+    ImmunotherapySerializer,
+    PrimaryDiagnosisSerializer,
+    RadiationSerializer,
+    SampleRegistrationSerializer,
+    SpecimenSerializer,
+    SurgerySerializer,
+    TreatmentSerializer,
+)
+from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 
 """
     This Views module based on the api_views.py module, but only contains
@@ -103,8 +99,7 @@ class DiscoveryDonorViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = DonorFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Donor.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -117,8 +112,7 @@ class DiscoverySpecimenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = SpecimenFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Specimen.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -133,8 +127,7 @@ class DiscoverySampleRegistrationViewSet(
     filter_backends = [DjangoFilterBackend]
     filterset_class = SampleRegistrationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = SampleRegistration.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -147,8 +140,7 @@ class DiscoveryPrimaryDiagnosisViewSet(mixins.ListModelMixin, viewsets.GenericVi
     filter_backends = [DjangoFilterBackend]
     filterset_class = PrimaryDiagnosisFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = PrimaryDiagnosis.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -161,8 +153,7 @@ class DiscoveryTreatmentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = TreatmentFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Treatment.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -175,8 +166,7 @@ class DiscoveryChemotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewSe
     filter_backends = [DjangoFilterBackend]
     filterset_class = ChemotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Chemotherapy.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -189,8 +179,7 @@ class DiscoveryHormoneTherapyViewSet(mixins.ListModelMixin, viewsets.GenericView
     filter_backends = [DjangoFilterBackend]
     filterset_class = HormoneTherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = HormoneTherapy.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -203,8 +192,7 @@ class DiscoveryRadiationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = RadiationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Radiation.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -217,8 +205,7 @@ class DiscoveryImmunotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewS
     filter_backends = [DjangoFilterBackend]
     filterset_class = ImmunotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Immunotherapy.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -231,8 +218,7 @@ class DiscoverySurgeryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = SurgeryFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Surgery.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -245,8 +231,7 @@ class DiscoveryFollowUpViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = FollowUpFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = FollowUp.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -259,8 +244,7 @@ class DiscoveryBiomarkerViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = BiomarkerFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Biomarker.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))
@@ -273,8 +257,7 @@ class DiscoveryComorbidityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet
     filter_backends = [DjangoFilterBackend]
     filterset_class = ComorbidityFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "moh_rate_limit"
+    throttle_classes = [MoHRateThrottle]
     queryset = Comorbidity.objects.all()
 
     @extend_schema(responses=DiscoverySerializer(many=False))

@@ -5740,6 +5740,7 @@ components:
         submitter_specimen_id:
           type: string
           minLength: 1
+          nullable: true
         submitter_treatment_id:
           type: string
           minLength: 1
@@ -6728,6 +6729,7 @@ components:
           type: string
         submitter_specimen_id:
           type: string
+          nullable: true
         submitter_treatment_id:
           type: string
       required:
@@ -6739,7 +6741,6 @@ components:
       - program_id
       - residual_tumour_classification
       - submitter_donor_id
-      - submitter_specimen_id
       - submitter_treatment_id
       - surgery_location
       - surgery_site
@@ -6816,6 +6817,7 @@ components:
         submitter_specimen_id:
           type: string
           minLength: 1
+          nullable: true
         submitter_treatment_id:
           type: string
           minLength: 1
@@ -6828,7 +6830,6 @@ components:
       - program_id
       - residual_tumour_classification
       - submitter_donor_id
-      - submitter_specimen_id
       - submitter_treatment_id
       - surgery_location
       - surgery_site
