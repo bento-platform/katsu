@@ -680,6 +680,71 @@ GENE_DESCRIPTOR = tag_ids_and_describe({
     "required": ["id", "symbol"]
 }, {})
 
+
+VRS_VARIATION_SCHEMA = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:variation",
+    "title": "VRS schema",
+    "description": "VRS variation object",
+    "type": "object",
+    "properties": {
+        "_id": {
+            "type": "string",
+            "format": "^[a-z0-9]+:[A-Za-z0-9.\-:]+$" # regex that matches 'prefix:reference' format
+        },
+        "type": base_type("string")
+    },
+    "required": []
+}, {})
+
+
+EXPRESSION_SCHEMA = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:expression",
+    "title": "Expression schema",
+    "description": "Enables description of an object based on a nomenclature",
+    "type": "object",
+    "properties": {
+        "syntax": base_type("string"),
+        "value": base_type("string"),
+        "version": base_type("string")
+    }
+}, {})
+
+
+EXTENSION_SCHEMA = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:extension",
+    "title": "Extension schema",
+    "description": "The Extension class provides a means to extend descriptions with other attributes unique to a content provider",
+    "type": "object",
+    "properties": {
+        "name": base_type("string"),
+        "value": base_type("string")
+    },
+    "required": ["name", "value"]
+}, {})
+
+VCF_RECORD_SCHEMA = tag_ids_and_describe({
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:phenopackets:vcf_record",
+    "title": "VCF record schema",
+    "description": "This element is used to describe variants using the Variant Call Format.",
+    "type": "object",
+    "properties": {
+        "genome_assembly": base_type("string"),
+        "chrom": base_type("string"),
+        "pos": base_type("integer"),
+        "id": base_type("string"),
+        "ref": base_type("string"),
+        "alt": base_type("string"),
+        "qual": base_type("string"),
+        "filter": base_type("string"),
+        "info": base_type("string")
+    },
+}, {})
+
+
 VARIANT_DESCRIPTOR = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "katsu:phenopackets:gene_descriptor",
@@ -688,7 +753,22 @@ VARIANT_DESCRIPTOR = tag_ids_and_describe({
     "type": "object",
     "properties": {
         "id": base_type("string"),
-        "variation": "", #TODO
-        
+        "variation": VRS_VARIATION_SCHEMA,
+        "label": base_type("string"),
+        "description": base_type("string"),
+        "gene_descriptor": GENE_DESCRIPTOR,
+        "expressions": array_of(EXPRESSION_SCHEMA),
+        "vcf_record": VCF_RECORD_SCHEMA,
+        "xrefs": array_of(base_type("string")),
+        "alternate_labels": array_of(base_type("string")),
+        "extensions": array_of(EXTENSION_SCHEMA),
+        "molecule_context": {
+            "type": "string",
+            "default": "unspecified_molecule_context",
+            "description": "The molecular context of the variant."
+        },
+        "structural_type": ONTOLOGY_CLASS,
+        "vrs_ref_allele_seq": base_type("string"),
+        "allelic_state": ONTOLOGY_CLASS
     }
 }, {})
