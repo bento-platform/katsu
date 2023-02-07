@@ -15,7 +15,36 @@ __all__ = [
     "array_of"
 ]
 
-DRAF_7 = "http://json-schema.org/draft-07/schema#"
+DRAFT_07 = "http://json-schema.org/draft-07/schema#"
+
+class SCHEMA_TYPES(Enum):
+    STRING = "string"
+    INTEGER = "integer"
+    NUMBER = "number"
+    BOOLEAN = "boolean"
+    OBJECT = "object"
+    NULL = "null"
+
+class SCHEMA_STRING_FORMATS(Enum):
+    """
+    Json-schema supported string formats as enums
+    See: https://json-schema.org/understanding-json-schema/reference/string.html#format
+    """
+    DATE_TIME = "date-time"
+    TIME = "time"
+    DATE = "date"
+    DURATION = "duration"
+    EMAIL = "email"
+    IDN_EMAIL = "idn-email"
+    HOSTNAME = "hostname"
+    IDN_HOSTNAME = "idn-hostname"
+    IPV4 = "ipv4"
+    IPV6 = "ipv6"
+    UUID = "uuid"
+    URI = "uri"
+    URI_REFERENCE = "uri-reference"
+    IRI = "iri"
+    IRI_REFERENCE = "iri-reference"
 
 def merge_schema_dictionaries(dict1: dict, dict2: dict):
     """
@@ -119,7 +148,7 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
                      schema_id: str = None, title: str = None, description: str = None,
                      additional_properties: bool = False, required=None) -> dict:
     return {
-        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$schema": DRAFT_07,
         "$id": schema_id,
         "title": title,
         "description": description,
@@ -132,84 +161,67 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
         "additionalProperties": additional_properties
     }
 
+def describe_schema_opt(schema: dict, description: str):
+    """ Optionally adds a description entry to a schema dict """
+    if description:
+        return {
+            **schema,
+            "description": description
+        }
+    else:
+        return schema
 
 def validation_schema_list(schema):
     """ Schema to validate JSON array values. """
 
     return {
-        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$schema": DRAFT_07,
         "$id": "chord_metadata_service:schema_list",
         "title": "Schema list",
         "type": "array",
         "items": schema
     }
 
-
-def array_of(schema):
+def array_of(item, description=""):
     """
     Simple array schema with items schema specified by argument.
     Use to simplify/shorthen json-schema writing.
     """
-    return {
+    schema = {
         "type": "array",
-        "items": schema
+        "items": item
     }
+    return describe_schema_opt(schema, description)
 
-def enum_of(values: List[str]):
-    return {
+def enum_of(values: List[str], description=""):
+    schema = {
         "type": "string",
         "enum": values
     }
+    return describe_schema_opt(schema, description)
 
-class SCHEMA_TYPES(Enum):
-    STRING = "string"
-    INTEGER = "integer"
-    NUMBER = "number"
-    BOOLEAN = "boolean"
-    OBJECT = "object"
-    NULL = "null"
-
-def base_type(type: SCHEMA_TYPES):
+def base_type(type: SCHEMA_TYPES, description=""):
     """
     Creates a basic type schema
     """
-    return {"type": type.value}
+    return describe_schema_opt({"type": type.value}, description)
 
-def string_with_pattern(pattern: str):
+def string_with_pattern(pattern: str, description=""):
     """
     Creates a regex formated string schema
     """
-    return {
+    schema = {
         "type": "string",
         "pattern": pattern
     }
+    return describe_schema_opt(schema, description)
 
-class SCHEMA_STRING_FORMATS(Enum):
-    """
-    Json-schema supported string formats as enums
-    See: https://json-schema.org/understanding-json-schema/reference/string.html#format
-    """
-    DATE_TIME = "date-time"
-    TIME = "time"
-    DATE = "date"
-    DURATION = "duration"
-    EMAIL = "email"
-    IDN_EMAIL = "idn-email"
-    HOSTNAME = "hostname"
-    IDN_HOSTNAME = "idn-hostname"
-    IPV4 = "ipv4"
-    IPV6 = "ipv6"
-    UUID = "uuid"
-    URI = "uri"
-    URI_REFERENCE = "uri-reference"
-    IRI = "iri"
-    IRI_REFERENCE = "iri-reference"
-
-def string_with_format(format: SCHEMA_STRING_FORMATS):
-    return {
+def string_with_format(format: SCHEMA_STRING_FORMATS, description=""):
+    schema = {
         "type": "string",
         "format": format.value
     }
+    return describe_schema_opt(schema, description)
 
 DATE_TIME = string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME)
 
