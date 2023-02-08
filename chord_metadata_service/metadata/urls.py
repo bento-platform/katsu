@@ -13,6 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
+
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import (
@@ -42,3 +44,7 @@ urlpatterns = [
     path("", SpectacularSwaggerView.as_view(), name="swagger-ui"),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
+
+# Only use CanDIG urls
+if os.environ.get("CANDIG") == "TRUE":
+    urlpatterns = urlpatterns[4:]
