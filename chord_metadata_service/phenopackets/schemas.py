@@ -482,7 +482,7 @@ PHENOPACKET_MEDICAL_ACTION_SCHEMA = tag_ids_and_describe({
         "treatment_termination_reason": ONTOLOGY_CLASS
     },
     "required": ["action"]
-}, {})
+}, descriptions=descriptions.MEDICAL_ACTION)
 
 FILE_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -513,7 +513,7 @@ GENE_DESCRIPTOR = tag_ids_and_describe({
         "alternate_symbols": array_of(base_type(SCHEMA_TYPES.STRING))
     },
     "required": ["id", "symbol"]
-}, {})
+}, descriptions=descriptions.GENE_DESCRIPTOR)
 
 VRS_VARIATION_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -541,7 +541,7 @@ EXPRESSION_SCHEMA = tag_ids_and_describe({
         "value": base_type(SCHEMA_TYPES.STRING),
         "version": base_type(SCHEMA_TYPES.STRING)
     }
-}, {})
+}, descriptions=descriptions.EXPRESSION)
 
 
 EXTENSION_SCHEMA = tag_ids_and_describe({
@@ -574,7 +574,7 @@ VCF_RECORD_SCHEMA = tag_ids_and_describe({
         "filter": base_type(SCHEMA_TYPES.STRING),
         "info": base_type(SCHEMA_TYPES.STRING)
     },
-}, {})
+}, descriptions=descriptions.VCF_RECORD)
 
 
 VARIANT_DESCRIPTOR = tag_ids_and_describe({
@@ -603,7 +603,7 @@ VARIANT_DESCRIPTOR = tag_ids_and_describe({
         "vrs_ref_allele_seq": base_type(SCHEMA_TYPES.STRING),
         "allelic_state": ONTOLOGY_CLASS
     }
-}, {})
+}, descriptions=descriptions.VARIANT_DESCRIPTOR)
 
 
 PHENOPACKET_VARIANT_INTERPRETATION = tag_ids_and_describe({
@@ -617,7 +617,7 @@ PHENOPACKET_VARIANT_INTERPRETATION = tag_ids_and_describe({
         "therapeutic_actionability": enum_of(["UNKNOWN_ACTIONABILITY", "NOT_ACTIONABLE", "ACTIONABLE"]),
         "variant": VARIANT_DESCRIPTOR
     }
-}, {})
+}, descriptions=descriptions.VARIANT_INTERPRETATION)
 
 
 PHENOPACKET_GENOMIC_INTERPRETATION = tag_ids_and_describe({
@@ -655,7 +655,7 @@ PHENOPACKET_INTERPRETATION_SCHEMA = tag_ids_and_describe({
         },
         "summary": base_type(SCHEMA_TYPES.STRING)
     }
-}, {})
+}, descriptions=descriptions.INTERPRETATION)
 
 PHENOPACKET_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,

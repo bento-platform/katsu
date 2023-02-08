@@ -17,6 +17,8 @@ from chord_metadata_service.restapi.validators import (
 from . import descriptions as d
 from .schemas import (
     ALLELE_SCHEMA,
+    EXPRESSION_SCHEMA,
+    EXTENSION_SCHEMA,
     ONE_OF_MEDICAL_ACTION,
     PHENOPACKET_DISEASE_ONSET_SCHEMA,
     PHENOPACKET_EVIDENCE_SCHEMA,
@@ -24,6 +26,7 @@ from .schemas import (
     PHENOPACKET_MEASUREMENT_VALUE_SCHEMA,
     PHENOPACKET_TIME_ELEMENT_SCHEMA,
     PHENOPACKET_UPDATE_SCHEMA,
+    VCF_RECORD_SCHEMA,
 )
 
 
@@ -45,6 +48,7 @@ class BaseTimeStamp(models.Model):
     class Meta:
         # Abstract prevents the creation of a _TimeStamp table
         abstract = True
+
 
 class MetaData(models.Model):
     """
@@ -99,7 +103,8 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
     modifier = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "modifier"))
     onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
-    resolution = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+    resolution = JSONField(blank=True, null=True, validators=[
+                           JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
 
     # evidence can stay here because evidence is given for an observation of PF
     # JSON schema to check evidence_code is present
@@ -128,21 +133,28 @@ class Procedure(models.Model):
     body_site = JSONField(blank=True, null=True, validators=[ontology_validator],
                           help_text=rec_help(d.PROCEDURE, "body_site"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "extra_properties"))
-    performed = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+    performed = JSONField(blank=True, null=True, validators=[
+                          JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
 
     def __str__(self):
         return str(self.id)
+
 
 class Measurement(models.Model):
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for a given measurement')
     description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.MEASUREMENT, "description"))
     assay = JSONField(verbose_name='assay', validators=[ontology_validator],
-                       help_text=rec_help(d.MEASUREMENT, "assay"))
-    measurement_value = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_MEASUREMENT_VALUE_SCHEMA)])
-    time_observed = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
-    procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, help_text='Clinical procdure performed to acquire the sample used for the measurement')
+                      help_text=rec_help(d.MEASUREMENT, "assay"))
+    measurement_value = models.JSONField(blank=True, null=True, validators=[
+                                         JsonSchemaValidator(PHENOPACKET_MEASUREMENT_VALUE_SCHEMA)])
+    time_observed = JSONField(blank=True, null=True, validators=[
+                              JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+    procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING,
+                                  help_text='Clinical procdure performed to acquire the sample used for the measurement')
+
     def __str__(self):
         return str(self.id)
+
 
 class MedicalAction(models.Model):
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for a medical action')
@@ -152,6 +164,10 @@ class MedicalAction(models.Model):
     response_to_treatment = models.JSONField(validators=[ontology_validator])
     adverse_events = models.JSONField(validators=[ontology_list_validator])
     treatment_termination_reason = models.JSONField(validators=[ontology_validator])
+
+    def __str__(self) -> str:
+        return str(self.id)
+
 
 class HtsFile(BaseTimeStamp, IndexableMixin):
     """
@@ -226,7 +242,7 @@ class Variant(BaseTimeStamp):
     zygosity = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text=rec_help(d.VARIANT, "zygosity"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT, "extra_properties"))
-    
+
     def __str__(self):
         return str(self.id)
 
@@ -306,40 +322,8 @@ class Biosample(BaseTimeStamp, IndexableMixin):
         return {'reference': {
             'reference': self.sampled_tissue.get('id'),
             'display': self.sampled_tissue.get('label')
-            }
         }
-
-
-class Phenopacket(BaseTimeStamp, IndexableMixin):
-    """
-    Class to aggregate Individual's experiments data
-
-    FHIR: Composition
-    """
-
-    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.PHENOPACKET, "id"))
-    # if Individual instance is deleted Phenopacket instance is deleted too
-    # CHECK !!! Force as required?
-    subject = models.ForeignKey(
-        Individual, on_delete=models.CASCADE, related_name="phenopackets",
-        help_text=rec_help(d.PHENOPACKET, "subject"))
-    # PhenotypicFeatures are present in Biosample, so can be accessed via Biosample instance
-    # phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
-    #   help_text='Phenotypic features observed in the proband.')
-    measurements = models.ManyToManyField(Measurement, blank=True)
-    biosamples = models.ManyToManyField(Biosample, blank=True, help_text=rec_help(d.PHENOPACKET, "biosamples"))
-    genes = models.ManyToManyField(Gene, blank=True, help_text=rec_help(d.PHENOPACKET, "genes"))
-    variants = models.ManyToManyField(Variant, blank=True, help_text=rec_help(d.PHENOPACKET, "variants"))
-    diseases = models.ManyToManyField(Disease, blank=True, help_text=rec_help(d.PHENOPACKET, "diseases"))
-    medical_actions = models.ManyToManyField(MedicalAction, blank=True)
-    hts_files = models.ManyToManyField(HtsFile, blank=True, help_text=rec_help(d.PHENOPACKET, "hts_files"))
-    # TODO OneToOneField
-    meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
-    table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
-    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOPACKET, "extra_properties"))
-
-    def __str__(self):
-        return str(self.id)
+        }
 
 
 #############################################################
@@ -347,6 +331,76 @@ class Phenopacket(BaseTimeStamp, IndexableMixin):
 #                    Interpretation                         #
 #                                                           #
 #############################################################
+
+class GeneDescriptor(BaseTimeStamp):
+    # Corresponds to GeneDescriptor.value_id field in schema
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENE_DESCRIPTOR, "value_id"))
+    symbol = models.CharField(max_length=200, blank=True, help_text=rec_help(d.GENE_DESCRIPTOR, "symbol"))
+    description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.GENE_DESCRIPTOR, "description"))
+    alternate_ids = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
+                               help_text=rec_help(d.GENE_DESCRIPTOR, "alternate_ids"))
+    xrefs = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
+                       help_text=rec_help(d.GENE_DESCRIPTOR, "xrefs"))
+    alternate_symbols = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
+                                   help_text=rec_help(d.GENE_DESCRIPTOR, "alternate_symbols"))
+
+    def __str__(self) -> str:
+        return str(self.id)
+
+
+class VariantDescriptor(BaseTimeStamp):
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "id"))
+    variation = models.JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT_DESCRIPTOR, "variation"))
+    label = models.CharField(blank=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "label"))
+    description = models.CharField(blank=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "description"))
+    gene_context = models.ForeignKey(GeneDescriptor, blank=True, on_delete=models.CASCADE,
+                                     help_text=rec_help(d.VARIANT_DESCRIPTOR, "gene_context"))
+    expressions = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(EXPRESSION_SCHEMA)],
+                                   help_text=rec_help(d.VARIANT_DESCRIPTOR, "expressions"))
+    vcf_record = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(VCF_RECORD_SCHEMA)])
+    xrefs = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
+                       help_text=rec_help(d.VARIANT_DESCRIPTOR, "xrefs"))
+    alternate_labels = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
+                                  help_text=rec_help(d.VARIANT_DESCRIPTOR, "alternate_labels"))
+    extensions = ArrayField(models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(EXTENSION_SCHEMA)]),
+                            blank=True, default=list, help_text=rec_help(d.VARIANT_DESCRIPTOR, "extensions"))
+    molecule_context = models.CharField(max_length=200, blank=True,
+                                        help_text=rec_help(d.VARIANT_DESCRIPTOR, "molecule_context"))
+    structural_type = models.JSONField(blank=True, null=True, validators=[ontology_validator],
+                                       help_text=rec_help(d.VARIANT_DESCRIPTOR, "structural_type"))
+    vrs_ref_allele_seq = models.CharField(max_length=200, blank=True,
+                                          help_text=rec_help(d.VARIANT_DESCRIPTOR, "vrs_ref_allele_seq"))
+    allelic_state = models.JSONField(blank=True, null=True, validators=[
+                                     ontology_validator], help_text=rec_help(d.VARIANT_DESCRIPTOR, "allelic_state"))
+
+    def __str__(self) -> str:
+        return str(self.id)
+
+
+class VariantInterpretation(BaseTimeStamp):
+    VARIANT_INTERPRETATION_STATUS = (
+        ('NOT_PROVIDED', 'NOT_PROVIDED'),
+        ('BENIGN', 'BENIGN'),
+        ('LIKELY_BENIGN', 'LIKELY_BENIGN'),
+        ('UNCERTAIN_SIGNIFICANCE', 'UNCERTAIN_SIGNIFICANCE'),
+        ('LIKELY_PATHOGENIC', 'LIKELY_PATHOGENIC'),
+        ('PATHOGENIC', 'PATHOGENIC')
+    )
+    THERAPEUTIC_ACTIONABILITY_CHOICES = (
+        ('UNKNOWN_ACTIONABILITY', 'UNKNOWN_ACTIONABILITY'),
+        ('NOT_ACTIONABLE', 'NOT_ACTIONABLE'),
+        ('ACTIONABLE', 'ACTIONABLE'),
+    )
+
+    acmg_pathogenicity_classification = models.CharField(max_length=200, choices=VARIANT_INTERPRETATION_STATUS, default='NOT_PROVIDED',
+                                                         help_text=rec_help(d.VARIANT_INTERPRETATION, "acmg_pathogenicity_classification"))
+    therapeutic_actionability = models.CharField(max_length=200, choices=THERAPEUTIC_ACTIONABILITY_CHOICES, default='UNKNOWN_ACTIONABILITY',
+                                                 help_text=rec_help(d.VARIANT_INTERPRETATION, "therapeutic_actionability"))
+    variant = models.ForeignKey(VariantDescriptor, on_delete=models.CASCADE,
+                                help_text=rec_help(d.VARIANT_INTERPRETATION, "variant"))
+
+    def __str__(self) -> str:
+        return str(self.id)
 
 
 class GenomicInterpretation(BaseTimeStamp):
@@ -361,14 +415,21 @@ class GenomicInterpretation(BaseTimeStamp):
         ('UNKNOWN', 'UNKNOWN'),
         ('REJECTED', 'REJECTED'),
         ('CANDIDATE', 'CANDIDATE'),
+        ('CONTRIBUTORY', 'CONTRIBUTORY'),
         ('CAUSATIVE', 'CAUSATIVE')
-        )
-    status = models.CharField(max_length=200, choices=GENOMIC_INTERPRETATION_STATUS,
-                              help_text='How the call of this GenomicInterpretation was interpreted.')
-    gene = models.ForeignKey(Gene, on_delete=models.CASCADE,
-                             blank=True, null=True, help_text='The gene contributing to the diagnosis.')
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE,
-                                blank=True, null=True, help_text='The variant contributing to the diagnosis.')
+    )
+    subject_or_biosample_id = models.CharField(
+        max_length=200, blank=True, help_text="Id of the patient or biosample of the subject being interpreted")
+    interpretation_status = models.CharField(max_length=200, choices=GENOMIC_INTERPRETATION_STATUS,
+                                             help_text='How the call of this GenomicInterpretation was interpreted.')
+
+    # Corresponds to 'call' field in schema in case of GeneDescriptor
+    gene_descriptor = models.ForeignKey(GeneDescriptor, on_delete=models.CASCADE,
+                                        blank=True, help_text="Corresponds to 'call' field in schema in case of GeneDescriptor")
+    # Corresponds to 'call' field in schema in case of VariantInterpretation
+    variant_interpretation = models.ForeignKey(VariantInterpretation, on_delete=models.CASCADE,
+                                               blank=True, help_text="Corresponds to 'call' field in schema in case of VariantInterpretation")
+
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
 
@@ -406,27 +467,64 @@ class Interpretation(BaseTimeStamp):
     FHIR: DiagnosticReport
     """
 
-    RESOLUTION_STATUS = (
-        ('UNKNOWN', 'UNKNOWN'),
+    PROGRESS_STATUS = (
+        ('UNKNOWN_PROGRESS', 'UNKNOWN_PROGRESS'),
+        ('IN_PROGRESS', 'IN_PROGRESS'),
+        ('COMPLETED', 'COMPLETED'),
         ('SOLVED', 'SOLVED'),
         ('UNSOLVED', 'UNSOLVED'),
-        ('IN_PROGRESS', 'IN_PROGRESS')
     )
 
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for the interpretation.')
-    resolution_status = models.CharField(choices=RESOLUTION_STATUS, max_length=200, blank=True,
-                                         help_text='The current status of work on the case.')
-    # In Phenopackets schema this field is 'phenopacket_or_family'
-    phenopacket = models.ForeignKey(Phenopacket, on_delete=models.CASCADE, related_name='interpretations',
-                                    help_text='The subject of this interpretation.')
-    # fetch disease via from phenopacket
-    # diagnosis on one disease ? there can be many disease associated with phenopacket
+    progress_status = models.CharField(choices=PROGRESS_STATUS, max_length=200, blank=True,
+                                       help_text='The current status of work on the case.')
     diagnosis = models.ManyToManyField(Diagnosis, help_text='One or more diagnoses, if made.')
-    meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text='Metadata about this interpretation.')
+    summary = models.CharField(max_length=200, blank=True, help_text='Free text summary of the interpretation.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
 
     def __str__(self):
         return str(self.id)
 
-# TODO: Should TIME_ELEMENT be a table?
+
+#############################################################
+#                                                           #
+#                    Phenopacket                            #
+#                                                           #
+#############################################################
+
+class Phenopacket(BaseTimeStamp, IndexableMixin):
+    """
+    Class to aggregate Individual's experiments data
+
+    FHIR: Composition
+    """
+
+    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.PHENOPACKET, "id"))
+    # if Individual instance is deleted Phenopacket instance is deleted too
+    # CHECK !!! Force as required?
+    subject = models.ForeignKey(
+        Individual, on_delete=models.CASCADE, related_name="phenopackets",
+        help_text=rec_help(d.PHENOPACKET, "subject"))
+    # PhenotypicFeatures are present in Biosample, so can be accessed via Biosample instance
+    # phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
+    #   help_text='Phenotypic features observed in the proband.')
+    measurements = models.ManyToManyField(Measurement, blank=True, help_text=rec_help(d.PHENOPACKET, "measurements"))
+    biosamples = models.ManyToManyField(Biosample, blank=True, help_text=rec_help(d.PHENOPACKET, "biosamples"))
+
+    # NOTE: As of Phenopackets V2.0, genes and variants fields are replaced with interpretations
+    interpretations = models.ManyToManyField(
+        Interpretation, blank=True, help_text=rec_help(d.PHENOPACKET, "interpretations"))
+
+    diseases = models.ManyToManyField(Disease, blank=True, help_text=rec_help(d.PHENOPACKET, "diseases"))
+    medical_actions = models.ManyToManyField(
+        MedicalAction, blank=True, help_text=rec_help(d.PHENOPACKET, "medical_actions"))
+    # TODO: do we keep files referenced in phenopackets? Already tracked by experiments
+    # hts_files = models.ManyToManyField(HtsFile, blank=True, help_text=rec_help(d.PHENOPACKET, "hts_files"))
+    # TODO OneToOneField
+    meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
+    table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOPACKET, "extra_properties"))
+
+    def __str__(self):
+        return str(self.id)

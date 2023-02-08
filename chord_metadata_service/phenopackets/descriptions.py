@@ -169,6 +169,19 @@ GENE = {
     }
 }
 
+GENE_DESCRIPTOR = {
+    "description": "This element represents an identifier for a gene, using the Gene Descriptor from the VRSATILE Framework.",
+    "properties": {
+        "value_id": "Official identifier of the gene. REQUIRED.",
+        "symbol": "Official gene symbol. REQUIRED.",
+        "description": "A free-text description of the gene",
+        "alternate_ids": "Alternative identifier(s) of the gene",
+        "xrefs": "Related concept IDs (e.g. gene ortholog IDs) may be placed in xrefs",
+        "alternate_symbols": "Alternative symbol(s) of the gene",
+        **EXTRA_PROPERTIES
+    }
+}
+
 ALLELE = {
     "properties": {
         "id": "An arbitrary identifier.",
@@ -184,6 +197,72 @@ ALLELE = {
         "deleted_sequence": "Deleted sequence , sequence for the deletion, can be empty, e.g. A",
         "inserted_sequence": "Inserted sequence , sequence for the insertion, can be empty, e.g. G",
         "iscn": "E.g. t(8;9;11)(q12;p24;p12)."
+    }
+}
+
+EXPRESSION = {
+    "description": ("The Expression class is designed to enable descriptions based on a specified"
+                    " nomenclature or syntax for representing an object. Common examples of expressions"
+                    " for the description of molecular variation include the HGVS and ISCN nomenclatures."),
+    "properties": {
+        "syntax": "A name for the expression syntax. REQUIRED.",
+        "value": "The concept expression as a string. REQUIRED.",
+        "version": "An optional version of the expression syntax."
+    }
+}
+VCF_RECORD = {
+    "description": ("This element is used to describe variants using the Variant Call Format, which is in near "
+                    "universal use for exome, genome, and other Next-Generation-Sequencing-based variant calling."
+                    " It is an appropriate option to use for variants reported according to their chromosomal "
+                    "location as derived from a VCF file."),
+    "properties": {
+        "genome_assembly": "Identifier for the genome assembly used to call the allele. REQUIRED.",
+        "chrom": "Chromosome or contig identifier. REQUIRED.",
+        "pos": "The reference position, with the 1st base having position 1. REQUIRED.",
+        "id": "Identifier: Semicolon-separated list of unique identifiers where available. If this is a dbSNP variant thers number(s) should be used.",
+        "ref": "Reference base. REQUIRED.",
+        "alt": "Alternate base. REQUIRED.",
+        "qual": "Quality: Phred-scaled quality score for the assertion made in ALT.",
+        "filter": "Filter status: PASS if this position has passed all filters.",
+        "info": "Additional information: Semicolon-separated series of additional information fields"
+    }
+}
+
+VARIANT_DESCRIPTOR = {
+    "description": ("Variation Descriptors are part of the VRSATILE framework, a set of conventions extending"
+                    " the GA4GH Variation Representation Specification (VRS)."),
+    "properties": {
+        "id": "Descriptor ID; MUST be unique within document. REQUIRED.",
+        "variation": "The VRS Variation object",
+        "label": "A primary label for the variation",
+        "description": "A free-text description of the variation",
+        "gene_context": GENE_DESCRIPTOR,
+        "expressions": {
+            "description": "",
+            "items": EXPRESSION
+        },
+        "vcf_record": {
+            "description": "",
+            "items": VCF_RECORD
+        },
+        "xrefs": "List of CURIEs representing associated concepts. Allele registry, ClinVar, or other related IDs should be included as xrefs",
+        "alternate_labels": "Common aliases for a variant, e.g. EGFR vIII, are alternate labels",
+        "extensions": "List of resource-specific Extensions needed to describe the variation",
+        "molecule_context": "The molecular context of the vrs variation.",
+        "structural_type": "The structural variant type associated with this variant, such as a substitution, deletion, or fusion.",
+        "vrs_ref_allele_seq": "A Sequence corresponding to a “ref allele”, describing the sequence expected at a SequenceLocation reference.",
+        "allelic_state": ("The zygosity of the variant as determined in all of the samples represented"
+                            " in this Phenopacket is represented using a list of terms taken from the Genotype Ontology (GENO)."),
+    }
+}
+
+VARIANT_INTERPRETATION = {
+    "description": ("This element represents the interpretation of a variant according to the American College of "
+                    " Medical Genetics (ACMG) variant interpretation guidelines."),
+    "properties": {
+        "acmg_pathogenicity_classification": "one of the five ACMG pathogenicity categories, or NOT_PROVIDED. The default is NOT_PROVIDED",
+        "therapeutic_actionability": "The therapeutic actionability of the variant, default is UNKNOWN_ACTIONABILITY",
+        "variant": VARIANT_DESCRIPTOR
     }
 }
 
@@ -282,6 +361,34 @@ MEASUREMENT = {
     }
 }
 
+MEDICAL_ACTION = {
+    "description": ("This element describes medications, procedures, other actions taken for clinical management."
+                    " The element is a list of options."),
+    "properties": {
+        "action": "One of a list of medical actions. REQUIRED.",
+        "treatment_target": "The condition or disease that this treatment was intended to address",
+        "treatment_intent": "Whether the intention of the treatment was curative, palliative…",
+        "response_to_treatment": "How the patient responded to the treatment",
+        "adverse_events": {
+            "description": "Any adverse effects experienced by the patient attributed to the treatment",
+            "items": ontology_class("Any adverse effects experienced by the patient attributed to the treatment")
+        },
+        "treatment_termination_reason": "The reason that the treatment was stopped."
+    }
+}
+
+INTERPRETATION = {
+    "description": ("This message intends to represent the interpretation of a genomic analysis,"
+                    " such as the report from a diagnostic laboratory."),
+    "properties": {
+        "id": "Arbitrary identifier. REQUIRED.",
+        "progress_status": "The current resolution status. REQUIRED.",
+        "diagnosis": "The diagnosis, if made.",
+        "summary": "Additional data about this interpretation",
+        **EXTRA_PROPERTIES
+    }
+}
+
 PHENOPACKET = {
     "description": "An anonymous phenotypic description of an individual or biosample with potential genes of interest "
                    "and/or diagnoses. The concept has multiple use-cases.",
@@ -295,6 +402,10 @@ PHENOPACKET = {
         "biosamples": {
             "description": "Samples (e.g. biopsies) taken from the individual, if any.",
             "items": BIOSAMPLE
+        },
+        "interpretations": {
+            "description": "Interpretations related to this phenopacket",
+            "items": INTERPRETATION
         },
         "genes": {
             "description": "Genes deemed to be relevant to the case; application-specific.",
@@ -315,6 +426,10 @@ PHENOPACKET = {
         "measurements": {
             "description": "Measurements performed in the proband",
             "items": MEASUREMENT
+        },
+        "medical_actions": {
+            "description": "Medical actions performed",
+            "items": MEDICAL_ACTION
         },
         "meta_data": META_DATA,
         **EXTRA_PROPERTIES
