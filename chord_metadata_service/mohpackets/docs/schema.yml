@@ -5,6 +5,21 @@ info:
   description: Metadata Service provides a phenotypic description of an Individual
     in the context of biomedical research.
 paths:
+  /api/v1/delete/all:
+    delete:
+      operationId: api_v1_delete_all_destroy
+      description: Clean all the tables in the database
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '204':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
   /api/v1/discovery/biomarkers/:
     get:
       operationId: api_v1_discovery_biomarkers_list
@@ -4236,7 +4251,7 @@ components:
           type: integer
           readOnly: true
         chemotherapy_dosage_units:
-          $ref: '#/components/schemas/ChemotherapyDosageUnitsEnum'
+          $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
           maxLength: 255
@@ -4266,19 +4281,11 @@ components:
       - program_id
       - submitter_donor_id
       - submitter_treatment_id
-    ChemotherapyDosageUnitsEnum:
-      enum:
-      - mg/m2
-      - IU/m2
-      - ug/m2
-      - g/m2
-      - mg/kg
-      type: string
     ChemotherapyRequest:
       type: object
       properties:
         chemotherapy_dosage_units:
-          $ref: '#/components/schemas/ChemotherapyDosageUnitsEnum'
+          $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
           minLength: 1
@@ -4433,7 +4440,9 @@ components:
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         primary_site:
-          $ref: '#/components/schemas/PrimarySiteEnum'
+          type: array
+          items:
+            $ref: '#/components/schemas/PrimarySiteEnum'
         is_deceased:
           type: boolean
         program_id:
@@ -4468,7 +4477,9 @@ components:
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         primary_site:
-          $ref: '#/components/schemas/PrimarySiteEnum'
+          type: array
+          items:
+            $ref: '#/components/schemas/PrimarySiteEnum'
         is_deceased:
           type: boolean
         program_id:
@@ -4482,6 +4493,14 @@ components:
       - primary_site
       - program_id
       - submitter_donor_id
+    DosageUnitsEnum:
+      enum:
+      - mg/m2
+      - IU/m2
+      - ug/m2
+      - g/m2
+      - mg/kg
+      type: string
     FollowUp:
       type: object
       properties:
@@ -4662,15 +4681,12 @@ components:
         id:
           type: integer
           readOnly: true
-        chemotherapy_dosage_units:
-          $ref: '#/components/schemas/ChemotherapyDosageUnitsEnum'
+        hormone_drug_dosage_units:
+          $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
           maxLength: 255
         drug_rxnormcui:
-          type: string
-          maxLength: 64
-        hormone_drug_dosage_units:
           type: string
           maxLength: 64
         cumulative_drug_dosage_prescribed:
@@ -4690,7 +4706,6 @@ components:
         submitter_treatment_id:
           type: string
       required:
-      - chemotherapy_dosage_units
       - drug_name
       - drug_rxnormcui
       - hormone_drug_dosage_units
@@ -4700,17 +4715,13 @@ components:
     HormoneTherapyRequest:
       type: object
       properties:
-        chemotherapy_dosage_units:
-          $ref: '#/components/schemas/ChemotherapyDosageUnitsEnum'
+        hormone_drug_dosage_units:
+          $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
           minLength: 1
           maxLength: 255
         drug_rxnormcui:
-          type: string
-          minLength: 1
-          maxLength: 64
-        hormone_drug_dosage_units:
           type: string
           minLength: 1
           maxLength: 64
@@ -4734,7 +4745,6 @@ components:
           type: string
           minLength: 1
       required:
-      - chemotherapy_dosage_units
       - drug_name
       - drug_rxnormcui
       - hormone_drug_dosage_units
@@ -4888,9 +4898,12 @@ components:
       type: string
     MethodOfProgressionStatusEnum:
       enum:
-      - Imaging (procedure)Histopathology test (procedure)Assessment of symptom control
-        (procedure)Physical examination procedure (procedure)Tumor marker measurement
-        (procedure)Laboratory data interpretation (procedure)
+      - Imaging (procedure)
+      - Histopathology test (procedure)
+      - Assessment of symptom control (procedure)
+      - Physical examination procedure (procedure)
+      - Tumor marker measurement (procedure)
+      - Laboratory data interpretation (procedure)
       type: string
     NCategoryEnum:
       enum:
@@ -5250,7 +5263,7 @@ components:
       type: object
       properties:
         chemotherapy_dosage_units:
-          $ref: '#/components/schemas/ChemotherapyDosageUnitsEnum'
+          $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
           minLength: 1
@@ -5331,7 +5344,9 @@ components:
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         primary_site:
-          $ref: '#/components/schemas/PrimarySiteEnum'
+          type: array
+          items:
+            $ref: '#/components/schemas/PrimarySiteEnum'
         is_deceased:
           type: boolean
         program_id:
@@ -5411,17 +5426,13 @@ components:
     PatchedHormoneTherapyRequest:
       type: object
       properties:
-        chemotherapy_dosage_units:
-          $ref: '#/components/schemas/ChemotherapyDosageUnitsEnum'
+        hormone_drug_dosage_units:
+          $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
           minLength: 1
           maxLength: 255
         drug_rxnormcui:
-          type: string
-          minLength: 1
-          maxLength: 64
-        hormone_drug_dosage_units:
           type: string
           minLength: 1
           maxLength: 64
@@ -5697,17 +5708,23 @@ components:
           - $ref: '#/components/schemas/ResidualTumourClassificationEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_involved:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_involved:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_assessed:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
         lymphovascular_invasion:
           oneOf:
           - $ref: '#/components/schemas/LymphovascularInvasionEnum'
@@ -5753,7 +5770,9 @@ components:
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
         treatment_type:
-          $ref: '#/components/schemas/TreatmentTypeEnum'
+          type: array
+          items:
+            $ref: '#/components/schemas/TreatmentTypeEnum'
         is_primary_treatment:
           $ref: '#/components/schemas/uBooleanEnum'
         treatment_start_date:
@@ -6689,17 +6708,23 @@ components:
           - $ref: '#/components/schemas/ResidualTumourClassificationEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_involved:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_involved:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_assessed:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
         lymphovascular_invasion:
           oneOf:
           - $ref: '#/components/schemas/LymphovascularInvasionEnum'
@@ -6774,17 +6799,23 @@ components:
           - $ref: '#/components/schemas/ResidualTumourClassificationEnum'
           - $ref: '#/components/schemas/BlankEnum'
         margin_types_involved:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_involved:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
         margin_types_not_assessed:
-          oneOf:
-          - $ref: '#/components/schemas/MarginTypesEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
         lymphovascular_invasion:
           oneOf:
           - $ref: '#/components/schemas/LymphovascularInvasionEnum'
@@ -6950,7 +6981,9 @@ components:
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
         treatment_type:
-          $ref: '#/components/schemas/TreatmentTypeEnum'
+          type: array
+          items:
+            $ref: '#/components/schemas/TreatmentTypeEnum'
         is_primary_treatment:
           $ref: '#/components/schemas/uBooleanEnum'
         treatment_start_date:
@@ -7012,7 +7045,9 @@ components:
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
         treatment_type:
-          $ref: '#/components/schemas/TreatmentTypeEnum'
+          type: array
+          items:
+            $ref: '#/components/schemas/TreatmentTypeEnum'
         is_primary_treatment:
           $ref: '#/components/schemas/uBooleanEnum'
         treatment_start_date:
