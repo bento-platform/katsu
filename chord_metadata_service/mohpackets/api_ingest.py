@@ -422,6 +422,9 @@ def ingest_comorbidities(request):
     )
 
 
+@extend_schema(
+    responses={204: OpenApiTypes.STR},
+)
 @api_view(["DELETE"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def delete_all(request):
