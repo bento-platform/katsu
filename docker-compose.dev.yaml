@@ -4,6 +4,7 @@ services:
   katsu-db:
     image: postgres:13-alpine
     container_name: katsu-db
+    restart: "no"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -16,6 +17,6 @@ services:
   adminer:
     image: adminer:4.8.1
     container_name: katsu-adminer
-    restart: always
+    restart: "no"
     ports:
       - 8080:8080

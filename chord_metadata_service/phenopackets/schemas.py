@@ -18,6 +18,7 @@ from chord_metadata_service.restapi.schema_utils import (
     array_of,
     base_type,
     enum_of,
+    named_one_of,
     string_with_format,
     string_with_pattern,
     tag_ids_and_describe
@@ -216,7 +217,7 @@ PHENOPACKET_GESTATIONAL_AGE = tag_ids_and_describe({
     "type": "object",
     "properties": {
         "weeks": base_type(SCHEMA_TYPES.INTEGER),
-        "days": base_type(SCHEMA_TYPES.INTEGER)
+        "days": base_type(SCHEMA_TYPES.INTEGER),
     },
     "required": ["weeks"]
 }, {})  # TODO: description
@@ -227,12 +228,12 @@ PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
     "title": "Time element schema",
     "type": "object",
     "oneOf": [
-        PHENOPACKET_GESTATIONAL_AGE,
-        AGE,
-        AGE_RANGE,
-        ONTOLOGY_CLASS,
-        string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME),
-        TIME_INTERVAL
+        named_one_of("gestational_age", PHENOPACKET_GESTATIONAL_AGE),
+        named_one_of("age", AGE),
+        named_one_of("age_range", AGE_RANGE),
+        named_one_of("ontology_class", ONTOLOGY_CLASS),
+        named_one_of("timestamp", DATE_TIME),
+        named_one_of("interval", TIME_INTERVAL)
     ],
     "required": ["oneOf"]
 }, {})  # TODO: description
@@ -284,11 +285,15 @@ PHENOPACKET_VALUE_SCHEMA = {
     "$id": "katsu:phenopackets:value",
     "title": "Value schema",
     "type": "object",
-    "oneOf": [
-        PHENOPACKET_QUANTITY_SCHEMA,
-        ONTOLOGY_CLASS
-    ],
-    "required": ["oneOf"]
+    "properties": {
+        "value": {
+            "oneOf": [
+                PHENOPACKET_QUANTITY_SCHEMA, 
+                ONTOLOGY_CLASS
+            ]
+        }
+    },
+    "required": ["value"]
 }
 
 PHENOPACKET_COMPLEX_VALUE_SCHEMA = {

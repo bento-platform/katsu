@@ -223,5 +223,17 @@ def string_with_format(format: SCHEMA_STRING_FORMATS, description=""):
     }
     return describe_schema_opt(schema, description)
 
+def named_one_of(prop_name: str, prop_schema: dict):
+    """
+    Returns a schema valid as a oneOf object item for a specific property name
+    """
+    return {
+        "type": "object",
+        "properties": {
+            prop_name: prop_schema
+        },
+        "required": [prop_name]
+    }
+
 DATE_TIME = string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME)
 
