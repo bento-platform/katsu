@@ -56,10 +56,6 @@ def create_bulk_objects(serializer_class, data: dict):
         The serializer class used to validate the input data before creating the objects.
     """
 
-    # if "data" not in data:
-    #     raise ValueError("Invalid data format. Expected a JSON object with 'data' key.")
-    # data_list = data["data"]
-
     # Use the serializer to validate the input data
     serializer = serializer_class(data=data, many=True)
     serializer.is_valid(raise_exception=True)
