@@ -1,4 +1,4 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2023.01.17
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2023.02.09
 
 # Install Postgres client for checking if database is ready
 # Install Poetry for dependency management

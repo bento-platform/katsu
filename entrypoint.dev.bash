@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Set .gitconfig for development
+/set_gitconfig.bash
+
 # Install the package / any dependency changes
 poetry install
 
