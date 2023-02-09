@@ -48,36 +48,36 @@ def set_foreign_keys():
         rules = json.load(f)
 
     name_dict = {
-        # "programs": "Program.json",
-        # "donors": "Donor.json",
         "primary_diagnoses": "PrimaryDiagnosis.json",
-        # "specimens": "Specimen.json",
-        # "sample_registrations": "SampleRegistration.json",
-        # "treatments": "Treatment.json",
-        # "chemotherapies": "Chemotherapy.json",
-        # "hormone_therapies": "HormoneTherapy.json",
-        # "radiations": "Radiation.json",
-        # "immunotherapies": "Immunotherapy.json",
-        # "surgeries": "Surgery.json",
-        # "follow_ups": "FollowUp.json",
-        # "biomarkers": "Biomarker.json",
-        # "comorbidities": "Comorbidity.json",
+        "specimens": "Specimen.json",
+        "sample_registrations": "SampleRegistration.json",
+        "treatments": "Treatment.json",
+        "chemotherapies": "Chemotherapy.json",
+        "hormone_therapies": "HormoneTherapy.json",
+        "radiations": "Radiation.json",
+        "immunotherapies": "Immunotherapy.json",
+        "surgeries": "Surgery.json",
+        "follow_ups": "FollowUp.json",
+        "biomarkers": "Biomarker.json",
+        "comorbidities": "Comorbidity.json",
     }
 
     # Load the JSON data from the ordered_name_dict
     for model_name, file_name in name_dict.items():
         with open(
-            f"chord_metadata_service/mohpackets/data/template_data/{file_name}", "r"
+            f"chord_metadata_service/mohpackets/data/no_keys_data/{file_name}", "r"
         ) as f:
-            data = json.load(f)
-        # rule = rules.get(model_name)
-        rule = rules.get("primary_diagnoses")
+            data_without_keys = json.load(f)
+        rule = rules.get(model_name)
 
-        replace_values(data, rule)
+        data_with_keys = replace_values(data_without_keys, rule)
 
         # write the transformed data to a json file
-        # with open("data.json", "w") as output_file:
-        #     json.dump(input_data, output_file, indent=4)
+        with open(
+            f"chord_metadata_service/mohpackets/data/synthetic_data/{file_name}", "w"
+        ) as f:
+            json.dump(data_with_keys, f, indent=4)
+            print(f"Finished processing {file_name}.")
 
 
 def replace_values(input_data, transformation_rules):
