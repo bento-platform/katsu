@@ -68,7 +68,10 @@ def set_foreign_keys():
             f"chord_metadata_service/mohpackets/data/no_keys_data/{file_name}", "r"
         ) as f:
             data_without_keys = json.load(f)
-        rule = rules.get(model_name)
+        try:
+            rule = rules.get(model_name)
+        except KeyError as e:
+            print(f"KeyError: {e}")
 
         data_with_keys = replace_values(data_without_keys, rule)
 
