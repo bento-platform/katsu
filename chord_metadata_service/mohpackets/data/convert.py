@@ -85,11 +85,12 @@ def replace_values(data, rule):
             field_name = target["field_name"]
             field_value = target["field_value"]
             target_start_range, target_end_range = target["range"]
+            target_range = target_end_range - target_start_range + 1
             for i in range(item_range):
                 item_index = item_start_range + i - 1
                 target_index = target_start_range + i
                 if target_index > target_end_range:
-                    target_index = target_start_range + (i % target_end_range)
+                    target_index = target_start_range + (i % target_range)
                 data[item_index][field_name] = field_value + str(target_index)
 
     # write to new json file
