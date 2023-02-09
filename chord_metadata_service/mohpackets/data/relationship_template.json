@@ -90,5 +90,1507 @@
         }
       ]
     }
+  ],
+  "specimens": [
+    {
+      "range": [1, 3],
+      "targets": [
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [4, 6],
+      "targets": [
+        {
+          "range": [2, 2],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [7, 8],
+      "targets": [
+        {
+          "range": [3, 3],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [9, 10],
+      "targets": [
+        {
+          "range": [4, 4],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [11, 12],
+      "targets": [
+        {
+          "range": [5, 6],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [13, 14],
+      "targets": [
+        {
+          "range": [7, 8],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [3, 3],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [15, 16],
+      "targets": [
+        {
+          "range": [9, 10],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [4, 4],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [17, 18],
+      "targets": [
+        {
+          "range": [11, 12],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [5, 6],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [19, 22],
+      "targets": [
+        {
+          "range": [13, 16],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [7, 10],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    }
+  ],
+  "sample_registrations": [
+    {
+      "range": [1, 3],
+      "targets": [
+        {
+          "range": [1, 1],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [4, 6],
+      "targets": [
+        {
+          "range": [2, 2],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [7, 8],
+      "targets": [
+        {
+          "range": [3, 3],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [9, 10],
+      "targets": [
+        {
+          "range": [4, 4],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [11, 12],
+      "targets": [
+        {
+          "range": [5, 6],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [13, 14],
+      "targets": [
+        {
+          "range": [7, 8],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [3, 3],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [15, 16],
+      "targets": [
+        {
+          "range": [9, 10],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [4, 4],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [17, 18],
+      "targets": [
+        {
+          "range": [11, 12],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [5, 6],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [19, 20],
+      "targets": [
+        {
+          "range": [13, 14],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [7, 8],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [3, 3],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [21, 22],
+      "targets": [
+        {
+          "range": [15, 16],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [9, 10],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [4, 4],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [23, 24],
+      "targets": [
+        {
+          "range": [17, 18],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [11, 12],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [5, 6],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [25, 28],
+      "targets": [
+        {
+          "range": [19, 22],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [13, 16],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [7, 10],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    }
+  ],
+  "treatments": [
+    {
+      "range": [1, 3],
+      "targets": [
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [4, 6],
+      "targets": [
+        {
+          "range": [2, 2],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [7, 8],
+      "targets": [
+        {
+          "range": [3, 3],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [9, 10],
+      "targets": [
+        {
+          "range": [4, 4],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [11, 12],
+      "targets": [
+        {
+          "range": [5, 6],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [13, 14],
+      "targets": [
+        {
+          "range": [7, 8],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [3, 3],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [15, 16],
+      "targets": [
+        {
+          "range": [9, 10],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [4, 4],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [17, 18],
+      "targets": [
+        {
+          "range": [11, 12],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [5, 6],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [19, 22],
+      "targets": [
+        {
+          "range": [13, 16],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [7, 10],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    }
+  ],
+  "chemotherapies": [
+    {
+      "range": [1, 3],
+      "targets": [
+        {
+          "range": [1, 1],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [4, 5],
+      "targets": [
+        {
+          "range": [2, 2],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [6, 7],
+      "targets": [
+        {
+          "range": [3, 4],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    }
+  ],
+  "hormone_therapies": [
+    {
+      "range": [1, 3],
+      "targets": [
+        {
+          "range": [5, 5],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [4, 5],
+      "targets": [
+        {
+          "range": [6, 6],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [6, 7],
+      "targets": [
+        {
+          "range": [7, 8],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    }
+  ],
+  "radiations": [
+    {
+      "range": [1, 2],
+      "targets": [
+        {
+          "range": [9, 10],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [3, 4],
+      "targets": [
+        {
+          "range": [11, 12],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [5, 5],
+      "targets": [
+        {
+          "range": [13, 13],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [3, 3],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    }
+  ],
+  "immunotherapies": [
+    {
+      "range": [1, 3],
+      "targets": [
+        {
+          "range": [14, 14],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [3, 3],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [4, 5],
+      "targets": [
+        {
+          "range": [15, 15],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [4, 4],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [6, 7],
+      "targets": [
+        {
+          "range": [16, 17],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [4, 5],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    }
+  ],
+  "surgeries": [
+    {
+      "range": [1, 1],
+      "targets": [
+        {
+          "range": [18, 18],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [6, 6],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [2, 5],
+      "targets": [
+        {
+          "range": [19, 22],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [7, 10],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    }
+  ],
+  "follow_ups": [
+    {
+      "range": [1, 3],
+      "targets": [
+        {
+          "range": [1, 1],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [4, 6],
+      "targets": [
+        {
+          "range": [2, 2],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [7, 8],
+      "targets": [
+        {
+          "range": [3, 3],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [9, 10],
+      "targets": [
+        {
+          "range": [4, 4],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [11, 12],
+      "targets": [
+        {
+          "range": [5, 6],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [13, 14],
+      "targets": [
+        {
+          "range": [7, 8],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [3, 3],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [15, 16],
+      "targets": [
+        {
+          "range": [9, 10],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [4, 4],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [17, 18],
+      "targets": [
+        {
+          "range": [11, 12],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [5, 6],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [19, 20],
+      "targets": [
+        {
+          "range": [13, 14],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [7, 8],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [3, 3],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [21, 22],
+      "targets": [
+        {
+          "range": [15, 16],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [9, 10],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [4, 4],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [23, 24],
+      "targets": [
+        {
+          "range": [17, 18],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [11, 12],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [5, 6],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [25, 28],
+      "targets": [
+        {
+          "range": [19, 22],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [13, 16],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [7, 10],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    }
+  ],
+  "biomarkers": [
+    {
+      "range": [1, 3],
+      "targets": [
+        {
+          "range": [1, 1],
+          "field_name": "submitter_follow_up_id",
+          "field_value": "FOLLOW_UP_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [4, 6],
+      "targets": [
+        {
+          "range": [2, 2],
+          "field_name": "submitter_follow_up_id",
+          "field_value": "FOLLOW_UP_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [7, 8],
+      "targets": [
+        {
+          "range": [3, 3],
+          "field_name": "submitter_follow_up_id",
+          "field_value": "FOLLOW_UP_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [9, 10],
+      "targets": [
+        {
+          "range": [4, 4],
+          "field_name": "submitter_follow_up_id",
+          "field_value": "FOLLOW_UP_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [11, 12],
+      "targets": [
+        {
+          "range": [5, 6],
+          "field_name": "submitter_follow_up_id",
+          "field_value": "FOLLOW_UP_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_treatment_id",
+          "field_value": "TREATMENT_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "primary_diagnosis_id",
+          "field_value": "PRIMARY_DIAGNOSIS_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    }
+  ],
+  "comorbidities": [
+    {
+      "range": [1, 3],
+      "targets": [
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [4, 6],
+      "targets": [
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [7, 8],
+      "targets": [
+        {
+          "range": [3, 3],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [9, 10],
+      "targets": [
+        {
+          "range": [4, 4],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [11, 12],
+      "targets": [
+        {
+          "range": [5, 6],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    },
+    {
+      "range": [13, 14],
+      "targets": [
+        {
+          "range": [7, 8],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "program_id",
+          "field_value": "PROGRAM_"
+        }
+      ]
+    }
   ]
 }
