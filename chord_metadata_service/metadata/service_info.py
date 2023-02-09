@@ -1,5 +1,4 @@
 import subprocess
-import os
 
 from bento_lib.types import GA4GHServiceInfo
 
