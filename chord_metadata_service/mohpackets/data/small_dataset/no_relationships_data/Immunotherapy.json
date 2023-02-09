@@ -1,0 +1,58 @@
+[
+    {
+        "program_id": "PROGRAM_{REPLACE_ME}",
+        "submitter_donor_id": "DONOR_{REPLACE_ME}",
+        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
+        "immunotherapy_type": "Cell-based",
+        "drug_name": "Belantamab",
+        "drug_rxnormcui": "4459876"
+    },
+    {
+        "program_id": "PROGRAM_{REPLACE_ME}",
+        "submitter_donor_id": "DONOR_{REPLACE_ME}",
+        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
+        "immunotherapy_type": "Monoclonal antibodies other than immune checkpoint inhibitors",
+        "drug_name": "Pexidartinib",
+        "drug_rxnormcui": "8756456"
+    },
+    {
+        "program_id": "PROGRAM_{REPLACE_ME}",
+        "submitter_donor_id": "DONOR_{REPLACE_ME}",
+        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
+        "immunotherapy_type": "Immune checkpoint inhibitors",
+        "drug_name": "Selumitinib",
+        "drug_rxnormcui": "278936"
+    },
+    {
+        "program_id": "PROGRAM_{REPLACE_ME}",
+        "submitter_donor_id": "DONOR_{REPLACE_ME}",
+        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
+        "immunotherapy_type": "Cell-based",
+        "drug_name": "Pexidartinib",
+        "drug_rxnormcui": "239766"
+    },
+    {
+        "program_id": "PROGRAM_{REPLACE_ME}",
+        "submitter_donor_id": "DONOR_{REPLACE_ME}",
+        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
+        "immunotherapy_type": "Immune checkpoint inhibitors",
+        "drug_name": "Pembrolizumab",
+        "drug_rxnormcui": "8756456"
+    },
+    {
+        "program_id": "PROGRAM_{REPLACE_ME}",
+        "submitter_donor_id": "DONOR_{REPLACE_ME}",
+        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
+        "immunotherapy_type": "Cell-based",
+        "drug_name": "Necitumumab",
+        "drug_rxnormcui": "987654"
+    },
+    {
+        "program_id": "PROGRAM_{REPLACE_ME}",
+        "submitter_donor_id": "DONOR_{REPLACE_ME}",
+        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
+        "immunotherapy_type": "Cell-based",
+        "drug_name": "Necitumumab",
+        "drug_rxnormcui": "987654"
+    }
+]

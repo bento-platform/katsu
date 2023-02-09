@@ -1,0 +1,126 @@
+[
+    {
+        "submitter_donor_id": "DONOR_1",
+        "program_id": "PROGRAM_1",
+        "is_deceased": false,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1996-05-10",
+        "date_of_death": "",
+        "primary_site": [
+            "Hematopoietic and reticuloendothelial systems"
+        ]
+    },
+    {
+        "submitter_donor_id": "DONOR_2",
+        "program_id": "PROGRAM_1",
+        "is_deceased": false,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "2007-01-01",
+        "date_of_death": "",
+        "primary_site": [
+            "Liver and intrahepatic bile ducts",
+            "Other and unspecified major salivary glands",
+            "Prostate gland",
+            "Tonsil"
+        ]
+    },
+    {
+        "submitter_donor_id": "DONOR_3",
+        "program_id": "PROGRAM_1",
+        "is_deceased": true,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1995-09-30",
+        "date_of_death": "2008-09",
+        "primary_site": [
+            "Hypopharynx",
+            "Retroperitoneum and peritoneum"
+        ]
+    },
+    {
+        "submitter_donor_id": "DONOR_4",
+        "program_id": "PROGRAM_1",
+        "is_deceased": false,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1999-02-19",
+        "date_of_death": "",
+        "primary_site": [
+            "Other and unspecified parts of mouth"
+        ]
+    },
+    {
+        "submitter_donor_id": "DONOR_5",
+        "program_id": "PROGRAM_1",
+        "is_deceased": false,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1978-03-05",
+        "date_of_death": "",
+        "primary_site": [
+            "Stomach",
+            "Cervix uteri",
+            "Pyriform sinus",
+            "Thyroid gland"
+        ]
+    },
+    {
+        "submitter_donor_id": "DONOR_6",
+        "program_id": "PROGRAM_1",
+        "is_deceased": true,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1965-09-23",
+        "date_of_death": "1982-09",
+        "primary_site": [
+            "Parotid gland"
+        ]
+    },
+    {
+        "submitter_donor_id": "DONOR_7",
+        "program_id": "PROGRAM_2",
+        "is_deceased": true,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "2008-12-31",
+        "date_of_death": "2015-12",
+        "primary_site": [
+            "Other and ill-defined sites within respiratory system and intrathoracic organs"
+        ]
+    },
+    {
+        "submitter_donor_id": "DONOR_8",
+        "program_id": "PROGRAM_2",
+        "is_deceased": false,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1998-06-09",
+        "date_of_death": "",
+        "primary_site": [
+            "Hematopoietic and reticuloendothelial systems",
+            "Ureter",
+            "Bladder",
+            "Other and unspecified male genital organs"
+        ]
+    },
+    {
+        "submitter_donor_id": "DONOR_9",
+        "program_id": "PROGRAM_2",
+        "is_deceased": false,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "2005-12-12",
+        "date_of_death": "",
+        "primary_site": [
+            "Accessory sinuses",
+            "Breast"
+        ]
+    },
+    {
+        "submitter_donor_id": "DONOR_10",
+        "program_id": "PROGRAM_2",
+        "is_deceased": true,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1989-08-01",
+        "date_of_death": "2011-08",
+        "primary_site": [
+            "Penis",
+            "Gum",
+            "Bronchus and lung",
+            "Liver and intrahepatic bile ducts"
+        ]
+    }
+]
