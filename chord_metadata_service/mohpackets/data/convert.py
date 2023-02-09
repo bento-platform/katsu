@@ -75,27 +75,85 @@ def set_foreign_keys():
 
         replace_values(data, rule)
 
+        # write the transformed data to a json file
+        # with open("data.json", "w") as output_file:
+        #     json.dump(input_data, output_file, indent=4)
 
-def replace_values(data, rule):
-    # loop through rule
-    for item in rule:
-        item_start_range, item_end_range = item["range"]
-        item_range = item_end_range - item_start_range + 1
-        for target in item["targets"]:
-            field_name = target["field_name"]
-            field_value = target["field_value"]
-            target_start_range, target_end_range = target["range"]
-            target_range = target_end_range - target_start_range + 1
-            for i in range(item_range):
-                item_index = item_start_range + i - 1
-                target_index = target_start_range + i
-                if target_index > target_end_range:
-                    target_index = target_start_range + (i % target_range)
-                data[item_index][field_name] = field_value + str(target_index)
 
-    # write to new json file
-    with open("data.json", "w") as json_file:
-        json.dump(data, json_file, indent=4)
+def replace_values(input_data, transformation_rules):
+    """
+    Replace values in input data using transformation rules.
+
+    Inputs:
+        - `input_data`: a list of dictionaries
+        - `transformation_rules`:  a list of dictionaries, each defining a rule
+
+    Each rule consists of:
+        - `range`: tuple of two integers, specifying range of items to apply the rule to.
+        - `targets`: list of dictionaries, each defining a field to be updated.
+
+    Each target consists of:
+        - `field_name`: name of field to update.
+        - `field_value`: new value of the field.
+        - `range`: tuple of two integers, specifying the range of numbers to add to field_value.
+
+    The function updates specified fields by combining field_value (e.g. "DONOR_") with a string
+    representation of the target index (e.g. "1"). Target index is calculated by adding
+    current item index to target_start, if result is greater than target_end, it's wrapped around.
+
+    Here an example of input data:
+    [
+        {
+            "submitter_donor_id": "DONOR_{REPLACE_ME}",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
+        }
+    ]
+    and transformation rules:
+    [
+        {
+        "range": [1, 3],
+        "targets": [
+            {
+            "range": [1, 1],
+            "field_name": "submitter_donor_id",
+            "field_value": "DONOR_"
+            }
+        ]
+        }
+    ]
+    and the result:
+    [
+        {
+            "submitter_donor_id": "DONOR_1",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
+        }
+    ]
+    """
+    for rule in transformation_rules:
+        item_start, item_end = rule["range"]
+        target_fields = rule["targets"]
+
+        # loop through each item in the range
+        for item_index_offset in range(item_end - item_start + 1):
+            item_index = item_start + item_index_offset - 1
+
+            for target_field in target_fields:
+                field_name = target_field["field_name"]
+                field_value = target_field["field_value"]
+                target_start, target_end = target_field["range"]
+
+                # compute the target index
+                target_index = target_start + item_index_offset
+
+                # wrap around the target index if it's out of range
+                if target_index > target_end:
+                    target_index = target_start + (
+                        item_index_offset % (target_end - target_start + 1)
+                    )
+
+                # replace the value in the input data
+                input_data[item_index][field_name] = field_value + str(target_index)
+    return input_data
 
 
 def main():
