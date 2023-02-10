@@ -3,13 +3,13 @@
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
         "submitter_treatment_id": "TREATMENT_9",
-        "radiation_therapy_modality": "Brachytherapy (procedure)",
+        "radiation_therapy_modality": "Teleradiotherapy using electrons (procedure)",
         "radiation_therapy_type": "Internal",
         "radiation_therapy_fractions": "30",
-        "radiation_therapy_dosage": "70",
-        "anatomical_site_irradiated": "Pancreas",
-        "radiation_boost": true,
-        "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_1"
+        "radiation_therapy_dosage": "66",
+        "anatomical_site_irradiated": "Chest wall structure",
+        "radiation_boost": false,
+        "reference_radiation_treatment_id": ""
     },
     {
         "program_id": "PROGRAM_1",
@@ -17,9 +17,9 @@
         "submitter_treatment_id": "TREATMENT_10",
         "radiation_therapy_modality": "Teleradiotherapy using electrons (procedure)",
         "radiation_therapy_type": "Internal",
-        "radiation_therapy_fractions": "35",
-        "radiation_therapy_dosage": "66",
-        "anatomical_site_irradiated": "Entire esophagus",
+        "radiation_therapy_fractions": "30",
+        "radiation_therapy_dosage": "70",
+        "anatomical_site_irradiated": "Shoulder region structure",
         "radiation_boost": false,
         "reference_radiation_treatment_id": ""
     },
@@ -27,36 +27,36 @@
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
         "submitter_treatment_id": "TREATMENT_11",
-        "radiation_therapy_modality": "Other",
+        "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
         "radiation_therapy_type": "Internal",
         "radiation_therapy_fractions": "30",
         "radiation_therapy_dosage": "66",
-        "anatomical_site_irradiated": "Chest wall",
-        "radiation_boost": true,
-        "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_3"
+        "anatomical_site_irradiated": "Oropharyngeal structure",
+        "radiation_boost": false,
+        "reference_radiation_treatment_id": ""
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
         "submitter_treatment_id": "TREATMENT_12",
-        "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-        "radiation_therapy_type": "External",
-        "radiation_therapy_fractions": "35",
-        "radiation_therapy_dosage": "70",
-        "anatomical_site_irradiated": "Small intestinal",
-        "radiation_boost": true,
-        "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_4"
+        "radiation_therapy_modality": "Teleradiotherapy neutrons (procedure)",
+        "radiation_therapy_type": "Internal",
+        "radiation_therapy_fractions": "30",
+        "radiation_therapy_dosage": "66",
+        "anatomical_site_irradiated": "Entire thorax",
+        "radiation_boost": false,
+        "reference_radiation_treatment_id": ""
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_3",
         "submitter_treatment_id": "TREATMENT_13",
-        "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+        "radiation_therapy_modality": "Brachytherapy (procedure)",
         "radiation_therapy_type": "Internal",
         "radiation_therapy_fractions": "30",
         "radiation_therapy_dosage": "70",
-        "anatomical_site_irradiated": "Stomach",
-        "radiation_boost": false,
-        "reference_radiation_treatment_id": ""
+        "anatomical_site_irradiated": "Colon structure",
+        "radiation_boost": true,
+        "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_5"
     }
 ]
