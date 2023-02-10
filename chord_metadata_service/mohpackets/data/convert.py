@@ -36,7 +36,7 @@ def convert_to_fixtures():
         with open(os.path.join(fixtures_folder, json_file_name), "w") as fixtures_file:
             json.dump(fixtures, fixtures_file, indent=4)
 
-    print(f"\nSuccesfully converted files to fixtures and saved to folder fixtures.")
+    print(f"\nSuccess! Converted files to fixtures and saved to folder fixtures.")
 
 
 def set_foreign_keys():
@@ -92,7 +92,7 @@ def set_foreign_keys():
 
         with open(output_path, "w") as f:
             json.dump(data_with_keys, f, indent=4)
-    print(f"\nSuccesfully set foreign keys and saved to folder synthetic_data.")
+    print(f"\nSuccess! Set foreign keys and saved to folder synthetic_data.")
 
 
 def replace_values(input_data, transformation_rules):
