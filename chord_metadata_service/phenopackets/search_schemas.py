@@ -92,7 +92,6 @@ INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, 
 
 UPDATE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_UPDATE_SCHEMA, {
     "properties": {
-        # TODO: timestamp
         "updated_by": {
             "search": search_optional_str(0, multiple=True),
         },
@@ -100,6 +99,15 @@ UPDATE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_UPD
             "search": search_optional_str(1, multiple=True),
         }
     },
+    "search": {
+        "database": {
+            "type": "jsonb"
+        }
+    }
+})
+
+TIME_ELEMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_TIME_ELEMENT_SCHEMA, {
+    "oneOf": [],
     "search": {
         "database": {
             "type": "jsonb"
@@ -425,25 +433,6 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                 }
             }
         },
-        # "genes": {  # TODO: Too sensitive for search?
-        #     "items": merge_schema_dictionaries(
-        #         GENE_SEARCH_SCHEMA,
-        #         {"search": {"database": {
-        #             "relationship": {
-        #                 "type": "MANY_TO_ONE",
-        #                 "foreign_key": "gene_id"
-        #             }}}}),
-        #     "search": {
-        #         "database": {
-        #             "relation": models.Phenopacket._meta.get_field("genes").remote_field.through._meta.db_table,
-        #             "relationship": {
-        #                 "type": "ONE_TO_MANY",
-        #                 "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
-        #                 "parent_primary_key": models.Phenopacket._meta.pk.column  # TODO: Redundant?
-        #             }
-        #         }
-        #     }
-        # },
         "interpretations": {
             "items": merge_schema_dictionaries(
                 INTERPRETATION_SEARCH_SCHEMA,

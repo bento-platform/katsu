@@ -302,7 +302,7 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.Phenopacket
-        fields = ["id", "subject", "biosamples", "genes", "variants", "hts_files"]
+        fields = ["id", "subject", "measurements", "biosamples", "interpretations"]
 
     def filter_found_phenotypic_feature(self, qs, name, value):
         """
@@ -322,7 +322,7 @@ class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.GenomicInterpretation
-        fields = ["id", "gene", "variant"]
+        fields = ["id", "gene_descriptor", "variant_interpretation"]
 
 
 class DiagnosisFilter(django_filters.rest_framework.FilterSet):

@@ -44,9 +44,9 @@ class BaseTimeStamp(models.Model):
     """
     created = models.DateTimeField(auto_now=True)
     updated = models.DateTimeField(auto_now_add=True)
-
+    
     class Meta:
-        # Abstract prevents the creation of a _TimeStamp table
+        # Abstract prevents the creation of a BaseTimeStamp table
         abstract = True
 
 
@@ -391,7 +391,7 @@ class VariantInterpretation(BaseTimeStamp):
         ('NOT_ACTIONABLE', 'NOT_ACTIONABLE'),
         ('ACTIONABLE', 'ACTIONABLE'),
     )
-
+    id = models.CharField(primary_key=True, max_length=200, help_text="Unique identifier for VariantInterpretation rows")
     acmg_pathogenicity_classification = models.CharField(max_length=200, choices=VARIANT_INTERPRETATION_STATUS, default='NOT_PROVIDED',
                                                          help_text=rec_help(d.VARIANT_INTERPRETATION, "acmg_pathogenicity_classification"))
     therapeutic_actionability = models.CharField(max_length=200, choices=THERAPEUTIC_ACTIONABILITY_CHOICES, default='UNKNOWN_ACTIONABILITY',
@@ -412,7 +412,7 @@ class GenomicInterpretation(BaseTimeStamp):
     """
 
     GENOMIC_INTERPRETATION_STATUS = (
-        ('UNKNOWN', 'UNKNOWN'),
+        ('UNKNOWN_STATUS', 'UNKNOWN_STATUS'),
         ('REJECTED', 'REJECTED'),
         ('CANDIDATE', 'CANDIDATE'),
         ('CONTRIBUTORY', 'CONTRIBUTORY'),
@@ -420,15 +420,15 @@ class GenomicInterpretation(BaseTimeStamp):
     )
     subject_or_biosample_id = models.CharField(
         max_length=200, blank=True, help_text="Id of the patient or biosample of the subject being interpreted")
-    interpretation_status = models.CharField(max_length=200, choices=GENOMIC_INTERPRETATION_STATUS,
+    interpretation_status = models.CharField(max_length=200, choices=GENOMIC_INTERPRETATION_STATUS, default="UNKNOWN_STATUS",
                                              help_text='How the call of this GenomicInterpretation was interpreted.')
 
     # Corresponds to 'call' field in schema in case of GeneDescriptor
-    gene_descriptor = models.ForeignKey(GeneDescriptor, on_delete=models.CASCADE,
+    gene_descriptor = models.ForeignKey(GeneDescriptor, on_delete=models.CASCADE, null=True,
                                         blank=True, help_text="Corresponds to 'call' field in schema in case of GeneDescriptor")
     # Corresponds to 'call' field in schema in case of VariantInterpretation
-    variant_interpretation = models.ForeignKey(VariantInterpretation, on_delete=models.CASCADE,
-                                               blank=True, help_text="Corresponds to 'call' field in schema in case of VariantInterpretation")
+    variant_interpretation = models.ForeignKey(VariantInterpretation, on_delete=models.CASCADE, null=True,
+                                                blank=True, help_text="Corresponds to 'call' field in schema in case of VariantInterpretation")
 
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
