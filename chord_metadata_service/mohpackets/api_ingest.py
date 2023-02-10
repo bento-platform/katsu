@@ -1,4 +1,6 @@
+from django.core.management import call_command
 from django.db import transaction
+from django.http import HttpResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -54,12 +56,8 @@ def create_bulk_objects(serializer_class, data: dict):
         The serializer class used to validate the input data before creating the objects.
     """
 
-    if "data" not in data:
-        raise ValueError("Invalid data format. Expected a JSON object with 'data' key.")
-    data_list = data["data"]
-
     # Use the serializer to validate the input data
-    serializer = serializer_class(data=data_list, many=True)
+    serializer = serializer_class(data=data, many=True)
     serializer.is_valid(raise_exception=True)
     # Note: bulk_create() would be faster but it requires to append the _id to the foreign keys
     with transaction.atomic():
@@ -422,6 +420,23 @@ def ingest_comorbidities(request):
         status=status.HTTP_201_CREATED,
         data={f"Ingestion Successful! {len(objs)} comorbidities were created."},
     )
+
+
+@extend_schema(
+    responses={204: OpenApiTypes.STR},
+)
+@api_view(["DELETE"])
+# @permission_classes([CanDIGAdminOrReadOnly])
+def delete_all(request):
+    """
+    Clean all the tables in the database
+    """
+    try:
+        call_command("flush", interactive=False, verbosity=0)
+    except Exception as e:
+        return HttpResponse(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return HttpResponse(status=status.HTTP_204_NO_CONTENT)
 
 
 # TODO: provide a check function before ingest

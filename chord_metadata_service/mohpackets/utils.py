@@ -1,5 +1,5 @@
-from django.conf import settings
 from authx.auth import get_opa_datasets
+from django.conf import settings
 
 from chord_metadata_service.mohpackets.models import Program
 
@@ -31,7 +31,9 @@ def get_authorized_datasets(request):
         # It also makes testing a  bit easier.
         # We can add some logic to filter out the datasets that not authorized to see
         # For example: only authorized to see the first half of the datasets.
-        opa_res_datasets = Program.objects.all().values_list("program_id", flat=True)
+        # You can also overwrite this to return the datasets you want to see.
+        # For example: return ["dataset1", "dataset2"]
+        opa_res_datasets = Program.objects.all().values_list("name", flat=True)
         opa_res_datasets = opa_res_datasets[: len(opa_res_datasets) // 2]
         return opa_res_datasets
 

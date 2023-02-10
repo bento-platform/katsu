@@ -4,17 +4,9 @@ MoH model fields and are used for validation during serialization.
 """
 
 # Unknown + Boolean
-UBOOLEAN = [
-    "Yes",
-    "No",
-    "Unknown"
-]
+UBOOLEAN = ["Yes", "No", "Unknown"]
 
-CAUSE_OF_DEATH = [
-    "Died of cancer",
-    "Died of other reasons",
-    "Unknown"
-]
+CAUSE_OF_DEATH = ["Died of cancer", "Died of other reasons", "Unknown"]
 
 PRIMARY_SITE = [
     "Accessory sinuses",
@@ -86,7 +78,7 @@ PRIMARY_SITE = [
     "Ureter",
     "Uterus, NOS",
     "Vagina",
-    "Vulva"
+    "Vulva",
 ]
 
 TUMOUR_STAGING_SYSTEM = [
@@ -101,7 +93,7 @@ TUMOUR_STAGING_SYSTEM = [
     "Rai staging system",
     "Revised International staging system (RISS)",
     "SEER staging system",
-    "St Jude staging system"
+    "St Jude staging system",
 ]
 
 T_CATEGORY = [
@@ -156,7 +148,7 @@ T_CATEGORY = [
     "Tis(Paget’s)",
     "Tis pu",
     "Tis pd",
-    "TX"
+    "TX",
 ]
 
 N_CATEGORY = [
@@ -205,7 +197,7 @@ M_CATEGORY = [
     "M1d(0)",
     "M1d(1)",
     "M1e",
-    "MX"
+    "MX",
 ]
 
 STAGE_GROUP = [
@@ -294,7 +286,7 @@ STAGE_GROUP = [
     "In situ",
     "Localized",
     "Regionalized",
-    "Distant"
+    "Distant",
 ]
 
 STORAGE = [
@@ -306,15 +298,10 @@ STORAGE = [
     "Other",
     "Paraffin block",
     "RNA later frozen",
-    "Unknown"
+    "Unknown",
 ]
 
-CONFIRMED_DIAGNOSIS_TUMOUR = [
-    "Yes",
-    "No",
-    "Not done",
-    "Unknown"
-]
+CONFIRMED_DIAGNOSIS_TUMOUR = ["Yes", "No", "Not done", "Unknown"]
 
 TUMOUR_GRADING_SYSTEM = [
     "FNCLCC grading system",
@@ -327,7 +314,7 @@ TUMOUR_GRADING_SYSTEM = [
     "Scarff-Bloom-Richardson grading system",
     "Three-tier grading system",
     "Two-tier grading system",
-    "WHO grading system for CNS tumours"
+    "WHO grading system for CNS tumours",
 ]
 
 TUMOUR_GRADE = [
@@ -348,34 +335,21 @@ TUMOUR_GRADE = [
     "Grade Group 2",
     "Grade Group 3",
     "Grade Group 4",
-    "Grade Group 5"
+    "Grade Group 5",
 ]
 
-PERCENT_CELLS_RANGE = [
-    "0-19%",
-    "20-50%",
-    "51-100%"
-]
+PERCENT_CELLS_RANGE = ["0-19%", "20-50%", "51-100%"]
 
 CELLS_MEASURE_METHOD = [
     "Genomics",
     "Image analysis",
     "Pathology estimate by percent nuclei",
-    "Unknown"
+    "Unknown",
 ]
 
-GENDER = [
-    "Man",
-    "Woman",
-    "Non-binary"
-]
+GENDER = ["Man", "Woman", "Non-binary"]
 
-SEX_AT_BIRTH = [
-    "Male",
-    "Female",
-    "Other",
-    "Unknown"
-]
+SEX_AT_BIRTH = ["Male", "Female", "Other", "Unknown"]
 
 SPECIMEN_TISSUE_SOURCE = [
     "Amniotic fluid",
@@ -408,7 +382,7 @@ SPECIMEN_TISSUE_SOURCE = [
     "Sputum",
     "Tissue",
     "Vitreous Fluid",
-    "Wound"
+    "Wound",
 ]
 
 SPECIMEN_TYPE = [
@@ -440,7 +414,7 @@ SAMPLE_TYPE = [
     "Protein",
     "rRNA-depleted RNA",
     "Total DNA",
-    "Total RNA"
+    "Total RNA",
 ]
 
 BASIS_OF_DIAGNOSIS = [
@@ -451,7 +425,7 @@ BASIS_OF_DIAGNOSIS = [
     "Histology of a metastasis",
     "Histology of a primary tumour",
     "Specific tumour markers",
-    "Unknown"
+    "Unknown",
 ]
 
 LYMPH_NODE_STATUS = [
@@ -459,13 +433,13 @@ LYMPH_NODE_STATUS = [
     "No",
     "No lymph nodes found in resected specimen",
     "Not applicable",
-    "Yes"
+    "Yes",
 ]
 
 LYMPH_NODE_METHOD = [
     "Imaging",
     "Lymph node dissection/pathological exam",
-    "Physical palpation of patient"
+    "Physical palpation of patient",
 ]
 
 TREATMENT_TYPE = [
@@ -480,15 +454,10 @@ TREATMENT_TYPE = [
     "Photodynamic therapy",
     "Radiation therapy",
     "Stem cell transplant",
-    "Surgery"
+    "Surgery",
 ]
 
-TREATMENT_SETTING = [
-    "Adjuvant",
-    "Advanced/Metastatic",
-    "Neoadjuvant",
-    "Not applicable"
-]
+TREATMENT_SETTING = ["Adjuvant", "Advanced/Metastatic", "Neoadjuvant", "Not applicable"]
 
 TREATMENT_RESPONSE_METHOD = [
     "RECIST 1.1",
@@ -496,7 +465,7 @@ TREATMENT_RESPONSE_METHOD = [
     "Cheson CLL 2012 Oncology Response Criteria",
     "Response Assessment in Neuro-Oncology (RANO)",
     "AML Response Criteria",
-    "Physician Assessed Response Criteria"
+    "Physician Assessed Response Criteria",
 ]
 
 TREATMENT_RESPONSE = [
@@ -521,16 +490,10 @@ TREATMENT_RESPONSE = [
     "Physician assessed complete response",
     "Physician assessed partial response",
     "Physician assessed stable disease",
-    "No evidence of disease (NED)"
+    "No evidence of disease (NED)",
 ]
 
-DOSAGE_UNITS = [
-    "mg/m2",
-    "IU/m2",
-    "ug/m2",
-    "g/m2",
-    "mg/kg"
-]
+DOSAGE_UNITS = ["mg/m2", "IU/m2", "ug/m2", "g/m2", "mg/kg"]
 
 RADIATION_THERAPY_MODALITY = [
     "Megavoltage radiation therapy using photons (procedure)",
@@ -538,7 +501,7 @@ RADIATION_THERAPY_MODALITY = [
     "Teleradiotherapy protons (procedure)",
     "Teleradiotherapy neutrons (procedure)",
     "Brachytherapy (procedure)",
-    "Other"
+    "Other",
 ]
 
 RADIATION_ANATOMICAL_SITE = [
@@ -611,14 +574,14 @@ RADIATION_ANATOMICAL_SITE = [
     "Bone structure of extremity",
     "Skin structure",
     "Soft tissues",
-    "Entire body as a whole"
+    "Entire body as a whole",
 ]
 
 IMMUNOTHERAPY_TYPE = [
     "Cell-based",
     "Immune checkpoint inhibitors",
     "Monoclonal antibodies other than immune checkpoint inhibitors",
-    "Other immunomodulatory substances"
+    "Other immunomodulatory substances",
 ]
 
 SURGERY_TYPE = [
@@ -670,31 +633,20 @@ SURGERY_TYPE = [
     "Transhiatal esophagectomy",
     "Triple bypass of pancreas",
     "Wedge/localised gastric resection",
-    "Wide Local Excision"
+    "Wide Local Excision",
 ]
 
-SURGERY_LOCATION = [
-    "Local recurrence",
-    "Metastatic",
-    "Primary"
-]
+SURGERY_LOCATION = ["Local recurrence", "Metastatic", "Primary"]
 
 TUMOUR_FOCALITY = [
     "Cannot be assessed",
     "Multifocal",
     "Not applicable",
     "Unifocal",
-    "Unknown"
+    "Unknown",
 ]
 
-TUMOUR_CLASSIFICATION = [
-    "Not applicable",
-    "RX",
-    "R0",
-    "R1",
-    "R2",
-    "Unknown"
-]
+TUMOUR_CLASSIFICATION = ["Not applicable", "RX", "R0", "R1", "R2", "Unknown"]
 
 MARGIN_TYPES = [
     "Circumferential resection margin",
@@ -702,7 +654,7 @@ MARGIN_TYPES = [
     "Distal margin",
     "Not applicable",
     "Proximal margin",
-    "Unknown"
+    "Unknown",
 ]
 
 LYMPHOVACULAR_INVASION = [
@@ -712,7 +664,7 @@ LYMPHOVACULAR_INVASION = [
     "Not applicable",
     "Present",
     "Venous (large vessel) invasion only",
-    "Unknown"
+    "Unknown",
 ]
 
 PERINEURAL_INVASION = [
@@ -720,7 +672,7 @@ PERINEURAL_INVASION = [
     "Cannot be assessed",
     "Not applicable",
     "Present",
-    "Unknown"
+    "Unknown",
 ]
 
 LOST_FOLLOW_UP_REASON = [
@@ -729,7 +681,7 @@ LOST_FOLLOW_UP_REASON = [
     "Lost contact",
     "Not applicable",
     "Unknown",
-    "Withdrew from study"
+    "Withdrew from study",
 ]
 
 DISEASE_STATUS_FOLLOWUP = [
@@ -740,7 +692,7 @@ DISEASE_STATUS_FOLLOWUP = [
     "Partial remission",
     "Progression NOS",
     "Relapse or recurrence",
-    "Stable"
+    "Stable",
 ]
 
 RELAPSE_TYPE = [
@@ -748,16 +700,16 @@ RELAPSE_TYPE = [
     "Local recurrence",
     "Local recurrence and distant metastasis",
     "Progression (liquid tumours)",
-    "Biochemical progression"
+    "Biochemical progression",
 ]
 
 PROGRESSION_STATUS_METHOD = [
-    "Imaging (procedure)"
-    "Histopathology test (procedure)"
-    "Assessment of symptom control (procedure)"
-    "Physical examination procedure (procedure)"
-    "Tumor marker measurement (procedure)"
-    "Laboratory data interpretation (procedure)"
+    "Imaging (procedure)",
+    "Histopathology test (procedure)",
+    "Assessment of symptom control (procedure)",
+    "Physical examination procedure (procedure)",
+    "Tumor marker measurement (procedure)",
+    "Laboratory data interpretation (procedure)",
 ]
 
 MALIGNANCY_LATERALITY = [
@@ -767,29 +719,25 @@ MALIGNANCY_LATERALITY = [
     "Not applicable",
     "Right",
     "Unilateral, Side not specified",
-    "Unknown"
+    "Unknown",
 ]
 
 REGEX_PATTERNS = {
     # ID format
     # Examples: 90234, BLD_donor_89, AML-90
     "ID": r"^[A-Za-z0-9\-\._]{1,64}",
-
     # Date format
     # A date, or partial date (e.g. just year or year + month) as used in
     # human communication. The format is YYYY, YYYY-MM, or YYYY-MM-DD,
     # e.g. 2018, 1973-06, or 1905-08-23. There SHALL be no time zone.
     "DATE": r"^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
-
     # ICD-O-3 morphology codes
     # Examples: 8260/3, 9691/36
     "MORPHOLOGY": r"^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$",
-
     # ICD-O-3 topography codes
     # Examples: C50.1, C18
     "TOPOGRAPHY": r"^[C][0-9]{2}(.[0-9]{1})?$",
-
     # WHO ICD-10 codes
     # Examples: E10, C50.1, I11, M06
-    "COMORBIDITY": r"^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$"
+    "COMORBIDITY": r"^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$",
 }
