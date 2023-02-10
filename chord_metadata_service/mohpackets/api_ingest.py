@@ -1,13 +1,12 @@
 from django.core.management import call_command
-from django.db import models, transaction
+from django.db import transaction
 from django.http import HttpResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
 from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
     ChemotherapySerializer,
@@ -56,10 +55,6 @@ def create_bulk_objects(serializer_class, data: dict):
     serializer_class: class
         The serializer class used to validate the input data before creating the objects.
     """
-
-    # if "data" not in data:
-    #     raise ValueError("Invalid data format. Expected a JSON object with 'data' key.")
-    # data_list = data["data"]
 
     # Use the serializer to validate the input data
     serializer = serializer_class(data=data, many=True)
@@ -427,6 +422,9 @@ def ingest_comorbidities(request):
     )
 
 
+@extend_schema(
+    responses={204: OpenApiTypes.STR},
+)
 @api_view(["DELETE"])
 # @permission_classes([CanDIGAdminOrReadOnly])
 def delete_all(request):

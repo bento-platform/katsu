@@ -13,6 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
+
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import (
@@ -31,10 +33,10 @@ from .settings import DEBUG
 
 urlpatterns = [
     # ==== NON CANDIG API ====
-    # path("api/", include(restapi_urls)),
-    # path("service-info", api_views.service_info, name="service-info"),
-    # *chord_urls.urlpatterns,  # TODO: Use include? can we double up?
-    # *([path("admin/", admin.site.urls)] if DEBUG else []),
+    path("api/", include(restapi_urls)),
+    path("service-info", api_views.service_info, name="service-info"),
+    *chord_urls.urlpatterns,  # TODO: Use include? can we double up?
+    *([path("admin/", admin.site.urls)] if DEBUG else []),
     # ==== NON CANDIG API END ====
     path("api/v1/", include(moh_urls)),
     # OpenAPI 3 documentation with Swagger UI
@@ -42,3 +44,7 @@ urlpatterns = [
     path("", SpectacularSwaggerView.as_view(), name="swagger-ui"),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
+
+# Only use CanDIG urls
+if os.environ.get("CANDIG") == "TRUE":
+    urlpatterns = urlpatterns[4:]
