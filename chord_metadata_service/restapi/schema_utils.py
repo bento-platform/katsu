@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import List, Optional
+from django.db import models
 
 from .description_utils import describe_schema
 
@@ -76,6 +77,28 @@ def search_optional_eq(order: int, queryable: str = "all"):
 def search_optional_str(order: int, queryable: str = "all", multiple: bool = False):
     return _searchable_field(["eq", "ico", "in"], order, queryable, multiple)
 
+def search_db_pk(model: models.Model):
+    """
+    Helper for search schema primary key definitions
+    """
+    return {
+        "search": {
+            **search_optional_eq(0),
+            "database": {
+                "field": model._meta.pk.column
+            }
+        }
+    }
+
+def search_db_fk(type: str, foreign_model: models.Model, field_name: str):
+    return {
+        "search": { "database": { "relationship": {
+                    "type": type,
+                    "foreign_key": foreign_model._meta.get_field(field_name).column
+                }
+            }
+        }
+    }
 
 def tag_schema_with_search_properties(schema, search_descriptions: Optional[dict]):
     if not isinstance(schema, dict) or not search_descriptions:

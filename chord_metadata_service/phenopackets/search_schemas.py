@@ -3,6 +3,7 @@ from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.search_schemas import RESOURCE_SEARCH_SCHEMA
 from chord_metadata_service.restapi.schema_utils import (
     merge_schema_dictionaries,
+    search_db_pk,
     search_optional_eq,
     search_optional_str,
     tag_schema_with_search_properties,
@@ -330,6 +331,12 @@ DISEASE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DI
     }
 })
 
+INTERPRETATION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_INTERPRETATION_SCHEMA, {
+    "properties": {
+        "id": search_db_pk(models.Interpretation),
+    },
+    "search": {}
+})
 # noinspection PyProtectedMember
 PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_SCHEMA, {
     "properties": {
@@ -388,27 +395,44 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                 }
             }
         },
-        "genes": {  # TODO: Too sensitive for search?
+        # "genes": {  # TODO: Too sensitive for search?
+        #     "items": merge_schema_dictionaries(
+        #         GENE_SEARCH_SCHEMA,
+        #         {"search": {"database": {
+        #             "relationship": {
+        #                 "type": "MANY_TO_ONE",
+        #                 "foreign_key": "gene_id"
+        #             }}}}),
+        #     "search": {
+        #         "database": {
+        #             "relation": models.Phenopacket._meta.get_field("genes").remote_field.through._meta.db_table,
+        #             "relationship": {
+        #                 "type": "ONE_TO_MANY",
+        #                 "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
+        #                 "parent_primary_key": models.Phenopacket._meta.pk.column  # TODO: Redundant?
+        #             }
+        #         }
+        #     }
+        # },
+        "interpretations": {
             "items": merge_schema_dictionaries(
-                GENE_SEARCH_SCHEMA,
+                INTERPRETATION_SEARCH_SCHEMA,
                 {"search": {"database": {
                     "relationship": {
                         "type": "MANY_TO_ONE",
-                        "foreign_key": "gene_id"
-                    }}}}),
+                        "foreign_key": "interpretation_id"
+                    }
+                }}}),
             "search": {
                 "database": {
-                    "relation": models.Phenopacket._meta.get_field("genes").remote_field.through._meta.db_table,
+                    "relation": models.Phenopacket._meta.get_field("interpretations").remote_field.through._meta.db_table,
                     "relationship": {
                         "type": "ONE_TO_MANY",
-                        "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
-                        "parent_primary_key": models.Phenopacket._meta.pk.column  # TODO: Redundant?
+                        "parent_foreign_key": "phenopacket_id",
+                        "parent_primary_key": models.Phenopacket._meta.pk.column
                     }
                 }
             }
-        },
-        "variants": {
-            "items": VARIANT_SEARCH_SCHEMA
         },
         "diseases": {  # TODO: Too sensitive for search?
             "items": merge_schema_dictionaries(

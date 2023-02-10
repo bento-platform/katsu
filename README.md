@@ -96,7 +96,9 @@ git submodule update --init
 The service uses PostgreSQL database for data storage.
 
 * Create and activate virtual environment
-* Run: `pip install -r requirements.txt`
+* Prod mode, run: `pip install -r requirements.txt`
+* Dev mode, run: `pip install -r requirements-dev.txt`
+* Dev mode, with local bento-lib dev package, run: `pip install -r requirements-dev.txt && pip install -e {path_to_bento_lib_directory}`
 * To configure the application (such as the DB credentials) we are using python-dotenv:
     - Take a look at the .env-sample file at the root of the project
     - You can export these in your virtualenv or simply `cp .env-sample .env`
