@@ -6,38 +6,34 @@
   "array": true,
   "columns": [
     {
+      "name": "submitter_follow_up_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": "\"FOLLOW_UP_\" + this.to_s"
+    },
+    {
       "name": "program_id",
       "null_percentage": 0,
-      "type": "Template",
-      "value": "",
+      "type": "Blank",
       "formula": ""
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
-      "type": "Template",
-      "value": "",
+      "type": "Blank",
       "formula": ""
     },
     {
       "name": "submitter_primary_diagnosis_id",
       "null_percentage": 0,
-      "type": "Template",
-      "value": "",
+      "type": "Blank",
       "formula": ""
     },
     {
       "name": "submitter_treatment_id",
       "null_percentage": 0,
-      "type": "Template",
-      "value": "",
+      "type": "Blank",
       "formula": ""
-    },
-    {
-      "name": "submitter_follow_up_id",
-      "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"FOLLOW_UP_\" + this.to_s"
     },
     {
       "name": "date_of_followup",

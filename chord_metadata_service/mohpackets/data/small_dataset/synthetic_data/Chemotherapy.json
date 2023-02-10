@@ -4,27 +4,27 @@
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_1",
         "drug_name": "FLUOROURACIL",
-        "drug_rxnormcui": "876459",
+        "drug_rxnormcui": "6534648",
         "chemotherapy_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "150",
+        "cumulative_drug_dosage_prescribed": "320",
         "cumulative_drug_dosage_actual": "111"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_1",
-        "drug_name": "NIVOLUMAB",
-        "drug_rxnormcui": "7365837",
+        "drug_name": "GEMCITABINE",
+        "drug_rxnormcui": "836494",
         "chemotherapy_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "320",
-        "cumulative_drug_dosage_actual": "60"
+        "cumulative_drug_dosage_prescribed": "150",
+        "cumulative_drug_dosage_actual": "78"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_1",
-        "drug_name": "OXALIPLATIN",
-        "drug_rxnormcui": "6534648",
+        "drug_name": "FLUOROURACIL",
+        "drug_rxnormcui": "7365837",
         "chemotherapy_dosage_units": "mg/m2",
         "cumulative_drug_dosage_prescribed": "4600",
         "cumulative_drug_dosage_actual": "79"
@@ -33,40 +33,40 @@
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_2",
-        "drug_name": "OXALIPLATIN",
-        "drug_rxnormcui": "876459",
+        "drug_name": "GEMCITABINE",
+        "drug_rxnormcui": "87354",
         "chemotherapy_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "320",
-        "cumulative_drug_dosage_actual": "66"
+        "cumulative_drug_dosage_prescribed": "4600",
+        "cumulative_drug_dosage_actual": "78"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_2",
-        "drug_name": "GEMCITABINE",
-        "drug_rxnormcui": "836754",
-        "chemotherapy_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "780",
-        "cumulative_drug_dosage_actual": "90"
-    },
-    {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_1",
-        "submitter_treatment_id": "TREATMENT_3",
-        "drug_name": "NIVOLUMAB",
-        "drug_rxnormcui": "56438",
-        "chemotherapy_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "780",
-        "cumulative_drug_dosage_actual": "90"
-    },
-    {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_1",
-        "submitter_treatment_id": "TREATMENT_4",
         "drug_name": "NIVOLUMAB",
         "drug_rxnormcui": "56438",
         "chemotherapy_dosage_units": "mg/m2",
         "cumulative_drug_dosage_prescribed": "150",
         "cumulative_drug_dosage_actual": "100"
+    },
+    {
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_treatment_id": "TREATMENT_3",
+        "drug_name": "FLUOROURACIL",
+        "drug_rxnormcui": "87354",
+        "chemotherapy_dosage_units": "mg/m2",
+        "cumulative_drug_dosage_prescribed": "320",
+        "cumulative_drug_dosage_actual": "94"
+    },
+    {
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_treatment_id": "TREATMENT_4",
+        "drug_name": "LIPOSOMAL IRINOTECAN",
+        "drug_rxnormcui": "6534648",
+        "chemotherapy_dosage_units": "mg/m2",
+        "cumulative_drug_dosage_prescribed": "780",
+        "cumulative_drug_dosage_actual": "60"
     }
 ]

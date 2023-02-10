@@ -2,449 +2,421 @@
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_1",
             "submitter_sample_id": "SAMPLE_REGISTRATION_1",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_1",
             "gender": "Man",
-            "sex_at_birth": "Unknown",
-            "specimen_tissue_source": "Amniotic fluid",
-            "tumour_normal_designation": "Tumour",
-            "specimen_type": "Recurrent tumour",
-            "sample_type": "polyA+ RNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_1",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_2",
-            "gender": "Non-binary",
-            "sex_at_birth": "Unknown",
-            "specimen_tissue_source": "Amniotic fluid",
-            "tumour_normal_designation": "Normal",
-            "specimen_type": "Cell line - derived from normal",
-            "sample_type": "Other DNA enrichments",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_1",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_3",
-            "gender": "Woman",
-            "sex_at_birth": "Unknown",
-            "specimen_tissue_source": "Pleural fluid (thoracentesis fluid)",
-            "tumour_normal_designation": "Normal",
-            "specimen_type": "Metastatic tumour",
-            "sample_type": "ctDNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_2",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_4",
-            "gender": "Non-binary",
-            "sex_at_birth": "Female",
-            "specimen_tissue_source": "Vitreous Fluid",
+            "sex_at_birth": "Male",
+            "specimen_tissue_source": "Blood venous",
             "tumour_normal_designation": "Normal",
             "specimen_type": "Primary tumour - adjacent to normal",
-            "sample_type": "polyA+ RNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "sample_type": "Other DNA enrichments"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_2",
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_2",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_5",
-            "gender": "Non-binary",
-            "sex_at_birth": "Other",
-            "specimen_tissue_source": "Sputum",
-            "tumour_normal_designation": "Tumour",
-            "specimen_type": "Metastatic tumour - metastasis to distant location",
-            "sample_type": "Amplified DNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_2",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_6",
+            "submitter_specimen_id": "SPECIMEN_1",
             "gender": "Woman",
             "sex_at_birth": "Unknown",
             "specimen_tissue_source": "Saliva",
             "tumour_normal_designation": "Normal",
-            "specimen_type": "Primary tumour - additional new primary",
-            "sample_type": "Other DNA enrichments",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "specimen_type": "Normal - tissue adjacent to primary tumour",
+            "sample_type": "ctDNA"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_3",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_1",
+            "gender": "Man",
+            "sex_at_birth": "Female",
+            "specimen_tissue_source": "Serum, Convalescent",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Cell line - derived from xenograft tumour",
+            "sample_type": "Protein"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_4",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_2",
+            "gender": "Non-binary",
+            "sex_at_birth": "Unknown",
+            "specimen_tissue_source": "Serum, Convalescent",
+            "tumour_normal_designation": "Normal",
+            "specimen_type": "Xenograft - derived from tumour cell line",
+            "sample_type": "rRNA-depleted RNA"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_5",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_2",
+            "gender": "Man",
+            "sex_at_birth": "Female",
+            "specimen_tissue_source": "Cerebral spinal fluid",
+            "tumour_normal_designation": "Normal",
+            "specimen_type": "Xenograft - derived from metastatic tumour",
+            "sample_type": "Other DNA enrichments"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_6",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_2",
+            "gender": "Man",
+            "sex_at_birth": "Other",
+            "specimen_tissue_source": "Cord blood",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Metastatic tumour - metastasis to distant location",
+            "sample_type": "rRNA-depleted RNA"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_7",
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
             "submitter_specimen_id": "SPECIMEN_3",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_7",
-            "gender": "Woman",
-            "sex_at_birth": "Unknown",
-            "specimen_tissue_source": "Blood arterial",
+            "gender": "Man",
+            "sex_at_birth": "Male",
+            "specimen_tissue_source": "Bone",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Cell line - derived from xenograft tumour",
+            "sample_type": "Total RNA"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_8",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_3",
+            "gender": "Man",
+            "sex_at_birth": "Other",
+            "specimen_tissue_source": "Cerebral spinal fluid",
+            "tumour_normal_designation": "Normal",
+            "specimen_type": "Xenograft - derived from metastatic tumour",
+            "sample_type": "Amplified DNA"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_9",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_4",
+            "gender": "Man",
+            "sex_at_birth": "Other",
+            "specimen_tissue_source": "Fluid, Pericardial",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Cell line - derived from metastatic tumour",
+            "sample_type": "Other RNA fractions"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_10",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_4",
+            "gender": "Man",
+            "sex_at_birth": "Other",
+            "specimen_tissue_source": "Fluid, Abdomen",
             "tumour_normal_designation": "Tumour",
             "specimen_type": "Metastatic tumour",
-            "sample_type": "Other DNA enrichments",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "sample_type": "ctDNA"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_11",
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_3",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_8",
+            "submitter_specimen_id": "SPECIMEN_5",
+            "gender": "Man",
+            "sex_at_birth": "Unknown",
+            "specimen_tissue_source": "Genital vaginal",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Primary tumour - adjacent to normal",
+            "sample_type": "Amplified DNA"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_12",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_6",
+            "gender": "Non-binary",
+            "sex_at_birth": "Female",
+            "specimen_tissue_source": "Placenta",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Recurrent tumour",
+            "sample_type": "Other DNA enrichments"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_13",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_7",
+            "gender": "Woman",
+            "sex_at_birth": "Female",
+            "specimen_tissue_source": "Sputum",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Metastatic tumour - metastasis to distant location",
+            "sample_type": "Total DNA"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_14",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_8",
+            "gender": "Non-binary",
+            "sex_at_birth": "Male",
+            "specimen_tissue_source": "Marrow",
+            "tumour_normal_designation": "Normal",
+            "specimen_type": "Cell line - derived from primary tumour",
+            "sample_type": "Total RNA"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_15",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_2",
+            "submitter_specimen_id": "SPECIMEN_9",
+            "gender": "Woman",
+            "sex_at_birth": "Male",
+            "specimen_tissue_source": "Skin",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Normal - tissue adjacent to primary tumour",
+            "sample_type": "ctDNA"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_16",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_2",
+            "submitter_specimen_id": "SPECIMEN_10",
+            "gender": "Woman",
+            "sex_at_birth": "Other",
+            "specimen_tissue_source": "Pancreatic fluid",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Primary tumour - adjacent to normal",
+            "sample_type": "Total DNA"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_17",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_2",
+            "submitter_specimen_id": "SPECIMEN_11",
+            "gender": "Woman",
+            "sex_at_birth": "Male",
+            "specimen_tissue_source": "Duodenal fluid",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Cell line - derived from xenograft tumour",
+            "sample_type": "polyA+ RNA"
+        }
+    },
+    {
+        "model": "mohpackets.sampleregistration",
+        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_18",
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_2",
+            "submitter_specimen_id": "SPECIMEN_12",
             "gender": "Man",
             "sex_at_birth": "Other",
             "specimen_tissue_source": "Whole blood",
             "tumour_normal_designation": "Tumour",
             "specimen_type": "Cell line - derived from metastatic tumour",
-            "sample_type": "Amplified DNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "sample_type": "Amplified DNA"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_4",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_9",
-            "gender": "Man",
-            "sex_at_birth": "Other",
-            "specimen_tissue_source": "Genital vaginal",
-            "tumour_normal_designation": "Normal",
-            "specimen_type": "Primary tumour - additional new primary",
-            "sample_type": "Amplified DNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_4",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_10",
-            "gender": "Woman",
-            "sex_at_birth": "Other",
-            "specimen_tissue_source": "Pancreatic fluid",
-            "tumour_normal_designation": "Normal",
-            "specimen_type": "Metastatic tumour - additional metastatic",
-            "sample_type": "Amplified DNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_5",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_11",
-            "gender": "Man",
-            "sex_at_birth": "Female",
-            "specimen_tissue_source": "Marrow",
-            "tumour_normal_designation": "Tumour",
-            "specimen_type": "Primary tumour - adjacent to normal",
-            "sample_type": "polyA+ RNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_6",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_12",
-            "gender": "Woman",
-            "sex_at_birth": "Unknown",
-            "specimen_tissue_source": "Duodenal fluid",
-            "tumour_normal_designation": "Tumour",
-            "specimen_type": "Primary tumour",
-            "sample_type": "Total RNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_7",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_13",
-            "gender": "Man",
-            "sex_at_birth": "Female",
-            "specimen_tissue_source": "Genital vaginal",
-            "tumour_normal_designation": "Normal",
-            "specimen_type": "Metastatic tumour - metastasis local to lymph node",
-            "sample_type": "Other DNA enrichments",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_8",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_14",
-            "gender": "Non-binary",
-            "sex_at_birth": "Other",
-            "specimen_tissue_source": "Fluid, Joint",
-            "tumour_normal_designation": "Tumour",
-            "specimen_type": "Metastatic tumour - metastasis to distant location",
-            "sample_type": "ctDNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_2",
-            "submitter_specimen_id": "SPECIMEN_9",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_15",
-            "gender": "Man",
-            "sex_at_birth": "Other",
-            "specimen_tissue_source": "Cerebral spinal fluid",
-            "tumour_normal_designation": "Tumour",
-            "specimen_type": "Metastatic tumour",
-            "sample_type": "Amplified DNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_2",
-            "submitter_specimen_id": "SPECIMEN_10",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_16",
-            "gender": "Non-binary",
-            "sex_at_birth": "Female",
-            "specimen_tissue_source": "Duodenal fluid",
-            "tumour_normal_designation": "Tumour",
-            "specimen_type": "Recurrent tumour",
-            "sample_type": "Total RNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_2",
-            "submitter_specimen_id": "SPECIMEN_11",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_17",
-            "gender": "Man",
-            "sex_at_birth": "Other",
-            "specimen_tissue_source": "Blood, Fetal",
-            "tumour_normal_designation": "Normal",
-            "specimen_type": "Normal - tissue adjacent to primary tumour",
-            "sample_type": "polyA+ RNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_2",
-            "submitter_specimen_id": "SPECIMEN_12",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_18",
-            "gender": "Non-binary",
-            "sex_at_birth": "Other",
-            "specimen_tissue_source": "Fluid, Kidney",
-            "tumour_normal_designation": "Tumour",
-            "specimen_type": "Metastatic tumour",
-            "sample_type": "Protein",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6"
-        }
-    },
-    {
-        "model": "mohpackets.sampleregistration",
-        "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_19",
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_3",
             "submitter_specimen_id": "SPECIMEN_13",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_19",
             "gender": "Man",
             "sex_at_birth": "Female",
-            "specimen_tissue_source": "Saliva",
-            "tumour_normal_designation": "Normal",
-            "specimen_type": "Cell line - derived from metastatic tumour",
-            "sample_type": "Other DNA enrichments",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7"
+            "specimen_tissue_source": "Bile Fluid",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Metastatic tumour - metastasis to distant location",
+            "sample_type": "Other DNA enrichments"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_20",
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_3",
             "submitter_specimen_id": "SPECIMEN_14",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_20",
             "gender": "Man",
-            "sex_at_birth": "Female",
-            "specimen_tissue_source": "Vitreous Fluid",
-            "tumour_normal_designation": "Tumour",
-            "specimen_type": "Normal - tissue adjacent to primary tumour",
-            "sample_type": "Other DNA enrichments",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8"
+            "sex_at_birth": "Unknown",
+            "specimen_tissue_source": "Bile Fluid",
+            "tumour_normal_designation": "Normal",
+            "specimen_type": "Recurrent tumour",
+            "sample_type": "rRNA-depleted RNA"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_21",
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_4",
             "submitter_specimen_id": "SPECIMEN_15",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_21",
-            "gender": "Man",
-            "sex_at_birth": "Male",
-            "specimen_tissue_source": "Genital vaginal",
-            "tumour_normal_designation": "Normal",
-            "specimen_type": "Xenograft - derived from primary tumour",
-            "sample_type": "rRNA-depleted RNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9"
+            "gender": "Woman",
+            "sex_at_birth": "Unknown",
+            "specimen_tissue_source": "Whole blood",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Primary tumour",
+            "sample_type": "Protein"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_22",
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_4",
             "submitter_specimen_id": "SPECIMEN_16",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_22",
             "gender": "Non-binary",
-            "sex_at_birth": "Male",
-            "specimen_tissue_source": "Tissue",
+            "sex_at_birth": "Female",
+            "specimen_tissue_source": "Placenta",
             "tumour_normal_designation": "Normal",
-            "specimen_type": "Normal - tissue adjacent to primary tumour",
-            "sample_type": "Total DNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10"
+            "specimen_type": "Xenograft - derived from tumour cell line",
+            "sample_type": "Total RNA"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_23",
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_5",
             "submitter_specimen_id": "SPECIMEN_17",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_23",
-            "gender": "Non-binary",
-            "sex_at_birth": "Other",
-            "specimen_tissue_source": "Fluid, Pericardial",
+            "gender": "Man",
+            "sex_at_birth": "Female",
+            "specimen_tissue_source": "Fluid, Kidney",
             "tumour_normal_designation": "Normal",
-            "specimen_type": "Xenograft - derived from metastatic tumour",
-            "sample_type": "polyA+ RNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11"
+            "specimen_type": "Primary tumour",
+            "sample_type": "rRNA-depleted RNA"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_24",
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_6",
             "submitter_specimen_id": "SPECIMEN_18",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_24",
-            "gender": "Non-binary",
-            "sex_at_birth": "Male",
-            "specimen_tissue_source": "Marrow",
-            "tumour_normal_designation": "Tumour",
+            "gender": "Man",
+            "sex_at_birth": "Unknown",
+            "specimen_tissue_source": "Sputum",
+            "tumour_normal_designation": "Normal",
             "specimen_type": "Xenograft - derived from metastatic tumour",
-            "sample_type": "Other DNA enrichments",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12"
+            "sample_type": "Total DNA"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_25",
             "program_id": "PROGRAM_2",
             "submitter_donor_id": "DONOR_7",
             "submitter_specimen_id": "SPECIMEN_19",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_25",
-            "gender": "Non-binary",
-            "sex_at_birth": "Unknown",
-            "specimen_tissue_source": "Cord blood",
+            "gender": "Man",
+            "sex_at_birth": "Female",
+            "specimen_tissue_source": "Duodenal fluid",
             "tumour_normal_designation": "Normal",
-            "specimen_type": "Xenograft - derived from tumour cell line",
-            "sample_type": "Amplified DNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13"
+            "specimen_type": "Cell line - derived from primary tumour",
+            "sample_type": "ctDNA"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_26",
             "program_id": "PROGRAM_2",
             "submitter_donor_id": "DONOR_8",
             "submitter_specimen_id": "SPECIMEN_20",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_26",
-            "gender": "Woman",
-            "sex_at_birth": "Other",
-            "specimen_tissue_source": "Serum, Convalescent",
+            "gender": "Non-binary",
+            "sex_at_birth": "Female",
+            "specimen_tissue_source": "Skin",
             "tumour_normal_designation": "Normal",
-            "specimen_type": "Cell line - derived from xenograft tumour",
-            "sample_type": "Amplified DNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14"
+            "specimen_type": "Cell line - derived from normal",
+            "sample_type": "Protein"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_27",
             "program_id": "PROGRAM_2",
             "submitter_donor_id": "DONOR_9",
             "submitter_specimen_id": "SPECIMEN_21",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_27",
             "gender": "Man",
-            "sex_at_birth": "Female",
-            "specimen_tissue_source": "Seminal fluid",
-            "tumour_normal_designation": "Normal",
-            "specimen_type": "Cell line - derived from normal",
-            "sample_type": "rRNA-depleted RNA",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15"
+            "sex_at_birth": "Unknown",
+            "specimen_tissue_source": "Tissue",
+            "tumour_normal_designation": "Tumour",
+            "specimen_type": "Xenograft - derived from tumour cell line",
+            "sample_type": "Other RNA fractions"
         }
     },
     {
         "model": "mohpackets.sampleregistration",
         "fields": {
+            "submitter_sample_id": "SAMPLE_REGISTRATION_28",
             "program_id": "PROGRAM_2",
             "submitter_donor_id": "DONOR_10",
             "submitter_specimen_id": "SPECIMEN_22",
-            "submitter_sample_id": "SAMPLE_REGISTRATION_28",
-            "gender": "Woman",
-            "sex_at_birth": "Other",
-            "specimen_tissue_source": "Pancreatic fluid",
-            "tumour_normal_designation": "Tumour",
-            "specimen_type": "Primary tumour - additional new primary",
-            "sample_type": "Protein",
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16"
+            "gender": "Non-binary",
+            "sex_at_birth": "Male",
+            "specimen_tissue_source": "Bone",
+            "tumour_normal_designation": "Normal",
+            "specimen_type": "Metastatic tumour - metastasis to distant location",
+            "sample_type": "polyA+ RNA"
         }
     }
 ]

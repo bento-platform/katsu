@@ -233,7 +233,7 @@ class SurgeryViewSet(viewsets.ModelViewSet):
     serializer_class = SurgerySerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = SurgeryFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
+    # permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
     throttle_classes = [MoHRateThrottle]
     queryset = Surgery.objects.all()

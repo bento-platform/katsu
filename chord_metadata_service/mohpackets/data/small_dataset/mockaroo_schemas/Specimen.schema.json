@@ -6,31 +6,28 @@
   "array": true,
   "columns": [
     {
+      "name": "submitter_specimen_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": "\"SPECIMEN_\" + this.to_s"
+    },
+    {
       "name": "program_id",
       "null_percentage": 0,
-      "type": "Template",
-      "value": "",
+      "type": "Blank",
       "formula": ""
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
-      "type": "Template",
-      "value": "",
+      "type": "Blank",
       "formula": ""
     },
     {
       "name": "submitter_primary_diagnosis_id",
       "null_percentage": 0,
-      "type": "Template",
-      "value": "",
+      "type": "Blank",
       "formula": ""
-    },
-    {
-      "name": "submitter_specimen_id",
-      "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"SPECIMEN_\" + this.to_s"
     },
     {
       "name": "pathological_tumour_staging_system",

@@ -5,7 +5,7 @@
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_5",
-            "drug_name": "anastrozole",
+            "drug_name": "exemestane",
             "drug_rxnormcui": "345678",
             "hormone_drug_dosage_units": "mg/m2",
             "cumulative_drug_dosage_prescribed": "200",
@@ -18,8 +18,8 @@
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_5",
-            "drug_name": "letrozole",
-            "drug_rxnormcui": "223986",
+            "drug_name": "triptorelin",
+            "drug_rxnormcui": "258494",
             "hormone_drug_dosage_units": "mg/m2",
             "cumulative_drug_dosage_prescribed": "200",
             "cumulative_drug_dosage_actual": "200"
@@ -31,7 +31,20 @@
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_5",
-            "drug_name": "goserelin",
+            "drug_name": "exemestane",
+            "drug_rxnormcui": "557845",
+            "hormone_drug_dosage_units": "mg/m2",
+            "cumulative_drug_dosage_prescribed": "200",
+            "cumulative_drug_dosage_actual": "200"
+        }
+    },
+    {
+        "model": "mohpackets.hormonetherapy",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_treatment_id": "TREATMENT_6",
+            "drug_name": "exemestane",
             "drug_rxnormcui": "29875",
             "hormone_drug_dosage_units": "mg/m2",
             "cumulative_drug_dosage_prescribed": "200",
@@ -44,20 +57,7 @@
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_6",
-            "drug_name": "triptorelin",
-            "drug_rxnormcui": "223986",
-            "hormone_drug_dosage_units": "mg/m2",
-            "cumulative_drug_dosage_prescribed": "200",
-            "cumulative_drug_dosage_actual": "200"
-        }
-    },
-    {
-        "model": "mohpackets.hormonetherapy",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_treatment_id": "TREATMENT_6",
-            "drug_name": "goserelin",
+            "drug_name": "exemestane",
             "drug_rxnormcui": "84857",
             "hormone_drug_dosage_units": "mg/m2",
             "cumulative_drug_dosage_prescribed": "200",
@@ -70,8 +70,8 @@
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_7",
-            "drug_name": "goserelin",
-            "drug_rxnormcui": "345678",
+            "drug_name": "degarelix",
+            "drug_rxnormcui": "29875",
             "hormone_drug_dosage_units": "mg/m2",
             "cumulative_drug_dosage_prescribed": "200",
             "cumulative_drug_dosage_actual": "200"
@@ -83,8 +83,8 @@
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_8",
-            "drug_name": "degarelix",
-            "drug_rxnormcui": "557845",
+            "drug_name": "goserelin",
+            "drug_rxnormcui": "223986",
             "hormone_drug_dosage_units": "mg/m2",
             "cumulative_drug_dosage_prescribed": "200",
             "cumulative_drug_dosage_actual": "200"

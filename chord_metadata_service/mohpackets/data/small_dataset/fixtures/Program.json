@@ -3,14 +3,14 @@
         "model": "mohpackets.program",
         "fields": {
             "program_id": "PROGRAM_1",
-            "name": "Arab American University - Jenin"
+            "name": "IO-ALINES"
         }
     },
     {
         "model": "mohpackets.program",
         "fields": {
             "program_id": "PROGRAM_2",
-            "name": "University of Electronic Science and Technology of China"
+            "name": "COMPASS"
         }
     }
 ]

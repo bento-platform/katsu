@@ -14,8 +14,8 @@
     {
       "name": "program_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "if this <= 6\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
+      "type": "Blank",
+      "formula": ""
     },
     {
       "name": "is_deceased",

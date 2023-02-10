@@ -1,420 +1,420 @@
 [
     {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_1",
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "treatment_type": [
-            "Other targeting molecular therapy",
-            "Photodynamic therapy",
-            "Surgery"
+            "Endoscopic therapy",
+            "Photodynamic therapy"
         ],
-        "is_primary_treatment": "No",
+        "is_primary_treatment": "Yes",
         "treatment_start_date": "2021-02",
-        "treatment_end_date": "2022-10",
-        "treatment_setting": "Not applicable",
-        "treatment_intent": "Palliative",
-        "days_per_cycle": 5,
-        "number_of_cycles": 4,
-        "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "Progressive disease"
-    },
-    {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
-        "submitter_treatment_id": "TREATMENT_2",
-        "treatment_type": [
-            "Endoscopic therapy",
-            "Photodynamic therapy"
-        ],
-        "is_primary_treatment": "Yes",
-        "treatment_start_date": "2021-03",
-        "treatment_end_date": "2022-08",
-        "treatment_setting": "Advanced/Metastatic",
-        "treatment_intent": "Palliative",
-        "days_per_cycle": 7,
-        "number_of_cycles": 4,
-        "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "Complete remission"
-    },
-    {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
-        "submitter_treatment_id": "TREATMENT_3",
-        "treatment_type": [
-            "Chemotherapy"
-        ],
-        "is_primary_treatment": "Yes",
-        "treatment_start_date": "2021-09",
-        "treatment_end_date": "2022-02",
-        "treatment_setting": "Not applicable",
-        "treatment_intent": "Curative",
-        "days_per_cycle": 3,
-        "number_of_cycles": 4,
-        "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "Physician assessed stable disease"
-    },
-    {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
-        "submitter_treatment_id": "TREATMENT_4",
-        "treatment_type": [
-            "Stem cell transplant"
-        ],
-        "is_primary_treatment": "Yes",
-        "treatment_start_date": "2021-11",
-        "treatment_end_date": "2022-05",
-        "treatment_setting": "Neoadjuvant",
-        "treatment_intent": "Curative",
-        "days_per_cycle": 7,
-        "number_of_cycles": 4,
-        "response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
-        "response_to_treatment": "Complete remission with incomplete hematologic recovery (CRi)"
-    },
-    {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
-        "submitter_treatment_id": "TREATMENT_5",
-        "treatment_type": [
-            "No treatment",
-            "Bone marrow transplant"
-        ],
-        "is_primary_treatment": "Unknown",
-        "treatment_start_date": "2021-06",
         "treatment_end_date": "2022-09",
-        "treatment_setting": "Advanced/Metastatic",
-        "treatment_intent": "Palliative",
-        "days_per_cycle": 7,
-        "number_of_cycles": 5,
-        "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "No evidence of disease (NED)"
-    },
-    {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
-        "submitter_treatment_id": "TREATMENT_6",
-        "treatment_type": [
-            "Other targeting molecular therapy",
-            "Endoscopic therapy",
-            "Photodynamic therapy"
-        ],
-        "is_primary_treatment": "No",
-        "treatment_start_date": "2021-08",
-        "treatment_end_date": "2022-08",
-        "treatment_setting": "Advanced/Metastatic",
-        "treatment_intent": "Curative",
-        "days_per_cycle": 5,
-        "number_of_cycles": 3,
-        "response_to_treatment_criteria_method": "RECIST 1.1",
-        "response_to_treatment": "Physician assessed complete response"
-    },
-    {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
-        "submitter_treatment_id": "TREATMENT_7",
-        "treatment_type": [
-            "Surgery",
-            "Radiation therapy"
-        ],
-        "is_primary_treatment": "Yes",
-        "treatment_start_date": "2021-07",
-        "treatment_end_date": "2022-03",
         "treatment_setting": "Neoadjuvant",
-        "treatment_intent": "Curative",
+        "treatment_intent": "Palliative",
         "days_per_cycle": 1,
         "number_of_cycles": 3,
-        "response_to_treatment_criteria_method": "AML Response Criteria",
+        "response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
         "response_to_treatment": "Stable disease"
     },
     {
+        "submitter_treatment_id": "TREATMENT_2",
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
-        "submitter_treatment_id": "TREATMENT_8",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "treatment_type": [
-            "Endoscopic therapy"
+            "Radiation therapy",
+            "Bone marrow transplant",
+            "Surgery"
         ],
         "is_primary_treatment": "Yes",
-        "treatment_start_date": "2021-08",
-        "treatment_end_date": "2022-02",
-        "treatment_setting": "Adjuvant",
-        "treatment_intent": "Palliative",
-        "days_per_cycle": 5,
-        "number_of_cycles": 5,
+        "treatment_start_date": "2021-09",
+        "treatment_end_date": "2022-05",
+        "treatment_setting": "Not applicable",
+        "treatment_intent": "Curative",
+        "days_per_cycle": 2,
+        "number_of_cycles": 3,
         "response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
-        "response_to_treatment": "Complete response"
+        "response_to_treatment": "Minor response"
     },
     {
+        "submitter_treatment_id": "TREATMENT_3",
         "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
-        "submitter_treatment_id": "TREATMENT_9",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "treatment_type": [
-            "Ablation",
-            "Hormonal therapy"
+            "No treatment",
+            "Hormonal therapy",
+            "Other targeting molecular therapy"
         ],
         "is_primary_treatment": "Yes",
-        "treatment_start_date": "2021-01",
-        "treatment_end_date": "2022-08",
+        "treatment_start_date": "2021-03",
+        "treatment_end_date": "2022-10",
+        "treatment_setting": "Adjuvant",
+        "treatment_intent": "Palliative",
+        "days_per_cycle": 1,
+        "number_of_cycles": 4,
+        "response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
+        "response_to_treatment": "Immune partial response (iPR)"
+    },
+    {
+        "submitter_treatment_id": "TREATMENT_4",
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
+        "treatment_type": [
+            "Chemotherapy",
+            "Ablation"
+        ],
+        "is_primary_treatment": "Yes",
+        "treatment_start_date": "2021-06",
+        "treatment_end_date": "2022-05",
         "treatment_setting": "Not applicable",
+        "treatment_intent": "Curative",
+        "days_per_cycle": 7,
+        "number_of_cycles": 3,
+        "response_to_treatment_criteria_method": "iRECIST",
+        "response_to_treatment": "Progressive disease"
+    },
+    {
+        "submitter_treatment_id": "TREATMENT_5",
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
+        "treatment_type": [
+            "Immunotherapy"
+        ],
+        "is_primary_treatment": "No",
+        "treatment_start_date": "2021-10",
+        "treatment_end_date": "2022-04",
+        "treatment_setting": "Adjuvant",
+        "treatment_intent": "Curative",
+        "days_per_cycle": 2,
+        "number_of_cycles": 5,
+        "response_to_treatment_criteria_method": "iRECIST",
+        "response_to_treatment": "Complete remission with incomplete hematologic recovery (CRi)"
+    },
+    {
+        "submitter_treatment_id": "TREATMENT_6",
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
+        "treatment_type": [
+            "Radiation therapy",
+            "Ablation"
+        ],
+        "is_primary_treatment": "Unknown",
+        "treatment_start_date": "2021-03",
+        "treatment_end_date": "2022-09",
+        "treatment_setting": "Adjuvant",
         "treatment_intent": "Curative",
         "days_per_cycle": 6,
         "number_of_cycles": 3,
-        "response_to_treatment_criteria_method": "AML Response Criteria",
-        "response_to_treatment": "Partial remission"
+        "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
+        "response_to_treatment": "Immune stable disease (iSD)"
     },
     {
+        "submitter_treatment_id": "TREATMENT_7",
         "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
-        "submitter_treatment_id": "TREATMENT_10",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
         "treatment_type": [
+            "Chemotherapy",
+            "Ablation",
+            "Bone marrow transplant"
+        ],
+        "is_primary_treatment": "No",
+        "treatment_start_date": "2021-06",
+        "treatment_end_date": "2022-03",
+        "treatment_setting": "Not applicable",
+        "treatment_intent": "Curative",
+        "days_per_cycle": 3,
+        "number_of_cycles": 3,
+        "response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
+        "response_to_treatment": "Molecular relapse (after CR MRD-)"
+    },
+    {
+        "submitter_treatment_id": "TREATMENT_8",
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
+        "treatment_type": [
+            "Bone marrow transplant",
             "Ablation"
         ],
         "is_primary_treatment": "Yes",
         "treatment_start_date": "2021-03",
-        "treatment_end_date": "2022-08",
+        "treatment_end_date": "2022-10",
         "treatment_setting": "Not applicable",
         "treatment_intent": "Palliative",
-        "days_per_cycle": 4,
+        "days_per_cycle": 1,
         "number_of_cycles": 5,
-        "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "Partial remission"
+        "response_to_treatment_criteria_method": "AML Response Criteria",
+        "response_to_treatment": "Minor response"
     },
     {
+        "submitter_treatment_id": "TREATMENT_9",
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5",
-        "submitter_treatment_id": "TREATMENT_11",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
         "treatment_type": [
-            "No treatment",
-            "Photodynamic therapy"
+            "Radiation therapy",
+            "Photodynamic therapy",
+            "Endoscopic therapy"
         ],
         "is_primary_treatment": "Unknown",
-        "treatment_start_date": "2021-06",
-        "treatment_end_date": "2022-10",
-        "treatment_setting": "Neoadjuvant",
+        "treatment_start_date": "2021-07",
+        "treatment_end_date": "2022-07",
+        "treatment_setting": "Adjuvant",
         "treatment_intent": "Curative",
-        "days_per_cycle": 2,
-        "number_of_cycles": 3,
+        "days_per_cycle": 7,
+        "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "iRECIST",
         "response_to_treatment": "Complete remission without measurable residual disease (CR MRD-)"
     },
     {
+        "submitter_treatment_id": "TREATMENT_10",
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_2",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
+        "treatment_type": [
+            "No treatment"
+        ],
+        "is_primary_treatment": "No",
+        "treatment_start_date": "2021-12",
+        "treatment_end_date": "2022-08",
+        "treatment_setting": "Adjuvant",
+        "treatment_intent": "Curative",
+        "days_per_cycle": 3,
+        "number_of_cycles": 3,
+        "response_to_treatment_criteria_method": "iRECIST",
+        "response_to_treatment": "Minor response"
+    },
+    {
+        "submitter_treatment_id": "TREATMENT_11",
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_2",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5",
+        "treatment_type": [
+            "Other targeting molecular therapy",
+            "Photodynamic therapy",
+            "No treatment"
+        ],
+        "is_primary_treatment": "No",
+        "treatment_start_date": "2021-12",
+        "treatment_end_date": "2022-07",
+        "treatment_setting": "Not applicable",
+        "treatment_intent": "Curative",
+        "days_per_cycle": 4,
+        "number_of_cycles": 3,
+        "response_to_treatment_criteria_method": "iRECIST",
+        "response_to_treatment": "Immune partial response (iPR)"
+    },
+    {
+        "submitter_treatment_id": "TREATMENT_12",
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6",
-        "submitter_treatment_id": "TREATMENT_12",
+        "treatment_type": [
+            "Bone marrow transplant",
+            "Stem cell transplant"
+        ],
+        "is_primary_treatment": "No",
+        "treatment_start_date": "2021-10",
+        "treatment_end_date": "2022-10",
+        "treatment_setting": "Advanced/Metastatic",
+        "treatment_intent": "Palliative",
+        "days_per_cycle": 6,
+        "number_of_cycles": 4,
+        "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
+        "response_to_treatment": "Complete remission without measurable residual disease (CR MRD-)"
+    },
+    {
+        "submitter_treatment_id": "TREATMENT_13",
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_3",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7",
+        "treatment_type": [
+            "Photodynamic therapy"
+        ],
+        "is_primary_treatment": "Yes",
+        "treatment_start_date": "2021-09",
+        "treatment_end_date": "2022-05",
+        "treatment_setting": "Advanced/Metastatic",
+        "treatment_intent": "Curative",
+        "days_per_cycle": 3,
+        "number_of_cycles": 5,
+        "response_to_treatment_criteria_method": "RECIST 1.1",
+        "response_to_treatment": "Immune stable disease (iSD)"
+    },
+    {
+        "submitter_treatment_id": "TREATMENT_14",
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_3",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8",
+        "treatment_type": [
+            "Endoscopic therapy",
+            "Bone marrow transplant"
+        ],
+        "is_primary_treatment": "Yes",
+        "treatment_start_date": "2021-03",
+        "treatment_end_date": "2022-01",
+        "treatment_setting": "Advanced/Metastatic",
+        "treatment_intent": "Curative",
+        "days_per_cycle": 4,
+        "number_of_cycles": 4,
+        "response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
+        "response_to_treatment": "No evidence of disease (NED)"
+    },
+    {
+        "submitter_treatment_id": "TREATMENT_15",
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_4",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9",
+        "treatment_type": [
+            "Radiation therapy",
+            "No treatment"
+        ],
+        "is_primary_treatment": "Yes",
+        "treatment_start_date": "2021-06",
+        "treatment_end_date": "2022-03",
+        "treatment_setting": "Not applicable",
+        "treatment_intent": "Curative",
+        "days_per_cycle": 3,
+        "number_of_cycles": 5,
+        "response_to_treatment_criteria_method": "AML Response Criteria",
+        "response_to_treatment": "Physician assessed stable disease"
+    },
+    {
+        "submitter_treatment_id": "TREATMENT_16",
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_4",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10",
         "treatment_type": [
             "Bone marrow transplant",
             "Chemotherapy"
         ],
-        "is_primary_treatment": "Unknown",
-        "treatment_start_date": "2021-01",
-        "treatment_end_date": "2022-02",
-        "treatment_setting": "Not applicable",
+        "is_primary_treatment": "No",
+        "treatment_start_date": "2021-06",
+        "treatment_end_date": "2022-10",
+        "treatment_setting": "Adjuvant",
         "treatment_intent": "Curative",
         "days_per_cycle": 7,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "Stable disease"
+        "response_to_treatment": "Complete remission with incomplete hematologic recovery (CRi)"
     },
     {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_3",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7",
-        "submitter_treatment_id": "TREATMENT_13",
-        "treatment_type": [
-            "Other targeting molecular therapy",
-            "Immunotherapy",
-            "Surgery"
-        ],
-        "is_primary_treatment": "Yes",
-        "treatment_start_date": "2021-04",
-        "treatment_end_date": "2022-09",
-        "treatment_setting": "Neoadjuvant",
-        "treatment_intent": "Palliative",
-        "days_per_cycle": 2,
-        "number_of_cycles": 4,
-        "response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
-        "response_to_treatment": "Immune confirmed progressive disease (iCPD)"
-    },
-    {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_3",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8",
-        "submitter_treatment_id": "TREATMENT_14",
-        "treatment_type": [
-            "Other targeting molecular therapy",
-            "Chemotherapy",
-            "Radiation therapy"
-        ],
-        "is_primary_treatment": "No",
-        "treatment_start_date": "2021-12",
-        "treatment_end_date": "2022-09",
-        "treatment_setting": "Not applicable",
-        "treatment_intent": "Curative",
-        "days_per_cycle": 1,
-        "number_of_cycles": 5,
-        "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "Minor response"
-    },
-    {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_4",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9",
-        "submitter_treatment_id": "TREATMENT_15",
-        "treatment_type": [
-            "Chemotherapy",
-            "Photodynamic therapy",
-            "Other targeting molecular therapy"
-        ],
-        "is_primary_treatment": "No",
-        "treatment_start_date": "2021-05",
-        "treatment_end_date": "2022-06",
-        "treatment_setting": "Not applicable",
-        "treatment_intent": "Curative",
-        "days_per_cycle": 2,
-        "number_of_cycles": 3,
-        "response_to_treatment_criteria_method": "RECIST 1.1",
-        "response_to_treatment": "Complete remission without measurable residual disease (CR MRD-)"
-    },
-    {
-        "program_id": "PROGRAM_1",
-        "submitter_donor_id": "DONOR_4",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10",
-        "submitter_treatment_id": "TREATMENT_16",
-        "treatment_type": [
-            "Surgery",
-            "Radiation therapy",
-            "Ablation"
-        ],
-        "is_primary_treatment": "No",
-        "treatment_start_date": "2021-04",
-        "treatment_end_date": "2022-07",
-        "treatment_setting": "Advanced/Metastatic",
-        "treatment_intent": "Palliative",
-        "days_per_cycle": 1,
-        "number_of_cycles": 5,
-        "response_to_treatment_criteria_method": "RECIST 1.1",
-        "response_to_treatment": "Immune confirmed progressive disease (iCPD)"
-    },
-    {
+        "submitter_treatment_id": "TREATMENT_17",
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_5",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11",
-        "submitter_treatment_id": "TREATMENT_17",
         "treatment_type": [
-            "Chemotherapy"
+            "Other targeting molecular therapy"
         ],
-        "is_primary_treatment": "Unknown",
-        "treatment_start_date": "2021-07",
-        "treatment_end_date": "2022-11",
-        "treatment_setting": "Advanced/Metastatic",
-        "treatment_intent": "Palliative",
-        "days_per_cycle": 2,
+        "is_primary_treatment": "Yes",
+        "treatment_start_date": "2021-09",
+        "treatment_end_date": "2022-06",
+        "treatment_setting": "Not applicable",
+        "treatment_intent": "Curative",
+        "days_per_cycle": 3,
         "number_of_cycles": 4,
-        "response_to_treatment_criteria_method": "iRECIST",
-        "response_to_treatment": "Partial remission"
+        "response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
+        "response_to_treatment": "Immune stable disease (iSD)"
     },
     {
+        "submitter_treatment_id": "TREATMENT_18",
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_6",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12",
-        "submitter_treatment_id": "TREATMENT_18",
         "treatment_type": [
-            "Hormonal therapy",
-            "Ablation"
+            "Bone marrow transplant"
         ],
-        "is_primary_treatment": "Unknown",
-        "treatment_start_date": "2021-06",
-        "treatment_end_date": "2022-01",
-        "treatment_setting": "Not applicable",
-        "treatment_intent": "Curative",
-        "days_per_cycle": 7,
+        "is_primary_treatment": "No",
+        "treatment_start_date": "2021-02",
+        "treatment_end_date": "2022-06",
+        "treatment_setting": "Adjuvant",
+        "treatment_intent": "Palliative",
+        "days_per_cycle": 1,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
-        "response_to_treatment": "Immune complete response (iCR)"
+        "response_to_treatment": "Partial response"
     },
     {
+        "submitter_treatment_id": "TREATMENT_19",
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_7",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13",
-        "submitter_treatment_id": "TREATMENT_19",
         "treatment_type": [
-            "Surgery",
-            "No treatment",
-            "Radiation therapy"
+            "Bone marrow transplant"
         ],
-        "is_primary_treatment": "Unknown",
-        "treatment_start_date": "2021-08",
-        "treatment_end_date": "2022-05",
+        "is_primary_treatment": "No",
+        "treatment_start_date": "2021-04",
+        "treatment_end_date": "2022-01",
         "treatment_setting": "Advanced/Metastatic",
         "treatment_intent": "Curative",
         "days_per_cycle": 1,
-        "number_of_cycles": 3,
+        "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
         "response_to_treatment": "Partial response"
     },
     {
+        "submitter_treatment_id": "TREATMENT_20",
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_8",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14",
-        "submitter_treatment_id": "TREATMENT_20",
         "treatment_type": [
-            "Radiation therapy",
-            "Other targeting molecular therapy"
+            "Chemotherapy",
+            "Photodynamic therapy",
+            "Endoscopic therapy"
         ],
-        "is_primary_treatment": "Yes",
-        "treatment_start_date": "2021-12",
+        "is_primary_treatment": "Unknown",
+        "treatment_start_date": "2021-10",
         "treatment_end_date": "2022-04",
-        "treatment_setting": "Advanced/Metastatic",
+        "treatment_setting": "Adjuvant",
         "treatment_intent": "Palliative",
         "days_per_cycle": 4,
-        "number_of_cycles": 4,
-        "response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
-        "response_to_treatment": "Primary refractory disease"
+        "number_of_cycles": 5,
+        "response_to_treatment_criteria_method": "iRECIST",
+        "response_to_treatment": "Molecular relapse (after CR MRD-)"
     },
     {
+        "submitter_treatment_id": "TREATMENT_21",
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_9",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15",
-        "submitter_treatment_id": "TREATMENT_21",
         "treatment_type": [
-            "Photodynamic therapy"
+            "Other targeting molecular therapy"
         ],
-        "is_primary_treatment": "Unknown",
-        "treatment_start_date": "2021-04",
-        "treatment_end_date": "2022-01",
-        "treatment_setting": "Not applicable",
-        "treatment_intent": "Palliative",
-        "days_per_cycle": 3,
+        "is_primary_treatment": "No",
+        "treatment_start_date": "2021-11",
+        "treatment_end_date": "2022-08",
+        "treatment_setting": "Neoadjuvant",
+        "treatment_intent": "Curative",
+        "days_per_cycle": 5,
         "number_of_cycles": 3,
-        "response_to_treatment_criteria_method": "AML Response Criteria",
-        "response_to_treatment": "Stable disease"
+        "response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
+        "response_to_treatment": "Molecular relapse (after CR MRD-)"
     },
     {
+        "submitter_treatment_id": "TREATMENT_22",
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_10",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16",
-        "submitter_treatment_id": "TREATMENT_22",
         "treatment_type": [
-            "Stem cell transplant"
+            "Other targeting molecular therapy",
+            "Immunotherapy",
+            "No treatment"
         ],
-        "is_primary_treatment": "Yes",
-        "treatment_start_date": "2021-08",
-        "treatment_end_date": "2022-10",
-        "treatment_setting": "Neoadjuvant",
+        "is_primary_treatment": "No",
+        "treatment_start_date": "2021-06",
+        "treatment_end_date": "2022-07",
+        "treatment_setting": "Advanced/Metastatic",
         "treatment_intent": "Curative",
-        "days_per_cycle": 7,
+        "days_per_cycle": 4,
         "number_of_cycles": 3,
         "response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
-        "response_to_treatment": "Complete remission without measurable residual disease (CR MRD-)"
+        "response_to_treatment": "No evidence of disease (NED)"
     }
 ]

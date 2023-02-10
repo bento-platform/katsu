@@ -1,6 +1,8 @@
 import json
 import os
 
+from django.core.management import call_command
+
 
 def convert_to_fixtures():
     """
@@ -57,6 +59,8 @@ def set_foreign_keys():
     os.makedirs(synthetic_data_folder, exist_ok=True)
 
     file_names = {
+        "programs": "Program.json",
+        "donors": "Donor.json",
         "primary_diagnoses": "PrimaryDiagnosis.json",
         "specimens": "Specimen.json",
         "sample_registrations": "SampleRegistration.json",

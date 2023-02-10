@@ -6,9 +6,14 @@
             "program_id": "PROGRAM_1",
             "is_deceased": false,
             "cause_of_death": "Died of cancer",
-            "date_of_birth": "1978-08-30",
+            "date_of_birth": "2000-06-23",
             "date_of_death": "",
-            "primary_site": "Floor of mouth"
+            "primary_site": [
+                "Palate",
+                "Rectosigmoid junction",
+                "Tonsil",
+                "Other and unspecified parts of mouth"
+            ]
         }
     },
     {
@@ -17,10 +22,14 @@
             "submitter_donor_id": "DONOR_2",
             "program_id": "PROGRAM_1",
             "is_deceased": false,
-            "cause_of_death": "Unknown",
-            "date_of_birth": "1988-03-08",
+            "cause_of_death": "Died of cancer",
+            "date_of_birth": "2008-05-11",
             "date_of_death": "",
-            "primary_site": "Oropharynx"
+            "primary_site": [
+                "Gum",
+                "Cervix uteri",
+                "Tonsil"
+            ]
         }
     },
     {
@@ -28,11 +37,17 @@
         "fields": {
             "submitter_donor_id": "DONOR_3",
             "program_id": "PROGRAM_1",
-            "is_deceased": false,
-            "cause_of_death": "Died of other reasons",
-            "date_of_birth": "1966-08-09",
-            "date_of_death": "",
-            "primary_site": "Bones, joints and articular cartilage of limbs"
+            "is_deceased": true,
+            "cause_of_death": "Unknown",
+            "date_of_birth": "1993-08-20",
+            "date_of_death": "2000-08",
+            "primary_site": [
+                "Parotid gland",
+                "Gum",
+                "Stomach",
+                "Gallbladder",
+                "Bladder"
+            ]
         }
     },
     {
@@ -40,11 +55,16 @@
         "fields": {
             "submitter_donor_id": "DONOR_4",
             "program_id": "PROGRAM_1",
-            "is_deceased": false,
+            "is_deceased": true,
             "cause_of_death": "Died of other reasons",
-            "date_of_birth": "2008-03-16",
-            "date_of_death": "",
-            "primary_site": "Meninges"
+            "date_of_birth": "2001-11-02",
+            "date_of_death": "2005-11",
+            "primary_site": [
+                "Tonsil",
+                "Prostate gland",
+                "Other and ill-defined sites within respiratory system and intrathoracic organs",
+                "Retroperitoneum and peritoneum"
+            ]
         }
     },
     {
@@ -52,23 +72,30 @@
         "fields": {
             "submitter_donor_id": "DONOR_5",
             "program_id": "PROGRAM_1",
-            "is_deceased": false,
-            "cause_of_death": "Died of cancer",
-            "date_of_birth": "1987-06-23",
-            "date_of_death": "",
-            "primary_site": "Thyroid gland"
+            "is_deceased": true,
+            "cause_of_death": "Died of other reasons",
+            "date_of_birth": "1965-07-19",
+            "date_of_death": "2023-07",
+            "primary_site": [
+                "Renal pelvis",
+                "Other and ill-defined sites within respiratory system and intrathoracic organs"
+            ]
         }
     },
     {
         "model": "mohpackets.donor",
         "fields": {
             "submitter_donor_id": "DONOR_6",
-            "program_id": "PROGRAM_2",
-            "is_deceased": false,
-            "cause_of_death": "Died of other reasons",
-            "date_of_birth": "2002-04-28",
-            "date_of_death": "",
-            "primary_site": "Floor of mouth"
+            "program_id": "PROGRAM_1",
+            "is_deceased": true,
+            "cause_of_death": "Died of cancer",
+            "date_of_birth": "1995-04-15",
+            "date_of_death": "1997-04",
+            "primary_site": [
+                "Small intestine",
+                "Bones, joints and articular cartilage of limbs",
+                "Nasal cavity and middle ear"
+            ]
         }
     },
     {
@@ -76,11 +103,17 @@
         "fields": {
             "submitter_donor_id": "DONOR_7",
             "program_id": "PROGRAM_2",
-            "is_deceased": false,
-            "cause_of_death": "Unknown",
-            "date_of_birth": "2005-04-05",
-            "date_of_death": "",
-            "primary_site": "Liver and intrahepatic bile ducts"
+            "is_deceased": true,
+            "cause_of_death": "Died of cancer",
+            "date_of_birth": "1991-04-10",
+            "date_of_death": "2006-04",
+            "primary_site": [
+                "Hypopharynx",
+                "Heart, mediastinum, and pleura",
+                "Anus and anal canal",
+                "Ureter",
+                "Gum"
+            ]
         }
     },
     {
@@ -88,11 +121,15 @@
         "fields": {
             "submitter_donor_id": "DONOR_8",
             "program_id": "PROGRAM_2",
-            "is_deceased": true,
-            "cause_of_death": "Died of cancer",
-            "date_of_birth": "1965-09-20",
-            "date_of_death": "2009-09",
-            "primary_site": "Stomach"
+            "is_deceased": false,
+            "cause_of_death": "Died of other reasons",
+            "date_of_birth": "1972-11-24",
+            "date_of_death": "",
+            "primary_site": [
+                "Peripheral nerves and autonomic nervous system",
+                "Other endocrine glands and related structures",
+                "Meninges"
+            ]
         }
     },
     {
@@ -101,10 +138,15 @@
             "submitter_donor_id": "DONOR_9",
             "program_id": "PROGRAM_2",
             "is_deceased": true,
-            "cause_of_death": "Died of other reasons",
-            "date_of_birth": "1997-05-13",
-            "date_of_death": "2021-05",
-            "primary_site": "Breast"
+            "cause_of_death": "Unknown",
+            "date_of_birth": "2005-07-08",
+            "date_of_death": "2008-07",
+            "primary_site": [
+                "Anus and anal canal",
+                "Other and unspecified urinary organs",
+                "Ureter",
+                "Lymph nodes"
+            ]
         }
     },
     {
@@ -112,11 +154,16 @@
         "fields": {
             "submitter_donor_id": "DONOR_10",
             "program_id": "PROGRAM_2",
-            "is_deceased": false,
-            "cause_of_death": "Unknown",
-            "date_of_birth": "1982-06-07",
-            "date_of_death": "",
-            "primary_site": "Ureter"
+            "is_deceased": true,
+            "cause_of_death": "Died of other reasons",
+            "date_of_birth": "1995-03-18",
+            "date_of_death": "2003-03",
+            "primary_site": [
+                "Oropharynx",
+                "Parotid gland",
+                "Other and unspecified parts of tongue",
+                "Other and unspecified parts of biliary tract"
+            ]
         }
     }
 ]

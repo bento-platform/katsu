@@ -4,15 +4,14 @@
         "fields": {
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+            "submitter_specimen_id": "SPECIMEN_1",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "submitter_treatment_id": "TREATMENT_1",
             "submitter_follow_up_id": "FOLLOW_UP_1",
             "test_interval": 8,
-            "psa_level": 276,
-            "ca125": 114,
-            "cea": 14,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "psa_level": 230,
+            "ca125": 29,
+            "cea": 11
         }
     },
     {
@@ -20,15 +19,14 @@
         "fields": {
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+            "submitter_specimen_id": "SPECIMEN_1",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "submitter_treatment_id": "TREATMENT_1",
             "submitter_follow_up_id": "FOLLOW_UP_1",
-            "test_interval": 5,
-            "psa_level": 273,
-            "ca125": 46,
-            "cea": 5,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "test_interval": 3,
+            "psa_level": 244,
+            "ca125": 103,
+            "cea": 10
         }
     },
     {
@@ -36,15 +34,14 @@
         "fields": {
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+            "submitter_specimen_id": "SPECIMEN_1",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "submitter_treatment_id": "TREATMENT_1",
             "submitter_follow_up_id": "FOLLOW_UP_1",
-            "test_interval": 5,
-            "psa_level": 225,
-            "ca125": 52,
-            "cea": 9,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "test_interval": 8,
+            "psa_level": 378,
+            "ca125": 85,
+            "cea": 12
         }
     },
     {
@@ -52,15 +49,14 @@
         "fields": {
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+            "submitter_specimen_id": null,
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "submitter_treatment_id": "TREATMENT_1",
             "submitter_follow_up_id": "FOLLOW_UP_2",
-            "test_interval": 5,
-            "psa_level": 352,
-            "ca125": 117,
-            "cea": 14,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "test_interval": 8,
+            "psa_level": 252,
+            "ca125": 27,
+            "cea": 5
         }
     },
     {
@@ -68,15 +64,14 @@
         "fields": {
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+            "submitter_specimen_id": null,
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "submitter_treatment_id": "TREATMENT_1",
             "submitter_follow_up_id": "FOLLOW_UP_2",
-            "test_interval": 5,
-            "psa_level": 319,
-            "ca125": 59,
-            "cea": 9,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "test_interval": 6,
+            "psa_level": 397,
+            "ca125": 41,
+            "cea": 12
         }
     },
     {
@@ -84,15 +79,29 @@
         "fields": {
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+            "submitter_specimen_id": null,
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "submitter_treatment_id": "TREATMENT_1",
             "submitter_follow_up_id": "FOLLOW_UP_2",
+            "test_interval": 8,
+            "psa_level": 328,
+            "ca125": 116,
+            "cea": 10
+        }
+    },
+    {
+        "model": "mohpackets.biomarker",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_specimen_id": "SPECIMEN_1",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
+            "submitter_treatment_id": "TREATMENT_1",
+            "submitter_follow_up_id": "FOLLOW_UP_3",
             "test_interval": 7,
-            "psa_level": 248,
-            "ca125": 72,
-            "cea": 8,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "psa_level": 347,
+            "ca125": 41,
+            "cea": 6
         }
     },
     {
@@ -100,15 +109,14 @@
         "fields": {
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+            "submitter_specimen_id": "SPECIMEN_1",
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "submitter_treatment_id": "TREATMENT_1",
             "submitter_follow_up_id": "FOLLOW_UP_3",
             "test_interval": 3,
-            "psa_level": 239,
-            "ca125": 39,
-            "cea": 8,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "psa_level": 254,
+            "ca125": 77,
+            "cea": 11
         }
     },
     {
@@ -116,31 +124,14 @@
         "fields": {
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
-            "submitter_treatment_id": "TREATMENT_1",
-            "submitter_follow_up_id": "FOLLOW_UP_3",
-            "test_interval": 4,
-            "psa_level": 210,
-            "ca125": 116,
-            "cea": 6,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
-        }
-    },
-    {
-        "model": "mohpackets.biomarker",
-        "fields": {
-            "program_id": "PROGRAM_1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+            "submitter_specimen_id": null,
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "submitter_treatment_id": "TREATMENT_2",
             "submitter_follow_up_id": "FOLLOW_UP_4",
             "test_interval": 5,
-            "psa_level": 348,
-            "ca125": 118,
-            "cea": 5,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "psa_level": 345,
+            "ca125": 89,
+            "cea": 11
         }
     },
     {
@@ -148,15 +139,14 @@
         "fields": {
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+            "submitter_specimen_id": null,
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "submitter_treatment_id": "TREATMENT_2",
             "submitter_follow_up_id": "FOLLOW_UP_4",
-            "test_interval": 6,
-            "psa_level": 396,
-            "ca125": 79,
-            "cea": 9,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "test_interval": 8,
+            "psa_level": 385,
+            "ca125": 40,
+            "cea": 13
         }
     },
     {
@@ -164,15 +154,14 @@
         "fields": {
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+            "submitter_specimen_id": null,
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "submitter_treatment_id": "TREATMENT_2",
             "submitter_follow_up_id": "FOLLOW_UP_5",
-            "test_interval": 4,
-            "psa_level": 240,
-            "ca125": 72,
-            "cea": 9,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "test_interval": 3,
+            "psa_level": 312,
+            "ca125": 85,
+            "cea": 11
         }
     },
     {
@@ -180,15 +169,14 @@
         "fields": {
             "program_id": "PROGRAM_1",
             "submitter_donor_id": "DONOR_1",
-            "submitter_specimen_id": "SPECIMEN_{REPLACE_ME}",
-            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+            "submitter_specimen_id": null,
+            "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "submitter_treatment_id": "TREATMENT_2",
             "submitter_follow_up_id": "FOLLOW_UP_6",
-            "test_interval": 3,
-            "psa_level": 384,
-            "ca125": 122,
-            "cea": 12,
-            "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+            "test_interval": 5,
+            "psa_level": 294,
+            "ca125": 108,
+            "cea": 4
         }
     }
 ]
