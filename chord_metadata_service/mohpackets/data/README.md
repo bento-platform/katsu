@@ -10,9 +10,9 @@
 Use the `loaddata` command:
 
 ```bash
-katsu_path="chord_metadata_service/mohpackets/data/small_dataset/fixtures"
-fixtures=(Program Donor PrimaryDiagnosis Specimen SampleRegistration Treatment Chemotherapy HormoneTherapy Radiation Immunotherapy Surgery FollowUp Biomarker Comorbidity)
-for fixture in "${fixtures[@]}"; do python manage.py loaddata $katsu_path/$fixture.json; done
+fixtures_path="chord_metadata_service/mohpackets/data/small_dataset/fixtures"
+fixtures_name=(Program Donor PrimaryDiagnosis Specimen SampleRegistration Treatment Chemotherapy HormoneTherapy Radiation Immunotherapy Surgery FollowUp Biomarker Comorbidity)
+for fixture in "${fixtures_name[@]}"; do python manage.py loaddata $fixtures_path/$fixture.json; done
 ```
 
 ## Clean up data
