@@ -21,8 +21,9 @@
     {
       "name": "name",
       "null_percentage": 0,
-      "type": "University",
-      "formula": null
+      "type": "Template",
+      "value": null,
+      "formula": "[\"BIO-CAN\",\n\"INSPIRE\",\n\"POG\",\n\"IO-ALINES\",\n\"COMPASS\"][random(0,4)]\n"
     }
   ]
 }

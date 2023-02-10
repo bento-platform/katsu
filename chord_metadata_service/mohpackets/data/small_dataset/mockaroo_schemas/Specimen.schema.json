@@ -1,6 +1,6 @@
 {
   "id": 469109,
-  "num_rows": 10,
+  "num_rows": 22,
   "file_format": "json",
   "name": "Specimen",
   "array": true,
@@ -8,26 +8,29 @@
     {
       "name": "program_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "if this <= 5 \nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
+      "type": "Template",
+      "value": "PROGRAM_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"DONOR_\" + this.to_s"
+      "type": "Template",
+      "value": "DONOR_{REPLACE_ME}",
+      "formula": ""
+    },
+    {
+      "name": "submitter_primary_diagnosis_id",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_specimen_id",
       "null_percentage": 0,
       "type": "Row Number",
       "formula": "\"SPECIMEN_\" + this.to_s"
-    },
-    {
-      "name": "submitter_primary_diagnosis_id",
-      "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"PRIMARY_DIAGNOSIS_\" + this.to_s"
     },
     {
       "name": "pathological_tumour_staging_system",
@@ -85,7 +88,7 @@
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\"C04.9\",\n\"C02.9\",\n\"C02.1\",\n\"C06.2\",\n\"C02.1\",\n\"C02.0\",\n\"C04.0\",\n\"C02.1\",\n\"C02.1\",\n\"C02.1\",\n\"C02.1\",\n\"C03.9\",\n\"C02.2\",\n\"C06.9\",\n\"C04.9\",\n\"C02.1\",\n\"C02.9\",\n\"C04.0\",\n\"C05.1\",\n\"C03.1\"][random(0,19)]\n"
+      "formula": "[\"8240/1\",\n\"8973/2\",\n\"8962/1\",\n\"8479/2\",\n\"8830/6\",\n\"8620/9\",\n\"8971/1\",\n\"8980/9\",\n\"8063/1\",\n\"8209/3\",\n\"8289/9\",\n\"8250/3\",\n\"8970/3\",\n\"8124/9\",\n\"8980/2\",\n\"8820/3\",\n\"8268/6\",\n\"8823/1\",\n\"8630/9\"][random(0,19)]\n"
     },
     {
       "name": "specimen_anatomic_location",

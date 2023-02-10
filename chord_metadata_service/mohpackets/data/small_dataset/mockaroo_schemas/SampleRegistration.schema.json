@@ -1,6 +1,6 @@
 {
   "id": 469108,
-  "num_rows": 10,
+  "num_rows": 28,
   "file_format": "json",
   "name": "SampleRegistration",
   "array": true,
@@ -8,26 +8,29 @@
     {
       "name": "program_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "if this <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
+      "type": "Template",
+      "value": "PROGRAM_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"DONOR_\" + this.to_s"
+      "type": "Template",
+      "value": "DONOR_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_specimen_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"SPECIMEN_\" + this.to_s"
+      "type": "Template",
+      "value": "SPECIMEN_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_sample_id",
       "null_percentage": 0,
       "type": "Row Number",
-      "formula": "\"SAMPLE_REG_:\" + this.to_s"
+      "formula": "\"SAMPLE_REGISTRATION_\" + this.to_s"
     },
     {
       "name": "gender",

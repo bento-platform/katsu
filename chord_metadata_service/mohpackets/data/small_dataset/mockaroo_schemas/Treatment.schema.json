@@ -1,6 +1,6 @@
 {
   "id": 469111,
-  "num_rows": 10,
+  "num_rows": 22,
   "file_format": "json",
   "name": "Treatment",
   "array": true,
@@ -8,14 +8,23 @@
     {
       "name": "program_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "if this <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
+      "type": "Template",
+      "value": "PROGRAM_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"DONOR_\" + this.to_s"
+      "type": "Template",
+      "value": "DONOR_{REPLACE_ME}",
+      "formula": ""
+    },
+    {
+      "name": "submitter_primary_diagnosis_id",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_treatment_id",
@@ -24,17 +33,11 @@
       "formula": "\"TREATMENT_\" + this.to_s"
     },
     {
-      "name": "submitter_primary_diagnosis_id",
-      "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"PRIMARY_DIAGNOSIS_\" + this.to_s"
-    },
-    {
       "name": "treatment_type",
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\"Ablation\",\n\"Bone marrow transplant\",\n\"Chemotherapy\",\n\"Endoscopic therapy\",\n\"Hormonal therapy\",\n\"Immunotherapy\",\n\"No treatment\",\n\"Other targeting molecular therapy\",\n\"Photodynamic therapy\",\n\"Radiation therapy\",\n\"Stem cell transplant\",\n\"Surgery\"][random(0,11)]"
+      "formula": "[\"Ablation\",\n\"Bone marrow transplant\",\n\"Chemotherapy\",\n\"Endoscopic therapy\",\n\"Hormonal therapy\",\n\"Immunotherapy\",\n\"No treatment\",\n\"Other targeting molecular therapy\",\n\"Photodynamic therapy\",\n\"Radiation therapy\",\n\"Stem cell transplant\",\n\"Surgery\"].sample(random(1,3))"
     },
     {
       "name": "is_primary_treatment",
@@ -105,7 +108,7 @@
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\"Complete response\",\n\"Disease progression\",\n\"NED\",\n\"Partial response\",\n\"Stable disease\"][random(0,4)]"
+      "formula": "[\n\"Complete response\",\n    \"Partial response\",\n    \"Progressive disease\",\n    \"Stable disease\",\n    \"Immune complete response (iCR)\",\n    \"Immune partial response (iPR)\",\n    \"Immune uncomfirmed progressive disease (iUPD)\",\n    \"Immune confirmed progressive disease (iCPD)\",\n    \"Immune stable disease (iSD)\",\n    \"Complete remission\",\n    \"Partial remission\",\n    \"Minor response\",\n    \"Complete remission without measurable residual disease (CR MRD-)\",\n    \"Complete remission with incomplete hematologic recovery (CRi)\",\n    \"Morphologic leukemia-free state\",\n    \"Primary refractory disease\",\n    \"Hematologic relapse (after CR MRD-, CR, CRi)\",\n    \"Molecular relapse (after CR MRD-)\",\n    \"Physician assessed complete response\",\n    \"Physician assessed partial response\",\n    \"Physician assessed stable disease\",\n    \"No evidence of disease (NED)\"\n][random(0,21)]"
     }
   ]
 }

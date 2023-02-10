@@ -1,6 +1,6 @@
 {
   "id": 469099,
-  "num_rows": 10,
+  "num_rows": 12,
   "file_format": "json",
   "name": "Biomarker",
   "array": true,
@@ -8,38 +8,44 @@
     {
       "name": "program_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "if this <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
+      "type": "Template",
+      "value": "PROGRAM_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"DONOR_\" + this.to_s\n"
+      "type": "Template",
+      "value": "DONOR_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_specimen_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"SPECIMEN_\" + this.to_s\n"
+      "type": "Template",
+      "value": "SPECIMEN_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_primary_diagnosis_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"PRIMARY_DIAGNOSIS_\" + this.to_s"
+      "type": "Template",
+      "value": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_treatment_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"TREATMENT_\" + this.to_s"
+      "type": "Template",
+      "value": "TREATMENT_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_follow_up_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"FOLLOW_UP\" + this.to_s"
+      "type": "Template",
+      "value": "FOLLOW_UP_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "test_interval",

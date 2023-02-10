@@ -1,6 +1,6 @@
 {
   "id": 469110,
-  "num_rows": 2,
+  "num_rows": 5,
   "file_format": "json",
   "name": "Surgery",
   "array": true,
@@ -8,26 +8,30 @@
     {
       "name": "program_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "if this + 8 <= 5\nthen \"PROGRAM_1\"\nelse \"PROGRAM_2\" end"
+      "type": "Template",
+      "value": "PROGRAM_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"DONOR_\" + (this + 8).to_s"
+      "type": "Template",
+      "value": "DONOR_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_specimen_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"SPECIMEN_\" + (this + 8).to_s"
+      "type": "Template",
+      "value": "SPECIMEN_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "submitter_treatment_id",
       "null_percentage": 0,
-      "type": "Row Number",
-      "formula": "\"TREATMENT_\" + (this + 8).to_s"
+      "type": "Template",
+      "value": "TREATMENT_{REPLACE_ME}",
+      "formula": ""
     },
     {
       "name": "surgery_type",
@@ -41,7 +45,7 @@
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\"Chest wall\", \n\"Entire esophagus\", \n\"Stomach\", \n\"Small intestinal\", \n\"Colon\", \n\"Rectum\",\n\"Anal structure\", \t\n\"Liver\",\n\"Biliary tract\", \n\"Gallbladder\",\n\"Pancreas\",  \t\n\"Abdomen\"][random(0,11)]"
+      "formula": "[\"C01\", \n  \"C02\", \n  \"C03\", \n  \"C04\", \n  \"C05\", \n  \"C06\", \n  \"C07\", \n  \"C08\", \n  \"C09\", \n  \"C10\",\n\"C11\", \n  \"C12\", \n  \"C13\", \n  \"C14\", \n  \"C15\", \n  \"C16\", \n  \"C17\", \n  \"C18\", \n  \"C19\", \n  \"C20\"][random(0,19)]"
     },
     {
       "name": "surgery_location",
@@ -90,14 +94,14 @@
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\"Circumferential resection margin\",\n\"Common bile duct margin\",\n\"Distal margin\",\n\"Not applicable\",\n\"Proximal margin\",\n\"Unknown\"][random(0,5)]\n"
+      "formula": "[\"Circumferential resection margin\",\n\"Common bile duct margin\",\n\"Distal margin\",\n\"Not applicable\",\n\"Proximal margin\",\n\"Unknown\"].sample(random(0,2))\n"
     },
     {
       "name": "margin_types_not_involved",
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\"Circumferential resection margin\",\n\"Common bile duct margin\",\n\"Distal margin\",\n\"Not applicable\",\n\"Proximal margin\",\n\"Unknown\"][random(0,5)]\n"
+      "formula": "[\"Circumferential resection margin\",\n\"Common bile duct margin\",\n\"Distal margin\",\n\"Not applicable\",\n\"Proximal margin\",\n\"Unknown\"].sample(random(0,2))\n"
     },
     {
       "name": "lymphovascular_invasion",
@@ -111,7 +115,7 @@
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\"Circumferential resection margin\",\n\"Common bile duct margin\",\n\"Distal margin\",\n\"Not applicable\",\n\"Proximal margin\",\n\"Unknown\"][random(0,5)]\n"
+      "formula": "[\"Circumferential resection margin\",\n\"Common bile duct margin\",\n\"Distal margin\",\n\"Not applicable\",\n\"Proximal margin\",\n\"Unknown\"].sample(random(0,2))\n"
     },
     {
       "name": "perineural_invasion",
