@@ -220,7 +220,7 @@ PHENOPACKET_GESTATIONAL_AGE = tag_ids_and_describe({
         "days": base_type(SCHEMA_TYPES.INTEGER),
     },
     "required": ["weeks"]
-}, {})  # TODO: description
+}, descriptions.GESTATIONAL_AGE)  # TODO: description
 
 PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -236,7 +236,7 @@ PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
         named_one_of("interval", TIME_INTERVAL)
     ],
     "required": ["oneOf"]
-}, {})  # TODO: description
+}, descriptions.TIME_ELEMENT)  # TODO: description
 
 PHENOPACKET_PROCEDURE_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -630,12 +630,26 @@ PHENOPACKET_GENOMIC_INTERPRETATION = tag_ids_and_describe({
         "subject_or_biosample_id": base_type(SCHEMA_TYPES.STRING),
         "interpretation_status": enum_of(["UNKNOWN_STATUS", "REJECTED", "CANDIDATE", "CONTRIBUTORY", "CAUSATIVE"]),
         "call": {
+            "type": "object",
             "oneOf": [GENE_DESCRIPTOR, PHENOPACKET_VARIANT_INTERPRETATION]
         }
     },
     "required": ["subject_or_biosample_id", "interpretation_status", "call"]
-}, {})
+}, descriptions.GENOMIC_INTERPRETATION)
 
+
+PHENOPACKET_DIAGNOSIS_SCHEMA = tag_ids_and_describe({
+    "$schema": DRAFT_07,
+    "$id": "katsu:phenopackets:diagnosis",
+    "title": "Phenopacket diagnosis schema",
+    "description": "Refers to a disease and its genomic interpretations",
+    "type": "object",
+    "properties": {
+        "disease": ONTOLOGY_CLASS,
+        "genomic_interpretations": array_of(PHENOPACKET_GENOMIC_INTERPRETATION)
+    },
+    "required": ["disease"]
+}, descriptions=descriptions.DIAGNOSIS)
 
 PHENOPACKET_INTERPRETATION_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,

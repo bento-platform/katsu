@@ -3,9 +3,11 @@ from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.search_schemas import RESOURCE_SEARCH_SCHEMA
 from chord_metadata_service.restapi.schema_utils import (
     merge_schema_dictionaries,
+    search_db_fk,
     search_db_pk,
     search_optional_eq,
     search_optional_str,
+    search_table_ref,
     tag_schema_with_search_properties,
 )
 from chord_metadata_service.restapi.search_schemas import ONTOLOGY_SEARCH_SCHEMA
@@ -331,11 +333,39 @@ DISEASE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DI
     }
 })
 
+GENOMIC_INTERPRETATION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENOMIC_INTERPRETATION, {
+    "properties": {
+        "id": search_table_ref(models.GenomicInterpretation),
+        "subject_or_biosample_id": search_optional_str(0),
+        "interpretation_status": search_optional_str(0),
+        "call": {}
+    },
+    "search": search_table_ref(models.GenomicInterpretation)
+})
+
+DIAGNOSIS_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DIAGNOSIS_SCHEMA, {
+    "properties": {
+        "id": search_db_pk(models.Diagnosis),
+        "disease": ONTOLOGY_SEARCH_SCHEMA,
+        "genomic_interpretations": merge_schema_dictionaries(
+            GENOMIC_INTERPRETATION_SEARCH_SCHEMA,
+            search_db_fk("MANY_TO_ONE", models.Diagnosis, "genomic_interpretations")
+        ),
+    },
+    "search": search_table_ref(models.Diagnosis)
+})
+
 INTERPRETATION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_INTERPRETATION_SCHEMA, {
     "properties": {
         "id": search_db_pk(models.Interpretation),
+        "progress_status": search_optional_str(0),
+        "diagnosis": merge_schema_dictionaries(
+            DIAGNOSIS_SEARCH_SCHEMA,
+            search_db_fk("MANY_TO_ONE", models.Interpretation, "diagnosis")
+        ),
+        "summary": search_optional_str(0)
     },
-    "search": {}
+    "search": search_table_ref(models.Interpretation)
 })
 # noinspection PyProtectedMember
 PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_SCHEMA, {

@@ -436,9 +436,79 @@ PHENOPACKET = {
     }
 }
 
-TIME_ELEMENT = {
-    "description": "This element intends to bundle all of the various ways of denoting time or age in phenopackets schema."
+
+GESTATIONAL_AGE = {
+    "description": ("Gestational age (or menstrual age) is the time elapsed between the first "
+                    "day of the last normal menstrual period and the day of delivery."),
+    "properties": {
+        "weeks": "Completed weeks of gestation according to the above definition. REQUIRED.",
+        "days": "RECOMMENDED, If available"
+    }
 }
-# TODO: Mutually recursive, use functions
-# DIAGNOSIS
-# GENOMIC_INTERPRETATION
+
+AGE = {
+    "description": ("The Age element allows the age of the subject to be encoded in several"
+                    " different ways that support different use cases. Age is encoded as ISO8601 duration."),
+    "properties": {
+        "iso8601duration": "An ISO8601 string represent age"
+    }
+}
+
+AGE_RANGE = {
+    "description": "The AgeRange element is intended to be used when the age of a subject is represented by a bin, e.g., 5-10 years."   ,
+    "properties": {
+        "start": AGE,
+        "end": AGE
+    }
+}
+
+TIME_STAMP = {
+    "description": "In phenopackets we define the Timestamp as an ISO-8601 date time string."
+}
+
+TIME_INTERVAL = {
+    "description": "Indicates an interval of time",
+    "properties": {
+        "start": TIME_STAMP,
+        "end": TIME_STAMP
+    }
+}
+
+TIME_ELEMENT = {
+    "description": "This element intends to bundle all of the various ways of denoting time or age in phenopackets schema.",
+    "properties": {
+        "gestational_age": GESTATIONAL_AGE,
+        "age": AGE,
+        "age_range": AGE_RANGE,
+        "ontology_class": ontology_class("indicates the age of the individual as an ontology class"),
+        "timestamp": TIME_STAMP,
+        "interval": TIME_INTERVAL
+    }
+}
+
+GENOMIC_INTERPRETATION = {
+    "description": ("This element is used as a component of the Interpretation element, and describes"
+                    " the interpretation for an individual variant or gene."),
+    "properties": {
+        "subject_or_biosample_id": "The id of the patient or biosample that is the subject being interpreted. REQUIRED.",
+        "interpretation_status": "Status of the interpretation. REQUIRED.",
+        "call": {
+            "oneOf": [
+                GENE_DESCRIPTOR,
+                VARIANT_INTERPRETATION
+            ]
+        }
+    }
+}
+
+DIAGNOSIS = {
+    "description": ("The diagnosis element is meant to refer to the disease that is inferred to be present in the"
+                    " individual or family being analyzed."),
+    "properties": {
+        "disease": DISEASE,
+        "genomic_interpretations": {
+            "description": "The genomic elements assessed as being responsible for the disease or empty.",
+            "items": GENOMIC_INTERPRETATION
+        }
+    }
+}

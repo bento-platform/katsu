@@ -100,6 +100,14 @@ def search_db_fk(type: str, foreign_model: models.Model, field_name: str):
         }
     }
 
+def search_table_ref(model: models.Model):
+    return {
+        "database": {
+            "primary_key": model._meta.pk.column,
+            "relation": model._meta.db_table
+        }
+    }
+
 def tag_schema_with_search_properties(schema, search_descriptions: Optional[dict]):
     if not isinstance(schema, dict) or not search_descriptions:
         return schema
@@ -169,7 +177,7 @@ def tag_ids_and_describe(schema: dict, descriptions: dict):
 
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
                      schema_id: str = None, title: str = None, description: str = None,
-                     additional_properties: bool = False, required=None) -> dict:
+                     additional_properties: bool = False, required:List[str]=None) -> dict:
     return {
         "$schema": DRAFT_07,
         "$id": schema_id,
@@ -183,6 +191,20 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
         "required": required or [],
         "additionalProperties": additional_properties
     }
+
+def make_object_schema(properties: dict, schema_id: str = None, title: str = None, description:str = None,
+                        additional_properties: bool = False, required:List[str] = None) -> dict:
+    return {
+        "$schema": DRAFT_07,
+        "$id": schema_id,
+        "title": title,
+        "description": description,
+        "type": "object",
+        "properties": properties,
+        "required": required or [],
+        "additionalProperties": additional_properties
+    }
+
 
 def describe_schema_opt(schema: dict, description: str):
     """ Optionally adds a description entry to a schema dict """
