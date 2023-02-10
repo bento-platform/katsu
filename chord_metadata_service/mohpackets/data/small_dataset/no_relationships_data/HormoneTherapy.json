@@ -1,72 +1,7 @@
-[
-    {
-        "program_id": "PROGRAM_{REPLACE_ME}",
-        "submitter_donor_id": "DONOR_{REPLACE_ME}",
-        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
-        "drug_name": "anastrozole",
-        "drug_rxnormcui": "345678",
-        "hormone_drug_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "200",
-        "cumulative_drug_dosage_actual": "200"
-    },
-    {
-        "program_id": "PROGRAM_{REPLACE_ME}",
-        "submitter_donor_id": "DONOR_{REPLACE_ME}",
-        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
-        "drug_name": "letrozole",
-        "drug_rxnormcui": "223986",
-        "hormone_drug_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "200",
-        "cumulative_drug_dosage_actual": "200"
-    },
-    {
-        "program_id": "PROGRAM_{REPLACE_ME}",
-        "submitter_donor_id": "DONOR_{REPLACE_ME}",
-        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
-        "drug_name": "goserelin",
-        "drug_rxnormcui": "29875",
-        "hormone_drug_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "200",
-        "cumulative_drug_dosage_actual": "200"
-    },
-    {
-        "program_id": "PROGRAM_{REPLACE_ME}",
-        "submitter_donor_id": "DONOR_{REPLACE_ME}",
-        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
-        "drug_name": "triptorelin",
-        "drug_rxnormcui": "223986",
-        "hormone_drug_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "200",
-        "cumulative_drug_dosage_actual": "200"
-    },
-    {
-        "program_id": "PROGRAM_{REPLACE_ME}",
-        "submitter_donor_id": "DONOR_{REPLACE_ME}",
-        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
-        "drug_name": "goserelin",
-        "drug_rxnormcui": "84857",
-        "hormone_drug_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "200",
-        "cumulative_drug_dosage_actual": "200"
-    },
-    {
-        "program_id": "PROGRAM_{REPLACE_ME}",
-        "submitter_donor_id": "DONOR_{REPLACE_ME}",
-        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
-        "drug_name": "goserelin",
-        "drug_rxnormcui": "345678",
-        "hormone_drug_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "200",
-        "cumulative_drug_dosage_actual": "200"
-    },
-    {
-        "program_id": "PROGRAM_{REPLACE_ME}",
-        "submitter_donor_id": "DONOR_{REPLACE_ME}",
-        "submitter_treatment_id": "TREATMENT_{REPLACE_ME}",
-        "drug_name": "degarelix",
-        "drug_rxnormcui": "557845",
-        "hormone_drug_dosage_units": "mg/m2",
-        "cumulative_drug_dosage_prescribed": "200",
-        "cumulative_drug_dosage_actual": "200"
-    }
-]
+[{"program_id":"","submitter_donor_id":"","submitter_treatment_id":"","drug_name":"goserelin","drug_rxnormcui":"46475","hormone_drug_dosage_units":"mg/m2","cumulative_drug_dosage_prescribed":"200","cumulative_drug_dosage_actual":"200"},
+{"program_id":"","submitter_donor_id":"","submitter_treatment_id":"","drug_name":"goserelin","drug_rxnormcui":"223986","hormone_drug_dosage_units":"mg/m2","cumulative_drug_dosage_prescribed":"200","cumulative_drug_dosage_actual":"200"},
+{"program_id":"","submitter_donor_id":"","submitter_treatment_id":"","drug_name":"degarelix","drug_rxnormcui":"29875","hormone_drug_dosage_units":"mg/m2","cumulative_drug_dosage_prescribed":"200","cumulative_drug_dosage_actual":"200"},
+{"program_id":"","submitter_donor_id":"","submitter_treatment_id":"","drug_name":"leuprolide","drug_rxnormcui":"223986","hormone_drug_dosage_units":"mg/m2","cumulative_drug_dosage_prescribed":"200","cumulative_drug_dosage_actual":"200"},
+{"program_id":"","submitter_donor_id":"","submitter_treatment_id":"","drug_name":"leuprolide","drug_rxnormcui":"345678","hormone_drug_dosage_units":"mg/m2","cumulative_drug_dosage_prescribed":"200","cumulative_drug_dosage_actual":"200"},
+{"program_id":"","submitter_donor_id":"","submitter_treatment_id":"","drug_name":"leuprolide","drug_rxnormcui":"29875","hormone_drug_dosage_units":"mg/m2","cumulative_drug_dosage_prescribed":"200","cumulative_drug_dosage_actual":"200"},
+{"program_id":"","submitter_donor_id":"","submitter_treatment_id":"","drug_name":"degarelix","drug_rxnormcui":"29875","hormone_drug_dosage_units":"mg/m2","cumulative_drug_dosage_prescribed":"200","cumulative_drug_dosage_actual":"200"}]
