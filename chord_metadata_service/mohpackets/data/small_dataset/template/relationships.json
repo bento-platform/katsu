@@ -97,7 +97,7 @@
       "targets": [
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -117,7 +117,7 @@
       "targets": [
         {
           "range": [2, 2],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -137,7 +137,7 @@
       "targets": [
         {
           "range": [3, 3],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -157,7 +157,7 @@
       "targets": [
         {
           "range": [4, 4],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -177,7 +177,7 @@
       "targets": [
         {
           "range": [5, 6],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -197,7 +197,7 @@
       "targets": [
         {
           "range": [7, 8],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -217,7 +217,7 @@
       "targets": [
         {
           "range": [9, 10],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -237,7 +237,7 @@
       "targets": [
         {
           "range": [11, 12],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -257,7 +257,7 @@
       "targets": [
         {
           "range": [13, 16],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -284,7 +284,7 @@
         },
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -309,7 +309,7 @@
         },
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -334,7 +334,7 @@
         },
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -359,7 +359,7 @@
         },
         {
           "range": [2, 2],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -384,7 +384,7 @@
         },
         {
           "range": [2, 2],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -409,7 +409,7 @@
         },
         {
           "range": [3, 3],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -434,7 +434,7 @@
         },
         {
           "range": [4, 4],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -459,7 +459,7 @@
         },
         {
           "range": [5, 6],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -484,7 +484,7 @@
         },
         {
           "range": [7, 8],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -509,7 +509,7 @@
         },
         {
           "range": [9, 10],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -534,7 +534,7 @@
         },
         {
           "range": [11, 12],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -559,7 +559,7 @@
         },
         {
           "range": [13, 16],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -581,7 +581,7 @@
       "targets": [
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -601,7 +601,7 @@
       "targets": [
         {
           "range": [2, 2],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -621,7 +621,7 @@
       "targets": [
         {
           "range": [3, 3],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -641,7 +641,7 @@
       "targets": [
         {
           "range": [4, 4],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -661,7 +661,7 @@
       "targets": [
         {
           "range": [5, 6],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -681,7 +681,7 @@
       "targets": [
         {
           "range": [7, 8],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -701,7 +701,7 @@
       "targets": [
         {
           "range": [9, 10],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -721,7 +721,7 @@
       "targets": [
         {
           "range": [11, 12],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -741,7 +741,7 @@
       "targets": [
         {
           "range": [13, 16],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1015,6 +1015,11 @@
           "field_value": "TREATMENT_"
         },
         {
+          "range": [18, 18],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
           "range": [6, 6],
           "field_name": "submitter_donor_id",
           "field_value": "DONOR_"
@@ -1058,7 +1063,7 @@
         },
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1083,7 +1088,7 @@
         },
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1108,7 +1113,7 @@
         },
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1133,7 +1138,7 @@
         },
         {
           "range": [2, 2],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1158,7 +1163,7 @@
         },
         {
           "range": [2, 2],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1183,7 +1188,7 @@
         },
         {
           "range": [3, 3],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1208,7 +1213,7 @@
         },
         {
           "range": [4, 4],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1233,7 +1238,7 @@
         },
         {
           "range": [5, 6],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1258,7 +1263,7 @@
         },
         {
           "range": [7, 8],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1283,7 +1288,7 @@
         },
         {
           "range": [9, 10],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1308,7 +1313,7 @@
         },
         {
           "range": [11, 12],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1333,7 +1338,7 @@
         },
         {
           "range": [13, 16],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1360,12 +1365,17 @@
         },
         {
           "range": [1, 1],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [1, 1],
           "field_name": "submitter_treatment_id",
           "field_value": "TREATMENT_"
         },
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1395,7 +1405,7 @@
         },
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1420,12 +1430,17 @@
         },
         {
           "range": [1, 1],
+          "field_name": "submitter_specimen_id",
+          "field_value": "SPECIMEN_"
+        },
+        {
+          "range": [1, 1],
           "field_name": "submitter_treatment_id",
           "field_value": "TREATMENT_"
         },
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1455,7 +1470,7 @@
         },
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
@@ -1485,7 +1500,7 @@
         },
         {
           "range": [1, 1],
-          "field_name": "primary_diagnosis_id",
+          "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {

@@ -2,7 +2,7 @@
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_1",
         "submitter_follow_up_id": "FOLLOW_UP_1",
         "date_of_followup": "2022-11",
@@ -17,13 +17,12 @@
         "recurrence_t_category": "T1a2",
         "recurrence_n_category": "N4",
         "recurrence_m_category": "M1a",
-        "recurrence_stage_group": "Stage IBS",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "recurrence_stage_group": "Stage IBS"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_1",
         "submitter_follow_up_id": "FOLLOW_UP_2",
         "date_of_followup": "2022-10",
@@ -38,13 +37,12 @@
         "recurrence_t_category": "T4b(s)",
         "recurrence_n_category": "N4",
         "recurrence_m_category": "M1",
-        "recurrence_stage_group": "Occult Carcinoma",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "recurrence_stage_group": "Occult Carcinoma"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_1",
         "submitter_follow_up_id": "FOLLOW_UP_3",
         "date_of_followup": "2022-09",
@@ -59,13 +57,12 @@
         "recurrence_t_category": "T2",
         "recurrence_n_category": "N0",
         "recurrence_m_category": "M0",
-        "recurrence_stage_group": "Stage II",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "recurrence_stage_group": "Stage II"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_2",
         "submitter_follow_up_id": "FOLLOW_UP_4",
         "date_of_followup": "2022-08",
@@ -80,13 +77,12 @@
         "recurrence_t_category": "Tis",
         "recurrence_n_category": "NX",
         "recurrence_m_category": "M1b(1)",
-        "recurrence_stage_group": "Stage IA1",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "recurrence_stage_group": "Stage IA1"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_2",
         "submitter_follow_up_id": "FOLLOW_UP_5",
         "date_of_followup": "2022-08",
@@ -101,13 +97,12 @@
         "recurrence_t_category": "Ta",
         "recurrence_n_category": "N1a",
         "recurrence_m_category": "M1b",
-        "recurrence_stage_group": "Stage II",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "recurrence_stage_group": "Stage II"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_2",
         "submitter_follow_up_id": "FOLLOW_UP_6",
         "date_of_followup": "2022-11",
@@ -122,13 +117,12 @@
         "recurrence_t_category": "Tis(DCIS)",
         "recurrence_n_category": "N1mi",
         "recurrence_m_category": "M1c(0)",
-        "recurrence_stage_group": "Stage IIIC1",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "recurrence_stage_group": "Stage IIIC1"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_3",
         "submitter_follow_up_id": "FOLLOW_UP_7",
         "date_of_followup": "2022-09",
@@ -143,13 +137,12 @@
         "recurrence_t_category": "T4a(s)",
         "recurrence_n_category": "N1a",
         "recurrence_m_category": "M1a",
-        "recurrence_stage_group": "Stage IB",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "recurrence_stage_group": "Stage IB"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_3",
         "submitter_follow_up_id": "FOLLOW_UP_8",
         "date_of_followup": "2022-09",
@@ -164,13 +157,12 @@
         "recurrence_t_category": "Tis",
         "recurrence_n_category": "N0(mol-)",
         "recurrence_m_category": "M1b(0)",
-        "recurrence_stage_group": "Stage IA1",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "recurrence_stage_group": "Stage IA1"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "submitter_treatment_id": "TREATMENT_4",
         "submitter_follow_up_id": "FOLLOW_UP_9",
         "date_of_followup": "2022-08",
@@ -185,13 +177,12 @@
         "recurrence_t_category": "T2a",
         "recurrence_n_category": "N3c",
         "recurrence_m_category": "M1b(1)",
-        "recurrence_stage_group": "Stage IA2",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "recurrence_stage_group": "Stage IA2"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "submitter_treatment_id": "TREATMENT_4",
         "submitter_follow_up_id": "FOLLOW_UP_10",
         "date_of_followup": "2022-10",
@@ -206,13 +197,12 @@
         "recurrence_t_category": "T3(m)",
         "recurrence_n_category": "N3a",
         "recurrence_m_category": "M1e",
-        "recurrence_stage_group": "Stage IA1",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "recurrence_stage_group": "Stage IA1"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "submitter_treatment_id": "TREATMENT_5",
         "submitter_follow_up_id": "FOLLOW_UP_11",
         "date_of_followup": "2022-09",
@@ -227,13 +217,12 @@
         "recurrence_t_category": "T4c",
         "recurrence_n_category": "N3b",
         "recurrence_m_category": "M1b(0)",
-        "recurrence_stage_group": "Stage IC",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "recurrence_stage_group": "Stage IC"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "submitter_treatment_id": "TREATMENT_6",
         "submitter_follow_up_id": "FOLLOW_UP_12",
         "date_of_followup": "2022-10",
@@ -248,13 +237,12 @@
         "recurrence_t_category": "T1c",
         "recurrence_n_category": "N1mi",
         "recurrence_m_category": "M1d(1)",
-        "recurrence_stage_group": "Stage IIIE",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "recurrence_stage_group": "Stage IIIE"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
         "submitter_treatment_id": "TREATMENT_7",
         "submitter_follow_up_id": "FOLLOW_UP_13",
         "date_of_followup": "2022-08",
@@ -269,13 +257,12 @@
         "recurrence_t_category": "T4a",
         "recurrence_n_category": "N0(mol-)",
         "recurrence_m_category": "M1",
-        "recurrence_stage_group": "Stage IEA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
+        "recurrence_stage_group": "Stage IEA"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
         "submitter_treatment_id": "TREATMENT_8",
         "submitter_follow_up_id": "FOLLOW_UP_14",
         "date_of_followup": "2022-09",
@@ -290,13 +277,12 @@
         "recurrence_t_category": "T3e",
         "recurrence_n_category": "N0(i+)",
         "recurrence_m_category": "M1a(0)",
-        "recurrence_stage_group": "Stage IIIC1",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
+        "recurrence_stage_group": "Stage IIIC1"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
         "submitter_treatment_id": "TREATMENT_9",
         "submitter_follow_up_id": "FOLLOW_UP_15",
         "date_of_followup": "2022-10",
@@ -311,13 +297,12 @@
         "recurrence_t_category": "T1a",
         "recurrence_n_category": "N2mi",
         "recurrence_m_category": "MX",
-        "recurrence_stage_group": "Stage 0is",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
+        "recurrence_stage_group": "Stage 0is"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
         "submitter_treatment_id": "TREATMENT_10",
         "submitter_follow_up_id": "FOLLOW_UP_16",
         "date_of_followup": "2022-11",
@@ -332,13 +317,12 @@
         "recurrence_t_category": "Tis(Paget\u2019s)",
         "recurrence_n_category": "N3b",
         "recurrence_m_category": "M1a(0)",
-        "recurrence_stage_group": "Stage IBES",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
+        "recurrence_stage_group": "Stage IBES"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5",
         "submitter_treatment_id": "TREATMENT_11",
         "submitter_follow_up_id": "FOLLOW_UP_17",
         "date_of_followup": "2022-10",
@@ -353,13 +337,12 @@
         "recurrence_t_category": "Tis(DCIS)",
         "recurrence_n_category": "N1a",
         "recurrence_m_category": "M0(i+)",
-        "recurrence_stage_group": "Stage IAS",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5"
+        "recurrence_stage_group": "Stage IAS"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6",
         "submitter_treatment_id": "TREATMENT_12",
         "submitter_follow_up_id": "FOLLOW_UP_18",
         "date_of_followup": "2022-08",
@@ -374,13 +357,12 @@
         "recurrence_t_category": "T1a",
         "recurrence_n_category": "N0(i+)",
         "recurrence_m_category": "M1b(1)",
-        "recurrence_stage_group": "Stage 0is",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6"
+        "recurrence_stage_group": "Stage 0is"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_3",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7",
         "submitter_treatment_id": "TREATMENT_13",
         "submitter_follow_up_id": "FOLLOW_UP_19",
         "date_of_followup": "2022-11",
@@ -395,13 +377,12 @@
         "recurrence_t_category": "T4b(s)",
         "recurrence_n_category": "N0",
         "recurrence_m_category": "MX",
-        "recurrence_stage_group": "Stage 0",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7"
+        "recurrence_stage_group": "Stage 0"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_3",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8",
         "submitter_treatment_id": "TREATMENT_14",
         "submitter_follow_up_id": "FOLLOW_UP_20",
         "date_of_followup": "2022-09",
@@ -416,13 +397,12 @@
         "recurrence_t_category": "T2c",
         "recurrence_n_category": "N0(i+)",
         "recurrence_m_category": "M1c(0)",
-        "recurrence_stage_group": "Stage II bulky",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8"
+        "recurrence_stage_group": "Stage II bulky"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_4",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9",
         "submitter_treatment_id": "TREATMENT_15",
         "submitter_follow_up_id": "FOLLOW_UP_21",
         "date_of_followup": "2022-09",
@@ -437,13 +417,12 @@
         "recurrence_t_category": "Tis(LAMN)",
         "recurrence_n_category": "N0b",
         "recurrence_m_category": "M1c",
-        "recurrence_stage_group": "Stage IC",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9"
+        "recurrence_stage_group": "Stage IC"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_4",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10",
         "submitter_treatment_id": "TREATMENT_16",
         "submitter_follow_up_id": "FOLLOW_UP_22",
         "date_of_followup": "2022-10",
@@ -458,13 +437,12 @@
         "recurrence_t_category": "T1b(m)",
         "recurrence_n_category": "N0(mol+)",
         "recurrence_m_category": "M1d(1)",
-        "recurrence_stage_group": "Stage IIIC1",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10"
+        "recurrence_stage_group": "Stage IIIC1"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_5",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11",
         "submitter_treatment_id": "TREATMENT_17",
         "submitter_follow_up_id": "FOLLOW_UP_23",
         "date_of_followup": "2022-10",
@@ -479,13 +457,12 @@
         "recurrence_t_category": "Tis(Paget\u2019s)",
         "recurrence_n_category": "N0b (no biopsy)",
         "recurrence_m_category": "M1b(1)",
-        "recurrence_stage_group": "Stage IIIC",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11"
+        "recurrence_stage_group": "Stage IIIC"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_6",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12",
         "submitter_treatment_id": "TREATMENT_18",
         "submitter_follow_up_id": "FOLLOW_UP_24",
         "date_of_followup": "2022-09",
@@ -500,13 +477,12 @@
         "recurrence_t_category": "T0",
         "recurrence_n_category": "NX",
         "recurrence_m_category": "M1c(1)",
-        "recurrence_stage_group": "Stage IB2",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12"
+        "recurrence_stage_group": "Stage IB2"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_7",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13",
         "submitter_treatment_id": "TREATMENT_19",
         "submitter_follow_up_id": "FOLLOW_UP_25",
         "date_of_followup": "2022-08",
@@ -521,13 +497,12 @@
         "recurrence_t_category": "Tis(LCIS)",
         "recurrence_n_category": "N3",
         "recurrence_m_category": "M1a(1)",
-        "recurrence_stage_group": "Stage IB1",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13"
+        "recurrence_stage_group": "Stage IB1"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_8",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14",
         "submitter_treatment_id": "TREATMENT_20",
         "submitter_follow_up_id": "FOLLOW_UP_26",
         "date_of_followup": "2022-10",
@@ -542,13 +517,12 @@
         "recurrence_t_category": "Tis pu",
         "recurrence_n_category": "N0b",
         "recurrence_m_category": "M1d",
-        "recurrence_stage_group": "Stage IIIES",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14"
+        "recurrence_stage_group": "Stage IIIES"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_9",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15",
         "submitter_treatment_id": "TREATMENT_21",
         "submitter_follow_up_id": "FOLLOW_UP_27",
         "date_of_followup": "2022-10",
@@ -563,13 +537,12 @@
         "recurrence_t_category": "T3e",
         "recurrence_n_category": "N3c",
         "recurrence_m_category": "M0(i+)",
-        "recurrence_stage_group": "Stage IB",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15"
+        "recurrence_stage_group": "Stage IB"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_10",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16",
         "submitter_treatment_id": "TREATMENT_22",
         "submitter_follow_up_id": "FOLLOW_UP_28",
         "date_of_followup": "2022-09",
@@ -584,7 +557,6 @@
         "recurrence_t_category": "T2a2",
         "recurrence_n_category": "N1b",
         "recurrence_m_category": "M0",
-        "recurrence_stage_group": "Stage IIID",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16"
+        "recurrence_stage_group": "Stage IIID"
     }
 ]

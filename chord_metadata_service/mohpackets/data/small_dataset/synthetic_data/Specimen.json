@@ -2,7 +2,7 @@
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_specimen_id": "SPECIMEN_1",
         "pathological_tumour_staging_system": "AJCC 8th edition",
         "pathological_t_category": "T4a(m)",
@@ -18,13 +18,12 @@
         "tumour_grading_system": "Grading system for GISTs",
         "tumour_grade": "High",
         "percent_tumour_cells_range": "0-19%",
-        "percent_tumour_cells_measurement_method": "Genomics",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "percent_tumour_cells_measurement_method": "Genomics"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_specimen_id": "SPECIMEN_2",
         "pathological_tumour_staging_system": "Durie-Salmon staging system",
         "pathological_t_category": "T4a(m)",
@@ -40,13 +39,12 @@
         "tumour_grading_system": "Grading system for GISTs",
         "tumour_grade": "Grade I",
         "percent_tumour_cells_range": "51-100%",
-        "percent_tumour_cells_measurement_method": "Unknown",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "percent_tumour_cells_measurement_method": "Unknown"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_specimen_id": "SPECIMEN_3",
         "pathological_tumour_staging_system": "AJCC 8th edition",
         "pathological_t_category": "T1b",
@@ -62,13 +60,12 @@
         "tumour_grading_system": "Four-tier grading system",
         "tumour_grade": "Grade III",
         "percent_tumour_cells_range": "51-100%",
-        "percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "submitter_specimen_id": "SPECIMEN_4",
         "pathological_tumour_staging_system": "Ann Arbor staging system",
         "pathological_t_category": "T3c",
@@ -84,13 +81,12 @@
         "tumour_grading_system": "Two-tier grading system",
         "tumour_grade": "G3",
         "percent_tumour_cells_range": "20-50%",
-        "percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "submitter_specimen_id": "SPECIMEN_5",
         "pathological_tumour_staging_system": "Durie-Salmon staging system",
         "pathological_t_category": "T1b(s)",
@@ -106,13 +102,12 @@
         "tumour_grading_system": "ISUP grading system",
         "tumour_grade": "G4",
         "percent_tumour_cells_range": "0-19%",
-        "percent_tumour_cells_measurement_method": "Image analysis",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "percent_tumour_cells_measurement_method": "Image analysis"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "submitter_specimen_id": "SPECIMEN_6",
         "pathological_tumour_staging_system": "Ann Arbor staging system",
         "pathological_t_category": "Tis(Paget\u2019s)",
@@ -128,13 +123,12 @@
         "tumour_grading_system": "ISUP grading system",
         "tumour_grade": "GX",
         "percent_tumour_cells_range": "51-100%",
-        "percent_tumour_cells_measurement_method": "Genomics",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "percent_tumour_cells_measurement_method": "Genomics"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
         "submitter_specimen_id": "SPECIMEN_7",
         "pathological_tumour_staging_system": "AJCC 7th edition",
         "pathological_t_category": "T1c",
@@ -150,13 +144,12 @@
         "tumour_grading_system": "WHO grading system for CNS tumours",
         "tumour_grade": "G4",
         "percent_tumour_cells_range": "20-50%",
-        "percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
+        "percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
         "submitter_specimen_id": "SPECIMEN_8",
         "pathological_tumour_staging_system": "AJCC 7th edition",
         "pathological_t_category": "T1mi",
@@ -172,13 +165,12 @@
         "tumour_grading_system": "Grading system for GNETs",
         "tumour_grade": "G3",
         "percent_tumour_cells_range": "51-100%",
-        "percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
+        "percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
         "submitter_specimen_id": "SPECIMEN_9",
         "pathological_tumour_staging_system": "AJCC 8th edition",
         "pathological_t_category": "T1c",
@@ -194,13 +186,12 @@
         "tumour_grading_system": "Nuclear grading system for DCIS",
         "tumour_grade": "Grade Group 1",
         "percent_tumour_cells_range": "20-50%",
-        "percent_tumour_cells_measurement_method": "Genomics",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
+        "percent_tumour_cells_measurement_method": "Genomics"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
         "submitter_specimen_id": "SPECIMEN_10",
         "pathological_tumour_staging_system": "Revised International staging system (RISS)",
         "pathological_t_category": "T4b(s)",
@@ -216,13 +207,12 @@
         "tumour_grading_system": "FNCLCC grading system",
         "tumour_grade": "Grade IV",
         "percent_tumour_cells_range": "20-50%",
-        "percent_tumour_cells_measurement_method": "Unknown",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
+        "percent_tumour_cells_measurement_method": "Unknown"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5",
         "submitter_specimen_id": "SPECIMEN_11",
         "pathological_tumour_staging_system": "Lugano staging system",
         "pathological_t_category": "Tis pu",
@@ -238,13 +228,12 @@
         "tumour_grading_system": "WHO grading system for CNS tumours",
         "tumour_grade": "G1",
         "percent_tumour_cells_range": "0-19%",
-        "percent_tumour_cells_measurement_method": "Genomics",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5"
+        "percent_tumour_cells_measurement_method": "Genomics"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6",
         "submitter_specimen_id": "SPECIMEN_12",
         "pathological_tumour_staging_system": "St Jude staging system",
         "pathological_t_category": "T1a1",
@@ -260,13 +249,12 @@
         "tumour_grading_system": "ISUP grading system",
         "tumour_grade": "G4",
         "percent_tumour_cells_range": "51-100%",
-        "percent_tumour_cells_measurement_method": "Unknown",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6"
+        "percent_tumour_cells_measurement_method": "Unknown"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_3",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7",
         "submitter_specimen_id": "SPECIMEN_13",
         "pathological_tumour_staging_system": "AJCC 7th edition",
         "pathological_t_category": "T3b",
@@ -282,13 +270,12 @@
         "tumour_grading_system": "Nuclear grading system for DCIS",
         "tumour_grade": "G1",
         "percent_tumour_cells_range": "20-50%",
-        "percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7"
+        "percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_3",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8",
         "submitter_specimen_id": "SPECIMEN_14",
         "pathological_tumour_staging_system": "St Jude staging system",
         "pathological_t_category": "T4b(s)",
@@ -304,13 +291,12 @@
         "tumour_grading_system": "Four-tier grading system",
         "tumour_grade": "GX",
         "percent_tumour_cells_range": "51-100%",
-        "percent_tumour_cells_measurement_method": "Image analysis",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8"
+        "percent_tumour_cells_measurement_method": "Image analysis"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_4",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9",
         "submitter_specimen_id": "SPECIMEN_15",
         "pathological_tumour_staging_system": "Revised International staging system (RISS)",
         "pathological_t_category": "T4c",
@@ -326,13 +312,12 @@
         "tumour_grading_system": "Four-tier grading system",
         "tumour_grade": "GX",
         "percent_tumour_cells_range": "0-19%",
-        "percent_tumour_cells_measurement_method": "Image analysis",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9"
+        "percent_tumour_cells_measurement_method": "Image analysis"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_4",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10",
         "submitter_specimen_id": "SPECIMEN_16",
         "pathological_tumour_staging_system": "St Jude staging system",
         "pathological_t_category": "T0",
@@ -348,13 +333,12 @@
         "tumour_grading_system": "WHO grading system for CNS tumours",
         "tumour_grade": "Grade Group 4",
         "percent_tumour_cells_range": "20-50%",
-        "percent_tumour_cells_measurement_method": "Unknown",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10"
+        "percent_tumour_cells_measurement_method": "Unknown"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_5",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11",
         "submitter_specimen_id": "SPECIMEN_17",
         "pathological_tumour_staging_system": "Lugano staging system",
         "pathological_t_category": "T3(m)",
@@ -370,13 +354,12 @@
         "tumour_grading_system": "Two-tier grading system",
         "tumour_grade": "G4",
         "percent_tumour_cells_range": "0-19%",
-        "percent_tumour_cells_measurement_method": "Image analysis",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11"
+        "percent_tumour_cells_measurement_method": "Image analysis"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_6",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12",
         "submitter_specimen_id": "SPECIMEN_18",
         "pathological_tumour_staging_system": "AJCC 8th edition",
         "pathological_t_category": "T4",
@@ -392,13 +375,12 @@
         "tumour_grading_system": "FNCLCC grading system",
         "tumour_grade": "High grade",
         "percent_tumour_cells_range": "20-50%",
-        "percent_tumour_cells_measurement_method": "Genomics",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12"
+        "percent_tumour_cells_measurement_method": "Genomics"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_7",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13",
         "submitter_specimen_id": "SPECIMEN_19",
         "pathological_tumour_staging_system": "FIGO staging system",
         "pathological_t_category": "T2(m)",
@@ -414,13 +396,12 @@
         "tumour_grading_system": "FNCLCC grading system",
         "tumour_grade": "High grade",
         "percent_tumour_cells_range": "51-100%",
-        "percent_tumour_cells_measurement_method": "Unknown",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13"
+        "percent_tumour_cells_measurement_method": "Unknown"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_8",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14",
         "submitter_specimen_id": "SPECIMEN_20",
         "pathological_tumour_staging_system": "Ann Arbor staging system",
         "pathological_t_category": "T3a",
@@ -436,13 +417,12 @@
         "tumour_grading_system": "WHO grading system for CNS tumours",
         "tumour_grade": "Grade Group 2",
         "percent_tumour_cells_range": "51-100%",
-        "percent_tumour_cells_measurement_method": "Unknown",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14"
+        "percent_tumour_cells_measurement_method": "Unknown"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_9",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15",
         "submitter_specimen_id": "SPECIMEN_21",
         "pathological_tumour_staging_system": "FIGO staging system",
         "pathological_t_category": "T1b",
@@ -458,13 +438,12 @@
         "tumour_grading_system": "Three-tier grading system",
         "tumour_grade": "Grade II",
         "percent_tumour_cells_range": "51-100%",
-        "percent_tumour_cells_measurement_method": "Image analysis",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15"
+        "percent_tumour_cells_measurement_method": "Image analysis"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_10",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16",
         "submitter_specimen_id": "SPECIMEN_22",
         "pathological_tumour_staging_system": "Lugano staging system",
         "pathological_t_category": "T1a(s)",
@@ -480,7 +459,6 @@
         "tumour_grading_system": "ISUP grading system",
         "tumour_grade": "Low grade",
         "percent_tumour_cells_range": "51-100%",
-        "percent_tumour_cells_measurement_method": "Genomics",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16"
+        "percent_tumour_cells_measurement_method": "Genomics"
     }
 ]

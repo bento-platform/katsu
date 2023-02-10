@@ -2,7 +2,7 @@
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_1",
         "treatment_type": [
             "Other targeting molecular therapy",
@@ -16,13 +16,12 @@
         "days_per_cycle": 4,
         "number_of_cycles": 5,
         "response_to_treatment_criteria_method": "AML Response Criteria",
-        "response_to_treatment": "Primary refractory disease",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "response_to_treatment": "Primary refractory disease"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_2",
         "treatment_type": [
             "Photodynamic therapy"
@@ -35,13 +34,12 @@
         "days_per_cycle": 4,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "iRECIST",
-        "response_to_treatment": "Progressive disease",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "response_to_treatment": "Progressive disease"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "submitter_treatment_id": "TREATMENT_3",
         "treatment_type": [
             "Immunotherapy",
@@ -56,13 +54,12 @@
         "days_per_cycle": 6,
         "number_of_cycles": 3,
         "response_to_treatment_criteria_method": "RECIST 1.1",
-        "response_to_treatment": "No evidence of disease (NED)",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "response_to_treatment": "No evidence of disease (NED)"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "submitter_treatment_id": "TREATMENT_4",
         "treatment_type": [
             "Bone marrow transplant"
@@ -75,13 +72,12 @@
         "days_per_cycle": 6,
         "number_of_cycles": 3,
         "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "Immune partial response (iPR)",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "response_to_treatment": "Immune partial response (iPR)"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "submitter_treatment_id": "TREATMENT_5",
         "treatment_type": [
             "Hormonal therapy"
@@ -94,13 +90,12 @@
         "days_per_cycle": 1,
         "number_of_cycles": 5,
         "response_to_treatment_criteria_method": "RECIST 1.1",
-        "response_to_treatment": "Morphologic leukemia-free state",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "response_to_treatment": "Morphologic leukemia-free state"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "submitter_treatment_id": "TREATMENT_6",
         "treatment_type": [
             "Surgery",
@@ -115,13 +110,12 @@
         "days_per_cycle": 7,
         "number_of_cycles": 5,
         "response_to_treatment_criteria_method": "iRECIST",
-        "response_to_treatment": "Stable disease",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "response_to_treatment": "Stable disease"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
         "submitter_treatment_id": "TREATMENT_7",
         "treatment_type": [
             "Surgery",
@@ -136,13 +130,12 @@
         "days_per_cycle": 6,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
-        "response_to_treatment": "Partial response",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
+        "response_to_treatment": "Partial response"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_1",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
         "submitter_treatment_id": "TREATMENT_8",
         "treatment_type": [
             "Surgery",
@@ -156,13 +149,12 @@
         "days_per_cycle": 4,
         "number_of_cycles": 3,
         "response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
-        "response_to_treatment": "Physician assessed partial response",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
+        "response_to_treatment": "Physician assessed partial response"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
         "submitter_treatment_id": "TREATMENT_9",
         "treatment_type": [
             "Surgery",
@@ -176,13 +168,12 @@
         "days_per_cycle": 1,
         "number_of_cycles": 5,
         "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "Immune partial response (iPR)",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
+        "response_to_treatment": "Immune partial response (iPR)"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
         "submitter_treatment_id": "TREATMENT_10",
         "treatment_type": [
             "Hormonal therapy",
@@ -197,13 +188,12 @@
         "days_per_cycle": 2,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "Complete remission without measurable residual disease (CR MRD-)",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
+        "response_to_treatment": "Complete remission without measurable residual disease (CR MRD-)"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5",
         "submitter_treatment_id": "TREATMENT_11",
         "treatment_type": [
             "Other targeting molecular therapy"
@@ -216,13 +206,12 @@
         "days_per_cycle": 6,
         "number_of_cycles": 3,
         "response_to_treatment_criteria_method": "RECIST 1.1",
-        "response_to_treatment": "Physician assessed stable disease",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5"
+        "response_to_treatment": "Physician assessed stable disease"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_2",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6",
         "submitter_treatment_id": "TREATMENT_12",
         "treatment_type": [
             "Other targeting molecular therapy",
@@ -237,13 +226,12 @@
         "days_per_cycle": 3,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
-        "response_to_treatment": "Immune confirmed progressive disease (iCPD)",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6"
+        "response_to_treatment": "Immune confirmed progressive disease (iCPD)"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_3",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7",
         "submitter_treatment_id": "TREATMENT_13",
         "treatment_type": [
             "Radiation therapy"
@@ -256,13 +244,12 @@
         "days_per_cycle": 2,
         "number_of_cycles": 3,
         "response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
-        "response_to_treatment": "Stable disease",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7"
+        "response_to_treatment": "Stable disease"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_3",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8",
         "submitter_treatment_id": "TREATMENT_14",
         "treatment_type": [
             "Photodynamic therapy",
@@ -277,13 +264,12 @@
         "days_per_cycle": 2,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "AML Response Criteria",
-        "response_to_treatment": "Immune stable disease (iSD)",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8"
+        "response_to_treatment": "Immune stable disease (iSD)"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_4",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9",
         "submitter_treatment_id": "TREATMENT_15",
         "treatment_type": [
             "Chemotherapy",
@@ -298,13 +284,12 @@
         "days_per_cycle": 6,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "iRECIST",
-        "response_to_treatment": "Complete remission with incomplete hematologic recovery (CRi)",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9"
+        "response_to_treatment": "Complete remission with incomplete hematologic recovery (CRi)"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_4",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10",
         "submitter_treatment_id": "TREATMENT_16",
         "treatment_type": [
             "No treatment"
@@ -317,13 +302,12 @@
         "days_per_cycle": 6,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "Complete response",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10"
+        "response_to_treatment": "Complete response"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_5",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11",
         "submitter_treatment_id": "TREATMENT_17",
         "treatment_type": [
             "Photodynamic therapy"
@@ -336,13 +320,12 @@
         "days_per_cycle": 7,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
-        "response_to_treatment": "Primary refractory disease",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11"
+        "response_to_treatment": "Primary refractory disease"
     },
     {
         "program_id": "PROGRAM_1",
         "submitter_donor_id": "DONOR_6",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12",
         "submitter_treatment_id": "TREATMENT_18",
         "treatment_type": [
             "Ablation",
@@ -356,13 +339,12 @@
         "days_per_cycle": 1,
         "number_of_cycles": 3,
         "response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
-        "response_to_treatment": "Progressive disease",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12"
+        "response_to_treatment": "Progressive disease"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_7",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13",
         "submitter_treatment_id": "TREATMENT_19",
         "treatment_type": [
             "Radiation therapy",
@@ -376,13 +358,12 @@
         "days_per_cycle": 3,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "AML Response Criteria",
-        "response_to_treatment": "Primary refractory disease",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13"
+        "response_to_treatment": "Primary refractory disease"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_8",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14",
         "submitter_treatment_id": "TREATMENT_20",
         "treatment_type": [
             "Endoscopic therapy"
@@ -395,13 +376,12 @@
         "days_per_cycle": 5,
         "number_of_cycles": 3,
         "response_to_treatment_criteria_method": "iRECIST",
-        "response_to_treatment": "Immune stable disease (iSD)",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14"
+        "response_to_treatment": "Immune stable disease (iSD)"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_9",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15",
         "submitter_treatment_id": "TREATMENT_21",
         "treatment_type": [
             "Ablation"
@@ -414,13 +394,12 @@
         "days_per_cycle": 5,
         "number_of_cycles": 4,
         "response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
-        "response_to_treatment": "Partial response",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15"
+        "response_to_treatment": "Partial response"
     },
     {
         "program_id": "PROGRAM_2",
         "submitter_donor_id": "DONOR_10",
-        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_{REPLACE_ME}",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16",
         "submitter_treatment_id": "TREATMENT_22",
         "treatment_type": [
             "Immunotherapy"
@@ -433,7 +412,6 @@
         "days_per_cycle": 4,
         "number_of_cycles": 5,
         "response_to_treatment_criteria_method": "AML Response Criteria",
-        "response_to_treatment": "Immune complete response (iCR)",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16"
+        "response_to_treatment": "Immune complete response (iCR)"
     }
 ]

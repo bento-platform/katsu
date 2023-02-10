@@ -10,7 +10,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Recurrent tumour",
         "sample_type": "polyA+ RNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
     },
     {
         "program_id": "PROGRAM_1",
@@ -23,7 +23,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Cell line - derived from normal",
         "sample_type": "Other DNA enrichments",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
     },
     {
         "program_id": "PROGRAM_1",
@@ -36,7 +36,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Metastatic tumour",
         "sample_type": "ctDNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
     },
     {
         "program_id": "PROGRAM_1",
@@ -49,7 +49,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Primary tumour - adjacent to normal",
         "sample_type": "polyA+ RNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
     },
     {
         "program_id": "PROGRAM_1",
@@ -62,7 +62,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Metastatic tumour - metastasis to distant location",
         "sample_type": "Amplified DNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
     },
     {
         "program_id": "PROGRAM_1",
@@ -75,7 +75,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Primary tumour - additional new primary",
         "sample_type": "Other DNA enrichments",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
     },
     {
         "program_id": "PROGRAM_1",
@@ -88,7 +88,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Metastatic tumour",
         "sample_type": "Other DNA enrichments",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
     },
     {
         "program_id": "PROGRAM_1",
@@ -101,7 +101,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Cell line - derived from metastatic tumour",
         "sample_type": "Amplified DNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1"
     },
     {
         "program_id": "PROGRAM_1",
@@ -114,7 +114,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Primary tumour - additional new primary",
         "sample_type": "Amplified DNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
     },
     {
         "program_id": "PROGRAM_1",
@@ -127,7 +127,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Metastatic tumour - additional metastatic",
         "sample_type": "Amplified DNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
     },
     {
         "program_id": "PROGRAM_1",
@@ -140,7 +140,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Primary tumour - adjacent to normal",
         "sample_type": "polyA+ RNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
     },
     {
         "program_id": "PROGRAM_1",
@@ -153,7 +153,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Primary tumour",
         "sample_type": "Total RNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2"
     },
     {
         "program_id": "PROGRAM_1",
@@ -166,7 +166,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Metastatic tumour - metastasis local to lymph node",
         "sample_type": "Other DNA enrichments",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
     },
     {
         "program_id": "PROGRAM_1",
@@ -179,7 +179,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Metastatic tumour - metastasis to distant location",
         "sample_type": "ctDNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3"
     },
     {
         "program_id": "PROGRAM_1",
@@ -192,7 +192,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Metastatic tumour",
         "sample_type": "Amplified DNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
     },
     {
         "program_id": "PROGRAM_1",
@@ -205,7 +205,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Recurrent tumour",
         "sample_type": "Total RNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4"
     },
     {
         "program_id": "PROGRAM_1",
@@ -218,7 +218,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Normal - tissue adjacent to primary tumour",
         "sample_type": "polyA+ RNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5"
     },
     {
         "program_id": "PROGRAM_1",
@@ -231,7 +231,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Metastatic tumour",
         "sample_type": "Protein",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6"
     },
     {
         "program_id": "PROGRAM_1",
@@ -244,7 +244,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Cell line - derived from metastatic tumour",
         "sample_type": "Other DNA enrichments",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7"
     },
     {
         "program_id": "PROGRAM_1",
@@ -257,7 +257,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Normal - tissue adjacent to primary tumour",
         "sample_type": "Other DNA enrichments",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8"
     },
     {
         "program_id": "PROGRAM_1",
@@ -270,7 +270,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Xenograft - derived from primary tumour",
         "sample_type": "rRNA-depleted RNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9"
     },
     {
         "program_id": "PROGRAM_1",
@@ -283,7 +283,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Normal - tissue adjacent to primary tumour",
         "sample_type": "Total DNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10"
     },
     {
         "program_id": "PROGRAM_1",
@@ -296,7 +296,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Xenograft - derived from metastatic tumour",
         "sample_type": "polyA+ RNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11"
     },
     {
         "program_id": "PROGRAM_1",
@@ -309,7 +309,7 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Xenograft - derived from metastatic tumour",
         "sample_type": "Other DNA enrichments",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12"
     },
     {
         "program_id": "PROGRAM_2",
@@ -322,7 +322,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Xenograft - derived from tumour cell line",
         "sample_type": "Amplified DNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13"
     },
     {
         "program_id": "PROGRAM_2",
@@ -335,7 +335,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Cell line - derived from xenograft tumour",
         "sample_type": "Amplified DNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14"
     },
     {
         "program_id": "PROGRAM_2",
@@ -348,7 +348,7 @@
         "tumour_normal_designation": "Normal",
         "specimen_type": "Cell line - derived from normal",
         "sample_type": "rRNA-depleted RNA",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15"
     },
     {
         "program_id": "PROGRAM_2",
@@ -361,6 +361,6 @@
         "tumour_normal_designation": "Tumour",
         "specimen_type": "Primary tumour - additional new primary",
         "sample_type": "Protein",
-        "primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16"
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16"
     }
 ]

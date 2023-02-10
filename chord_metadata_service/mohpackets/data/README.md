@@ -128,7 +128,7 @@ This is a diagram of the relationships between the models in the dataset.
   - 6-7: treatment_16_17 | donor_4_5 | program_1
 
 - 5 Surgery
-  - 1: treatment_18 | donor_6 | program_1
+  - 1: treatment_18 | specimen_18 | donor_6 | program_1
   - 2-5: treatment_19_22 | donor_7_10 | program_2
 
 - 28 FollowUp
@@ -146,9 +146,9 @@ This is a diagram of the relationships between the models in the dataset.
   - 25-28: treatment_19_22: primary_diagnosis_13_16 | donor_7_10 | program_2
 
 - 12 Biomarker
-  - 1-3: follow_up_1 | treatment_1 | primary_diagnosis_1 | donor_1 | program_1
+  - 1-3: follow_up_1 | specimen_1 | treatment_1 | primary_diagnosis_1 | donor_1 | program_1
   - 4-6: follow_up_2 | treatment_1 | primary_diagnosis_1 | donor_1 | program_1
-  - 7-8: follow_up_3 | treatment_1 | primary_diagnosis_1 | donor_1 | program_1
+  - 7-8: follow_up_3 | specimen_1 | treatment_1 | primary_diagnosis_1 | donor_1 | program_1
   - 9-10: follow_up_4 | treatment_2 | primary_diagnosis_1 | donor_1 | program_1
   - 11-12: follow_up_5_6 | treatment_2 | primary_diagnosis_1 | donor_1 | program_1
 

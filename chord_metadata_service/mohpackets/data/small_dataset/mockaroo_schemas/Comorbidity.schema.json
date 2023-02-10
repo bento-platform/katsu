@@ -9,14 +9,14 @@
       "name": "program_id",
       "null_percentage": 0,
       "type": "Template",
-      "value": "PROGRAM_{REPLACE_ME}",
+      "value": "",
       "formula": ""
     },
     {
       "name": "submitter_donor_id",
       "null_percentage": 0,
       "type": "Template",
-      "value": "DONOR_{REPLACE_ME}",
+      "value": "",
       "formula": ""
     },
     {
