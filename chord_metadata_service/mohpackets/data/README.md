@@ -10,26 +10,9 @@
 Use the `loaddata` command:
 
 ```bash
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Program.json chord_metadata_service/mohpackets/data/fixtures/Donor.json chord_metadata_service/mohpackets/data/fixtures/PrimaryDiagnosis.json chord_metadata_service/mohpackets/data/fixtures/Specimen.json chord_metadata_service/mohpackets/data/fixtures/SampleRegistration.json chord_metadata_service/mohpackets/data/fixtures/Treatment.json chord_metadata_service/mohpackets/data/fixtures/Chemotherapy.json chord_metadata_service/mohpackets/data/fixtures/HormoneTherapy.json chord_metadata_service/mohpackets/data/fixtures/Radiation.json chord_metadata_service/mohpackets/data/fixtures/Immunotherapy.json chord_metadata_service/mohpackets/data/fixtures/Surgery.json chord_metadata_service/mohpackets/data/fixtures/FollowUp.json chord_metadata_service/mohpackets/data/fixtures/Biomarker.json chord_metadata_service/mohpackets/data/fixtures/Comorbidity.json
-```
-
-or run one by one (order matters):
-
-```bash
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Program.json 
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Donor.json 
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/PrimaryDiagnosis.json
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Specimen.json
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/SampleRegistration.json
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Treatment.json
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Chemotherapy.json
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/HormoneTherapy.json
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Radiation.json
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Immunotherapy.json
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Surgery.json
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/FollowUp.json
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Biomarker.json 
-python manage.py loaddata chord_metadata_service/mohpackets/data/fixtures/Comorbidity.json
+katsu_path="chord_metadata_service/mohpackets/data/small_dataset/fixtures"
+fixtures=(Program Donor PrimaryDiagnosis Specimen SampleRegistration Treatment Chemotherapy HormoneTherapy Radiation Immunotherapy Surgery FollowUp Biomarker Comorbidity)
+for fixture in "${fixtures[@]}"; do python manage.py loaddata $katsu_path/$fixture.json; done
 ```
 
 ## Clean up data
@@ -83,18 +66,18 @@ This is a diagram of the relationships between the models in the dataset.
   - 19-22: primary_diagnosis_13_16 | donor_7_10 | program_2
 
 - 28 SampleRegistration
-  - 1-3: specimen_1 | primary_diagnosis_1 | donor_1 | program_1
-  - 4-6: specimen_2 | primary_diagnosis_1 | donor_1 | program_1
-  - 7-8: specimen_3 | primary_diagnosis_1 | donor_1 | program_1
-  - 9-10: specimen_4 | primary_diagnosis_2 | donor_1 | program_1
-  - 11-12: specimen_5_6 | primary_diagnosis_2 | donor_1 | program_1
-  - 13-14: specimen_7_8 | primary_diagnosis_3 | donor_1 | program_1
-  - 15-16: specimen_9_10 | primary_diagnosis_4 | donor_2 | program_1
-  - 17-18: specimen_11_12 | primary_diagnosis_5_6 | donor_2 | program_1
-  - 19-20: specimen_13_14 | primary_diagnosis_7_8 | donor_3 | program_1
-  - 21-22: specimen_15_16 | primary_diagnosis_9_10 | donor_4 | program_1
-  - 23-24: specimen_17_18 | primary_diagnosis_11_12 | donor_5_6 | program_1
-  - 25-28: specimen_19_22 | primary_diagnosis_13_16 | donor_7_10 | program_2
+  - 1-3: specimen_1 | donor_1 | program_1
+  - 4-6: specimen_2 | donor_1 | program_1
+  - 7-8: specimen_3 | donor_1 | program_1
+  - 9-10: specimen_4 | donor_1 | program_1
+  - 11-12: specimen_5_6 | donor_1 | program_1
+  - 13-14: specimen_7_8 | donor_1 | program_1
+  - 15-16: specimen_9_10 | donor_2 | program_1
+  - 17-18: specimen_11_12 | donor_2 | program_1
+  - 19-20: specimen_13_14 | donor_3 | program_1
+  - 21-22: specimen_15_16 | donor_4 | program_1
+  - 23-24: specimen_17_18 | donor_5_6 | program_1
+  - 25-28: specimen_19_22 | donor_7_10 | program_2
 
 - 22 Treatment
   - 1-3: primary_diagnosis_1 | donor_1 | program_1
