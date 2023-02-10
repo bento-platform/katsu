@@ -302,7 +302,7 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.Phenopacket
-        fields = ["id", "subject", "measurements", "biosamples", "interpretations"]
+        fields = ["id", "subject"]
 
     def filter_found_phenotypic_feature(self, qs, name, value):
         """

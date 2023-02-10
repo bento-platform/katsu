@@ -192,7 +192,8 @@ PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
         "modifier": {  # TODO: Plural?
             "items": ONTOLOGY_SEARCH_SCHEMA
         },
-        "onset": ONTOLOGY_SEARCH_SCHEMA,
+        "onset": TIME_ELEMENT_SEARCH_SCHEMA,
+        "resolution": TIME_ELEMENT_SEARCH_SCHEMA,
         "evidence": EVIDENCE_SEARCH_SCHEMA,
     },
     "search": {

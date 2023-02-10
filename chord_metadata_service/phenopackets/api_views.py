@@ -173,12 +173,12 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
 PHENOPACKET_PREFETCH = (
     *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
     "diseases",
-    "genes",
-    "hts_files",
     *(f"meta_data__{p}" for p in META_DATA_PREFETCH),
     "phenotypic_features",
     "subject",
-    "variants",
+    "interpretations",
+    "measurements",
+    "medical_actions"
 )
 
 PHENOPACKET_SELECT_REL = (
