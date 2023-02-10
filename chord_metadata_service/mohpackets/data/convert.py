@@ -1,8 +1,6 @@
 import json
 import os
 
-from django.core.management import call_command
-
 
 def convert_to_fixtures():
     """
