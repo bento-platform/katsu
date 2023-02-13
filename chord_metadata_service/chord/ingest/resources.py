@@ -4,7 +4,7 @@ __all__ = ["ingest_resource"]
 
 
 def ingest_resource(resource: dict) -> rm.Resource:
-    namespace_prefix = resource["namespace_prefix"].strip()
+    namespace_prefix = resource["namespacePrefix"].strip()
     version = resource.get("version", "").strip()
     assigned_resource_id = ru.make_resource_id(namespace_prefix, version)
 
@@ -15,7 +15,7 @@ def ingest_resource(resource: dict) -> rm.Resource:
         namespace_prefix=namespace_prefix,
         url=resource["url"],
         version=version,
-        iri_prefix=resource["iri_prefix"],
+        iri_prefix=resource["iriPrefix"],
         extra_properties=resource.get("extra_properties", {})
         # TODO extra_properties
     )

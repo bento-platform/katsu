@@ -21,10 +21,10 @@ class Resource(models.Model):
     # resource_id e.g. "id": "uniprot:2019_07"
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.RESOURCE, "id"))
     name = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "name"))
-    namespace_prefix = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "namespace_prefix"))
+    namespace_prefix = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "namespacePrefix"))
     url = models.URLField(max_length=200, help_text=rec_help(d.RESOURCE, "url"))
     version = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "version"))
-    iri_prefix = models.URLField(max_length=200, help_text=rec_help(d.RESOURCE, "iri_prefix"))
+    iri_prefix = models.URLField(max_length=200, help_text=rec_help(d.RESOURCE, "iriPrefix"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.RESOURCE, "extra_properties"))
 
     created = models.DateTimeField(auto_now=True)

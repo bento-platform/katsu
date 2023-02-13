@@ -223,7 +223,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     genes = phenopacket_data.get("genes", [])
     diseases = phenopacket_data.get("diseases", [])
     hts_files = phenopacket_data.get("hts_files", [])
-    meta_data = phenopacket_data["meta_data"]  # required to be present, so no .get()
+    meta_data = phenopacket_data["metaData"]  # required to be present, so no .get()
     resources = meta_data.get("resources", [])
 
     # If there's a subject attached to the phenopacket, create it

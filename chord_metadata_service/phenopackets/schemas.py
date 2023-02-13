@@ -682,8 +682,8 @@ PHENOPACKET_SCHEMA = tag_ids_and_describe({
         "diseases": array_of(PHENOPACKET_DISEASE_SCHEMA),
         "medical_actions": array_of(PHENOPACKET_MEDICAL_ACTION_SCHEMA),
         "files": array_of(FILE_SCHEMA),
-        "meta_data": PHENOPACKET_META_DATA_SCHEMA,
+        "metaData": PHENOPACKET_META_DATA_SCHEMA,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "meta_data"],
+    "required": ["id", "metaData"],
 }, descriptions.PHENOPACKET)
