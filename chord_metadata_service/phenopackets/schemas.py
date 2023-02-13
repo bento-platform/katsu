@@ -285,15 +285,11 @@ PHENOPACKET_VALUE_SCHEMA = {
     "$id": "katsu:phenopackets:value",
     "title": "Value schema",
     "type": "object",
-    "properties": {
-        "value": {
-            "oneOf": [
-                PHENOPACKET_QUANTITY_SCHEMA, 
-                ONTOLOGY_CLASS
-            ]
-        }
-    },
-    "required": ["value"]
+    "oneOf": [
+        named_one_of("quantity", PHENOPACKET_QUANTITY_SCHEMA),
+        named_one_of("ontologyClass", ONTOLOGY_CLASS)
+    ],
+    "required": ["oneOf"]
 }
 
 PHENOPACKET_COMPLEX_VALUE_SCHEMA = {
@@ -315,8 +311,7 @@ PHENOPACKET_MEASUREMENT_VALUE_SCHEMA = {
     "oneOf": [
         named_one_of("value", PHENOPACKET_VALUE_SCHEMA),
         named_one_of("complex_value", PHENOPACKET_COMPLEX_VALUE_SCHEMA)
-    ],
-    "required": ["oneOf"]
+    ]
 }
 
 PHENOPACKET_MEASUREMENT_SCHEMA = {
@@ -327,11 +322,14 @@ PHENOPACKET_MEASUREMENT_SCHEMA = {
     "properties": {
         "description": base_type(SCHEMA_TYPES.STRING),
         "assay": ONTOLOGY_CLASS,
-        "measurement_value": PHENOPACKET_MEASUREMENT_VALUE_SCHEMA,
         "time_observed": PHENOPACKET_TIME_ELEMENT_SCHEMA,
         "procedure": PHENOPACKET_PROCEDURE_SCHEMA
     },
-    "required": ["assay", "measurement_value"]
+    "oneOf": [
+        named_one_of("value", PHENOPACKET_VALUE_SCHEMA),
+        named_one_of("complex_value", PHENOPACKET_COMPLEX_VALUE_SCHEMA)
+    ],
+    "required": ["assay"]
 }
 
 FILE_SCHEMA = tag_ids_and_describe({
