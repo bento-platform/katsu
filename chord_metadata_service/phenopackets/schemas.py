@@ -234,8 +234,7 @@ PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
         named_one_of("ontology_class", ONTOLOGY_CLASS),
         named_one_of("timestamp", DATE_TIME),
         named_one_of("interval", TIME_INTERVAL)
-    ],
-    "required": ["oneOf"]
+    ]
 }, descriptions.TIME_ELEMENT)  # TODO: description
 
 PHENOPACKET_PROCEDURE_SCHEMA = tag_ids_and_describe({
@@ -288,8 +287,7 @@ PHENOPACKET_VALUE_SCHEMA = {
     "oneOf": [
         named_one_of("quantity", PHENOPACKET_QUANTITY_SCHEMA),
         named_one_of("ontologyClass", ONTOLOGY_CLASS)
-    ],
-    "required": ["oneOf"]
+    ]
 }
 
 PHENOPACKET_COMPLEX_VALUE_SCHEMA = {
@@ -402,7 +400,7 @@ PHENOPACKET_DISEASE_SCHEMA = tag_ids_and_describe({
     "type": "object",
     "properties": {
         "term": ONTOLOGY_CLASS,
-        "onset": PHENOPACKET_DISEASE_ONSET_SCHEMA,
+        "onset": PHENOPACKET_TIME_ELEMENT_SCHEMA,
         "disease_stage": array_of(ONTOLOGY_CLASS),
         "tnm_finding": array_of(ONTOLOGY_CLASS),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
@@ -684,7 +682,7 @@ PHENOPACKET_SCHEMA = tag_ids_and_describe({
         "diseases": array_of(PHENOPACKET_DISEASE_SCHEMA),
         "medical_actions": array_of(PHENOPACKET_MEDICAL_ACTION_SCHEMA),
         "files": array_of(FILE_SCHEMA),
-        "metaData": PHENOPACKET_META_DATA_SCHEMA,
+        "meta_data": PHENOPACKET_META_DATA_SCHEMA,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "meta_data"],
