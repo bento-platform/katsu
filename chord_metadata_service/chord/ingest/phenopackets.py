@@ -5,6 +5,7 @@ import uuid
 
 from dateutil.parser import isoparse
 from decimal import Decimal
+from django.utils import timezone
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Table
@@ -196,6 +197,16 @@ def get_or_create_hts_file(hts_file) -> pm.HtsFile:
     )
     return hts_file
 
+def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
+    interp_obj, _ = pm.Interpretation.objects.get_or_create(
+        id=interpretation["id"],
+        progress_status=interpretation["progress_status"],
+        diagnosis=interpretation["diagnosis"],
+        summary=interpretation["summary"],
+        extra_properties=interpretation.get("extra_properties", {})
+    )
+    return interp_obj
+
 
 def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate: bool = True,
                        idx: Optional[int] = None) -> pm.Phenopacket:
@@ -225,6 +236,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     hts_files = phenopacket_data.get("hts_files", [])
     meta_data = phenopacket_data["metaData"]  # required to be present, so no .get()
     resources = meta_data.get("resources", [])
+    interpretations = phenopacket_data.get("interpretations", [])
 
     # If there's a subject attached to the phenopacket, create it
     # - or, if it already exists, *update* the extra properties if needed.
@@ -239,22 +251,17 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     # Get or create all biosamples in the phenopacket
     biosamples_db = [get_or_create_biosample(bs) for bs in biosamples]
 
-    # Get or create all genes in the phenopacket
-    # TODO: May want to augment alternate_ids
-    genes_db = [get_or_create_gene(g) for g in genes]
-
     # Get or create all diseases in the phenopacket
     diseases_db = [get_or_create_disease(disease) for disease in diseases]
-
-    # Get or create all manually-specified HTS files in the phenopacket
-    hts_files_db = [get_or_create_hts_file(hts_file) for hts_file in hts_files]
 
     # Get or create all resources (ontologies, etc.) in the phenopacket
     resources_db = [ingest_resource(rs) for rs in resources]
 
+    interpretations_db = [get_or_create_interpretation(interp) for interp in interpretations]
+
     # Create phenopacket metadata object
     meta_data_obj = pm.MetaData(
-        created_by=meta_data["created_by"],
+        created_by=meta_data.get("created_by"),
         submitted_by=meta_data.get("submitted_by"),
         phenopacket_schema_version="1.0.0-RC3",
         external_references=meta_data.get("external_references", []),
@@ -270,6 +277,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
         id=new_phenopacket_id,
         subject=subject_obj,
         meta_data=meta_data_obj,
+        updated=timezone.now(),
         table=Table.objects.get(ownership_record_id=table_id, data_type=DATA_TYPE_PHENOPACKET),
     )
 
@@ -277,11 +285,12 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     new_phenopacket.save()
 
     # ... and attach all the other objects to it.
-    new_phenopacket.phenotypic_features.set(phenotypic_features_db)
+    # new_phenopacket.phenotypic_features.set(phenotypic_features_db)
+    new_phenopacket.interpretations.set(interpretations_db)
     new_phenopacket.biosamples.set(biosamples_db)
-    new_phenopacket.genes.set(genes_db)
+    # new_phenopacket.genes.set(genes_db)
     new_phenopacket.diseases.set(diseases_db)
-    new_phenopacket.hts_files.set(hts_files_db)
+    # new_phenopacket.hts_files.set(hts_files_db)
 
     return new_phenopacket
 

@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
@@ -44,13 +43,13 @@ class BaseTimeStamp(models.Model):
     """
     created = models.DateTimeField(auto_now=True)
     updated = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         # Abstract prevents the creation of a BaseTimeStamp table
         abstract = True
 
 
-class MetaData(models.Model):
+class MetaData(BaseTimeStamp):
     """
     Class to store structured definitions of the resources
     and ontologies used within the phenopacket
@@ -58,9 +57,8 @@ class MetaData(models.Model):
     FHIR: Metadata
     """
 
-    created = models.DateTimeField(default=timezone.now, help_text=rec_help(d.META_DATA, "created"))
-    created_by = models.CharField(max_length=200, help_text=rec_help(d.META_DATA, "created_by"))
-    submitted_by = models.CharField(max_length=200, blank=True, help_text=rec_help(d.META_DATA, "submitted_by"))
+    created_by = models.CharField(max_length=200, blank=True, null=True, default=None, help_text=rec_help(d.META_DATA, "created_by"))
+    submitted_by = models.CharField(max_length=200, blank=True, null=True, default=None, help_text=rec_help(d.META_DATA, "submitted_by"))
     resources = models.ManyToManyField(Resource, help_text=rec_help(d.META_DATA, "resources"))
     updates = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(
                         schema=validation_schema_list(PHENOPACKET_UPDATE_SCHEMA), formats=['date-time'])],
@@ -71,7 +69,6 @@ class MetaData(models.Model):
                                     schema=validation_schema_list(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA))],
                                     help_text=rec_help(d.META_DATA, "external_references"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.META_DATA, "extra_properties"))
-    updated = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.id)
