@@ -32,6 +32,7 @@ from chord_metadata_service.mohpackets.api_ingest import (
     ingest_specimens,
     ingest_surgeries,
     ingest_treatments,
+    version_check,
 )
 from chord_metadata_service.mohpackets.api_views import (
     BiomarkerViewSet,
@@ -108,5 +109,6 @@ urlpatterns = [
     path("discovery/", include(discovery_router.urls)),
     path("ingest/", include(ingest_patterns)),
     path("delete/all", delete_all),
+    path("version_check", version_check),
     path("discovery/overview", moh_overview),
 ]
