@@ -1,6 +1,6 @@
 from django.core.management import call_command
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -440,4 +440,10 @@ def delete_all(request):
     return HttpResponse(status=status.HTTP_204_NO_CONTENT)
 
 
-# TODO: provide a check function before ingest
+@extend_schema(
+    responses={200: OpenApiTypes.STR},
+)
+@api_view(["GET"])
+@permission_classes([CanDIGAdminOrReadOnly])
+def version_check(_request):
+    return JsonResponse({"version": "0.9.0"}, status=status.HTTP_200_OK)
