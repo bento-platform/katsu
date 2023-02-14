@@ -4060,6 +4060,20 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/version_check:
+    get:
+      operationId: api_v1_version_check_retrieve
+      tags:
+      - api
+      security:
+      - BentoRemoteUserAuthentication: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
 components:
   schemas:
     AnatomicalSiteIrradiatedEnum:
