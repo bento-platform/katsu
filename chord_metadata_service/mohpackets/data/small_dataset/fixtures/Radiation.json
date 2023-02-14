@@ -1,0 +1,77 @@
+[
+    {
+        "model": "mohpackets.radiation",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_2",
+            "submitter_treatment_id": "TREATMENT_9",
+            "radiation_therapy_modality": "Brachytherapy (procedure)",
+            "radiation_therapy_type": "Internal",
+            "radiation_therapy_fractions": "30",
+            "radiation_therapy_dosage": "66",
+            "anatomical_site_irradiated": "Chest wall structure",
+            "radiation_boost": true,
+            "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_1"
+        }
+    },
+    {
+        "model": "mohpackets.radiation",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_2",
+            "submitter_treatment_id": "TREATMENT_10",
+            "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+            "radiation_therapy_type": "Internal",
+            "radiation_therapy_fractions": "35",
+            "radiation_therapy_dosage": "66",
+            "anatomical_site_irradiated": "Pelvic structure",
+            "radiation_boost": false,
+            "reference_radiation_treatment_id": ""
+        }
+    },
+    {
+        "model": "mohpackets.radiation",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_2",
+            "submitter_treatment_id": "TREATMENT_11",
+            "radiation_therapy_modality": "Teleradiotherapy protons (procedure)",
+            "radiation_therapy_type": "Internal",
+            "radiation_therapy_fractions": "35",
+            "radiation_therapy_dosage": "66",
+            "anatomical_site_irradiated": "Oropharyngeal structure",
+            "radiation_boost": true,
+            "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_3"
+        }
+    },
+    {
+        "model": "mohpackets.radiation",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_2",
+            "submitter_treatment_id": "TREATMENT_12",
+            "radiation_therapy_modality": "Brachytherapy (procedure)",
+            "radiation_therapy_type": "Internal",
+            "radiation_therapy_fractions": "30",
+            "radiation_therapy_dosage": "70",
+            "anatomical_site_irradiated": "Entire prostate",
+            "radiation_boost": false,
+            "reference_radiation_treatment_id": ""
+        }
+    },
+    {
+        "model": "mohpackets.radiation",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "submitter_donor_id": "DONOR_3",
+            "submitter_treatment_id": "TREATMENT_13",
+            "radiation_therapy_modality": "Teleradiotherapy protons (procedure)",
+            "radiation_therapy_type": "Internal",
+            "radiation_therapy_fractions": "35",
+            "radiation_therapy_dosage": "66",
+            "anatomical_site_irradiated": "Oral cavity structure",
+            "radiation_boost": true,
+            "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_5"
+        }
+    }
+]

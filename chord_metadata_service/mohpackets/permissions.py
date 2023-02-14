@@ -1,6 +1,6 @@
-from django.conf import settings
-from rest_framework.permissions import BasePermission, SAFE_METHODS
 from authx.auth import is_site_admin
+from django.conf import settings
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 """
     This module contains custom permission classes for the API.
@@ -31,4 +31,6 @@ class CanDIGAdminOrReadOnly(BasePermission):
                     admin_secret=opa_secret,
                     site_admin_key=opa_site_admin,
                 )
+            elif settings.CANDIG_AUTHORIZATION == "LOCAL_NO_AUTH_TESTING_ONLY":
+                return True
             return False

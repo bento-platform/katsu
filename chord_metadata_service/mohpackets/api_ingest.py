@@ -1,12 +1,13 @@
 from django.core.management import call_command
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
+from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
 from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
     ChemotherapySerializer,
@@ -79,7 +80,7 @@ def create_bulk_objects(serializer_class, data: dict):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_programs(request):
     serializer = ProgramSerializer
     data = request.data
@@ -93,7 +94,7 @@ def ingest_programs(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} programs were created."},
+        data={f"{len(objs)} programs were created."},
     )
 
 
@@ -104,7 +105,7 @@ def ingest_programs(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_donors(request):
     serializer = DonorSerializer
     data = request.data
@@ -118,7 +119,7 @@ def ingest_donors(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} donors were created."},
+        data={f"{len(objs)} donors were created."},
     )
 
 
@@ -129,7 +130,7 @@ def ingest_donors(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_primary_diagnosises(request):
     serializer = PrimaryDiagnosisSerializer
     data = request.data
@@ -143,7 +144,7 @@ def ingest_primary_diagnosises(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} primary diagnosises were created."},
+        data={f"{len(objs)} primary diagnosises were created."},
     )
 
 
@@ -154,7 +155,7 @@ def ingest_primary_diagnosises(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_specimens(request):
     serializer = SpecimenSerializer
     data = request.data
@@ -168,7 +169,7 @@ def ingest_specimens(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} specimens were created."},
+        data={f"{len(objs)} specimens were created."},
     )
 
 
@@ -179,7 +180,7 @@ def ingest_specimens(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_sample_registrations(request):
     serializer = SampleRegistrationSerializer
     data = request.data
@@ -193,7 +194,7 @@ def ingest_sample_registrations(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} sample registrations were created."},
+        data={f"{len(objs)} sample registrations were created."},
     )
 
 
@@ -204,7 +205,7 @@ def ingest_sample_registrations(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_treatments(request):
     serializer = TreatmentSerializer
     data = request.data
@@ -218,7 +219,7 @@ def ingest_treatments(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} treatments were created."},
+        data={f"{len(objs)} treatments were created."},
     )
 
 
@@ -229,7 +230,7 @@ def ingest_treatments(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_chemotherapies(request):
     serializer = ChemotherapySerializer
     data = request.data
@@ -243,7 +244,7 @@ def ingest_chemotherapies(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} chemotherapies were created."},
+        data={f"{len(objs)} chemotherapies were created."},
     )
 
 
@@ -254,7 +255,7 @@ def ingest_chemotherapies(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_radiations(request):
     serializer = RadiationSerializer
     data = request.data
@@ -268,7 +269,7 @@ def ingest_radiations(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} radiations were created."},
+        data={f"{len(objs)} radiations were created."},
     )
 
 
@@ -279,7 +280,7 @@ def ingest_radiations(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_surgeries(request):
     serializer = SurgerySerializer
     data = request.data
@@ -293,7 +294,7 @@ def ingest_surgeries(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} surgeries were created."},
+        data={f"{len(objs)} surgeries were created."},
     )
 
 
@@ -304,7 +305,7 @@ def ingest_surgeries(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_hormonetherapies(request):
     serializer = HormoneTherapySerializer
     data = request.data
@@ -318,7 +319,7 @@ def ingest_hormonetherapies(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} hormonetherapies were created."},
+        data={f"{len(objs)} hormonetherapies were created."},
     )
 
 
@@ -329,7 +330,7 @@ def ingest_hormonetherapies(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_immunotherapies(request):
     serializer = ImmunotherapySerializer
     data = request.data
@@ -343,7 +344,7 @@ def ingest_immunotherapies(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} immunotherapies were created."},
+        data={f"{len(objs)} immunotherapies were created."},
     )
 
 
@@ -354,7 +355,7 @@ def ingest_immunotherapies(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_followups(request):
     serializer = FollowUpSerializer
     data = request.data
@@ -368,7 +369,7 @@ def ingest_followups(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} followups were created."},
+        data={f"{len(objs)} followups were created."},
     )
 
 
@@ -379,7 +380,7 @@ def ingest_followups(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_biomarkers(request):
     serializer = BiomarkerSerializer
     data = request.data
@@ -393,7 +394,7 @@ def ingest_biomarkers(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} biomarkers were created."},
+        data={f"{len(objs)} biomarkers were created."},
     )
 
 
@@ -404,7 +405,7 @@ def ingest_biomarkers(request):
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def ingest_comorbidities(request):
     serializer = ComorbiditySerializer
     data = request.data
@@ -418,7 +419,7 @@ def ingest_comorbidities(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"Ingestion Successful! {len(objs)} comorbidities were created."},
+        data={f"{len(objs)} comorbidities were created."},
     )
 
 
@@ -426,7 +427,7 @@ def ingest_comorbidities(request):
     responses={204: OpenApiTypes.STR},
 )
 @api_view(["DELETE"])
-# @permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGAdminOrReadOnly])
 def delete_all(request):
     """
     Clean all the tables in the database
@@ -439,4 +440,10 @@ def delete_all(request):
     return HttpResponse(status=status.HTTP_204_NO_CONTENT)
 
 
-# TODO: provide a check function before ingest
+@extend_schema(
+    responses={200: OpenApiTypes.STR},
+)
+@api_view(["GET"])
+@permission_classes([CanDIGAdminOrReadOnly])
+def version_check(_request):
+    return JsonResponse({"version": "0.9.0"}, status=status.HTTP_200_OK)

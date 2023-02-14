@@ -1,0 +1,16 @@
+[
+    {
+        "model": "mohpackets.program",
+        "fields": {
+            "program_id": "PROGRAM_1",
+            "name": "IO-ALINES"
+        }
+    },
+    {
+        "model": "mohpackets.program",
+        "fields": {
+            "program_id": "PROGRAM_2",
+            "name": "COMPASS"
+        }
+    }
+]

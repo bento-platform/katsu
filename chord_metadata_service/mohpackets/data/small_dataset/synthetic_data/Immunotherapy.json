@@ -1,0 +1,58 @@
+[
+    {
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_3",
+        "submitter_treatment_id": "TREATMENT_14",
+        "immunotherapy_type": "Cell-based",
+        "drug_name": "Necitumumab",
+        "drug_rxnormcui": "8756456"
+    },
+    {
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_3",
+        "submitter_treatment_id": "TREATMENT_14",
+        "immunotherapy_type": "Immune checkpoint inhibitors",
+        "drug_name": "Gilteritinib",
+        "drug_rxnormcui": "4459876"
+    },
+    {
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_3",
+        "submitter_treatment_id": "TREATMENT_14",
+        "immunotherapy_type": "Other immunomodulatory substances",
+        "drug_name": "Copanlisib",
+        "drug_rxnormcui": "987654"
+    },
+    {
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_4",
+        "submitter_treatment_id": "TREATMENT_15",
+        "immunotherapy_type": "Cell-based",
+        "drug_name": "Copanlisib",
+        "drug_rxnormcui": "4459876"
+    },
+    {
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_4",
+        "submitter_treatment_id": "TREATMENT_15",
+        "immunotherapy_type": "Other immunomodulatory substances",
+        "drug_name": "Pexidartinib",
+        "drug_rxnormcui": "8836851"
+    },
+    {
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_4",
+        "submitter_treatment_id": "TREATMENT_16",
+        "immunotherapy_type": "Immune checkpoint inhibitors",
+        "drug_name": "Pexidartinib",
+        "drug_rxnormcui": "239766"
+    },
+    {
+        "program_id": "PROGRAM_1",
+        "submitter_donor_id": "DONOR_5",
+        "submitter_treatment_id": "TREATMENT_17",
+        "immunotherapy_type": "Monoclonal antibodies other than immune checkpoint inhibitors",
+        "drug_name": "Copanlisib",
+        "drug_rxnormcui": "4459876"
+    }
+]
