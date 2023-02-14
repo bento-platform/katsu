@@ -154,6 +154,33 @@ PHENOPACKET_EVIDENCE_SCHEMA = tag_ids_and_describe({
     "required": ["evidence_code"],
 }, descriptions.EVIDENCE)
 
+PHENOPACKET_GESTATIONAL_AGE = tag_ids_and_describe({
+    "$schema": DRAFT_07,
+    "$id": "katsu:phenopackets:gestational_age",
+    "title": "Gestational age schema",
+    "type": "object",
+    "properties": {
+        "weeks": base_type(SCHEMA_TYPES.INTEGER),
+        "days": base_type(SCHEMA_TYPES.INTEGER),
+    },
+    "required": ["weeks"]
+}, descriptions.GESTATIONAL_AGE)
+
+PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
+    "$schema": DRAFT_07,
+    "$id": "katsu:phenopackets:time_element",
+    "title": "Time element schema",
+    "type": "object",
+    "oneOf": [
+        named_one_of("gestational_age", PHENOPACKET_GESTATIONAL_AGE),
+        named_one_of("age", AGE),
+        named_one_of("age_range", AGE_RANGE),
+        named_one_of("ontology_class", ONTOLOGY_CLASS),
+        named_one_of("timestamp", DATE_TIME),
+        named_one_of("interval", TIME_INTERVAL)
+    ]
+}, descriptions.TIME_ELEMENT)
+
 PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
     "$id": "katsu:phenopackets:phenotypic_feature",
@@ -161,10 +188,11 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = tag_ids_and_describe({
     "properties": {
         "description": base_type(SCHEMA_TYPES.STRING),
         "type": ONTOLOGY_CLASS,
-        "negated": base_type(SCHEMA_TYPES.BOOLEAN),
+        "excluded": base_type(SCHEMA_TYPES.BOOLEAN),
         "severity": ONTOLOGY_CLASS,
         "modifiers": array_of(ONTOLOGY_CLASS),
-        "onset": ONTOLOGY_CLASS,
+        "onset": PHENOPACKET_TIME_ELEMENT_SCHEMA,
+        "resolution": PHENOPACKET_TIME_ELEMENT_SCHEMA,
         "evidence": PHENOPACKET_EVIDENCE_SCHEMA,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
@@ -210,33 +238,6 @@ PHENOPACKET_VARIANT_SCHEMA = tag_ids_and_describe({
     }
 }, descriptions.VARIANT)
 
-PHENOPACKET_GESTATIONAL_AGE = tag_ids_and_describe({
-    "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:gestational_age",
-    "title": "Gestational age schema",
-    "type": "object",
-    "properties": {
-        "weeks": base_type(SCHEMA_TYPES.INTEGER),
-        "days": base_type(SCHEMA_TYPES.INTEGER),
-    },
-    "required": ["weeks"]
-}, descriptions.GESTATIONAL_AGE)  # TODO: description
-
-PHENOPACKET_TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
-    "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:time_element",
-    "title": "Time element schema",
-    "type": "object",
-    "oneOf": [
-        named_one_of("gestational_age", PHENOPACKET_GESTATIONAL_AGE),
-        named_one_of("age", AGE),
-        named_one_of("age_range", AGE_RANGE),
-        named_one_of("ontology_class", ONTOLOGY_CLASS),
-        named_one_of("timestamp", DATE_TIME),
-        named_one_of("interval", TIME_INTERVAL)
-    ]
-}, descriptions.TIME_ELEMENT)  # TODO: description
-
 PHENOPACKET_PROCEDURE_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
     "$id": "katsu:phenopackets:procedure",
@@ -259,9 +260,13 @@ PHENOPACKET_QUANTITY_SCHEMA = {
         "unit": ONTOLOGY_CLASS,
         "value": base_type(SCHEMA_TYPES.NUMBER),
         "reference_range": {
-            "unit": ONTOLOGY_CLASS,
-            "low": base_type(SCHEMA_TYPES.NUMBER),
-            "high": base_type(SCHEMA_TYPES.NUMBER)
+            "type": SCHEMA_TYPES.OBJECT,
+            "properties": {
+                "unit": ONTOLOGY_CLASS,
+                "low": base_type(SCHEMA_TYPES.NUMBER),
+                "high": base_type(SCHEMA_TYPES.NUMBER)
+            },
+            "required": ["unit", "low", "high"]
         }
     },
     "required": ["unit", "value"]
@@ -408,6 +413,19 @@ PHENOPACKET_DISEASE_SCHEMA = tag_ids_and_describe({
     "required": ["term"],
 }, descriptions.DISEASE)
 
+DOSE_INTERVAL = tag_ids_and_describe({
+    "$schema": DRAFT_07,
+    "$id": "katsu:phenopackets:dose_interval",
+    "title": "Phenopacket dose interval for treatment",
+    "description": "Represents the dose intervals of a treatment.",
+    "type": "object",
+    "properties": {
+        "quantity": PHENOPACKET_QUANTITY_SCHEMA,
+        "schedule_frequency": ONTOLOGY_CLASS,
+        "interval": TIME_INTERVAL
+    },
+    "required": ["quantity", "schedule_frequency", "interval"]
+}, {})
 
 PHENOPACKET_TREATMENT = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -418,15 +436,12 @@ PHENOPACKET_TREATMENT = tag_ids_and_describe({
     "properties": {
         "agent": ONTOLOGY_CLASS,
         "route_of_administration": ONTOLOGY_CLASS,
-        "dose_intervals": array_of(
-            {
-                "quantity": PHENOPACKET_QUANTITY_SCHEMA,
-                "schedule_frequency": ONTOLOGY_CLASS,
-                "interval": TIME_INTERVAL
-            }
-        )
-    }
-}, {})
+        "dose_intervals": array_of(DOSE_INTERVAL),
+        "drug_type": enum_of(["UNKNOWN_DRUG_TYPE", "PRESCRIPTION", "EHR_MEDICATION_LIST", "ADMINISTRATION_RELATED_TO_PROCEDURE"]),
+        "cumulative_dose": PHENOPACKET_QUANTITY_SCHEMA
+    },
+    "required": ["agent"]
+}, {}) #TODO: add description
 
 PHENOPACKET_RADIATION_THERAPY = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -450,17 +465,15 @@ PHENOPACKET_THERAPEUTIC_REGIMEN = tag_ids_and_describe({
     "description": "This element represents a therapeutic regimen which will involve a specified set of treatments for a particular condition.",
     "type": "object",
     "properties": {
-        "identifier": {
-            "oneOf": [
-                ONTOLOGY_CLASS,
-                PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
-            ]
-        },
         "start_time": PHENOPACKET_TIME_ELEMENT_SCHEMA,
         "end_time": PHENOPACKET_TIME_ELEMENT_SCHEMA,
         "status": enum_of(["UNKNOWN_STATUS", "STARTED", "COMPLETED", "DISCONTINUED"])
     },
-    "required": ["identifier", "status"]
+    "oneOf": [
+        named_one_of("ontology_class", ONTOLOGY_CLASS),
+        named_one_of("external_reference", PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA)
+    ],
+    "required": ["status"]
 }, {})
 
 ONE_OF_MEDICAL_ACTION = tag_ids_and_describe({
@@ -470,12 +483,11 @@ ONE_OF_MEDICAL_ACTION = tag_ids_and_describe({
     "description": "One-of schema for supported medical action schemas",
     "type": "object",
     "oneOf": [
-        PHENOPACKET_PROCEDURE_SCHEMA,
-        PHENOPACKET_TREATMENT,
-        PHENOPACKET_RADIATION_THERAPY,
-        PHENOPACKET_THERAPEUTIC_REGIMEN
-    ],
-    "required": ["oneOf"]
+        named_one_of("procedure", PHENOPACKET_PROCEDURE_SCHEMA),
+        named_one_of("treatment", PHENOPACKET_TREATMENT),
+        named_one_of("radiation_therapy", PHENOPACKET_RADIATION_THERAPY),
+        named_one_of("therapeutic_regimen", PHENOPACKET_THERAPEUTIC_REGIMEN)
+    ]
 }, {})  # TODO: describe
 
 PHENOPACKET_MEDICAL_ACTION_SCHEMA = tag_ids_and_describe({
@@ -485,14 +497,18 @@ PHENOPACKET_MEDICAL_ACTION_SCHEMA = tag_ids_and_describe({
     "description": "Describes a medical action",
     "type": "object",
     "properties": {
-        "action": ONE_OF_MEDICAL_ACTION,
         "treatment_target": ONTOLOGY_CLASS,
         "treatment_intent": ONTOLOGY_CLASS,
         "response_to_treatment": ONTOLOGY_CLASS,
         "adverse_events": array_of(ONTOLOGY_CLASS),
         "treatment_termination_reason": ONTOLOGY_CLASS
     },
-    "required": ["action"]
+    "oneOf": [
+        named_one_of("procedure", PHENOPACKET_PROCEDURE_SCHEMA),
+        named_one_of("treatment", PHENOPACKET_TREATMENT),
+        named_one_of("radiation_therapy", PHENOPACKET_RADIATION_THERAPY),
+        named_one_of("therapeutic_regimen", PHENOPACKET_THERAPEUTIC_REGIMEN)
+    ]
 }, descriptions=descriptions.MEDICAL_ACTION)
 
 
@@ -658,12 +674,12 @@ PHENOPACKET_INTERPRETATION_SCHEMA = tag_ids_and_describe({
     "type": "object",
     "properties": {
         "id": base_type(SCHEMA_TYPES.STRING),
-        "progress_status": enum_of(["UNKNOWN_PROGRESS", "IN_PROGRESS", "COMPLETED", "SOLVED", "UNSOLVED"]),
+        "progressStatus": enum_of(["UNKNOWN_PROGRESS", "IN_PROGRESS", "COMPLETED", "SOLVED", "UNSOLVED"]),
         "diagnosis": PHENOPACKET_DIAGNOSIS_SCHEMA,
         "summary": base_type(SCHEMA_TYPES.STRING),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "progress_status"]
+    "required": ["id", "progressStatus"]
 }, descriptions=descriptions.INTERPRETATION)
 
 PHENOPACKET_SCHEMA = tag_ids_and_describe({
@@ -682,8 +698,8 @@ PHENOPACKET_SCHEMA = tag_ids_and_describe({
         "diseases": array_of(PHENOPACKET_DISEASE_SCHEMA),
         "medical_actions": array_of(PHENOPACKET_MEDICAL_ACTION_SCHEMA),
         "files": array_of(FILE_SCHEMA),
-        "metaData": PHENOPACKET_META_DATA_SCHEMA,
+        "meta_data": PHENOPACKET_META_DATA_SCHEMA,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "metaData"],
+    "required": ["id", "meta_data"],
 }, descriptions.PHENOPACKET)

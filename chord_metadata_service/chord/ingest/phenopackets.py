@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import uuid
+from humps import decamelize
 
 from dateutil.parser import isoparse
 from decimal import Decimal
@@ -10,7 +11,7 @@ from django.utils import timezone
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Table
 from chord_metadata_service.phenopackets import models as pm
-from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, PHENOPACKET_SCHEMA
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
@@ -200,9 +201,9 @@ def get_or_create_hts_file(hts_file) -> pm.HtsFile:
 def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
     interp_obj, _ = pm.Interpretation.objects.get_or_create(
         id=interpretation["id"],
-        progress_status=interpretation["progress_status"],
+        progress_status=interpretation["progressStatus"],
         diagnosis=interpretation["diagnosis"],
-        summary=interpretation["summary"],
+        summary=interpretation.get("summary", {}),
         extra_properties=interpretation.get("extra_properties", {})
     )
     return interp_obj
@@ -234,7 +235,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     genes = phenopacket_data.get("genes", [])
     diseases = phenopacket_data.get("diseases", [])
     hts_files = phenopacket_data.get("hts_files", [])
-    meta_data = phenopacket_data["metaData"]  # required to be present, so no .get()
+    meta_data = phenopacket_data["meta_data"]  # required to be present, so no .get()
     resources = meta_data.get("resources", [])
     interpretations = phenopacket_data.get("interpretations", [])
 
@@ -300,6 +301,10 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id) -> Union[list[pm.Phe
         logger.info(f"Attempting ingestion of phenopackets from path: {json_doc_path}")
         with open(json_doc_path, "r") as jf:
             json_data = json.load(jf)
+
+    # Converts camelCase keys to snake_case for workflow ingests.
+    # Ingests made with HTTP through /pivate/ingest are converted to snake_case by a django middleware
+    json_data = decamelize(json_data)
 
     # First, validate all phenopackets
     map_if_list(validate_phenopacket, json_data)
