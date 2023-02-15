@@ -39,3 +39,4 @@ config.json
 # MacOS
 .DS_Store
 katsu.code-workspace
+backup.json

@@ -433,6 +433,7 @@ def delete_all(request):
     Clean all the tables in the database
     """
     try:
+        call_command("dumpdata", output="backup.json")
         call_command("flush", interactive=False, verbosity=0)
     except Exception as e:
         return HttpResponse(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
