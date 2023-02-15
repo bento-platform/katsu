@@ -336,9 +336,6 @@ SPECTACULAR_SETTINGS = {
         "Individual in the context of biomedical research."
     ),
     "VERSION": "1.0.0",
-    # Mainly used for tag extraction, where paths like '/api/v1/albums' with
-    # a SCHEMA_PATH_PREFIX regex '/api/v[0-9]' would yield the tag 'albums'.
-    "SCHEMA_PATH_PREFIX": r"/api/v1/moh",
     # include schema endpoint into schema
     "SERVE_INCLUDE_SCHEMA": False,
     # Filter out the url patterns we don't want documented

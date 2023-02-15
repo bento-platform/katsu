@@ -105,7 +105,7 @@ ingest_patterns = [
 ]
 
 urlpatterns = [
-    path("moh/", include(router.urls)),
+    path("model/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
     path("ingest/", include(ingest_patterns)),
     path("delete/all", delete_all),
