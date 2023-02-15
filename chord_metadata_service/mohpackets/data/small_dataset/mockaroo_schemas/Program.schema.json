@@ -23,7 +23,7 @@
       "null_percentage": 0,
       "type": "Template",
       "value": null,
-      "formula": "[\"BIO-CAN\",\n\"INSPIRE\",\n\"POG\",\n\"IO-ALINES\",\n\"COMPASS\"][random(0,4)]\n"
+      "formula": "[\"SYNTHETIC-BIO-CAN\",\n\"SYNTHETIC-INSPIRE\",\n\"SYNTHETIC-POG\",\n\"SYNTHETIC-IO-ALINES\",\n\"SYNTHETIC-COMPASS\"][random(0,4)]\n"
     }
   ]
 }
