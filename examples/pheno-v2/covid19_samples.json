@@ -235,6 +235,10 @@
               },
               "value": 2.0
             },
+            "scheduleFrequency": {
+              "id": "NCIT:C125004",
+              "label": "Once Daily"
+            },
             "interval": {
               "start": "2020-03-20T00:00:00Z",
               "end": "2020-03-22T00:00:00Z"
@@ -247,6 +251,10 @@
                 "label": "Liter per Minute"
               },
               "value": 50.0
+            },
+            "scheduleFrequency": {
+              "id": "NCIT:C125004",
+              "label": "Once Daily"
             },
             "interval": {
               "start": "2020-03-22T00:00:00Z",
@@ -330,6 +338,10 @@
               },
               "value": 14.0
             },
+            "scheduleFrequency": {
+              "id": "NCIT:C125004",
+              "label": "Once Daily"
+            },
             "interval": {
               "start": "2020-03-22T00:00:00Z",
               "end": "2020-03-28T00:00:00Z"
@@ -346,6 +358,17 @@
         },
         "doseIntervals": [
           {
+            "quantity": {
+              "unit": {
+                "id": "NCIT:C91060",
+                "label": "Centimeters of Water"
+              },
+              "value": 14.0
+            },
+            "scheduleFrequency": {
+              "id": "NCIT:C125004",
+              "label": "Once Daily"
+            },
             "interval": {
               "start": "2020-03-24T00:00:00Z",
               "end": "2020-03-28T00:00:00Z"

@@ -251,6 +251,19 @@ PHENOPACKET_PROCEDURE_SCHEMA = tag_ids_and_describe({
     "required": ["code"],
 }, descriptions=descriptions.PROCEDURE)
 
+REFERENCE_RANGE_SCHEMA = {
+    "$schema": DRAFT_07,
+    "$id": "katsu:phenopackets:reference_range",
+    "title": "Reference range schema",
+    "type": "object",
+    "properties": {
+        "unit": ONTOLOGY_CLASS,
+        "low": base_type(SCHEMA_TYPES.NUMBER),
+        "high": base_type(SCHEMA_TYPES.NUMBER)
+    },
+    "required": ["unit", "low", "high"]
+}
+
 PHENOPACKET_QUANTITY_SCHEMA = {
     "$schema": DRAFT_07,
     "$id": "katsu:phenopackets:quantity",
@@ -259,15 +272,7 @@ PHENOPACKET_QUANTITY_SCHEMA = {
     "properties": {
         "unit": ONTOLOGY_CLASS,
         "value": base_type(SCHEMA_TYPES.NUMBER),
-        "reference_range": {
-            "type": "object",
-            "properties": {
-                "unit": ONTOLOGY_CLASS,
-                "low": base_type(SCHEMA_TYPES.NUMBER),
-                "high": base_type(SCHEMA_TYPES.NUMBER)
-            },
-            "required": ["unit", "low", "high"]
-        }
+        "reference_range": REFERENCE_RANGE_SCHEMA
     },
     "required": ["unit", "value"]
 }
@@ -413,7 +418,7 @@ PHENOPACKET_DISEASE_SCHEMA = tag_ids_and_describe({
     "required": ["term"],
 }, descriptions.DISEASE)
 
-DOSE_INTERVAL = tag_ids_and_describe({
+DOSE_INTERVAL = {
     "$schema": DRAFT_07,
     "$id": "katsu:phenopackets:dose_interval",
     "title": "Phenopacket dose interval for treatment",
@@ -425,7 +430,7 @@ DOSE_INTERVAL = tag_ids_and_describe({
         "interval": TIME_INTERVAL
     },
     "required": ["quantity", "schedule_frequency", "interval"]
-}, {})
+}
 
 PHENOPACKET_TREATMENT = tag_ids_and_describe({
     "$schema": DRAFT_07,
