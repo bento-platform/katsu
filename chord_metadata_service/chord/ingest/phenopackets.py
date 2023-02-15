@@ -49,7 +49,7 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
     pf_obj = pm.PhenotypicFeature(
         description=pf.get("description", ""),
         pftype=pf["type"],
-        negated=pf.get("negated", False),
+        excluded=pf.get("excluded", False),
         modifier=pf.get("modifier", []),  # TODO: Validate ontology term in schema...
         severity=pf.get("severity"),
         onset=pf.get("onset"),
