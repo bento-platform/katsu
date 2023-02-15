@@ -260,7 +260,7 @@ PHENOPACKET_QUANTITY_SCHEMA = {
         "unit": ONTOLOGY_CLASS,
         "value": base_type(SCHEMA_TYPES.NUMBER),
         "reference_range": {
-            "type": SCHEMA_TYPES.OBJECT,
+            "type": "object",
             "properties": {
                 "unit": ONTOLOGY_CLASS,
                 "low": base_type(SCHEMA_TYPES.NUMBER),
@@ -291,7 +291,7 @@ PHENOPACKET_VALUE_SCHEMA = {
     "type": "object",
     "oneOf": [
         named_one_of("quantity", PHENOPACKET_QUANTITY_SCHEMA),
-        named_one_of("ontologyClass", ONTOLOGY_CLASS)
+        named_one_of("ontology_class", ONTOLOGY_CLASS)
     ]
 }
 
