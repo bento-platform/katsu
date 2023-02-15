@@ -506,14 +506,19 @@ class Phenopacket(BaseTimeStamp, IndexableMixin):
     # PhenotypicFeatures are present in Biosample, so can be accessed via Biosample instance
     # phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
     #   help_text='Phenotypic features observed in the proband.')
+
+    # TODO: Change to JSONField
     measurements = models.ManyToManyField(Measurement, blank=True, help_text=rec_help(d.PHENOPACKET, "measurements"))
+
     biosamples = models.ManyToManyField(Biosample, blank=True, help_text=rec_help(d.PHENOPACKET, "biosamples"))
 
     # NOTE: As of Phenopackets V2.0, genes and variants fields are replaced with interpretations
     interpretations = models.ManyToManyField(
         Interpretation, blank=True, help_text=rec_help(d.PHENOPACKET, "interpretations"))
 
+    # TODO: Change to JSONField
     diseases = models.ManyToManyField(Disease, blank=True, help_text=rec_help(d.PHENOPACKET, "diseases"))
+    # TODO: Change to JSONField
     medical_actions = models.ManyToManyField(
         MedicalAction, blank=True, help_text=rec_help(d.PHENOPACKET, "medical_actions"))
     # TODO: do we keep files referenced in phenopackets? Already tracked by experiments
