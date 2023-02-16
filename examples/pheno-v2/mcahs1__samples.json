@@ -179,7 +179,9 @@
           "interpretationStatus": "CONTRIBUTORY",
           "variantInterpretation": {
             "acmgPathogenicityClassification": "PATHOGENIC",
+            "therapeutic_actionability": "UNKNOWN_ACTIONABILITY",
             "variationDescriptor": {
+              "id": "clinvar:13294",
               "expressions": [{
                 "syntax": "hgvs",
                 "value": "NM_001848.2:c.877G\u003eA"

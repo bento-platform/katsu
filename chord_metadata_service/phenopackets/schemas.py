@@ -193,7 +193,7 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = tag_ids_and_describe({
         "modifiers": array_of(ONTOLOGY_CLASS),
         "onset": PHENOPACKET_TIME_ELEMENT_SCHEMA,
         "resolution": PHENOPACKET_TIME_ELEMENT_SCHEMA,
-        "evidence": PHENOPACKET_EVIDENCE_SCHEMA,
+        "evidence": array_of(PHENOPACKET_EVIDENCE_SCHEMA),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
 }, descriptions.PHENOTYPIC_FEATURE)
@@ -631,9 +631,9 @@ PHENOPACKET_VARIANT_INTERPRETATION = tag_ids_and_describe({
     "properties": {
         "acmg_pathogenicity_classification": enum_of(["NOT_PROVIDED", "BENIGN", "LIKELY_BENIGN", "UNCERTAIN_SIGNIFICANCE", "LIKELY_PATHOGENIC", "PATHOGENIC"]),
         "therapeutic_actionability": enum_of(["UNKNOWN_ACTIONABILITY", "NOT_ACTIONABLE", "ACTIONABLE"]),
-        "variant": VARIANT_DESCRIPTOR
+        "variation_descriptor": VARIANT_DESCRIPTOR
     },
-    "required": ["acmg_pathogenicity_classification", "therapeutic_actionability", "variant"]
+    "required": ["acmg_pathogenicity_classification", "therapeutic_actionability", "variation_descriptor"]
 }, descriptions=descriptions.VARIANT_INTERPRETATION)
 
 
@@ -646,15 +646,12 @@ PHENOPACKET_GENOMIC_INTERPRETATION = tag_ids_and_describe({
     "properties": {
         "subject_or_biosample_id": base_type(SCHEMA_TYPES.STRING),
         "interpretation_status": enum_of(["UNKNOWN_STATUS", "REJECTED", "CANDIDATE", "CONTRIBUTORY", "CAUSATIVE"]),
-        "call": {
-            "type": "object",
-            "oneOf": [
-                named_one_of("gene_descriptor", GENE_DESCRIPTOR),
-                named_one_of("variant_interpretation", PHENOPACKET_VARIANT_INTERPRETATION)
-            ]
-        }
     },
-    "required": ["subject_or_biosample_id", "interpretation_status", "call"]
+    "oneOf": [
+        named_one_of("gene_descriptor", GENE_DESCRIPTOR),
+        named_one_of("variant_interpretation", PHENOPACKET_VARIANT_INTERPRETATION)
+    ],
+    "required": ["subject_or_biosample_id", "interpretation_status"]
 }, descriptions.GENOMIC_INTERPRETATION)
 
 
@@ -679,12 +676,12 @@ PHENOPACKET_INTERPRETATION_SCHEMA = tag_ids_and_describe({
     "type": "object",
     "properties": {
         "id": base_type(SCHEMA_TYPES.STRING),
-        "progressStatus": enum_of(["UNKNOWN_PROGRESS", "IN_PROGRESS", "COMPLETED", "SOLVED", "UNSOLVED"]),
+        "progress_status": enum_of(["UNKNOWN_PROGRESS", "IN_PROGRESS", "COMPLETED", "SOLVED", "UNSOLVED"]),
         "diagnosis": PHENOPACKET_DIAGNOSIS_SCHEMA,
         "summary": base_type(SCHEMA_TYPES.STRING),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "progressStatus"]
+    "required": ["id", "progress_status"]
 }, descriptions=descriptions.INTERPRETATION)
 
 PHENOPACKET_SCHEMA = tag_ids_and_describe({

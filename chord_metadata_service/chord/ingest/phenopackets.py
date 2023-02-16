@@ -196,13 +196,53 @@ def get_or_create_hts_file(hts_file) -> pm.HtsFile:
         individual_to_sample_identifiers=hts_file.get("individual_to_sample_identifiers", None),
         extra_properties=hts_file.get("extra_properties", {})
     )
+    # TODO: seems to simply return the param object hts_file, not the htsf_obj
     return hts_file
 
+
+def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpretation:
+    gene_descriptor = None
+    variant_interpretation = None
+
+    # A GenomicInterpretation contains either a gene_descriptor, or a variant_interpretation
+    if "gene_descriptor" in gen_interp:
+        gene_descriptor = {}
+    elif "variant_interpretation" in gen_interp:
+        variant_interpretation = {}
+
+    gen_obj, _ = pm.GenomicInterpretation.objects.get_or_create(
+        subject_or_biosample_id=gen_interp["subject_or_biosample_id"],
+        interpretation_status=gen_interp["interpretation_status"],
+        gene_descriptor=gene_descriptor,
+        variant_interpretation=variant_interpretation
+    )
+
+    return gen_obj
+
+def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
+    # Create GenomicInterpretation
+    genomic_interpretations_data = diagnosis.get("genomic_interpretations", [])
+    genomic_interpretations = [
+        get_or_create_genomic_interpretation(gen_interp)
+        for gen_interp
+        in genomic_interpretations_data
+    ]
+
+    diag_obj, _ = pm.Diagnosis.objects.get_or_create(
+        disease=diagnosis["disease"],
+        genomic_interpretations=genomic_interpretations,
+        extra_properties=diagnosis.get("extra_properties", {})
+    )
+    return diag_obj
+
+
 def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
+    diagnosis = get_or_create_diagnosis(interpretation["diagnosis"])
+
     interp_obj, _ = pm.Interpretation.objects.get_or_create(
         id=interpretation["id"],
-        progress_status=interpretation["progressStatus"],
-        diagnosis=interpretation["diagnosis"],
+        progress_status=interpretation["progress_status"],
+        diagnosis=diagnosis,
         summary=interpretation.get("summary", {}),
         extra_properties=interpretation.get("extra_properties", {})
     )
