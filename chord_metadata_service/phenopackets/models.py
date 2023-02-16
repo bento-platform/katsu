@@ -25,7 +25,8 @@ from .schemas import (
     PHENOPACKET_MEASUREMENT_VALUE_SCHEMA,
     PHENOPACKET_TIME_ELEMENT_SCHEMA,
     PHENOPACKET_UPDATE_SCHEMA,
-    VCF_RECORD_SCHEMA,
+    VCF_RECORD_SCHEMA, PHENOPACKET_PROCEDURE_SCHEMA, PHENOPACKET_MEASUREMENT_SCHEMA, PHENOPACKET_DISEASE_SCHEMA,
+    PHENOPACKET_MEDICAL_ACTION_SCHEMA,
 )
 
 
@@ -61,12 +62,12 @@ class MetaData(BaseTimeStamp):
     submitted_by = models.CharField(max_length=200, blank=True, null=True, default=None, help_text=rec_help(d.META_DATA, "submitted_by"))
     resources = models.ManyToManyField(Resource, help_text=rec_help(d.META_DATA, "resources"))
     updates = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(
-                        schema=validation_schema_list(PHENOPACKET_UPDATE_SCHEMA), formats=['date-time'])],
+        schema=validation_schema_list(PHENOPACKET_UPDATE_SCHEMA), formats=['date-time'])],
                         help_text=rec_help(d.META_DATA, "updates"))
     phenopacket_schema_version = models.CharField(max_length=200, blank=True,
                                                   help_text='Schema version of the current phenopacket.')
     external_references = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(
-                                    schema=validation_schema_list(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA))],
+        schema=validation_schema_list(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA))],
                                     help_text=rec_help(d.META_DATA, "external_references"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.META_DATA, "extra_properties"))
 
@@ -101,7 +102,7 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "modifier"))
     onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
     resolution = JSONField(blank=True, null=True, validators=[
-                           JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+        JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
 
     # evidence can stay here because evidence is given for an observation of PF
     # JSON schema to check evidence_code is present
@@ -131,7 +132,7 @@ class Procedure(models.Model):
                           help_text=rec_help(d.PROCEDURE, "body_site"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "extra_properties"))
     performed = JSONField(blank=True, null=True, validators=[
-                          JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+        JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
 
     def __str__(self):
         return str(self.id)
@@ -143,11 +144,12 @@ class Measurement(models.Model):
     assay = JSONField(verbose_name='assay', validators=[ontology_validator],
                       help_text=rec_help(d.MEASUREMENT, "assay"))
     measurement_value = models.JSONField(blank=True, null=True, validators=[
-                                         JsonSchemaValidator(PHENOPACKET_MEASUREMENT_VALUE_SCHEMA)])
+        JsonSchemaValidator(PHENOPACKET_MEASUREMENT_VALUE_SCHEMA)])
     time_observed = JSONField(blank=True, null=True, validators=[
-                              JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
-    procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING,
-                                  help_text='Clinical procdure performed to acquire the sample used for the measurement')
+        JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+
+    procedure = models.JSONField(blank=True, null=True, validators=[
+        JsonSchemaValidator(schema=PHENOPACKET_PROCEDURE_SCHEMA)])
 
     def __str__(self):
         return str(self.id)
@@ -368,7 +370,7 @@ class VariantDescriptor(BaseTimeStamp):
     vrs_ref_allele_seq = models.CharField(max_length=200, blank=True,
                                           help_text=rec_help(d.VARIANT_DESCRIPTOR, "vrs_ref_allele_seq"))
     allelic_state = models.JSONField(blank=True, null=True, validators=[
-                                     ontology_validator], help_text=rec_help(d.VARIANT_DESCRIPTOR, "allelic_state"))
+        ontology_validator], help_text=rec_help(d.VARIANT_DESCRIPTOR, "allelic_state"))
 
     def __str__(self) -> str:
         return str(self.id)
@@ -425,7 +427,7 @@ class GenomicInterpretation(BaseTimeStamp):
                                         blank=True, help_text="Corresponds to 'call' field in schema in case of GeneDescriptor")
     # Corresponds to 'call' field in schema in case of VariantInterpretation
     variant_interpretation = models.ForeignKey(VariantInterpretation, on_delete=models.CASCADE, null=True,
-                                                blank=True, help_text="Corresponds to 'call' field in schema in case of VariantInterpretation")
+                                               blank=True, help_text="Corresponds to 'call' field in schema in case of VariantInterpretation")
 
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
@@ -507,22 +509,21 @@ class Phenopacket(BaseTimeStamp, IndexableMixin):
     # phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
     #   help_text='Phenotypic features observed in the proband.')
 
-    # TODO: Change to JSONField
-    measurements = models.ManyToManyField(Measurement, blank=True, help_text=rec_help(d.PHENOPACKET, "measurements"))
-
+    measurements = models.JSONField(
+        blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_MEASUREMENT_SCHEMA)])
     biosamples = models.ManyToManyField(Biosample, blank=True, help_text=rec_help(d.PHENOPACKET, "biosamples"))
 
     # NOTE: As of Phenopackets V2.0, genes and variants fields are replaced with interpretations
     interpretations = models.ManyToManyField(
         Interpretation, blank=True, help_text=rec_help(d.PHENOPACKET, "interpretations"))
 
-    # TODO: Change to JSONField
-    diseases = models.ManyToManyField(Disease, blank=True, help_text=rec_help(d.PHENOPACKET, "diseases"))
-    # TODO: Change to JSONField
-    medical_actions = models.ManyToManyField(
-        MedicalAction, blank=True, help_text=rec_help(d.PHENOPACKET, "medical_actions"))
-    # TODO: do we keep files referenced in phenopackets? Already tracked by experiments
-    # hts_files = models.ManyToManyField(HtsFile, blank=True, help_text=rec_help(d.PHENOPACKET, "hts_files"))
+    diseases = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
+
+    medical_actions = models.JSONField(
+        blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_MEDICAL_ACTION_SCHEMA)])
+
+    # TODO: warn users that files will not be ingested in phenopackets
+
     # TODO OneToOneField
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
     table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
