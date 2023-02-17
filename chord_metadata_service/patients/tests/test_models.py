@@ -26,7 +26,7 @@ class IndividualTest(TestCase):
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
         self.disease_1 = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.phenopacket.diseases.set([self.disease_1])
+        self.phenopacket.diseases_docs.set([self.disease_1])
 
     def test_individual(self):
         individual_one = Individual.objects.get(id='patient:1')

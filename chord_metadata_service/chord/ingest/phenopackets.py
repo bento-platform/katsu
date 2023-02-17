@@ -275,7 +275,7 @@ def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
     ]
 
     diag_obj, _ = pm.Diagnosis.objects.get_or_create(
-        temp_disease=diagnosis["disease"],
+        diseases_docs=diagnosis["disease"],
         extra_properties=diagnosis.get("extra_properties", {})
     )
     diag_obj.genomic_interpretations.set(genomic_interpretations)
@@ -361,7 +361,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     new_phenopacket = pm.Phenopacket(
         id=new_phenopacket_id,
         subject=subject_obj,
-        temp_diseases=diseases,
+        diseases_docs=diseases,
         measurements=measurements,
         medical_actions=medical_actions,
         meta_data=meta_data_obj,

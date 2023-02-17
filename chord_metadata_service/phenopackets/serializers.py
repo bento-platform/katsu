@@ -211,7 +211,7 @@ class SimplePhenopacketSerializer(GenericSerializer):
                                                      exclude_when_nested=["individual"]).data
         response['genes'] = GeneSerializer(instance.genes, many=True, required=False).data
         response['variants'] = VariantSerializer(instance.variants, many=True, required=False).data
-        response['diseases'] = DiseaseSerializer(instance.diseases, many=True, required=False).data
+        response['diseases'] = DiseaseSerializer(instance.diseases_docs, many=True, required=False).data
         response['hts_files'] = HtsFileSerializer(instance.hts_files, many=True, required=False).data
         response['meta_data'] = MetaDataSerializer(instance.meta_data, exclude_when_nested=['id']).data
         return response

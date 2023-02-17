@@ -145,7 +145,7 @@ class IngestTest(TestCase):
         self.assertEqual(pfs[0].negated, EXAMPLE_INGEST_PHENOPACKET["phenotypic_features"][0]["negated"])
         # TODO: Test more properties
 
-        diseases = list(p.diseases.all().order_by("term__id"))
+        diseases = list(p.diseases_docs.all().order_by("term__id"))
         self.assertEqual(len(diseases), 1)
         # TODO: More
 

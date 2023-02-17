@@ -447,10 +447,10 @@ class Diagnosis(BaseTimeStamp):
     """
 
     # disease = models.ForeignKey(Disease, on_delete=models.CASCADE, help_text='The diagnosed condition.')
-    temp_disease = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
+    diseases_docs = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
     # required?
     genomic_interpretations = models.ManyToManyField(
-        GenomicInterpretation, blank=True, null=True,
+        GenomicInterpretation, blank=True,
         help_text='The genomic elements assessed as being responsible for the disease.')
     extra_properties = JSONField(
         blank=True, null=True, help_text='Extra properties that are not supported by current schema')
@@ -477,7 +477,7 @@ class Interpretation(BaseTimeStamp):
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for the interpretation.')
     progress_status = models.CharField(choices=PROGRESS_STATUS, max_length=200, blank=True,
                                        help_text='The current status of work on the case.')
-    diagnosis = models.ForeignKey(Diagnosis, blank=True, on_delete=models.CASCADE, help_text='One or more diagnoses, if made.')
+    diagnosis = models.ForeignKey(Diagnosis, blank=True, null=True, on_delete=models.CASCADE, help_text='One or more diagnoses, if made.')
     summary = models.CharField(max_length=200, blank=True, help_text='Free text summary of the interpretation.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
@@ -517,7 +517,8 @@ class Phenopacket(BaseTimeStamp, IndexableMixin):
     interpretations = models.ManyToManyField(
         Interpretation, blank=True, help_text=rec_help(d.PHENOPACKET, "interpretations"))
 
-    temp_diseases = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
+    # Note: Renamed from "diseases" due to migration from ManyToMany to JSONField
+    diseases_docs = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
 
     medical_actions = models.JSONField(
         blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_MEDICAL_ACTION_SCHEMA)])
