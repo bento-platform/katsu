@@ -5,24 +5,9 @@ info:
   description: Metadata Service provides a phenotypic description of an Individual
     in the context of biomedical research.
 paths:
-  /api/v1/delete/all:
-    delete:
-      operationId: api_v1_delete_all_destroy
-      description: Clean all the tables in the database
-      tags:
-      - api
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '204':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/discovery/biomarkers/:
+  /moh/v1/discovery/biomarkers/:
     get:
-      operationId: api_v1_discovery_biomarkers_list
+      operationId: discovery_biomarkers_list
       parameters:
       - in: query
         name: program_id
@@ -65,7 +50,7 @@ paths:
         schema:
           type: integer
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -75,9 +60,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/chemotherapies/:
+  /moh/v1/discovery/chemotherapies/:
     get:
-      operationId: api_v1_discovery_chemotherapies_list
+      operationId: discovery_chemotherapies_list
       parameters:
       - in: query
         name: program_id
@@ -112,7 +97,7 @@ paths:
         schema:
           type: integer
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -122,9 +107,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/comorbidities/:
+  /moh/v1/discovery/comorbidities/:
     get:
-      operationId: api_v1_discovery_comorbidities_list
+      operationId: discovery_comorbidities_list
       parameters:
       - in: query
         name: program_id
@@ -159,7 +144,7 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -169,9 +154,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/donors/:
+  /moh/v1/discovery/donors/:
     get:
-      operationId: api_v1_discovery_donors_list
+      operationId: discovery_donors_list
       parameters:
       - in: query
         name: submitter_donor_id
@@ -266,7 +251,7 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -276,9 +261,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/follow_ups/:
+  /moh/v1/discovery/follow_ups/:
     get:
-      operationId: api_v1_discovery_follow_ups_list
+      operationId: discovery_follow_ups_list
       parameters:
       - in: query
         name: submitter_follow_up_id
@@ -353,7 +338,7 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -363,9 +348,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/hormone_therapies/:
+  /moh/v1/discovery/hormone_therapies/:
     get:
-      operationId: api_v1_discovery_hormone_therapies_list
+      operationId: discovery_hormone_therapies_list
       parameters:
       - in: query
         name: program_id
@@ -400,7 +385,7 @@ paths:
         schema:
           type: integer
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -410,9 +395,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/immunotherapies/:
+  /moh/v1/discovery/immunotherapies/:
     get:
-      operationId: api_v1_discovery_immunotherapies_list
+      operationId: discovery_immunotherapies_list
       parameters:
       - in: query
         name: program_id
@@ -439,7 +424,7 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -449,12 +434,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/overview:
+  /moh/v1/discovery/overview:
     get:
-      operationId: api_v1_discovery_overview_retrieve
+      operationId: discovery_overview_retrieve
       description: MoH Overview schema
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -464,9 +449,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_schema_response'
           description: ''
-  /api/v1/discovery/primary_diagnoses/:
+  /moh/v1/discovery/primary_diagnoses/:
     get:
-      operationId: api_v1_discovery_primary_diagnoses_list
+      operationId: discovery_primary_diagnoses_list
       parameters:
       - in: query
         name: submitter_primary_diagnosis_id
@@ -525,7 +510,7 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -535,9 +520,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/radiations/:
+  /moh/v1/discovery/radiations/:
     get:
-      operationId: api_v1_discovery_radiations_list
+      operationId: discovery_radiations_list
       parameters:
       - in: query
         name: program_id
@@ -580,7 +565,7 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -590,9 +575,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/sample_registrations/:
+  /moh/v1/discovery/sample_registrations/:
     get:
-      operationId: api_v1_discovery_sample_registrations_list
+      operationId: discovery_sample_registrations_list
       parameters:
       - in: query
         name: submitter_sample_id
@@ -635,7 +620,7 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -645,9 +630,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/specimens/:
+  /moh/v1/discovery/specimens/:
     get:
-      operationId: api_v1_discovery_specimens_list
+      operationId: discovery_specimens_list
       parameters:
       - in: query
         name: submitter_specimen_id
@@ -726,7 +711,7 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -736,9 +721,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/surgeries/:
+  /moh/v1/discovery/surgeries/:
     get:
-      operationId: api_v1_discovery_surgeries_list
+      operationId: discovery_surgeries_list
       parameters:
       - in: query
         name: program_id
@@ -809,7 +794,7 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -819,9 +804,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/discovery/treatments/:
+  /moh/v1/discovery/treatments/:
     get:
-      operationId: api_v1_discovery_treatments_list
+      operationId: discovery_treatments_list
       parameters:
       - in: query
         name: submitter_treatment_id
@@ -880,7 +865,7 @@ paths:
         schema:
           type: string
       tags:
-      - api
+      - discovery
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -890,373 +875,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /api/v1/ingest/biomarkers:
-    post:
-      operationId: api_v1_ingest_biomarkers_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/chemotherapies:
-    post:
-      operationId: api_v1_ingest_chemotherapies_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/comorbidities:
-    post:
-      operationId: api_v1_ingest_comorbidities_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/donors:
-    post:
-      operationId: api_v1_ingest_donors_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/follow_ups:
-    post:
-      operationId: api_v1_ingest_follow_ups_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/hormone_therapies:
-    post:
-      operationId: api_v1_ingest_hormone_therapies_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/immunotherapies:
-    post:
-      operationId: api_v1_ingest_immunotherapies_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/primary_diagnoses:
-    post:
-      operationId: api_v1_ingest_primary_diagnoses_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/programs:
-    post:
-      operationId: api_v1_ingest_programs_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/radiations:
-    post:
-      operationId: api_v1_ingest_radiations_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/sample_registrations:
-    post:
-      operationId: api_v1_ingest_sample_registrations_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/specimens:
-    post:
-      operationId: api_v1_ingest_specimens_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/surgeries:
-    post:
-      operationId: api_v1_ingest_surgeries_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/ingest/treatments:
-    post:
-      operationId: api_v1_ingest_treatments_create
-      tags:
-      - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/IngestRequestRequest'
-        required: true
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
-  /api/v1/moh/biomarkers/:
+  /moh/v1/model/biomarkers/:
     get:
-      operationId: biomarkers_list
+      operationId: model_biomarkers_list
       parameters:
       - in: query
         name: program_id
@@ -1311,7 +932,7 @@ paths:
         schema:
           type: integer
       tags:
-      - biomarkers
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -1322,9 +943,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedBiomarkerList'
           description: ''
     post:
-      operationId: biomarkers_create
+      operationId: model_biomarkers_create
       tags:
-      - biomarkers
+      - model
       requestBody:
         content:
           application/json:
@@ -1346,9 +967,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Biomarker'
           description: ''
-  /api/v1/moh/biomarkers/{id}/:
+  /moh/v1/model/biomarkers/{id}/:
     get:
-      operationId: biomarkers_retrieve
+      operationId: model_biomarkers_retrieve
       parameters:
       - in: path
         name: id
@@ -1357,7 +978,7 @@ paths:
         description: A unique integer value identifying this biomarker.
         required: true
       tags:
-      - biomarkers
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -1368,7 +989,7 @@ paths:
                 $ref: '#/components/schemas/Biomarker'
           description: ''
     put:
-      operationId: biomarkers_update
+      operationId: model_biomarkers_update
       parameters:
       - in: path
         name: id
@@ -1377,7 +998,7 @@ paths:
         description: A unique integer value identifying this biomarker.
         required: true
       tags:
-      - biomarkers
+      - model
       requestBody:
         content:
           application/json:
@@ -1400,7 +1021,7 @@ paths:
                 $ref: '#/components/schemas/Biomarker'
           description: ''
     patch:
-      operationId: biomarkers_partial_update
+      operationId: model_biomarkers_partial_update
       parameters:
       - in: path
         name: id
@@ -1409,7 +1030,7 @@ paths:
         description: A unique integer value identifying this biomarker.
         required: true
       tags:
-      - biomarkers
+      - model
       requestBody:
         content:
           application/json:
@@ -1431,7 +1052,7 @@ paths:
                 $ref: '#/components/schemas/Biomarker'
           description: ''
     delete:
-      operationId: biomarkers_destroy
+      operationId: model_biomarkers_destroy
       parameters:
       - in: path
         name: id
@@ -1440,15 +1061,15 @@ paths:
         description: A unique integer value identifying this biomarker.
         required: true
       tags:
-      - biomarkers
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/chemotherapies/:
+  /moh/v1/model/chemotherapies/:
     get:
-      operationId: chemotherapies_list
+      operationId: model_chemotherapies_list
       parameters:
       - in: query
         name: program_id
@@ -1495,7 +1116,7 @@ paths:
         schema:
           type: integer
       tags:
-      - chemotherapies
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -1506,9 +1127,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedChemotherapyList'
           description: ''
     post:
-      operationId: chemotherapies_create
+      operationId: model_chemotherapies_create
       tags:
-      - chemotherapies
+      - model
       requestBody:
         content:
           application/json:
@@ -1530,9 +1151,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Chemotherapy'
           description: ''
-  /api/v1/moh/chemotherapies/{id}/:
+  /moh/v1/model/chemotherapies/{id}/:
     get:
-      operationId: chemotherapies_retrieve
+      operationId: model_chemotherapies_retrieve
       parameters:
       - in: path
         name: id
@@ -1541,7 +1162,7 @@ paths:
         description: A unique integer value identifying this chemotherapy.
         required: true
       tags:
-      - chemotherapies
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -1552,7 +1173,7 @@ paths:
                 $ref: '#/components/schemas/Chemotherapy'
           description: ''
     put:
-      operationId: chemotherapies_update
+      operationId: model_chemotherapies_update
       parameters:
       - in: path
         name: id
@@ -1561,7 +1182,7 @@ paths:
         description: A unique integer value identifying this chemotherapy.
         required: true
       tags:
-      - chemotherapies
+      - model
       requestBody:
         content:
           application/json:
@@ -1584,7 +1205,7 @@ paths:
                 $ref: '#/components/schemas/Chemotherapy'
           description: ''
     patch:
-      operationId: chemotherapies_partial_update
+      operationId: model_chemotherapies_partial_update
       parameters:
       - in: path
         name: id
@@ -1593,7 +1214,7 @@ paths:
         description: A unique integer value identifying this chemotherapy.
         required: true
       tags:
-      - chemotherapies
+      - model
       requestBody:
         content:
           application/json:
@@ -1615,7 +1236,7 @@ paths:
                 $ref: '#/components/schemas/Chemotherapy'
           description: ''
     delete:
-      operationId: chemotherapies_destroy
+      operationId: model_chemotherapies_destroy
       parameters:
       - in: path
         name: id
@@ -1624,15 +1245,15 @@ paths:
         description: A unique integer value identifying this chemotherapy.
         required: true
       tags:
-      - chemotherapies
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/comorbidities/:
+  /moh/v1/model/comorbidities/:
     get:
-      operationId: comorbidities_list
+      operationId: model_comorbidities_list
       parameters:
       - in: query
         name: program_id
@@ -1679,7 +1300,7 @@ paths:
         schema:
           type: integer
       tags:
-      - comorbidities
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -1690,9 +1311,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedComorbidityList'
           description: ''
     post:
-      operationId: comorbidities_create
+      operationId: model_comorbidities_create
       tags:
-      - comorbidities
+      - model
       requestBody:
         content:
           application/json:
@@ -1714,9 +1335,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Comorbidity'
           description: ''
-  /api/v1/moh/comorbidities/{id}/:
+  /moh/v1/model/comorbidities/{id}/:
     get:
-      operationId: comorbidities_retrieve
+      operationId: model_comorbidities_retrieve
       parameters:
       - in: path
         name: id
@@ -1725,7 +1346,7 @@ paths:
         description: A unique integer value identifying this comorbidity.
         required: true
       tags:
-      - comorbidities
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -1736,7 +1357,7 @@ paths:
                 $ref: '#/components/schemas/Comorbidity'
           description: ''
     put:
-      operationId: comorbidities_update
+      operationId: model_comorbidities_update
       parameters:
       - in: path
         name: id
@@ -1745,7 +1366,7 @@ paths:
         description: A unique integer value identifying this comorbidity.
         required: true
       tags:
-      - comorbidities
+      - model
       requestBody:
         content:
           application/json:
@@ -1768,7 +1389,7 @@ paths:
                 $ref: '#/components/schemas/Comorbidity'
           description: ''
     patch:
-      operationId: comorbidities_partial_update
+      operationId: model_comorbidities_partial_update
       parameters:
       - in: path
         name: id
@@ -1777,7 +1398,7 @@ paths:
         description: A unique integer value identifying this comorbidity.
         required: true
       tags:
-      - comorbidities
+      - model
       requestBody:
         content:
           application/json:
@@ -1799,7 +1420,7 @@ paths:
                 $ref: '#/components/schemas/Comorbidity'
           description: ''
     delete:
-      operationId: comorbidities_destroy
+      operationId: model_comorbidities_destroy
       parameters:
       - in: path
         name: id
@@ -1808,15 +1429,15 @@ paths:
         description: A unique integer value identifying this comorbidity.
         required: true
       tags:
-      - comorbidities
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/donors/:
+  /moh/v1/model/donors/:
     get:
-      operationId: donors_list
+      operationId: model_donors_list
       parameters:
       - in: query
         name: submitter_donor_id
@@ -1923,7 +1544,7 @@ paths:
         schema:
           type: integer
       tags:
-      - donors
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -1934,9 +1555,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedDonorList'
           description: ''
     post:
-      operationId: donors_create
+      operationId: model_donors_create
       tags:
-      - donors
+      - model
       requestBody:
         content:
           application/json:
@@ -1958,9 +1579,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Donor'
           description: ''
-  /api/v1/moh/donors/{submitter_donor_id}/:
+  /moh/v1/model/donors/{submitter_donor_id}/:
     get:
-      operationId: donors_retrieve
+      operationId: model_donors_retrieve
       parameters:
       - in: path
         name: submitter_donor_id
@@ -1969,7 +1590,7 @@ paths:
         description: A unique value identifying this donor.
         required: true
       tags:
-      - donors
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -1980,7 +1601,7 @@ paths:
                 $ref: '#/components/schemas/Donor'
           description: ''
     put:
-      operationId: donors_update
+      operationId: model_donors_update
       parameters:
       - in: path
         name: submitter_donor_id
@@ -1989,7 +1610,7 @@ paths:
         description: A unique value identifying this donor.
         required: true
       tags:
-      - donors
+      - model
       requestBody:
         content:
           application/json:
@@ -2012,7 +1633,7 @@ paths:
                 $ref: '#/components/schemas/Donor'
           description: ''
     patch:
-      operationId: donors_partial_update
+      operationId: model_donors_partial_update
       parameters:
       - in: path
         name: submitter_donor_id
@@ -2021,7 +1642,7 @@ paths:
         description: A unique value identifying this donor.
         required: true
       tags:
-      - donors
+      - model
       requestBody:
         content:
           application/json:
@@ -2043,7 +1664,7 @@ paths:
                 $ref: '#/components/schemas/Donor'
           description: ''
     delete:
-      operationId: donors_destroy
+      operationId: model_donors_destroy
       parameters:
       - in: path
         name: submitter_donor_id
@@ -2052,15 +1673,15 @@ paths:
         description: A unique value identifying this donor.
         required: true
       tags:
-      - donors
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/follow_ups/:
+  /moh/v1/model/follow_ups/:
     get:
-      operationId: follow_ups_list
+      operationId: model_follow_ups_list
       parameters:
       - in: query
         name: submitter_follow_up_id
@@ -2147,7 +1768,7 @@ paths:
         schema:
           type: integer
       tags:
-      - follow_ups
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -2158,9 +1779,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedFollowUpList'
           description: ''
     post:
-      operationId: follow_ups_create
+      operationId: model_follow_ups_create
       tags:
-      - follow_ups
+      - model
       requestBody:
         content:
           application/json:
@@ -2182,9 +1803,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/FollowUp'
           description: ''
-  /api/v1/moh/follow_ups/{submitter_follow_up_id}/:
+  /moh/v1/model/follow_ups/{submitter_follow_up_id}/:
     get:
-      operationId: follow_ups_retrieve
+      operationId: model_follow_ups_retrieve
       parameters:
       - in: path
         name: submitter_follow_up_id
@@ -2193,7 +1814,7 @@ paths:
         description: A unique value identifying this follow up.
         required: true
       tags:
-      - follow_ups
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -2204,7 +1825,7 @@ paths:
                 $ref: '#/components/schemas/FollowUp'
           description: ''
     put:
-      operationId: follow_ups_update
+      operationId: model_follow_ups_update
       parameters:
       - in: path
         name: submitter_follow_up_id
@@ -2213,7 +1834,7 @@ paths:
         description: A unique value identifying this follow up.
         required: true
       tags:
-      - follow_ups
+      - model
       requestBody:
         content:
           application/json:
@@ -2236,7 +1857,7 @@ paths:
                 $ref: '#/components/schemas/FollowUp'
           description: ''
     patch:
-      operationId: follow_ups_partial_update
+      operationId: model_follow_ups_partial_update
       parameters:
       - in: path
         name: submitter_follow_up_id
@@ -2245,7 +1866,7 @@ paths:
         description: A unique value identifying this follow up.
         required: true
       tags:
-      - follow_ups
+      - model
       requestBody:
         content:
           application/json:
@@ -2267,7 +1888,7 @@ paths:
                 $ref: '#/components/schemas/FollowUp'
           description: ''
     delete:
-      operationId: follow_ups_destroy
+      operationId: model_follow_ups_destroy
       parameters:
       - in: path
         name: submitter_follow_up_id
@@ -2276,15 +1897,15 @@ paths:
         description: A unique value identifying this follow up.
         required: true
       tags:
-      - follow_ups
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/hormone_therapies/:
+  /moh/v1/model/hormone_therapies/:
     get:
-      operationId: hormone_therapies_list
+      operationId: model_hormone_therapies_list
       parameters:
       - in: query
         name: program_id
@@ -2331,7 +1952,7 @@ paths:
         schema:
           type: integer
       tags:
-      - hormone_therapies
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -2342,9 +1963,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedHormoneTherapyList'
           description: ''
     post:
-      operationId: hormone_therapies_create
+      operationId: model_hormone_therapies_create
       tags:
-      - hormone_therapies
+      - model
       requestBody:
         content:
           application/json:
@@ -2366,9 +1987,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/HormoneTherapy'
           description: ''
-  /api/v1/moh/hormone_therapies/{id}/:
+  /moh/v1/model/hormone_therapies/{id}/:
     get:
-      operationId: hormone_therapies_retrieve
+      operationId: model_hormone_therapies_retrieve
       parameters:
       - in: path
         name: id
@@ -2377,7 +1998,7 @@ paths:
         description: A unique integer value identifying this hormone therapy.
         required: true
       tags:
-      - hormone_therapies
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -2388,7 +2009,7 @@ paths:
                 $ref: '#/components/schemas/HormoneTherapy'
           description: ''
     put:
-      operationId: hormone_therapies_update
+      operationId: model_hormone_therapies_update
       parameters:
       - in: path
         name: id
@@ -2397,7 +2018,7 @@ paths:
         description: A unique integer value identifying this hormone therapy.
         required: true
       tags:
-      - hormone_therapies
+      - model
       requestBody:
         content:
           application/json:
@@ -2420,7 +2041,7 @@ paths:
                 $ref: '#/components/schemas/HormoneTherapy'
           description: ''
     patch:
-      operationId: hormone_therapies_partial_update
+      operationId: model_hormone_therapies_partial_update
       parameters:
       - in: path
         name: id
@@ -2429,7 +2050,7 @@ paths:
         description: A unique integer value identifying this hormone therapy.
         required: true
       tags:
-      - hormone_therapies
+      - model
       requestBody:
         content:
           application/json:
@@ -2451,7 +2072,7 @@ paths:
                 $ref: '#/components/schemas/HormoneTherapy'
           description: ''
     delete:
-      operationId: hormone_therapies_destroy
+      operationId: model_hormone_therapies_destroy
       parameters:
       - in: path
         name: id
@@ -2460,15 +2081,15 @@ paths:
         description: A unique integer value identifying this hormone therapy.
         required: true
       tags:
-      - hormone_therapies
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/immunotherapies/:
+  /moh/v1/model/immunotherapies/:
     get:
-      operationId: immunotherapies_list
+      operationId: model_immunotherapies_list
       parameters:
       - in: query
         name: program_id
@@ -2507,7 +2128,7 @@ paths:
         schema:
           type: integer
       tags:
-      - immunotherapies
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -2518,9 +2139,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedImmunotherapyList'
           description: ''
     post:
-      operationId: immunotherapies_create
+      operationId: model_immunotherapies_create
       tags:
-      - immunotherapies
+      - model
       requestBody:
         content:
           application/json:
@@ -2542,9 +2163,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Immunotherapy'
           description: ''
-  /api/v1/moh/immunotherapies/{id}/:
+  /moh/v1/model/immunotherapies/{id}/:
     get:
-      operationId: immunotherapies_retrieve
+      operationId: model_immunotherapies_retrieve
       parameters:
       - in: path
         name: id
@@ -2553,7 +2174,7 @@ paths:
         description: A unique integer value identifying this immunotherapy.
         required: true
       tags:
-      - immunotherapies
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -2564,7 +2185,7 @@ paths:
                 $ref: '#/components/schemas/Immunotherapy'
           description: ''
     put:
-      operationId: immunotherapies_update
+      operationId: model_immunotherapies_update
       parameters:
       - in: path
         name: id
@@ -2573,7 +2194,7 @@ paths:
         description: A unique integer value identifying this immunotherapy.
         required: true
       tags:
-      - immunotherapies
+      - model
       requestBody:
         content:
           application/json:
@@ -2596,7 +2217,7 @@ paths:
                 $ref: '#/components/schemas/Immunotherapy'
           description: ''
     patch:
-      operationId: immunotherapies_partial_update
+      operationId: model_immunotherapies_partial_update
       parameters:
       - in: path
         name: id
@@ -2605,7 +2226,7 @@ paths:
         description: A unique integer value identifying this immunotherapy.
         required: true
       tags:
-      - immunotherapies
+      - model
       requestBody:
         content:
           application/json:
@@ -2627,7 +2248,7 @@ paths:
                 $ref: '#/components/schemas/Immunotherapy'
           description: ''
     delete:
-      operationId: immunotherapies_destroy
+      operationId: model_immunotherapies_destroy
       parameters:
       - in: path
         name: id
@@ -2636,15 +2257,15 @@ paths:
         description: A unique integer value identifying this immunotherapy.
         required: true
       tags:
-      - immunotherapies
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/primary_diagnoses/:
+  /moh/v1/model/primary_diagnoses/:
     get:
-      operationId: primary_diagnoses_list
+      operationId: model_primary_diagnoses_list
       parameters:
       - in: query
         name: submitter_primary_diagnosis_id
@@ -2715,7 +2336,7 @@ paths:
         schema:
           type: integer
       tags:
-      - primary_diagnoses
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -2726,9 +2347,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedPrimaryDiagnosisList'
           description: ''
     post:
-      operationId: primary_diagnoses_create
+      operationId: model_primary_diagnoses_create
       tags:
-      - primary_diagnoses
+      - model
       requestBody:
         content:
           application/json:
@@ -2750,9 +2371,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/PrimaryDiagnosis'
           description: ''
-  /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/:
+  /moh/v1/model/primary_diagnoses/{submitter_primary_diagnosis_id}/:
     get:
-      operationId: primary_diagnoses_retrieve
+      operationId: model_primary_diagnoses_retrieve
       parameters:
       - in: path
         name: submitter_primary_diagnosis_id
@@ -2761,7 +2382,7 @@ paths:
         description: A unique value identifying this primary diagnosis.
         required: true
       tags:
-      - primary_diagnoses
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -2772,7 +2393,7 @@ paths:
                 $ref: '#/components/schemas/PrimaryDiagnosis'
           description: ''
     put:
-      operationId: primary_diagnoses_update
+      operationId: model_primary_diagnoses_update
       parameters:
       - in: path
         name: submitter_primary_diagnosis_id
@@ -2781,7 +2402,7 @@ paths:
         description: A unique value identifying this primary diagnosis.
         required: true
       tags:
-      - primary_diagnoses
+      - model
       requestBody:
         content:
           application/json:
@@ -2804,7 +2425,7 @@ paths:
                 $ref: '#/components/schemas/PrimaryDiagnosis'
           description: ''
     patch:
-      operationId: primary_diagnoses_partial_update
+      operationId: model_primary_diagnoses_partial_update
       parameters:
       - in: path
         name: submitter_primary_diagnosis_id
@@ -2813,7 +2434,7 @@ paths:
         description: A unique value identifying this primary diagnosis.
         required: true
       tags:
-      - primary_diagnoses
+      - model
       requestBody:
         content:
           application/json:
@@ -2835,7 +2456,7 @@ paths:
                 $ref: '#/components/schemas/PrimaryDiagnosis'
           description: ''
     delete:
-      operationId: primary_diagnoses_destroy
+      operationId: model_primary_diagnoses_destroy
       parameters:
       - in: path
         name: submitter_primary_diagnosis_id
@@ -2844,15 +2465,15 @@ paths:
         description: A unique value identifying this primary diagnosis.
         required: true
       tags:
-      - primary_diagnoses
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/programs/:
+  /moh/v1/model/programs/:
     get:
-      operationId: programs_list
+      operationId: model_programs_list
       parameters:
       - in: query
         name: program_id
@@ -2885,7 +2506,7 @@ paths:
         schema:
           type: integer
       tags:
-      - programs
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -2896,9 +2517,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedProgramList'
           description: ''
     post:
-      operationId: programs_create
+      operationId: model_programs_create
       tags:
-      - programs
+      - model
       requestBody:
         content:
           application/json:
@@ -2920,9 +2541,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Program'
           description: ''
-  /api/v1/moh/programs/{program_id}/:
+  /moh/v1/model/programs/{program_id}/:
     get:
-      operationId: programs_retrieve
+      operationId: model_programs_retrieve
       parameters:
       - in: path
         name: program_id
@@ -2931,7 +2552,7 @@ paths:
         description: A unique value identifying this program.
         required: true
       tags:
-      - programs
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -2942,7 +2563,7 @@ paths:
                 $ref: '#/components/schemas/Program'
           description: ''
     put:
-      operationId: programs_update
+      operationId: model_programs_update
       parameters:
       - in: path
         name: program_id
@@ -2951,7 +2572,7 @@ paths:
         description: A unique value identifying this program.
         required: true
       tags:
-      - programs
+      - model
       requestBody:
         content:
           application/json:
@@ -2974,7 +2595,7 @@ paths:
                 $ref: '#/components/schemas/Program'
           description: ''
     patch:
-      operationId: programs_partial_update
+      operationId: model_programs_partial_update
       parameters:
       - in: path
         name: program_id
@@ -2983,7 +2604,7 @@ paths:
         description: A unique value identifying this program.
         required: true
       tags:
-      - programs
+      - model
       requestBody:
         content:
           application/json:
@@ -3005,7 +2626,7 @@ paths:
                 $ref: '#/components/schemas/Program'
           description: ''
     delete:
-      operationId: programs_destroy
+      operationId: model_programs_destroy
       parameters:
       - in: path
         name: program_id
@@ -3014,15 +2635,15 @@ paths:
         description: A unique value identifying this program.
         required: true
       tags:
-      - programs
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/radiations/:
+  /moh/v1/model/radiations/:
     get:
-      operationId: radiations_list
+      operationId: model_radiations_list
       parameters:
       - in: query
         name: program_id
@@ -3077,7 +2698,7 @@ paths:
         schema:
           type: integer
       tags:
-      - radiations
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -3088,9 +2709,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedRadiationList'
           description: ''
     post:
-      operationId: radiations_create
+      operationId: model_radiations_create
       tags:
-      - radiations
+      - model
       requestBody:
         content:
           application/json:
@@ -3112,9 +2733,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Radiation'
           description: ''
-  /api/v1/moh/radiations/{id}/:
+  /moh/v1/model/radiations/{id}/:
     get:
-      operationId: radiations_retrieve
+      operationId: model_radiations_retrieve
       parameters:
       - in: path
         name: id
@@ -3123,7 +2744,7 @@ paths:
         description: A unique integer value identifying this radiation.
         required: true
       tags:
-      - radiations
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -3134,7 +2755,7 @@ paths:
                 $ref: '#/components/schemas/Radiation'
           description: ''
     put:
-      operationId: radiations_update
+      operationId: model_radiations_update
       parameters:
       - in: path
         name: id
@@ -3143,7 +2764,7 @@ paths:
         description: A unique integer value identifying this radiation.
         required: true
       tags:
-      - radiations
+      - model
       requestBody:
         content:
           application/json:
@@ -3166,7 +2787,7 @@ paths:
                 $ref: '#/components/schemas/Radiation'
           description: ''
     patch:
-      operationId: radiations_partial_update
+      operationId: model_radiations_partial_update
       parameters:
       - in: path
         name: id
@@ -3175,7 +2796,7 @@ paths:
         description: A unique integer value identifying this radiation.
         required: true
       tags:
-      - radiations
+      - model
       requestBody:
         content:
           application/json:
@@ -3197,7 +2818,7 @@ paths:
                 $ref: '#/components/schemas/Radiation'
           description: ''
     delete:
-      operationId: radiations_destroy
+      operationId: model_radiations_destroy
       parameters:
       - in: path
         name: id
@@ -3206,15 +2827,15 @@ paths:
         description: A unique integer value identifying this radiation.
         required: true
       tags:
-      - radiations
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/sample_registrations/:
+  /moh/v1/model/sample_registrations/:
     get:
-      operationId: sample_registrations_list
+      operationId: model_sample_registrations_list
       parameters:
       - in: query
         name: submitter_sample_id
@@ -3269,7 +2890,7 @@ paths:
         schema:
           type: integer
       tags:
-      - sample_registrations
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -3280,9 +2901,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedSampleRegistrationList'
           description: ''
     post:
-      operationId: sample_registrations_create
+      operationId: model_sample_registrations_create
       tags:
-      - sample_registrations
+      - model
       requestBody:
         content:
           application/json:
@@ -3304,9 +2925,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/SampleRegistration'
           description: ''
-  /api/v1/moh/sample_registrations/{submitter_sample_id}/:
+  /moh/v1/model/sample_registrations/{submitter_sample_id}/:
     get:
-      operationId: sample_registrations_retrieve
+      operationId: model_sample_registrations_retrieve
       parameters:
       - in: path
         name: submitter_sample_id
@@ -3315,7 +2936,7 @@ paths:
         description: A unique value identifying this sample registration.
         required: true
       tags:
-      - sample_registrations
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -3326,7 +2947,7 @@ paths:
                 $ref: '#/components/schemas/SampleRegistration'
           description: ''
     put:
-      operationId: sample_registrations_update
+      operationId: model_sample_registrations_update
       parameters:
       - in: path
         name: submitter_sample_id
@@ -3335,7 +2956,7 @@ paths:
         description: A unique value identifying this sample registration.
         required: true
       tags:
-      - sample_registrations
+      - model
       requestBody:
         content:
           application/json:
@@ -3358,7 +2979,7 @@ paths:
                 $ref: '#/components/schemas/SampleRegistration'
           description: ''
     patch:
-      operationId: sample_registrations_partial_update
+      operationId: model_sample_registrations_partial_update
       parameters:
       - in: path
         name: submitter_sample_id
@@ -3367,7 +2988,7 @@ paths:
         description: A unique value identifying this sample registration.
         required: true
       tags:
-      - sample_registrations
+      - model
       requestBody:
         content:
           application/json:
@@ -3389,7 +3010,7 @@ paths:
                 $ref: '#/components/schemas/SampleRegistration'
           description: ''
     delete:
-      operationId: sample_registrations_destroy
+      operationId: model_sample_registrations_destroy
       parameters:
       - in: path
         name: submitter_sample_id
@@ -3398,15 +3019,15 @@ paths:
         description: A unique value identifying this sample registration.
         required: true
       tags:
-      - sample_registrations
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/specimens/:
+  /moh/v1/model/specimens/:
     get:
-      operationId: specimens_list
+      operationId: model_specimens_list
       parameters:
       - in: query
         name: submitter_specimen_id
@@ -3497,7 +3118,7 @@ paths:
         schema:
           type: integer
       tags:
-      - specimens
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -3508,9 +3129,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedSpecimenList'
           description: ''
     post:
-      operationId: specimens_create
+      operationId: model_specimens_create
       tags:
-      - specimens
+      - model
       requestBody:
         content:
           application/json:
@@ -3532,9 +3153,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Specimen'
           description: ''
-  /api/v1/moh/specimens/{submitter_specimen_id}/:
+  /moh/v1/model/specimens/{submitter_specimen_id}/:
     get:
-      operationId: specimens_retrieve
+      operationId: model_specimens_retrieve
       parameters:
       - in: path
         name: submitter_specimen_id
@@ -3543,7 +3164,7 @@ paths:
         description: A unique value identifying this specimen.
         required: true
       tags:
-      - specimens
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -3554,7 +3175,7 @@ paths:
                 $ref: '#/components/schemas/Specimen'
           description: ''
     put:
-      operationId: specimens_update
+      operationId: model_specimens_update
       parameters:
       - in: path
         name: submitter_specimen_id
@@ -3563,7 +3184,7 @@ paths:
         description: A unique value identifying this specimen.
         required: true
       tags:
-      - specimens
+      - model
       requestBody:
         content:
           application/json:
@@ -3586,7 +3207,7 @@ paths:
                 $ref: '#/components/schemas/Specimen'
           description: ''
     patch:
-      operationId: specimens_partial_update
+      operationId: model_specimens_partial_update
       parameters:
       - in: path
         name: submitter_specimen_id
@@ -3595,7 +3216,7 @@ paths:
         description: A unique value identifying this specimen.
         required: true
       tags:
-      - specimens
+      - model
       requestBody:
         content:
           application/json:
@@ -3617,7 +3238,7 @@ paths:
                 $ref: '#/components/schemas/Specimen'
           description: ''
     delete:
-      operationId: specimens_destroy
+      operationId: model_specimens_destroy
       parameters:
       - in: path
         name: submitter_specimen_id
@@ -3626,15 +3247,15 @@ paths:
         description: A unique value identifying this specimen.
         required: true
       tags:
-      - specimens
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/surgeries/:
+  /moh/v1/model/surgeries/:
     get:
-      operationId: surgeries_list
+      operationId: model_surgeries_list
       parameters:
       - in: query
         name: program_id
@@ -3717,7 +3338,7 @@ paths:
         schema:
           type: integer
       tags:
-      - surgeries
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -3728,9 +3349,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedSurgeryList'
           description: ''
     post:
-      operationId: surgeries_create
+      operationId: model_surgeries_create
       tags:
-      - surgeries
+      - model
       requestBody:
         content:
           application/json:
@@ -3752,9 +3373,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Surgery'
           description: ''
-  /api/v1/moh/surgeries/{id}/:
+  /moh/v1/model/surgeries/{id}/:
     get:
-      operationId: surgeries_retrieve
+      operationId: model_surgeries_retrieve
       parameters:
       - in: path
         name: id
@@ -3763,7 +3384,7 @@ paths:
         description: A unique integer value identifying this surgery.
         required: true
       tags:
-      - surgeries
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -3774,7 +3395,7 @@ paths:
                 $ref: '#/components/schemas/Surgery'
           description: ''
     put:
-      operationId: surgeries_update
+      operationId: model_surgeries_update
       parameters:
       - in: path
         name: id
@@ -3783,7 +3404,7 @@ paths:
         description: A unique integer value identifying this surgery.
         required: true
       tags:
-      - surgeries
+      - model
       requestBody:
         content:
           application/json:
@@ -3806,7 +3427,7 @@ paths:
                 $ref: '#/components/schemas/Surgery'
           description: ''
     patch:
-      operationId: surgeries_partial_update
+      operationId: model_surgeries_partial_update
       parameters:
       - in: path
         name: id
@@ -3815,7 +3436,7 @@ paths:
         description: A unique integer value identifying this surgery.
         required: true
       tags:
-      - surgeries
+      - model
       requestBody:
         content:
           application/json:
@@ -3837,7 +3458,7 @@ paths:
                 $ref: '#/components/schemas/Surgery'
           description: ''
     delete:
-      operationId: surgeries_destroy
+      operationId: model_surgeries_destroy
       parameters:
       - in: path
         name: id
@@ -3846,15 +3467,15 @@ paths:
         description: A unique integer value identifying this surgery.
         required: true
       tags:
-      - surgeries
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/moh/treatments/:
+  /moh/v1/model/treatments/:
     get:
-      operationId: treatments_list
+      operationId: model_treatments_list
       parameters:
       - in: query
         name: submitter_treatment_id
@@ -3925,7 +3546,7 @@ paths:
         schema:
           type: integer
       tags:
-      - treatments
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -3936,9 +3557,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedTreatmentList'
           description: ''
     post:
-      operationId: treatments_create
+      operationId: model_treatments_create
       tags:
-      - treatments
+      - model
       requestBody:
         content:
           application/json:
@@ -3960,9 +3581,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Treatment'
           description: ''
-  /api/v1/moh/treatments/{submitter_treatment_id}/:
+  /moh/v1/model/treatments/{submitter_treatment_id}/:
     get:
-      operationId: treatments_retrieve
+      operationId: model_treatments_retrieve
       parameters:
       - in: path
         name: submitter_treatment_id
@@ -3971,7 +3592,7 @@ paths:
         description: A unique value identifying this treatment.
         required: true
       tags:
-      - treatments
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
@@ -3982,7 +3603,7 @@ paths:
                 $ref: '#/components/schemas/Treatment'
           description: ''
     put:
-      operationId: treatments_update
+      operationId: model_treatments_update
       parameters:
       - in: path
         name: submitter_treatment_id
@@ -3991,7 +3612,7 @@ paths:
         description: A unique value identifying this treatment.
         required: true
       tags:
-      - treatments
+      - model
       requestBody:
         content:
           application/json:
@@ -4014,7 +3635,7 @@ paths:
                 $ref: '#/components/schemas/Treatment'
           description: ''
     patch:
-      operationId: treatments_partial_update
+      operationId: model_treatments_partial_update
       parameters:
       - in: path
         name: submitter_treatment_id
@@ -4023,7 +3644,7 @@ paths:
         description: A unique value identifying this treatment.
         required: true
       tags:
-      - treatments
+      - model
       requestBody:
         content:
           application/json:
@@ -4045,7 +3666,7 @@ paths:
                 $ref: '#/components/schemas/Treatment'
           description: ''
     delete:
-      operationId: treatments_destroy
+      operationId: model_treatments_destroy
       parameters:
       - in: path
         name: submitter_treatment_id
@@ -4054,26 +3675,12 @@ paths:
         description: A unique value identifying this treatment.
         required: true
       tags:
-      - treatments
+      - model
       security:
       - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
-  /api/v1/version_check:
-    get:
-      operationId: api_v1_version_check_retrieve
-      tags:
-      - api
-      security:
-      - BentoRemoteUserAuthentication: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: string
-          description: ''
 components:
   schemas:
     AnatomicalSiteIrradiatedEnum:
@@ -4828,16 +4435,6 @@ components:
       - Monoclonal antibodies other than immune checkpoint inhibitors
       - Other immunomodulatory substances
       type: string
-    IngestRequestRequest:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: object
-            additionalProperties: {}
-      required:
-      - data
     LateralityOfPriorMalignancyEnum:
       enum:
       - Bilateral
