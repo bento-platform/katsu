@@ -42,3 +42,4 @@ katsu.code-workspace
 
 # Backup files
 backup.json
+chord_metadata_service/mohpackets/data/backup_db/*
