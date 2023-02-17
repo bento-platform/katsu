@@ -73,7 +73,6 @@ def create_bulk_objects(serializer_class, data: dict):
 def backup_db():
     """Backup the database with current date and time."""
     backup_db_folder = "chord_metadata_service/mohpackets/data/backup_db"
-    # Create the fixtures folder if it doesn't already exist
     os.makedirs(backup_db_folder, exist_ok=True)
     db_name = f"db_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"
     try:
