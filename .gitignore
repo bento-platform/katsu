@@ -10,7 +10,6 @@ postgres/
 
 # migrations
 patients/migrations/*
-**/phenopackets/migrations/*
 
 # passwords
 passwords.txt

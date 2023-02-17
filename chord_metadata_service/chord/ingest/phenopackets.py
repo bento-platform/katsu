@@ -23,6 +23,15 @@ from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, work
 
 from typing import Any, Optional, Union
 
+def _get_or_create_opt(key: str, data: dict, create_func):
+    """
+    Helper function to get or create DB objects if a key is in a dict
+    """
+    obj = None
+    if key in data:
+        obj = create_func(data[key])
+    return obj
+
 
 def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
     # Below is code for if we want to re-use phenotypic features in the future
@@ -200,15 +209,52 @@ def get_or_create_hts_file(hts_file) -> pm.HtsFile:
     return hts_file
 
 
-def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpretation:
-    gene_descriptor = None
-    variant_interpretation = None
+def get_or_create_gene_descriptor(gene_desc) -> pm.GeneDescriptor:
+    gene_descriptor, _ = pm.GeneDescriptor.objects.get_or_create(
+        id=gene_desc["value_id"],
+        symbol=gene_desc["symbol"],
+        description=gene_desc.get("description", ""),
+        alternate_ids=gene_desc.get("alternate_ids", []),
+        xrefs=gene_desc.get("xrefs", []),
+        alternate_symbols=gene_desc.get("alternate_symbols", [])
+    )
+    return gene_descriptor
 
-    # A GenomicInterpretation contains either a gene_descriptor, or a variant_interpretation
-    if "gene_descriptor" in gen_interp:
-        gene_descriptor = {}
-    elif "variant_interpretation" in gen_interp:
-        variant_interpretation = {}
+
+def get_or_create_variant_descriptor(var_desc: dict) -> pm.VariantDescriptor:
+    gene_descriptor = _get_or_create_opt("gene_context", var_desc, get_or_create_gene_descriptor)
+    variant_descriptor, _ = pm.VariantDescriptor.objects.get_or_create(
+        id=var_desc["id"],
+        variation=var_desc.get("variation", {}),
+        label=var_desc.get("label", ""),
+        description=var_desc.get("description", ""),
+        gene_context=gene_descriptor,
+        expressions=var_desc.get("expressions", []),
+        vcf_record=var_desc.get("vcf_record", {}),
+        xrefs=var_desc.get("xrefs", []),
+        alternate_labels=var_desc.get("alternate_labels", []),
+        extensions=var_desc.get("extensions", []),
+        molecule_context=var_desc.get("molecule_context", "unspecified_molecule_context"),
+        structural_type=var_desc.get("structural_type", {}),
+        vrs_ref_allele_seq=var_desc.get("vrs_ref_allele_seq", ""),
+        allelic_state=var_desc.get("allelic_state", {})
+    )
+    return variant_descriptor
+
+
+def get_or_create_variant_interp(variant_interp_data: dict) -> pm.VariantInterpretation:
+    variant_descriptor = get_or_create_variant_descriptor(variant_interp_data["variation_descriptor"])
+    variant_interpretation, _ = pm.VariantInterpretation.objects.get_or_create(
+        acmg_pathogenicity_classification=variant_interp_data["acmg_pathogenicity_classification"],
+        therapeutic_actionability=variant_interp_data["therapeutic_actionability"],
+        variant=variant_descriptor
+    )
+    return variant_interpretation
+
+
+def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpretation:
+    gene_descriptor = _get_or_create_opt("gene_descriptor", gen_interp, get_or_create_gene_descriptor)
+    variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
 
     gen_obj, _ = pm.GenomicInterpretation.objects.get_or_create(
         subject_or_biosample_id=gen_interp["subject_or_biosample_id"],
@@ -216,8 +262,8 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
         gene_descriptor=gene_descriptor,
         variant_interpretation=variant_interpretation
     )
-
     return gen_obj
+
 
 def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
     # Create GenomicInterpretation
@@ -229,23 +275,23 @@ def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
     ]
 
     diag_obj, _ = pm.Diagnosis.objects.get_or_create(
-        disease=diagnosis["disease"],
-        genomic_interpretations=genomic_interpretations,
+        temp_disease=diagnosis["disease"],
         extra_properties=diagnosis.get("extra_properties", {})
     )
+    diag_obj.genomic_interpretations.set(genomic_interpretations)
     return diag_obj
 
 
 def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
     diagnosis = get_or_create_diagnosis(interpretation["diagnosis"])
-
     interp_obj, _ = pm.Interpretation.objects.get_or_create(
         id=interpretation["id"],
-        progress_status=interpretation["progress_status"],
         diagnosis=diagnosis,
+        progress_status=interpretation["progress_status"],
         summary=interpretation.get("summary", {}),
         extra_properties=interpretation.get("extra_properties", {})
     )
+    # interp_obj.diagnosis.set(diagnosis)
     return interp_obj
 
 
@@ -315,7 +361,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     new_phenopacket = pm.Phenopacket(
         id=new_phenopacket_id,
         subject=subject_obj,
-        diseases=diseases,
+        temp_diseases=diseases,
         measurements=measurements,
         medical_actions=medical_actions,
         meta_data=meta_data_obj,

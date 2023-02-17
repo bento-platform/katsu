@@ -352,7 +352,7 @@ class VariantDescriptor(BaseTimeStamp):
     variation = models.JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT_DESCRIPTOR, "variation"))
     label = models.CharField(blank=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "label"))
     description = models.CharField(blank=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "description"))
-    gene_context = models.ForeignKey(GeneDescriptor, blank=True, on_delete=models.CASCADE,
+    gene_context = models.ForeignKey(GeneDescriptor, blank=True, null=True, on_delete=models.CASCADE,
                                      help_text=rec_help(d.VARIANT_DESCRIPTOR, "gene_context"))
     expressions = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(EXPRESSION_SCHEMA)],
                                    help_text=rec_help(d.VARIANT_DESCRIPTOR, "expressions"))
@@ -390,7 +390,6 @@ class VariantInterpretation(BaseTimeStamp):
         ('NOT_ACTIONABLE', 'NOT_ACTIONABLE'),
         ('ACTIONABLE', 'ACTIONABLE'),
     )
-    id = models.CharField(primary_key=True, max_length=200, help_text="Unique identifier for VariantInterpretation rows")
     acmg_pathogenicity_classification = models.CharField(max_length=200, choices=VARIANT_INTERPRETATION_STATUS, default='NOT_PROVIDED',
                                                          help_text=rec_help(d.VARIANT_INTERPRETATION, "acmg_pathogenicity_classification"))
     therapeutic_actionability = models.CharField(max_length=200, choices=THERAPEUTIC_ACTIONABILITY_CHOICES, default='UNKNOWN_ACTIONABILITY',
@@ -448,13 +447,13 @@ class Diagnosis(BaseTimeStamp):
     """
 
     # disease = models.ForeignKey(Disease, on_delete=models.CASCADE, help_text='The diagnosed condition.')
-    disease = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
+    temp_disease = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
     # required?
     genomic_interpretations = models.ManyToManyField(
-        GenomicInterpretation, blank=True,
+        GenomicInterpretation, blank=True, null=True,
         help_text='The genomic elements assessed as being responsible for the disease.')
-    extra_properties = JSONField(blank=True, null=True,
-                                 help_text='Extra properties that are not supported by current schema')
+    extra_properties = JSONField(
+        blank=True, null=True, help_text='Extra properties that are not supported by current schema')
 
     def __str__(self):
         return str(self.id)
@@ -478,7 +477,7 @@ class Interpretation(BaseTimeStamp):
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for the interpretation.')
     progress_status = models.CharField(choices=PROGRESS_STATUS, max_length=200, blank=True,
                                        help_text='The current status of work on the case.')
-    diagnosis = models.ManyToManyField(Diagnosis, help_text='One or more diagnoses, if made.')
+    diagnosis = models.ForeignKey(Diagnosis, blank=True, on_delete=models.CASCADE, help_text='One or more diagnoses, if made.')
     summary = models.CharField(max_length=200, blank=True, help_text='Free text summary of the interpretation.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
@@ -518,7 +517,7 @@ class Phenopacket(BaseTimeStamp, IndexableMixin):
     interpretations = models.ManyToManyField(
         Interpretation, blank=True, help_text=rec_help(d.PHENOPACKET, "interpretations"))
 
-    diseases = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
+    temp_diseases = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
 
     medical_actions = models.JSONField(
         blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_MEDICAL_ACTION_SCHEMA)])
