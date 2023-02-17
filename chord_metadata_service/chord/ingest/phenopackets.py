@@ -23,6 +23,7 @@ from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, work
 
 from typing import Any, Optional, Union
 
+
 def _get_or_create_opt(key: str, data: dict, create_func):
     """
     Helper function to get or create DB objects if a key is in a dict
@@ -173,42 +174,6 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
     return bs_obj
 
 
-def get_or_create_gene(g: dict) -> pm.Gene:
-    # TODO: Validate CURIE
-    # TODO: Rename alternate_id
-    g_obj, _ = pm.Gene.objects.get_or_create(
-        id=g["id"],
-        alternate_ids=g.get("alternate_ids", []),
-        symbol=g["symbol"],
-        extra_properties=g.get("extra_properties", {})
-    )
-    return g_obj
-
-
-def get_or_create_disease(disease) -> pm.Disease:
-    d_obj, _ = pm.Disease.objects.get_or_create(
-        term=disease["term"],
-        disease_stage=disease.get("disease_stage", []),
-        tnm_finding=disease.get("tnm_finding", []),
-        extra_properties=disease.get("extra_properties", {}),
-        **query_and_check_nulls(disease, "onset")
-    )
-    return d_obj
-
-
-def get_or_create_hts_file(hts_file) -> pm.HtsFile:
-    htsf_obj, _ = pm.HtsFile.objects.get_or_create(
-        uri=hts_file["uri"],
-        description=hts_file.get("description", None),
-        hts_format=hts_file["hts_format"],
-        genome_assembly=hts_file["genome_assembly"],
-        individual_to_sample_identifiers=hts_file.get("individual_to_sample_identifiers", None),
-        extra_properties=hts_file.get("extra_properties", {})
-    )
-    # TODO: seems to simply return the param object hts_file, not the htsf_obj
-    return hts_file
-
-
 def get_or_create_gene_descriptor(gene_desc) -> pm.GeneDescriptor:
     gene_descriptor, _ = pm.GeneDescriptor.objects.get_or_create(
         id=gene_desc["value_id"],
@@ -291,7 +256,7 @@ def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
         summary=interpretation.get("summary", {}),
         extra_properties=interpretation.get("extra_properties", {})
     )
-    # interp_obj.diagnosis.set(diagnosis)
+
     return interp_obj
 
 
