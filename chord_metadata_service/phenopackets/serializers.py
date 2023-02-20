@@ -12,7 +12,7 @@ from .models import (
     Phenopacket,
     GenomicInterpretation,
     Diagnosis,
-    Interpretation,
+    Interpretation, VariantInterpretation, VariantDescriptor, GeneDescriptor,
 )
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
@@ -31,7 +31,10 @@ __all__ = [
     "BiosampleSerializer",
     "SimplePhenopacketSerializer",
     "PhenopacketSerializer",
+    "VariantDescriptorSerializer",
+    "VariantInterpretationSerializer",
     "GenomicInterpretationSerializer",
+    "GeneDescriptorSerializer",
     "DiagnosisSerializer",
     "InterpretationSerializer",
 ]
@@ -189,9 +192,74 @@ class BiosampleSerializer(GenericSerializer):
         return instance
 
 
+#############################################################
+#                                                           #
+#                Interpretation Serializers                 #
+#                                                           #
+#############################################################
+
+class VariantDescriptorSerializer(GenericSerializer):
+    class Meta:
+        model = VariantDescriptor
+        fields = '__all__'
+
+
+class VariantInterpretationSerializer(GenericSerializer):
+    variant = VariantDescriptorSerializer(many=False, required=True)
+    # def to_representation(self, instance):
+    #     response = super().to_representation(instance)
+    #     response['variant'] = VariantDescriptorSerializer(instance.variant, many=False, required=False).data
+    #     return response
+
+    class Meta:
+        model = VariantInterpretation
+        fields = '__all__'
+
+
+class GeneDescriptorSerializer(GenericSerializer):
+
+    class Meta:
+        model = GeneDescriptor
+        fields = '__all__'
+
+
+class GenomicInterpretationSerializer(GenericSerializer):
+    gene_descriptor = GeneDescriptorSerializer()
+    variant_interpretation = VariantInterpretationSerializer()
+
+    class Meta:
+        model = GenomicInterpretation
+        fields = '__all__'
+
+
+class DiagnosisSerializer(GenericSerializer):
+
+    genomic_interpretations = GenomicInterpretationSerializer(many=True, required=False)
+
+    class Meta:
+        model = Diagnosis
+        fields = '__all__'
+
+
+class InterpretationSerializer(GenericSerializer):
+
+    diagnosis = DiagnosisSerializer()
+
+    class Meta:
+        model = Interpretation
+        fields = '__all__'
+
+#############################################################
+#                                                           #
+#              Phenopacket Data  Serializers                 #
+#                                                           #
+#############################################################
+
+
 class SimplePhenopacketSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
+    interpretations = InterpretationSerializer(many=True, required=False)
 
     class Meta:
         model = Phenopacket
@@ -226,27 +294,3 @@ class PhenopacketSerializer(SimplePhenopacketSerializer):
             exclude_when_nested=["phenopackets", "biosamples"]
             ).data
         return response
-
-
-#############################################################
-#                                                           #
-#                Interpretation Serializers                 #
-#                                                           #
-#############################################################
-
-class GenomicInterpretationSerializer(GenericSerializer):
-    class Meta:
-        model = GenomicInterpretation
-        fields = '__all__'
-
-
-class DiagnosisSerializer(GenericSerializer):
-    class Meta:
-        model = Diagnosis
-        fields = '__all__'
-
-
-class InterpretationSerializer(GenericSerializer):
-    class Meta:
-        model = Interpretation
-        fields = '__all__'
