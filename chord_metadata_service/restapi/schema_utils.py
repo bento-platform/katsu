@@ -49,6 +49,7 @@ def search_optional_str(order: int, queryable: str = "all", multiple: bool = Fal
         q.SEARCH_OP_IN,
         q.SEARCH_OP_ISW,
         q.SEARCH_OP_IEW,
+        q.SEARCH_OP_ILIKE,
     ], order, queryable, multiple)
 
 
