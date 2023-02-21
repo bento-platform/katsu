@@ -26,17 +26,13 @@ VALID_META_DATA_1 = {
 }
 
 VALID_META_DATA_2 = {
-    "created_by": "Ksenia Zaytseva",
-    "submitted_by": "Ksenia Zaytseva",
+    "created_by": "Victor Rocheleau",
+    "submitted_by": "Victor Rocheleau",
     "external_references": [
         {
-            "id": "PMID:30808312",
-            "description": "Bao M, et al. COL6A1 mutation leading to Bethlem myopathy with recurrent hematuria: a case "
-                           "report. BMC Neurol. 2019;19(1):32."
-        },
-        {
-            "id": "PMID:3080844",
-            "description": "Test"
+            "id": "DOI:10.1016/j.jaccas.2020.04.001",
+            "reference": "PMID:32292915",
+            "description": "The Imperfect Cytokine Storm: Severe COVID-19 With ARDS in a Patient on Durable LVAD Support"
         }
     ],
     "updates": [
@@ -46,7 +42,7 @@ VALID_META_DATA_2 = {
             "comment": "added phenotypic features to individual patient:1"
         }
     ],
-    "phenopacket_schema_version": "0.1"
+    "phenopacket_schema_version": "2.0"
 }
 
 VALID_INDIVIDUAL_1 = {

@@ -199,14 +199,14 @@
       "created": "2021-05-14T10:35:00Z",
       "createdBy": "Peter R.",
       "resources": [{
-        "id": "hp",
+        "id": "HP:2018-03-08",
         "name": "human phenotype ontology",
         "url": "http://purl.obolibrary.org/obo/hp.owl",
         "version": "2018-03-08",
         "namespacePrefix": "HP",
         "iriPrefix": "http://purl.obolibrary.org/obo/HP_"
       }, {
-        "id": "geno",
+        "id": "GENO:19-03-2018",
         "name": "Genotype Ontology",
         "url": "http://purl.obolibrary.org/obo/geno.owl",
         "version": "19-03-2018",

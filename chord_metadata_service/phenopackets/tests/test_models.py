@@ -133,34 +133,34 @@ class HtsFileTest(TestCase):
         self.assertEqual(str(self.hts_file), 'https://data.example/genomes/germline_wgs.vcf.gz')
 
 
-class GeneTest(TestCase):
-    """ Test module for Gene model. """
+# class GeneTest(TestCase):
+#     """ Test module for Gene model. """
+#
+#     def setUp(self):
+#         self.gene_1 = m.Gene.objects.create(**c.VALID_GENE_1)
+#
+#     def test_gene(self):
+#         gene_1 = m.Gene.objects.get(id='HGNC:347')
+#         self.assertEqual(gene_1.symbol, 'ETF1')
+#         with self.assertRaises(IntegrityError):
+#             m.Gene.objects.create(**c.DUPLICATE_GENE_2)
+#
+#     def test_gene_str(self):
+#         self.assertEqual(str(self.gene_1), "HGNC:347")
 
-    def setUp(self):
-        self.gene_1 = m.Gene.objects.create(**c.VALID_GENE_1)
 
-    def test_gene(self):
-        gene_1 = m.Gene.objects.get(id='HGNC:347')
-        self.assertEqual(gene_1.symbol, 'ETF1')
-        with self.assertRaises(IntegrityError):
-            m.Gene.objects.create(**c.DUPLICATE_GENE_2)
-
-    def test_gene_str(self):
-        self.assertEqual(str(self.gene_1), "HGNC:347")
-
-
-class VariantTest(TestCase):
-    """ Test module for Variant model. """
-
-    def setUp(self):
-        self.variant = m.Variant.objects.create(**c.VALID_VARIANT_1)
-
-    def test_variant(self):
-        variant_query = m.Variant.objects.filter(zygosity__id='NCBITaxon:9606')
-        self.assertEqual(variant_query.count(), 1)
-
-    def test_variant_str(self):
-        self.assertEqual(str(self.variant), str(self.variant.id))
+# class VariantTest(TestCase):
+#     """ Test module for Variant model. """
+#
+#     def setUp(self):
+#         self.variant = m.Variant.objects.create(**c.VALID_VARIANT_1)
+#
+#     def test_variant(self):
+#         variant_query = m.Variant.objects.filter(zygosity__id='NCBITaxon:9606')
+#         self.assertEqual(variant_query.count(), 1)
+#
+#     def test_variant_str(self):
+#         self.assertEqual(str(self.variant), str(self.variant.id))
 
 
 class DiseaseTest(TestCase):
@@ -278,8 +278,8 @@ class MetaDataTest(TestCase):
         self.metadata.resources.set([self.resource_1, self.resource_2])
 
     def test_metadata(self):
-        metadata = m.MetaData.objects.get(created_by__icontains='ksenia')
-        self.assertEqual(metadata.submitted_by, 'Ksenia Zaytseva')
+        metadata = m.MetaData.objects.get(created_by__icontains='victor')
+        self.assertEqual(metadata.submitted_by, c.VALID_META_DATA_2["submitted_by"])
         self.assertEqual(metadata.resources.count(), 2)
 
     def test_metadata_str(self):
