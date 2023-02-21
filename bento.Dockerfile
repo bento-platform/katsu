@@ -1,4 +1,4 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2023.02.09
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2023.02.21
 
 # Install Postgres client for checking if database is ready
 # Install Poetry for dependency management and uvicorn to serve the API
@@ -25,4 +25,5 @@ RUN poetry install --without dev
 # Create temporary directory for downloading files etc.
 RUN mkdir -p tmp
 
-CMD [ "bash", "./entrypoint.bash" ]
+ENTRYPOINT [ "bash", "./entrypoint.bash" ]
+CMD [ "bash", "./run.bash" ]
