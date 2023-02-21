@@ -13,9 +13,9 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
     karyotypic_sex = django_filters.CharFilter(lookup_expr="iexact")
     ethnicity = django_filters.CharFilter(lookup_expr="icontains")
     race = django_filters.CharFilter(lookup_expr="icontains")
-    disease = django_filters.CharFilter(
-        method="filter_disease", field_name="phenopackets__diseases",
-        label="Disease"
+    disease_docs = django_filters.CharFilter(
+        method="filter_disease", field_name="phenopackets__diseases_docs",
+        label="Diseases"
     )
     # e.g. select all patients who have a symptom "dry cough"
     found_phenotypic_feature = django_filters.CharFilter(
@@ -42,7 +42,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         qs = qs.filter(
             Q(phenopackets__phenotypic_features__pftype__id__icontains=value) |
             Q(phenopackets__phenotypic_features__pftype__label__icontains=value),
-            phenopackets__phenotypic_features__negated=False
+            phenopackets__phenotypic_features__excluded=False
         ).distinct()
         return qs
 
@@ -54,11 +54,11 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         qs = qs.filter(mcodepacket__cancer_related_procedures__code__icontains=value).distinct()
         return qs
 
+    # TODO: Diseases were changed to JSONField, we cant use case-insensitive 'icontains'. Rollback to M2M?
     def filter_disease(self, qs, name, value):
-        qs = qs.filter(
-            Q(phenopackets__diseases__term__id__icontains=value) |
-            Q(phenopackets__diseases__term__label__icontains=value)
-        ).distinct()
+        id_filter = Q(phenopackets__diseases_docs__contains=[{"term": {"id": value}}])
+        label_filter = Q(phenopackets__diseases_docs__contains=[{"term": {"label": value}}])
+        qs = qs.filter(id_filter | label_filter).distinct()
         return qs
 
     def filter_extra_properties(self, qs, name, value):

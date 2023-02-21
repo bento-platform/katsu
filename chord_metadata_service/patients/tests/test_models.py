@@ -18,6 +18,7 @@ class IndividualTest(TestCase):
             id="phenopacket_id:1",
             subject=self.individual_one,
             meta_data=self.meta_data,
+            diseases_docs=[c.VALID_DISEASE_1]
         )
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
@@ -25,8 +26,6 @@ class IndividualTest(TestCase):
         self.phenotypic_feature_2 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
-        self.disease_1 = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.phenopacket.diseases_docs.set([self.disease_1])
 
     def test_individual(self):
         individual_one = Individual.objects.get(id='patient:1')
@@ -40,12 +39,22 @@ class IndividualTest(TestCase):
 
     def test_filtering(self):
         f = IndividualFilter()
-        # all phenotypic feature constants have negated=True
+        # all phenotypic feature constants have excluded=True
         result = f.filter_found_phenotypic_feature(Individual.objects.all(), "phenopackets", "proptosis")
         self.assertEqual(len(result), 0)
         result = f.filter_found_phenotypic_feature(Individual.objects.all(), "phenopackets", "HP:0000520")
         self.assertEqual(len(result), 0)
-        result = f.filter_disease(Individual.objects.all(), "phenopackets", "OMIM:164400")
+
+        # There are 2 excluded phenotypic features...
+        result = Individual.objects.all().filter(phenopackets__phenotypic_features__excluded=True)
+        self.assertEqual(len(result), 2)
+
+        # ... and both excluded phenotypic features are for individual_one
+        result = result.distinct()
         self.assertEqual(len(result), 1)
-        result = f.filter_disease(Individual.objects.all(), "phenopackets", "spinocerebellar ataxia")
+        self.assertEqual(result.first().id, self.individual_one.id)
+
+        result = f.filter_disease(Individual.objects.all(), "phenopackets", c.VALID_DISEASE_1["term"]["id"])
+        self.assertEqual(len(result), 1)
+        result = f.filter_disease(Individual.objects.all(), "phenopackets", c.VALID_DISEASE_1["term"]["label"])
         self.assertEqual(len(result), 1)

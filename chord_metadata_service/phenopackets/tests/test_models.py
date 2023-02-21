@@ -286,6 +286,7 @@ class MetaDataTest(TestCase):
         self.assertEqual(str(self.metadata), str(self.metadata.id))
 
 
+
 class PhenopacketTest(TestCase):
     """ Test module for Phenopacket model """
 

@@ -150,6 +150,7 @@ VALID_DISEASE_1 = {
         "id": "OMIM:164400",
         "label": "Spinocerebellar ataxia 1"
     },
+    "excluded": "False",
     "onset": {
         "age": "P25Y3M2D"
     },
@@ -159,7 +160,7 @@ VALID_DISEASE_1 = {
             "label": "Cancer TNM Finding by Site"
         }
     ],
-    "tnm_finding": [
+    "clinical_tnm_finding": [
         {
             "id": "NCIT:C28091",
             "label": "Gleason Score 7"
@@ -300,7 +301,7 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
             "id": "HP:0000520",
             "label": "Proptosis"
         },
-        negated=True,
+        excluded=True,
         severity={
             "id": "HP: 0012825",
             "label": "Mild"
@@ -341,7 +342,7 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
 def invalid_phenotypic_feature():
     return dict(
         description='This is a test phenotypic feature',
-        negated=True,
+        excluded=True,
         severity={
             "id": "HP: 0012825",
             "label": "Mild"
