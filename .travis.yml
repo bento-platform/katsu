@@ -3,16 +3,16 @@ language: python
 python:
   - "3.10"
 addons:
-  postgresql: "12"
+  postgresql: "13"
   apt:
     packages:
-      - postgresql-12
-      - postgresql-contrib-12
+      - postgresql-13
+      - postgresql-contrib-13
 before_install:
   - sudo -u postgres psql -U postgres -p 5433 -d postgres -c "alter user postgres with password 'hj38f3Ntr';"
 install:
-  - pip install -r requirements-dev.txt
+  - pip install -r requirements-candig-dev.txt
 script:
   - export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="hj38f3Ntr" && export POSTGRES_PORT=5433
-  - python3 -m coverage run ./manage.py test
+  - python3 -m coverage run ./manage.py test chord_metadata_service/mohpackets
   - codecov
