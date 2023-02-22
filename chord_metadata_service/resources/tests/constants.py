@@ -17,9 +17,10 @@ VALID_RESOURCE_2 = {
 }
 
 DUPLICATE_RESOURCE_3 = {
-    "id": "HGNC:2019-08-08",
-    "name": "HUGO Gene Nomenclature Committee",
-    "url": "https://www.genenames.org",
-    "version": "2019-08-08",
-    "namespace_prefix": "HGNC"
+    "id": "MONDO:http://purl.obolibrary.org/obo/mondo/releases/2021-11-26/mondo.owl",
+    "name": "Mondo Disease Ontology",
+    "url": "http://purl.obolibrary.org/obo/mondo.obo",
+    "version": "http://purl.obolibrary.org/obo/mondo/releases/2021-11-26/mondo.owl",
+    "namespace_prefix": "MONDO",
+    "iri_prefix": "http://purl.obolibrary.org/obo/MONDO_"
 }
