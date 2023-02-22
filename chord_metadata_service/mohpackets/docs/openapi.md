@@ -5,18 +5,23 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 
 # Authentication
 
-* API Key (BentoRemoteUserAuthentication)
-    - Parameter Name: **api_key**, in: header. 
+- HTTP Authentication, scheme: basic
 
-<h1 id="metadata-service-api-api">api</h1>
+* API Key (cookieAuth)
+    - Parameter Name: **sessionid**, in: cookie. 
 
-## api_v1_discovery_biomarkers_list
+* API Key (tokenAuth)
+    - Parameter Name: **Authorization**, in: header. Token-based authentication with required prefix "Token"
 
-<a id="opIdapi_v1_discovery_biomarkers_list"></a>
+<h1 id="metadata-service-api-discovery">discovery</h1>
 
-`GET /api/v1/discovery/biomarkers/`
+## discovery_biomarkers_list
 
-<h3 id="api_v1_discovery_biomarkers_list-parameters">Parameters</h3>
+<a id="opIddiscovery_biomarkers_list"></a>
+
+`GET /moh/v1/discovery/biomarkers/`
+
+<h3 id="discovery_biomarkers_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -41,13 +46,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_chemotherapies_list
+## discovery_chemotherapies_list
 
-<a id="opIdapi_v1_discovery_chemotherapies_list"></a>
+<a id="opIddiscovery_chemotherapies_list"></a>
 
-`GET /api/v1/discovery/chemotherapies/`
+`GET /moh/v1/discovery/chemotherapies/`
 
-<h3 id="api_v1_discovery_chemotherapies_list-parameters">Parameters</h3>
+<h3 id="discovery_chemotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -70,13 +75,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_comorbidities_list
+## discovery_comorbidities_list
 
-<a id="opIdapi_v1_discovery_comorbidities_list"></a>
+<a id="opIddiscovery_comorbidities_list"></a>
 
-`GET /api/v1/discovery/comorbidities/`
+`GET /moh/v1/discovery/comorbidities/`
 
-<h3 id="api_v1_discovery_comorbidities_list-parameters">Parameters</h3>
+<h3 id="discovery_comorbidities_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -99,13 +104,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_donors_list
+## discovery_donors_list
 
-<a id="opIdapi_v1_discovery_donors_list"></a>
+<a id="opIddiscovery_donors_list"></a>
 
-`GET /api/v1/discovery/donors/`
+`GET /moh/v1/discovery/donors/`
 
-<h3 id="api_v1_discovery_donors_list-parameters">Parameters</h3>
+<h3 id="discovery_donors_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -143,13 +148,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_follow_ups_list
+## discovery_follow_ups_list
 
-<a id="opIdapi_v1_discovery_follow_ups_list"></a>
+<a id="opIddiscovery_follow_ups_list"></a>
 
-`GET /api/v1/discovery/follow_ups/`
+`GET /moh/v1/discovery/follow_ups/`
 
-<h3 id="api_v1_discovery_follow_ups_list-parameters">Parameters</h3>
+<h3 id="discovery_follow_ups_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -182,13 +187,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_hormone_therapies_list
+## discovery_hormone_therapies_list
 
-<a id="opIdapi_v1_discovery_hormone_therapies_list"></a>
+<a id="opIddiscovery_hormone_therapies_list"></a>
 
-`GET /api/v1/discovery/hormone_therapies/`
+`GET /moh/v1/discovery/hormone_therapies/`
 
-<h3 id="api_v1_discovery_hormone_therapies_list-parameters">Parameters</h3>
+<h3 id="discovery_hormone_therapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -211,13 +216,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_immunotherapies_list
+## discovery_immunotherapies_list
 
-<a id="opIdapi_v1_discovery_immunotherapies_list"></a>
+<a id="opIddiscovery_immunotherapies_list"></a>
 
-`GET /api/v1/discovery/immunotherapies/`
+`GET /moh/v1/discovery/immunotherapies/`
 
-<h3 id="api_v1_discovery_immunotherapies_list-parameters">Parameters</h3>
+<h3 id="discovery_immunotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -238,11 +243,11 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_overview_retrieve
+## discovery_overview_retrieve
 
-<a id="opIdapi_v1_discovery_overview_retrieve"></a>
+<a id="opIddiscovery_overview_retrieve"></a>
 
-`GET /api/v1/discovery/overview`
+`GET /moh/v1/discovery/overview`
 
 MoH Overview schema
 
@@ -257,13 +262,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_primary_diagnoses_list
+## discovery_primary_diagnoses_list
 
-<a id="opIdapi_v1_discovery_primary_diagnoses_list"></a>
+<a id="opIddiscovery_primary_diagnoses_list"></a>
 
-`GET /api/v1/discovery/primary_diagnoses/`
+`GET /moh/v1/discovery/primary_diagnoses/`
 
-<h3 id="api_v1_discovery_primary_diagnoses_list-parameters">Parameters</h3>
+<h3 id="discovery_primary_diagnoses_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -292,13 +297,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_radiations_list
+## discovery_radiations_list
 
-<a id="opIdapi_v1_discovery_radiations_list"></a>
+<a id="opIddiscovery_radiations_list"></a>
 
-`GET /api/v1/discovery/radiations/`
+`GET /moh/v1/discovery/radiations/`
 
-<h3 id="api_v1_discovery_radiations_list-parameters">Parameters</h3>
+<h3 id="discovery_radiations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -323,13 +328,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_sample_registrations_list
+## discovery_sample_registrations_list
 
-<a id="opIdapi_v1_discovery_sample_registrations_list"></a>
+<a id="opIddiscovery_sample_registrations_list"></a>
 
-`GET /api/v1/discovery/sample_registrations/`
+`GET /moh/v1/discovery/sample_registrations/`
 
-<h3 id="api_v1_discovery_sample_registrations_list-parameters">Parameters</h3>
+<h3 id="discovery_sample_registrations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -354,13 +359,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_specimens_list
+## discovery_specimens_list
 
-<a id="opIdapi_v1_discovery_specimens_list"></a>
+<a id="opIddiscovery_specimens_list"></a>
 
-`GET /api/v1/discovery/specimens/`
+`GET /moh/v1/discovery/specimens/`
 
-<h3 id="api_v1_discovery_specimens_list-parameters">Parameters</h3>
+<h3 id="discovery_specimens_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -394,13 +399,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_surgeries_list
+## discovery_surgeries_list
 
-<a id="opIdapi_v1_discovery_surgeries_list"></a>
+<a id="opIddiscovery_surgeries_list"></a>
 
-`GET /api/v1/discovery/surgeries/`
+`GET /moh/v1/discovery/surgeries/`
 
-<h3 id="api_v1_discovery_surgeries_list-parameters">Parameters</h3>
+<h3 id="discovery_surgeries_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -432,13 +437,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_treatments_list
+## discovery_treatments_list
 
-<a id="opIdapi_v1_discovery_treatments_list"></a>
+<a id="opIddiscovery_treatments_list"></a>
 
-`GET /api/v1/discovery/treatments/`
+`GET /moh/v1/discovery/treatments/`
 
-<h3 id="api_v1_discovery_treatments_list-parameters">Parameters</h3>
+<h3 id="discovery_treatments_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -467,295 +472,15 @@ MoH Overview schema
 }
 ```
 
-## api_v1_ingest_biomarkers_create
+<h1 id="metadata-service-api-model">model</h1>
 
-<a id="opIdapi_v1_ingest_biomarkers_create"></a>
+## model_biomarkers_list
 
-`POST /api/v1/ingest/biomarkers`
+<a id="opIdmodel_biomarkers_list"></a>
 
-<h3 id="api_v1_ingest_biomarkers_create-parameters">Parameters</h3>
+`GET /moh/v1/model/biomarkers/`
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_chemotherapies_create
-
-<a id="opIdapi_v1_ingest_chemotherapies_create"></a>
-
-`POST /api/v1/ingest/chemotherapies`
-
-<h3 id="api_v1_ingest_chemotherapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_comorbidities_create
-
-<a id="opIdapi_v1_ingest_comorbidities_create"></a>
-
-`POST /api/v1/ingest/comorbidities`
-
-<h3 id="api_v1_ingest_comorbidities_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_donors_create
-
-<a id="opIdapi_v1_ingest_donors_create"></a>
-
-`POST /api/v1/ingest/donors`
-
-<h3 id="api_v1_ingest_donors_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_follow_ups_create
-
-<a id="opIdapi_v1_ingest_follow_ups_create"></a>
-
-`POST /api/v1/ingest/follow_ups`
-
-<h3 id="api_v1_ingest_follow_ups_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_hormone_therapies_create
-
-<a id="opIdapi_v1_ingest_hormone_therapies_create"></a>
-
-`POST /api/v1/ingest/hormone_therapies`
-
-<h3 id="api_v1_ingest_hormone_therapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_immunotherapies_create
-
-<a id="opIdapi_v1_ingest_immunotherapies_create"></a>
-
-`POST /api/v1/ingest/immunotherapies`
-
-<h3 id="api_v1_ingest_immunotherapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_primary_diagnoses_create
-
-<a id="opIdapi_v1_ingest_primary_diagnoses_create"></a>
-
-`POST /api/v1/ingest/primary_diagnoses`
-
-<h3 id="api_v1_ingest_primary_diagnoses_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_programs_create
-
-<a id="opIdapi_v1_ingest_programs_create"></a>
-
-`POST /api/v1/ingest/programs`
-
-<h3 id="api_v1_ingest_programs_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_radiations_create
-
-<a id="opIdapi_v1_ingest_radiations_create"></a>
-
-`POST /api/v1/ingest/radiations`
-
-<h3 id="api_v1_ingest_radiations_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_sample_registrations_create
-
-<a id="opIdapi_v1_ingest_sample_registrations_create"></a>
-
-`POST /api/v1/ingest/sample_registrations`
-
-<h3 id="api_v1_ingest_sample_registrations_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_specimens_create
-
-<a id="opIdapi_v1_ingest_specimens_create"></a>
-
-`POST /api/v1/ingest/specimens`
-
-<h3 id="api_v1_ingest_specimens_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_surgeries_create
-
-<a id="opIdapi_v1_ingest_surgeries_create"></a>
-
-`POST /api/v1/ingest/surgeries`
-
-<h3 id="api_v1_ingest_surgeries_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_treatments_create
-
-<a id="opIdapi_v1_ingest_treatments_create"></a>
-
-`POST /api/v1/ingest/treatments`
-
-<h3 id="api_v1_ingest_treatments_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-<h1 id="metadata-service-api-biomarkers">biomarkers</h1>
-
-## biomarkers_list
-
-<a id="opIdbiomarkers_list"></a>
-
-`GET /api/v1/moh/biomarkers/`
-
-<h3 id="biomarkers_list-parameters">Parameters</h3>
+<h3 id="model_biomarkers_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -799,13 +524,13 @@ MoH Overview schema
 }
 ```
 
-## biomarkers_create
+## model_biomarkers_create
 
-<a id="opIdbiomarkers_create"></a>
+<a id="opIdmodel_biomarkers_create"></a>
 
-`POST /api/v1/moh/biomarkers/`
+`POST /moh/v1/model/biomarkers/`
 
-<h3 id="biomarkers_create-parameters">Parameters</h3>
+<h3 id="model_biomarkers_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -831,13 +556,13 @@ MoH Overview schema
 }
 ```
 
-## biomarkers_retrieve
+## model_biomarkers_retrieve
 
-<a id="opIdbiomarkers_retrieve"></a>
+<a id="opIdmodel_biomarkers_retrieve"></a>
 
-`GET /api/v1/moh/biomarkers/{id}/`
+`GET /moh/v1/model/biomarkers/{id}/`
 
-<h3 id="biomarkers_retrieve-parameters">Parameters</h3>
+<h3 id="model_biomarkers_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -863,13 +588,13 @@ MoH Overview schema
 }
 ```
 
-## biomarkers_update
+## model_biomarkers_update
 
-<a id="opIdbiomarkers_update"></a>
+<a id="opIdmodel_biomarkers_update"></a>
 
-`PUT /api/v1/moh/biomarkers/{id}/`
+`PUT /moh/v1/model/biomarkers/{id}/`
 
-<h3 id="biomarkers_update-parameters">Parameters</h3>
+<h3 id="model_biomarkers_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -896,13 +621,13 @@ MoH Overview schema
 }
 ```
 
-## biomarkers_partial_update
+## model_biomarkers_partial_update
 
-<a id="opIdbiomarkers_partial_update"></a>
+<a id="opIdmodel_biomarkers_partial_update"></a>
 
-`PATCH /api/v1/moh/biomarkers/{id}/`
+`PATCH /moh/v1/model/biomarkers/{id}/`
 
-<h3 id="biomarkers_partial_update-parameters">Parameters</h3>
+<h3 id="model_biomarkers_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -929,27 +654,25 @@ MoH Overview schema
 }
 ```
 
-## biomarkers_destroy
+## model_biomarkers_destroy
 
-<a id="opIdbiomarkers_destroy"></a>
+<a id="opIdmodel_biomarkers_destroy"></a>
 
-`DELETE /api/v1/moh/biomarkers/{id}/`
+`DELETE /moh/v1/model/biomarkers/{id}/`
 
-<h3 id="biomarkers_destroy-parameters">Parameters</h3>
+<h3 id="model_biomarkers_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |id|path|integer|true|A unique integer value identifying this biomarker.|
 
-<h1 id="metadata-service-api-chemotherapies">chemotherapies</h1>
+## model_chemotherapies_list
 
-## chemotherapies_list
+<a id="opIdmodel_chemotherapies_list"></a>
 
-<a id="opIdchemotherapies_list"></a>
+`GET /moh/v1/model/chemotherapies/`
 
-`GET /api/v1/moh/chemotherapies/`
-
-<h3 id="chemotherapies_list-parameters">Parameters</h3>
+<h3 id="model_chemotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -989,13 +712,13 @@ MoH Overview schema
 }
 ```
 
-## chemotherapies_create
+## model_chemotherapies_create
 
-<a id="opIdchemotherapies_create"></a>
+<a id="opIdmodel_chemotherapies_create"></a>
 
-`POST /api/v1/moh/chemotherapies/`
+`POST /moh/v1/model/chemotherapies/`
 
-<h3 id="chemotherapies_create-parameters">Parameters</h3>
+<h3 id="model_chemotherapies_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1019,13 +742,13 @@ MoH Overview schema
 }
 ```
 
-## chemotherapies_retrieve
+## model_chemotherapies_retrieve
 
-<a id="opIdchemotherapies_retrieve"></a>
+<a id="opIdmodel_chemotherapies_retrieve"></a>
 
-`GET /api/v1/moh/chemotherapies/{id}/`
+`GET /moh/v1/model/chemotherapies/{id}/`
 
-<h3 id="chemotherapies_retrieve-parameters">Parameters</h3>
+<h3 id="model_chemotherapies_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1049,13 +772,13 @@ MoH Overview schema
 }
 ```
 
-## chemotherapies_update
+## model_chemotherapies_update
 
-<a id="opIdchemotherapies_update"></a>
+<a id="opIdmodel_chemotherapies_update"></a>
 
-`PUT /api/v1/moh/chemotherapies/{id}/`
+`PUT /moh/v1/model/chemotherapies/{id}/`
 
-<h3 id="chemotherapies_update-parameters">Parameters</h3>
+<h3 id="model_chemotherapies_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1080,13 +803,13 @@ MoH Overview schema
 }
 ```
 
-## chemotherapies_partial_update
+## model_chemotherapies_partial_update
 
-<a id="opIdchemotherapies_partial_update"></a>
+<a id="opIdmodel_chemotherapies_partial_update"></a>
 
-`PATCH /api/v1/moh/chemotherapies/{id}/`
+`PATCH /moh/v1/model/chemotherapies/{id}/`
 
-<h3 id="chemotherapies_partial_update-parameters">Parameters</h3>
+<h3 id="model_chemotherapies_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1111,27 +834,25 @@ MoH Overview schema
 }
 ```
 
-## chemotherapies_destroy
+## model_chemotherapies_destroy
 
-<a id="opIdchemotherapies_destroy"></a>
+<a id="opIdmodel_chemotherapies_destroy"></a>
 
-`DELETE /api/v1/moh/chemotherapies/{id}/`
+`DELETE /moh/v1/model/chemotherapies/{id}/`
 
-<h3 id="chemotherapies_destroy-parameters">Parameters</h3>
+<h3 id="model_chemotherapies_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |id|path|integer|true|A unique integer value identifying this chemotherapy.|
 
-<h1 id="metadata-service-api-comorbidities">comorbidities</h1>
+## model_comorbidities_list
 
-## comorbidities_list
+<a id="opIdmodel_comorbidities_list"></a>
 
-<a id="opIdcomorbidities_list"></a>
+`GET /moh/v1/model/comorbidities/`
 
-`GET /api/v1/moh/comorbidities/`
-
-<h3 id="comorbidities_list-parameters">Parameters</h3>
+<h3 id="model_comorbidities_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1171,13 +892,13 @@ MoH Overview schema
 }
 ```
 
-## comorbidities_create
+## model_comorbidities_create
 
-<a id="opIdcomorbidities_create"></a>
+<a id="opIdmodel_comorbidities_create"></a>
 
-`POST /api/v1/moh/comorbidities/`
+`POST /moh/v1/model/comorbidities/`
 
-<h3 id="comorbidities_create-parameters">Parameters</h3>
+<h3 id="model_comorbidities_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1201,13 +922,13 @@ MoH Overview schema
 }
 ```
 
-## comorbidities_retrieve
+## model_comorbidities_retrieve
 
-<a id="opIdcomorbidities_retrieve"></a>
+<a id="opIdmodel_comorbidities_retrieve"></a>
 
-`GET /api/v1/moh/comorbidities/{id}/`
+`GET /moh/v1/model/comorbidities/{id}/`
 
-<h3 id="comorbidities_retrieve-parameters">Parameters</h3>
+<h3 id="model_comorbidities_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1231,13 +952,13 @@ MoH Overview schema
 }
 ```
 
-## comorbidities_update
+## model_comorbidities_update
 
-<a id="opIdcomorbidities_update"></a>
+<a id="opIdmodel_comorbidities_update"></a>
 
-`PUT /api/v1/moh/comorbidities/{id}/`
+`PUT /moh/v1/model/comorbidities/{id}/`
 
-<h3 id="comorbidities_update-parameters">Parameters</h3>
+<h3 id="model_comorbidities_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1262,13 +983,13 @@ MoH Overview schema
 }
 ```
 
-## comorbidities_partial_update
+## model_comorbidities_partial_update
 
-<a id="opIdcomorbidities_partial_update"></a>
+<a id="opIdmodel_comorbidities_partial_update"></a>
 
-`PATCH /api/v1/moh/comorbidities/{id}/`
+`PATCH /moh/v1/model/comorbidities/{id}/`
 
-<h3 id="comorbidities_partial_update-parameters">Parameters</h3>
+<h3 id="model_comorbidities_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1293,27 +1014,25 @@ MoH Overview schema
 }
 ```
 
-## comorbidities_destroy
+## model_comorbidities_destroy
 
-<a id="opIdcomorbidities_destroy"></a>
+<a id="opIdmodel_comorbidities_destroy"></a>
 
-`DELETE /api/v1/moh/comorbidities/{id}/`
+`DELETE /moh/v1/model/comorbidities/{id}/`
 
-<h3 id="comorbidities_destroy-parameters">Parameters</h3>
+<h3 id="model_comorbidities_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |id|path|integer|true|A unique integer value identifying this comorbidity.|
 
-<h1 id="metadata-service-api-donors">donors</h1>
+## model_donors_list
 
-## donors_list
+<a id="opIdmodel_donors_list"></a>
 
-<a id="opIddonors_list"></a>
+`GET /moh/v1/model/donors/`
 
-`GET /api/v1/moh/donors/`
-
-<h3 id="donors_list-parameters">Parameters</h3>
+<h3 id="model_donors_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1358,7 +1077,9 @@ MoH Overview schema
       "cause_of_death": "Died of cancer",
       "date_of_birth": "string",
       "date_of_death": "string",
-      "primary_site": "Accessory sinuses",
+      "primary_site": [
+        "Accessory sinuses"
+      ],
       "is_deceased": true,
       "program_id": "string"
     }
@@ -1366,13 +1087,13 @@ MoH Overview schema
 }
 ```
 
-## donors_create
+## model_donors_create
 
-<a id="opIddonors_create"></a>
+<a id="opIdmodel_donors_create"></a>
 
-`POST /api/v1/moh/donors/`
+`POST /moh/v1/model/donors/`
 
-<h3 id="donors_create-parameters">Parameters</h3>
+<h3 id="model_donors_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1388,19 +1109,21 @@ MoH Overview schema
   "cause_of_death": "Died of cancer",
   "date_of_birth": "string",
   "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
+  "primary_site": [
+    "Accessory sinuses"
+  ],
   "is_deceased": true,
   "program_id": "string"
 }
 ```
 
-## donors_retrieve
+## model_donors_retrieve
 
-<a id="opIddonors_retrieve"></a>
+<a id="opIdmodel_donors_retrieve"></a>
 
-`GET /api/v1/moh/donors/{submitter_donor_id}/`
+`GET /moh/v1/model/donors/{submitter_donor_id}/`
 
-<h3 id="donors_retrieve-parameters">Parameters</h3>
+<h3 id="model_donors_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1416,19 +1139,21 @@ MoH Overview schema
   "cause_of_death": "Died of cancer",
   "date_of_birth": "string",
   "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
+  "primary_site": [
+    "Accessory sinuses"
+  ],
   "is_deceased": true,
   "program_id": "string"
 }
 ```
 
-## donors_update
+## model_donors_update
 
-<a id="opIddonors_update"></a>
+<a id="opIdmodel_donors_update"></a>
 
-`PUT /api/v1/moh/donors/{submitter_donor_id}/`
+`PUT /moh/v1/model/donors/{submitter_donor_id}/`
 
-<h3 id="donors_update-parameters">Parameters</h3>
+<h3 id="model_donors_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1445,19 +1170,21 @@ MoH Overview schema
   "cause_of_death": "Died of cancer",
   "date_of_birth": "string",
   "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
+  "primary_site": [
+    "Accessory sinuses"
+  ],
   "is_deceased": true,
   "program_id": "string"
 }
 ```
 
-## donors_partial_update
+## model_donors_partial_update
 
-<a id="opIddonors_partial_update"></a>
+<a id="opIdmodel_donors_partial_update"></a>
 
-`PATCH /api/v1/moh/donors/{submitter_donor_id}/`
+`PATCH /moh/v1/model/donors/{submitter_donor_id}/`
 
-<h3 id="donors_partial_update-parameters">Parameters</h3>
+<h3 id="model_donors_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1474,33 +1201,33 @@ MoH Overview schema
   "cause_of_death": "Died of cancer",
   "date_of_birth": "string",
   "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
+  "primary_site": [
+    "Accessory sinuses"
+  ],
   "is_deceased": true,
   "program_id": "string"
 }
 ```
 
-## donors_destroy
+## model_donors_destroy
 
-<a id="opIddonors_destroy"></a>
+<a id="opIdmodel_donors_destroy"></a>
 
-`DELETE /api/v1/moh/donors/{submitter_donor_id}/`
+`DELETE /moh/v1/model/donors/{submitter_donor_id}/`
 
-<h3 id="donors_destroy-parameters">Parameters</h3>
+<h3 id="model_donors_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |submitter_donor_id|path|string|true|A unique value identifying this donor.|
 
-<h1 id="metadata-service-api-follow_ups">follow_ups</h1>
+## model_follow_ups_list
 
-## follow_ups_list
+<a id="opIdmodel_follow_ups_list"></a>
 
-<a id="opIdfollow_ups_list"></a>
+`GET /moh/v1/model/follow_ups/`
 
-`GET /api/v1/moh/follow_ups/`
-
-<h3 id="follow_ups_list-parameters">Parameters</h3>
+<h3 id="model_follow_ups_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1542,7 +1269,7 @@ MoH Overview schema
       "disease_status_at_followup": "Complete remission",
       "relapse_type": "Distant recurrence/metastasis",
       "date_of_relapse": "string",
-      "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+      "method_of_progression_status": "Imaging (procedure)",
       "anatomic_site_progression_or_recurrence": "string",
       "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
@@ -1559,13 +1286,13 @@ MoH Overview schema
 }
 ```
 
-## follow_ups_create
+## model_follow_ups_create
 
-<a id="opIdfollow_ups_create"></a>
+<a id="opIdmodel_follow_ups_create"></a>
 
-`POST /api/v1/moh/follow_ups/`
+`POST /moh/v1/model/follow_ups/`
 
-<h3 id="follow_ups_create-parameters">Parameters</h3>
+<h3 id="model_follow_ups_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1583,7 +1310,7 @@ MoH Overview schema
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
   "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+  "method_of_progression_status": "Imaging (procedure)",
   "anatomic_site_progression_or_recurrence": "string",
   "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
@@ -1598,13 +1325,13 @@ MoH Overview schema
 }
 ```
 
-## follow_ups_retrieve
+## model_follow_ups_retrieve
 
-<a id="opIdfollow_ups_retrieve"></a>
+<a id="opIdmodel_follow_ups_retrieve"></a>
 
-`GET /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
+`GET /moh/v1/model/follow_ups/{submitter_follow_up_id}/`
 
-<h3 id="follow_ups_retrieve-parameters">Parameters</h3>
+<h3 id="model_follow_ups_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1622,7 +1349,7 @@ MoH Overview schema
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
   "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+  "method_of_progression_status": "Imaging (procedure)",
   "anatomic_site_progression_or_recurrence": "string",
   "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
@@ -1637,13 +1364,13 @@ MoH Overview schema
 }
 ```
 
-## follow_ups_update
+## model_follow_ups_update
 
-<a id="opIdfollow_ups_update"></a>
+<a id="opIdmodel_follow_ups_update"></a>
 
-`PUT /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
+`PUT /moh/v1/model/follow_ups/{submitter_follow_up_id}/`
 
-<h3 id="follow_ups_update-parameters">Parameters</h3>
+<h3 id="model_follow_ups_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1662,7 +1389,7 @@ MoH Overview schema
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
   "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+  "method_of_progression_status": "Imaging (procedure)",
   "anatomic_site_progression_or_recurrence": "string",
   "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
@@ -1677,13 +1404,13 @@ MoH Overview schema
 }
 ```
 
-## follow_ups_partial_update
+## model_follow_ups_partial_update
 
-<a id="opIdfollow_ups_partial_update"></a>
+<a id="opIdmodel_follow_ups_partial_update"></a>
 
-`PATCH /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
+`PATCH /moh/v1/model/follow_ups/{submitter_follow_up_id}/`
 
-<h3 id="follow_ups_partial_update-parameters">Parameters</h3>
+<h3 id="model_follow_ups_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1702,7 +1429,7 @@ MoH Overview schema
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
   "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+  "method_of_progression_status": "Imaging (procedure)",
   "anatomic_site_progression_or_recurrence": "string",
   "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
@@ -1717,27 +1444,25 @@ MoH Overview schema
 }
 ```
 
-## follow_ups_destroy
+## model_follow_ups_destroy
 
-<a id="opIdfollow_ups_destroy"></a>
+<a id="opIdmodel_follow_ups_destroy"></a>
 
-`DELETE /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
+`DELETE /moh/v1/model/follow_ups/{submitter_follow_up_id}/`
 
-<h3 id="follow_ups_destroy-parameters">Parameters</h3>
+<h3 id="model_follow_ups_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
 
-<h1 id="metadata-service-api-hormone_therapies">hormone_therapies</h1>
+## model_hormone_therapies_list
 
-## hormone_therapies_list
+<a id="opIdmodel_hormone_therapies_list"></a>
 
-<a id="opIdhormone_therapies_list"></a>
+`GET /moh/v1/model/hormone_therapies/`
 
-`GET /api/v1/moh/hormone_therapies/`
-
-<h3 id="hormone_therapies_list-parameters">Parameters</h3>
+<h3 id="model_hormone_therapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1764,10 +1489,9 @@ MoH Overview schema
   "results": [
     {
       "id": 0,
-      "chemotherapy_dosage_units": "mg/m2",
+      "hormone_drug_dosage_units": "mg/m2",
       "drug_name": "string",
       "drug_rxnormcui": "string",
-      "hormone_drug_dosage_units": "string",
       "cumulative_drug_dosage_prescribed": 32767,
       "cumulative_drug_dosage_actual": 32767,
       "program_id": "string",
@@ -1778,13 +1502,13 @@ MoH Overview schema
 }
 ```
 
-## hormone_therapies_create
+## model_hormone_therapies_create
 
-<a id="opIdhormone_therapies_create"></a>
+<a id="opIdmodel_hormone_therapies_create"></a>
 
-`POST /api/v1/moh/hormone_therapies/`
+`POST /moh/v1/model/hormone_therapies/`
 
-<h3 id="hormone_therapies_create-parameters">Parameters</h3>
+<h3 id="model_hormone_therapies_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1797,10 +1521,9 @@ MoH Overview schema
 ```json
 {
   "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
+  "hormone_drug_dosage_units": "mg/m2",
   "drug_name": "string",
   "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
   "cumulative_drug_dosage_prescribed": 32767,
   "cumulative_drug_dosage_actual": 32767,
   "program_id": "string",
@@ -1809,13 +1532,13 @@ MoH Overview schema
 }
 ```
 
-## hormone_therapies_retrieve
+## model_hormone_therapies_retrieve
 
-<a id="opIdhormone_therapies_retrieve"></a>
+<a id="opIdmodel_hormone_therapies_retrieve"></a>
 
-`GET /api/v1/moh/hormone_therapies/{id}/`
+`GET /moh/v1/model/hormone_therapies/{id}/`
 
-<h3 id="hormone_therapies_retrieve-parameters">Parameters</h3>
+<h3 id="model_hormone_therapies_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1828,10 +1551,9 @@ MoH Overview schema
 ```json
 {
   "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
+  "hormone_drug_dosage_units": "mg/m2",
   "drug_name": "string",
   "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
   "cumulative_drug_dosage_prescribed": 32767,
   "cumulative_drug_dosage_actual": 32767,
   "program_id": "string",
@@ -1840,13 +1562,13 @@ MoH Overview schema
 }
 ```
 
-## hormone_therapies_update
+## model_hormone_therapies_update
 
-<a id="opIdhormone_therapies_update"></a>
+<a id="opIdmodel_hormone_therapies_update"></a>
 
-`PUT /api/v1/moh/hormone_therapies/{id}/`
+`PUT /moh/v1/model/hormone_therapies/{id}/`
 
-<h3 id="hormone_therapies_update-parameters">Parameters</h3>
+<h3 id="model_hormone_therapies_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1860,10 +1582,9 @@ MoH Overview schema
 ```json
 {
   "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
+  "hormone_drug_dosage_units": "mg/m2",
   "drug_name": "string",
   "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
   "cumulative_drug_dosage_prescribed": 32767,
   "cumulative_drug_dosage_actual": 32767,
   "program_id": "string",
@@ -1872,13 +1593,13 @@ MoH Overview schema
 }
 ```
 
-## hormone_therapies_partial_update
+## model_hormone_therapies_partial_update
 
-<a id="opIdhormone_therapies_partial_update"></a>
+<a id="opIdmodel_hormone_therapies_partial_update"></a>
 
-`PATCH /api/v1/moh/hormone_therapies/{id}/`
+`PATCH /moh/v1/model/hormone_therapies/{id}/`
 
-<h3 id="hormone_therapies_partial_update-parameters">Parameters</h3>
+<h3 id="model_hormone_therapies_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1892,10 +1613,9 @@ MoH Overview schema
 ```json
 {
   "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
+  "hormone_drug_dosage_units": "mg/m2",
   "drug_name": "string",
   "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
   "cumulative_drug_dosage_prescribed": 32767,
   "cumulative_drug_dosage_actual": 32767,
   "program_id": "string",
@@ -1904,27 +1624,25 @@ MoH Overview schema
 }
 ```
 
-## hormone_therapies_destroy
+## model_hormone_therapies_destroy
 
-<a id="opIdhormone_therapies_destroy"></a>
+<a id="opIdmodel_hormone_therapies_destroy"></a>
 
-`DELETE /api/v1/moh/hormone_therapies/{id}/`
+`DELETE /moh/v1/model/hormone_therapies/{id}/`
 
-<h3 id="hormone_therapies_destroy-parameters">Parameters</h3>
+<h3 id="model_hormone_therapies_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |id|path|integer|true|A unique integer value identifying this hormone therapy.|
 
-<h1 id="metadata-service-api-immunotherapies">immunotherapies</h1>
+## model_immunotherapies_list
 
-## immunotherapies_list
+<a id="opIdmodel_immunotherapies_list"></a>
 
-<a id="opIdimmunotherapies_list"></a>
+`GET /moh/v1/model/immunotherapies/`
 
-`GET /api/v1/moh/immunotherapies/`
-
-<h3 id="immunotherapies_list-parameters">Parameters</h3>
+<h3 id="model_immunotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1960,13 +1678,13 @@ MoH Overview schema
 }
 ```
 
-## immunotherapies_create
+## model_immunotherapies_create
 
-<a id="opIdimmunotherapies_create"></a>
+<a id="opIdmodel_immunotherapies_create"></a>
 
-`POST /api/v1/moh/immunotherapies/`
+`POST /moh/v1/model/immunotherapies/`
 
-<h3 id="immunotherapies_create-parameters">Parameters</h3>
+<h3 id="model_immunotherapies_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1988,13 +1706,13 @@ MoH Overview schema
 }
 ```
 
-## immunotherapies_retrieve
+## model_immunotherapies_retrieve
 
-<a id="opIdimmunotherapies_retrieve"></a>
+<a id="opIdmodel_immunotherapies_retrieve"></a>
 
-`GET /api/v1/moh/immunotherapies/{id}/`
+`GET /moh/v1/model/immunotherapies/{id}/`
 
-<h3 id="immunotherapies_retrieve-parameters">Parameters</h3>
+<h3 id="model_immunotherapies_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2016,13 +1734,13 @@ MoH Overview schema
 }
 ```
 
-## immunotherapies_update
+## model_immunotherapies_update
 
-<a id="opIdimmunotherapies_update"></a>
+<a id="opIdmodel_immunotherapies_update"></a>
 
-`PUT /api/v1/moh/immunotherapies/{id}/`
+`PUT /moh/v1/model/immunotherapies/{id}/`
 
-<h3 id="immunotherapies_update-parameters">Parameters</h3>
+<h3 id="model_immunotherapies_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2045,13 +1763,13 @@ MoH Overview schema
 }
 ```
 
-## immunotherapies_partial_update
+## model_immunotherapies_partial_update
 
-<a id="opIdimmunotherapies_partial_update"></a>
+<a id="opIdmodel_immunotherapies_partial_update"></a>
 
-`PATCH /api/v1/moh/immunotherapies/{id}/`
+`PATCH /moh/v1/model/immunotherapies/{id}/`
 
-<h3 id="immunotherapies_partial_update-parameters">Parameters</h3>
+<h3 id="model_immunotherapies_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2074,27 +1792,25 @@ MoH Overview schema
 }
 ```
 
-## immunotherapies_destroy
+## model_immunotherapies_destroy
 
-<a id="opIdimmunotherapies_destroy"></a>
+<a id="opIdmodel_immunotherapies_destroy"></a>
 
-`DELETE /api/v1/moh/immunotherapies/{id}/`
+`DELETE /moh/v1/model/immunotherapies/{id}/`
 
-<h3 id="immunotherapies_destroy-parameters">Parameters</h3>
+<h3 id="model_immunotherapies_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |id|path|integer|true|A unique integer value identifying this immunotherapy.|
 
-<h1 id="metadata-service-api-primary_diagnoses">primary_diagnoses</h1>
+## model_primary_diagnoses_list
 
-## primary_diagnoses_list
+<a id="opIdmodel_primary_diagnoses_list"></a>
 
-<a id="opIdprimary_diagnoses_list"></a>
+`GET /moh/v1/model/primary_diagnoses/`
 
-`GET /api/v1/moh/primary_diagnoses/`
-
-<h3 id="primary_diagnoses_list-parameters">Parameters</h3>
+<h3 id="model_primary_diagnoses_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2145,13 +1861,13 @@ MoH Overview schema
 }
 ```
 
-## primary_diagnoses_create
+## model_primary_diagnoses_create
 
-<a id="opIdprimary_diagnoses_create"></a>
+<a id="opIdmodel_primary_diagnoses_create"></a>
 
-`POST /api/v1/moh/primary_diagnoses/`
+`POST /moh/v1/model/primary_diagnoses/`
 
-<h3 id="primary_diagnoses_create-parameters">Parameters</h3>
+<h3 id="model_primary_diagnoses_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2180,13 +1896,13 @@ MoH Overview schema
 }
 ```
 
-## primary_diagnoses_retrieve
+## model_primary_diagnoses_retrieve
 
-<a id="opIdprimary_diagnoses_retrieve"></a>
+<a id="opIdmodel_primary_diagnoses_retrieve"></a>
 
-`GET /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
+`GET /moh/v1/model/primary_diagnoses/{submitter_primary_diagnosis_id}/`
 
-<h3 id="primary_diagnoses_retrieve-parameters">Parameters</h3>
+<h3 id="model_primary_diagnoses_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2215,13 +1931,13 @@ MoH Overview schema
 }
 ```
 
-## primary_diagnoses_update
+## model_primary_diagnoses_update
 
-<a id="opIdprimary_diagnoses_update"></a>
+<a id="opIdmodel_primary_diagnoses_update"></a>
 
-`PUT /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
+`PUT /moh/v1/model/primary_diagnoses/{submitter_primary_diagnosis_id}/`
 
-<h3 id="primary_diagnoses_update-parameters">Parameters</h3>
+<h3 id="model_primary_diagnoses_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2251,13 +1967,13 @@ MoH Overview schema
 }
 ```
 
-## primary_diagnoses_partial_update
+## model_primary_diagnoses_partial_update
 
-<a id="opIdprimary_diagnoses_partial_update"></a>
+<a id="opIdmodel_primary_diagnoses_partial_update"></a>
 
-`PATCH /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
+`PATCH /moh/v1/model/primary_diagnoses/{submitter_primary_diagnosis_id}/`
 
-<h3 id="primary_diagnoses_partial_update-parameters">Parameters</h3>
+<h3 id="model_primary_diagnoses_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2287,27 +2003,25 @@ MoH Overview schema
 }
 ```
 
-## primary_diagnoses_destroy
+## model_primary_diagnoses_destroy
 
-<a id="opIdprimary_diagnoses_destroy"></a>
+<a id="opIdmodel_primary_diagnoses_destroy"></a>
 
-`DELETE /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
+`DELETE /moh/v1/model/primary_diagnoses/{submitter_primary_diagnosis_id}/`
 
-<h3 id="primary_diagnoses_destroy-parameters">Parameters</h3>
+<h3 id="model_primary_diagnoses_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
 
-<h1 id="metadata-service-api-programs">programs</h1>
+## model_programs_list
 
-## programs_list
+<a id="opIdmodel_programs_list"></a>
 
-<a id="opIdprograms_list"></a>
+`GET /moh/v1/model/programs/`
 
-`GET /api/v1/moh/programs/`
-
-<h3 id="programs_list-parameters">Parameters</h3>
+<h3 id="model_programs_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2338,13 +2052,13 @@ MoH Overview schema
 }
 ```
 
-## programs_create
+## model_programs_create
 
-<a id="opIdprograms_create"></a>
+<a id="opIdmodel_programs_create"></a>
 
-`POST /api/v1/moh/programs/`
+`POST /moh/v1/model/programs/`
 
-<h3 id="programs_create-parameters">Parameters</h3>
+<h3 id="model_programs_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2363,13 +2077,13 @@ MoH Overview schema
 }
 ```
 
-## programs_retrieve
+## model_programs_retrieve
 
-<a id="opIdprograms_retrieve"></a>
+<a id="opIdmodel_programs_retrieve"></a>
 
-`GET /api/v1/moh/programs/{program_id}/`
+`GET /moh/v1/model/programs/{program_id}/`
 
-<h3 id="programs_retrieve-parameters">Parameters</h3>
+<h3 id="model_programs_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2388,13 +2102,13 @@ MoH Overview schema
 }
 ```
 
-## programs_update
+## model_programs_update
 
-<a id="opIdprograms_update"></a>
+<a id="opIdmodel_programs_update"></a>
 
-`PUT /api/v1/moh/programs/{program_id}/`
+`PUT /moh/v1/model/programs/{program_id}/`
 
-<h3 id="programs_update-parameters">Parameters</h3>
+<h3 id="model_programs_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2414,13 +2128,13 @@ MoH Overview schema
 }
 ```
 
-## programs_partial_update
+## model_programs_partial_update
 
-<a id="opIdprograms_partial_update"></a>
+<a id="opIdmodel_programs_partial_update"></a>
 
-`PATCH /api/v1/moh/programs/{program_id}/`
+`PATCH /moh/v1/model/programs/{program_id}/`
 
-<h3 id="programs_partial_update-parameters">Parameters</h3>
+<h3 id="model_programs_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2440,27 +2154,25 @@ MoH Overview schema
 }
 ```
 
-## programs_destroy
+## model_programs_destroy
 
-<a id="opIdprograms_destroy"></a>
+<a id="opIdmodel_programs_destroy"></a>
 
-`DELETE /api/v1/moh/programs/{program_id}/`
+`DELETE /moh/v1/model/programs/{program_id}/`
 
-<h3 id="programs_destroy-parameters">Parameters</h3>
+<h3 id="model_programs_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |program_id|path|string|true|A unique value identifying this program.|
 
-<h1 id="metadata-service-api-radiations">radiations</h1>
+## model_radiations_list
 
-## radiations_list
+<a id="opIdmodel_radiations_list"></a>
 
-<a id="opIdradiations_list"></a>
+`GET /moh/v1/model/radiations/`
 
-`GET /api/v1/moh/radiations/`
-
-<h3 id="radiations_list-parameters">Parameters</h3>
+<h3 id="model_radiations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2504,13 +2216,13 @@ MoH Overview schema
 }
 ```
 
-## radiations_create
+## model_radiations_create
 
-<a id="opIdradiations_create"></a>
+<a id="opIdmodel_radiations_create"></a>
 
-`POST /api/v1/moh/radiations/`
+`POST /moh/v1/model/radiations/`
 
-<h3 id="radiations_create-parameters">Parameters</h3>
+<h3 id="model_radiations_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2536,13 +2248,13 @@ MoH Overview schema
 }
 ```
 
-## radiations_retrieve
+## model_radiations_retrieve
 
-<a id="opIdradiations_retrieve"></a>
+<a id="opIdmodel_radiations_retrieve"></a>
 
-`GET /api/v1/moh/radiations/{id}/`
+`GET /moh/v1/model/radiations/{id}/`
 
-<h3 id="radiations_retrieve-parameters">Parameters</h3>
+<h3 id="model_radiations_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2568,13 +2280,13 @@ MoH Overview schema
 }
 ```
 
-## radiations_update
+## model_radiations_update
 
-<a id="opIdradiations_update"></a>
+<a id="opIdmodel_radiations_update"></a>
 
-`PUT /api/v1/moh/radiations/{id}/`
+`PUT /moh/v1/model/radiations/{id}/`
 
-<h3 id="radiations_update-parameters">Parameters</h3>
+<h3 id="model_radiations_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2601,13 +2313,13 @@ MoH Overview schema
 }
 ```
 
-## radiations_partial_update
+## model_radiations_partial_update
 
-<a id="opIdradiations_partial_update"></a>
+<a id="opIdmodel_radiations_partial_update"></a>
 
-`PATCH /api/v1/moh/radiations/{id}/`
+`PATCH /moh/v1/model/radiations/{id}/`
 
-<h3 id="radiations_partial_update-parameters">Parameters</h3>
+<h3 id="model_radiations_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2634,27 +2346,25 @@ MoH Overview schema
 }
 ```
 
-## radiations_destroy
+## model_radiations_destroy
 
-<a id="opIdradiations_destroy"></a>
+<a id="opIdmodel_radiations_destroy"></a>
 
-`DELETE /api/v1/moh/radiations/{id}/`
+`DELETE /moh/v1/model/radiations/{id}/`
 
-<h3 id="radiations_destroy-parameters">Parameters</h3>
+<h3 id="model_radiations_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |id|path|integer|true|A unique integer value identifying this radiation.|
 
-<h1 id="metadata-service-api-sample_registrations">sample_registrations</h1>
+## model_sample_registrations_list
 
-## sample_registrations_list
+<a id="opIdmodel_sample_registrations_list"></a>
 
-<a id="opIdsample_registrations_list"></a>
+`GET /moh/v1/model/sample_registrations/`
 
-`GET /api/v1/moh/sample_registrations/`
-
-<h3 id="sample_registrations_list-parameters">Parameters</h3>
+<h3 id="model_sample_registrations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2697,13 +2407,13 @@ MoH Overview schema
 }
 ```
 
-## sample_registrations_create
+## model_sample_registrations_create
 
-<a id="opIdsample_registrations_create"></a>
+<a id="opIdmodel_sample_registrations_create"></a>
 
-`POST /api/v1/moh/sample_registrations/`
+`POST /moh/v1/model/sample_registrations/`
 
-<h3 id="sample_registrations_create-parameters">Parameters</h3>
+<h3 id="model_sample_registrations_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2728,13 +2438,13 @@ MoH Overview schema
 }
 ```
 
-## sample_registrations_retrieve
+## model_sample_registrations_retrieve
 
-<a id="opIdsample_registrations_retrieve"></a>
+<a id="opIdmodel_sample_registrations_retrieve"></a>
 
-`GET /api/v1/moh/sample_registrations/{submitter_sample_id}/`
+`GET /moh/v1/model/sample_registrations/{submitter_sample_id}/`
 
-<h3 id="sample_registrations_retrieve-parameters">Parameters</h3>
+<h3 id="model_sample_registrations_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2759,13 +2469,13 @@ MoH Overview schema
 }
 ```
 
-## sample_registrations_update
+## model_sample_registrations_update
 
-<a id="opIdsample_registrations_update"></a>
+<a id="opIdmodel_sample_registrations_update"></a>
 
-`PUT /api/v1/moh/sample_registrations/{submitter_sample_id}/`
+`PUT /moh/v1/model/sample_registrations/{submitter_sample_id}/`
 
-<h3 id="sample_registrations_update-parameters">Parameters</h3>
+<h3 id="model_sample_registrations_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2791,13 +2501,13 @@ MoH Overview schema
 }
 ```
 
-## sample_registrations_partial_update
+## model_sample_registrations_partial_update
 
-<a id="opIdsample_registrations_partial_update"></a>
+<a id="opIdmodel_sample_registrations_partial_update"></a>
 
-`PATCH /api/v1/moh/sample_registrations/{submitter_sample_id}/`
+`PATCH /moh/v1/model/sample_registrations/{submitter_sample_id}/`
 
-<h3 id="sample_registrations_partial_update-parameters">Parameters</h3>
+<h3 id="model_sample_registrations_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2823,27 +2533,25 @@ MoH Overview schema
 }
 ```
 
-## sample_registrations_destroy
+## model_sample_registrations_destroy
 
-<a id="opIdsample_registrations_destroy"></a>
+<a id="opIdmodel_sample_registrations_destroy"></a>
 
-`DELETE /api/v1/moh/sample_registrations/{submitter_sample_id}/`
+`DELETE /moh/v1/model/sample_registrations/{submitter_sample_id}/`
 
-<h3 id="sample_registrations_destroy-parameters">Parameters</h3>
+<h3 id="model_sample_registrations_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
 
-<h1 id="metadata-service-api-specimens">specimens</h1>
+## model_specimens_list
 
-## specimens_list
+<a id="opIdmodel_specimens_list"></a>
 
-<a id="opIdspecimens_list"></a>
+`GET /moh/v1/model/specimens/`
 
-`GET /api/v1/moh/specimens/`
-
-<h3 id="specimens_list-parameters">Parameters</h3>
+<h3 id="model_specimens_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2904,13 +2612,13 @@ MoH Overview schema
 }
 ```
 
-## specimens_create
+## model_specimens_create
 
-<a id="opIdspecimens_create"></a>
+<a id="opIdmodel_specimens_create"></a>
 
-`POST /api/v1/moh/specimens/`
+`POST /moh/v1/model/specimens/`
 
-<h3 id="specimens_create-parameters">Parameters</h3>
+<h3 id="model_specimens_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2944,13 +2652,13 @@ MoH Overview schema
 }
 ```
 
-## specimens_retrieve
+## model_specimens_retrieve
 
-<a id="opIdspecimens_retrieve"></a>
+<a id="opIdmodel_specimens_retrieve"></a>
 
-`GET /api/v1/moh/specimens/{submitter_specimen_id}/`
+`GET /moh/v1/model/specimens/{submitter_specimen_id}/`
 
-<h3 id="specimens_retrieve-parameters">Parameters</h3>
+<h3 id="model_specimens_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2984,13 +2692,13 @@ MoH Overview schema
 }
 ```
 
-## specimens_update
+## model_specimens_update
 
-<a id="opIdspecimens_update"></a>
+<a id="opIdmodel_specimens_update"></a>
 
-`PUT /api/v1/moh/specimens/{submitter_specimen_id}/`
+`PUT /moh/v1/model/specimens/{submitter_specimen_id}/`
 
-<h3 id="specimens_update-parameters">Parameters</h3>
+<h3 id="model_specimens_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3025,13 +2733,13 @@ MoH Overview schema
 }
 ```
 
-## specimens_partial_update
+## model_specimens_partial_update
 
-<a id="opIdspecimens_partial_update"></a>
+<a id="opIdmodel_specimens_partial_update"></a>
 
-`PATCH /api/v1/moh/specimens/{submitter_specimen_id}/`
+`PATCH /moh/v1/model/specimens/{submitter_specimen_id}/`
 
-<h3 id="specimens_partial_update-parameters">Parameters</h3>
+<h3 id="model_specimens_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3066,27 +2774,25 @@ MoH Overview schema
 }
 ```
 
-## specimens_destroy
+## model_specimens_destroy
 
-<a id="opIdspecimens_destroy"></a>
+<a id="opIdmodel_specimens_destroy"></a>
 
-`DELETE /api/v1/moh/specimens/{submitter_specimen_id}/`
+`DELETE /moh/v1/model/specimens/{submitter_specimen_id}/`
 
-<h3 id="specimens_destroy-parameters">Parameters</h3>
+<h3 id="model_specimens_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
 
-<h1 id="metadata-service-api-surgeries">surgeries</h1>
+## model_surgeries_list
 
-## surgeries_list
+<a id="opIdmodel_surgeries_list"></a>
 
-<a id="opIdsurgeries_list"></a>
+`GET /moh/v1/model/surgeries/`
 
-`GET /api/v1/moh/surgeries/`
-
-<h3 id="surgeries_list-parameters">Parameters</h3>
+<h3 id="model_surgeries_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3127,9 +2833,15 @@ MoH Overview schema
       "surgery_location": "Local recurrence",
       "tumour_focality": "Cannot be assessed",
       "residual_tumour_classification": "Not applicable",
-      "margin_types_involved": "Circumferential resection margin",
-      "margin_types_not_involved": "Circumferential resection margin",
-      "margin_types_not_assessed": "Circumferential resection margin",
+      "margin_types_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_assessed": [
+        "Circumferential resection margin"
+      ],
       "lymphovascular_invasion": "Absent",
       "perineural_invasion": "Absent",
       "tumour_length": 32767,
@@ -3144,13 +2856,13 @@ MoH Overview schema
 }
 ```
 
-## surgeries_create
+## model_surgeries_create
 
-<a id="opIdsurgeries_create"></a>
+<a id="opIdmodel_surgeries_create"></a>
 
-`POST /api/v1/moh/surgeries/`
+`POST /moh/v1/model/surgeries/`
 
-<h3 id="surgeries_create-parameters">Parameters</h3>
+<h3 id="model_surgeries_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3168,9 +2880,15 @@ MoH Overview schema
   "surgery_location": "Local recurrence",
   "tumour_focality": "Cannot be assessed",
   "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
+  "margin_types_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_assessed": [
+    "Circumferential resection margin"
+  ],
   "lymphovascular_invasion": "Absent",
   "perineural_invasion": "Absent",
   "tumour_length": 32767,
@@ -3183,13 +2901,13 @@ MoH Overview schema
 }
 ```
 
-## surgeries_retrieve
+## model_surgeries_retrieve
 
-<a id="opIdsurgeries_retrieve"></a>
+<a id="opIdmodel_surgeries_retrieve"></a>
 
-`GET /api/v1/moh/surgeries/{id}/`
+`GET /moh/v1/model/surgeries/{id}/`
 
-<h3 id="surgeries_retrieve-parameters">Parameters</h3>
+<h3 id="model_surgeries_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3207,9 +2925,15 @@ MoH Overview schema
   "surgery_location": "Local recurrence",
   "tumour_focality": "Cannot be assessed",
   "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
+  "margin_types_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_assessed": [
+    "Circumferential resection margin"
+  ],
   "lymphovascular_invasion": "Absent",
   "perineural_invasion": "Absent",
   "tumour_length": 32767,
@@ -3222,13 +2946,13 @@ MoH Overview schema
 }
 ```
 
-## surgeries_update
+## model_surgeries_update
 
-<a id="opIdsurgeries_update"></a>
+<a id="opIdmodel_surgeries_update"></a>
 
-`PUT /api/v1/moh/surgeries/{id}/`
+`PUT /moh/v1/model/surgeries/{id}/`
 
-<h3 id="surgeries_update-parameters">Parameters</h3>
+<h3 id="model_surgeries_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3247,9 +2971,15 @@ MoH Overview schema
   "surgery_location": "Local recurrence",
   "tumour_focality": "Cannot be assessed",
   "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
+  "margin_types_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_assessed": [
+    "Circumferential resection margin"
+  ],
   "lymphovascular_invasion": "Absent",
   "perineural_invasion": "Absent",
   "tumour_length": 32767,
@@ -3262,13 +2992,13 @@ MoH Overview schema
 }
 ```
 
-## surgeries_partial_update
+## model_surgeries_partial_update
 
-<a id="opIdsurgeries_partial_update"></a>
+<a id="opIdmodel_surgeries_partial_update"></a>
 
-`PATCH /api/v1/moh/surgeries/{id}/`
+`PATCH /moh/v1/model/surgeries/{id}/`
 
-<h3 id="surgeries_partial_update-parameters">Parameters</h3>
+<h3 id="model_surgeries_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3287,9 +3017,15 @@ MoH Overview schema
   "surgery_location": "Local recurrence",
   "tumour_focality": "Cannot be assessed",
   "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
+  "margin_types_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_assessed": [
+    "Circumferential resection margin"
+  ],
   "lymphovascular_invasion": "Absent",
   "perineural_invasion": "Absent",
   "tumour_length": 32767,
@@ -3302,27 +3038,25 @@ MoH Overview schema
 }
 ```
 
-## surgeries_destroy
+## model_surgeries_destroy
 
-<a id="opIdsurgeries_destroy"></a>
+<a id="opIdmodel_surgeries_destroy"></a>
 
-`DELETE /api/v1/moh/surgeries/{id}/`
+`DELETE /moh/v1/model/surgeries/{id}/`
 
-<h3 id="surgeries_destroy-parameters">Parameters</h3>
+<h3 id="model_surgeries_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |id|path|integer|true|A unique integer value identifying this surgery.|
 
-<h1 id="metadata-service-api-treatments">treatments</h1>
+## model_treatments_list
 
-## treatments_list
+<a id="opIdmodel_treatments_list"></a>
 
-<a id="opIdtreatments_list"></a>
+`GET /moh/v1/model/treatments/`
 
-`GET /api/v1/moh/treatments/`
-
-<h3 id="treatments_list-parameters">Parameters</h3>
+<h3 id="model_treatments_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3355,7 +3089,9 @@ MoH Overview schema
   "results": [
     {
       "submitter_treatment_id": "string",
-      "treatment_type": "Ablation",
+      "treatment_type": [
+        "Ablation"
+      ],
       "is_primary_treatment": "Yes",
       "treatment_start_date": "string",
       "treatment_end_date": "string",
@@ -3373,13 +3109,13 @@ MoH Overview schema
 }
 ```
 
-## treatments_create
+## model_treatments_create
 
-<a id="opIdtreatments_create"></a>
+<a id="opIdmodel_treatments_create"></a>
 
-`POST /api/v1/moh/treatments/`
+`POST /moh/v1/model/treatments/`
 
-<h3 id="treatments_create-parameters">Parameters</h3>
+<h3 id="model_treatments_create-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3392,7 +3128,9 @@ MoH Overview schema
 ```json
 {
   "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
+  "treatment_type": [
+    "Ablation"
+  ],
   "is_primary_treatment": "Yes",
   "treatment_start_date": "string",
   "treatment_end_date": "string",
@@ -3408,13 +3146,13 @@ MoH Overview schema
 }
 ```
 
-## treatments_retrieve
+## model_treatments_retrieve
 
-<a id="opIdtreatments_retrieve"></a>
+<a id="opIdmodel_treatments_retrieve"></a>
 
-`GET /api/v1/moh/treatments/{submitter_treatment_id}/`
+`GET /moh/v1/model/treatments/{submitter_treatment_id}/`
 
-<h3 id="treatments_retrieve-parameters">Parameters</h3>
+<h3 id="model_treatments_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3427,7 +3165,9 @@ MoH Overview schema
 ```json
 {
   "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
+  "treatment_type": [
+    "Ablation"
+  ],
   "is_primary_treatment": "Yes",
   "treatment_start_date": "string",
   "treatment_end_date": "string",
@@ -3443,13 +3183,13 @@ MoH Overview schema
 }
 ```
 
-## treatments_update
+## model_treatments_update
 
-<a id="opIdtreatments_update"></a>
+<a id="opIdmodel_treatments_update"></a>
 
-`PUT /api/v1/moh/treatments/{submitter_treatment_id}/`
+`PUT /moh/v1/model/treatments/{submitter_treatment_id}/`
 
-<h3 id="treatments_update-parameters">Parameters</h3>
+<h3 id="model_treatments_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3463,7 +3203,9 @@ MoH Overview schema
 ```json
 {
   "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
+  "treatment_type": [
+    "Ablation"
+  ],
   "is_primary_treatment": "Yes",
   "treatment_start_date": "string",
   "treatment_end_date": "string",
@@ -3479,13 +3221,13 @@ MoH Overview schema
 }
 ```
 
-## treatments_partial_update
+## model_treatments_partial_update
 
-<a id="opIdtreatments_partial_update"></a>
+<a id="opIdmodel_treatments_partial_update"></a>
 
-`PATCH /api/v1/moh/treatments/{submitter_treatment_id}/`
+`PATCH /moh/v1/model/treatments/{submitter_treatment_id}/`
 
-<h3 id="treatments_partial_update-parameters">Parameters</h3>
+<h3 id="model_treatments_partial_update-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3499,7 +3241,9 @@ MoH Overview schema
 ```json
 {
   "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
+  "treatment_type": [
+    "Ablation"
+  ],
   "is_primary_treatment": "Yes",
   "treatment_start_date": "string",
   "treatment_end_date": "string",
@@ -3515,13 +3259,13 @@ MoH Overview schema
 }
 ```
 
-## treatments_destroy
+## model_treatments_destroy
 
-<a id="opIdtreatments_destroy"></a>
+<a id="opIdmodel_treatments_destroy"></a>
 
-`DELETE /api/v1/moh/treatments/{submitter_treatment_id}/`
+`DELETE /moh/v1/model/treatments/{submitter_treatment_id}/`
 
-<h3 id="treatments_destroy-parameters">Parameters</h3>
+<h3 id="model_treatments_destroy-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3796,7 +3540,7 @@ MoH Overview schema
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|integer|false|read-only|none|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|true|none|none|
+|chemotherapy_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|none|
 |drug_name|string|true|none|none|
 |drug_rxnormcui|string|true|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
@@ -3804,34 +3548,6 @@ MoH Overview schema
 |program_id|string|true|none|none|
 |submitter_donor_id|string|true|none|none|
 |submitter_treatment_id|string|true|none|none|
-
-<h2 id="tocS_ChemotherapyDosageUnitsEnum">ChemotherapyDosageUnitsEnum</h2>
-
-<a id="schemachemotherapydosageunitsenum"></a>
-<a id="schema_ChemotherapyDosageUnitsEnum"></a>
-<a id="tocSchemotherapydosageunitsenum"></a>
-<a id="tocschemotherapydosageunitsenum"></a>
-
-```json
-"mg/m2"
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|*anonymous*|string|false|none|none|
-
-#### Enumerated Values
-
-|Property|Value|
-|---|---|
-|*anonymous*|mg/m2|
-|*anonymous*|IU/m2|
-|*anonymous*|ug/m2|
-|*anonymous*|g/m2|
-|*anonymous*|mg/kg|
 
 <h2 id="tocS_ChemotherapyRequest">ChemotherapyRequest</h2>
 
@@ -3858,7 +3574,7 @@ MoH Overview schema
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|true|none|none|
+|chemotherapy_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|none|
 |drug_name|string|true|none|none|
 |drug_rxnormcui|string|true|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
@@ -4072,7 +3788,9 @@ It also override the list serializer to a single object
   "cause_of_death": "Died of cancer",
   "date_of_birth": "string",
   "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
+  "primary_site": [
+    "Accessory sinuses"
+  ],
   "is_deceased": true,
   "program_id": "string"
 }
@@ -4104,7 +3822,7 @@ continued
 |---|---|---|---|---|
 |date_of_birth|string|true|none|none|
 |date_of_death|string|true|none|none|
-|primary_site|[PrimarySiteEnum](#schemaprimarysiteenum)|true|none|none|
+|primary_site|[[PrimarySiteEnum](#schemaprimarysiteenum)]|true|none|none|
 |is_deceased|boolean|true|none|none|
 |program_id|string|true|none|none|
 
@@ -4121,7 +3839,9 @@ continued
   "cause_of_death": "Died of cancer",
   "date_of_birth": "string",
   "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
+  "primary_site": [
+    "Accessory sinuses"
+  ],
   "is_deceased": true,
   "program_id": "string"
 }
@@ -4153,9 +3873,37 @@ continued
 |---|---|---|---|---|
 |date_of_birth|string|true|none|none|
 |date_of_death|string|true|none|none|
-|primary_site|[PrimarySiteEnum](#schemaprimarysiteenum)|true|none|none|
+|primary_site|[[PrimarySiteEnum](#schemaprimarysiteenum)]|true|none|none|
 |is_deceased|boolean|true|none|none|
 |program_id|string|true|none|none|
+
+<h2 id="tocS_DosageUnitsEnum">DosageUnitsEnum</h2>
+
+<a id="schemadosageunitsenum"></a>
+<a id="schema_DosageUnitsEnum"></a>
+<a id="tocSdosageunitsenum"></a>
+<a id="tocsdosageunitsenum"></a>
+
+```json
+"mg/m2"
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|string|false|none|none|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|*anonymous*|mg/m2|
+|*anonymous*|IU/m2|
+|*anonymous*|ug/m2|
+|*anonymous*|g/m2|
+|*anonymous*|mg/kg|
 
 <h2 id="tocS_FollowUp">FollowUp</h2>
 
@@ -4172,7 +3920,7 @@ continued
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
   "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+  "method_of_progression_status": "Imaging (procedure)",
   "anatomic_site_progression_or_recurrence": "string",
   "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
@@ -4362,7 +4110,7 @@ continued
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
   "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+  "method_of_progression_status": "Imaging (procedure)",
   "anatomic_site_progression_or_recurrence": "string",
   "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
@@ -4573,10 +4321,9 @@ continued
 ```json
 {
   "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
+  "hormone_drug_dosage_units": "mg/m2",
   "drug_name": "string",
   "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
   "cumulative_drug_dosage_prescribed": 32767,
   "cumulative_drug_dosage_actual": 32767,
   "program_id": "string",
@@ -4591,10 +4338,9 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|integer|false|read-only|none|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|true|none|none|
+|hormone_drug_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|none|
 |drug_name|string|true|none|none|
 |drug_rxnormcui|string|true|none|none|
-|hormone_drug_dosage_units|string|true|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
 |cumulative_drug_dosage_actual|integer¦null|false|none|none|
 |program_id|string|true|none|none|
@@ -4610,10 +4356,9 @@ continued
 
 ```json
 {
-  "chemotherapy_dosage_units": "mg/m2",
+  "hormone_drug_dosage_units": "mg/m2",
   "drug_name": "string",
   "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
   "cumulative_drug_dosage_prescribed": 32767,
   "cumulative_drug_dosage_actual": 32767,
   "program_id": "string",
@@ -4627,10 +4372,9 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|true|none|none|
+|hormone_drug_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|none|
 |drug_name|string|true|none|none|
 |drug_rxnormcui|string|true|none|none|
-|hormone_drug_dosage_units|string|true|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
 |cumulative_drug_dosage_actual|integer¦null|false|none|none|
 |program_id|string|true|none|none|
@@ -4725,32 +4469,6 @@ continued
 |*anonymous*|Immune checkpoint inhibitors|
 |*anonymous*|Monoclonal antibodies other than immune checkpoint inhibitors|
 |*anonymous*|Other immunomodulatory substances|
-
-<h2 id="tocS_IngestRequestRequest">IngestRequestRequest</h2>
-
-<a id="schemaingestrequestrequest"></a>
-<a id="schema_IngestRequestRequest"></a>
-<a id="tocSingestrequestrequest"></a>
-<a id="tocsingestrequestrequest"></a>
-
-```json
-{
-  "data": [
-    {
-      "property1": null,
-      "property2": null
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|data|[object]|true|none|none|
-|» **additionalProperties**|any|false|none|none|
 
 <h2 id="tocS_LateralityOfPriorMalignancyEnum">LateralityOfPriorMalignancyEnum</h2>
 
@@ -4972,7 +4690,7 @@ continued
 <a id="tocsmethodofprogressionstatusenum"></a>
 
 ```json
-"Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)"
+"Imaging (procedure)"
 
 ```
 
@@ -4986,7 +4704,12 @@ continued
 
 |Property|Value|
 |---|---|
-|*anonymous*|Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)|
+|*anonymous*|Imaging (procedure)|
+|*anonymous*|Histopathology test (procedure)|
+|*anonymous*|Assessment of symptom control (procedure)|
+|*anonymous*|Physical examination procedure (procedure)|
+|*anonymous*|Tumor marker measurement (procedure)|
+|*anonymous*|Laboratory data interpretation (procedure)|
 
 <h2 id="tocS_NCategoryEnum">NCategoryEnum</h2>
 
@@ -5171,7 +4894,9 @@ continued
       "cause_of_death": "Died of cancer",
       "date_of_birth": "string",
       "date_of_death": "string",
-      "primary_site": "Accessory sinuses",
+      "primary_site": [
+        "Accessory sinuses"
+      ],
       "is_deceased": true,
       "program_id": "string"
     }
@@ -5209,7 +4934,7 @@ continued
       "disease_status_at_followup": "Complete remission",
       "relapse_type": "Distant recurrence/metastasis",
       "date_of_relapse": "string",
-      "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+      "method_of_progression_status": "Imaging (procedure)",
       "anatomic_site_progression_or_recurrence": "string",
       "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
@@ -5251,10 +4976,9 @@ continued
   "results": [
     {
       "id": 0,
-      "chemotherapy_dosage_units": "mg/m2",
+      "hormone_drug_dosage_units": "mg/m2",
       "drug_name": "string",
       "drug_rxnormcui": "string",
-      "hormone_drug_dosage_units": "string",
       "cumulative_drug_dosage_prescribed": 32767,
       "cumulative_drug_dosage_actual": 32767,
       "program_id": "string",
@@ -5534,9 +5258,15 @@ continued
       "surgery_location": "Local recurrence",
       "tumour_focality": "Cannot be assessed",
       "residual_tumour_classification": "Not applicable",
-      "margin_types_involved": "Circumferential resection margin",
-      "margin_types_not_involved": "Circumferential resection margin",
-      "margin_types_not_assessed": "Circumferential resection margin",
+      "margin_types_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_assessed": [
+        "Circumferential resection margin"
+      ],
       "lymphovascular_invasion": "Absent",
       "perineural_invasion": "Absent",
       "tumour_length": 32767,
@@ -5576,7 +5306,9 @@ continued
   "results": [
     {
       "submitter_treatment_id": "string",
-      "treatment_type": "Ablation",
+      "treatment_type": [
+        "Ablation"
+      ],
       "is_primary_treatment": "Yes",
       "treatment_start_date": "string",
       "treatment_end_date": "string",
@@ -5667,7 +5399,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|false|none|none|
+|chemotherapy_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|false|none|none|
 |drug_name|string|false|none|none|
 |drug_rxnormcui|string|false|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
@@ -5757,7 +5489,9 @@ continued
   "cause_of_death": "Died of cancer",
   "date_of_birth": "string",
   "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
+  "primary_site": [
+    "Accessory sinuses"
+  ],
   "is_deceased": true,
   "program_id": "string"
 }
@@ -5789,7 +5523,7 @@ continued
 |---|---|---|---|---|
 |date_of_birth|string|false|none|none|
 |date_of_death|string|false|none|none|
-|primary_site|[PrimarySiteEnum](#schemaprimarysiteenum)|false|none|none|
+|primary_site|[[PrimarySiteEnum](#schemaprimarysiteenum)]|false|none|none|
 |is_deceased|boolean|false|none|none|
 |program_id|string|false|none|none|
 
@@ -5808,7 +5542,7 @@ continued
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
   "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+  "method_of_progression_status": "Imaging (procedure)",
   "anatomic_site_progression_or_recurrence": "string",
   "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
@@ -5992,10 +5726,9 @@ continued
 
 ```json
 {
-  "chemotherapy_dosage_units": "mg/m2",
+  "hormone_drug_dosage_units": "mg/m2",
   "drug_name": "string",
   "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
   "cumulative_drug_dosage_prescribed": 32767,
   "cumulative_drug_dosage_actual": 32767,
   "program_id": "string",
@@ -6009,10 +5742,9 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|false|none|none|
+|hormone_drug_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|false|none|none|
 |drug_name|string|false|none|none|
 |drug_rxnormcui|string|false|none|none|
-|hormone_drug_dosage_units|string|false|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
 |cumulative_drug_dosage_actual|integer¦null|false|none|none|
 |program_id|string|false|none|none|
@@ -6539,9 +6271,15 @@ continued
   "surgery_location": "Local recurrence",
   "tumour_focality": "Cannot be assessed",
   "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
+  "margin_types_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_assessed": [
+    "Circumferential resection margin"
+  ],
   "lymphovascular_invasion": "Absent",
   "perineural_invasion": "Absent",
   "tumour_length": 32767,
@@ -6615,7 +6353,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_involved|any|false|none|none|
+|margin_types_involved|[oneOf]|false|none|none|
 
 oneOf
 
@@ -6633,7 +6371,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_involved|any|false|none|none|
+|margin_types_not_involved|[oneOf]|false|none|none|
 
 oneOf
 
@@ -6651,7 +6389,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_assessed|any|false|none|none|
+|margin_types_not_assessed|[oneOf]|false|none|none|
 
 oneOf
 
@@ -6723,7 +6461,9 @@ continued
 ```json
 {
   "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
+  "treatment_type": [
+    "Ablation"
+  ],
   "is_primary_treatment": "Yes",
   "treatment_start_date": "string",
   "treatment_end_date": "string",
@@ -6745,7 +6485,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_treatment_id|string|false|none|none|
-|treatment_type|[TreatmentTypeEnum](#schematreatmenttypeenum)|false|none|none|
+|treatment_type|[[TreatmentTypeEnum](#schematreatmenttypeenum)]|false|none|none|
 |is_primary_treatment|[uBooleanEnum](#schemaubooleanenum)|false|none|none|
 |treatment_start_date|string|false|none|none|
 |treatment_end_date|string|false|none|none|
@@ -8443,9 +8183,15 @@ continued
   "surgery_location": "Local recurrence",
   "tumour_focality": "Cannot be assessed",
   "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
+  "margin_types_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_assessed": [
+    "Circumferential resection margin"
+  ],
   "lymphovascular_invasion": "Absent",
   "perineural_invasion": "Absent",
   "tumour_length": 32767,
@@ -8520,7 +8266,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_involved|any|true|none|none|
+|margin_types_involved|[oneOf]|true|none|none|
 
 oneOf
 
@@ -8538,7 +8284,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_involved|any|true|none|none|
+|margin_types_not_involved|[oneOf]|true|none|none|
 
 oneOf
 
@@ -8556,7 +8302,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_assessed|any|true|none|none|
+|margin_types_not_assessed|[oneOf]|true|none|none|
 
 oneOf
 
@@ -8658,9 +8404,15 @@ continued
   "surgery_location": "Local recurrence",
   "tumour_focality": "Cannot be assessed",
   "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
+  "margin_types_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_assessed": [
+    "Circumferential resection margin"
+  ],
   "lymphovascular_invasion": "Absent",
   "perineural_invasion": "Absent",
   "tumour_length": 32767,
@@ -8734,7 +8486,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_involved|any|true|none|none|
+|margin_types_involved|[oneOf]|true|none|none|
 
 oneOf
 
@@ -8752,7 +8504,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_involved|any|true|none|none|
+|margin_types_not_involved|[oneOf]|true|none|none|
 
 oneOf
 
@@ -8770,7 +8522,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_assessed|any|true|none|none|
+|margin_types_not_assessed|[oneOf]|true|none|none|
 
 oneOf
 
@@ -8989,7 +8741,9 @@ continued
 ```json
 {
   "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
+  "treatment_type": [
+    "Ablation"
+  ],
   "is_primary_treatment": "Yes",
   "treatment_start_date": "string",
   "treatment_end_date": "string",
@@ -9011,7 +8765,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_treatment_id|string|true|none|none|
-|treatment_type|[TreatmentTypeEnum](#schematreatmenttypeenum)|true|none|none|
+|treatment_type|[[TreatmentTypeEnum](#schematreatmenttypeenum)]|true|none|none|
 |is_primary_treatment|[uBooleanEnum](#schemaubooleanenum)|true|none|none|
 |treatment_start_date|string|true|none|none|
 |treatment_end_date|string|true|none|none|
@@ -9060,7 +8814,9 @@ continued
 ```json
 {
   "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
+  "treatment_type": [
+    "Ablation"
+  ],
   "is_primary_treatment": "Yes",
   "treatment_start_date": "string",
   "treatment_end_date": "string",
@@ -9082,7 +8838,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_treatment_id|string|true|none|none|
-|treatment_type|[TreatmentTypeEnum](#schematreatmenttypeenum)|true|none|none|
+|treatment_type|[[TreatmentTypeEnum](#schematreatmenttypeenum)]|true|none|none|
 |is_primary_treatment|[uBooleanEnum](#schemaubooleanenum)|true|none|none|
 |treatment_start_date|string|true|none|none|
 |treatment_end_date|string|true|none|none|
