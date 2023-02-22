@@ -109,6 +109,15 @@ DUPLICATE_GENE_2 = {
     "symbol": "DYI"
 }
 
+VALID_GENE_DESCRIPTOR_1 = {
+    "value_id": "HGNC:347",
+    "symbol": "ETF1",
+    "alternate_ids": ["ensembl:ENSRNOG00000019450", "ncbigene:307503"],
+    "extra_properties": {
+        "comment": "test data"
+    }
+}
+
 VALID_VARIANT_1 = {
     "allele_type": "spdiAllele",
     "allele": {
@@ -143,6 +152,24 @@ VALID_VARIANT_2 = {
     "extra_properties": {
         "comment": "test data"
     }
+}
+
+VALID_VARIANT_DESCRIPTOR = {
+    "id": "clinvar:13294",
+    "expressions": [{
+        "syntax": "hgvs",
+        "value": "NM_001848.2:c.877G\u003eA"
+    }],
+    "allelic_state": {
+        "id": "GENO:0000135",
+        "label": "heterozygous"
+    }
+}
+
+VALID_VARIANT_INTERPRETATION = {
+    "acmg_pathogenicity_classification": "PATHOGENIC",
+    "therapeutic_actionability": "UNKNOWN_ACTIONABILITY",
+    "variant": VALID_VARIANT_DESCRIPTOR
 }
 
 VALID_DISEASE_1 = {
@@ -375,11 +402,27 @@ def invalid_phenotypic_feature():
     )
 
 
-def valid_genomic_interpretation(gene=None, variant=None):
+def valid_variant_interpretation(variant_descriptor, acmg_class="NOT_PROVIDED",
+                                 therapeutic_actionability="UNKNOWN_ACTIONABILITY"):
     return dict(
-        status='CANDIDATE',
-        gene=gene,
-        variant=variant,
+        acmg_pathogenicity_classification=acmg_class,
+        therapeutic_actionability=therapeutic_actionability,
+        variant=variant_descriptor
+    )
+
+
+def valid_variant_descriptor(gene_descriptor):
+    return dict(
+        **VALID_VARIANT_DESCRIPTOR,
+        gene_context=gene_descriptor
+    )
+
+
+def valid_genomic_interpretation(gene_descriptor=None, variant_interpretation=None):
+    return dict(
+        interpretation_status='CANDIDATE',
+        gene_descriptor=gene_descriptor,
+        variant_interpretation=variant_interpretation,
         extra_properties={
             "comment": "test data"
         }
@@ -388,7 +431,7 @@ def valid_genomic_interpretation(gene=None, variant=None):
 
 def valid_diagnosis(disease):
     return dict(
-        disease=disease,
+        disease_doc=disease,
         extra_properties={
             "comment": "test data"
         }

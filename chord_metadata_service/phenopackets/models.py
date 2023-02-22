@@ -333,7 +333,7 @@ class Biosample(BaseTimeStamp, IndexableMixin):
 
 class GeneDescriptor(BaseTimeStamp):
     # Corresponds to GeneDescriptor.value_id field in schema
-    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENE_DESCRIPTOR, "value_id"))
+    value_id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENE_DESCRIPTOR, "value_id"))
     symbol = models.CharField(max_length=200, blank=True, help_text=rec_help(d.GENE_DESCRIPTOR, "symbol"))
     description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.GENE_DESCRIPTOR, "description"))
     alternate_ids = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
@@ -342,9 +342,11 @@ class GeneDescriptor(BaseTimeStamp):
                        help_text=rec_help(d.GENE_DESCRIPTOR, "xrefs"))
     alternate_symbols = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
                                    help_text=rec_help(d.GENE_DESCRIPTOR, "alternate_symbols"))
+    extra_properties = JSONField(blank=True, null=True,
+                                 help_text='Extra properties that are not supported by current schema')
 
     def __str__(self) -> str:
-        return str(self.id)
+        return str(self.value_id)
 
 
 class VariantDescriptor(BaseTimeStamp):
@@ -432,7 +434,7 @@ class GenomicInterpretation(BaseTimeStamp):
                                  help_text='Extra properties that are not supported by current schema')
 
     def clean(self):
-        if not (self.gene or self.variant):
+        if not (self.gene_descriptor or self.variant_interpretation):
             raise ValidationError('Either Gene or Variant must be specified')
 
     def __str__(self):
@@ -447,7 +449,7 @@ class Diagnosis(BaseTimeStamp):
     """
 
     # disease = models.ForeignKey(Disease, on_delete=models.CASCADE, help_text='The diagnosed condition.')
-    diseases_docs = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
+    disease_doc = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
     # required?
     genomic_interpretations = models.ManyToManyField(
         GenomicInterpretation, blank=True,

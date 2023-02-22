@@ -318,7 +318,33 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
 
 class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
     status = django_filters.CharFilter(lookup_expr="iexact")
+    gene_filter = django_filters.CharFilter(method="filter_gene", field_name="gene_descriptor",
+                                            label="Filter by  GeneDescriptor IDs and symbols")
+    variant_filter = django_filters.CharFilter(method="filter_variant", field_name="variant_interpretation",
+                                               label="Filter by VariantInterpretation ID and ontologies")
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
+
+    def filter_gene(self, qs, name, value):
+        # GeneDescriptor filters
+        value_id_filter = Q(gene_descriptor__value_id__icontains=value)
+        symbol_filter = Q(gene_descriptor__symbol__icontains=value)
+        alt_id_filter = Q(gene_descriptor__alternate_ids__icontains=value)
+        alt_symbols_filter = Q(gene_descriptor__alternate_symbols__icontains=value)
+
+        qs = qs.filter(
+            value_id_filter | symbol_filter | alt_id_filter | alt_symbols_filter
+        ).distinct()
+        return qs
+
+    def filter_variant(self, qs, name, value):
+        id_filter = Q(variant_interpretation__variant__id__icontains=value)
+        label_filter = Q(variant_interpretation__variant__label__icontains=value)
+        pathology_class_filter = Q(variant_interpretation__acmg_pathogenicity_classification__icontains=value)
+        therapeutic_actionability_filter = Q(variant_interpretation__therapeutic_actionability__icontains=value)
+        qs = qs.filter(
+            id_filter | label_filter | pathology_class_filter | therapeutic_actionability_filter
+        ).distinct()
+        return qs
 
     class Meta:
         model = m.GenomicInterpretation
@@ -327,7 +353,7 @@ class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
 
 class DiagnosisFilter(django_filters.rest_framework.FilterSet):
     disease_type = django_filters.CharFilter(
-        method=filter_ontology, field_name="disease__term", label="Disease type"
+        method=filter_ontology, field_name="disease_doc__term", label="Disease type"
     )
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(

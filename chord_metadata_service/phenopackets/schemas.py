@@ -529,9 +529,10 @@ GENE_DESCRIPTOR = tag_ids_and_describe({
         "description": base_type(SCHEMA_TYPES.STRING),
         "alternate_ids": array_of(base_type(SCHEMA_TYPES.STRING)),
         "xrefs": array_of(base_type(SCHEMA_TYPES.STRING)),
-        "alternate_symbols": array_of(base_type(SCHEMA_TYPES.STRING))
+        "alternate_symbols": array_of(base_type(SCHEMA_TYPES.STRING)),
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
-    "required": ["id", "symbol"]
+    "required": ["value_id", "symbol"]
 }, descriptions=descriptions.GENE_DESCRIPTOR)
 
 VRS_VARIATION_SCHEMA = tag_ids_and_describe({

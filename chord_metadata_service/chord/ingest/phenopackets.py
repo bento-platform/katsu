@@ -240,7 +240,7 @@ def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
     ]
 
     diag_obj, _ = pm.Diagnosis.objects.get_or_create(
-        diseases_docs=diagnosis["disease"],
+        disease_doc=diagnosis["disease"],
         extra_properties=diagnosis.get("extra_properties", {})
     )
     diag_obj.genomic_interpretations.set(genomic_interpretations)
