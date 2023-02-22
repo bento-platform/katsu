@@ -31,6 +31,6 @@ class CanDIGAdminOrReadOnly(BasePermission):
                     admin_secret=opa_secret,
                     site_admin_key=opa_site_admin,
                 )
-            elif settings.CANDIG_AUTHORIZATION == "LOCAL_NO_AUTH_TESTING_ONLY":
+            elif settings.CANDIG_AUTHORIZATION == "LOCAL_SETTING_NO_AUTH":
                 return True
             return False
