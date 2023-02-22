@@ -37,7 +37,7 @@ jobs:
           npx widdershins ./chord_metadata_service/mohpackets/docs/schema.yml -o ./chord_metadata_service/mohpackets/docs/openapi.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true
 
       - name: Update schema.yml and openapi.md in repo
-        uses: gavinr/actions-update-file@v1.2.0
+        uses: test-room-7/action-update-file@v1
         with:
           files: |
             chord_metadata_service/mohpackets/docs/schema.yml
