@@ -31,6 +31,9 @@ jobs:
         with:
           node-version: '16'
 
+      - name: Create package.json file
+        run: |
+          echo '{"name": "my-project", "version": "1.0.0"}' > package.json
       - name: Install dependencies
         run: npm install
       
