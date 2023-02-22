@@ -51,7 +51,7 @@ jobs:
       - name: Update schema.yml and openapi.md in repo
         uses: test-room-7/action-update-file@v1
         with:
-          files: |
+          file-path: |
             chord_metadata_service/mohpackets/docs/schema.yml
             chord_metadata_service/mohpackets/docs/openapi.md
           commit-msg: Updated openapi.md
