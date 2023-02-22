@@ -1,4 +1,4 @@
-name: Update MoH schema
+name: Docs
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   generate-moh-schema:
-    name: Update OpenAPI schema using current MoH model
+    name: Update MoH schema
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
