@@ -29,13 +29,12 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # CANDIG SETTINGS
-CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "LOCAL_NO_AUTH_TESTING_ONLY")
-# CANDIG_OPA_URL = os.getenv("OPA_URL", "")
-# CANDIG_OPA_SECRET = os.getenv("OPA_SECRET", "my-secret-beacon-token")
-# CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("OPA_SITE_ADMIN_KEY", "site-admin")
-# if exists("/run/secrets/opa-root-token"):
-#     with open("/run/secrets/opa-root-token", "r") as f:
-#         CANDIG_OPA_SECRET = f.read()
+CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "LOCAL_SETTING_NO_AUTH")
+CANDIG_OPA_URL = os.getenv("OPA_URL", "LOCAL_SETTING_NO_OPA_URL")
+CANDIG_OPA_SECRET = os.getenv("OPA_SECRET", "LOCAL_SETTING_NO_OPA_SECRET")
+CANDIG_OPA_SITE_ADMIN_KEY = os.getenv(
+    "OPA_SITE_ADMIN_KEY", "LOCAL_SETTING_NO_SITE_ADMIN_KEY"
+)
 
 # Application definition
 
@@ -192,7 +191,7 @@ STATIC_URL = "static/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
