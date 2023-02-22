@@ -115,32 +115,8 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                      TextField()),
                                 Cast("phenopackets__biosamples__hts_files__extra_properties", TextField()),
 
-                                # Gene fields
-                                "phenopackets__genes__id",
-                                "phenopackets__genes__alternate_ids",
-                                "phenopackets__genes__symbol",
-                                Cast("phenopackets__genes__extra_properties", TextField()),
-
-                                # Variant fields
-                                "phenopackets__variants__allele_type",
-                                Cast("phenopackets__variants__allele", TextField()),
-                                Cast("phenopackets__variants__zygosity", TextField()),
-                                Cast("phenopackets__variants__extra_properties", TextField()),
-
                                 # Disease field
-                                Cast("phenopackets__diseases__term", TextField()),
-                                Cast("phenopackets__diseases__onset", TextField()),
-                                Cast("phenopackets__diseases__disease_stage", TextField()),
-                                Cast("phenopackets__diseases__tnm_finding", TextField()),
-                                Cast("phenopackets__diseases__extra_properties", TextField()),
-
-                                # HTS file fields
-                                "phenopackets__hts_files__uri",
-                                "phenopackets__hts_files__description",
-                                "phenopackets__hts_files__hts_format",
-                                "phenopackets__hts_files__genome_assembly",
-                                Cast("phenopackets__hts_files__individual_to_sample_identifiers", TextField()),
-                                Cast("phenopackets__hts_files__extra_properties", TextField()),
+                                Cast("phenopackets__diseases_docs", TextField()),
 
                                 # Experiment fields
                                 "phenopackets__biosamples__experiment__study_type",
