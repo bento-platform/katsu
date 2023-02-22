@@ -3,7 +3,10 @@
 # Set .gitconfig for development
 /set_gitconfig.bash
 
-# Install the package / any dependency changes
+# Source the development virtual environment
+source /env/bin/activate
+
+# Update dependencies and install module locally (similar to pip install -e: "editable mode")
 poetry install
 
 # Wait for database to start
@@ -14,7 +17,7 @@ python manage.py makemigrations
 python manage.py migrate
 
 # Set the internal port unless it's been externally configured
-if [ -z "${INTERNAL_PORT}" ]; then
+if [[ -z "${INTERNAL_PORT}" ]]; then
   # Set default internal port to 8000
   INTERNAL_PORT=8000
 fi
