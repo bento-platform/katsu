@@ -54,8 +54,5 @@ jobs:
           files: |
             chord_metadata_service/mohpackets/docs/schema.yml
             chord_metadata_service/mohpackets/docs/openapi.md
-          commit-message: Updated schema and OpenAPI documentation
-          author-name: GitHub Actions
-          author-email: actions@github.com
-          branch: develop
+          commit-msg: Updated openapi.md
           github-token: ${{ secrets.GITHUB_TOKEN }}
