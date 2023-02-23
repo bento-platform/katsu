@@ -1,9 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Metadata Service API
+  title: MoH Service API
   version: 1.0.0
-  description: Metadata Service provides a phenotypic description of an Individual
-    in the context of biomedical research.
+  description: This is the RESTful API for the MoH Service.
 paths:
   /moh/v1/discovery/biomarkers/:
     get:

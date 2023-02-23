@@ -1,7 +1,7 @@
 
-<h1 id="metadata-service-api">Metadata Service API v1.0.0</h1>
+<h1 id="moh-service-api">MoH Service API v1.0.0</h1>
 
-Metadata Service provides a phenotypic description of an Individual in the context of biomedical research.
+This is the RESTful API for the MoH Service.
 
 # Authentication
 
@@ -13,7 +13,7 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 * API Key (tokenAuth)
     - Parameter Name: **Authorization**, in: header. Token-based authentication with required prefix "Token"
 
-<h1 id="metadata-service-api-discovery">discovery</h1>
+<h1 id="moh-service-api-discovery">discovery</h1>
 
 ## discovery_biomarkers_list
 
@@ -472,7 +472,7 @@ MoH Overview schema
 }
 ```
 
-<h1 id="metadata-service-api-model">model</h1>
+<h1 id="moh-service-api-model">model</h1>
 
 ## model_biomarkers_list
 
