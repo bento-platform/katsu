@@ -216,11 +216,8 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Metadata Service API",
-    "DESCRIPTION": (
-        "Metadata Service provides a phenotypic description of an "
-        "Individual in the context of biomedical research."
-    ),
+    "TITLE": "MoH Service API",
+    "DESCRIPTION": ("This is the RESTful API for the MoH Service."),
     "VERSION": "1.0.0",
     # include schema endpoint into schema
     "SERVE_INCLUDE_SCHEMA": False,
