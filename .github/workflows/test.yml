@@ -5,12 +5,10 @@ on:
     branches:
       - develop
       - master
-      - github_action_testing
   pull_request:
     branches:
       - develop
       - master
-      - github_action_testing
 
 jobs:
   build:
