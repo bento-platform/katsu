@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import os
+from os.path import exists
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,10 +32,14 @@ ALLOWED_HOSTS = []
 # CANDIG SETTINGS
 CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "LOCAL_SETTING_NO_AUTH")
 CANDIG_OPA_URL = os.getenv("OPA_URL", "LOCAL_SETTING_NO_OPA_URL")
-CANDIG_OPA_SECRET = os.getenv("OPA_SECRET", "LOCAL_SETTING_NO_OPA_SECRET")
 CANDIG_OPA_SITE_ADMIN_KEY = os.getenv(
     "OPA_SITE_ADMIN_KEY", "LOCAL_SETTING_NO_SITE_ADMIN_KEY"
 )
+CANDIG_OPA_SECRET = "LOCAL_SETTING_NO_OPA_SECRET"
+if exists("/run/secrets/opa-root-token"):
+    with open("/run/secrets/opa-root-token", "r") as f:
+        CANDIG_OPA_SECRET = f.read()
+
 
 # Application definition
 
@@ -117,7 +122,7 @@ LOGGING = {
     },
 }
 
-# function to read postgres password file
+# function to read docker secret password file
 def get_secret(path):
     try:
         with open(path, "r", encoding="utf-8") as f:
