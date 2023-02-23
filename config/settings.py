@@ -225,9 +225,7 @@ SPECTACULAR_SETTINGS = {
     # include schema endpoint into schema
     "SERVE_INCLUDE_SCHEMA": False,
     # Filter out the url patterns we don't want documented
-    "PREPROCESSING_HOOKS": [
-        "chord_metadata_service.metadata.hooks.preprocessing_filter_path"
-    ],
+    "PREPROCESSING_HOOKS": ["config.hooks.preprocessing_filter_path"],
     # Split components into request and response parts where appropriate
     "COMPONENT_SPLIT_REQUEST": True,
     # Aid client generator targets that have trouble with read-only properties.
