@@ -9,7 +9,7 @@ from chord_metadata_service.phenopackets.filters import (
     filter_extra_properties_datatype,
     PhenotypicFeatureFilter,
     DiseaseFilter,
-    PhenopacketFilter, DiagnosisFilter, GenomicInterpretationFilter
+    PhenopacketFilter, DiagnosisFilter, GenomicInterpretationFilter, filter_json_array
 )
 
 from . import constants as c
@@ -168,8 +168,6 @@ class GenomicInterpretationTest(TestCase):
     """ Test module for GenomicInterpretation model. """
 
     def setUp(self):
-        # self.gene = m.Gene.objects.create(**c.VALID_GENE_1)
-        # self.variant = m.Variant.objects.create(**c.VALID_VARIANT_1)
         self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
         self.variant_descriptor = m.VariantDescriptor.objects.create(**c.VALID_VARIANT_DESCRIPTOR)
         self.variant_interpretation = m.VariantInterpretation.objects.create(
@@ -214,6 +212,7 @@ class GenomicInterpretationTest(TestCase):
             value
         )
         self.assertEqual(qs.count(), count)
+
 
 class DiagnosisTest(TestCase):
     """ Test module for Diagnosis model. """
@@ -260,9 +259,8 @@ class InterpretationTest(TestCase):
     """ Test module for Interpretation model. """
 
     def setUp(self):
-        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(
-            self.disease))
+        # self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
+        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_1))
         self.meta_data_phenopacket = m.MetaData.objects.create(**c.VALID_META_DATA_1)
         self.meta_data_interpretation = m.MetaData.objects.create(**c.VALID_META_DATA_2)
 
@@ -272,17 +270,15 @@ class InterpretationTest(TestCase):
             subject=self.individual,
             meta_data=self.meta_data_phenopacket,
         )
-        self.interpretation = m.Interpretation.objects.create(**c.valid_interpretation(
-            phenopacket=self.phenopacket,
-            meta_data=self.meta_data_interpretation
-            ))
-        self.interpretation.diagnosis.set([self.diagnosis])
+        self.interpretation = m.Interpretation.objects.create(**c.valid_interpretation(self.diagnosis))
 
     def test_interpretation(self):
-        interpretation_query = m.Interpretation.objects.filter(
-            resolution_status='IN_PROGRESS'
+        interpretation_qs = m.Interpretation.objects.filter(
+            progress_status='IN_PROGRESS'
             )
-        self.assertEqual(interpretation_query.count(), 1)
+        self.assertEqual(interpretation_qs.count(), 1)
+        # TODO: test diagnosis filters
+        # interpretation_qs = m.Interpretation.objects.filter()
 
     def test_interpretation_str(self):
         self.assertEqual(str(self.interpretation), str(self.interpretation.id))
@@ -306,43 +302,53 @@ class MetaDataTest(TestCase):
         self.assertEqual(str(self.metadata), str(self.metadata.id))
 
 
-
 class PhenopacketTest(TestCase):
     """ Test module for Phenopacket model """
 
     def setUp(self):
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
+        self.interpretation = m.Interpretation.objects.create(
+            **c.valid_interpretation(
+                diagnosis=m.Diagnosis.objects.create(
+                    **c.valid_diagnosis(
+                        disease=c.VALID_DISEASE_1)
+                )
+            )
+        )
         self.phenopacket = m.Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=self.individual,
             meta_data=self.meta_data,
+            measurements=[c.VALID_MEASUREMENT_1, c.VALID_MEASUREMENT_2],
+            diseases_docs=[c.VALID_DISEASE_1],
+            medical_actions=c.VALID_MEDICAL_ACTIONS
         )
+        self.phenopacket.interpretations.set([self.interpretation])
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
         self.phenotypic_feature_2 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
-        self.disease_1 = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.phenopacket.disease.set([self.disease_1])
+
 
     def test_phenopacket(self):
         phenopacket = m.Phenopacket.objects.filter(id="phenopacket_id:1")
         self.assertEqual(len(phenopacket), 1)
         self.assertEqual(len(phenopacket.values("phenotypic_features")), 2)
-        self.assertEqual(len(phenopacket.values("diseases")), 1)
+        self.assertEqual(len(phenopacket.values("diseases_docs")), 1)
 
     def test_filtering(self):
         f = PhenopacketFilter()
-        number_of_found_pf = len(m.Phenopacket.objects.filter(phenotypic_features__negated=False))
+        number_of_found_pf = len(m.Phenopacket.objects.filter(phenotypic_features__excluded=False))
         # all phenotypic feature constants have negated=True
         result = f.filter_found_phenotypic_feature(m.Phenopacket.objects.all(), "phenotypic_features", "proptosis")
         self.assertEqual(len(result), 0)
         result = f.filter_found_phenotypic_feature(m.Phenopacket.objects.all(), "phenotypic_features", "HP:0000520")
         self.assertEqual(len(result), 0)
         self.assertEqual(len(result), number_of_found_pf)
-        result_label = filter_ontology(m.Phenopacket.objects.all(), "diseases__term", "Spinocerebellar ataxia 1")
+        result_label = filter_json_array(m.Phenopacket.objects.all(), "diseases_docs", [{"term": {"label": "Spinocerebellar ataxia 1"}}])
         self.assertEqual(len(result_label), 1)
-        result_id = filter_ontology(m.Phenopacket.objects.all(), "diseases__term", "OMIM:164400")
+        result_id = filter_json_array(m.Phenopacket.objects.all(), "diseases_docs", [{"term": {"id": "OMIM:164400"}}])
         self.assertEqual(len(result_label), len(result_id))

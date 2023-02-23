@@ -73,6 +73,22 @@ def filter_datasets(qs, name, value):
         return qs
 
 
+def filter_json_array(qs, name, value):
+    """
+    Filters on the id and label of an ontology contained in a JSONField with a JSON array object.
+    :param qs: QuerySet to filter
+    :param name: lookup pointing to JSONField field (e.g. 'diseases_docs' on phenopacket)
+    :param value: The value to filter on
+    :return: The filtered QuerySet
+    """
+    if value:
+        lookup = "__".join([name, "contains"])
+        qs = qs.filter(
+            **{lookup: value}
+        ).distinct()
+    return qs
+
+
 # FILTERS
 
 
@@ -311,7 +327,7 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
         qs = qs.filter(
             Q(phenotypic_features__pftype__id__icontains=value) |
             Q(phenotypic_features__pftype__label__icontains=value),
-            phenotypic_features__negated=False
+            phenotypic_features__excluded=False
         ).distinct()
         return qs
 
@@ -373,7 +389,7 @@ class DiagnosisFilter(django_filters.rest_framework.FilterSet):
 
 
 class InterpretationFilter(django_filters.rest_framework.FilterSet):
-    resolution_status = django_filters.CharFilter(lookup_expr="iexact")
+    progress_status = django_filters.CharFilter(lookup_expr="iexact")
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
@@ -389,3 +405,9 @@ class InterpretationFilter(django_filters.rest_framework.FilterSet):
     class Meta:
         model = m.Interpretation
         fields = ["id", "phenopacket"]
+
+    def filter_diagnosis(self, qs, name, value):
+        # TODO: implement and test diagnosis filters
+        qs = qs.filter(
+        ).distinct()
+        return qs

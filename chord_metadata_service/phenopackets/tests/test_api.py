@@ -244,11 +244,13 @@ class CreatePhenopacketTest(APITestCase):
 class CreateGenomicInterpretationTest(APITestCase):
 
     def setUp(self):
-        self.gene = m.Gene.objects.create(**c.VALID_GENE_1).id
-        self.variant = m.Variant.objects.create(**c.VALID_VARIANT_1).id
-        self.genomic_interpretation = c.valid_genomic_interpretation(
-            gene=self.gene,
-            variant=self.variant
+        self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
+        self.variant_descriptor = m.VariantDescriptor.objects.create(**c.VALID_VARIANT_DESCRIPTOR)
+        self.variant_interpretation = m.VariantInterpretation.objects.create(
+            **c.valid_variant_interpretation(self.variant_descriptor)
+        )
+        self.genomic_interpretation = m.GenomicInterpretation.objects.create(
+            **c.valid_genomic_interpretation(self.gene_descriptor, self.variant_interpretation)
         )
 
     def test_genomic_interpretation(self):
@@ -265,8 +267,7 @@ class CreateGenomicInterpretationTest(APITestCase):
 class CreateDiagnosisTest(APITestCase):
 
     def setUp(self):
-        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1).id
-        self.diagnosis = c.valid_diagnosis(self.disease)
+        self.diagnosis = c.valid_diagnosis(c.VALID_DISEASE_1)
 
     def test_diagnosis(self):
         response = get_response('diagnoses-list',

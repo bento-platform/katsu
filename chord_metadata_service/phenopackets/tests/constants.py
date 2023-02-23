@@ -216,6 +216,124 @@ INVALID_DISEASE_2 = {
     }
 }
 
+VALID_MEASUREMENT_1 = {
+    "assay": {
+        "id": "NCIT:C113237",
+        "label": "Absolute Blood Lymphocyte Count"
+    },
+    "value": {
+        "quantity": {
+            "unit": {
+                "id": "NCIT:C67245",
+                "label": "Thousand Cells"
+            },
+            "value": 1.4,
+            "referenceRange": {
+                "unit": {
+                    "id": "NCIT:C67245",
+                    "label": "Thousand Cells"
+                },
+                "low": 1.0,
+                "high": 4.5
+            }
+        }
+    },
+    "timeObserved": {
+        "interval": {
+            "start": "2019-09-01T00:00:00Z",
+            "end": "2020-03-01T00:00:00Z"
+        }
+    }
+}
+
+VALID_MEASUREMENT_2 = {
+    "assay": {
+        "id": "LOINC:26474-7",
+        "label": "Lymphocytes [#/volume] in Blood"
+    },
+    "value": {
+        "quantity": {
+            "unit": {
+                "id": "NCIT:C67245",
+                "label": "Thousand Cells"
+            },
+            "value": 0.7,
+            "referenceRange": {
+                "unit": {
+                    "id": "NCIT:C67245",
+                    "label": "Thousand Cells"
+                },
+                "low": 1.0,
+                "high": 4.5
+            }
+        }
+    },
+    "timeObserved": {
+        "timestamp": "2020-03-20T00:00:00Z"
+    }
+}
+
+VALID_MEDICAL_ACTIONS = [
+    {
+        "procedure": {
+            "code": {
+                "id": "NCIT:C80473",
+                "label": "Left Ventricular Assist Device"
+            },
+            "performed": {
+                "timestamp": "2016-01-01T00:00:00Z"
+            }
+        }
+    },
+    {
+        "treatment": {
+            "agent": {
+                "id": "NCIT:C722",
+                "label": "Oxygen"
+            },
+            "routeOfAdministration": {
+                "id": "NCIT:C38284",
+                "label": "Nasal Route of Administration"
+            },
+            "doseIntervals": [
+                {
+                    "quantity": {
+                        "unit": {
+                            "id": "NCIT:C67388",
+                            "label": "Liter per Minute"
+                        },
+                        "value": 2.0
+                    },
+                    "scheduleFrequency": {
+                        "id": "NCIT:C125004",
+                        "label": "Once Daily"
+                    },
+                    "interval": {
+                        "start": "2020-03-20T00:00:00Z",
+                        "end": "2020-03-22T00:00:00Z"
+                    }
+                },
+                {
+                    "quantity": {
+                        "unit": {
+                            "id": "NCIT:C67388",
+                            "label": "Liter per Minute"
+                        },
+                        "value": 50.0
+                    },
+                    "scheduleFrequency": {
+                        "id": "NCIT:C125004",
+                        "label": "Once Daily"
+                    },
+                    "interval": {
+                        "start": "2020-03-22T00:00:00Z",
+                        "end": "2020-03-23T00:00:00Z"
+                    }
+                }
+            ]
+        }
+    }
+],
 
 def valid_phenopacket(subject, meta_data):
     return dict(
@@ -438,12 +556,12 @@ def valid_diagnosis(disease):
     )
 
 
-def valid_interpretation(phenopacket, meta_data):
+def valid_interpretation(diagnosis):
     return dict(
         id='interpretation:1',
-        resolution_status='IN_PROGRESS',
-        phenopacket=phenopacket,
-        meta_data=meta_data,
+        progress_status='IN_PROGRESS',
+        diagnosis=diagnosis,
+        summary="Test interpretation",
         extra_properties={
             "comment": "test data"
         }

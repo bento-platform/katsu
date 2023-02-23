@@ -263,11 +263,13 @@ class Disease(BaseTimeStamp, IndexableMixin):
     # "id": "HP:0003581",
     # "label": "Adult onset"
     # }
+    excluded = models.BooleanField(blank=True, null=True)
     onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+    resolution = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
     disease_stage = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                               help_text=rec_help(d.DISEASE, "disease_stage"))
-    tnm_finding = JSONField(blank=True, null=True, validators=[ontology_list_validator],
-                            help_text=rec_help(d.DISEASE, "tnm_finding"))
+    clinical_tnm_finding = JSONField(blank=True, null=True, validators=[ontology_list_validator],
+                                     help_text=rec_help(d.DISEASE, "tnm_finding"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.DISEASE, "extra_properties"))
 
     def __str__(self):
