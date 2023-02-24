@@ -39,3 +39,6 @@ config.json
 # MacOS
 .DS_Store
 katsu.code-workspace
+
+# Backup files
+chord_metadata_service/mohpackets/data/backup_db/*

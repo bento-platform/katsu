@@ -3,14 +3,14 @@
         "model": "mohpackets.program",
         "fields": {
             "program_id": "PROGRAM_1",
-            "name": "IO-ALINES"
+            "name": "SYNTHETIC-POG"
         }
     },
     {
         "model": "mohpackets.program",
         "fields": {
             "program_id": "PROGRAM_2",
-            "name": "COMPASS"
+            "name": "SYNTHETIC-BIO-CAN"
         }
     }
 ]

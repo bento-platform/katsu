@@ -1,3 +1,6 @@
+import os
+from datetime import datetime
+
 from django.core.management import call_command
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
@@ -65,6 +68,17 @@ def create_bulk_objects(serializer_class, data: dict):
         objs = serializer.save()
 
     return objs
+
+
+def backup_db():
+    """Backup the database with current date and time."""
+    backup_db_folder = "chord_metadata_service/mohpackets/data/backup_db"
+    os.makedirs(backup_db_folder, exist_ok=True)
+    db_name = f"db_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"
+    try:
+        call_command("dumpdata", output=f"{backup_db_folder}/{db_name}")
+    except Exception as e:
+        print(f"Error during backup_db: {e}")
 
 
 ##########################################
@@ -433,6 +447,7 @@ def delete_all(request):
     Clean all the tables in the database
     """
     try:
+        backup_db()
         call_command("flush", interactive=False, verbosity=0)
     except Exception as e:
         return HttpResponse(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)

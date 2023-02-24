@@ -38,7 +38,7 @@ urlpatterns = [
     *chord_urls.urlpatterns,  # TODO: Use include? can we double up?
     *([path("admin/", admin.site.urls)] if DEBUG else []),
     # ==== NON CANDIG API END ====
-    path("api/v1/", include(moh_urls)),
+    path("moh/v1/", include(moh_urls)),
     # OpenAPI 3 documentation with Swagger UI
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("", SpectacularSwaggerView.as_view(), name="swagger-ui"),
