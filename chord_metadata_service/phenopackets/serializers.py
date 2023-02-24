@@ -260,7 +260,7 @@ class SimplePhenopacketSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
     interpretations = InterpretationSerializer(many=True, required=False)
-    diseases_docs = serializers.JSONField()
+    diseases = DiseaseSerializer(many=True, required=False)
 
     class Meta:
         model = Phenopacket

@@ -172,6 +172,11 @@ VALID_VARIANT_INTERPRETATION = {
     "variant": VALID_VARIANT_DESCRIPTOR
 }
 
+VALID_DISEASE_ONTOLOGY = {
+    "id": "OMIM:164400",
+    "label": "Spinocerebellar ataxia 1"
+}
+
 VALID_DISEASE_1 = {
     "term": {
         "id": "OMIM:164400",
@@ -549,7 +554,7 @@ def valid_genomic_interpretation(gene_descriptor=None, variant_interpretation=No
 
 def valid_diagnosis(disease):
     return dict(
-        disease_doc=disease,
+        disease=disease,
         extra_properties={
             "comment": "test data"
         }

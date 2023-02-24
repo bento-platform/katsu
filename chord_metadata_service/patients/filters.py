@@ -1,6 +1,6 @@
 import django_filters
 from django.db.models import Q
-from django.db.models import TextField
+from django.db.models import TextField, BooleanField
 from django.db.models.functions import Cast
 from django.contrib.postgres.search import SearchVector
 from .models import Individual
@@ -13,10 +13,9 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
     karyotypic_sex = django_filters.CharFilter(lookup_expr="iexact")
     ethnicity = django_filters.CharFilter(lookup_expr="icontains")
     race = django_filters.CharFilter(lookup_expr="icontains")
-    disease_docs = django_filters.CharFilter(
-        method="filter_disease", field_name="phenopackets__diseases_docs",
-        label="Diseases"
-    )
+    disease = django_filters.CharFilter(
+        method="filter_disease", field_name="phenopackets__diseases",
+        label="Disease")
     # e.g. select all patients who have a symptom "dry cough"
     found_phenotypic_feature = django_filters.CharFilter(
         method="filter_found_phenotypic_feature", field_name="phenopackets__phenotypic_features",
@@ -54,11 +53,11 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         qs = qs.filter(mcodepacket__cancer_related_procedures__code__icontains=value).distinct()
         return qs
 
-    # TODO: Diseases were changed to JSONField, we cant use case-insensitive 'icontains'. Rollback to M2M?
     def filter_disease(self, qs, name, value):
-        id_filter = Q(phenopackets__diseases_docs__contains=[{"term": {"id": value}}])
-        label_filter = Q(phenopackets__diseases_docs__contains=[{"term": {"label": value}}])
-        qs = qs.filter(id_filter | label_filter).distinct()
+        qs = qs.filter(
+            Q(phenopackets__diseases__term__id__icontains=value) |
+            Q(phenopackets__diseases__term__label__icontains=value)
+        ).distinct()
         return qs
 
     def filter_extra_properties(self, qs, name, value):
@@ -116,7 +115,15 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 Cast("phenopackets__biosamples__hts_files__extra_properties", TextField()),
 
                                 # Disease field
-                                Cast("phenopackets__diseases_docs", TextField()),
+                                Cast("phenopackets__diseases__term", TextField()),
+                                Cast("phenopackets__diseases__excluded", BooleanField()),
+                                Cast("phenopackets__diseases__onset", TextField()),
+                                Cast("phenopackets__diseases__resolution", TextField()),
+                                Cast("phenopackets__diseases__disease_stage", TextField()),
+                                Cast("phenopackets__diseases__clinical_tnm_finding", TextField()),
+                                Cast("phenopackets__diseases__primary_site", TextField()),
+                                Cast("phenopackets__diseases__laterality", TextField()),
+                                Cast("phenopackets__diseases__extra_properties", TextField()),
 
                                 # Experiment fields
                                 "phenopackets__biosamples__experiment__study_type",

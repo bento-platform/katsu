@@ -230,6 +230,17 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
     return gen_obj
 
 
+def get_or_create_disease(disease) -> pm.Disease:
+    d_obj, _ = pm.Disease.objects.get_or_create(
+        term=disease["term"],
+        disease_stage=disease.get("disease_stage", []),
+        clinical_tnm_finding=disease.get("tnm_finding", []),
+        extra_properties=disease.get("extra_properties", {}),
+        **query_and_check_nulls(disease, "onset")
+    )
+    return d_obj
+
+
 def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
     # Create GenomicInterpretation
     genomic_interpretations_data = diagnosis.get("genomic_interpretations", [])
@@ -240,7 +251,7 @@ def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
     ]
 
     diag_obj, _ = pm.Diagnosis.objects.get_or_create(
-        disease_doc=diagnosis["disease"],
+        disease_ontology=diagnosis["disease"],
         extra_properties=diagnosis.get("extra_properties", {})
     )
     diag_obj.genomic_interpretations.set(genomic_interpretations)
@@ -308,6 +319,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     resources_db = [ingest_resource(rs) for rs in resources]
 
     interpretations_db = [get_or_create_interpretation(interp) for interp in interpretations]
+    diseases_db = [get_or_create_disease(disease) for disease in diseases]
 
     # Create phenopacket metadata object
     meta_data_obj = pm.MetaData(
@@ -326,7 +338,6 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     new_phenopacket = pm.Phenopacket(
         id=new_phenopacket_id,
         subject=subject_obj,
-        diseases_docs=diseases,
         measurements=measurements,
         medical_actions=medical_actions,
         meta_data=meta_data_obj,
@@ -341,6 +352,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     # new_phenopacket.phenotypic_features.set(phenotypic_features_db)
     new_phenopacket.interpretations.set(interpretations_db)
     new_phenopacket.biosamples.set(biosamples_db)
+    new_phenopacket.diseases.set(diseases_db)
 
     return new_phenopacket
 

@@ -60,7 +60,7 @@ class OverviewTest(APITestCase):
         )
         self.phenopacket_1.biosamples.set([self.biosample_1])
         self.phenopacket_2.biosamples.set([self.biosample_2])
-        self.phenopacket_1.diseases_docs.set([self.disease])
+        self.phenopacket_1.diseases.set([self.disease])
 
         # experiments
         self.instrument = exp_m.Instrument.objects.create(**exp_c.valid_instrument())
@@ -185,7 +185,7 @@ class PublicSearchFieldsTest(APITestCase):
             **ph_c.valid_phenotypic_feature(self.biosample_1, self.phenopacket_1)
         )
         self.phenopacket_1.biosamples.set([self.biosample_1])
-        self.phenopacket_1.diseases_docs.set([self.disease])
+        self.phenopacket_1.diseases.set([self.disease])
 
         # experiments
         self.instrument = exp_m.Instrument.objects.create(**exp_c.valid_instrument())

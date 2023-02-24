@@ -233,19 +233,19 @@ class DiagnosisTest(TestCase):
         self.genomic_interpretation_2 = m.GenomicInterpretation.objects.create(
             **c.valid_genomic_interpretation(self.gene_descriptor)
             )
-        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_1))
+        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_ONTOLOGY))
         self.diagnosis.genomic_interpretations.set([
             self.genomic_interpretation_1,
             self.genomic_interpretation_2
         ])
 
     def test_diagnosis(self):
-        self._test_disease_filter(Q(disease_doc__term__id__icontains="omim"), 1)
-        self._test_disease_filter(Q(disease_doc__term__id__icontains="Omim:1644"), 1)
-        self._test_disease_filter(Q(disease_doc__term__id__icontains="should_not_match"), 0)
+        self._test_disease_filter(Q(disease__term__id__icontains="omim"), 1)
+        self._test_disease_filter(Q(disease__term__id__icontains="Omim:1644"), 1)
+        self._test_disease_filter(Q(disease__term__id__icontains="should_not_match"), 0)
 
-        self._test_disease_filter(Q(disease_doc__term__label__icontains="spinocerebellar"), 1)
-        self._test_disease_filter(Q(disease_doc__term__label__icontains="should_not_match"), 0)
+        self._test_disease_filter(Q(disease__term__label__icontains="spinocerebellar"), 1)
+        self._test_disease_filter(Q(disease__term__label__icontains="should_not_match"), 0)
 
     def test_diagnosis_str(self):
         self.assertEqual(str(self.diagnosis), str(self.diagnosis.id))
@@ -260,7 +260,7 @@ class InterpretationTest(TestCase):
 
     def setUp(self):
         # self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_1))
+        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_ONTOLOGY))
         self.meta_data_phenopacket = m.MetaData.objects.create(**c.VALID_META_DATA_1)
         self.meta_data_interpretation = m.MetaData.objects.create(**c.VALID_META_DATA_2)
 
@@ -312,18 +312,19 @@ class PhenopacketTest(TestCase):
             **c.valid_interpretation(
                 diagnosis=m.Diagnosis.objects.create(
                     **c.valid_diagnosis(
-                        disease=c.VALID_DISEASE_1)
+                        disease=c.VALID_DISEASE_ONTOLOGY)
                 )
             )
         )
+        self.disease_1 = m.Disease.objects.create(**c.VALID_DISEASE_1)
         self.phenopacket = m.Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=self.individual,
             meta_data=self.meta_data,
             measurements=[c.VALID_MEASUREMENT_1, c.VALID_MEASUREMENT_2],
-            diseases_docs=[c.VALID_DISEASE_1],
             medical_actions=c.VALID_MEDICAL_ACTIONS
         )
+        self.phenopacket.diseases.set(self.disease_1)
         self.phenopacket.interpretations.set([self.interpretation])
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
@@ -337,7 +338,7 @@ class PhenopacketTest(TestCase):
         phenopacket = m.Phenopacket.objects.filter(id="phenopacket_id:1")
         self.assertEqual(len(phenopacket), 1)
         self.assertEqual(len(phenopacket.values("phenotypic_features")), 2)
-        self.assertEqual(len(phenopacket.values("diseases_docs")), 1)
+        self.assertEqual(len(phenopacket.values("diseases")), 1)
 
     def test_filtering(self):
         f = PhenopacketFilter()
@@ -348,7 +349,7 @@ class PhenopacketTest(TestCase):
         result = f.filter_found_phenotypic_feature(m.Phenopacket.objects.all(), "phenotypic_features", "HP:0000520")
         self.assertEqual(len(result), 0)
         self.assertEqual(len(result), number_of_found_pf)
-        result_label = filter_json_array(m.Phenopacket.objects.all(), "diseases_docs", [{"term": {"label": "Spinocerebellar ataxia 1"}}])
+        result_label = filter_ontology(m.Phenopacket.objects.all(), "diseases__term", "Spinocerebellar ataxia 1")
         self.assertEqual(len(result_label), 1)
-        result_id = filter_json_array(m.Phenopacket.objects.all(), "diseases_docs", [{"term": {"id": "OMIM:164400"}}])
+        result_id = filter_ontology(m.Phenopacket.objects.all(), "diseases__term", "OMIM:164400")
         self.assertEqual(len(result_label), len(result_id))

@@ -77,7 +77,7 @@ def filter_json_array(qs, name, value):
     """
     Filters on the id and label of an ontology contained in a JSONField with a JSON array object.
     :param qs: QuerySet to filter
-    :param name: lookup pointing to JSONField field (e.g. 'diseases_docs' on phenopacket)
+    :param name: lookup pointing to JSONField field
     :param value: The value to filter on
     :return: The filtered QuerySet
     """
@@ -369,7 +369,7 @@ class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
 
 class DiagnosisFilter(django_filters.rest_framework.FilterSet):
     disease_type = django_filters.CharFilter(
-        method=filter_ontology, field_name="disease_doc__term", label="Disease type"
+        method=filter_ontology, field_name="disease__term", label="Disease type"
     )
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(

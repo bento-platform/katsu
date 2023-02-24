@@ -116,7 +116,7 @@ def ingest_conditions(phenopacket_ids: Dict[str, str], conditions_data):
         subject = _parse_reference(item["resource"]["subject"]["reference"])
 
         phenopacket = Phenopacket.objects.get(id=phenopacket_ids[subject])
-        phenopacket.diseases_docs.add(disease)
+        phenopacket.diseases.add(disease)
 
         logger.info(f'Disease {disease.id} created')
 

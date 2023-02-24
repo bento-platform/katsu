@@ -254,6 +254,7 @@ class Disease(BaseTimeStamp, IndexableMixin):
     FHIR: Condition
     """
 
+    objects = None
     term = JSONField(validators=[ontology_validator], help_text=rec_help(d.DISEASE, "term"))
     # "ageOfOnset": {
     # "age": "P38Y7M"
@@ -270,6 +271,8 @@ class Disease(BaseTimeStamp, IndexableMixin):
                               help_text=rec_help(d.DISEASE, "disease_stage"))
     clinical_tnm_finding = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                                      help_text=rec_help(d.DISEASE, "tnm_finding"))
+    primary_site = JSONField(blank=True, null=True, validators=[ontology_validator])
+    laterality = JSONField(blank=True, null=True, validators=[ontology_validator])
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.DISEASE, "extra_properties"))
 
     def __str__(self):
@@ -450,8 +453,7 @@ class Diagnosis(BaseTimeStamp):
     FHIR: Condition
     """
 
-    # disease = models.ForeignKey(Disease, on_delete=models.CASCADE, help_text='The diagnosed condition.')
-    disease_doc = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
+    disease_ontology = JSONField(blank=False, null=True, validators=[ontology_validator])
     # required?
     genomic_interpretations = models.ManyToManyField(
         GenomicInterpretation, blank=True,
@@ -521,8 +523,7 @@ class Phenopacket(BaseTimeStamp, IndexableMixin):
     interpretations = models.ManyToManyField(
         Interpretation, blank=True, help_text=rec_help(d.PHENOPACKET, "interpretations"))
 
-    # Note: Renamed from "diseases" due to migration from ManyToMany to JSONField
-    diseases_docs = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_DISEASE_SCHEMA)])
+    diseases = models.ManyToManyField(Disease, blank=True, help_text=rec_help(d.PHENOPACKET, "diseases"))
 
     medical_actions = models.JSONField(
         blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_MEDICAL_ACTION_SCHEMA)])

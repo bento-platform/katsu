@@ -13,13 +13,14 @@ class IndividualTest(TestCase):
     def setUp(self):
         self.individual_one = Individual.objects.create(id='patient:1', sex='FEMALE', age={"age": "P25Y3M2D"})
         self.individual_two = Individual.objects.create(id='patient:2', sex='FEMALE', age={"age": "P45Y3M2D"})
+        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
         self.phenopacket = m.Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=self.individual_one,
             meta_data=self.meta_data,
-            diseases_docs=[c.VALID_DISEASE_1]
         )
+        self.phenopacket.diseases.set(self.disease)
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
