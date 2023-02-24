@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
-  title: MoH Service API
+  title: Metadata Service API
   version: 1.0.0
-  description: This is the RESTful API for the MoH Service.
+  description: Metadata Service provides a phenotypic description of an Individual
+    in the context of biomedical research.
 paths:
   /moh/v1/discovery/biomarkers/:
     get:
@@ -51,9 +52,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -100,9 +99,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -149,9 +146,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -258,9 +253,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -347,9 +340,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -396,9 +387,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -437,9 +426,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -454,10 +441,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      - {}
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -528,9 +512,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -585,9 +567,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -642,9 +622,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -735,9 +713,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -820,9 +796,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -893,9 +867,7 @@ paths:
       tags:
       - discovery
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -962,9 +934,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -989,9 +959,7 @@ paths:
               $ref: '#/components/schemas/BiomarkerRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -1012,9 +980,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1046,9 +1012,7 @@ paths:
               $ref: '#/components/schemas/BiomarkerRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1079,9 +1043,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedBiomarkerRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1101,9 +1063,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -1158,9 +1118,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1185,9 +1143,7 @@ paths:
               $ref: '#/components/schemas/ChemotherapyRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -1208,9 +1164,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1242,9 +1196,7 @@ paths:
               $ref: '#/components/schemas/ChemotherapyRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1275,9 +1227,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedChemotherapyRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1297,9 +1247,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -1354,9 +1302,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1381,9 +1327,7 @@ paths:
               $ref: '#/components/schemas/ComorbidityRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -1404,9 +1348,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1438,9 +1380,7 @@ paths:
               $ref: '#/components/schemas/ComorbidityRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1471,9 +1411,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedComorbidityRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1493,9 +1431,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -1610,9 +1546,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1637,9 +1571,7 @@ paths:
               $ref: '#/components/schemas/DonorRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -1660,9 +1592,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1694,9 +1624,7 @@ paths:
               $ref: '#/components/schemas/DonorRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1727,9 +1655,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedDonorRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1749,9 +1675,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -1846,9 +1770,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1873,9 +1795,7 @@ paths:
               $ref: '#/components/schemas/FollowUpRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -1896,9 +1816,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1930,9 +1848,7 @@ paths:
               $ref: '#/components/schemas/FollowUpRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1963,9 +1879,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedFollowUpRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -1985,9 +1899,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -2042,9 +1954,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2069,9 +1979,7 @@ paths:
               $ref: '#/components/schemas/HormoneTherapyRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -2092,9 +2000,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2126,9 +2032,7 @@ paths:
               $ref: '#/components/schemas/HormoneTherapyRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2159,9 +2063,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedHormoneTherapyRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2181,9 +2083,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -2230,9 +2130,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2257,9 +2155,7 @@ paths:
               $ref: '#/components/schemas/ImmunotherapyRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -2280,9 +2176,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2314,9 +2208,7 @@ paths:
               $ref: '#/components/schemas/ImmunotherapyRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2347,9 +2239,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedImmunotherapyRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2369,9 +2259,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -2450,9 +2338,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2477,9 +2363,7 @@ paths:
               $ref: '#/components/schemas/PrimaryDiagnosisRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -2500,9 +2384,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2534,9 +2416,7 @@ paths:
               $ref: '#/components/schemas/PrimaryDiagnosisRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2567,9 +2447,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedPrimaryDiagnosisRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2589,9 +2467,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -2632,9 +2508,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2659,9 +2533,7 @@ paths:
               $ref: '#/components/schemas/ProgramRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -2682,9 +2554,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2716,9 +2586,7 @@ paths:
               $ref: '#/components/schemas/ProgramRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2749,9 +2617,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedProgramRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2771,9 +2637,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -2836,9 +2700,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2863,9 +2725,7 @@ paths:
               $ref: '#/components/schemas/RadiationRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -2886,9 +2746,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2920,9 +2778,7 @@ paths:
               $ref: '#/components/schemas/RadiationRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2953,9 +2809,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRadiationRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -2975,9 +2829,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -3040,9 +2892,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3067,9 +2917,7 @@ paths:
               $ref: '#/components/schemas/SampleRegistrationRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -3090,9 +2938,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3124,9 +2970,7 @@ paths:
               $ref: '#/components/schemas/SampleRegistrationRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3157,9 +3001,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedSampleRegistrationRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3179,9 +3021,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -3280,9 +3120,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3307,9 +3145,7 @@ paths:
               $ref: '#/components/schemas/SpecimenRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -3330,9 +3166,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3364,9 +3198,7 @@ paths:
               $ref: '#/components/schemas/SpecimenRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3397,9 +3229,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedSpecimenRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3419,9 +3249,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -3512,10 +3340,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      - {}
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3540,9 +3365,7 @@ paths:
               $ref: '#/components/schemas/SurgeryRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -3563,10 +3386,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      - {}
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3598,9 +3418,7 @@ paths:
               $ref: '#/components/schemas/SurgeryRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3631,9 +3449,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedSurgeryRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3653,9 +3469,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -3734,9 +3548,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3761,9 +3573,7 @@ paths:
               $ref: '#/components/schemas/TreatmentRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '201':
           content:
@@ -3784,9 +3594,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3818,9 +3626,7 @@ paths:
               $ref: '#/components/schemas/TreatmentRequest'
         required: true
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3851,9 +3657,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedTreatmentRequest'
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '200':
           content:
@@ -3873,9 +3677,7 @@ paths:
       tags:
       - model
       security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
+      - BentoRemoteUserAuthentication: []
       responses:
         '204':
           description: No response body
@@ -6996,15 +6798,7 @@ components:
       - Unknown
       type: string
   securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: sessionid
-    tokenAuth:
+    BentoRemoteUserAuthentication:
       type: apiKey
       in: header
-      name: Authorization
-      description: Token-based authentication with required prefix "Token"
+      name: api_key
