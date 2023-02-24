@@ -17,6 +17,7 @@ __all__ = [
 ]
 
 DRAFT_07 = "http://json-schema.org/draft-07/schema#"
+CURIE_PATTERN = r"^[a-z0-9]+:[A-Za-z0-9.\-:]+$"
 
 class SCHEMA_TYPES(Enum):
     STRING = "string"
@@ -192,6 +193,7 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
         "additionalProperties": additional_properties
     }
 
+
 def make_object_schema(properties: dict, schema_id: str = None, title: str = None, description:str = None,
                         additional_properties: bool = False, required:List[str] = None) -> dict:
     return {
@@ -216,6 +218,7 @@ def describe_schema_opt(schema: dict, description: str):
     else:
         return schema
 
+
 def validation_schema_list(schema):
     """ Schema to validate JSON array values. """
 
@@ -226,6 +229,7 @@ def validation_schema_list(schema):
         "type": "array",
         "items": schema
     }
+
 
 def array_of(item, description=""):
     """
@@ -238,6 +242,7 @@ def array_of(item, description=""):
     }
     return describe_schema_opt(schema, description)
 
+
 def enum_of(values: List[str], description=""):
     schema = {
         "type": "string",
@@ -245,11 +250,13 @@ def enum_of(values: List[str], description=""):
     }
     return describe_schema_opt(schema, description)
 
+
 def base_type(type: SCHEMA_TYPES, description=""):
     """
     Creates a basic type schema
     """
     return describe_schema_opt({"type": type.value}, description)
+
 
 def string_with_pattern(pattern: str, description=""):
     """
@@ -261,12 +268,14 @@ def string_with_pattern(pattern: str, description=""):
     }
     return describe_schema_opt(schema, description)
 
+
 def string_with_format(format: SCHEMA_STRING_FORMATS, description=""):
     schema = {
         "type": "string",
         "format": format.value
     }
     return describe_schema_opt(schema, description)
+
 
 def named_one_of(prop_name: str, prop_schema: dict):
     """
@@ -280,5 +289,6 @@ def named_one_of(prop_name: str, prop_schema: dict):
         "required": [prop_name]
     }
 
-DATE_TIME = string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME)
 
+DATE_TIME = string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME)
+CURIE_SCHEMA = string_with_pattern(CURIE_PATTERN)

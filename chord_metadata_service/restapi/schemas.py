@@ -75,10 +75,10 @@ AGE = tag_ids_and_describe({
     "title": "Age schema",
     "type": "object",
     "properties": {
-        "age": AGE_STRING
+        "iso8601duration": AGE_STRING
     },
     "additionalProperties": False,
-    "required": ["age"]
+    "required": ["iso8601duration"]
 }, descriptions.AGE_NESTED)
 
 

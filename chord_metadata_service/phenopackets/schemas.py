@@ -1,4 +1,5 @@
 # Individual schemas for validation of JSONField values
+import json
 
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.schemas import RESOURCE_SCHEMA
@@ -21,7 +22,7 @@ from chord_metadata_service.restapi.schema_utils import (
     named_one_of,
     string_with_format,
     string_with_pattern,
-    tag_ids_and_describe
+    tag_ids_and_describe, CURIE_SCHEMA
 )
 
 from . import descriptions
@@ -56,6 +57,10 @@ __all__ = [
     "PHENOPACKET_MEDICAL_ACTION_SCHEMA"
 ]
 
+with open("vrs.json", "r") as file:
+    # TODO: use the json-schema provided by GA4GH for VRS schemas
+
+    VRS_SCHEMAS = json.load(file)
 
 ALLELE_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -410,9 +415,12 @@ PHENOPACKET_DISEASE_SCHEMA = tag_ids_and_describe({
     "type": "object",
     "properties": {
         "term": ONTOLOGY_CLASS,
+        "excluded": base_type(SCHEMA_TYPES.BOOLEAN),
         "onset": PHENOPACKET_TIME_ELEMENT_SCHEMA,
+        "resolution": PHENOPACKET_TIME_ELEMENT_SCHEMA,
         "disease_stage": array_of(ONTOLOGY_CLASS),
-        "tnm_finding": array_of(ONTOLOGY_CLASS),
+        "clinical_tnm_finding": array_of(ONTOLOGY_CLASS),
+        "primary_site": ONTOLOGY_CLASS,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["term"],
@@ -535,6 +543,7 @@ GENE_DESCRIPTOR = tag_ids_and_describe({
     "required": ["value_id", "symbol"]
 }, descriptions=descriptions.GENE_DESCRIPTOR)
 
+# TODO: load vrs schemas from json document
 VRS_VARIATION_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
     "$id": "katsu:phenopackets:variation",
@@ -543,7 +552,7 @@ VRS_VARIATION_SCHEMA = tag_ids_and_describe({
     "type": "object",
     "properties": {
         # Regex that matches 'prefix:reference' CURIE notation
-        "_id": string_with_pattern("^[a-z0-9]+:[A-Za-z0-9.\-:]+$"),
+        "_id": CURIE_SCHEMA,
         "type": base_type(SCHEMA_TYPES.STRING)
     },
     "required": []
@@ -560,7 +569,8 @@ EXPRESSION_SCHEMA = tag_ids_and_describe({
         "syntax": base_type(SCHEMA_TYPES.STRING),
         "value": base_type(SCHEMA_TYPES.STRING),
         "version": base_type(SCHEMA_TYPES.STRING)
-    }
+    },
+    "required": ["syntax", "value"]
 }, descriptions=descriptions.EXPRESSION)
 
 
@@ -594,6 +604,7 @@ VCF_RECORD_SCHEMA = tag_ids_and_describe({
         "filter": base_type(SCHEMA_TYPES.STRING),
         "info": base_type(SCHEMA_TYPES.STRING)
     },
+    "required": ["genome_assembly", "chrom", "pos", "ref", "alt"]
 }, descriptions=descriptions.VCF_RECORD)
 
 

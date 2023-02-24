@@ -13,11 +13,11 @@ from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKET
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 
 EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_1 = {
-    "json_document": os.path.join(os.path.dirname(__file__), "phenopackets_example_1.json"),
+    "json_document": os.path.join(os.path.dirname(__file__), "examples/covid.json"),
 }
 
 EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_2 = {
-    "json_document": os.path.join(os.path.dirname(__file__), "phenopackets_example_2.json"),
+    "json_document": os.path.join(os.path.dirname(__file__), "examples/covid.json"),
 }
 
 
@@ -289,10 +289,7 @@ class CreateInterpretationTest(APITestCase):
         self.metadata_interpretation = m.MetaData.objects.create(**c.VALID_META_DATA_2).id
         self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
         self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_ONTOLOGY)).id
-        self.interpretation = c.valid_interpretation(
-            phenopacket=self.phenopacket,
-            meta_data=self.metadata_interpretation
-        )
+        self.interpretation = c.valid_interpretation(diagnosis=self.diagnosis)
         self.interpretation['diagnosis'] = [self.diagnosis]
 
     def test_interpretation(self):

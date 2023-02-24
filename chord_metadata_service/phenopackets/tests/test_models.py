@@ -240,12 +240,12 @@ class DiagnosisTest(TestCase):
         ])
 
     def test_diagnosis(self):
-        self._test_disease_filter(Q(disease__term__id__icontains="omim"), 1)
-        self._test_disease_filter(Q(disease__term__id__icontains="Omim:1644"), 1)
-        self._test_disease_filter(Q(disease__term__id__icontains="should_not_match"), 0)
+        self._test_disease_filter(Q(disease_ontology__term__id__icontains="omim"), 1)
+        self._test_disease_filter(Q(disease_ontology__term__id__icontains="Omim:1644"), 1)
+        self._test_disease_filter(Q(disease_ontology__term__id__icontains="should_not_match"), 0)
 
-        self._test_disease_filter(Q(disease__term__label__icontains="spinocerebellar"), 1)
-        self._test_disease_filter(Q(disease__term__label__icontains="should_not_match"), 0)
+        self._test_disease_filter(Q(disease_ontology__term__label__icontains="spinocerebellar"), 1)
+        self._test_disease_filter(Q(disease_ontology__term__label__icontains="should_not_match"), 0)
 
     def test_diagnosis_str(self):
         self.assertEqual(str(self.diagnosis), str(self.diagnosis.id))
