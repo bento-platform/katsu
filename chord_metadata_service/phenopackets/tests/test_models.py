@@ -324,7 +324,7 @@ class PhenopacketTest(TestCase):
             measurements=[c.VALID_MEASUREMENT_1, c.VALID_MEASUREMENT_2],
             medical_actions=c.VALID_MEDICAL_ACTIONS
         )
-        self.phenopacket.diseases.set(self.disease_1)
+        self.phenopacket.diseases.set([self.disease_1])
         self.phenopacket.interpretations.set([self.interpretation])
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)

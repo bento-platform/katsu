@@ -554,7 +554,7 @@ def valid_genomic_interpretation(gene_descriptor=None, variant_interpretation=No
 
 def valid_diagnosis(disease):
     return dict(
-        disease=disease,
+        disease_ontology=disease,
         extra_properties={
             "comment": "test data"
         }
