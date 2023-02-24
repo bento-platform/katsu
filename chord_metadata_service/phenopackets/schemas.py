@@ -57,7 +57,7 @@ __all__ = [
     "PHENOPACKET_MEDICAL_ACTION_SCHEMA"
 ]
 
-with open("vrs.json", "r") as file:
+with open("chord_metadata_service/phenopackets/vrs.json", "r") as file:
     # TODO: use the json-schema provided by GA4GH for VRS schemas
 
     VRS_SCHEMAS = json.load(file)
