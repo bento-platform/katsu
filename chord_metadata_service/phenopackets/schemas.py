@@ -1,5 +1,6 @@
 # Individual schemas for validation of JSONField values
 import json
+from jsonschema import RefResolver
 
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.schemas import RESOURCE_SCHEMA
@@ -58,9 +59,93 @@ __all__ = [
 ]
 
 with open("chord_metadata_service/phenopackets/vrs.json", "r") as file:
-    # TODO: use the json-schema provided by GA4GH for VRS schemas
+    vrs_schema_definitions = json.load(file)
 
-    VRS_SCHEMAS = json.load(file)
+
+def _is_ref(schema:dict):
+    return "$ref" in schema
+
+
+def tag_jsonschema_with_nested_ids(schema: dict, refs: dict, schema_id=None, discriminator=None):
+    if schema_id:
+        schema["$id"] = schema_id
+    else:
+        schema_id = schema.get("$id", schema_id)
+
+    if _is_ref(schema):
+        schema = _get_ref_or_def(schema.get("$ref"), refs)
+
+    schema_type = schema.get("type")
+    schema_type_discriminator = discriminator if discriminator else schema.get("discriminator")
+
+    # object, array, string
+    if schema_type == "object":
+        return {
+            **schema,
+            "properties": {
+                k: tag_jsonschema_with_nested_ids(
+                    schema=v,
+                    refs=refs,
+                    schema_id=f"{schema_id}:{k}",
+                    discriminator=discriminator
+                ) if "$id" not in v else v
+                for k, v in schema["properties"].items()
+            }
+        } if "properties" in schema else schema
+
+    if schema_type == "array":
+        return {
+            **schema,
+            "items": tag_jsonschema_with_nested_ids(
+                schema={**schema["items"]} if "$id" not in schema["items"] else schema["items"],
+                refs=refs,
+                schema_id=schema_id,
+                discriminator=discriminator
+            )
+        } if "items" in schema else schema
+
+    if not schema_type and schema_type_discriminator and "oneOf" in schema:
+        options = [
+            tag_jsonschema_with_nested_ids(schema=one_of_schema, refs=refs, discriminator=schema_type_discriminator)
+            for one_of_schema in schema["oneOf"]
+        ]
+        return {
+            "type": "object",
+            "oneOf": options
+        }
+
+    return schema
+
+
+def _vrs_id(name: str):
+    return f"katsu:phenopackets:vrs:{name.lower()}"
+
+
+def _get_ref_or_def(ref: str, refs: dict):
+    if ref in refs:
+        return refs[ref]
+    else:
+        def_name = ref.split("/")[-1]
+        schema_def = vrs_schema_definitions["definitions"][def_name]
+        schema = tag_jsonschema_with_nested_ids(schema=schema_def, refs=refs, schema_id=_vrs_id(def_name))
+        refs[ref] = schema
+        return schema
+
+
+def merge_jsonschema_definitions(definitions: dict) -> dict:
+    refs = {}
+    for (name, root_schema) in definitions["definitions"].items():
+        ref_name = f"#/definitions/{name}"
+        schema_id = f"katsu:phenopackets:vrs:{name.lower()}"
+        refs[ref_name] = {
+            "name": name,
+            "schema": tag_jsonschema_with_nested_ids(root_schema, refs, schema_id)
+        }
+    return {val.get("name"): val.get("schema") for (_, val) in refs.items()}
+
+
+VRS_SCHEMAS = merge_jsonschema_definitions(vrs_schema_definitions)
+
 
 ALLELE_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
