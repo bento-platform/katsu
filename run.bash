@@ -4,7 +4,7 @@
 ./wait_for_db.bash
 
 # Run migrations; make migrations for other apps if needed
-python manage.py makemigrations
+python manage.py makemigrations admin auth
 python manage.py migrate
 
 # Set the internal port unless it's been externally configured

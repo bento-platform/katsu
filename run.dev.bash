@@ -12,8 +12,8 @@ poetry install
 # Wait for database to start
 ./wait_for_db.bash
 
-# Run migrations; make migrations for auth built-in app if needed
-python manage.py makemigrations auth
+# Run migrations; make migrations for admin/auth built-in apps if needed
+python manage.py makemigrations admin auth
 python manage.py migrate
 
 # Set the internal port unless it's been externally configured
