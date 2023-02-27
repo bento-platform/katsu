@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-30bq59j6h_8^_%c#t4&d@1spzp@z(p1z8)h$a@1s*0^=bv!i2b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["chord-metadata", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["chord-metadata", "localhost", "127.0.0.1", "docker.localhost"]
 
 # CANDIG SETTINGS
 CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "LOCAL_SETTING_NO_AUTH")
