@@ -23,7 +23,7 @@ from chord_metadata_service.restapi.schema_utils import (
     named_one_of,
     string_with_format,
     string_with_pattern,
-    tag_ids_and_describe, CURIE_SCHEMA
+    tag_ids_and_describe, CURIE_SCHEMA, SchemaDefinitionsResolver
 )
 
 from . import descriptions
@@ -62,98 +62,8 @@ with open("chord_metadata_service/phenopackets/vrs.json", "r") as file:
     vrs_schema_definitions = json.load(file)
 
 
-def tag_jsonschema_with_nested_ids(schema: dict, refs: dict, schema_id=None, discriminator=None):
-    if schema_id:
-        schema["$id"] = schema_id
-    else:
-        schema_id = schema.get("$id", schema_id)
-
-    if "$ref" in schema:
-        return _get_ref_or_def(schema.get("$ref"), refs)
-
-    schema_type = schema.get("type")
-    discriminator = schema.get("discriminator", discriminator)
-
-    # if not schema_type and discriminator:
-    #     schema["type"] = "object"
-
-    # object, array, string
-    if schema_type == "object" and "properties" in schema:
-        return {
-            **schema,
-            "properties": {
-                k: tag_jsonschema_with_nested_ids(
-                    schema=v,
-                    refs=refs,
-                    schema_id=f"{schema_id}:{k}",
-                    discriminator=discriminator
-                ) if "$id" not in v else v
-                for k, v in schema["properties"].items()
-            }
-        }
-
-    if schema_type == "array":
-        return {
-            **schema,
-            "items": tag_jsonschema_with_nested_ids(
-                schema={**schema["items"]} if "$id" not in schema["items"] else schema["items"],
-                refs=refs,
-                schema_id=schema_id,
-                discriminator=discriminator
-            )
-        } if "items" in schema else schema
-
-    # For abstract types handling
-    # if not schema_type and schema_type_discriminator and "oneOf" in schema:
-
-    if "oneOf" in schema:
-        options = [
-            tag_jsonschema_with_nested_ids(
-                schema=one_of_schema,
-                refs=refs,
-                schema_id=schema_id,
-                discriminator=discriminator)
-            for one_of_schema in schema["oneOf"]
-        ]
-        new_schema = {
-            **schema,
-            "type": "object",
-            "oneOf": options
-        }
-        return new_schema
-
-    # Else return the schema
-    return schema
-
-
-def _vrs_id(name: str):
-    return f"katsu:phenopackets:vrs:{name.lower()}"
-
-
-def _get_ref_or_def(ref: str, refs: dict):
-    if ref in refs:
-        return refs[ref]
-    else:
-        def_name = ref.split("/")[-1]
-        schema_def = vrs_schema_definitions["definitions"][def_name]
-        schema = tag_jsonschema_with_nested_ids(schema=schema_def, refs=refs, schema_id=_vrs_id(def_name))
-        refs[ref] = schema
-        return schema
-
-
-def merge_jsonschema_definitions(definitions: dict) -> dict:
-    refs = {}
-    for (name, root_schema) in definitions["definitions"].items():
-        ref_name = f"#/definitions/{name}"
-        schema_id = f"katsu:phenopackets:vrs:{name}"
-        refs[ref_name] = {
-            "name": name,
-            "schema": tag_jsonschema_with_nested_ids(root_schema, refs, schema_id)
-        }
-    return {val.get("name"): val.get("schema") for (_, val) in refs.items()}
-
-
-VRS_SCHEMAS = merge_jsonschema_definitions(vrs_schema_definitions)
+VRS_SCHEMAS = SchemaDefinitionsResolver(definitions=vrs_schema_definitions, base_id="katsu:phenopackets:vrs")
+allele_schema = VRS_SCHEMAS.resolve("allele")
 print("VRS schemas merged.")
 
 

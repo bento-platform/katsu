@@ -176,6 +176,105 @@ def tag_ids_and_describe(schema: dict, descriptions: dict):
     return tag_schema_with_nested_ids(describe_schema(schema, descriptions))
 
 
+class SchemaDefinitionsResolver:
+    definitions = {}
+    refs = {}
+    schemas = None
+
+    def __init__(self, definitions: dict, base_id="katsu:phenopackets", id_separator=":"):
+        self.definitions = definitions
+        self.base_id = base_id
+        self.id_separator = id_separator
+        self._merge_jsonschema_definitions()
+
+    def resolve(self, schema_name: str):
+        schema = self.schemas.get(schema_name)
+        if "oneOf" in schema:
+            one_ofs = [
+                self.refs[one_of_item["$ref"]] if "$ref" in one_of_item else one_of_item
+                for one_of_item in schema["oneOf"]
+            ]
+            schema = {**schema, "oneOf": one_ofs}
+        if "properties" in schema:
+            props = {
+                prop_key: self.refs[prop_item["$ref"]] if "$ref" in prop_item else prop_item
+                for prop_key, prop_item in schema["properties"].items()
+            }
+            schema = {**schema, "properties": props}
+        return schema
+
+    def _merge_jsonschema_definitions(self) -> dict:
+        for (name, root_schema) in self.definitions["definitions"].items():
+            ref_name = f"#/definitions/{name}"
+            schema_id = self._make_id(name)
+            self.refs[ref_name] = self._tag_jsonschema_with_nested_ids(schema=root_schema, schema_id=schema_id)
+        self.schemas = {k.split("/")[-1].lower(): val for (k, val) in self.refs.items()}
+        print("Json-schema definitions parsed.")
+
+    def _tag_jsonschema_with_nested_ids(self, schema: dict, schema_id=None, discriminator=None):
+        if schema_id:
+            schema["$id"] = schema_id
+        else:
+            schema_id = schema.get("$id")
+
+        if "$ref" in schema:
+            return self._get_ref_or_def(schema.get("$ref"))
+
+        schema_type = schema.get("type")
+        discriminator = schema.get("discriminator", discriminator)
+
+        if "oneOf" in schema:
+            options = [
+                self._tag_jsonschema_with_nested_ids(
+                    schema=one_of_schema,
+                    discriminator=discriminator)
+                for one_of_schema in schema["oneOf"]
+            ]
+            schema = {
+                **schema,
+                "type": "object",
+                "oneOf": options
+            }
+
+        # object, array, string
+        if schema_type == "object" and "properties" in schema:
+            return {
+                **schema,
+                "properties": {
+                    k: self._tag_jsonschema_with_nested_ids(
+                        schema=v,
+                        schema_id=f"{schema_id}:{k}",
+                        discriminator=discriminator
+                    ) if "$id" not in v else v
+                    for k, v in schema["properties"].items()
+                }
+            }
+
+        if schema_type == "array" and "items" in schema:
+            return {
+                **schema,
+                "items": self._tag_jsonschema_with_nested_ids(
+                    schema={**schema["items"]} if "$id" not in schema["items"] else schema["items"],
+                    discriminator=discriminator
+                )
+            }
+
+        return schema
+
+    def _get_ref_or_def(self, ref_name: str):
+        if ref_name in self.refs:
+            return self.refs[ref_name]
+        else:
+            def_name = ref_name.split("/")[-1]
+            schema_def = self.definitions["definitions"][def_name]
+            schema = self._tag_jsonschema_with_nested_ids(schema=schema_def, schema_id=self._make_id(def_name))
+            self.refs[ref_name] = schema
+            return schema
+
+    def _make_id(self, name: str):
+        return f"{self.base_id}{self.id_separator}{name}"
+
+
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
                      schema_id: str = None, title: str = None, description: str = None,
                      additional_properties: bool = False, required:List[str]=None) -> dict:
