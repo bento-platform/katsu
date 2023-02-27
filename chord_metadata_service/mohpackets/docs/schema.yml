@@ -3515,7 +3515,6 @@ paths:
       - basicAuth: []
       - cookieAuth: []
       - tokenAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -3566,7 +3565,6 @@ paths:
       - basicAuth: []
       - cookieAuth: []
       - tokenAuth: []
-      - {}
       responses:
         '200':
           content:
