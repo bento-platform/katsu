@@ -34,13 +34,13 @@ RUN apk add --no-cache \
 
 RUN mkdir /app
 WORKDIR /app
-ADD ./requirements.txt /app
-ADD ./requirements-dev.txt /app
-RUN pip install -r requirements-dev.txt
+RUN pip install -r requirements-candig-dev.txt
 
 COPY . /app/chord_metadata_service
 
 WORKDIR /app/chord_metadata_service
 
 
-ENTRYPOINT ["python", "manage.py", "runserver"]
+ENTRYPOINT ["/app/chord_metadata_service/entrypoint.sh"]
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
