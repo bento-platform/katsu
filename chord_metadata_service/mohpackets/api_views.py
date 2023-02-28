@@ -96,7 +96,6 @@ def filter_by_authorized_datasets(request, queryset):
 
 class ProgramViewSet(viewsets.ModelViewSet):
     serializer_class = ProgramSerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = ProgramFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -114,7 +113,6 @@ class ProgramViewSet(viewsets.ModelViewSet):
 
 class DonorViewSet(viewsets.ModelViewSet):
     serializer_class = DonorSerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = DonorFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -127,7 +125,6 @@ class DonorViewSet(viewsets.ModelViewSet):
 
 class SpecimenViewSet(viewsets.ModelViewSet):
     serializer_class = SpecimenSerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = SpecimenFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -140,7 +137,6 @@ class SpecimenViewSet(viewsets.ModelViewSet):
 
 class SampleRegistrationViewSet(viewsets.ModelViewSet):
     serializer_class = SampleRegistrationSerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = SampleRegistrationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -153,7 +149,6 @@ class SampleRegistrationViewSet(viewsets.ModelViewSet):
 
 class PrimaryDiagnosisViewSet(viewsets.ModelViewSet):
     serializer_class = PrimaryDiagnosisSerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = PrimaryDiagnosisFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -166,7 +161,6 @@ class PrimaryDiagnosisViewSet(viewsets.ModelViewSet):
 
 class TreatmentViewSet(viewsets.ModelViewSet):
     serializer_class = TreatmentSerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = TreatmentFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -179,7 +173,6 @@ class TreatmentViewSet(viewsets.ModelViewSet):
 
 class ChemotherapyViewSet(viewsets.ModelViewSet):
     serializer_class = ChemotherapySerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = ChemotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -192,7 +185,6 @@ class ChemotherapyViewSet(viewsets.ModelViewSet):
 
 class HormoneTherapyViewSet(viewsets.ModelViewSet):
     serializer_class = HormoneTherapySerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = HormoneTherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -205,7 +197,6 @@ class HormoneTherapyViewSet(viewsets.ModelViewSet):
 
 class RadiationViewSet(viewsets.ModelViewSet):
     serializer_class = RadiationSerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = RadiationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -218,7 +209,6 @@ class RadiationViewSet(viewsets.ModelViewSet):
 
 class ImmunotherapyViewSet(viewsets.ModelViewSet):
     serializer_class = ImmunotherapySerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = ImmunotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -231,7 +221,6 @@ class ImmunotherapyViewSet(viewsets.ModelViewSet):
 
 class SurgeryViewSet(viewsets.ModelViewSet):
     serializer_class = SurgerySerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = SurgeryFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -244,7 +233,6 @@ class SurgeryViewSet(viewsets.ModelViewSet):
 
 class FollowUpViewSet(viewsets.ModelViewSet):
     serializer_class = FollowUpSerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = FollowUpFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -257,7 +245,6 @@ class FollowUpViewSet(viewsets.ModelViewSet):
 
 class BiomarkerViewSet(viewsets.ModelViewSet):
     serializer_class = BiomarkerSerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = BiomarkerFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -270,7 +257,6 @@ class BiomarkerViewSet(viewsets.ModelViewSet):
 
 class ComorbidityViewSet(viewsets.ModelViewSet):
     serializer_class = ComorbiditySerializer
-    # filter_backends = [DjangoFilterBackend]
     filterset_class = ComorbidityFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
