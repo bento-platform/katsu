@@ -196,12 +196,40 @@ class SchemaDefinitionsResolver:
             ]
             schema = {**schema, "oneOf": one_ofs}
         if "properties" in schema:
+            # props = {
+            #     prop_key: self.refs[prop_item["$ref"]] if "$ref" in prop_item else prop_item
+            #     for prop_key, prop_item in schema["properties"].items()
+            # }
             props = {
-                prop_key: self.refs[prop_item["$ref"]] if "$ref" in prop_item else prop_item
+                prop_key: self._resolve_prop(prop_item)
                 for prop_key, prop_item in schema["properties"].items()
             }
-            schema = {**schema, "properties": props}
+            schema = {
+                **schema,
+                "properties": props
+            }
         return schema
+
+    def _resolve_prop(self, prop_item: dict):
+        if "$ref" in prop_item:
+            return self.refs[prop_item["$ref"]]
+        if "oneOf" in prop_item:
+            return {
+                **prop_item,
+                "oneOf": [
+                    self._resolve_prop(one_of) for one_of in prop_item["oneOf"]
+                ]
+            }
+        if "properties" in prop_item:
+            return {
+                **prop_item,
+                "properties": {
+                    k: self._resolve_prop(v)
+                    for k, v in prop_item["properties"].items()
+                }
+            }
+        return prop_item
+
 
     def _merge_jsonschema_definitions(self) -> dict:
         for (name, root_schema) in self.definitions["definitions"].items():
