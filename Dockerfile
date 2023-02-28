@@ -36,13 +36,12 @@ RUN mkdir /app
 WORKDIR /app
 ADD ./requirements-candig-base.txt /app
 ADD ./requirements-candig-dev.txt /app
-RUN pip install -r requirements-candig-dev.txt
+RUN pip install --no-cache-dir -r requirements-candig-dev.txt
 
 COPY . /app/chord_metadata_service
 
 WORKDIR /app/chord_metadata_service
 
 
-ENTRYPOINT ["/app/chord_metadata_service/entrypoint.sh"]
-
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# ENTRYPOINT ["/app/chord_metadata_service/entrypoint.sh"]
+CMD [ "bash", "./entrypoint.sh" ]
