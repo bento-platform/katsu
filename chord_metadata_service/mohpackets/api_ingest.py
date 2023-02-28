@@ -1,7 +1,8 @@
+import logging
 import os
 from datetime import datetime
 
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from drf_spectacular.types import OpenApiTypes
@@ -78,7 +79,8 @@ def backup_db():
     try:
         call_command("dumpdata", output=f"{backup_db_folder}/{db_name}")
     except Exception as e:
-        print(f"Error during backup_db: {e}")
+        logging.error(f"Error during backup_db: {e}")
+        raise CommandError("Error during backup_db") from e
 
 
 ##########################################
