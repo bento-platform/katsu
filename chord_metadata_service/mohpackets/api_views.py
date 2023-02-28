@@ -83,8 +83,6 @@ def filter_by_authorized_datasets(request, queryset):
     then the queryset will only include the results from those datasets.
     """
     authorized_datasets = get_authorized_datasets(request)
-    print("==========================")
-    print(f"authorized_datasets: {authorized_datasets}")
     filtered_dataset = queryset.filter(program_id__name__in=authorized_datasets)
     return filtered_dataset
 

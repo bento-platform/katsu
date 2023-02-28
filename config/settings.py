@@ -27,6 +27,8 @@ SECRET_KEY = "django-insecure-30bq59j6h_8^_%c#t4&d@1spzp@z(p1z8)h$a@1s*0^=bv!i2b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+FAKE_AUTHORIZED_DATASETS = ["SYNTHETIC-POG"]
+
 ALLOWED_HOSTS = ["chord-metadata", "localhost", "127.0.0.1", "docker.localhost"]
 
 # CANDIG SETTINGS
@@ -105,7 +107,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "console": {
-            "format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+            "format": "%(asctime)s [%(name)s] %(levelname)s: %(message)s",
         },
     },
     "handlers": {
