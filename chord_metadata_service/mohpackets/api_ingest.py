@@ -46,6 +46,8 @@ from chord_metadata_service.mohpackets.serializers import (
 #                                        #
 ##########################################
 
+logger = logging.getLogger(__name__)
+
 
 def create_bulk_objects(serializer_class, data: dict):
     """Create a list of objects in bulk using a list of JSON strings.
@@ -79,7 +81,7 @@ def backup_db():
     try:
         call_command("dumpdata", output=f"{backup_db_folder}/{db_name}")
     except Exception as e:
-        logging.error(f"Error during backup_db: {e}")
+        logger.error(f"Error during backup_db: {e}")
         raise CommandError("Error during backup_db") from e
 
 

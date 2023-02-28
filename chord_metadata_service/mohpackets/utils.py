@@ -6,6 +6,7 @@ from django.conf import settings
 """
     This module contains various utility functions.
 """
+logger = logging.getLogger(__name__)
 
 
 def get_authorized_datasets(request):
@@ -32,7 +33,7 @@ def get_authorized_datasets(request):
         # NOTE: THIS IS FOR LOCAL TESTING ONLY
         # If the request is not coming from auth stack (i.e. we call the API directly)
         # then we return a fake authorized dataset list.
-        logging.warning(
+        logger.warning(
             f"No authorization header found, using fake authorized datasets {settings.FAKE_AUTHORIZED_DATASETS}"
         )
         return settings.FAKE_AUTHORIZED_DATASETS
