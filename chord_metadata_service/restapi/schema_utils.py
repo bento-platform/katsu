@@ -181,34 +181,61 @@ class SchemaDefinitionsResolver:
     refs = {}
     schemas = None
 
-    def __init__(self, definitions: dict, base_id="katsu:phenopackets", id_separator=":"):
+    def __init__(self, definitions: dict, base_id="katsu:phenopackets", id_separator=":",
+                 composition_keywords=["oneOf", "allOf", "anyOf"]):
         self.definitions = definitions
         self.base_id = base_id
         self.id_separator = id_separator
+        self.composition_keywords = composition_keywords
+        self.schema_draft = definitions.get("$schema", DRAFT_07)
         self._merge_jsonschema_definitions()
+
+    def _resolve_compose_opt(self, schema: dict):
+        for kw in self.composition_keywords:
+            if kw in schema:
+                print(kw, schema.get("$id"))
+                schema = {
+                    **schema,
+                    kw: [
+                        self.refs[composed_item["$ref"]]
+                        if "$ref" in composed_item else self._resolve_compose_opt(composed_item)
+                        for composed_item in schema[kw]
+                    ]
+                }
+        return schema
+
+    def _resolve_conditions_opt(self, schema: dict):
+        for condition in ["if", "then", "else"]:
+            if condition in schema:
+                schema = {
+                    **schema,
+                    condition: self.refs[schema["$ref"]]
+                    if "$ref" in schema[condition] else schema[condition]
+                }
+        return schema
+
+    def _resolve_properties(self, schema: dict):
+        if "properties" in schema:
+            schema = {
+                **schema,
+                "properties": {
+                    prop_key: self._resolve_prop(prop_item)
+                    for prop_key, prop_item in schema["properties"].items()
+                }
+            }
+        return schema
 
     def resolve(self, schema_name: str):
         schema = self.schemas.get(schema_name)
-        if "oneOf" in schema:
-            one_ofs = [
-                self.refs[one_of_item["$ref"]] if "$ref" in one_of_item else one_of_item
-                for one_of_item in schema["oneOf"]
-            ]
-            schema = {**schema, "oneOf": one_ofs}
-        if "properties" in schema:
-            # props = {
-            #     prop_key: self.refs[prop_item["$ref"]] if "$ref" in prop_item else prop_item
-            #     for prop_key, prop_item in schema["properties"].items()
-            # }
-            props = {
-                prop_key: self._resolve_prop(prop_item)
-                for prop_key, prop_item in schema["properties"].items()
-            }
-            schema = {
-                **schema,
-                "properties": props
-            }
-        return schema
+        if not schema:
+            return
+        schema = self._resolve_compose_opt(schema=schema)
+        schema = self._resolve_properties(schema=schema)
+        schema = self._resolve_conditions_opt(schema=schema)
+        return {
+            "$schema": self.schema_draft,
+            **schema
+        }
 
     def _resolve_prop(self, prop_item: dict):
         if "$ref" in prop_item:
@@ -230,13 +257,12 @@ class SchemaDefinitionsResolver:
             }
         return prop_item
 
-
     def _merge_jsonschema_definitions(self) -> dict:
         for (name, root_schema) in self.definitions["definitions"].items():
             ref_name = f"#/definitions/{name}"
             schema_id = self._make_id(name)
             self.refs[ref_name] = self._tag_jsonschema_with_nested_ids(schema=root_schema, schema_id=schema_id)
-        self.schemas = {k.split("/")[-1].lower(): val for (k, val) in self.refs.items()}
+        self.schemas = {k.split("/")[-1]: val for (k, val) in self.refs.items()}
         print("Json-schema definitions parsed.")
 
     def _tag_jsonschema_with_nested_ids(self, schema: dict, schema_id=None, discriminator=None):
