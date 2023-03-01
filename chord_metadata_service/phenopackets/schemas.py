@@ -63,51 +63,11 @@ with open("chord_metadata_service/phenopackets/vrs.json", "r") as file:
 
 
 VRS_SCHEMAS = SchemaDefinitionsResolver(definitions=vrs_schema_definitions, base_id="katsu:phenopackets:vrs")
-systemic_variation_schema = VRS_SCHEMAS.resolve("SystemicVariation")
-allele_resolved = VRS_SCHEMAS.resolve("Allele")
-curie = VRS_SCHEMAS.resolve("CURIE")
-variation = VRS_SCHEMAS.resolve("Variation")
-print("VRS schemas merged.")
 
-
-ALLELE_SCHEMA = tag_ids_and_describe({
-    "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:allele",
-    "title": "Allele schema",
-    "description": "Variant allele types",
-    "type": "object",
-    "properties": {
-        "id": base_type(SCHEMA_TYPES.STRING),
-
-        "hgvs": base_type(SCHEMA_TYPES.STRING),
-
-        "genome_assembly": base_type(SCHEMA_TYPES.STRING),
-        "chr": base_type(SCHEMA_TYPES.STRING),
-        "pos": base_type(SCHEMA_TYPES.INTEGER),
-        "ref": base_type(SCHEMA_TYPES.STRING),
-        "alt": base_type(SCHEMA_TYPES.STRING),
-        "info": base_type(SCHEMA_TYPES.STRING),
-
-        "seq_id": base_type(SCHEMA_TYPES.STRING),
-        "position": base_type(SCHEMA_TYPES.INTEGER),
-        "deleted_sequence": base_type(SCHEMA_TYPES.STRING),
-        "inserted_sequence": base_type(SCHEMA_TYPES.STRING),
-
-        "iscn": base_type(SCHEMA_TYPES.STRING)
-    },
-    "additionalProperties": False,
-    "oneOf": [
-        {"required": ["hgvs"]},
-        {"required": ["genome_assembly"]},
-        {"required": ["seq_id"]},
-        {"required": ["iscn"]}
-    ],
-    "dependencies": {
-        "genome_assembly": ["chr", "pos", "ref", "alt", "info"],
-        "seq_id": ["position", "deleted_sequence", "inserted_sequence"]
-    }
-}, descriptions.ALLELE)
-
+ALLELE_SCHEMA = tag_ids_and_describe(
+    VRS_SCHEMAS.resolve("Allele"),
+    descriptions.ALLELE
+)
 
 PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -120,7 +80,6 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = tag_ids_and_describe({
     },
     "required": ["id"]
 }, descriptions.EXTERNAL_REFERENCE)
-
 
 PHENOPACKET_UPDATE_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -551,21 +510,14 @@ GENE_DESCRIPTOR = tag_ids_and_describe({
     "required": ["value_id", "symbol"]
 }, descriptions=descriptions.GENE_DESCRIPTOR)
 
-# TODO: load vrs schemas from json document
-VRS_VARIATION_SCHEMA = tag_ids_and_describe({
-    "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:variation",
-    "title": "VRS schema",
-    "description": "VRS variation object",
-    "type": "object",
-    "properties": {
-        # Regex that matches 'prefix:reference' CURIE notation
-        "_id": CURIE_SCHEMA,
-        "type": base_type(SCHEMA_TYPES.STRING)
+#
+VRS_VARIATION_SCHEMA = tag_ids_and_describe(
+    {
+        **VRS_SCHEMAS.resolve("Variation"),
+        "type": "object"
     },
-    "required": []
-}, {})
-
+    {}
+)
 
 EXPRESSION_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,

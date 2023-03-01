@@ -7,6 +7,7 @@ from chord_metadata_service.chord.ingest.phenopackets import validate_phenopacke
 from chord_metadata_service.chord.ingest.utils import workflow_file_output_to_path, get_output_or_raise
 from humps import decamelize
 
+
 class Command(BaseCommand):
 
     help = """
@@ -32,5 +33,3 @@ class Command(BaseCommand):
             DATA_TYPE_EXPERIMENT: validate_experiment,
             DATA_TYPE_PHENOPACKET: validate_phenopacket
         }[data_type](json_data)
-
-        print("Validation against json-schemas succeeded.")

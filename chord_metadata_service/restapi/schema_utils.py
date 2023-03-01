@@ -181,7 +181,7 @@ class SchemaDefinitionsResolver:
     Generic JSON-schema definitions resolver.
     """
     refs = {}
-    schemas = None
+    resolving = None
 
     def __init__(self, definitions: dict, base_id="katsu:phenopackets", id_separator=":",
                  composition_keywords=["oneOf", "allOf", "anyOf"]):
@@ -197,7 +197,6 @@ class SchemaDefinitionsResolver:
         """
         for kw in self.composition_keywords:
             if kw in schema:
-                print(kw, schema.get("$id"))
                 schema = {
                     **schema,
                     kw: [
@@ -233,8 +232,24 @@ class SchemaDefinitionsResolver:
 
     def _resolve_ref(self, schema: dict):
         ref_name = schema["$ref"].split("/")[-1]
+        if ref_name == self.resolving:
+            # Prevents cyclical resolving
+            return schema
+        if ref_name in self.refs:
+            # Use resolved ref if it exists
+            return self.refs[ref_name]
         definition = self.definitions["definitions"].get(ref_name)
-        return self._resolve_schema(schema=definition, schema_id=self._make_id(ref_name))
+        schema = self._resolve_schema(schema=definition, schema_id=self._make_id(ref_name))
+        self.refs[ref_name] = schema
+        return schema
+
+    def _resolve_array(self, schema: dict):
+        if "type" in schema and schema["type"] == "array" and "items" in schema:
+            return {
+                **schema,
+                "items": self._resolve_schema(schema=schema["items"])
+            }
+        return schema
 
     def _resolve_schema(self, schema: dict, schema_id=None):
         if schema_id:
@@ -244,8 +259,9 @@ class SchemaDefinitionsResolver:
             }
         if "$ref" in schema:
             schema = self._resolve_ref(schema)
-        schema = self._resolve_compose_opt(schema=schema)
         schema = self._resolve_properties(schema=schema, schema_id=schema_id)
+        schema = self._resolve_array(schema=schema)
+        schema = self._resolve_compose_opt(schema=schema)
         schema = self._resolve_conditions_opt(schema=schema)
         return {
             "$schema": self.schema_draft,
@@ -253,32 +269,22 @@ class SchemaDefinitionsResolver:
         }
 
     def resolve(self, schema_name: str):
+        self.resolving = schema_name
+
+        if schema_name in self.refs:
+            # Try to get a cached schema if it exists
+            return self._resolve_schema(self.refs[schema_name], self._make_id(schema_name))
+
         schema = self.definitions["definitions"].get(schema_name)
         if not schema:
             return
-        return self._resolve_schema(schema, self._make_id(schema_name))
 
-    def _resolve_prop(self, prop_item: dict):
-        if "$ref" in prop_item:
-            return self.refs[prop_item["$ref"]]
-        # TODO: handle any composition keyword
-        if "oneOf" in prop_item:
-            return {
-                **prop_item,
-                "oneOf": [
-                    self._resolve_schema(one_of) for one_of in prop_item["oneOf"]
-                ]
-            }
-        # TODO: handle type == array
-        if "properties" in prop_item:
-            return {
-                **prop_item,
-                "properties": {
-                    k: self._resolve_schema(v)
-                    for k, v in prop_item["properties"].items()
-                }
-            }
-        return prop_item
+        schema = self._resolve_schema(schema, self._make_id(schema_name))
+        if "type" not in schema:
+            schema["type"] = "object"
+        self.refs[schema_name] = schema
+        self.resolving = None
+        return schema
 
     def _make_id(self, name: str):
         return f"{self.base_id}{self.id_separator}{name}"
