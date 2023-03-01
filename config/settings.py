@@ -29,7 +29,11 @@ DEBUG = True
 
 FAKE_AUTHORIZED_DATASETS = ["SYNTHETIC-POG"]
 
-ALLOWED_HOSTS = ["chord-metadata", "localhost", "127.0.0.1", "docker.localhost"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "docker.localhost"]
+host_container_name = os.environ.get("HOST_CONTAINER_NAME")
+if host_container_name:
+    ALLOWED_HOSTS.append(host_container_name)
+    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS))
 
 # CANDIG SETTINGS
 CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "LOCAL_SETTING_NO_AUTH")
