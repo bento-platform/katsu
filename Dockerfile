@@ -43,5 +43,5 @@ COPY . /app/chord_metadata_service
 WORKDIR /app/chord_metadata_service
 
 
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/app/chord_metadata_service/entrypoint.sh"]
 
