@@ -177,7 +177,9 @@ def tag_ids_and_describe(schema: dict, descriptions: dict):
 
 
 class SchemaDefinitionsResolver:
-    definitions = {}
+    """
+    Generic JSON-schema definitions resolver.
+    """
     refs = {}
     schemas = None
 
@@ -188,142 +190,95 @@ class SchemaDefinitionsResolver:
         self.id_separator = id_separator
         self.composition_keywords = composition_keywords
         self.schema_draft = definitions.get("$schema", DRAFT_07)
-        self._merge_jsonschema_definitions()
 
     def _resolve_compose_opt(self, schema: dict):
+        """
+        Resolves schemas inside composition values (oneOf, allOf, anyOf)
+        """
         for kw in self.composition_keywords:
             if kw in schema:
                 print(kw, schema.get("$id"))
                 schema = {
                     **schema,
                     kw: [
-                        self.refs[composed_item["$ref"]]
-                        if "$ref" in composed_item else self._resolve_compose_opt(composed_item)
+                        self._resolve_schema(composed_item)
                         for composed_item in schema[kw]
                     ]
                 }
         return schema
 
     def _resolve_conditions_opt(self, schema: dict):
+        # Resolves schemas inside conditional properties
         for condition in ["if", "then", "else"]:
             if condition in schema:
                 schema = {
                     **schema,
-                    condition: self.refs[schema["$ref"]]
-                    if "$ref" in schema[condition] else schema[condition]
+                    condition: self._resolve_schema(schema[condition])
                 }
         return schema
 
-    def _resolve_properties(self, schema: dict):
+    def _resolve_properties(self, schema: dict, schema_id=None):
         if "properties" in schema:
             schema = {
                 **schema,
                 "properties": {
-                    prop_key: self._resolve_prop(prop_item)
+                    prop_key: self._resolve_schema(
+                        schema=prop_item,
+                        schema_id=f"{schema_id}:{prop_key}" if "$id" not in prop_item else None
+                    )
                     for prop_key, prop_item in schema["properties"].items()
                 }
             }
         return schema
 
-    def resolve(self, schema_name: str):
-        schema = self.schemas.get(schema_name)
-        if not schema:
-            return
+    def _resolve_ref(self, schema: dict):
+        ref_name = schema["$ref"].split("/")[-1]
+        definition = self.definitions["definitions"].get(ref_name)
+        return self._resolve_schema(schema=definition, schema_id=self._make_id(ref_name))
+
+    def _resolve_schema(self, schema: dict, schema_id=None):
+        if schema_id:
+            schema = {
+                **schema,
+                "$id": schema_id
+            }
+        if "$ref" in schema:
+            schema = self._resolve_ref(schema)
         schema = self._resolve_compose_opt(schema=schema)
-        schema = self._resolve_properties(schema=schema)
+        schema = self._resolve_properties(schema=schema, schema_id=schema_id)
         schema = self._resolve_conditions_opt(schema=schema)
         return {
             "$schema": self.schema_draft,
             **schema
         }
 
+    def resolve(self, schema_name: str):
+        schema = self.definitions["definitions"].get(schema_name)
+        if not schema:
+            return
+        return self._resolve_schema(schema, self._make_id(schema_name))
+
     def _resolve_prop(self, prop_item: dict):
         if "$ref" in prop_item:
             return self.refs[prop_item["$ref"]]
+        # TODO: handle any composition keyword
         if "oneOf" in prop_item:
             return {
                 **prop_item,
                 "oneOf": [
-                    self._resolve_prop(one_of) for one_of in prop_item["oneOf"]
+                    self._resolve_schema(one_of) for one_of in prop_item["oneOf"]
                 ]
             }
+        # TODO: handle type == array
         if "properties" in prop_item:
             return {
                 **prop_item,
                 "properties": {
-                    k: self._resolve_prop(v)
+                    k: self._resolve_schema(v)
                     for k, v in prop_item["properties"].items()
                 }
             }
         return prop_item
-
-    def _merge_jsonschema_definitions(self) -> dict:
-        for (name, root_schema) in self.definitions["definitions"].items():
-            ref_name = f"#/definitions/{name}"
-            schema_id = self._make_id(name)
-            self.refs[ref_name] = self._tag_jsonschema_with_nested_ids(schema=root_schema, schema_id=schema_id)
-        self.schemas = {k.split("/")[-1]: val for (k, val) in self.refs.items()}
-        print("Json-schema definitions parsed.")
-
-    def _tag_jsonschema_with_nested_ids(self, schema: dict, schema_id=None, discriminator=None):
-        if schema_id:
-            schema["$id"] = schema_id
-        else:
-            schema_id = schema.get("$id")
-
-        if "$ref" in schema:
-            return self._get_ref_or_def(schema.get("$ref"))
-
-        schema_type = schema.get("type")
-        discriminator = schema.get("discriminator", discriminator)
-
-        if "oneOf" in schema:
-            options = [
-                self._tag_jsonschema_with_nested_ids(
-                    schema=one_of_schema,
-                    discriminator=discriminator)
-                for one_of_schema in schema["oneOf"]
-            ]
-            schema = {
-                **schema,
-                "type": "object",
-                "oneOf": options
-            }
-
-        # object, array, string
-        if schema_type == "object" and "properties" in schema:
-            return {
-                **schema,
-                "properties": {
-                    k: self._tag_jsonschema_with_nested_ids(
-                        schema=v,
-                        schema_id=f"{schema_id}:{k}",
-                        discriminator=discriminator
-                    ) if "$id" not in v else v
-                    for k, v in schema["properties"].items()
-                }
-            }
-
-        if schema_type == "array" and "items" in schema:
-            return {
-                **schema,
-                "items": self._tag_jsonschema_with_nested_ids(
-                    schema={**schema["items"]} if "$id" not in schema["items"] else schema["items"],
-                    discriminator=discriminator
-                )
-            }
-
-        return schema
-
-    def _get_ref_or_def(self, ref_name: str):
-        if ref_name in self.refs:
-            return self.refs[ref_name]
-        else:
-            def_name = ref_name.split("/")[-1]
-            schema_def = self.definitions["definitions"][def_name]
-            schema = self._tag_jsonschema_with_nested_ids(schema=schema_def, schema_id=self._make_id(def_name))
-            self.refs[ref_name] = schema
-            return schema
 
     def _make_id(self, name: str):
         return f"{self.base_id}{self.id_separator}{name}"

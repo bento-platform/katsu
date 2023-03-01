@@ -64,6 +64,9 @@ with open("chord_metadata_service/phenopackets/vrs.json", "r") as file:
 
 VRS_SCHEMAS = SchemaDefinitionsResolver(definitions=vrs_schema_definitions, base_id="katsu:phenopackets:vrs")
 systemic_variation_schema = VRS_SCHEMAS.resolve("SystemicVariation")
+allele_resolved = VRS_SCHEMAS.resolve("Allele")
+curie = VRS_SCHEMAS.resolve("CURIE")
+variation = VRS_SCHEMAS.resolve("Variation")
 print("VRS schemas merged.")
 
 
