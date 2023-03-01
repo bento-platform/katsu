@@ -32,6 +32,7 @@ RUN apk add --no-cache \
 	yaml-dev \
 	zlib-dev
 
+RUN apk add --no-cache postgresql-client
 RUN mkdir /app
 WORKDIR /app
 ADD ./requirements-candig-base.txt /app
