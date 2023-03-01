@@ -169,7 +169,7 @@ VALID_VARIANT_DESCRIPTOR = {
 VALID_VARIANT_INTERPRETATION = {
     "acmg_pathogenicity_classification": "PATHOGENIC",
     "therapeutic_actionability": "UNKNOWN_ACTIONABILITY",
-    "variant": VALID_VARIANT_DESCRIPTOR
+    "variant_descriptor": VALID_VARIANT_DESCRIPTOR
 }
 
 VALID_DISEASE_ONTOLOGY = {
@@ -339,6 +339,44 @@ VALID_MEDICAL_ACTIONS = [
         }
     }
 ],
+
+VALID_GENOMIC_INTERPRETATION = {
+    "subjectOrBiosampleId": "proband A",
+    "interpretationStatus": "CAUSATIVE",
+    "variantInterpretation": {
+        "acmgPathogenicityClassification": "PATHOGENIC",
+        "therapeuticActionability": "ACTIONABLE",
+        "variationDescriptor": {
+            "id": "variant_descriptor-id",
+            "variation": {
+                "copyNumber": {
+                    "derivedSequenceExpression": {
+                        "location": {
+                            "sequenceId": "refseq:NC_000013.14",
+                            "sequenceInterval": {
+                                "startNumber": {
+                                    "value": "25981249"
+                                },
+                                "endNumber": {
+                                    "value": "61706822"
+                                }
+                            }
+                        },
+                        "reverseComplement": False
+                    },
+                    "number": {
+                        "value": "1"
+                    }
+                }
+            },
+            "extensions": [{
+                "name": "mosaicism",
+                "value": "40.0%"
+            }],
+            "moleculeContext": "unspecified_molecule_context"
+        }
+    }
+}
 
 def valid_phenopacket(subject, meta_data):
     return dict(

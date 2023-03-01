@@ -197,25 +197,6 @@ class BiosampleSerializer(GenericSerializer):
 #                Interpretation Serializers                 #
 #                                                           #
 #############################################################
-
-class VariantDescriptorSerializer(GenericSerializer):
-    class Meta:
-        model = VariantDescriptor
-        fields = '__all__'
-
-
-class VariantInterpretationSerializer(GenericSerializer):
-    variant = VariantDescriptorSerializer(many=False, required=True)
-    # def to_representation(self, instance):
-    #     response = super().to_representation(instance)
-    #     response['variant'] = VariantDescriptorSerializer(instance.variant, many=False, required=False).data
-    #     return response
-
-    class Meta:
-        model = VariantInterpretation
-        fields = '__all__'
-
-
 class GeneDescriptorSerializer(GenericSerializer):
 
     class Meta:
@@ -223,9 +204,24 @@ class GeneDescriptorSerializer(GenericSerializer):
         fields = '__all__'
 
 
+class VariantDescriptorSerializer(GenericSerializer):
+    gene_context = GeneDescriptorSerializer(many=False, required=False)
+    class Meta:
+        model = VariantDescriptor
+        fields = '__all__'
+
+
+class VariantInterpretationSerializer(GenericSerializer):
+    variant = VariantDescriptorSerializer(many=False, required=True)
+
+    class Meta:
+        model = VariantInterpretation
+        fields = '__all__'
+
+
 class GenomicInterpretationSerializer(GenericSerializer):
-    gene_descriptor = GeneDescriptorSerializer()
-    variant_interpretation = VariantInterpretationSerializer()
+    gene_descriptor = GeneDescriptorSerializer(many=False, required=False)
+    variant_interpretation = VariantInterpretationSerializer(many=False, required=False)
 
     class Meta:
         model = GenomicInterpretation

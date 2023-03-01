@@ -401,8 +401,8 @@ class VariantInterpretation(BaseTimeStamp):
                                                          help_text=rec_help(d.VARIANT_INTERPRETATION, "acmg_pathogenicity_classification"))
     therapeutic_actionability = models.CharField(max_length=200, choices=THERAPEUTIC_ACTIONABILITY_CHOICES, default='UNKNOWN_ACTIONABILITY',
                                                  help_text=rec_help(d.VARIANT_INTERPRETATION, "therapeutic_actionability"))
-    variant = models.ForeignKey(VariantDescriptor, on_delete=models.CASCADE,
-                                help_text=rec_help(d.VARIANT_INTERPRETATION, "variant"))
+    variation_descriptor = models.ForeignKey(VariantDescriptor, on_delete=models.CASCADE,
+                                             help_text=rec_help(d.VARIANT_INTERPRETATION, "variant"))
 
     def __str__(self) -> str:
         return str(self.id)

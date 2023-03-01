@@ -244,23 +244,15 @@ class CreatePhenopacketTest(APITestCase):
 class CreateGenomicInterpretationTest(APITestCase):
 
     def setUp(self):
-        self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
-        self.variant_descriptor = m.VariantDescriptor.objects.create(**c.VALID_VARIANT_DESCRIPTOR)
-        self.variant_interpretation = m.VariantInterpretation.objects.create(
-            **c.valid_variant_interpretation(self.variant_descriptor)
-        )
-        self.genomic_interpretation = m.GenomicInterpretation.objects.create(
-            **c.valid_genomic_interpretation(self.gene_descriptor, self.variant_interpretation)
-        )
+        self.genomic_interpretation_data = c.VALID_GENOMIC_INTERPRETATION
 
     def test_genomic_interpretation(self):
-        response = get_response('genomicinterpretations-list',
-                                self.genomic_interpretation)
+        response = get_response('genomicinterpretations-list', self.genomic_interpretation_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.GenomicInterpretation.objects.count(), 1)
 
     def test_serializer(self):
-        serializer = s.GenomicInterpretationSerializer(data=self.genomic_interpretation)
+        serializer = s.GenomicInterpretationSerializer(data=self.genomic_interpretation_data)
         self.assertEqual(serializer.is_valid(), True)
 
 
