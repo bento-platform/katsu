@@ -19,15 +19,14 @@ from .schemas import (
     EXPRESSION_SCHEMA,
     EXTENSION_SCHEMA,
     ONE_OF_MEDICAL_ACTION,
-    PHENOPACKET_DISEASE_ONSET_SCHEMA,
     PHENOPACKET_EVIDENCE_SCHEMA,
     PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA,
     PHENOPACKET_MEASUREMENT_VALUE_SCHEMA,
-    PHENOPACKET_TIME_ELEMENT_SCHEMA,
     PHENOPACKET_UPDATE_SCHEMA,
     VCF_RECORD_SCHEMA, PHENOPACKET_PROCEDURE_SCHEMA, PHENOPACKET_MEASUREMENT_SCHEMA, PHENOPACKET_DISEASE_SCHEMA,
     PHENOPACKET_MEDICAL_ACTION_SCHEMA,
 )
+from ..restapi.schemas import TIME_ELEMENT_SCHEMA
 
 
 #############################################################
@@ -100,9 +99,9 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "severity"))
     modifier = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "modifier"))
-    onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+    onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
     resolution = JSONField(blank=True, null=True, validators=[
-        JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+        JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
 
     # evidence can stay here because evidence is given for an observation of PF
     # JSON schema to check evidence_code is present
@@ -132,7 +131,7 @@ class Procedure(models.Model):
                           help_text=rec_help(d.PROCEDURE, "body_site"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "extra_properties"))
     performed = JSONField(blank=True, null=True, validators=[
-        JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+        JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
 
     def __str__(self):
         return str(self.id)
@@ -146,7 +145,7 @@ class Measurement(models.Model):
     measurement_value = models.JSONField(blank=True, null=True, validators=[
         JsonSchemaValidator(PHENOPACKET_MEASUREMENT_VALUE_SCHEMA)])
     time_observed = JSONField(blank=True, null=True, validators=[
-        JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+        JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
 
     procedure = models.JSONField(blank=True, null=True, validators=[
         JsonSchemaValidator(schema=PHENOPACKET_PROCEDURE_SCHEMA)])
@@ -265,8 +264,8 @@ class Disease(BaseTimeStamp, IndexableMixin):
     # "label": "Adult onset"
     # }
     excluded = models.BooleanField(blank=True, null=True)
-    onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
-    resolution = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_TIME_ELEMENT_SCHEMA)])
+    onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
+    resolution = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
     disease_stage = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                               help_text=rec_help(d.DISEASE, "disease_stage"))
     clinical_tnm_finding = JSONField(blank=True, null=True, validators=[ontology_list_validator],

@@ -10,7 +10,7 @@ from chord_metadata_service.restapi.schema_utils import (
     search_table_ref,
     tag_schema_with_search_properties,
 )
-from chord_metadata_service.restapi.search_schemas import ONTOLOGY_SEARCH_SCHEMA
+from chord_metadata_service.restapi.search_schemas import ONTOLOGY_SEARCH_SCHEMA, TIME_ELEMENT_SEARCH_SCHEMA
 
 __all__ = [
     "EXTERNAL_REFERENCE_SEARCH_SCHEMA",
@@ -99,15 +99,6 @@ UPDATE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_UPD
             "search": search_optional_str(1, multiple=True),
         }
     },
-    "search": {
-        "database": {
-            "type": "jsonb"
-        }
-    }
-})
-
-TIME_ELEMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_TIME_ELEMENT_SCHEMA, {
-    "oneOf": [],
     "search": {
         "database": {
             "type": "jsonb"
