@@ -1,6 +1,7 @@
 from django.urls import path
 
-from . import views_ingest, views_search, views_export, views_workflow
+from . import views_ingest, views_search, views_export
+from .workflows import views as views_workflow
 
 urlpatterns = [
     path('workflows', views_workflow.workflow_list, name="workflows"),

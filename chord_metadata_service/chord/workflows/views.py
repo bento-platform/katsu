@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from bento_lib.responses import errors
 from bento_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
-from .workflows.metadata import METADATA_WORKFLOWS, WORKFLOWS_PATH
+from .metadata import METADATA_WORKFLOWS, WORKFLOWS_PATH
 
 
 class WDLRenderer(BaseRenderer):
