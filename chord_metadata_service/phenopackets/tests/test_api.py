@@ -258,7 +258,8 @@ class CreateGenomicInterpretationTest(APITestCase):
 class CreateDiagnosisTest(APITestCase):
 
     def setUp(self):
-        self.diagnosis = c.valid_diagnosis(c.VALID_DISEASE_ONTOLOGY)
+        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
+        self.diagnosis = c.valid_diagnosis(self.disease.id)
 
     def test_diagnosis(self):
         response = get_response('diagnoses-list',
