@@ -16,10 +16,10 @@ from bento_lib.schemas.bento import BENTO_INGEST_SCHEMA
 from bento_lib.responses import errors
 from bento_lib.workflows import workflow_exists
 
-from .ingest import WORKFLOW_INGEST_FUNCTION_MAP
-from .ingest.exceptions import IngestError
-from .models import Table
-from .workflows.metadata import METADATA_WORKFLOWS
+from . import WORKFLOW_INGEST_FUNCTION_MAP
+from .exceptions import IngestError
+from ..models import Table
+from ..workflows.metadata import METADATA_WORKFLOWS
 
 
 BENTO_INGEST_SCHEMA_VALIDATOR = Draft7Validator(BENTO_INGEST_SCHEMA)
