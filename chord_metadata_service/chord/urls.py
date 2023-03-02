@@ -1,6 +1,7 @@
 from django.urls import path
 
-from . import views_search, views_export
+from . import views_search
+from .export import views as views_export
 from .ingest import views as views_ingest
 from .workflows import views as views_workflow
 

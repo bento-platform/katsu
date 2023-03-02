@@ -8,12 +8,13 @@ from django.conf import settings
 
 __all__ = [
     "ExportError",
-    "ExportFileContext"
+    "ExportFileContext",
+    "EXPORT_DIR",
 ]
 
 logger = logging.getLogger(__name__)
 
-EXPORT_DIR = 'export'
+EXPORT_DIR = "export"
 
 
 class ExportError(Exception):
@@ -28,7 +29,7 @@ class ExportFileContext:
     temp directories created with their contents.
 
     Attributes:
-        tmp_dir: path to the directory where the exported files are written.
+        base_path: path to the directory where the exported files are written.
             Can be None. In that case the files are written to a tmp directory
             on the system and cleaned once the context manager finishes.
         project_id: name that will be used to namespace the export directory.
@@ -56,18 +57,16 @@ class ExportFileContext:
             self.path = os.path.join(tmp_dir, EXPORT_DIR, project_id)
 
             # clean pre-existing export dir
-            isExistant = os.path.exists(self.path)
-            if isExistant:
+            if os.path.exists(self.path):
                 shutil.rmtree(self.path)
 
             original_umask = os.umask(0)    # fix issue with non-writable dir due to OS based mask
             os.makedirs(self.path, 0o777)
 
+            os.umask(original_umask)
+
         except OSError:
             raise ExportError
-
-        finally:
-            os.umask(original_umask)
 
     def __enter__(self):
         return self
