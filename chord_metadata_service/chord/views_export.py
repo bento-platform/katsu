@@ -87,7 +87,7 @@ def export(request: Request):
             # If no output path parameter has been provided, the generated export
             # is returned as an attachment to the Response and everything will
             # be cleaned afterwards.
-            # Otherwise, the provided local path is under the responsability of
+            # Otherwise, the provided local path is under the responsibility of
             # the caller
             if not output_path:
                 tarfile = file_export.write_tar()
