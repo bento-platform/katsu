@@ -311,5 +311,15 @@ class DonorRelatedClinicalDataViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DonorRelatedClinicalDataSerializer
     # queryset = Donor.objects.all()
     queryset = Donor.objects.prefetch_related(
-        "primarydiagnosis_set__specimen_set", "primarydiagnosis_set"
+        "primarydiagnosis_set",
+        "comorbidity_set",
+        "primarydiagnosis_set__specimen_set",
+        "primarydiagnosis_set__treatment_set",
+        "primarydiagnosis_set__treatment_set__chemotherapy_set",
+        "primarydiagnosis_set__treatment_set__hormonetherapy_set",
+        "primarydiagnosis_set__treatment_set__immunotherapy_set",
+        "primarydiagnosis_set__treatment_set__radiation",
+        "primarydiagnosis_set__treatment_set__surgery",
+        "primarydiagnosis_set__treatment_set__followup_set",
+        "primarydiagnosis_set__specimen_set__sampleregistration_set",
     ).all()
