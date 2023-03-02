@@ -52,3 +52,14 @@ INDIVIDUAL = {
         **EXTRA_PROPERTIES
     }
 }
+
+VITAL_STATUS = {
+    "description": ("This element can be used to report whether the individual is living or dead at the"
+                    " timepoint when the phenopacket was created (or if the status is unknown)."),
+    "properties": {
+        "status": "one of UNKNOWN_STATUS, ALIVE, DECEASED. REQUIRED.",
+        "time_of_death": "Should be left blank if patient not known to be deceased",
+        "cause_of_death": "Should be left blank if patient not known to be deceased",
+        "survival_time_in_days": "Number of days the patient was alive after their primary diagnosis"
+    }
+}

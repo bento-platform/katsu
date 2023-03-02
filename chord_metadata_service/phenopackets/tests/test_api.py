@@ -36,7 +36,6 @@ class CreateBiosampleTest(APITestCase):
             "sampled_tissue": {
                 "id": "UBERON_0001256"
             },
-            "individual_age_at_collection": "P67Y3M2D",
             "histological_diagnosis": {
                 "id": "NCIT:C39853",
                 "label": "Infiltrating Urothelial Carcinoma"

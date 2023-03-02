@@ -326,7 +326,6 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = tag_ids_and_describe({
         "sample_storage": ONTOLOGY_CLASS,
 
         # Extended fields
-        "individual_age_at_collection": TIME_ELEMENT_SCHEMA,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id"],

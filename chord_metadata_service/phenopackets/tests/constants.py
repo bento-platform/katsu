@@ -389,23 +389,15 @@ def valid_phenopacket(subject, meta_data):
 def valid_biosample_1(individual, procedure):
     return dict(
         id='biosample_id:1',
-        individual=individual,
+        individual_id=individual,
+        description='This is a test biosample.',
         sampled_tissue={
             "id": "UBERON_0001256",
             "label": "wall of urinary bladder"
         },
-        description='This is a test biosample.',
         taxonomy={
             "id": "NCBITaxon:9606",
             "label": "Homo sapiens"
-        },
-        individual_age_at_collection={
-            "start": {
-                "age": "P45Y"
-            },
-            "end": {
-                "age": "P49Y"
-            }
         },
         histological_diagnosis={
             "id": "NCIT:C39853",
@@ -430,7 +422,6 @@ def valid_biosample_1(individual, procedure):
             }
         ],
         procedure=procedure,
-        is_control_sample=True
     )
 
 

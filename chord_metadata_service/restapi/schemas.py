@@ -46,6 +46,16 @@ ONTOLOGY_CLASS_LIST = {
     "items": ONTOLOGY_CLASS,
 }
 
+CURIE_SCHEMA = {
+    "$schema": DRAFT_07,
+    "$id": "katsu:common:CURIE",
+    "title": "Curie style string",
+    "description": ("A [W3C Compact URI](https://www.w3.org/TR/curie/) formatted string. "
+                    "A CURIE string has the structure ``prefix``:``reference``, as defined by the W3C syntax."),
+    "type": "string",
+    "pattern": "^\\w[^:]*:.+$",
+    "additionalProperties": False,
+}
 
 KEY_VALUE_OBJECT = {
     "$schema": DRAFT_07,

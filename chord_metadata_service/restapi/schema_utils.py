@@ -405,4 +405,3 @@ def named_one_of(prop_name: str, prop_schema: dict):
 
 
 DATE_TIME = string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME)
-CURIE_SCHEMA = string_with_pattern(CURIE_PATTERN)
