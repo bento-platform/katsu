@@ -24,6 +24,8 @@ from chord_metadata_service.mohpackets import urls as moh_urls
 
 urlpatterns = [
     path("moh/v1/", include(moh_urls)),
+    # Debug toolbar
+    path("__debug__/", include("debug_toolbar.urls")),
     # OpenAPI 3 documentation with Swagger UI
     path("", SpectacularSwaggerView.as_view(), name="swagger-ui"),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
