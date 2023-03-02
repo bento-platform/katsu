@@ -340,3 +340,51 @@ class ComorbiditySerializer(serializers.ModelSerializer):
 ##########################################
 class IngestRequestSerializer(serializers.Serializer):
     data = serializers.ListField(child=serializers.JSONField())
+
+
+# ------------------------------
+class NestedPrimaryDiagnosisSerializer(serializers.ModelSerializer):
+    specimen = serializers.SerializerMethodField()
+
+    def get_specimen(self, obj):
+        spicemen = obj.specimen_set.all()
+        return SpecimenSerializer(spicemen, many=True).data
+
+    class Meta:
+        model = PrimaryDiagnosis
+        fields = [
+            "submitter_primary_diagnosis_id",
+            "date_of_diagnosis",
+            "cancer_type_code",
+            "basis_of_diagnosis",
+            "lymph_nodes_examined_status",
+            "lymph_nodes_examined_method",
+            "number_lymph_nodes_positive",
+            "clinical_tumour_staging_system",
+            "clinical_t_category",
+            "clinical_n_category",
+            "clinical_m_category",
+            "clinical_stage_group",
+            "specimen",
+        ]
+
+
+class DonorRelatedClinicalDataSerializer(serializers.ModelSerializer):
+    primary_diagnoses = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Donor
+        fields = [
+            "submitter_donor_id",
+            "program_id",
+            "is_deceased",
+            "cause_of_death",
+            "date_of_birth",
+            "date_of_death",
+            "primary_site",
+            "primary_diagnoses",
+        ]
+
+    def get_primary_diagnoses(self, obj):
+        primary_diagnoses = obj.primarydiagnosis_set.all()
+        return NestedPrimaryDiagnosisSerializer(primary_diagnoses, many=True).data
