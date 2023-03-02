@@ -343,12 +343,46 @@ class IngestRequestSerializer(serializers.Serializer):
 
 
 # ------------------------------
-class NestedPrimaryDiagnosisSerializer(serializers.ModelSerializer):
-    specimen = serializers.SerializerMethodField()
 
-    def get_specimen(self, obj):
+
+class DonorRelatedClinicalDataSerializer(serializers.ModelSerializer):
+    primary_diagnoses = serializers.SerializerMethodField()
+    comorbidities = serializers.SerializerMethodField()
+
+    def get_primary_diagnoses(self, obj):
+        primary_diagnoses = obj.primarydiagnosis_set.all()
+        return NestedPrimaryDiagnosisSerializer(primary_diagnoses, many=True).data
+
+    def get_comorbidities(self, obj):
+        comorbidities = obj.comorbidity_set.all()
+        return ComorbiditySerializer(comorbidities, many=True).data
+
+    class Meta:
+        model = Donor
+        fields = [
+            "submitter_donor_id",
+            "program_id",
+            "is_deceased",
+            "cause_of_death",
+            "date_of_birth",
+            "date_of_death",
+            "primary_site",
+            "primary_diagnoses",
+            "comorbidities",
+        ]
+
+
+class NestedPrimaryDiagnosisSerializer(serializers.ModelSerializer):
+    specimens = serializers.SerializerMethodField()
+    treatments = serializers.SerializerMethodField()
+
+    def get_specimens(self, obj):
         spicemen = obj.specimen_set.all()
-        return SpecimenSerializer(spicemen, many=True).data
+        return NestedSpecimenSerializer(spicemen, many=True).data
+
+    def get_treatments(self, obj):
+        treatments = obj.treatment_set.all()
+        return NestedTreatmentSerializer(treatments, many=True).data
 
     class Meta:
         model = PrimaryDiagnosis
@@ -365,26 +399,94 @@ class NestedPrimaryDiagnosisSerializer(serializers.ModelSerializer):
             "clinical_n_category",
             "clinical_m_category",
             "clinical_stage_group",
-            "specimen",
+            "specimens",
+            "treatments",
         ]
 
 
-class DonorRelatedClinicalDataSerializer(serializers.ModelSerializer):
-    primary_diagnoses = serializers.SerializerMethodField()
+class NestedSpecimenSerializer(serializers.ModelSerializer):
+    sample_registrations = serializers.SerializerMethodField()
+
+    def get_sample_registrations(self, obj):
+        sample_registrations = obj.sampleregistration_set.all()
+        return SampleRegistrationSerializer(sample_registrations, many=True).data
 
     class Meta:
-        model = Donor
+        model = Specimen
         fields = [
-            "submitter_donor_id",
-            "program_id",
-            "is_deceased",
-            "cause_of_death",
-            "date_of_birth",
-            "date_of_death",
-            "primary_site",
-            "primary_diagnoses",
+            "pathological_tumour_staging_system",
+            "pathological_t_category",
+            "pathological_n_category",
+            "pathological_m_category",
+            "pathological_stage_group",
+            "specimen_collection_date",
+            "specimen_storage",
+            "tumour_histological_type",
+            "specimen_anatomic_location",
+            "reference_pathology_confirmed_diagnosis",
+            "reference_pathology_confirmed_tumour_presence",
+            "tumour_grading_system",
+            "tumour_grade",
+            "percent_tumour_cells_range",
+            "percent_tumour_cells_measurement_method",
+            "sample_registrations",
         ]
 
-    def get_primary_diagnoses(self, obj):
-        primary_diagnoses = obj.primarydiagnosis_set.all()
-        return NestedPrimaryDiagnosisSerializer(primary_diagnoses, many=True).data
+
+class NestedTreatmentSerializer(serializers.ModelSerializer):
+    chemotherapies = serializers.SerializerMethodField()
+    hormone_therapies = serializers.SerializerMethodField()
+    immunotherapies = serializers.SerializerMethodField()
+    radiation = serializers.SerializerMethodField()
+    surgery = serializers.SerializerMethodField()
+    followups = serializers.SerializerMethodField()
+
+    def get_chemotherapies(self, obj):
+        chemotherapies = obj.chemotherapy_set.all()
+        return ChemotherapySerializer(chemotherapies, many=True).data
+
+    def get_hormone_therapies(self, obj):
+        hormone_therapies = obj.hormonetherapy_set.all()
+        return HormoneTherapySerializer(hormone_therapies, many=True).data
+
+    def get_immunotherapies(self, obj):
+        immunotherapies = obj.immunotherapy_set.all()
+        return ImmunotherapySerializer(immunotherapies, many=True).data
+
+    def get_radiation(self, obj):
+        try:
+            radiation = obj.radiation
+            return RadiationSerializer(radiation).data
+        except Radiation.DoesNotExist:
+            return None
+
+    def get_surgery(self, obj):
+        try:
+            surgery = obj.surgery
+            return SurgerySerializer(surgery).data
+        except Surgery.DoesNotExist:
+            return None
+
+    def get_followups(self, obj):
+        followups = obj.followup_set.all()
+        return FollowUpSerializer(followups, many=True).data
+
+    class Meta:
+        model = Treatment
+        fields = [
+            "submitter_treatment_id",
+            "is_primary_treatment",
+            "treatment_start_date",
+            "treatment_end_date",
+            "treatment_setting",
+            "treatment_intent",
+            "days_per_cycle",
+            "number_of_cycles",
+            "response_to_treatment_criteria_method",
+            "chemotherapies",
+            "hormone_therapies",
+            "immunotherapies",
+            "radiation",
+            "surgery",
+            "followups",
+        ]
