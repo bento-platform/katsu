@@ -1,7 +1,9 @@
+from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers, viewsets
-from rest_framework.decorators import api_view, throttle_classes
+from rest_framework import generics, serializers, viewsets
+from rest_framework.decorators import action, api_view, throttle_classes
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from chord_metadata_service.mohpackets.filters import (
     BiomarkerFilter,
@@ -302,3 +304,67 @@ def moh_overview(_request):
             # where to get ethnicity and gender?
         }
     )
+
+
+# class DonorRelatedClinicalDataView(APIView):
+#     def get(self, request, *args, **kwargs):
+#         donors = Donor.objects.prefetch_related("primarydiagnosis_set").all()
+#         data = []
+#         for donor in donors:
+#             donor_data = {
+#                 "submitter_donor_id": donor.submitter_donor_id,
+#                 "program_id": donor.program_id_id,
+#                 "is_deceased": donor.is_deceased,
+#                 "cause_of_death": donor.cause_of_death,
+#                 "date_of_birth": donor.date_of_birth,
+#                 "date_of_death": donor.date_of_death,
+#                 "primary_site": donor.primary_site,
+#                 "primary_diagnoses": [
+#                     {
+#                         "submitter_primary_diagnosis_id": d.submitter_primary_diagnosis_id,
+#                         "program_id": d.program_id_id,
+#                         "submitter_donor_id": d.submitter_donor_id_id,
+#                         "date_of_diagnosis": d.date_of_diagnosis,
+#                         "cancer_type_code": d.cancer_type_code,
+#                         "basis_of_diagnosis": d.basis_of_diagnosis,
+#                         "lymph_nodes_examined_status": d.lymph_nodes_examined_status,
+#                         "lymph_nodes_examined_method": d.lymph_nodes_examined_method,
+#                         "number_lymph_nodes_positive": d.number_lymph_nodes_positive,
+#                         "clinical_tumour_staging_system": d.clinical_tumour_staging_system,
+#                         "clinical_t_category": d.clinical_t_category,
+#                         "clinical_n_category": d.clinical_n_category,
+#                         "clinical_m_category": d.clinical_m_category,
+#                         "clinical_stage_group": d.clinical_stage_group,
+#                     }
+#                     for d in donor.primarydiagnosis_set.all()
+#                 ],
+#             }
+#             data.append(donor_data)
+#         return JsonResponse(data, safe=False)
+
+
+class DonorRelatedClinicalDataSerializer(serializers.ModelSerializer):
+    primary_diagnoses = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Donor
+        fields = [
+            "submitter_donor_id",
+            "program_id",
+            "is_deceased",
+            "cause_of_death",
+            "date_of_birth",
+            "date_of_death",
+            "primary_site",
+            "primary_diagnoses",
+        ]
+
+    def get_primary_diagnoses(self, obj):
+        primary_diagnoses = obj.primarydiagnosis_set.all()
+        return PrimaryDiagnosisSerializer(primary_diagnoses, many=True).data
+
+
+class DonorRelatedClinicalDataViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = DonorRelatedClinicalDataSerializer
+    # queryset = Donor.objects.all()
+    queryset = Donor.objects.prefetch_related("primarydiagnosis_set").all()

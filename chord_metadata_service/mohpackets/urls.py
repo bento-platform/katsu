@@ -38,6 +38,7 @@ from chord_metadata_service.mohpackets.api_views import (
     BiomarkerViewSet,
     ChemotherapyViewSet,
     ComorbidityViewSet,
+    DonorRelatedClinicalDataViewSet,
     DonorViewSet,
     FollowUpViewSet,
     HormoneTherapyViewSet,
@@ -111,4 +112,5 @@ urlpatterns = [
     path("delete/all", delete_all),
     path("version_check", version_check),
     path("discovery/overview", moh_overview),
+    path("model/a/", DonorRelatedClinicalDataViewSet.as_view({"get": "list"})),
 ]
