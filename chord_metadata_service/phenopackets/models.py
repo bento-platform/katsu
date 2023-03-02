@@ -452,8 +452,8 @@ class Diagnosis(BaseTimeStamp):
 
     FHIR: Condition
     """
+    disease = models.ForeignKey(Disease, on_delete=models.CASCADE, help_text='The diagnosed condition.')
 
-    disease_ontology = JSONField(blank=False, null=True, validators=[ontology_validator])
     # required?
     genomic_interpretations = models.ManyToManyField(
         GenomicInterpretation, blank=True,

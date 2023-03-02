@@ -353,8 +353,8 @@ class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
         return qs
 
     def filter_variant(self, qs, name, value):
-        id_filter = Q(variant_interpretation__variant__id__icontains=value)
-        label_filter = Q(variant_interpretation__variant__label__icontains=value)
+        id_filter = Q(variant_interpretation__variation_descriptor__id__icontains=value)
+        label_filter = Q(variant_interpretation__variation_descriptor__label__icontains=value)
         pathology_class_filter = Q(variant_interpretation__acmg_pathogenicity_classification__icontains=value)
         therapeutic_actionability_filter = Q(variant_interpretation__therapeutic_actionability__icontains=value)
         qs = qs.filter(

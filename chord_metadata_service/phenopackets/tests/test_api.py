@@ -280,7 +280,7 @@ class CreateInterpretationTest(APITestCase):
         ).id
         self.metadata_interpretation = m.MetaData.objects.create(**c.VALID_META_DATA_2).id
         self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_ONTOLOGY)).id
+        self.diagnosis = m.Diagnosis.objects.create(self.disease.id).id
         self.interpretation = c.valid_interpretation(diagnosis=self.diagnosis)
         self.interpretation['diagnosis'] = [self.diagnosis]
 

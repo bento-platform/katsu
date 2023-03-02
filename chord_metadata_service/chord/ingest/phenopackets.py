@@ -249,11 +249,11 @@ def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
         for gen_interp
         in genomic_interpretations_data
     ]
-
+    disease = pm.Disease.objects.get_or_create(diagnosis["disease"])
     diag_obj, _ = pm.Diagnosis.objects.get_or_create(
-        disease_ontology=diagnosis["disease"],
         extra_properties=diagnosis.get("extra_properties", {})
     )
+    diag_obj.disease.set(disease)
     diag_obj.genomic_interpretations.set(genomic_interpretations)
     return diag_obj
 

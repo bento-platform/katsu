@@ -233,19 +233,20 @@ class DiagnosisTest(TestCase):
         self.genomic_interpretation_2 = m.GenomicInterpretation.objects.create(
             **c.valid_genomic_interpretation(self.gene_descriptor)
             )
-        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_ONTOLOGY))
+        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
+        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(self.disease))
         self.diagnosis.genomic_interpretations.set([
             self.genomic_interpretation_1,
             self.genomic_interpretation_2
         ])
 
     def test_diagnosis(self):
-        self._test_disease_filter(Q(disease_ontology__term__id__icontains="omim"), 1)
-        self._test_disease_filter(Q(disease_ontology__term__id__icontains="Omim:1644"), 1)
-        self._test_disease_filter(Q(disease_ontology__term__id__icontains="should_not_match"), 0)
+        self._test_disease_filter(Q(disease__term__id__icontains="omim"), 1)
+        self._test_disease_filter(Q(disease__term__id__icontains="Omim:1644"), 1)
+        self._test_disease_filter(Q(disease__term__id__icontains="should_not_match"), 0)
 
-        self._test_disease_filter(Q(disease_ontology__term__label__icontains="spinocerebellar"), 1)
-        self._test_disease_filter(Q(disease_ontology__term__label__icontains="should_not_match"), 0)
+        self._test_disease_filter(Q(disease__term__label__icontains="spinocerebellar"), 1)
+        self._test_disease_filter(Q(disease__term__label__icontains="should_not_match"), 0)
 
     def test_diagnosis_str(self):
         self.assertEqual(str(self.diagnosis), str(self.diagnosis.id))
@@ -259,8 +260,8 @@ class InterpretationTest(TestCase):
     """ Test module for Interpretation model. """
 
     def setUp(self):
-        # self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_ONTOLOGY))
+        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
+        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(self.disease))
         self.meta_data_phenopacket = m.MetaData.objects.create(**c.VALID_META_DATA_1)
         self.meta_data_interpretation = m.MetaData.objects.create(**c.VALID_META_DATA_2)
 
@@ -308,15 +309,15 @@ class PhenopacketTest(TestCase):
     def setUp(self):
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
+        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
         self.interpretation = m.Interpretation.objects.create(
             **c.valid_interpretation(
                 diagnosis=m.Diagnosis.objects.create(
                     **c.valid_diagnosis(
-                        disease=c.VALID_DISEASE_ONTOLOGY)
+                        disease=self.disease)
                 )
             )
         )
-        self.disease_1 = m.Disease.objects.create(**c.VALID_DISEASE_1)
         self.phenopacket = m.Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=self.individual,
@@ -324,7 +325,7 @@ class PhenopacketTest(TestCase):
             measurements=[c.VALID_MEASUREMENT_1, c.VALID_MEASUREMENT_2],
             medical_actions=c.VALID_MEDICAL_ACTIONS
         )
-        self.phenopacket.diseases.set([self.disease_1])
+        self.phenopacket.diseases.set([self.disease])
         self.phenopacket.interpretations.set([self.interpretation])
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
