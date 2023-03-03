@@ -154,6 +154,52 @@ VALID_VARIANT_2 = {
     }
 }
 
+VALID_VARIANT_3 = {
+    "location": {
+        "interval": {
+            "end": {
+                "type": "Number",
+                "value": 44908822
+            },
+            "start": {
+                "type": "Number",
+                "value": 44908821
+            },
+            "type": "SequenceInterval"
+        },
+        "sequence_id": "ga4gh:SQ.IIB53T8CNeJJdUqzn9V_JnRtQadwWCbl",
+        "type": "SequenceLocation"
+    },
+    "state": {
+        "sequence": "T",
+        "type": "SequenceState"
+    },
+    "type": "Allele"
+}
+
+VALID_ALLELE = {
+    "location": {
+        "interval": {
+            "end": {
+                "type": "Number",
+                "value": 44908822
+            },
+            "start": {
+                "type": "Number",
+                "value": 44908821
+            },
+            "type": "SequenceInterval"
+        },
+        "sequence_id": "ga4gh:SQ.IIB53T8CNeJJdUqzn9V_JnRtQadwWCbl",
+        "type": "SequenceLocation"
+    },
+    "state": {
+        "sequence": "T",
+        "type": "SequenceState"
+    },
+    "type": "Allele"
+}
+
 VALID_VARIANT_DESCRIPTOR = {
     "id": "clinvar:13294",
     "expressions": [{

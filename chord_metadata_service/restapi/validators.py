@@ -11,10 +11,11 @@ from chord_metadata_service.restapi.schemas import (
 class JsonSchemaValidator:
     """ Custom class based validator to validate against Json schema for JSONField """
 
-    def __init__(self, schema, formats=None):
+    def __init__(self, schema, formats=None, resolver=None):
         self.schema = schema
         self.formats = formats
-        self.validator = Draft7Validator(self.schema, format_checker=FormatChecker(formats=self.formats))
+        self.validator = Draft7Validator(self.schema, format_checker=FormatChecker(formats=self.formats),
+                                         resolver=resolver)
 
     def __call__(self, value):
         if not self.validator.is_valid(value):

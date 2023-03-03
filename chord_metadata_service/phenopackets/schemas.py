@@ -1,7 +1,7 @@
 # Individual schemas for validation of JSONField values
 import json
-from jsonschema import RefResolver
-
+import jsonschema
+from pathlib import Path
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.schemas import RESOURCE_SCHEMA
 from chord_metadata_service.restapi.schemas import (
@@ -21,15 +21,13 @@ from chord_metadata_service.restapi.schema_utils import (
     enum_of,
     named_one_of,
     string_with_format,
-    tag_ids_and_describe,
-    SchemaDefinitionsResolver
+    tag_ids_and_describe, SchemaResolver,
 )
 
 from . import descriptions
 
 
 __all__ = [
-    "ALLELE_SCHEMA",
     "PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA",
     "PHENOPACKET_UPDATE_SCHEMA",
     "PHENOPACKET_META_DATA_SCHEMA",
@@ -56,15 +54,31 @@ __all__ = [
 ]
 
 with open("chord_metadata_service/phenopackets/vrs.json", "r") as file:
+    from jsonschema.validators import RefResolver
     vrs_schema_definitions = json.load(file)
+    path = Path("/chord_metadata_service/phenopackets")
+    VRS_REF_RESOLVER = RefResolver(
+        base_uri=f"{path.as_uri()}/",
+        referrer=vrs_schema_definitions
+    )
 
 
-VRS_SCHEMAS = SchemaDefinitionsResolver(definitions=vrs_schema_definitions, base_id="katsu:phenopackets:vrs")
+def get_vrs_validator(schema_name:str):
+    _, schema_obj = VRS_REF_RESOLVER.resolve(f"#/definitions/{schema_name}")
+    return jsonschema.Draft7Validator(schema=schema_obj, resolver=VRS_REF_RESOLVER)
 
-ALLELE_SCHEMA = tag_ids_and_describe(
-    VRS_SCHEMAS.resolve("Allele"),
-    descriptions.ALLELE
-)
+
+def name_to_ref(name: str):
+    return f"#/definitions/{name}"
+
+
+VARIATION_VALIDATOR = get_vrs_validator("Variation")
+ALLELE_VALIDATOR = get_vrs_validator("Allele")
+
+vrs_schema_resolver = SchemaResolver(resolver=VRS_REF_RESOLVER)
+VARIATION_SCHEMA = vrs_schema_resolver.resolve(name_to_ref("Variation"))
+ALLELE_SCHEMA = vrs_schema_resolver.resolve(name_to_ref("Allele"))
+print("")
 
 PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -480,14 +494,6 @@ GENE_DESCRIPTOR = tag_ids_and_describe({
     "required": ["value_id", "symbol"]
 }, descriptions=descriptions.GENE_DESCRIPTOR)
 
-#
-VRS_VARIATION_SCHEMA = tag_ids_and_describe(
-    {
-        **VRS_SCHEMAS.resolve("Variation"),
-        "type": "object"
-    },
-    {}
-)
 
 EXPRESSION_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -546,7 +552,7 @@ VARIANT_DESCRIPTOR = tag_ids_and_describe({
     "type": "object",
     "properties": {
         "id": base_type(SCHEMA_TYPES.STRING),
-        "variation": VRS_VARIATION_SCHEMA,
+        "variation": VARIATION_SCHEMA,
         "label": base_type(SCHEMA_TYPES.STRING),
         "description": base_type(SCHEMA_TYPES.STRING),
         "gene_descriptor": GENE_DESCRIPTOR,
