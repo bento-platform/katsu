@@ -355,7 +355,7 @@ class DonorRelatedClinicalDataSerializer(serializers.ModelSerializer):
 
     def get_comorbidities(self, obj):
         comorbidities = obj.comorbidity_set.all()
-        return ComorbiditySerializer(comorbidities, many=True).data
+        return NestedComorbiditySerializer(comorbidities, many=True).data
 
     class Meta:
         model = Donor
@@ -409,7 +409,7 @@ class NestedSpecimenSerializer(serializers.ModelSerializer):
 
     def get_sample_registrations(self, obj):
         sample_registrations = obj.sampleregistration_set.all()
-        return SampleRegistrationSerializer(sample_registrations, many=True).data
+        return NestedSampleRegistrationSerializer(sample_registrations, many=True).data
 
     class Meta:
         model = Specimen
@@ -443,33 +443,33 @@ class NestedTreatmentSerializer(serializers.ModelSerializer):
 
     def get_chemotherapies(self, obj):
         chemotherapies = obj.chemotherapy_set.all()
-        return ChemotherapySerializer(chemotherapies, many=True).data
+        return NestedChemotherapySerializer(chemotherapies, many=True).data
 
     def get_hormone_therapies(self, obj):
         hormone_therapies = obj.hormonetherapy_set.all()
-        return HormoneTherapySerializer(hormone_therapies, many=True).data
+        return NestedHormoneTherapySerializer(hormone_therapies, many=True).data
 
     def get_immunotherapies(self, obj):
         immunotherapies = obj.immunotherapy_set.all()
-        return ImmunotherapySerializer(immunotherapies, many=True).data
+        return NestedImmunotherapySerializer(immunotherapies, many=True).data
 
     def get_radiation(self, obj):
         try:
             radiation = obj.radiation
-            return RadiationSerializer(radiation).data
+            return NestedRadiationSerializer(radiation).data
         except Radiation.DoesNotExist:
             return None
 
     def get_surgery(self, obj):
         try:
             surgery = obj.surgery
-            return SurgerySerializer(surgery).data
+            return NestedSurgerySerializer(surgery).data
         except Surgery.DoesNotExist:
             return None
 
     def get_followups(self, obj):
         followups = obj.followup_set.all()
-        return FollowUpSerializer(followups, many=True).data
+        return NestedFollowUpSerializer(followups, many=True).data
 
     class Meta:
         model = Treatment
@@ -489,4 +489,31 @@ class NestedTreatmentSerializer(serializers.ModelSerializer):
             "radiation",
             "surgery",
             "followups",
+        ]
+
+
+class NestedComorbiditySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comorbidity
+        fields = [
+            "prior_malignancy",
+            "laterality_of_prior_malignancy",
+            "age_at_comorbidity_diagnosis",
+            "comorbidity_type_code",
+            "comorbidity_treatment_status",
+            "comorbidity_treatment",
+        ]
+
+
+class NestedSampleRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SampleRegistration
+        fields = [
+            "submitter_sample_id",
+            "gender",
+            "sex_at_birth",
+            "specimen_tissue_source",
+            "tumour_normal_designation",
+            "specimen_type",
+            "sample_type",
         ]
