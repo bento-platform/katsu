@@ -578,15 +578,23 @@ def valid_variant_descriptor(gene_descriptor):
 
 
 def valid_genomic_interpretation(gene_descriptor=None, variant_interpretation=None):
-    return dict(
+    base = dict(
         interpretation_status='CANDIDATE',
-        gene_descriptor=gene_descriptor,
-        variant_interpretation=variant_interpretation,
         extra_properties={
             "comment": "test data"
         }
     )
-
+    if gene_descriptor:
+        base = dict(
+            **base,
+            gene_descriptor=gene_descriptor
+        )
+    if variant_interpretation:
+        base = dict(
+            **base,
+            variant_interpretation=variant_interpretation
+        )
+    return base
 
 def valid_diagnosis(disease):
     return dict(

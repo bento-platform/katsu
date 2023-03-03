@@ -206,6 +206,7 @@ class GeneDescriptorSerializer(GenericSerializer):
 
 class VariantDescriptorSerializer(GenericSerializer):
     gene_context = GeneDescriptorSerializer(many=False, required=False)
+
     class Meta:
         model = VariantDescriptor
         fields = '__all__'
@@ -220,13 +221,18 @@ class VariantInterpretationSerializer(GenericSerializer):
 
 
 class GenomicInterpretationSerializer(GenericSerializer):
-    gene_descriptor = GeneDescriptorSerializer(many=False, required=False)
-    variant_interpretation = VariantInterpretationSerializer(many=False, required=False)
+    # gene_descriptor = GeneDescriptorSerializer(many=False, required=False)
+    # variant_interpretation = VariantInterpretationSerializer(many=False, required=False)
 
     class Meta:
         model = GenomicInterpretation
         fields = '__all__'
 
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response["gene_descriptor"] = GeneDescriptorSerializer(instance.gene_descriptor, many=False, required=False).data
+        response["variant_interpretation"] = VariantInterpretationSerializer(instance.variant_interpretation, many=False, required=False).data
+        return response
 
 class DiagnosisSerializer(GenericSerializer):
 

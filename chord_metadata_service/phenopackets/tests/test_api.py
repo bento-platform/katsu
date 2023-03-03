@@ -243,7 +243,8 @@ class CreatePhenopacketTest(APITestCase):
 class CreateGenomicInterpretationTest(APITestCase):
 
     def setUp(self):
-        self.genomic_interpretation_data = c.VALID_GENOMIC_INTERPRETATION
+        gene_description = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
+        self.genomic_interpretation_data = c.valid_genomic_interpretation(gene_descriptor=gene_description.value_id)
 
     def test_genomic_interpretation(self):
         response = get_response('genomicinterpretations-list', self.genomic_interpretation_data)
