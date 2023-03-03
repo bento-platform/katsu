@@ -89,21 +89,6 @@ class GeneViewSet(ExtendedPhenopacketsModelViewSet):
     queryset = m.Gene.objects.all().order_by("id")
 
 
-class VariantViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing variants
-
-    post:
-    Create a new variant
-
-    """
-    serializer_class = s.VariantSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.VariantFilter
-    queryset = m.Variant.objects.all().order_by("id")
-
-
 class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
     """
     get:

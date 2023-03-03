@@ -503,8 +503,10 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
             }
         ],
         onset={
-            "id": "HP:0003577",
-            "label": "Congenital onset"
+            "ontology_class": {
+                "id": "HP:0003577",
+                "label": "Congenital onset"
+            }
         },
         evidence={
             "evidence_code": {

@@ -6,7 +6,6 @@ from .models import (
     Procedure,
     HtsFile,
     Gene,
-    Variant,
     Disease,
     Biosample,
     Phenopacket,
@@ -26,7 +25,6 @@ __all__ = [
     "ProcedureSerializer",
     "HtsFileSerializer",
     "GeneSerializer",
-    "VariantSerializer",
     "DiseaseSerializer",
     "BiosampleSerializer",
     "SimplePhenopacketSerializer",
@@ -117,34 +115,6 @@ class GeneSerializer(GenericSerializer):
         class_converter = fhir_utils.fhir_obs_component_region_studied
 
 
-class VariantSerializer(GenericSerializer):
-
-    class Meta:
-        model = Variant
-        fields = '__all__'
-        # meta info for converting to FHIR
-        fhir_datatype_plural = 'observations'
-        class_converter = fhir_utils.fhir_obs_component_variant
-
-    def to_representation(self, obj):
-        """ Change 'allele_type' field name to allele type value. """
-
-        output = super().to_representation(obj)
-        output[obj.allele_type] = output.pop('allele')
-        return output
-
-    def to_internal_value(self, data):
-        """ When writing back to db change field name back to 'allele'. """
-
-        if 'allele' not in data.keys():
-            allele_type = data.get('allele_type')  # e.g. spdiAllele
-            # split by uppercase
-            normilize = filter(None, re.split("([A-Z][^A-Z]*)", allele_type))
-            normilized_allele_type = '_'.join([i.lower() for i in normilize])
-            data['allele'] = data.pop(normilized_allele_type)
-        return super(VariantSerializer, self).to_internal_value(data=data)
-
-
 class DiseaseSerializer(GenericSerializer):
 
     class Meta:
@@ -159,7 +129,6 @@ class BiosampleSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
     procedure = ProcedureSerializer(exclude_when_nested=['id'])
-    variants = VariantSerializer(read_only=True, many=True)
     experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
 
     class Meta:
@@ -245,12 +214,14 @@ class DiagnosisSerializer(GenericSerializer):
 
 class InterpretationSerializer(GenericSerializer):
 
-    diagnosis = DiagnosisSerializer()
-
     class Meta:
         model = Interpretation
         fields = '__all__'
 
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response["diagnosis"] = DiagnosisSerializer(instance.diagnosis, many=False, required=False).data
+        return response
 #############################################################
 #                                                           #
 #              Phenopacket Data  Serializers                 #

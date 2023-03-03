@@ -46,7 +46,6 @@ router.register(r'phenotypicfeatures', phenopacket_views.PhenotypicFeatureViewSe
 router.register(r'procedures', phenopacket_views.ProcedureViewSet, basename="procedures")
 router.register(r'htsfiles', phenopacket_views.HtsFileViewSet, basename="htsfiles")
 router.register(r'genes', phenopacket_views.GeneViewSet, basename="genes")
-router.register(r'variants', phenopacket_views.VariantViewSet, basename="variants")
 router.register(r'diseases', phenopacket_views.DiseaseViewSet, basename="diseases")
 router.register(r'metadata', phenopacket_views.MetaDataViewSet, basename="metadata")
 router.register(r'biosamples', phenopacket_views.BiosampleViewSet, basename="biosamples")

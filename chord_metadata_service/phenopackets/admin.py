@@ -27,11 +27,6 @@ class GeneAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.Variant)
-class VariantAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(m.Disease)
 class DiseaseAdmin(admin.ModelAdmin):
     pass

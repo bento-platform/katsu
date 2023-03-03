@@ -163,27 +163,6 @@ class CreateGeneTest(APITestCase):
         self.assertEqual(serializer.is_valid(), False)
 
 
-class CreateVariantTest(APITestCase):
-
-    def setUp(self):
-        self.variant = c.VALID_VARIANT_1
-        self.variant_2 = c.VALID_VARIANT_2
-
-    def test_variant(self):
-        response = get_response('variants-list', self.variant)
-        serializer = s.VariantSerializer(data=self.variant)
-        self.assertEqual(serializer.is_valid(), True)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(m.Variant.objects.count(), 1)
-
-    def test_to_represenation(self):
-        response = get_response('variants-list', self.variant_2)
-        serializer = s.VariantSerializer(data=self.variant)
-        self.assertEqual(serializer.is_valid(), True)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(m.Variant.objects.count(), 1)
-
-
 class CreateDiseaseTest(APITestCase):
 
     def setUp(self):
@@ -283,7 +262,6 @@ class CreateInterpretationTest(APITestCase):
         self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
         self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(self.disease)).id
         self.interpretation = c.valid_interpretation(diagnosis=self.diagnosis)
-        self.interpretation['diagnosis'] = [self.diagnosis]
 
     def test_interpretation(self):
         response = get_response('interpretations-list',

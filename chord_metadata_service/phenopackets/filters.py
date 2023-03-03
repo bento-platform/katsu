@@ -212,26 +212,6 @@ class GeneFilter(django_filters.rest_framework.FilterSet):
         fields = ["id", "symbol"]
 
 
-class VariantFilter(django_filters.rest_framework.FilterSet):
-    allele_type = django_filters.CharFilter(lookup_expr="iexact")
-    zygosity = django_filters.CharFilter(method=filter_ontology, field_name="zygosity", label="Zygosity")
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title",
-        label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__table__ownership_record__dataset__title",
-        label="Authorized datasets"
-    )
-
-    class Meta:
-        model = m.Variant
-        fields = ["id"]
-
-
 class DiseaseFilter(django_filters.rest_framework.FilterSet):
     term = django_filters.CharFilter(method=filter_ontology, field_name="term", label="Term")
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
