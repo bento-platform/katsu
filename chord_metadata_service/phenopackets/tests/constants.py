@@ -184,7 +184,14 @@ VALID_DISEASE_1 = {
     },
     "excluded": "False",
     "onset": {
-        "age": "P25Y3M2D"
+        "age": {
+            "iso8601duration": "P25Y3M2D"
+        }
+    },
+    "resolution": {
+        "age": {
+            "iso8601duration": "P28Y3M2D"
+        }
     },
     "disease_stage": [
         {

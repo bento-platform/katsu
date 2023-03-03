@@ -253,16 +253,7 @@ class Disease(BaseTimeStamp, IndexableMixin):
     FHIR: Condition
     """
 
-    objects = None
     term = JSONField(validators=[ontology_validator], help_text=rec_help(d.DISEASE, "term"))
-    # "ageOfOnset": {
-    # "age": "P38Y7M"
-    # }
-    # OR
-    # "ageOfOnset": {
-    # "id": "HP:0003581",
-    # "label": "Adult onset"
-    # }
     excluded = models.BooleanField(blank=True, null=True)
     onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
     resolution = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
