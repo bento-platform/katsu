@@ -221,13 +221,6 @@ GENE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENE_
 # TODO: Search? Probably not
 HTS_FILE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_HTS_FILE_SCHEMA, {})
 
-# TODO: search??
-VARIANT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_VARIANT_SCHEMA, {
-    "properties": {
-        "allele": {"search": {}},  # TODO
-        "zygosity": ONTOLOGY_SEARCH_SCHEMA,
-    }
-})
 
 BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_BIOSAMPLE_SCHEMA, {
     "properties": {
@@ -293,9 +286,6 @@ BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
         },
         "hts_files": {
             "items": HTS_FILE_SEARCH_SCHEMA  # TODO
-        },
-        "variants": {
-            "items": VARIANT_SEARCH_SCHEMA,  # TODO: search?
         },
         "is_control_sample": {
             "search": search_optional_eq(1),  # TODO: Boolean search

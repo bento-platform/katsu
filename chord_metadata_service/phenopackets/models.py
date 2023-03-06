@@ -15,7 +15,6 @@ from chord_metadata_service.restapi.validators import (
 )
 from . import descriptions as d
 from .schemas import (
-    ALLELE_SCHEMA,
     EXPRESSION_SCHEMA,
     EXTENSION_SCHEMA,
     ONE_OF_MEDICAL_ACTION,
@@ -215,31 +214,6 @@ class Gene(BaseTimeStamp):
                                help_text=rec_help(d.GENE, "alternate_ids"))
     symbol = models.CharField(max_length=200, help_text=rec_help(d.GENE, "symbol"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.GENE, "extra_properties"))
-
-    def __str__(self):
-        return str(self.id)
-
-
-class Variant(BaseTimeStamp):
-    """
-    Class to describe Individual variants or diagnosed causative variants
-
-    FHIR: Observation ?
-    Draft extension for Variant is in development
-    """
-
-    ALLELE = (
-        ('hgvsAllele', 'hgvsAllele'),
-        ('vcfAllele', 'vcfAllele'),
-        ('spdiAllele', 'spdiAllele'),
-        ('iscnAllele', 'iscnAllele'),
-    )
-    allele_type = models.CharField(max_length=200, choices=ALLELE, help_text="One of four allele types.")
-    allele = JSONField(validators=[JsonSchemaValidator(schema=ALLELE_SCHEMA)],
-                       help_text=rec_help(d.VARIANT, "allele"))
-    zygosity = JSONField(blank=True, null=True, validators=[ontology_validator],
-                         help_text=rec_help(d.VARIANT, "zygosity"))
-    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT, "extra_properties"))
 
     def __str__(self):
         return str(self.id)

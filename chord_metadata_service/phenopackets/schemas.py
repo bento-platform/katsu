@@ -21,7 +21,7 @@ from chord_metadata_service.restapi.schema_utils import (
     enum_of,
     named_one_of,
     string_with_format,
-    tag_ids_and_describe, SchemaResolver,
+    describe_schema, id_of
 )
 
 from . import descriptions
@@ -35,7 +35,6 @@ __all__ = [
     "PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA",
     "PHENOPACKET_GENE_SCHEMA",
     "PHENOPACKET_HTS_FILE_SCHEMA",
-    "PHENOPACKET_VARIANT_SCHEMA",
     "PHENOPACKET_BIOSAMPLE_SCHEMA",
     "PHENOPACKET_DISEASE_ONSET_SCHEMA",
     "PHENOPACKET_DISEASE_SCHEMA",
@@ -50,39 +49,26 @@ __all__ = [
     "PHENOPACKET_TREATMENT",
     "PHENOPACKET_RADIATION_THERAPY",
     "PHENOPACKET_THERAPEUTIC_REGIMEN",
-    "PHENOPACKET_MEDICAL_ACTION_SCHEMA"
+    "PHENOPACKET_MEDICAL_ACTION_SCHEMA",
+    "PHENOPACKET_REF_RESOLVER"
 ]
 
+path = Path("/chord_metadata_service/phenopackets")
+base_uri = f"{path.as_uri()}/"
+
+
+def schema_base_uri(name: str):
+    return f"{base_uri}{name}"
+
+
 with open("chord_metadata_service/phenopackets/vrs.json", "r") as file:
-    from jsonschema.validators import RefResolver
     vrs_schema_definitions = json.load(file)
-    path = Path("/chord_metadata_service/phenopackets")
-    VRS_REF_RESOLVER = RefResolver(
-        base_uri=f"{path.as_uri()}/",
-        referrer=vrs_schema_definitions
-    )
+    file.close()
 
 
-def get_vrs_validator(schema_name:str):
-    _, schema_obj = VRS_REF_RESOLVER.resolve(f"#/definitions/{schema_name}")
-    return jsonschema.Draft7Validator(schema=schema_obj, resolver=VRS_REF_RESOLVER)
-
-
-def name_to_ref(name: str):
-    return f"#/definitions/{name}"
-
-
-VARIATION_VALIDATOR = get_vrs_validator("Variation")
-ALLELE_VALIDATOR = get_vrs_validator("Allele")
-
-vrs_schema_resolver = SchemaResolver(resolver=VRS_REF_RESOLVER)
-VARIATION_SCHEMA = vrs_schema_resolver.resolve(name_to_ref("Variation"))
-ALLELE_SCHEMA = vrs_schema_resolver.resolve(name_to_ref("Allele"))
-print("")
-
-PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:external_reference",
+    # "$id": pheno_base_uri("external_reference"),
     "title": "External reference schema",
     "type": "object",
     "properties": {
@@ -92,9 +78,9 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = tag_ids_and_describe({
     "required": ["id"]
 }, descriptions.EXTERNAL_REFERENCE)
 
-PHENOPACKET_UPDATE_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_UPDATE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:update",
+    # "$id": pheno_base_uri("update"),
     "title": "Updates schema",
     "type": "object",
     "properties": {
@@ -108,9 +94,9 @@ PHENOPACKET_UPDATE_SCHEMA = tag_ids_and_describe({
 
 
 # noinspection PyProtectedMember
-PHENOPACKET_META_DATA_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_META_DATA_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:meta_data",
+    # "$id": pheno_base_uri("meta_data"),
     "type": "object",
     "properties": {
         "created": DATE_TIME,
@@ -124,9 +110,9 @@ PHENOPACKET_META_DATA_SCHEMA = tag_ids_and_describe({
     },
 }, descriptions.META_DATA)
 
-PHENOPACKET_EVIDENCE_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_EVIDENCE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:evidence",
+    # "$id": pheno_base_uri("evidence"),
     "title": "Evidence schema",
     "type": "object",
     "properties": {
@@ -138,9 +124,9 @@ PHENOPACKET_EVIDENCE_SCHEMA = tag_ids_and_describe({
 }, descriptions.EVIDENCE)
 
 
-PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:phenotypic_feature",
+    # "$id": pheno_base_uri("phenotypic_feature"),
     "type": "object",
     "properties": {
         "description": base_type(SCHEMA_TYPES.STRING),
@@ -156,9 +142,9 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = tag_ids_and_describe({
 }, descriptions.PHENOTYPIC_FEATURE)
 
 # TODO: search
-PHENOPACKET_GENE_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_GENE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:gene",
+    # "$id": pheno_base_uri("gene"),
     "type": "object",
     "properties": {
         "id": base_type(SCHEMA_TYPES.STRING),
@@ -169,9 +155,9 @@ PHENOPACKET_GENE_SCHEMA = tag_ids_and_describe({
     "required": ["id", "symbol"]
 }, descriptions.GENE)
 
-PHENOPACKET_HTS_FILE_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_HTS_FILE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:hts_file",
+    # "$id": pheno_base_uri("hts_file"),
     "type": "object",
     "properties": {
         "uri": string_with_format(SCHEMA_STRING_FORMATS.URI),
@@ -183,21 +169,10 @@ PHENOPACKET_HTS_FILE_SCHEMA = tag_ids_and_describe({
     }
 }, descriptions.HTS_FILE)
 
-# TODO: search??
-PHENOPACKET_VARIANT_SCHEMA = tag_ids_and_describe({
-    "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:variant",
-    "type": "object",  # TODO
-    "properties": {
-        "allele": ALLELE_SCHEMA,  # TODO
-        "zygosity": ONTOLOGY_CLASS,
-        "extra_properties": EXTRA_PROPERTIES_SCHEMA
-    }
-}, descriptions.VARIANT)
 
-PHENOPACKET_PROCEDURE_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_PROCEDURE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:procedure",
+    # "$id": pheno_base_uri("procedure"),
     "title": "Procedure schema",
     "type": "object",
     "properties": {
@@ -210,7 +185,7 @@ PHENOPACKET_PROCEDURE_SCHEMA = tag_ids_and_describe({
 
 REFERENCE_RANGE_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:reference_range",
+    # "$id": pheno_base_uri("reference_range"),
     "title": "Reference range schema",
     "type": "object",
     "properties": {
@@ -223,7 +198,7 @@ REFERENCE_RANGE_SCHEMA = {
 
 PHENOPACKET_QUANTITY_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:quantity",
+    # "$id": pheno_base_uri("quantity"),
     "title": "Quantity schema",
     "type": "object",
     "properties": {
@@ -236,7 +211,7 @@ PHENOPACKET_QUANTITY_SCHEMA = {
 
 PHENOPACKET_TYPED_QUANTITY_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:typed-quantity",
+    # "$id": pheno_base_uri("typed-quantity"),
     "title": "Quantity schema",
     "type": "object",
     "properties": {
@@ -248,7 +223,7 @@ PHENOPACKET_TYPED_QUANTITY_SCHEMA = {
 
 PHENOPACKET_VALUE_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:value",
+    # "$id": pheno_base_uri("value"),
     "title": "Value schema",
     "type": "object",
     "oneOf": [
@@ -259,7 +234,7 @@ PHENOPACKET_VALUE_SCHEMA = {
 
 PHENOPACKET_COMPLEX_VALUE_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:complex_value",
+    # "$id": pheno_base_uri("complex_value"),
     "title": "Complex value schema",
     "type": "object",
     "properties": {
@@ -270,7 +245,7 @@ PHENOPACKET_COMPLEX_VALUE_SCHEMA = {
 
 PHENOPACKET_MEASUREMENT_VALUE_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:measurement:measurement_value",
+    # "$id": pheno_base_uri("measurement_value"),
     "title": "Measurement value schema",
     "type": "object",
     "oneOf": [
@@ -281,7 +256,7 @@ PHENOPACKET_MEASUREMENT_VALUE_SCHEMA = {
 
 PHENOPACKET_MEASUREMENT_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:measurement",
+    # "$id": pheno_base_uri("measurement"),
     "title": "Measurement schema",
     "type": "object",
     "properties": {
@@ -297,9 +272,9 @@ PHENOPACKET_MEASUREMENT_SCHEMA = {
     "required": ["assay"]
 }
 
-FILE_SCHEMA = tag_ids_and_describe({
+FILE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:file",
+    # "$id": pheno_base_uri("file"),
     "title": "Phenopacket file schema",
     "description": "The File message allows a Phenopacket to link the structured phenotypic data it "
     + "contains to external files which can be used to inform analyses.",
@@ -312,9 +287,9 @@ FILE_SCHEMA = tag_ids_and_describe({
 }, {})
 
 # noinspection PyProtectedMember
-PHENOPACKET_BIOSAMPLE_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:biosample",
+    # "$id": pheno_base_uri("biosample"),
     "type": "object",
     "properties": {
         "id": base_type(SCHEMA_TYPES.STRING),
@@ -348,7 +323,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = tag_ids_and_describe({
 
 PHENOPACKET_DISEASE_ONSET_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:disease_onset",
+    # "$id": pheno_base_uri("disease_onset"),
     "title": "Onset age",
     "description": "Schema for the age of the onset of the disease.",
     "type": "object",
@@ -359,9 +334,9 @@ PHENOPACKET_DISEASE_ONSET_SCHEMA = {
     ]
 }
 
-PHENOPACKET_DISEASE_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_DISEASE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:disease",
+    # "$id": pheno_base_uri("disease"),
     "title": "Disease schema",
     "type": "object",
     "properties": {
@@ -379,7 +354,7 @@ PHENOPACKET_DISEASE_SCHEMA = tag_ids_and_describe({
 
 DOSE_INTERVAL = {
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:dose_interval",
+    # "$id": pheno_base_uri("dose_interval"),
     "title": "Phenopacket dose interval for treatment",
     "description": "Represents the dose intervals of a treatment.",
     "type": "object",
@@ -391,9 +366,9 @@ DOSE_INTERVAL = {
     "required": ["quantity", "schedule_frequency", "interval"]
 }
 
-PHENOPACKET_TREATMENT = tag_ids_and_describe({
+PHENOPACKET_TREATMENT = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:treatment",
+    # "$id": pheno_base_uri("treatment"),
     "title": "Phenopacket treatment",
     "description": "Represents a treatment with an agent, such as a drug.",
     "type": "object",
@@ -407,9 +382,9 @@ PHENOPACKET_TREATMENT = tag_ids_and_describe({
     "required": ["agent"]
 }, {}) #TODO: add description
 
-PHENOPACKET_RADIATION_THERAPY = tag_ids_and_describe({
+PHENOPACKET_RADIATION_THERAPY = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:radiation_therapy",
+    # "$id": pheno_base_uri("radiation_therapy"),
     "title": "Phenopacket radiation therapy",
     "description": "Radiation therapy (or radiotherapy) uses ionizing radiation, generally as part of cancer treatment to control or kill malignant cells.",
     "type": "object",
@@ -422,9 +397,9 @@ PHENOPACKET_RADIATION_THERAPY = tag_ids_and_describe({
     "required": ["modality", "body_site", "dosage", "fractions"]
 }, {})
 
-PHENOPACKET_THERAPEUTIC_REGIMEN = tag_ids_and_describe({
+PHENOPACKET_THERAPEUTIC_REGIMEN = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:therapeutic_regimen",
+    # "$id": pheno_base_uri("therapeutic_regimen"),
     "title": "Phenopacket therapeutic regimen",
     "description": "This element represents a therapeutic regimen which will involve a specified set of treatments for a particular condition.",
     "type": "object",
@@ -440,9 +415,9 @@ PHENOPACKET_THERAPEUTIC_REGIMEN = tag_ids_and_describe({
     "required": ["status"]
 }, {})
 
-ONE_OF_MEDICAL_ACTION = tag_ids_and_describe({
+ONE_OF_MEDICAL_ACTION = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:one_of_medical_actions",
+    # "$id": pheno_base_uri("one_of_medical_actions"),
     "title": "Supported Phenopacket medical actions",
     "description": "One-of schema for supported medical action schemas",
     "type": "object",
@@ -454,9 +429,9 @@ ONE_OF_MEDICAL_ACTION = tag_ids_and_describe({
     ]
 }, {})  # TODO: describe
 
-PHENOPACKET_MEDICAL_ACTION_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_MEDICAL_ACTION_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:medical_action",
+    # "$id": pheno_base_uri("medical_action"),
     "title": "Phenopacket medical action schema",
     "description": "Describes a medical action",
     "type": "object",
@@ -476,9 +451,9 @@ PHENOPACKET_MEDICAL_ACTION_SCHEMA = tag_ids_and_describe({
 }, descriptions=descriptions.MEDICAL_ACTION)
 
 
-GENE_DESCRIPTOR = tag_ids_and_describe({
+GENE_DESCRIPTOR = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:gene_descriptor",
+    # "$id": pheno_base_uri("gene_descriptor"),
     "title": "Gene descriptor schema",
     "description": "Schema used to describe genes",
     "type": "object",
@@ -495,9 +470,9 @@ GENE_DESCRIPTOR = tag_ids_and_describe({
 }, descriptions=descriptions.GENE_DESCRIPTOR)
 
 
-EXPRESSION_SCHEMA = tag_ids_and_describe({
+EXPRESSION_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:expression",
+    # "$id": pheno_base_uri("expression"),
     "title": "Expression schema",
     "description": "Enables description of an object based on a nomenclature",
     "type": "object",
@@ -510,9 +485,9 @@ EXPRESSION_SCHEMA = tag_ids_and_describe({
 }, descriptions=descriptions.EXPRESSION)
 
 
-EXTENSION_SCHEMA = tag_ids_and_describe({
+EXTENSION_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:extension",
+    # "$id": pheno_base_uri("extension"),
     "title": "Extension schema",
     "description": "The Extension class provides a means to extend descriptions with other attributes unique to a content provider",
     "type": "object",
@@ -523,9 +498,9 @@ EXTENSION_SCHEMA = tag_ids_and_describe({
     "required": ["name", "value"]
 }, {})
 
-VCF_RECORD_SCHEMA = tag_ids_and_describe({
+VCF_RECORD_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:vcf_record",
+    # "$id": pheno_base_uri("vcf_record"),
     "title": "VCF record schema",
     "description": "This element is used to describe variants using the Variant Call Format.",
     "type": "object",
@@ -544,15 +519,17 @@ VCF_RECORD_SCHEMA = tag_ids_and_describe({
 }, descriptions=descriptions.VCF_RECORD)
 
 
-VARIANT_DESCRIPTOR = tag_ids_and_describe({
+VARIANT_DESCRIPTOR = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:variant_descriptor",
+    # "$id": pheno_base_uri("variant_descriptor"),
     "title": "Variant descriptor schema",
     "description": "Schema used to describe variants",
     "type": "object",
     "properties": {
         "id": base_type(SCHEMA_TYPES.STRING),
-        "variation": VARIATION_SCHEMA,
+        "variation": {
+            "$ref": "#/definitions/Variation"
+        },
         "label": base_type(SCHEMA_TYPES.STRING),
         "description": base_type(SCHEMA_TYPES.STRING),
         "gene_descriptor": GENE_DESCRIPTOR,
@@ -570,9 +547,9 @@ VARIANT_DESCRIPTOR = tag_ids_and_describe({
 }, descriptions=descriptions.VARIANT_DESCRIPTOR)
 
 
-PHENOPACKET_VARIANT_INTERPRETATION = tag_ids_and_describe({
+PHENOPACKET_VARIANT_INTERPRETATION = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:variant_interpretation",
+    # "$id": pheno_base_uri("variant_interpretation"),
     "title": "Phenopacket variant interpretation schema",
     "description": "This element represents the interpretation of a variant according to the American College of Medical Genetics (ACMG) guidelines.",
     "type": "object",
@@ -585,9 +562,9 @@ PHENOPACKET_VARIANT_INTERPRETATION = tag_ids_and_describe({
 }, descriptions=descriptions.VARIANT_INTERPRETATION)
 
 
-PHENOPACKET_GENOMIC_INTERPRETATION = tag_ids_and_describe({
+PHENOPACKET_GENOMIC_INTERPRETATION = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:genomic_interpretation",
+    # "$id": pheno_base_uri("genomic_interpretation"),
     "title": "Phenopacket genomic interpretation schema",
     "description": "Describes the interpretation for an individual variant or gene",
     "type": "object",
@@ -603,9 +580,9 @@ PHENOPACKET_GENOMIC_INTERPRETATION = tag_ids_and_describe({
 }, descriptions.GENOMIC_INTERPRETATION)
 
 
-PHENOPACKET_DIAGNOSIS_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_DIAGNOSIS_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:diagnosis",
+    # "$id": pheno_base_uri("diagnosis"),
     "title": "Phenopacket diagnosis schema",
     "description": "Refers to a disease and its genomic interpretations",
     "type": "object",
@@ -616,9 +593,9 @@ PHENOPACKET_DIAGNOSIS_SCHEMA = tag_ids_and_describe({
     "required": ["disease"]
 }, descriptions=descriptions.DIAGNOSIS)
 
-PHENOPACKET_INTERPRETATION_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_INTERPRETATION_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:interpretation",
+    # "$id": pheno_base_uri("interpretation"),
     "title": "Phenopacket interpretation schema",
     "description": "This message intends to represent the interpretation of a genomic analysis, such as the report from a diagnostic laboratory.",
     "type": "object",
@@ -632,9 +609,9 @@ PHENOPACKET_INTERPRETATION_SCHEMA = tag_ids_and_describe({
     "required": ["id", "progress_status"]
 }, descriptions=descriptions.INTERPRETATION)
 
-PHENOPACKET_SCHEMA = tag_ids_and_describe({
+PHENOPACKET_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:phenopacket",
+    "$id": schema_base_uri("phenopacket"),
     "title": "Phenopacket schema",
     "description": "Schema for metadata service datasets",
     "type": "object",
@@ -653,3 +630,9 @@ PHENOPACKET_SCHEMA = tag_ids_and_describe({
     },
     "required": ["id", "meta_data"],
 }, descriptions.PHENOPACKET)
+
+# For efficient validation of VRS
+PHENOPACKET_REF_RESOLVER = jsonschema.RefResolver.from_schema({
+    **PHENOPACKET_SCHEMA,
+    "definitions": vrs_schema_definitions.get("definitions")
+})

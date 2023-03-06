@@ -17,7 +17,7 @@ EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_1 = {
 }
 
 EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_2 = {
-    "json_document": os.path.join(os.path.dirname(__file__), "examples/retinoblastoma.json"),
+    "json_document": os.path.join(os.path.dirname(__file__), "examples/mcahs1__samples.json"),
 }
 
 

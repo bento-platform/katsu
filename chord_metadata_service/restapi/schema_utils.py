@@ -180,6 +180,10 @@ def tag_ids_and_describe(schema: dict, descriptions: dict):
     return tag_schema_with_nested_ids(describe_schema(schema, descriptions))
 
 
+def id_of(schema: dict, default=None):
+    return schema.get("$id", default)
+
+
 class SchemaResolver:
     """
     A generic json-schema reference resolver wrapper for jsonschema.RefResolver.

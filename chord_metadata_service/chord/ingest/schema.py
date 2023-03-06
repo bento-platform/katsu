@@ -5,10 +5,11 @@ from .logger import logger
 __all__ = ["schema_validation"]
 
 
-def schema_validation(obj, schema):
-    v = jsonschema.Draft7Validator(schema, format_checker=jsonschema.FormatChecker())
+def schema_validation(obj, schema, resolver=None):
+    v = jsonschema.Draft7Validator(schema, format_checker=jsonschema.FormatChecker(), resolver=resolver)
     try:
-        jsonschema.validate(obj, schema, format_checker=jsonschema.FormatChecker())
+        # jsonschema.validate(obj, schema, format_checker=jsonschema.FormatChecker())
+        v.validate(obj, schema)
         logger.info("JSON schema validation passed.")
         return True
     except jsonschema.exceptions.ValidationError:
