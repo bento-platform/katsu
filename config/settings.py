@@ -27,6 +27,7 @@ SECRET_KEY = "django-insecure-30bq59j6h_8^_%c#t4&d@1spzp@z(p1z8)h$a@1s*0^=bv!i2b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Modify this for local development
 FAKE_AUTHORIZED_DATASETS = ["SYNTHETIC-POG"]
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "docker.localhost"]
