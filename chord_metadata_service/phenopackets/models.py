@@ -317,7 +317,7 @@ class GeneDescriptor(BaseTimeStamp):
         return str(self.value_id)
 
 
-class VariantDescriptor(BaseTimeStamp):
+class VariationDescriptor(BaseTimeStamp):
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "id"))
     variation = models.JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT_DESCRIPTOR, "variation"))
     label = models.CharField(blank=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "label"))
@@ -364,7 +364,7 @@ class VariantInterpretation(BaseTimeStamp):
                                                          help_text=rec_help(d.VARIANT_INTERPRETATION, "acmg_pathogenicity_classification"))
     therapeutic_actionability = models.CharField(max_length=200, choices=THERAPEUTIC_ACTIONABILITY_CHOICES, default='UNKNOWN_ACTIONABILITY',
                                                  help_text=rec_help(d.VARIANT_INTERPRETATION, "therapeutic_actionability"))
-    variation_descriptor = models.ForeignKey(VariantDescriptor, on_delete=models.CASCADE,
+    variation_descriptor = models.ForeignKey(VariationDescriptor, on_delete=models.CASCADE,
                                              help_text=rec_help(d.VARIANT_INTERPRETATION, "variant"))
 
     def __str__(self) -> str:

@@ -73,7 +73,6 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
 def validate_phenopacket(phenopacket_data: dict[str, Any], idx: Optional[int] = None) -> None:
     # Validate phenopacket data against phenopackets schema.
     # validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
-    # validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA, resolver=PHENOPACKET_REF_RESOLVER)
     validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA, resolver=PHENOPACKET_REF_RESOLVER)
     if not validation:
         # TODO: Report more precise errors
@@ -173,9 +172,9 @@ def get_or_create_gene_descriptor(gene_desc) -> pm.GeneDescriptor:
     return gene_descriptor
 
 
-def get_or_create_variant_descriptor(var_desc: dict) -> pm.VariantDescriptor:
+def get_or_create_variant_descriptor(var_desc: dict) -> pm.VariationDescriptor:
     gene_descriptor = _get_or_create_opt("gene_context", var_desc, get_or_create_gene_descriptor)
-    variant_descriptor, _ = pm.VariantDescriptor.objects.get_or_create(
+    variant_descriptor, _ = pm.VariationDescriptor.objects.get_or_create(
         id=var_desc["id"],
         variation=var_desc.get("variation", {}),
         label=var_desc.get("label", ""),

@@ -169,7 +169,7 @@ class GenomicInterpretationTest(TestCase):
 
     def setUp(self):
         self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
-        self.variant_descriptor = m.VariantDescriptor.objects.create(**c.VALID_VARIANT_DESCRIPTOR)
+        self.variant_descriptor = m.VariationDescriptor.objects.create(**c.VALID_VARIANT_DESCRIPTOR)
         self.variant_interpretation = m.VariantInterpretation.objects.create(
             **c.valid_variant_interpretation(self.variant_descriptor)
         )
@@ -222,7 +222,7 @@ class DiagnosisTest(TestCase):
         self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
 
         # With VariantInterpretation
-        self.variant_descriptor = m.VariantDescriptor.objects.create(**c.valid_variant_descriptor(self.gene_descriptor))
+        self.variant_descriptor = m.VariationDescriptor.objects.create(**c.valid_variant_descriptor(self.gene_descriptor))
         self.variant_interpretation = m.VariantInterpretation.objects.create(**c.valid_variant_interpretation(
                 variant_descriptor=self.variant_descriptor
         ))
