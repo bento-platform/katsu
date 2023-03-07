@@ -238,8 +238,8 @@ class CreateGenomicInterpretationTest(APITestCase):
 class CreateDiagnosisTest(APITestCase):
 
     def setUp(self):
-        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.diagnosis = c.valid_diagnosis(self.disease.id)
+        self.disease_ontology = c.VALID_DISEASE_ONTOLOGY
+        self.diagnosis = c.valid_diagnosis(self.disease_ontology)
 
     def test_diagnosis(self):
         response = get_response('diagnoses-list',
@@ -259,8 +259,8 @@ class CreateInterpretationTest(APITestCase):
             meta_data=self.metadata)
         ).id
         self.metadata_interpretation = m.MetaData.objects.create(**c.VALID_META_DATA_2).id
-        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(self.disease)).id
+        self.disease_ontology = c.VALID_DISEASE_ONTOLOGY
+        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(self.disease_ontology)).id
         self.interpretation = c.valid_interpretation(diagnosis=self.diagnosis)
 
     def test_interpretation(self):

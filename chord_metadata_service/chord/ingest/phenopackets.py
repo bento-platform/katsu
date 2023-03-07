@@ -199,7 +199,7 @@ def get_or_create_variant_interp(variant_interp_data: dict) -> pm.VariantInterpr
     variant_interpretation, _ = pm.VariantInterpretation.objects.get_or_create(
         acmg_pathogenicity_classification=variant_interp_data["acmg_pathogenicity_classification"],
         therapeutic_actionability=variant_interp_data["therapeutic_actionability"],
-        variant=variant_descriptor
+        variation_descriptor=variant_descriptor
     )
     return variant_interpretation
 
@@ -236,11 +236,12 @@ def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
         for gen_interp
         in genomic_interpretations_data
     ]
-    disease = pm.Disease.objects.get_or_create(diagnosis["disease"])
+    # disease = pm.Disease.objects.get_or_create(diagnosis["disease"])
     diag_obj, _ = pm.Diagnosis.objects.get_or_create(
+        disease_ontology=diagnosis.get("disease", {}),
         extra_properties=diagnosis.get("extra_properties", {})
     )
-    diag_obj.disease.set(disease)
+    # diag_obj.disease.set(disease)
     diag_obj.genomic_interpretations.set(genomic_interpretations)
     return diag_obj
 
