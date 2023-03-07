@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from rest_framework import viewsets, filters, mixins
+from rest_framework import viewsets, filters, mixins, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.settings import api_settings
@@ -12,12 +12,14 @@ from django.core.exceptions import ValidationError
 from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
+from drf_spectacular.utils import extend_schema, inline_serializer
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response
 
 from .serializers import IndividualSerializer
 from .models import Individual
 from .filters import IndividualFilter
+from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.restapi.api_renderers import (
@@ -35,8 +37,7 @@ from chord_metadata_service.restapi.utils import (
     experiment_type_stats
 )
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
-from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
+
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
@@ -162,7 +163,7 @@ class PublicListIndividuals(APIView):
             options = get_field_options(field_props)
             if value not in options \
                     and not (
-                        # case insensitive search on categories
+                        # case-insensitive search on categories
                         field_props["datatype"] == "string"
                         and value.lower() in [o.lower() for o in options]
                     ) \
@@ -190,14 +191,19 @@ class PublicListIndividuals(APIView):
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
             ))
 
-        if filtered_qs.count() <= settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
+        qct = filtered_qs.count()
+
+        if qct <= (threshold := settings.CONFIG_PUBLIC["rules"]["count_threshold"]):
+            logger.info(
+                f"Public individuals endpoint recieved query params {request.query_params} which resulted in "
+                f"sub-threshold count: {qct} <= {threshold}")
             return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
 
         tissues_count, sampled_tissues = biosample_tissue_stats(filtered_qs)
         experiments_count, experiment_types = experiment_type_stats(filtered_qs)
 
         return Response({
-            "count": filtered_qs.count(),
+            "count": qct,
             "biosamples": {
                 "count": tissues_count,
                 "sampled_tissue": sampled_tissues
