@@ -169,8 +169,7 @@ class ExportCBioTest(TestCase):
                 break
 
     def test_export_cbio_sample_data(self):
-        samples = pm.Biosample.objects.filter(phenopacket=self.p)\
-            .annotate(phenopacket_subject_id=F("phenopacket__subject"))
+        samples = pm.Biosample.objects.filter(phenopacket=self.p)
 
         with io.StringIO() as output:
             exp.sample_export(samples, output)
