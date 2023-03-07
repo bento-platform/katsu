@@ -223,11 +223,11 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
 
     # Pre-process biosamples; historically (<2.17.3) we were running into issues because a missing individual_id in
     # the biosample meant it would be left as None rather than properly associated with a specified subject.
-    #   - Here, we tag the biosample with the subject's ID if a subject is specified AND no individual_id is already
-    #     specified on the biosample.
+    #   - Here, we tag the biosample with the subject's ID if a subject is specified, since the Phenopacket spec
+    #     explicitly says of the biosamples field:
+    #       "This field describes samples that have been derived from the patient who is the object of the Phenopacket"
     biosamples = [
-        {**bs, "individual_id": subject["id"]}
-        if subject and "individual_id" not in bs else bs
+        {**bs, "individual_id": subject["id"]} if subject else bs
         for bs in phenopacket_data.get("biosamples", [])
     ]
 
