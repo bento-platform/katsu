@@ -14,7 +14,7 @@ def get_authorized_datasets(request):
     Returns a list of datasets that the user is authorized to see.
     NOTE: this function required the OPA service to be running, otherwise it will raise an exception.
     """
-    if settings.CANDIG_AUTHORIZATION == "OPA" and "Authorization" in request.headers:
+    if settings.KATSU_AUTHORIZATION == "OPA" and "Authorization" in request.headers:
         opa_url = settings.CANDIG_OPA_URL
         opa_secret = settings.CANDIG_OPA_SECRET
         try:
@@ -27,7 +27,7 @@ def get_authorized_datasets(request):
             raise ValueError("Error retrieving authorized datasets")
 
     if (
-        settings.CANDIG_AUTHORIZATION == "LOCAL_SETTING_NO_AUTH"
+        settings.KATSU_AUTHORIZATION == "LOCAL_SETTING_NO_AUTH"
         or "Authorization" not in request.headers
     ):
         # NOTE: THIS IS FOR LOCAL TESTING ONLY
