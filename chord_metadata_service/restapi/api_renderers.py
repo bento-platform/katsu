@@ -124,24 +124,12 @@ class IndividualCSVRenderer(JSONRenderer):
                 'karyotypic_sex': individual['karyotypic_sex'],
                 'race': individual.get('race', None),
                 'ethnicity': individual.get('ethnicity', None),
-                'age': None,
                 'diseases': None,
                 'created': individual['created'],
                 'updated': individual['updated']
             }
             if 'taxonomy' in individual:
                 ind_obj['taxonomy'] = individual['taxonomy'].get('label', None)
-            if 'age' in individual:
-                if 'age' in individual['age']:
-                    ind_obj['age'] = individual['age'].get('age', None)
-                elif 'start' and 'end' in individual['age']:
-                    ind_obj['age'] = str(
-                        individual['age']['start'].get('age', "NA")
-                        + ' - ' +
-                        individual['age']['end'].get('age', "NA")
-                    )
-                else:
-                    ind_obj['age'] = None
             if 'phenopackets' in individual:
                 all_diseases = []
                 for phenopacket in individual['phenopackets']:

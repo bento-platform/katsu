@@ -149,7 +149,7 @@ class IndividualCSVRendererTest(APITestCase):
         self.assertEqual(body[1][1], c.VALID_INDIVIDUAL['sex'])
         headers = body.pop(0)
         for column in ['id', 'sex', 'date of birth', 'taxonomy', 'karyotypic sex',
-                       'race', 'ethnicity', 'age', 'diseases', 'created', 'updated']:
+                       'race', 'ethnicity', 'diseases', 'created', 'updated']:
             self.assertIn(column, [column_name.lower() for column_name in headers])
 
 
@@ -587,66 +587,3 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertEqual(1, response_obj["count"])
-
-
-class PublicAgeRangeFilteringIndividualsTest(APITestCase):
-    """ Test for api/public GET filtering """
-
-    response_threshold = 5
-    random_range = 45
-
-    @staticmethod
-    def response_threshold_check(response):
-        return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
-
-    def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
-        for individual in individuals:
-            Individual.objects.create(**individual)
-
-        for individual in Individual.objects.all():
-            if individual.age:
-                if "age" in individual.age:
-                    age_numeric, age_unit = iso_duration_to_years(individual.age["age"])
-                    individual.age_numeric = age_numeric
-                    individual.age_unit = age_unit if age_unit else ""
-                    individual.save()
-
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
-    def test_public_filtering_age_range(self):
-        # age valid range search
-        response = self.client.get('/api/public?age=[20, 30)')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_obj = response.json()
-        db_count = Individual.objects.filter(age_numeric__gte=20, age_numeric__lt=30).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
-
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
-    def test_public_filtering_age_invalid_range(self):
-        # age invalid range max search
-        response = self.client.get('/api/public?age=[10, 50)')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_obj = response.json()
-        self.assertEqual(response_obj["code"], 400)
-
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY)
-    def test_public_filtering_age_range_min_and_max_no_age_in_config(self):
-        # test with config without age field, returns error
-        response = self.client.get('/api/public?age=[20, 30)')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_obj = response.json()
-        self.assertEqual(response_obj["code"], 400)
-
-    @override_settings(CONFIG_PUBLIC={})
-    def test_public_filtering_age_range_min_and_max_no_config(self):
-        # test when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
-        response = self.client.get('/api/public?age=[20, 30)')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_obj = response.json()
-        self.assertIsInstance(response_obj, dict)
-        self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)

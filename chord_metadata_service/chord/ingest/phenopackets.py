@@ -89,15 +89,15 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     # - Be a bit flexible with the subject date_of_birth field for Signature; convert blank strings to None.
     subject["date_of_birth"] = subject.get("date_of_birth") or None
     subject_query = query_and_check_nulls(subject, "date_of_birth", transform=isoparse)
-    for k in ("alternate_ids", "age", "sex", "taxonomy"):
+    for k in ("alternate_ids", "time_at_last_encounter", "sex", "taxonomy"):
         subject_query.update(query_and_check_nulls(subject, k))
 
     # - Check if age is represented as a duration string (vs. age range values) and convert it to years
-    age_numeric_value: Optional[Decimal] = None
-    age_unit_value: Optional[str] = None
-    if "age" in subject:
-        if "age" in subject["age"]:
-            age_numeric_value, age_unit_value = iso_duration_to_years(subject["age"]["age"])
+    # age_numeric_value: Optional[Decimal] = None
+    # age_unit_value: Optional[str] = None
+    # if "age" in subject:
+    #     if "age" in subject["age"]:
+    #         age_numeric_value, age_unit_value = iso_duration_to_years(subject["age"]["age"])
 
     # --------------------------------------------------------------------------------------------------------------
 
@@ -118,8 +118,6 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
         karyotypic_sex=subject.get("karyotypic_sex") or KaryotypicSex.UNKNOWN_KARYOTYPE,
         race=subject.get("race", ""),
         ethnicity=subject.get("ethnicity", ""),
-        age_numeric=age_numeric_value,
-        age_unit=age_unit_value if age_unit_value else "",
         extra_properties=existing_extra_properties,
         **subject_query
     )

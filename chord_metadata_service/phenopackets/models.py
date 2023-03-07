@@ -5,7 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.description_utils import rec_help
-from chord_metadata_service.restapi.models import IndexableMixin
+from chord_metadata_service.restapi.models import IndexableMixin, BaseTimeStamp
 from chord_metadata_service.restapi.schema_utils import validation_schema_list
 from chord_metadata_service.restapi.validators import (
     JsonSchemaValidator,
@@ -33,19 +33,6 @@ from ..restapi.schemas import TIME_ELEMENT_SCHEMA
 #                        Metadata                           #
 #                                                           #
 #############################################################
-
-class BaseTimeStamp(models.Model):
-    """
-    Abstract django model class for tables that should have
-    columns for 'created' and 'updated' timestamps.
-    Use in inheritance.
-    """
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        # Abstract prevents the creation of a BaseTimeStamp table
-        abstract = True
 
 
 class MetaData(BaseTimeStamp):

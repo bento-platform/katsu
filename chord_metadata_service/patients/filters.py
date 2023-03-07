@@ -67,7 +67,11 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         # creates index in db
         qs = qs.annotate(
             search=SearchVector("id", "alternate_ids", "date_of_birth",
-                                Cast("age", TextField()),
+                                Cast("time_at_last_encounter", TextField()),
+                                Cast("vital_status__status", TextField()),
+                                Cast("vital_status__time_of_death", TextField()),
+                                Cast("vital_status__cause_of_death", TextField()),
+                                Cast("vital_status__survival_time_in_days", TextField()),
                                 "sex", "karyotypic_sex",
                                 Cast("taxonomy", TextField()),
                                 Cast("comorbid_condition", TextField()),
@@ -100,11 +104,11 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 Cast("phenopackets__biosamples__procedure__body_site", TextField()),
                                 Cast("phenopackets__biosamples__procedure__extra_properties", TextField()),
                                 Cast("phenopackets__biosamples__extra_properties", TextField()),
-                                # Biosample Variant fields
-                                "phenopackets__biosamples__variants__allele_type",
-                                Cast("phenopackets__biosamples__variants__allele", TextField()),
-                                Cast("phenopackets__biosamples__variants__zygosity", TextField()),
-                                Cast("phenopackets__biosamples__variants__extra_properties", TextField()),
+
+                                # TODO: Interpretation Variant fields
+
+                                # TODO: Interpretation Gene fields
+
                                 # Biosample HTS file fields
                                 "phenopackets__biosamples__hts_files__uri",
                                 "phenopackets__biosamples__hts_files__description",

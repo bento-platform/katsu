@@ -14,6 +14,22 @@ def generate_random_date(years_from: int, years_to: int):
     return new_date.strftime('%Y-%m-%d')
 
 
+VITAL_STATUS_DECEASED = {
+    "status": "DECEASED",
+    "time_of_death": {
+        "timestamp": "2020-03-28T00:00:00Z"
+    },
+    "cause_of_death": {
+        "id": "MONDO:0100096",
+        "label": "COVID-19"
+    },
+    "survival_time_in_days": 20
+}
+
+VITAL_STATUS_ALIVE = {
+    "status": "ALIVE"
+}
+
 VALID_INDIVIDUAL = {
     "id": "patient:1",
     "taxonomy": {
@@ -21,16 +37,12 @@ VALID_INDIVIDUAL = {
         "label": "human"
     },
     "date_of_birth": "1960-01-01",
-    "age": {
-        "start": {
-            "age": "P45Y"
-        },
-        "end": {
-            "age": "P49Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P49Y"
         }
     },
     "sex": "FEMALE",
-    "active": True
 }
 
 INVALID_INDIVIDUAL = {
@@ -58,16 +70,12 @@ VALID_INDIVIDUAL_2 = {
         "label": "human"
     },
     "date_of_birth": "1967-01-01",
-    "age": {
-        "age": "P55Y"
-    },
     "sex": "MALE",
-    "active": True
 }
 
-CSV_HEADER = "Id,Sex,Date of birth,Taxonomy,Karyotypic sex,Race,Ethnicity,Age,Diseases,Created,Updated"
-INDIVIDUAL_1_CSV = "patient:1,FEMALE,1960-01-01,human,UNKNOWN_KARYOTYPE,,,P45Y - P49Y,,--IGNORE--,--IGNORE--"
-INDIVIDUAL_2_CSV = "patient:2,MALE,1967-01-01,human,UNKNOWN_KARYOTYPE,,,P55Y,,--IGNORE--,--IGNORE--"
+CSV_HEADER = "Id,Sex,Date of birth,Taxonomy,Karyotypic sex,Race,Ethnicity,Diseases,Created,Updated"
+INDIVIDUAL_1_CSV = "patient:1,FEMALE,1960-01-01,human,UNKNOWN_KARYOTYPE,,,,--IGNORE--,--IGNORE--"
+INDIVIDUAL_2_CSV = "patient:2,MALE,1967-01-01,human,UNKNOWN_KARYOTYPE,,,,--IGNORE--,--IGNORE--"
 
 
 def generate_valid_individual():
@@ -76,9 +84,6 @@ def generate_valid_individual():
         "taxonomy": {
             "id": "NCBITaxon:9606",
             "label": "human"
-        },
-        "age": {
-            "age": f"P{str(random.randrange(16, 89))}Y{str(random.randrange(1, 12))}M{str(random.randrange(1, 31))}D"
         },
         "sex": random.choice(["MALE", "FEMALE", "UNKNOWN_SEX", "OTHER_SEX"]),
         "extra_properties": {
