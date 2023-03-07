@@ -70,13 +70,6 @@ class ExportCBioTest(TestCase):
         )
         self.exp_res = ExperimentResult.objects.all()
 
-        # Update the last sample to remove direct reference to any individual.
-        # In that case, Sample and Individual are cross-referenced through the
-        # Phenopacket model.
-        pm.Biosample.objects.filter(
-                id=EXAMPLE_INGEST_PHENOPACKET["biosamples"][-1]["id"]
-            ).update(individual=None)
-
     @staticmethod
     def stream_to_dict(output: TextIO) -> Dict[str, str]:
         """
@@ -178,6 +171,7 @@ class ExportCBioTest(TestCase):
     def test_export_cbio_sample_data(self):
         samples = pm.Biosample.objects.filter(phenopacket=self.p)\
             .annotate(phenopacket_subject_id=F("phenopacket__subject"))
+
         with io.StringIO() as output:
             exp.sample_export(samples, output)
             # Check header
@@ -211,10 +205,7 @@ class ExportCBioTest(TestCase):
 
                 self.assertTrue(REGEXP_INVALID_FOR_ID.search(record["PATIENT_ID"]) is None)
                 self.assertTrue(REGEXP_INVALID_FOR_ID.search(record["SAMPLE_ID"]) is None)
-                self.assertEqual(
-                    record["PATIENT_ID"],
-                    exp.sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["individual_id"])
-                )
+                self.assertEqual(record["PATIENT_ID"], exp.sanitize_id(samples[sample_count].individual_id))
                 self.assertEqual(
                     record["SAMPLE_ID"],
                     exp.sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["id"])
