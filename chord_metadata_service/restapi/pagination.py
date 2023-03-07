@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 
 __all__ = [
     "LargeResultsSetPagination",
+    "BatchResultsSetPagination",
 ]
 
 
