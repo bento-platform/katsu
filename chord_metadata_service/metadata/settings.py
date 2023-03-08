@@ -97,7 +97,7 @@ DRS_URL = (
 
 # Candig-specific settings
 
-CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "LOCAL_NO_AUTH_TESTING_ONLY")
+KATSU_AUTHORIZATION = os.getenv("KATSU_AUTHORIZATION", "LOCAL_SETTING_NO_AUTH")
 CANDIG_OPA_URL = os.getenv("OPA_URL", "")
 CANDIG_OPA_SECRET = os.getenv("OPA_SECRET", "my-secret-beacon-token")
 CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("OPA_SITE_ADMIN_KEY", "site-admin")

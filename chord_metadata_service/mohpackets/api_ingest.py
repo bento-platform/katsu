@@ -1,7 +1,8 @@
+import logging
 import os
 from datetime import datetime
 
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from drf_spectacular.types import OpenApiTypes
@@ -45,6 +46,8 @@ from chord_metadata_service.mohpackets.serializers import (
 #                                        #
 ##########################################
 
+logger = logging.getLogger(__name__)
+
 
 def create_bulk_objects(serializer_class, data: dict):
     """Create a list of objects in bulk using a list of JSON strings.
@@ -78,7 +81,8 @@ def backup_db():
     try:
         call_command("dumpdata", output=f"{backup_db_folder}/{db_name}")
     except Exception as e:
-        print(f"Error during backup_db: {e}")
+        logger.error(f"Error during backup_db: {e}")
+        raise CommandError("Error during backup_db") from e
 
 
 ##########################################

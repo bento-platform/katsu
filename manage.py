@@ -5,10 +5,14 @@ import sys
 
 
 def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE',
-                          'chord_metadata_service.metadata.settings')
-    if 'test' in sys.argv:
-        os.environ['DJANGO_SETTINGS_MODULE'] = 'chord_metadata_service.metadata.test_settings'
+    # C3G settings
+    # os.environ.setdefault(
+    #     "DJANGO_SETTINGS_MODULE", "chord_metadata_service.metadata.settings"
+    # )
+
+    # CANDIG settings
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -20,5 +24,5 @@ def main():
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

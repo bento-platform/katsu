@@ -1,4 +1,4 @@
-name: Update MoH schema
+name: Docs
 
 on:
   push:
@@ -10,31 +10,49 @@ on:
 
 jobs:
   generate-moh-schema:
-    name: Update OpenAPI schema using current MoH model
+    name: Update MoH schema
     runs-on: ubuntu-latest
     steps:
-      - name: Set env variable to skip Bento endpoints
-        run: echo "CANDIG=TRUE" >> $GITHUB_ENV
-      
       - name: Check out repo
         uses: actions/checkout@v3
         with:
           submodules: true
-      
+
       - name: Install Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10' 
-      
+          python-version: "3.10"
+
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: python -m pip install -r requirements-candig-base.txt
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Create package.json file
+        run: |
+          echo '{"name": "my-project", "version": "1.0.0"}' > package.json
+          
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Install widdershins
+        run: npm install -g widdershins
 
       - name: Generate new schema.yml
         run: python manage.py spectacular --file ./chord_metadata_service/mohpackets/docs/schema.yml --validate --fail-on-warn
-      
-      - name: Update schema.yml in repo
+
+      - name: Convert schema to OpenAPI documentation
+        run: |
+          npx widdershins ./chord_metadata_service/mohpackets/docs/schema.yml -o ./chord_metadata_service/mohpackets/docs/openapi.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true
+
+      - name: Update schema.yml and openapi.md in repo
         uses: test-room-7/action-update-file@v1
-        with: 
-          file-path: chord_metadata_service/mohpackets/docs/schema.yml
-          commit-msg: Updated schema.yml
+        with:
+          file-path: |
+            chord_metadata_service/mohpackets/docs/schema.yml
+            chord_metadata_service/mohpackets/docs/openapi.md
+          commit-msg: Updated openapi.md
           github-token: ${{ secrets.GITHUB_TOKEN }}

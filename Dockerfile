@@ -32,15 +32,17 @@ RUN apk add --no-cache \
 	yaml-dev \
 	zlib-dev
 
+RUN apk add --no-cache postgresql-client
 RUN mkdir /app
 WORKDIR /app
-ADD ./requirements.txt /app
-ADD ./requirements-dev.txt /app
-RUN pip install -r requirements-dev.txt
+ADD ./requirements-candig-base.txt /app
+ADD ./requirements-candig-dev.txt /app
+RUN pip install --no-cache-dir -r requirements-candig-dev.txt
 
 COPY . /app/chord_metadata_service
 
 WORKDIR /app/chord_metadata_service
 
+RUN chmod +x /app/chord_metadata_service/entrypoint.sh
+CMD ["/app/chord_metadata_service/entrypoint.sh"]
 
-ENTRYPOINT ["python", "manage.py", "runserver"]

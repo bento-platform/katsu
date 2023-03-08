@@ -1,5 +1,5 @@
-bento-lib==3.2.0
 candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@main
+bento-lib==3.2.0
 Django==4.1.1
 django-autocomplete-light==3.9.4
 django-cors-headers==3.7.0

@@ -1,4 +1,3 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_serializer
 from rest_framework import mixins, serializers, viewsets
 from rest_framework.response import Response
@@ -96,7 +95,6 @@ def get_discovery_response(self):
 
 class DiscoveryDonorViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = DonorSerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = DonorFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -109,7 +107,6 @@ class DiscoveryDonorViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class DiscoverySpecimenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = SpecimenSerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = SpecimenFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -124,7 +121,6 @@ class DiscoverySampleRegistrationViewSet(
     mixins.ListModelMixin, viewsets.GenericViewSet
 ):
     serializer_class = SampleRegistrationSerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = SampleRegistrationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -137,7 +133,6 @@ class DiscoverySampleRegistrationViewSet(
 
 class DiscoveryPrimaryDiagnosisViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = PrimaryDiagnosisSerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = PrimaryDiagnosisFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -150,7 +145,6 @@ class DiscoveryPrimaryDiagnosisViewSet(mixins.ListModelMixin, viewsets.GenericVi
 
 class DiscoveryTreatmentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = TreatmentSerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = TreatmentFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -163,7 +157,6 @@ class DiscoveryTreatmentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class DiscoveryChemotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = ChemotherapySerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = ChemotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -176,7 +169,6 @@ class DiscoveryChemotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewSe
 
 class DiscoveryHormoneTherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = HormoneTherapySerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = HormoneTherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -189,7 +181,6 @@ class DiscoveryHormoneTherapyViewSet(mixins.ListModelMixin, viewsets.GenericView
 
 class DiscoveryRadiationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = RadiationSerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = RadiationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -202,7 +193,6 @@ class DiscoveryRadiationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class DiscoveryImmunotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = ImmunotherapySerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = ImmunotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -215,7 +205,6 @@ class DiscoveryImmunotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewS
 
 class DiscoverySurgeryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = SurgerySerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = SurgeryFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -228,7 +217,6 @@ class DiscoverySurgeryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class DiscoveryFollowUpViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = FollowUpSerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = FollowUpFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -241,7 +229,6 @@ class DiscoveryFollowUpViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class DiscoveryBiomarkerViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = BiomarkerSerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = BiomarkerFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
@@ -254,7 +241,6 @@ class DiscoveryBiomarkerViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class DiscoveryComorbidityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = ComorbiditySerializer
-    filter_backends = [DjangoFilterBackend]
     filterset_class = ComorbidityFilter
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
