@@ -28,7 +28,8 @@ from chord_metadata_service.restapi.semantic_mappings.hl7_genomics_mapping impor
 
 def fhir_coding_util(obj):
     """ Generic function to convert object to FHIR Coding. """
-
+    if "ontology_class" in obj:
+        obj = obj["ontology_class"]
     coding = c.Coding()
     coding.display = obj['label']
     coding.code = obj['id']
@@ -393,7 +394,7 @@ def fhir_composition(obj):
     composition.section = []
     sections = ['biosamples', 'variants', 'diseases', 'hts_files']
     for section in sections:
-        if obj[section]:
+        if section in obj:
             section_content = _get_section_object(obj.get(section, None), section)
             composition.section.append(section_content)
 

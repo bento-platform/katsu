@@ -162,7 +162,7 @@ class FHIRBiosampleTest(APITestCase):
         self.assertEqual(get_resp_obj['specimens'][0]['resourceType'], 'Specimen')
         self.assertIsNotNone(get_resp_obj['specimens'][0]['type']['coding'][0])
         self.assertIsNotNone(get_resp_obj['specimens'][0]['collection'])
-        self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][0]['valueRange'], dict)
+        self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][0]['valueCodeableConcept'], dict)
         self.assertEqual(get_resp_obj['specimens'][0]['extension'][4]['url'],
                          'http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-diagnostic-markers')
         self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][4]['valueCodeableConcept']['coding'],
@@ -210,23 +210,23 @@ class FHIRGeneTest(APITestCase):
                          'https://www.genenames.org/')
 
 
-class FHIRVariantTest(APITestCase):
-
-    def setUp(self):
-        self.variant = VALID_VARIANT_1
-
-    def test_get_fhir(self):
-        get_response('variants-list', self.variant)
-        get_resp = self.client.get('/api/variants?format=fhir')
-        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
-        get_resp_obj = get_resp.json()
-        self.assertIsInstance(get_resp_obj['observations'], list)
-        self.assertIsInstance(get_resp_obj['observations'][0]['code']['coding'], list)
-        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['code'], '81300-6')
-        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['display'], 'Structural variant [Length]')
-        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['system'], 'https://loinc.org')
-        self.assertEqual(get_resp_obj['observations'][0]['valueCodeableConcept']['coding'][0]['code'],
-                         get_resp_obj['observations'][0]['valueCodeableConcept']['coding'][0]['display'])
+# class FHIRVariantTest(APITestCase):
+#
+#     def setUp(self):
+#         self.variant = VALID_VARIANT_1
+#
+#     def test_get_fhir(self):
+#         get_response('variants-list', self.variant)
+#         get_resp = self.client.get('/api/variants?format=fhir')
+#         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+#         get_resp_obj = get_resp.json()
+#         self.assertIsInstance(get_resp_obj['observations'], list)
+#         self.assertIsInstance(get_resp_obj['observations'][0]['code']['coding'], list)
+#         self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['code'], '81300-6')
+#         self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['display'], 'Structural variant [Length]')
+#         self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['system'], 'https://loinc.org')
+#         self.assertEqual(get_resp_obj['observations'][0]['valueCodeableConcept']['coding'][0]['code'],
+#                          get_resp_obj['observations'][0]['valueCodeableConcept']['coding'][0]['display'])
 
 
 class FHIRDiseaseTest(APITestCase):

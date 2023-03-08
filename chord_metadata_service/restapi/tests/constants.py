@@ -36,8 +36,10 @@ INVALID_SUBJECT_NOT_PRESENT = {
 VALID_INDIVIDUAL_1 = {
     "id": "ind:NA19648",
     "date_of_birth": "1993-10-04",
-    "age": {
-        "age": "P28Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P28Y"
+        }
     },
     "sex": "FEMALE",
     "karyotypic_sex": "XX",
@@ -58,8 +60,10 @@ VALID_INDIVIDUAL_1 = {
 VALID_INDIVIDUAL_2 = {
     "id": "ind:HG00096",
     "date_of_birth": "1924-03-29",
-    "age": {
-        "age": "P97Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P97Y"
+        }
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
@@ -80,8 +84,10 @@ VALID_INDIVIDUAL_2 = {
 VALID_INDIVIDUAL_3 = {
     "id": "ind:HG00100",
     "date_of_birth": "1997-10-29",
-    "age": {
-        "age": "P24Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P24Y"
+        }
     },
     "sex": "FEMALE",
     "karyotypic_sex": "XX",
@@ -102,8 +108,10 @@ VALID_INDIVIDUAL_3 = {
 VALID_INDIVIDUAL_4 = {
     "id": "ind:HG00103",
     "date_of_birth": "1972-06-16",
-    "age": {
-        "age": "P49Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P49Y"
+        }
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
@@ -124,8 +132,10 @@ VALID_INDIVIDUAL_4 = {
 VALID_INDIVIDUAL_5 = {
     "id": "ind:HG00104",
     "date_of_birth": "1972-06-16",
-    "age": {
-        "age": "P49Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P49Y"
+        }
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
@@ -146,8 +156,10 @@ VALID_INDIVIDUAL_5 = {
 VALID_INDIVIDUAL_6 = {
     "id": "ind:HG00105",
     "date_of_birth": "1972-06-16",
-    "age": {
-        "age": "P49Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P49Y"
+        }
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
@@ -168,8 +180,33 @@ VALID_INDIVIDUAL_6 = {
 VALID_INDIVIDUAL_7 = {
     "id": "ind:HG00106",
     "date_of_birth": "1972-06-16",
-    "age": {
-        "age": "P49Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P49Y"
+        }
+    },
+    "sex": "MALE",
+    "karyotypic_sex": "XY",
+    "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+    },
+    "extra_properties": {
+        "smoking": "Not specified",
+        "covidstatus": "Indeterminate",
+        "death_dc": "Deceased",
+        "mobility": "I have slight problems in walking about",
+        "date_of_consent": "2021-03-03",
+        "lab_test_result_value": 786.86
+    }
+}
+VALID_INDIVIDUAL_8 = {
+    "id": "ind:HG00107",
+    "date_of_birth": "1972-06-16",
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P49Y"
+        }
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
@@ -187,27 +224,6 @@ VALID_INDIVIDUAL_7 = {
     }
 }
 
-VALID_INDIVIDUAL_8 = {
-    "id": "ind:HG00107",
-    "date_of_birth": "1972-06-16",
-    "age": {
-        "age": "P49Y"
-    },
-    "sex": "MALE",
-    "karyotypic_sex": "XY",
-    "taxonomy": {
-        "id": "NCBITaxon:9606",
-        "label": "Homo sapiens"
-    },
-    "extra_properties": {
-        "smoking": "Not specified",
-        "covidstatus": "Indeterminate",
-        "death_dc": "Deceased",
-        "mobility": "I have slight problems in walking about",
-        "date_of_consent": "2021-03-03",
-        "lab_test_result_value": 786.86
-    }
-}
 
 VALID_INDIVIDUALS = [
     VALID_INDIVIDUAL_1,

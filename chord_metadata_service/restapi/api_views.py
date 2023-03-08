@@ -82,8 +82,8 @@ def overview(_request):
     diseases_stats = stats_for_field(pheno_models.Phenopacket, "diseases__term__label")
     diseases_count = len(diseases_stats)
 
-    individuals_age = get_age_numeric_binned(patients_models.Individual.objects.all(), OVERVIEW_AGE_BIN_SIZE)
-
+    # individuals_age = get_age_numeric_binned(patients_models.Individual.objects.all(), OVERVIEW_AGE_BIN_SIZE)
+    individuals_age = {}
     r = {
         "phenopackets": phenopackets_count,
         "data_type_specific": {
@@ -178,7 +178,9 @@ def search_overview(request):
         "individuals": {
             "count": individuals_count,
             "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.SEX)},
-            "age": get_age_numeric_binned(queryset, OVERVIEW_AGE_BIN_SIZE),
+            "age": {}
+            # TODO: replace age_numeric
+            # "age": get_age_numeric_binned(queryset, OVERVIEW_AGE_BIN_SIZE),
         },
         "phenotypic_features": {
             "type": queryset_stats_for_field(queryset, "phenopackets__phenotypic_features__pftype__label")
@@ -240,8 +242,6 @@ def mcode_overview(_request):
         individuals_k_sex.update((individual.karyotypic_sex,))
         if individual.ethnicity != "":
             individuals_ethnicity.update((individual.ethnicity,))
-        if individual.age is not None:
-            individuals_age.update((parse_individual_age(individual.age),))
         if individual.taxonomy is not None:
             individuals_taxonomy.update((individual.taxonomy["label"],))
         if mcodepacket.cancer_condition is not None:

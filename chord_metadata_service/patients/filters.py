@@ -68,6 +68,8 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         qs = qs.annotate(
             search=SearchVector("id", "alternate_ids", "date_of_birth",
                                 Cast("time_at_last_encounter", TextField()),
+                                Cast("time_at_last_encounter__age", TextField()),
+                                Cast("time_at_last_encounter__age_range", TextField()),
                                 Cast("vital_status__status", TextField()),
                                 Cast("vital_status__time_of_death", TextField()),
                                 Cast("vital_status__cause_of_death", TextField()),

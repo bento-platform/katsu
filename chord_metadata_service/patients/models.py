@@ -22,11 +22,12 @@ class VitalStatus(BaseTimeStamp, IndexableMixin):
                                                                                  " after their primary diagnosis")
 
 
-class Individual(models.Model, IndexableMixin):
+class Individual(BaseTimeStamp, IndexableMixin):
     """ Class to store demographic information about an Individual (Patient) """
 
     SEX = Sex.as_django_values()
     KARYOTYPIC_SEX = KaryotypicSex.as_django_values()
+
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for the individual.')
     # TODO check for CURIE
     alternate_ids = ArrayField(models.CharField(max_length=200), blank=True, null=True,
@@ -47,9 +48,11 @@ class Individual(models.Model, IndexableMixin):
                                       help_text='The karyotypic sex of the individual.')
     taxonomy = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text='Ontology resource representing the species (e.g., NCBITaxon:9615).')
+
     # FHIR specific
     active = models.BooleanField(default=False, help_text='Whether this patient\'s record is in active use.')
     deceased = models.BooleanField(default=False, help_text='Indicates if the individual is deceased or not.')
+
     # mCode specific
     # this field should be complex Ontology - clinical status and code - two Codeable concept - single, cl status has
     # enum list of values
@@ -64,11 +67,10 @@ class Individual(models.Model, IndexableMixin):
                           help_text='Value representing the Karnofsky Performance status.')
     race = models.CharField(max_length=200, blank=True, help_text='A code for the person\'s race.')
     ethnicity = models.CharField(max_length=200, blank=True, help_text='A code for the person\'s ethnicity.')
+
     # extra
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.id)

@@ -92,13 +92,6 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     for k in ("alternate_ids", "time_at_last_encounter", "sex", "taxonomy"):
         subject_query.update(query_and_check_nulls(subject, k))
 
-    # - Check if age is represented as a duration string (vs. age range values) and convert it to years
-    # age_numeric_value: Optional[Decimal] = None
-    # age_unit_value: Optional[str] = None
-    # if "age" in subject:
-    #     if "age" in subject["age"]:
-    #         age_numeric_value, age_unit_value = iso_duration_to_years(subject["age"]["age"])
-
     # --------------------------------------------------------------------------------------------------------------
 
     # Check if subject already exists

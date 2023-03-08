@@ -83,10 +83,21 @@ def parse_onset(onset):
         return None
 
 
-def parse_duration(string):
+def parse_duration(duration: str | dict):
     """ Returns years integer. """
-    string = string.split('P')[-1]
+    if isinstance(duration, dict) and "iso8601duration" in duration:
+        duration = duration["iso8601duration"]
+    string = duration.split('P')[-1]
     return int(float(string.split('Y')[0]))
+
+
+def parse_time_at_last_encounter(time_element: dict) -> int:
+    if "age" in time_element:
+        return parse_duration(time_element["age"])
+    elif "age_range" in time_element:
+        start_age = parse_duration(time_element["age_range"]["start"]["age"])
+        end_age = parse_duration(time_element["age_range"]["end"]["age"])
+        return (start_age + end_age) // 2
 
 
 def parse_individual_age(age_obj: dict) -> int:
@@ -121,10 +132,12 @@ def _round_decimal_two_places(d: float) -> Decimal:
     return Decimal(d).quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
 
 
-def iso_duration_to_years(iso_age_duration: str, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
+def iso_duration_to_years(iso_age_duration: str| dict, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
     """
     This function takes ISO8601 Duration string in the format e.g 'P20Y6M4D' and converts it to years.
     """
+    if isinstance(iso_age_duration, dict):
+        iso_age_duration = iso_age_duration.get("iso8601duration")
     duration = isodate.parse_duration(iso_age_duration)
 
     # if duration string includes Y and M then the instance is of both types of Duration and datetime.timedelta
