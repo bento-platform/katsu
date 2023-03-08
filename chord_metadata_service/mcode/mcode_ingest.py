@@ -37,7 +37,6 @@ def ingest_mcodepacket(mcodepacket_data, table_id, idx: Optional[int] = None):
             defaults={
                 "alternate_ids": subject.get("alternate_ids", None),
                 "date_of_birth": subject.get("date_of_birth", None),
-                "age": subject.get("age", None),
                 "sex": subject.get("sex", None),
                 "karyotypic_sex": subject.get("karyotypic_sex", ""),
                 "taxonomy": subject.get("taxonomy", None),

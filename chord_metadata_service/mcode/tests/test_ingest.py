@@ -41,7 +41,6 @@ class IngestMcodeJsonTest(TestCase):
         individual = Individual.objects.get(id="ind:HG00096")
         self.assertEqual(individual.sex, "FEMALE")
         self.assertIsNotNone(individual.date_of_birth)
-        self.assertIsNotNone(individual.age)
         self.assertEqual(individual.karyotypic_sex, "XX")
         self.assertIsNotNone(individual.taxonomy)
         self.assertEqual(individual.active, True)
