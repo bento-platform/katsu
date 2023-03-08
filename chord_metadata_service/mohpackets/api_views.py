@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import generics, serializers, viewsets
@@ -310,11 +311,52 @@ def moh_overview(_request):
 class DonorRelatedClinicalDataViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DonorRelatedClinicalDataSerializer
     # queryset = Donor.objects.all()
+    donor_biomarkers_prefetch = Prefetch(
+        "biomarker_set",
+        queryset=Biomarker.objects.filter(
+            submitter_primary_diagnosis_id__isnull=True,
+            submitter_specimen_id__isnull=True,
+            submitter_treatment_id__isnull=True,
+            submitter_follow_up_id__isnull=True,
+        ),
+    )
+    primary_diagnosis_biomarkers_prefetch = Prefetch(
+        "primarydiagnosis_set__biomarker_set",
+        queryset=Biomarker.objects.filter(
+            submitter_primary_diagnosis_id__isnull=False,
+            submitter_specimen_id__isnull=True,
+            submitter_treatment_id__isnull=True,
+            submitter_follow_up_id__isnull=True,
+        ),
+    )
+    specimen_biomarkers_prefetch = Prefetch(
+        "primarydiagnosis_set__specimen_set__biomarker_set",
+        queryset=Biomarker.objects.filter(
+            submitter_specimen_id__isnull=False,
+            submitter_follow_up_id__isnull=True,
+        ),
+    )
+    treatment_biomarkers_prefetch = Prefetch(
+        "primarydiagnosis_set__treatment_set__biomarker_set",
+        queryset=Biomarker.objects.filter(
+            submitter_treatment_id__isnull=False,
+            submitter_follow_up_id__isnull=True,
+        ),
+    )
+    followup_biomarkers_prefetch = Prefetch(
+        "primarydiagnosis_set__treatment_set__followup_set__biomarker_set",
+        queryset=Biomarker.objects.filter(
+            submitter_follow_up_id__isnull=False,
+        ),
+    )
+
     queryset = Donor.objects.prefetch_related(
-        "primarydiagnosis_set",
+        donor_biomarkers_prefetch,
+        primary_diagnosis_biomarkers_prefetch,
+        specimen_biomarkers_prefetch,
+        treatment_biomarkers_prefetch,
+        followup_biomarkers_prefetch,
         "comorbidity_set",
-        "primarydiagnosis_set__specimen_set",
-        "primarydiagnosis_set__treatment_set",
         "primarydiagnosis_set__treatment_set__chemotherapy_set",
         "primarydiagnosis_set__treatment_set__hormonetherapy_set",
         "primarydiagnosis_set__treatment_set__immunotherapy_set",
