@@ -348,6 +348,7 @@ class IngestRequestSerializer(serializers.Serializer):
 class DonorRelatedClinicalDataSerializer(serializers.ModelSerializer):
     primary_diagnoses = serializers.SerializerMethodField()
     comorbidities = serializers.SerializerMethodField()
+    biomarkers = serializers.SerializerMethodField()
 
     def get_primary_diagnoses(self, obj):
         primary_diagnoses = obj.primarydiagnosis_set.all()
@@ -356,6 +357,10 @@ class DonorRelatedClinicalDataSerializer(serializers.ModelSerializer):
     def get_comorbidities(self, obj):
         comorbidities = obj.comorbidity_set.all()
         return NestedComorbiditySerializer(comorbidities, many=True).data
+
+    def get_biomarkers(self, obj):
+        biomarkers = obj.biomarker_set.all()
+        return NestedBiomarkerSerializer(biomarkers, many=True).data
 
     class Meta:
         model = Donor
@@ -369,12 +374,14 @@ class DonorRelatedClinicalDataSerializer(serializers.ModelSerializer):
             "primary_site",
             "primary_diagnoses",
             "comorbidities",
+            "biomarkers",
         ]
 
 
 class NestedPrimaryDiagnosisSerializer(serializers.ModelSerializer):
     specimens = serializers.SerializerMethodField()
     treatments = serializers.SerializerMethodField()
+    biomarkers = serializers.SerializerMethodField()
 
     def get_specimens(self, obj):
         spicemen = obj.specimen_set.all()
@@ -383,6 +390,10 @@ class NestedPrimaryDiagnosisSerializer(serializers.ModelSerializer):
     def get_treatments(self, obj):
         treatments = obj.treatment_set.all()
         return NestedTreatmentSerializer(treatments, many=True).data
+
+    def get_biomarkers(self, obj):
+        biomarkers = obj.biomarker_set.all()
+        return NestedBiomarkerSerializer(biomarkers, many=True).data
 
     class Meta:
         model = PrimaryDiagnosis
@@ -401,15 +412,21 @@ class NestedPrimaryDiagnosisSerializer(serializers.ModelSerializer):
             "clinical_stage_group",
             "specimens",
             "treatments",
+            "biomarkers",
         ]
 
 
 class NestedSpecimenSerializer(serializers.ModelSerializer):
     sample_registrations = serializers.SerializerMethodField()
+    biomarkers = serializers.SerializerMethodField()
 
     def get_sample_registrations(self, obj):
         sample_registrations = obj.sampleregistration_set.all()
         return NestedSampleRegistrationSerializer(sample_registrations, many=True).data
+
+    def get_biomarkers(self, obj):
+        biomarkers = obj.biomarker_set.all()
+        return NestedBiomarkerSerializer(biomarkers, many=True).data
 
     class Meta:
         model = Specimen
@@ -430,6 +447,7 @@ class NestedSpecimenSerializer(serializers.ModelSerializer):
             "percent_tumour_cells_range",
             "percent_tumour_cells_measurement_method",
             "sample_registrations",
+            "biomarkers",
         ]
 
 
@@ -440,6 +458,7 @@ class NestedTreatmentSerializer(serializers.ModelSerializer):
     radiation = serializers.SerializerMethodField()
     surgery = serializers.SerializerMethodField()
     followups = serializers.SerializerMethodField()
+    biomarkers = serializers.SerializerMethodField()
 
     def get_chemotherapies(self, obj):
         chemotherapies = obj.chemotherapy_set.all()
@@ -471,6 +490,10 @@ class NestedTreatmentSerializer(serializers.ModelSerializer):
         followups = obj.followup_set.all()
         return NestedFollowUpSerializer(followups, many=True).data
 
+    def get_biomarkers(self, obj):
+        biomarkers = obj.biomarker_set.all()
+        return NestedBiomarkerSerializer(biomarkers, many=True).data
+
     class Meta:
         model = Treatment
         fields = [
@@ -489,6 +512,7 @@ class NestedTreatmentSerializer(serializers.ModelSerializer):
             "radiation",
             "surgery",
             "followups",
+            "biomarkers",
         ]
 
 
@@ -516,4 +540,74 @@ class NestedSampleRegistrationSerializer(serializers.ModelSerializer):
             "tumour_normal_designation",
             "specimen_type",
             "sample_type",
+        ]
+
+
+class NestedChemotherapySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Chemotherapy
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id"]
+
+
+class NestedHormoneTherapySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HormoneTherapy
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id"]
+
+
+class NestedImmunotherapySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Immunotherapy
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id"]
+
+
+class NestedRadiationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Radiation
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id"]
+
+
+class NestedSurgerySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Surgery
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id"]
+
+
+class NestedFollowUpSerializer(serializers.ModelSerializer):
+
+    biomarkers = serializers.SerializerMethodField()
+
+    def get_biomarkers(self, obj):
+        biomarkers = obj.biomarker_set.all()
+        return NestedBiomarkerSerializer(biomarkers, many=True).data
+
+    class Meta:
+        model = FollowUp
+        fields = [
+            "date_of_followup",
+            "lost_to_followup",
+            "lost_to_followup_reason",
+            "disease_status_at_followup",
+            "relapse_type",
+            "date_of_relapse",
+            "method_of_progression_status",
+            "anatomic_site_progression_or_recurrence",
+            "recurrence_tumour_staging_system",
+            "recurrence_t_category",
+            "recurrence_n_category",
+            "recurrence_m_category",
+            "recurrence_stage_group",
+            "biomarkers",
+        ]
+
+
+class NestedBiomarkerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Biomarker
+        fields = [
+            "id",
+            "test_interval",
+            "psa_level",
+            "ca125",
+            "cea",
         ]
