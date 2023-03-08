@@ -18,18 +18,18 @@ __all__ = [
     "EXAMPLE_INGEST_MULTIPLE_OUTPUTS",
 ]
 
-with open(os.path.join(os.path.dirname(__file__), "example_phenopacket.json"), "r") as pf:
+with open(os.path.join(os.path.dirname(__file__), "example_phenopacket_v2.json"), "r") as pf:
     EXAMPLE_INGEST_PHENOPACKET = json.load(pf)
 
-with open(os.path.join(os.path.dirname(__file__), "example_phenopacket_2.json"), "r") as pf:
+with open(os.path.join(os.path.dirname(__file__), "example_phenopacket_2_v2.json"), "r") as pf:
     EXAMPLE_INGEST_PHENOPACKET_UPDATE = json.load(pf)
 
 EXAMPLE_INGEST_OUTPUTS = {
-    "json_document": os.path.join(os.path.dirname(__file__), "example_phenopacket.json"),
+    "json_document": os.path.join(os.path.dirname(__file__), "example_phenopacket_v2.json"),
 }
 
 EXAMPLE_INGEST_OUTPUTS_UPDATE = {
-    "json_document": os.path.join(os.path.dirname(__file__), "example_phenopacket_2.json"),
+    "json_document": os.path.join(os.path.dirname(__file__), "example_phenopacket_2_v2.json"),
 }
 
 

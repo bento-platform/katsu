@@ -147,7 +147,13 @@ class SearchTest(APITestCase):
         # Set up a dummy phenopacket
 
         self.individual, _ = Individual.objects.get_or_create(
-            id='patient:1', sex='FEMALE', age={"age": "P25Y3M2D"})
+            id='patient:1',
+            sex='FEMALE',
+            time_at_last_encounter={
+                "age": {
+                    "iso8601duration": "P25Y3M2D"
+                }
+            })
 
         self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
 

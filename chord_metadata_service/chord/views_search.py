@@ -200,7 +200,7 @@ def phenopacket_table_summary(table):
                 "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in Individual.SEX)},
                 "karyotypic_sex": {k: individuals_k_sex.get(k, 0) for k in (s[0] for s in Individual.KARYOTYPIC_SEX)},
                 "taxonomy": queryset_stats_for_field(phenopacket_qs, "subject__taxonomy__label"),
-                "age": get_field_bins(phenopacket_qs, "subject__age_numeric", 10),
+                "date_of_birth": phenopacket_qs.values("subject__date_of_birth")
             },
             "phenotypic_features": queryset_stats_for_field(phenopacket_qs, "phenotypic_features__pftype__label"),
         }

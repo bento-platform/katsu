@@ -128,7 +128,6 @@ BIOSAMPLE_PREFETCH = (
     "hts_files",
     "phenotypic_features",
     "procedure",
-    "variants",
     "experiment_set",
 )
 
