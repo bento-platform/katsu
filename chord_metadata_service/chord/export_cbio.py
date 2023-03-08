@@ -95,8 +95,7 @@ def study_export(getPath: Callable[[str], str], dataset_id: str):
 
     # Export samples
     with open(getPath(SAMPLE_DATA_FILENAME), 'w', newline='\n') as file_sample:
-        sampl = pm.Biosample.objects.filter(phenopacket__table__ownership_record__dataset_id=dataset.identifier)\
-            .annotate(phenopacket_subject_id=F("phenopacket__subject"))
+        sampl = pm.Biosample.objects.filter(phenopacket__table__ownership_record__dataset_id=dataset.identifier)
         sample_export(sampl, file_sample)
 
     with open(getPath(SAMPLE_META_FILENAME), 'w', newline='\n') as file_sample_meta:
@@ -229,15 +228,16 @@ def sample_export(results, file_handle: TextIO):
     samples = []
     for sample in results:
 
-        # sample.inidividual may be null: use Phenopacket model Subject field
-        # instead if available or skip.
-        subject_id = None
-        if sample.individual is not None:
-            subject_id = sample.individual
-        elif sample.phenopacket_subject_id is not None:
-            subject_id = sample.phenopacket_subject_id
-        else:
+        # sample.individual may be null, if the biosample is not related to an individual.
+        # skip these.
+        # prior to 2.17.3, these were associated with phenopacket subject if individual was null;
+        # however, that is not fully correct behaviour and was a workaround for ingest not properly associating
+        # biosamples with individuals.
+
+        if sample.individual is None:
             continue
+
+        subject_id = sample.individual
 
         sample_obj = {
             'individual_id': sanitize_id(subject_id),
