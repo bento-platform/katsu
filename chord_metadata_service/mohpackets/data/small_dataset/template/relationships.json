@@ -1333,16 +1333,6 @@
         },
         {
           "range": [1, 1],
-          "field_name": "submitter_treatment_id",
-          "field_value": "TREATMENT_"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "submitter_primary_diagnosis_id",
-          "field_value": "PRIMARY_DIAGNOSIS_"
-        },
-        {
-          "range": [1, 1],
           "field_name": "submitter_donor_id",
           "field_value": "DONOR_"
         },
@@ -1363,16 +1353,6 @@
         },
         {
           "range": [1, 1],
-          "field_name": "submitter_treatment_id",
-          "field_value": "TREATMENT_"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "submitter_primary_diagnosis_id",
-          "field_value": "PRIMARY_DIAGNOSIS_"
-        },
-        {
-          "range": [1, 1],
           "field_name": "submitter_donor_id",
           "field_value": "DONOR_"
         },
@@ -1387,11 +1367,6 @@
       "range": [7, 8],
       "targets": [
         {
-          "range": [3, 3],
-          "field_name": "submitter_follow_up_id",
-          "field_value": "FOLLOW_UP_"
-        },
-        {
           "range": [1, 1],
           "field_name": "submitter_specimen_id",
           "field_value": "SPECIMEN_"
@@ -1400,11 +1375,6 @@
           "range": [1, 1],
           "field_name": "submitter_treatment_id",
           "field_value": "TREATMENT_"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "submitter_primary_diagnosis_id",
-          "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
           "range": [1, 1],
@@ -1422,19 +1392,9 @@
       "range": [9, 10],
       "targets": [
         {
-          "range": [4, 4],
-          "field_name": "submitter_follow_up_id",
-          "field_value": "FOLLOW_UP_"
-        },
-        {
           "range": [2, 2],
           "field_name": "submitter_treatment_id",
           "field_value": "TREATMENT_"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "submitter_primary_diagnosis_id",
-          "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
           "range": [1, 1],
@@ -1449,25 +1409,15 @@
       ]
     },
     {
-      "range": [11, 12],
+      "range": [11, 11],
       "targets": [
         {
-          "range": [5, 6],
-          "field_name": "submitter_follow_up_id",
-          "field_value": "FOLLOW_UP_"
-        },
-        {
-          "range": [2, 2],
-          "field_name": "submitter_treatment_id",
-          "field_value": "TREATMENT_"
-        },
-        {
-          "range": [1, 1],
+          "range": [4, 4],
           "field_name": "submitter_primary_diagnosis_id",
           "field_value": "PRIMARY_DIAGNOSIS_"
         },
         {
-          "range": [1, 1],
+          "range": [2, 2],
           "field_name": "submitter_donor_id",
           "field_value": "DONOR_"
         },
@@ -1477,7 +1427,22 @@
           "field_value": "PROGRAM_"
         }
       ]
-    }
+    },
+    {
+        "range": [12, 12],
+        "targets": [
+          {
+            "range": [3, 3],
+            "field_name": "submitter_donor_id",
+            "field_value": "DONOR_"
+          },
+          {
+            "range": [1, 1],
+            "field_name": "program_id",
+            "field_value": "PROGRAM_"
+          }
+        ]
+      }
   ],
   "comorbidities": [
     {
