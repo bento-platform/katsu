@@ -12,6 +12,7 @@
   },
   "phenotypic_features": [
     {
+      "description": "Test pf 1",
       "type": {
         "id": "HP:0000790",
         "label": "Hematuria"
@@ -19,6 +20,7 @@
       "excluded": false
     },
     {
+      "description": "Test pf 2",
       "type": {
         "id": "HP:0100518",
         "label": "Dysuria"

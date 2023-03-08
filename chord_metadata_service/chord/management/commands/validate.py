@@ -29,7 +29,15 @@ class Command(BaseCommand):
         # Converts camelCase keys to snake_case
         json_data = decamelize(json_data)
 
-        {
-            DATA_TYPE_EXPERIMENT: validate_experiment,
-            DATA_TYPE_PHENOPACKET: validate_phenopacket
-        }[data_type](json_data)
+        if isinstance(json_data, list):
+            for pheno_item in json_data:
+                print(f"Subject id: {pheno_item['subject']['id']}")
+                {
+                    DATA_TYPE_EXPERIMENT: validate_experiment,
+                    DATA_TYPE_PHENOPACKET: validate_phenopacket
+                }[data_type](pheno_item)
+        else:
+            {
+                DATA_TYPE_EXPERIMENT: validate_experiment,
+                DATA_TYPE_PHENOPACKET: validate_phenopacket
+            }[data_type](json_data)

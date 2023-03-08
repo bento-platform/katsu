@@ -334,7 +334,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     new_phenopacket.save()
 
     # ... and attach all the other objects to it.
-    # new_phenopacket.phenotypic_features.set(phenotypic_features_db)
+    new_phenopacket.phenotypic_features.set(phenotypic_features_db)
     new_phenopacket.interpretations.set(interpretations_db)
     new_phenopacket.biosamples.set(biosamples_db)
     new_phenopacket.diseases.set(diseases_db)

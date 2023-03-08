@@ -1,11 +1,9 @@
 [
   {
+    "id": "pheno-1",
     "subject": {
       "id": "ind:NA20509001",
-      "date_of_birth": "1986-10-22",
-      "age": {
-        "age": "P45Y"
-      },
+      "date_of_birth": "1986-10-22T00:00:00Z",
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -53,12 +51,10 @@
     }
   },
   {
+    "id": "pheno-2",
     "subject": {
       "id": "ind:NA20509002",
-      "date_of_birth": "1950-11-22",
-      "age": {
-        "age": "P65Y6M3D"
-      },
+      "date_of_birth": "1950-11-22T00:00:00Z",
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -106,12 +102,10 @@
     }
   },
   {
+    "id": "pheno-3",
     "subject": {
       "id": "ind:NA20509003",
-      "date_of_birth": "1930-11-22",
-      "age": {
-        "age": "P75.8Y6M3D"
-      },
+      "date_of_birth": "1930-11-22T00:00:00Z",
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -159,11 +153,9 @@
     }
   },
   {
+    "id": "pheno-4",
     "subject": {
       "id": "ind:NA20509004",
-      "age": {
-        "age": "P0Y6M3D"
-      },
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -210,17 +202,10 @@
     }
   },
   {
+    "id": "pheno-5",
     "subject": {
       "id": "ind:NA20509005",
-      "date_of_birth": "1976-11-22",
-      "age": {
-        "start": {
-          "age": "P45Y"
-        },
-        "end": {
-          "age": "P50Y"
-        }
-      },
+      "date_of_birth": "1976-11-22T00:00:00Z",
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -270,11 +255,9 @@
     }
   },
   {
+    "id": "pheno-6",
     "subject": {
       "id": "ind:NA20509006",
-      "age": {
-        "age": "P0Y0M80D"
-      },
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -314,6 +297,7 @@
     }
   },
   {
+    "id": "pheno-7",
     "subject": {
       "id": "ind:NA20509007",
       "sex": "MALE",

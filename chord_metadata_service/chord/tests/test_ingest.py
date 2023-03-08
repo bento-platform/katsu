@@ -70,7 +70,7 @@ class IngestTest(TestCase):
                 "id": "HP:0000790",
                 "label": "Hematuria"
             },
-            "negated": False,
+            "excluded": False,
             "modifier": [],
             "evidence": []
         })
@@ -142,10 +142,10 @@ class IngestTest(TestCase):
         self.assertEqual(pfs[0].description, EXAMPLE_INGEST_PHENOPACKET["phenotypic_features"][0]["description"])
         self.assertEqual(pfs[0].pftype["id"], EXAMPLE_INGEST_PHENOPACKET["phenotypic_features"][0]["type"]["id"])
         self.assertEqual(pfs[0].pftype["label"], EXAMPLE_INGEST_PHENOPACKET["phenotypic_features"][0]["type"]["label"])
-        self.assertEqual(pfs[0].negated, EXAMPLE_INGEST_PHENOPACKET["phenotypic_features"][0]["negated"])
+        self.assertEqual(pfs[0].excluded, EXAMPLE_INGEST_PHENOPACKET["phenotypic_features"][0]["excluded"])
         # TODO: Test more properties
 
-        diseases = list(p.disease.all().order_by("term__id"))
+        diseases = list(p.diseases.all().order_by("term__id"))
         self.assertEqual(len(diseases), 1)
         # TODO: More
 
@@ -279,21 +279,9 @@ class IngestISOAgeToNumberTest(TestCase):
         self.assertIsInstance(ingested_phenopackets, list)
         # test for a single individual ind:NA20509001
         ind_1 = Phenopacket.objects.get(subject="ind:NA20509001")
-        self.assertIsNotNone(ind_1.subject.age_numeric)
-        self.assertIsNotNone(ind_1.subject.age_unit)
+        self.assertIsNotNone(ind_1.subject.extra_properties)
+        self.assertIsNotNone(ind_1.subject.date_of_birth)
         # test for all individuals
         for phenopacket in ingested_phenopackets:
-            if phenopacket.subject.age:
-                if "age" in phenopacket.subject.age:
-                    self.assertIsNotNone(phenopacket.subject.age_numeric)
-                    self.assertEqual(
-                        iso_duration_to_years(phenopacket.subject.age["age"])[0],
-                        phenopacket.subject.age_numeric
-                    )
-                    self.assertIsNotNone(phenopacket.subject.age_unit)
-                # if age range then age_numeric is None
-                else:
-                    self.assertIsNone(phenopacket.subject.age_numeric)
-            # if no age then no age_numeric
-            else:
-                self.assertIsNone(phenopacket.subject.age_numeric)
+            self.assertIsNotNone(phenopacket.subject.extra_properties)
+            self.assertIsNotNone(ind_1.subject.date_of_birth)
