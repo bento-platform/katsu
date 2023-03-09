@@ -14,6 +14,7 @@ from django.conf import settings
 
 from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.experiments import models as experiments_models
+from chord_metadata_service.logger import logger
 
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
@@ -639,6 +640,8 @@ def filter_queryset_field_value(qs, field_props, value: str):
         condition = {f"{field}__startswith": val}
     else:
         raise NotImplementedError()
+
+    logger.debug(f"Filtering {model}.{field} with {condition}")
 
     return qs.filter(**condition)
 

@@ -42,6 +42,8 @@ DEBUG = os.environ.get(
 ).lower() == "true"
 logging.info(f"DEBUG: {DEBUG}")
 
+LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").upper()
+
 
 # CHORD-specific settings
 
@@ -201,7 +203,7 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': LOG_LEVEL,
             'handlers': ['console'],
         },
     },
