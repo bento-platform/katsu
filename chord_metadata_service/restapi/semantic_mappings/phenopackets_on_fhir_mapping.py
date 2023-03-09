@@ -4,7 +4,7 @@ PHENOPACKETS_ON_FHIR_MAPPING = {
     "individual": {
         "title": "Individual",
         "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/Individual",
-        "age": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-age",
+        "birth_date": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-birthdate",
         "karyotypic_sex": {
             "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-karyotypic-sex",
             "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/karyotypic-sex"
@@ -67,14 +67,15 @@ PHENOPACKETS_ON_FHIR_MAPPING = {
     "biosample": {
         "title": "Biosample",
         "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/Biosample",
-        "individual_age_at_collection":
-            "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-individual-age-at-collection",
+        "time_of_collection":
+            "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-time_of_collection",
         "histological_diagnosis":
             "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-histological-diagnosis",
         "tumor_progression": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-tumor-progression",
         "tumor_grade": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-tumor-grade",
         "diagnostic_markers": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-diagnostic-markers",
-        "is_control_sample": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-control"
+        "is_control_sample": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-control",
+        "collected": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-collected"
     },
     "phenotypic_feature": {
         "title": "Phenotypic Feature",

@@ -13,7 +13,7 @@ from chord_metadata_service.chord.models import Table
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, PHENOPACKET_REF_RESOLVER
 from chord_metadata_service.patients.values import KaryotypicSex
-from chord_metadata_service.restapi.utils import iso_duration_to_years
+from chord_metadata_service.restapi.utils import iso_duration_to_years, time_element_to_years
 
 from .exceptions import IngestError
 from .logger import logger
@@ -94,6 +94,11 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
 
     # --------------------------------------------------------------------------------------------------------------
 
+    age_numeric_value: Optional[Decimal] = None
+    age_unit_value: Optional[str] = None
+    if "time_at_last_encounter" in subject:
+        age_numeric_value, age_unit_value = time_element_to_years(subject["time_at_last_encounter"])
+
     # Check if subject already exists
     existing_extra_properties: dict[str, Any]
     try:
@@ -111,6 +116,8 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
         karyotypic_sex=subject.get("karyotypic_sex") or KaryotypicSex.UNKNOWN_KARYOTYPE,
         race=subject.get("race", ""),
         ethnicity=subject.get("ethnicity", ""),
+        age_numeric=age_numeric_value,
+        age_unit=age_unit_value if age_unit_value else "",
         extra_properties=existing_extra_properties,
         **subject_query
     )
@@ -128,7 +135,7 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
     procedure, _ = pm.Procedure.objects.get_or_create(**bs["procedure"])
 
     bs_query = query_and_check_nulls(bs, "individual_id", lambda i: pm.Individual.objects.get(id=i))
-    for k in ("sampled_tissue", "taxonomy", "individual_age_at_collection", "histological_diagnosis",
+    for k in ("sampled_tissue", "taxonomy", "time_of_collection", "histological_diagnosis",
               "tumor_progression", "tumor_grade"):
         bs_query.update(query_and_check_nulls(bs, k))
 

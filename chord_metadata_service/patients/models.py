@@ -34,6 +34,11 @@ class Individual(BaseTimeStamp, IndexableMixin):
                                help_text='A list of alternative identifiers for the individual.')
     date_of_birth = models.DateField(null=True, blank=True, help_text='A timestamp either exact or imprecise.')
 
+    # Computed at ingestion
+    age_numeric = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True,
+                                      help_text='The age of the individual as number.')
+    age_unit = models.CharField(max_length=50, blank=True, help_text='The unit for measuring age.')
+
     time_at_last_encounter = models.JSONField(blank=True, null=True,
                                               validators=[JsonSchemaValidator(TIME_ELEMENT_SCHEMA)],
                                               help_text="TimeElement of the patient when last encountered.")

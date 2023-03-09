@@ -91,15 +91,6 @@ def parse_duration(duration: str | dict):
     return int(float(string.split('Y')[0]))
 
 
-def parse_time_at_last_encounter(time_element: dict) -> int:
-    if "age" in time_element:
-        return parse_duration(time_element["age"])
-    elif "age_range" in time_element:
-        start_age = parse_duration(time_element["age_range"]["start"]["age"])
-        end_age = parse_duration(time_element["age_range"]["end"]["age"])
-        return (start_age + end_age) // 2
-
-
 def parse_individual_age(age_obj: dict) -> int:
     """ Parses two possible age representations and returns average age or age as integer. """
     # AGE OPTIONS
@@ -130,6 +121,19 @@ def parse_individual_age(age_obj: dict) -> int:
 
 def _round_decimal_two_places(d: float) -> Decimal:
     return Decimal(d).quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
+
+
+def time_element_to_years(time_element: dict, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
+    time_value: Optional[Decimal] = None
+    time_unit: Optional[str] = None
+    if "age" in time_element:
+        return iso_duration_to_years(time_element["age"], unit=unit)
+    elif "age_range" in time_element:
+        start_value, start_unit = iso_duration_to_years(time_element["age_range"]["start"]["age"], unit=unit)
+        end_value, end_unit = iso_duration_to_years(time_element["age_range"]["end"]["age"], unit=unit)
+        time_value = (start_value + end_value) / 2
+        time_unit = start_unit
+    return time_value, time_unit
 
 
 def iso_duration_to_years(iso_age_duration: str| dict, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:

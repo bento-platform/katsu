@@ -162,12 +162,11 @@ class FHIRBiosampleTest(APITestCase):
         self.assertEqual(get_resp_obj['specimens'][0]['resourceType'], 'Specimen')
         self.assertIsNotNone(get_resp_obj['specimens'][0]['type']['coding'][0])
         self.assertIsNotNone(get_resp_obj['specimens'][0]['collection'])
-        self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][0]['valueCodeableConcept'], dict)
+        self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][0]['valueAge'], dict)
         self.assertEqual(get_resp_obj['specimens'][0]['extension'][4]['url'],
                          'http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-diagnostic-markers')
         self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][4]['valueCodeableConcept']['coding'],
                               list)
-        self.assertTrue(get_resp_obj['specimens'][0]['extension'][5]['valueBoolean'])
 
 
 class FHIRHtsFileTest(APITestCase):

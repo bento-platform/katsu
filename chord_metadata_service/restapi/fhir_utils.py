@@ -66,20 +66,22 @@ def codeable_concepts_fields(field_list, profile, obj):
 
 
 def fhir_age(obj, mapping, field):
-    """ Generic function to convert Age or AgeRange to FHIR Age. """
+    """ Generic function to convert Age or AgeRange of TimeElement to FHIR Age. """
 
     age_extension = extension.Extension()
     age_extension.url = mapping
 
-    if "start" in obj[field]:  # Is an age range
+    if "age_range" in obj[field]:
         age_extension.valueRange = range_.Range()
         age_extension.valueRange.low = quantity.Quantity()
-        age_extension.valueRange.low.unit = obj[field]['start']['age']
+        age_extension.valueRange.low.unit = obj[field]['start']['age']["iso8601duration"]
         age_extension.valueRange.high = quantity.Quantity()
-        age_extension.valueRange.high.unit = obj[field]['end']['age']
-    else:  # Is a precise age
+        age_extension.valueRange.high.unit = obj[field]['end']['age']["iso8601duration"]
+    elif "age" in obj[field]:
         age_extension.valueAge = age.Age()
-        age_extension.valueAge.unit = obj[field]['age']
+        age_extension.valueAge.unit = obj[field]['age']["iso8601duration"]
+    else:
+        raise ValueError("FHIR age may only be represented from TimeElement.age or TimeElement.age_range")
     return age_extension
 
 
@@ -109,10 +111,6 @@ def fhir_patient(obj):
     patient.active = obj.get('active', None)
     patient.deceasedBoolean = obj.get('deceased', None)
     patient.extension = list()
-    # age
-    if 'age' in obj.keys():
-        age_extension = fhir_age(obj, PHENOPACKETS_ON_FHIR_MAPPING['individual']['age'], 'age')
-        patient.extension.append(age_extension)
     # karyotypic_sex
     karyotypic_sex_extension = extension.Extension()
     karyotypic_sex_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['karyotypic_sex']['url']
@@ -240,11 +238,11 @@ def fhir_specimen(obj):
     # Individuals already contain a taxonomy attribute so this attribute is not needed.
     # extensions
     specimen.extension = []
-    # individual_age_at_collection
-    if 'individual_age_at_collection' in obj.keys():
+    # time_of_collection
+    if 'time_of_collection' in obj.keys():
         ind_age_at_collection_extension = fhir_age(
-            obj, PHENOPACKETS_ON_FHIR_MAPPING['biosample']['individual_age_at_collection'],
-            'individual_age_at_collection'
+            obj, PHENOPACKETS_ON_FHIR_MAPPING['biosample']['collected'],
+            'time_of_collection'
         )
         specimen.extension.append(ind_age_at_collection_extension)
     concept_extensions = codeable_concepts_fields(
