@@ -97,7 +97,7 @@ def filter_by_authorized_datasets(request, queryset):
 ####################################
 
 
-class ProgramViewSet(viewsets.ModelViewSet):
+class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProgramSerializer
     filterset_class = ProgramFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -114,7 +114,7 @@ class ProgramViewSet(viewsets.ModelViewSet):
         return filtered_dataset
 
 
-class DonorViewSet(viewsets.ModelViewSet):
+class DonorViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DonorSerializer
     filterset_class = DonorFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -126,7 +126,7 @@ class DonorViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class SpecimenViewSet(viewsets.ModelViewSet):
+class SpecimenViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = SpecimenSerializer
     filterset_class = SpecimenFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -138,7 +138,7 @@ class SpecimenViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class SampleRegistrationViewSet(viewsets.ModelViewSet):
+class SampleRegistrationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = SampleRegistrationSerializer
     filterset_class = SampleRegistrationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -150,7 +150,7 @@ class SampleRegistrationViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class PrimaryDiagnosisViewSet(viewsets.ModelViewSet):
+class PrimaryDiagnosisViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PrimaryDiagnosisSerializer
     filterset_class = PrimaryDiagnosisFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -162,7 +162,7 @@ class PrimaryDiagnosisViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class TreatmentViewSet(viewsets.ModelViewSet):
+class TreatmentViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TreatmentSerializer
     filterset_class = TreatmentFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -174,7 +174,7 @@ class TreatmentViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class ChemotherapyViewSet(viewsets.ModelViewSet):
+class ChemotherapyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ChemotherapySerializer
     filterset_class = ChemotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -186,7 +186,7 @@ class ChemotherapyViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class HormoneTherapyViewSet(viewsets.ModelViewSet):
+class HormoneTherapyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = HormoneTherapySerializer
     filterset_class = HormoneTherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -198,7 +198,7 @@ class HormoneTherapyViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class RadiationViewSet(viewsets.ModelViewSet):
+class RadiationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = RadiationSerializer
     filterset_class = RadiationFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -210,7 +210,7 @@ class RadiationViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class ImmunotherapyViewSet(viewsets.ModelViewSet):
+class ImmunotherapyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ImmunotherapySerializer
     filterset_class = ImmunotherapyFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -222,7 +222,7 @@ class ImmunotherapyViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class SurgeryViewSet(viewsets.ModelViewSet):
+class SurgeryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = SurgerySerializer
     filterset_class = SurgeryFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -234,7 +234,7 @@ class SurgeryViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class FollowUpViewSet(viewsets.ModelViewSet):
+class FollowUpViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = FollowUpSerializer
     filterset_class = FollowUpFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -246,7 +246,7 @@ class FollowUpViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class BiomarkerViewSet(viewsets.ModelViewSet):
+class BiomarkerViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = BiomarkerSerializer
     filterset_class = BiomarkerFilter
     permission_classes = [CanDIGAdminOrReadOnly]
@@ -258,7 +258,7 @@ class BiomarkerViewSet(viewsets.ModelViewSet):
         return filter_by_authorized_datasets(self.request, self.queryset)
 
 
-class ComorbidityViewSet(viewsets.ModelViewSet):
+class ComorbidityViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ComorbiditySerializer
     filterset_class = ComorbidityFilter
     permission_classes = [CanDIGAdminOrReadOnly]
