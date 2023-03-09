@@ -141,6 +141,19 @@ PROCEDURE = {
     }
 }
 
+
+FILE = {
+    "description": "A link to a High-Throughput Sequencing (HTS) data file.",
+    "properties": {
+        "uri": "A valid URI to the file",
+        "individual_to_file_identifiers": ("The mapping between the Individual.id or Biosample.id to any "
+                                           "identifier in the file."),
+        "file_attributes": "A map of attributes pertaining to the file or its contents.",
+        **EXTRA_PROPERTIES
+    }
+}
+
+
 HTS_FILE = {
     "description": "A link to a High-Throughput Sequencing (HTS) data file.",
     "properties": {
@@ -308,17 +321,20 @@ BIOSAMPLE = {
     "properties": {
         "id": "Unique arbitrary, researcher-specified identifier for the biosample.",
         "individual_id": "Identifier for the individual this biosample was sampled from.",
+        "derived_from_id": "id of the biosample from which the current biosample was derived (if applicable)",
         "description": "Human-readable, unstructured text describing the biosample or providing additional "
                        "information.",
         "sampled_tissue": ontology_class("describing the tissue from which the specimen was collected. The use of "
                                          "UBERON is recommended"),
+        "sample_type": "type of material, e.g., RNA, DNA, Cultured cells",
         "phenotypic_features": {
             "description": "A list of phenotypic features / abnormalities of the sample.",
             "items": phenotypic_feature("a biosample")
         },
+        "measurements": "List of measurements of the sample",
         "taxonomy": ontology_class("specified when more than one organism may be studied. It is advised that codes"
                                    "from the NCBI Taxonomy resource are used, e.g. NCBITaxon:9606 for humans"),
-        "individual_age_at_collection": None,  # TODO: oneOf
+        "time_of_collection": "Age of the proband at the time the sample was taken.",
         "histological_diagnosis": ontology_class("representing a refinement of the clinical diagnosis. Normal samples "
                                                  "could be tagged with NCIT:C38757, representing a negative finding"),
         "tumor_progression": ontology_class("representing if the specimen is from a primary tumour, a metastasis, or a "
@@ -327,6 +343,7 @@ BIOSAMPLE = {
                                             "application specific"),
         "tumor_grade": ontology_class("representing the tumour grade. This should be a child term of NCIT:C28076 "
                                       "(Disease Grade Qualifier) or equivalent"),
+        "pathological_stage": ontology_class("Pathological stage, if applicable."),
         "diagnostic_markers": {
             "description": "A list of ontology terms representing clinically-relevant bio-markers.",
             "items": ontology_class("representing a clinically-relevant bio-marker. Most of the assays, such as "

@@ -261,6 +261,7 @@ BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
         "taxonomy": ONTOLOGY_SEARCH_SCHEMA,
         # TODO: Front end will need to deal with this:
         # TODO: individual_age_at_collection
+        "time_of_collection": TIME_ELEMENT_SEARCH_SCHEMA,
         "histological_diagnosis": ONTOLOGY_SEARCH_SCHEMA,
         "tumor_progression": ONTOLOGY_SEARCH_SCHEMA,
         "tumor_grade": ONTOLOGY_SEARCH_SCHEMA,  # TODO: Is this a list?

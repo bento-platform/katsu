@@ -96,7 +96,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 "phenopackets__biosamples__description",
                                 Cast("phenopackets__biosamples__sampled_tissue", TextField()),
                                 Cast("phenopackets__biosamples__taxonomy", TextField()),
-                                Cast("phenopackets__biosamples__individual_age_at_collection", TextField()),
+                                Cast("phenopackets__biosamples__time_of_collection", TextField()),
                                 Cast("phenopackets__biosamples__histological_diagnosis", TextField()),
                                 Cast("phenopackets__biosamples__tumor_progression", TextField()),
                                 Cast("phenopackets__biosamples__tumor_grade", TextField()),

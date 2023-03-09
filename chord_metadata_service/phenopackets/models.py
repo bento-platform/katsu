@@ -104,7 +104,7 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
         return str(self.id)
 
 
-class Procedure(models.Model):
+class Procedure(BaseTimeStamp, IndexableMixin):
     """
     Class to represent a clinical procedure performed on an individual
     (subject) in order to extract a biosample
@@ -123,35 +123,14 @@ class Procedure(models.Model):
         return str(self.id)
 
 
-class Measurement(models.Model):
-    id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for a given measurement')
-    description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.MEASUREMENT, "description"))
-    assay = JSONField(verbose_name='assay', validators=[ontology_validator],
-                      help_text=rec_help(d.MEASUREMENT, "assay"))
-    measurement_value = models.JSONField(blank=True, null=True, validators=[
-        JsonSchemaValidator(PHENOPACKET_MEASUREMENT_VALUE_SCHEMA)])
-    time_observed = JSONField(blank=True, null=True, validators=[
-        JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
-
-    procedure = models.JSONField(blank=True, null=True, validators=[
-        JsonSchemaValidator(schema=PHENOPACKET_PROCEDURE_SCHEMA)])
+class File(BaseTimeStamp, IndexableMixin):
+    uri = models.URLField(primary_key=True, max_length=200, help_text=rec_help(d.FILE, "uri"))
+    individual_to_file_identifiers = JSONField(blank=True, null=True,
+                                               help_text=rec_help(d.FILE, "individual_to_file_identifiers"))
+    file_attributes = JSONField(blank=True, null=True, help_text=rec_help(d.FILE, "file_attributes"))
 
     def __str__(self):
-        return str(self.id)
-
-
-class MedicalAction(models.Model):
-    id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for a medical action')
-    action = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(ONE_OF_MEDICAL_ACTION)])
-    treatment_target = models.JSONField(validators=[ontology_validator])
-    treatment_intent = models.JSONField(validators=[ontology_validator])
-    response_to_treatment = models.JSONField(validators=[ontology_validator])
-    adverse_events = models.JSONField(validators=[ontology_list_validator])
-    treatment_termination_reason = models.JSONField(validators=[ontology_validator])
-
-    def __str__(self) -> str:
-        return str(self.id)
-
+        return str(self.uri)
 
 class HtsFile(BaseTimeStamp, IndexableMixin):
     """
@@ -242,15 +221,23 @@ class Biosample(BaseTimeStamp, IndexableMixin):
     individual = models.ForeignKey(
         Individual, on_delete=models.CASCADE, blank=True, null=True, related_name="biosamples",
         help_text=rec_help(d.BIOSAMPLE, "individual_id"))
+    derived_from_id = models.CharField(max_length=200, blank=True, help_text=rec_help(d.BIOSAMPLE, "derived_from_id"))
     description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.BIOSAMPLE, "description"))
     sampled_tissue = JSONField(validators=[ontology_validator], help_text=rec_help(d.BIOSAMPLE, "sampled_tissue"))
+    sample_type = JSONField(blank=True, null=True, validators=[ontology_validator],
+                            help_text=rec_help(d.BIOSAMPLE, "sample_type"))
+
     # phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
     #   help_text='List of phenotypic abnormalities of the sample.')
+
+    measurements = models.JSONField(blank=True, null=True,
+                                    validators=[JsonSchemaValidator(PHENOPACKET_MEASUREMENT_SCHEMA)],
+                                    help_text=rec_help(d.BIOSAMPLE, "measurements"))
     taxonomy = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text=rec_help(d.BIOSAMPLE, "taxonomy"))
-    # An ISO8601 string represent age
-    individual_age_at_collection = JSONField(blank=True, null=True, validators=[age_or_age_range_validator],
-                                             help_text=rec_help("individual_age_at_collection"))
+    time_of_collection = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(TIME_ELEMENT_SCHEMA)],
+                                   help_text=rec_help(d.BIOSAMPLE, "time_of_collection"))
+
     histological_diagnosis = JSONField(
         blank=True, null=True, validators=[ontology_validator],
         help_text=rec_help(d.BIOSAMPLE, "histological_diagnosis"))
@@ -259,6 +246,8 @@ class Biosample(BaseTimeStamp, IndexableMixin):
                                   help_text=rec_help(d.BIOSAMPLE, "tumor_progression"))
     tumor_grade = JSONField(blank=True, null=True, validators=[ontology_validator],
                             help_text=rec_help(d.BIOSAMPLE, "tumor_grade"))
+    pathological_stage = JSONField(blank=True, null=True, validators=[ontology_validator],
+                                   help_text=rec_help(d.BIOSAMPLE, "pathological_stage"))
     diagnostic_markers = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                                    help_text=rec_help(d.BIOSAMPLE, "diagnostic_markers"))
     # CHECK! if Procedure instance is deleted Biosample instance is deleted too

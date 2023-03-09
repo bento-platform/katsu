@@ -146,8 +146,7 @@ class BiosampleSerializer(GenericSerializer):
 
     def update(self, instance, validated_data):
         instance.sampled_tissue = validated_data.get('sampled_tissue', instance.sampled_tissue)
-        instance.individual_age_at_collection = validated_data.get('individual_age_at_collection',
-                                                                   instance.individual_age_at_collection)
+        instance.time_of_collection = validated_data.get('time_of_collection', instance.time_of_collection)
         instance.taxonomy = validated_data.get('taxonomy', instance.taxonomy)
         instance.histological_diagnosis = validated_data.get('histological_diagnosis', instance.histological_diagnosis)
         instance.tumor_progression = validated_data.get('tumor_progression', instance.tumor_progression)
