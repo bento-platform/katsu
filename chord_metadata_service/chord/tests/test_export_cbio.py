@@ -6,8 +6,8 @@ from os import walk, path
 from django.db.models import F
 from django.test import TestCase
 
-from chord_metadata_service.chord import export_cbio as exp
-from chord_metadata_service.chord.export_cbio import (
+from chord_metadata_service.chord.export import cbioportal as exp
+from chord_metadata_service.chord.export.cbioportal import (
     CBIO_FILES_SET,
     MUTATION_DATA_FILENAME,
     PATIENT_DATA_FILENAME,
@@ -17,7 +17,7 @@ from chord_metadata_service.chord.export_cbio import (
     SAMPLE_DATATYPE,
 )
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.chord.export_utils import ExportFileContext
+from chord_metadata_service.chord.export.utils import ExportFileContext
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
@@ -69,13 +69,6 @@ class ExportCBioTest(TestCase):
             EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT, self.t_exp.identifier
         )
         self.exp_res = ExperimentResult.objects.all()
-
-        # Update the last sample to remove direct reference to any individual.
-        # In that case, Sample and Individual are cross-referenced through the
-        # Phenopacket model.
-        pm.Biosample.objects.filter(
-                id=EXAMPLE_INGEST_PHENOPACKET["biosamples"][-1]["id"]
-            ).update(individual=None)
 
     @staticmethod
     def stream_to_dict(output: TextIO) -> Dict[str, str]:
@@ -176,8 +169,8 @@ class ExportCBioTest(TestCase):
                 break
 
     def test_export_cbio_sample_data(self):
-        samples = pm.Biosample.objects.filter(phenopacket=self.p)\
-            .annotate(phenopacket_subject_id=F("phenopacket__subject"))
+        samples = pm.Biosample.objects.filter(phenopacket=self.p)
+
         with io.StringIO() as output:
             exp.sample_export(samples, output)
             # Check header
@@ -211,10 +204,7 @@ class ExportCBioTest(TestCase):
 
                 self.assertTrue(REGEXP_INVALID_FOR_ID.search(record["PATIENT_ID"]) is None)
                 self.assertTrue(REGEXP_INVALID_FOR_ID.search(record["SAMPLE_ID"]) is None)
-                self.assertEqual(
-                    record["PATIENT_ID"],
-                    exp.sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["individual_id"])
-                )
+                self.assertEqual(record["PATIENT_ID"], exp.sanitize_id(samples[sample_count].individual_id))
                 self.assertEqual(
                     record["SAMPLE_ID"],
                     exp.sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["id"])

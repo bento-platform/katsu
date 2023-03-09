@@ -14,8 +14,8 @@ from rest_framework.request import Request
 from chord_metadata_service.chord.schemas import EXPORT_SCHEMA
 from bento_lib.responses import errors
 
-from .export import EXPORT_FORMAT_FUNCTION_MAP, EXPORT_FORMAT_OBJECT_TYPE_MAP, EXPORT_FORMATS, EXPORT_OBJECT_TYPE
-from .export_utils import ExportError, ExportFileContext
+from .metadata import EXPORT_FORMAT_FUNCTION_MAP, EXPORT_FORMAT_OBJECT_TYPE_MAP, EXPORT_FORMATS, EXPORT_OBJECT_TYPE
+from .utils import ExportError, ExportFileContext
 
 
 BENTO_EXPORT_SCHEMA_VALIDATOR = Draft7Validator(EXPORT_SCHEMA)
@@ -62,18 +62,18 @@ def export(request: Request):
             status=400
         )
 
-    format = request.data["format"].strip()
+    fmt = request.data["format"].strip()
     output_path = request.data.get("output_path")   # optional parameter
 
-    if format not in EXPORT_FORMATS:  # Check that the workflow exists
+    if fmt not in EXPORT_FORMATS:  # Check that the workflow exists
         return Response(errors.bad_request_error(
-            f"Export in format {format} is not implemented"),
+            f"Export in format {fmt} is not implemented"),
             status=400
         )
 
-    if object_type not in EXPORT_FORMAT_OBJECT_TYPE_MAP[format]:
+    if object_type not in EXPORT_FORMAT_OBJECT_TYPE_MAP[fmt]:
         return Response(errors.bad_request_error(
-            f"Exporting entities of type {object_type} in format {format} is not implemented"),
+            f"Exporting entities of type {object_type} in format {fmt} is not implemented"),
              status=400
         )
 
@@ -82,15 +82,16 @@ def export(request: Request):
     try:
         with ExportFileContext(output_path, object_id) as file_export:
             # Pass a callable to generate the proper file paths within the export context.
-            EXPORT_FORMAT_FUNCTION_MAP[format](file_export.get_path, object_id)
+            EXPORT_FORMAT_FUNCTION_MAP[fmt](file_export.get_path, object_id)
 
             # If no output path parameter has been provided, the generated export
             # is returned as an attachment to the Response and everything will
             # be cleaned afterwards.
-            # Otherwise, the provided local path is under the responsability of
+            # Otherwise, the provided local path is under the responsibility of
             # the caller
             if not output_path:
                 tarfile = file_export.write_tar()
+                # No context manager needed; Django will close it automatically.
                 return FileResponse(open(tarfile, "rb"), as_attachment=True)
 
     except ExportError as e:

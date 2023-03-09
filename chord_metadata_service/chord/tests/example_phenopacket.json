@@ -122,7 +122,6 @@
         },
         {
             "id": "sample2",
-            "individual_id": "patient1",
             "description": "",
             "sampled_tissue": {
                 "id": "UBERON:0002367",
@@ -182,7 +181,6 @@
         },
         {
             "id": "sample4",
-            "individual_id": "patient1",
             "description": "",
             "sampled_tissue": {
                 "id": "UBERON:0001222",
@@ -208,7 +206,6 @@
         },
         {
             "id": "sample5",
-            "individual_id": "patient1",
             "description": "",
             "sampled_tissue": {
                 "id": "UBERON:0015876",

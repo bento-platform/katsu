@@ -1,17 +1,21 @@
-workflow vcf2maf {
-    String chord_url
-    String drs_url
-    String metadata_url
-    String one_time_token_metadata_ingest
-    String temp_token_drs
-    String auth_host
-    String dataset_id
-    String dataset_name
-    String vep_cache_dir
-    String run_dir
+version 1.0
 
-    # Defaults (see: https://github.com/openwdl/wdl/blob/main/versions/1.0/SPEC.md#declared-inputs-defaults-and-overrides)
-    String vep_species = "Homo_sapiens"     # ensembl syntax
+workflow vcf2maf {
+    input {
+        String chord_url
+        String drs_url
+        String metadata_url
+        String one_time_token_metadata_ingest
+        String temp_token_drs
+        String auth_host
+        String dataset_id
+        String dataset_name
+        String vep_cache_dir
+        String run_dir
+
+        # Defaults (see: https://github.com/openwdl/wdl/blob/main/versions/1.0/SPEC.md#declared-inputs-defaults-and-overrides)
+        String vep_species = "Homo_sapiens"     # ensembl syntax
+    }
 
     call katsu_dataset_export_vcf {
         input:  dataset_name = dataset_name,
@@ -46,10 +50,11 @@ workflow vcf2maf {
 }
 
 task katsu_dataset_export_vcf {
-    #>>>>>> task inputs <<<<<<
-    String dataset_name
-    String drs_url
-    String metadata_url
+    input {
+        String dataset_name
+        String drs_url
+        String metadata_url
+    }
 
     # Enclosing command with curly braces {} causes issues with parsing in this
     # command block (tested with womtool-v78). Using triple angle braces made
@@ -70,12 +75,12 @@ task katsu_dataset_export_vcf {
         # (actually the upper limit)
         # TODO: handle pagination, i.e. if the `next` property is set, loop
         # over the pages of results
-        metadata_url = "${metadata_url}/api/experimentresults?datasets=${dataset_name}&file_format=vcf&page_size=10000"
+        metadata_url = "~{metadata_url}/api/experimentresults?datasets=~{dataset_name}&file_format=vcf&page_size=10000"
         response = requests.get(metadata_url, verify=False)
         r = response.json()
 
         if r["count"] == 0:
-            sys.exit("No VCF file to convert from dataset ${dataset_name}")
+            sys.exit("No VCF file to convert from dataset ~{dataset_name}")
 
         # Process each VCF from the results
         vcf_dict = dict()   # vcf processed keyed by filename
@@ -130,23 +135,19 @@ task katsu_dataset_export_vcf {
 
 
 task vcf_2_maf {
-    File vcf_files
-    String vep_species
-    String vep_cache_dir
-    String drs_url
-    String temp_token_drs
-    String auth_host
-    String run_dir
-
-    # workaround for var interpolation. Syntax ${} confuses wdl parsers
-    # between wdl level interpolation and shell string interpolation.
-    String dollar = "$"
+    input {
+        File vcf_files
+        String vep_species
+        String vep_cache_dir
+        String drs_url
+        String temp_token_drs
+        String auth_host
+        String run_dir
+    }
 
     # Enclosing command with curly braces {} causes issues with parsing in this
     # command block (tested with womtool-v78). Using triple angle braces made
-    # interpolation more straightforward. According to specs, this should
-    # restrict to ~{} syntax instead of ${} for string interpolation, which is
-    # accepted by womtools but is not recognized by toil runner...
+    # interpolation more straightforward.
     command <<<
         # This task also produces a .tsv file containing the list of MAF files
         # that have been computed and their uri in DRS
@@ -155,15 +156,15 @@ task vcf_2_maf {
         echo -e "vcf\tmaf\turi" > maf.list.tsv
 
         # Loop through list of VCF files
-        cat ${vcf_files} | while read -r g_vcf assembly_id orig_vcf_filename
+        cat ~{vcf_files} | while read -r g_vcf assembly_id orig_vcf_filename
         do
             # prepare file names
-            export vcf_file_name=$(basename ${dollar}{orig_vcf_filename})
-            filtered_vcf=$(echo ${dollar}{vcf_file_name} | sed 's/\(.*\.\)vcf\.gz/\1filtered\.vcf/')
-            export maf=${run_dir}/${dollar}{vcf_file_name}.maf
+            export vcf_file_name=$(basename ${orig_vcf_filename})
+            filtered_vcf=$(echo ${vcf_file_name} | sed 's/\(.*\.\)vcf\.gz/\1filtered\.vcf/')
+            export maf=~{run_dir}/${vcf_file_name}.maf
 
             # filter out variants that are homozyguous and identical to assemby ref.
-            bcftools view -i 'GT[*]="alt"' ${dollar}{g_vcf} > ${dollar}{filtered_vcf}
+            bcftools view -i 'GT[*]="alt"' ${g_vcf} > ${filtered_vcf}
 
             # even if VEP is in the path, vcf2maf script requires a valid path or it
             # defaults to a conda based path hard coded in the perl script (!)
@@ -174,28 +175,28 @@ task vcf_2_maf {
             VEP_ENSEMBL_VERSION=$(vep --help | grep "ensembl-vep" | grep -o "[0-9]*" | head -1)
 
             # Find the location of the reference assembly FASTA file for VEP
-            VEP_CACHE_PATH_SPECIES=$(echo ${vep_species} | tr '[:upper:]' '[:lower:]')
-            REF_FASTA_PATH=${vep_cache_dir}/${dollar}{VEP_CACHE_PATH_SPECIES}/${dollar}{VEP_ENSEMBL_VERSION}_${dollar}{assembly_id}
+            VEP_CACHE_PATH_SPECIES=$(echo ~{vep_species} | tr '[:upper:]' '[:lower:]')
+            REF_FASTA_PATH=~{vep_cache_dir}/${VEP_CACHE_PATH_SPECIES}/${VEP_ENSEMBL_VERSION}_${assembly_id}
 
             # The name of the FASTA file used as a reference can not be infered
             # consistently from primitives: GRCh37 assembly has not been updated since
             # ensembl version 75. We rely on the file actually present in the
             # cache directory
             # (pattern is like: "Homo_sapiens.GRCh37.75.dna.toplevel.fa.gz")
-            REF_FASTA_TOPLEVEL=$(ls ${dollar}{REF_FASTA_PATH} | grep "toplevel" | head -1)
+            REF_FASTA_TOPLEVEL=$(ls ${REF_FASTA_PATH} | grep "toplevel" | head -1)
 
             # Get the sample ID from the VCF file header.
             # Here it is assumed that only one sample is present in the file.
             # TODO: check output and syntax if multiple samples are present.
-            SAMPLE_ID=$(bcftools query -l ${dollar}{g_vcf})
+            SAMPLE_ID=$(bcftools query -l ${g_vcf})
 
             perl /opt/vcf2maf.pl \
-                --input-vcf ${dollar}{filtered_vcf} \
-                --output-maf ${dollar}{maf} \
-                --vep-data ${vep_cache_dir} \
-                --ref-fasta ${dollar}{REF_FASTA_PATH}/${dollar}{REF_FASTA_TOPLEVEL} \
-                --vep-path ${dollar}{VEP_PATH} \
-                --tumor-id ${dollar}{SAMPLE_ID}
+                --input-vcf ${filtered_vcf} \
+                --output-maf ${maf} \
+                --vep-data ~{vep_cache_dir} \
+                --ref-fasta ${REF_FASTA_PATH}/${REF_FASTA_TOPLEVEL} \
+                --vep-path ${VEP_PATH} \
+                --tumor-id ${SAMPLE_ID}
 
             # Store the maf file in DRS and register its uri
             python -c '
@@ -209,11 +210,11 @@ task vcf_2_maf {
             "deduplicate": True
         }
 
-        drs_url = "${drs_url}/private/ingest"
+        drs_url = "~{drs_url}/private/ingest"
         try:
             response = requests.post(
                 drs_url,
-                headers={"Host": "${auth_host}", "X-TT": "${temp_token_drs}"} if "${temp_token_drs}" else {},
+                headers={"Host": "~{auth_host}", "X-TT": "~{temp_token_drs}"} if "~{temp_token_drs}" else {},
                 json=params,
                 verify=False
             )
@@ -249,25 +250,19 @@ task vcf_2_maf {
 
 
 task katsu_update_experiment_results_with_maf {
-    #>>>>>> task inputs <<<<<<
-    String dataset_id
-    String metadata_url
-    String one_time_token_metadata_ingest
-    String auth_host
-    String run_dir
-    File experiment_results_json
-    File maf_list
-
-    #>>>>>> task constants <<<<<
-    # workaround for var interpolation. Syntax ${} confuses wdl parsers
-    # between wdl level interpolation and shell string interpolation.
-    String dollar = "$"
+    input {
+        String dataset_id
+        String metadata_url
+        String one_time_token_metadata_ingest
+        String auth_host
+        String run_dir
+        File experiment_results_json
+        File maf_list
+    }
 
     # Enclosing command with curly braces {} causes issues with parsing in this
     # command block (tested with womtool-v78). Using triple angle braces made
-    # interpolation more straightforward. According to specs, this should
-    # restrict to ~{} syntax instead of ${} for string interpolation, which is
-    # accepted by womtools but is not recognized by toil runner...
+    # interpolation more straightforward.
     command <<<
         python <<CODE
 
@@ -278,11 +273,11 @@ task katsu_update_experiment_results_with_maf {
         from os import path
 
         vcf_dict = dict()
-        with open("${experiment_results_json}") as file_handle:
+        with open("~{experiment_results_json}") as file_handle:
             vcf_dict = json.load(file_handle)
 
         maf_exp_res_list = []
-        with open("${maf_list}") as file_handle:
+        with open("~{maf_list}") as file_handle:
             tsv_reader = csv.DictReader(file_handle, delimiter="\t")
 
             for row in tsv_reader:
@@ -307,7 +302,7 @@ task katsu_update_experiment_results_with_maf {
                     }
                 })
 
-        EXPERIMENT_RESULTS_JSON = path.join("${run_dir}", "experiment_results_maf.json")
+        EXPERIMENT_RESULTS_JSON = path.join("~{run_dir}", "experiment_results_maf.json")
         with open(EXPERIMENT_RESULTS_JSON, "w") as file_handle:
             json.dump(maf_exp_res_list, file_handle)
 
@@ -317,12 +312,12 @@ task katsu_update_experiment_results_with_maf {
         # internally, direct access to the file is guaranteed.
 
         headers = (
-            {"Host": "${auth_host}", "X-OTT": "${one_time_token_metadata_ingest}"}
-            if "${one_time_token_metadata_ingest}"
+            {"Host": "~{auth_host}", "X-OTT": "~{one_time_token_metadata_ingest}"}
+            if "~{one_time_token_metadata_ingest}"
             else {}
         )
 
-        metadata_url = f"${metadata_url}/private/ingest"
+        metadata_url = f"~{metadata_url}/private/ingest"
         data = {
             "table_id": "FROM_DERIVED_DATA",
             "workflow_id": "maf_derived_from_vcf_json",
