@@ -61,7 +61,7 @@ def schema_base_uri(name: str):
     return f"{base_uri}{name}"
 
 
-with open("chord_metadata_service/phenopackets/vrs.json", "r") as file:
+with open("chord_metadata_service/vrs/schema/vrs.json", "r") as file:
     vrs_schema_definitions = json.load(file)
     file.close()
 
