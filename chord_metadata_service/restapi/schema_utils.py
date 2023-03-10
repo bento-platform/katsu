@@ -82,6 +82,7 @@ def search_optional_eq(order: int, queryable: str = "all"):
 def search_optional_str(order: int, queryable: str = "all", multiple: bool = False):
     return _searchable_field(["eq", "ico", "in"], order, queryable, multiple)
 
+
 def search_db_pk(model: models.Model):
     """
     Helper for search schema primary key definitions
@@ -95,15 +96,17 @@ def search_db_pk(model: models.Model):
         }
     }
 
+
 def search_db_fk(type: str, foreign_model: models.Model, field_name: str):
     return {
-        "search": { "database": { "relationship": {
-                    "type": type,
-                    "foreign_key": foreign_model._meta.get_field(field_name).column
-                }
-            }
+        "search": {"database": {"relationship": {
+            "type": type,
+            "foreign_key": foreign_model._meta.get_field(field_name).column
+        }
+        }
         }
     }
+
 
 def search_table_ref(model: models.Model):
     return {
@@ -112,6 +115,7 @@ def search_table_ref(model: models.Model):
             "relation": model._meta.db_table
         }
     }
+
 
 def tag_schema_with_search_properties(schema, search_descriptions: Optional[dict]):
     if not isinstance(schema, dict) or not search_descriptions:
@@ -162,7 +166,7 @@ def tag_schema_with_nested_ids(schema: dict):
                 for k, v in schema["properties"].items()
             },
         } if "properties" in schema else schema
-    
+
     if schema_type == "array":
         return {
             **schema,
@@ -275,7 +279,7 @@ class SchemaResolver:
 
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
                      schema_id: str = None, title: str = None, description: str = None,
-                     additional_properties: bool = False, required:List[str]=None) -> dict:
+                     additional_properties: bool = False, required: List[str] = None) -> dict:
     return {
         "$schema": DRAFT_07,
         "$id": schema_id,
@@ -291,8 +295,8 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
     }
 
 
-def make_object_schema(properties: dict, schema_id: str = None, title: str = None, description:str = None,
-                        additional_properties: bool = False, required:List[str] = None) -> dict:
+def make_object_schema(properties: dict, schema_id: str = None, title: str = None, description: str = None,
+                       additional_properties: bool = False, required: List[str] = None) -> dict:
     return {
         "$schema": DRAFT_07,
         "$id": schema_id,

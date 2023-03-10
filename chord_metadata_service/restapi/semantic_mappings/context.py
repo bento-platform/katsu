@@ -4,130 +4,130 @@
 # context from dataset to schema.org
 CONTEXT = [
     {
-      "sdo": "https://schema.org/",
-      "Dataset": "sdo:Dataset",
-      "title": {
-        "@id": "sdo:name",
-        "@type": "sdo:Text"
-      },
-      "description": {
-        "@id": "sdo:description",
-        "@type": "sdo:Text"
-      },
-      "DatasetDistribution": "sdo:DataDownload",
-      "distributions": {
-        "@id": "sdo:distribution",
-        "@type": "sdo:DataDownload"
-      },
-      "formats": "sdo:fileFormat",
-      "unit": "sdo:unitCode",
-      "access": {
-        "@id": "sdo:accessMode",
-        "@type": "sdo:EntryPoint"
-      },
-      "landing_page": {
-        "@id": "sdo:url",
-        "@type": "sdo:URL"
-      },
-      "size": {
-        "@id": "sdo:contentSize",
-        "@type": "sdo:Text"
-      },
-      "primary_publications": "sdo:citation",
-      "Publication": "sdo:ScholarlyArticle",
-      "citations": "sdo:citation",
-      "produced_by": "sdo:producer",
-      "creators": {
-        "@id": "sdo:creator",
-        "@type": "sdo:Thing"
-      },
-      "licenses": "sdo:license",
-      "is_about": "sdo:about",
-      "has_part": {
-        "@id": "sdo:hasPart",
-        "@type": "sdo:Dataset"
-      },
-      "acknowledges": "sdo:funder",
-      "keywords": "sdo:keywords",
-      "dates": "sdo:temporalCoverage",
-      "stored_in": {
-        "@id": "sdo:includedInDataCatalog",
-        "@type": "sdo:DataCatalog"
-      },
-      "version": "sdo:version",
-      "identifier": {
-        "@id": "sdo:identifier",
-        "@type": "sdo:Text"
-      },
-      "DataType": "sdo:Thing",
-      "information": {
-        "@id": "sdo:Property"
-      },
-      "Annotation": "sdo:Thing",
-      "TaxonomicInformation": "sdo:Thing",
-      "Identifier": "sdo:Thing",
-      "identifier_source": {
-        "@id": "sdo:Property",
-        "@type": "sdo:Text"
-      },
-      "AlternateIdentifier": "sdo:Thing",
-      "RelatedIdentifier": "sdo:Thing",
-      "CategoryValuesPair": "sdo:PropertyValue",
-      "category": {
-        "@id": "sdo:value",
-        "@type": "sdo:Text"
-      },
-      "category_iri": {
-        "@id": "sdo:url",
-        "@type": "sdo:URL"
-      },
-      "Organization": "sdo:Organization",
-      "Person": "sdo:Person",
-      "full_name": "sdo:name",
-      "first_name": "sdo:givenName",
-      "last_name": "sdo:familyName",
-      "affiliation": "sdo:affiliation",
-      "value": {
-        "@id": "sdo:value",
-        "@type": "sdo:DataType"
-      },
-      "types": "sdo:contentType",
-      "value_iri": {
-        "@id": "sdo:url",
-        "@type": "sdo:URL"
-      },
-      "name": {
-        "@id": "sdo:name",
-        "@type": "sdo:Text"
-      },
-      "Date": "sdo:DateTime",
-      "date": {
-        "@id": "sdo:Property"
-      },
-      "type": {
-        "@id": "sdo:Property"
-      },
-      "Disease": "sdo:MedicalCondition",
-      "MolecularEntity": "sdo:Thing",
-      "characteristics": {
-        "@id": "sdo:additionalProperty",
-        "@type": "sdo:Thing"
-      },
-      "disease_status": "sdo:status",
-      "Material": "sdo:Thing",
-      "derives_from": "sdo:relatedTo",
-      "License": "sdo:CreativeWork",
-      "DataRepository": "sdo:DataCatalog",
-      "DataAcquisition": "sdo:CreateAction",
-      "uses": "sdo:relatedTo",
-      "Software": "sdo:SoftwareApplication",
-      "values": "sdo:value",
-      "extra_properties": "sdo:additionalProperty",
-      "Place": "sdo:Place",
-      "Dimension": "sdo:Thing",
-      "dimensions": "sdo:additionalProperty"
+        "sdo": "https://schema.org/",
+        "Dataset": "sdo:Dataset",
+        "title": {
+            "@id": "sdo:name",
+            "@type": "sdo:Text"
+        },
+        "description": {
+            "@id": "sdo:description",
+            "@type": "sdo:Text"
+        },
+        "DatasetDistribution": "sdo:DataDownload",
+        "distributions": {
+            "@id": "sdo:distribution",
+            "@type": "sdo:DataDownload"
+        },
+        "formats": "sdo:fileFormat",
+        "unit": "sdo:unitCode",
+        "access": {
+            "@id": "sdo:accessMode",
+            "@type": "sdo:EntryPoint"
+        },
+        "landing_page": {
+            "@id": "sdo:url",
+            "@type": "sdo:URL"
+        },
+        "size": {
+            "@id": "sdo:contentSize",
+            "@type": "sdo:Text"
+        },
+        "primary_publications": "sdo:citation",
+        "Publication": "sdo:ScholarlyArticle",
+        "citations": "sdo:citation",
+        "produced_by": "sdo:producer",
+        "creators": {
+            "@id": "sdo:creator",
+            "@type": "sdo:Thing"
+        },
+        "licenses": "sdo:license",
+        "is_about": "sdo:about",
+        "has_part": {
+            "@id": "sdo:hasPart",
+            "@type": "sdo:Dataset"
+        },
+        "acknowledges": "sdo:funder",
+        "keywords": "sdo:keywords",
+        "dates": "sdo:temporalCoverage",
+        "stored_in": {
+            "@id": "sdo:includedInDataCatalog",
+            "@type": "sdo:DataCatalog"
+        },
+        "version": "sdo:version",
+        "identifier": {
+            "@id": "sdo:identifier",
+            "@type": "sdo:Text"
+        },
+        "DataType": "sdo:Thing",
+        "information": {
+            "@id": "sdo:Property"
+        },
+        "Annotation": "sdo:Thing",
+        "TaxonomicInformation": "sdo:Thing",
+        "Identifier": "sdo:Thing",
+        "identifier_source": {
+            "@id": "sdo:Property",
+            "@type": "sdo:Text"
+        },
+        "AlternateIdentifier": "sdo:Thing",
+        "RelatedIdentifier": "sdo:Thing",
+        "CategoryValuesPair": "sdo:PropertyValue",
+        "category": {
+            "@id": "sdo:value",
+            "@type": "sdo:Text"
+        },
+        "category_iri": {
+            "@id": "sdo:url",
+            "@type": "sdo:URL"
+        },
+        "Organization": "sdo:Organization",
+        "Person": "sdo:Person",
+        "full_name": "sdo:name",
+        "first_name": "sdo:givenName",
+        "last_name": "sdo:familyName",
+        "affiliation": "sdo:affiliation",
+        "value": {
+            "@id": "sdo:value",
+            "@type": "sdo:DataType"
+        },
+        "types": "sdo:contentType",
+        "value_iri": {
+            "@id": "sdo:url",
+            "@type": "sdo:URL"
+        },
+        "name": {
+            "@id": "sdo:name",
+            "@type": "sdo:Text"
+        },
+        "Date": "sdo:DateTime",
+        "date": {
+            "@id": "sdo:Property"
+        },
+        "type": {
+            "@id": "sdo:Property"
+        },
+        "Disease": "sdo:MedicalCondition",
+        "MolecularEntity": "sdo:Thing",
+        "characteristics": {
+            "@id": "sdo:additionalProperty",
+            "@type": "sdo:Thing"
+        },
+        "disease_status": "sdo:status",
+        "Material": "sdo:Thing",
+        "derives_from": "sdo:relatedTo",
+        "License": "sdo:CreativeWork",
+        "DataRepository": "sdo:DataCatalog",
+        "DataAcquisition": "sdo:CreateAction",
+        "uses": "sdo:relatedTo",
+        "Software": "sdo:SoftwareApplication",
+        "values": "sdo:value",
+        "extra_properties": "sdo:additionalProperty",
+        "Place": "sdo:Place",
+        "Dimension": "sdo:Thing",
+        "dimensions": "sdo:additionalProperty"
     }
-  ]
+]
 
 
 # context types according to dats schema

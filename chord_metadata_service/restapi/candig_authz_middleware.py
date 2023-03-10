@@ -39,7 +39,7 @@ class CandigAuthzMiddleware:
                 opa_res_datasets = self.get_opa_datasets(token, request.path, request.method)
                 if len(opa_res_datasets) == 0:
                     self.authorize_datasets = 'NO_DATASETS_AUTHORIZED'
-                elif type(opa_res_datasets) == tuple and opa_res_datasets[0] == "error":  # error response
+                elif isinstance(opa_res_datasets, tuple) and opa_res_datasets[0] == "error":  # error response
                     return opa_res_datasets[1]
                 else:
                     self.authorize_datasets = ",".join(opa_res_datasets)
@@ -63,7 +63,7 @@ class CandigAuthzMiddleware:
             "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/htsfiles/?.*", "^/api/individuals/?.*",
             "^/api/interpretations/?.*", "^/api/metadata/?.*", "^/api/phenopackets/?.*", "^/api/phenotypicfeatures/?.*",
             "^/api/procedures/?.*", "^/api/variants/?.*", "^/api/biosamples/?.*", "^/api/labsvital/?.*",
-            "^/api/mcodepackets/?.*", "^/api/medicationstatements/?.*",  "^/api/geneticspecimens/?.*",
+            "^/api/mcodepackets/?.*", "^/api/medicationstatements/?.*", "^/api/geneticspecimens/?.*",
             "^/api/cancergeneticvariants/?.*", "^/api/genomicregionsstudied/?.*", "^/api/genomicsreports/?.*",
             "^/api/cancerconditions/?.*", "^/api/tnmstaging/?.*", "^/api/cancerrelatedprocedures/?.*"
         ]
@@ -98,14 +98,14 @@ class CandigAuthzMiddleware:
                 headers={"X-Opa": f"{settings.CANDIG_OPA_SECRET}"},
                 json={
                     "input": {
-                            "token": token,
-                            "body": {
-                                "path": path,
-                                "method": method
-                            }
+                        "token": token,
+                        "body": {
+                            "path": path,
+                            "method": method
                         }
                     }
-                )
+                }
+            )
             response.raise_for_status()
         except requests.exceptions.RequestException:
             error_response = {
@@ -131,10 +131,10 @@ class CandigAuthzMiddleware:
                 headers={"Authorization": f"Bearer {settings.CANDIG_OPA_SECRET}"},
                 json={
                     "input": {
-                            "token": token
-                        }
+                        "token": token
                     }
-                )
+                }
+            )
             response.raise_for_status()
         except requests.exceptions.RequestException:
             return False

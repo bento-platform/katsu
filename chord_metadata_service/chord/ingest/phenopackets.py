@@ -13,7 +13,7 @@ from chord_metadata_service.chord.models import Table
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, PHENOPACKET_REF_RESOLVER
 from chord_metadata_service.patients.values import KaryotypicSex
-from chord_metadata_service.restapi.utils import iso_duration_to_years, time_element_to_years
+from chord_metadata_service.restapi.utils import time_element_to_years
 
 from .exceptions import IngestError
 from .logger import logger
@@ -311,7 +311,6 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
 
     # Get or create all biosamples in the phenopacket
     biosamples_db = [get_or_create_biosample(bs) for bs in biosamples]
-
 
     # Get or create all resources (ontologies, etc.) in the phenopacket
     resources_db = [ingest_resource(rs) for rs in resources]

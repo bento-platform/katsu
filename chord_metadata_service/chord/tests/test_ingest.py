@@ -28,7 +28,6 @@ from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
-from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 
 from .constants import VALID_DATA_USE_1

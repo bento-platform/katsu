@@ -238,27 +238,27 @@ VALID_INDIVIDUALS = [
 
 
 extra_properties_with_list = {
-        "smoking": "Former smoker",
-        "covidstatus": "Positive",
-        "death_dc": "Alive",
-        "mobility": "I have slight problems in walking about",
-        "date_of_consent": "2021-03-03",
-        "lab_test_result_value": 699.86,
-        "baseline_creatinine": [100, 120]
-    }
+    "smoking": "Former smoker",
+    "covidstatus": "Positive",
+    "death_dc": "Alive",
+    "mobility": "I have slight problems in walking about",
+    "date_of_consent": "2021-03-03",
+    "lab_test_result_value": 699.86,
+    "baseline_creatinine": [100, 120]
+}
 
 extra_properties_with_dict = {
-        "smoking": "Former smoker",
-        "covidstatus": "Positive",
-        "death_dc": "Alive",
-        "mobility": "I have slight problems in walking about",
-        "date_of_consent": "2021-03-03",
-        "lab_test_result_value": 699.86,
-        "baseline_creatinine": {
-            "test_key_1": 120,
-            "test_key_2": "test_value_2"
-        }
+    "smoking": "Former smoker",
+    "covidstatus": "Positive",
+    "death_dc": "Alive",
+    "mobility": "I have slight problems in walking about",
+    "date_of_consent": "2021-03-03",
+    "lab_test_result_value": 699.86,
+    "baseline_creatinine": {
+        "test_key_1": 120,
+        "test_key_2": "test_value_2"
     }
+}
 
 
 INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST = [
@@ -426,37 +426,37 @@ CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS = deepcopy(CONFIG_PUBLIC_TEST)
 CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS["fields"].update([
     ("unset_date",
      {
-        "mapping": "individual/extra_properties/unset_date",
-        "title": "Some date",
-        "description": "Some date",
-        "datatype": "date",
-        "config": {
-            "bin_by": "month"
-        }
+         "mapping": "individual/extra_properties/unset_date",
+         "title": "Some date",
+         "description": "Some date",
+         "datatype": "date",
+         "config": {
+             "bin_by": "month"
+         }
      }),
     ("unset_numeric",
      {
-        "mapping": "individual/extra_properties/unset_numeric",
-        "title": "Some measure",
-        "description": "Some measure",
-        "datatype": "number",
-        "config": {
-            "bin_size": 50,
-            "taper_left": 50,
-            "taper_right": 500,
-            "minimum": 0,
-            "maximum": 600,
-            "units": "mg/L"
-        }
+         "mapping": "individual/extra_properties/unset_numeric",
+         "title": "Some measure",
+         "description": "Some measure",
+         "datatype": "number",
+         "config": {
+             "bin_size": 50,
+             "taper_left": 50,
+             "taper_right": 500,
+             "minimum": 0,
+             "maximum": 600,
+             "units": "mg/L"
+         }
      }),
     ("unset_category",
      {
-        "mapping": "individual/extra_properties/unset_category",
-        "title": "Some things",
-        "description": "Some things",
-        "datatype": "string",
-        "config": {
-            "enum": None
-        }
+         "mapping": "individual/extra_properties/unset_category",
+         "title": "Some things",
+         "description": "Some things",
+         "datatype": "string",
+         "config": {
+             "enum": None
+         }
      })
 ])

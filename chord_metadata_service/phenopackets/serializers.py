@@ -1,4 +1,3 @@
-import re
 from rest_framework import serializers
 from .models import (
     MetaData,
@@ -188,7 +187,8 @@ class VariantInterpretationSerializer(GenericSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        response["variation_descriptor"] = VariantDescriptorSerializer(instance.variation_descriptor, many=False, required=True).data
+        response["variation_descriptor"] = VariantDescriptorSerializer(
+            instance.variation_descriptor, many=False, required=True).data
         return response
 
 
@@ -200,8 +200,10 @@ class GenomicInterpretationSerializer(GenericSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        response["gene_descriptor"] = GeneDescriptorSerializer(instance.gene_descriptor, many=False, required=False).data
-        response["variant_interpretation"] = VariantInterpretationSerializer(instance.variant_interpretation, many=False, required=False).data
+        response["gene_descriptor"] = GeneDescriptorSerializer(
+            instance.gene_descriptor, many=False, required=False).data
+        response["variant_interpretation"] = VariantInterpretationSerializer(
+            instance.variant_interpretation, many=False, required=False).data
         return response
 
 
@@ -267,5 +269,5 @@ class PhenopacketSerializer(SimplePhenopacketSerializer):
         response['subject'] = IndividualSerializer(
             instance.subject,
             exclude_when_nested=["phenopackets", "biosamples"]
-            ).data
+        ).data
         return response

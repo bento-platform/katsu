@@ -125,7 +125,7 @@ def time_element_to_years(time_element: dict, unit: str = "years") -> tuple[Opti
     return time_value, time_unit
 
 
-def iso_duration_to_years(iso_age_duration: str| dict, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
+def iso_duration_to_years(iso_age_duration: str | dict, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
     """
     This function takes ISO8601 Duration string in the format e.g 'P20Y6M4D' and converts it to years.
     """

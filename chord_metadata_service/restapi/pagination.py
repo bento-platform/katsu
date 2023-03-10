@@ -48,5 +48,6 @@ class BatchResultsSetPagination(LargeResultsSetPagination):
     This allows for results to be formatted in a single page without having to pass
     an arbitrary page_size as a GET parameter.
     """
+
     def get_page_size(self, request):
         return self.max_page_size

@@ -122,7 +122,7 @@ AGE_OR_AGE_RANGE = {
     ]
 }
 
- 
+
 TIME_INTERVAL = {
     "$schema": DRAFT_07,
     "$id": "katsu:common:time_interval",

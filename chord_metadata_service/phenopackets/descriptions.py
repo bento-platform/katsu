@@ -183,7 +183,8 @@ GENE = {
 }
 
 GENE_DESCRIPTOR = {
-    "description": "This element represents an identifier for a gene, using the Gene Descriptor from the VRSATILE Framework.",
+    "description": "This element represents an identifier for a gene, using the Gene Descriptor from the VRSATILE "
+                   "Framework.",
     "properties": {
         "value_id": "Official identifier of the gene. REQUIRED.",
         "symbol": "Official gene symbol. REQUIRED.",
@@ -191,9 +192,7 @@ GENE_DESCRIPTOR = {
         "alternate_ids": "Alternative identifier(s) of the gene",
         "xrefs": "Related concept IDs (e.g. gene ortholog IDs) may be placed in xrefs",
         "alternate_symbols": "Alternative symbol(s) of the gene",
-        **EXTRA_PROPERTIES
-    }
-}
+        **EXTRA_PROPERTIES}}
 
 ALLELE = {
     "properties": {
@@ -232,7 +231,8 @@ VCF_RECORD = {
         "genome_assembly": "Identifier for the genome assembly used to call the allele. REQUIRED.",
         "chrom": "Chromosome or contig identifier. REQUIRED.",
         "pos": "The reference position, with the 1st base having position 1. REQUIRED.",
-        "id": "Identifier: Semicolon-separated list of unique identifiers where available. If this is a dbSNP variant thers number(s) should be used.",
+        "id": "Identifier: Semicolon-separated list of unique identifiers where available. If this is a dbSNP variant "
+              "thers number(s) should be used.",
         "ref": "Reference base. REQUIRED.",
         "alt": "Alternate base. REQUIRED.",
         "qual": "Quality: Phred-scaled quality score for the assertion made in ALT.",
@@ -258,14 +258,18 @@ VARIANT_DESCRIPTOR = {
             "description": "",
             "items": VCF_RECORD
         },
-        "xrefs": "List of CURIEs representing associated concepts. Allele registry, ClinVar, or other related IDs should be included as xrefs",
+        "xrefs": "List of CURIEs representing associated concepts. Allele registry, ClinVar, or other related IDs "
+                 "should be included as xrefs",
         "alternate_labels": "Common aliases for a variant, e.g. EGFR vIII, are alternate labels",
         "extensions": "List of resource-specific Extensions needed to describe the variation",
         "molecule_context": "The molecular context of the vrs variation.",
-        "structural_type": "The structural variant type associated with this variant, such as a substitution, deletion, or fusion.",
-        "vrs_ref_allele_seq": "A Sequence corresponding to a “ref allele”, describing the sequence expected at a SequenceLocation reference.",
+        "structural_type": "The structural variant type associated with this variant, such as a substitution, "
+                           "deletion, or fusion.",
+        "vrs_ref_allele_seq": "A Sequence corresponding to a “ref allele”, describing the sequence expected at a "
+                              "SequenceLocation reference.",
         "allelic_state": ("The zygosity of the variant as determined in all of the samples represented"
-                            " in this Phenopacket is represented using a list of terms taken from the Genotype Ontology (GENO)."),
+                          "in this Phenopacket is represented using a list of terms taken from the Genotype Ontology "
+                          "(GENO)."),
     }
 }
 
@@ -273,7 +277,8 @@ VARIANT_INTERPRETATION = {
     "description": ("This element represents the interpretation of a variant according to the American College of "
                     " Medical Genetics (ACMG) variant interpretation guidelines."),
     "properties": {
-        "acmg_pathogenicity_classification": "one of the five ACMG pathogenicity categories, or NOT_PROVIDED. The default is NOT_PROVIDED",
+        "acmg_pathogenicity_classification": "one of the five ACMG pathogenicity categories, or NOT_PROVIDED. The "
+                                             "default is NOT_PROVIDED",
         "therapeutic_actionability": "The therapeutic actionability of the variant, default is UNKNOWN_ACTIONABILITY",
         "variant": VARIANT_DESCRIPTOR
     }
@@ -370,7 +375,8 @@ MEASUREMENT = {
                     "It can capture quantitative, ordinal (e.g., absent/present), or categorical measurements."),
     "properties": {
         "assay": "OntologyClass that describes the assay used to produce the measurement. REQUIRED.",
-        "description": "Human-readable, unstructured text describing the measurement or providing additional information.",
+        "description": "Human-readable, unstructured text describing the measurement or providing additional "
+                       "information.",
         "measurement_value": "Result of the measurement",
         "time_observed": "Time at which measurement was performed. RECOMMENDED.",
         "procedure": "Clinical procdure performed to acquire the sample used for the measurement",
@@ -462,7 +468,8 @@ AGE = {
 }
 
 AGE_RANGE = {
-    "description": "The AgeRange element is intended to be used when the age of a subject is represented by a bin, e.g., 5-10 years."   ,
+    "description": "The AgeRange element is intended to be used when the age of a subject is represented by a bin, "
+                   "e.g., 5-10 years.",
     "properties": {
         "start": AGE,
         "end": AGE
@@ -473,8 +480,8 @@ GENOMIC_INTERPRETATION = {
     "description": ("This element is used as a component of the Interpretation element, and describes"
                     " the interpretation for an individual variant or gene."),
     "properties": {
-        "subject_or_biosample_id": "The id of the patient or biosample that is the subject being interpreted. REQUIRED.",
-        "interpretation_status": "Status of the interpretation. REQUIRED.",
+        "subject_or_biosample_id": "The id of the patient or biosample that is the subject being interpreted.",
+        "interpretation_status": "Status of the interpretation.",
         "call": {
             "oneOf": [
                 GENE_DESCRIPTOR,

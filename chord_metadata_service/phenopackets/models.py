@@ -48,12 +48,12 @@ class MetaData(BaseTimeStamp):
     resources = models.ManyToManyField(Resource, help_text=rec_help(d.META_DATA, "resources"))
     updates = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(
         schema=validation_schema_list(PHENOPACKET_UPDATE_SCHEMA), formats=['date-time'])],
-                        help_text=rec_help(d.META_DATA, "updates"))
+        help_text=rec_help(d.META_DATA, "updates"))
     phenopacket_schema_version = models.CharField(max_length=200, blank=True,
                                                   help_text='Schema version of the current phenopacket.')
     external_references = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(
         schema=validation_schema_list(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA))],
-                                    help_text=rec_help(d.META_DATA, "external_references"))
+        help_text=rec_help(d.META_DATA, "external_references"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.META_DATA, "extra_properties"))
 
     def __str__(self):
@@ -378,7 +378,7 @@ class GenomicInterpretation(BaseTimeStamp):
     gene_descriptor = models.ForeignKey(GeneDescriptor, on_delete=models.CASCADE, null=True, blank=True,
                                         help_text="Corresponds to 'call' field in schema in case of GeneDescriptor")
     # Corresponds to 'call' field in schema in case of VariantInterpretation
-    variant_interpretation = models.ForeignKey(VariantInterpretation, on_delete=models.CASCADE, null=True,blank=True,
+    variant_interpretation = models.ForeignKey(VariantInterpretation, on_delete=models.CASCADE, null=True, blank=True,
                                                help_text="Corresponds to 'call' field in schema in case of "
                                                          "VariantInterpretation")
 
@@ -430,7 +430,8 @@ class Interpretation(BaseTimeStamp):
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for the interpretation.')
     progress_status = models.CharField(choices=PROGRESS_STATUS, max_length=200, blank=True,
                                        help_text='The current status of work on the case.')
-    diagnosis = models.ForeignKey(Diagnosis, blank=True, null=True, on_delete=models.CASCADE, help_text='One or more diagnoses, if made.')
+    diagnosis = models.ForeignKey(Diagnosis, blank=True, null=True, on_delete=models.CASCADE,
+                                  help_text='One or more diagnoses, if made.')
     summary = models.CharField(max_length=200, blank=True, help_text='Free text summary of the interpretation.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')

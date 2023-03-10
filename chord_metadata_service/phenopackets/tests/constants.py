@@ -25,25 +25,16 @@ VALID_META_DATA_1 = {
     "submitted_by": "David Lougheed"
 }
 
-VALID_META_DATA_2 = {
-    "created_by": "Victor Rocheleau",
-    "submitted_by": "Victor Rocheleau",
-    "external_references": [
-        {
-            "id": "DOI:10.1016/j.jaccas.2020.04.001",
-            "reference": "PMID:32292915",
-            "description": "The Imperfect Cytokine Storm: Severe COVID-19 With ARDS in a Patient on Durable LVAD Support"
-        }
-    ],
-    "updates": [
-        {
-            "timestamp": "2018-06-10T10:59:06Z",
-            "updated_by": "Julius J.",
-            "comment": "added phenotypic features to individual patient:1"
-        }
-    ],
-    "phenopacket_schema_version": "2.0"
-}
+VALID_META_DATA_2 = {"created_by": "Victor Rocheleau",
+                     "submitted_by": "Victor Rocheleau",
+                     "external_references": [{"id": "DOI:10.1016/j.jaccas.2020.04.001",
+                                              "reference": "PMID:32292915",
+                                              "description": "The Imperfect Cytokine Storm: Severe COVID-19 With ARDS "
+                                                             "in a Patient on Durable LVAD Support"}],
+                     "updates": [{"timestamp": "2018-06-10T10:59:06Z",
+                                  "updated_by": "Julius J.",
+                                  "comment": "added phenotypic features to individual patient:1"}],
+                     "phenopacket_schema_version": "2.0"}
 
 VALID_INDIVIDUAL_1 = {
     "id": "patient:1",
@@ -437,6 +428,7 @@ VALID_GENOMIC_INTERPRETATION = {
     }
 }
 
+
 def valid_phenopacket(subject, meta_data):
     return dict(
         id='phenopacket:1',
@@ -651,6 +643,7 @@ def valid_genomic_interpretation(gene_descriptor=None, variant_interpretation=No
             variant_interpretation=variant_interpretation
         )
     return base
+
 
 def valid_diagnosis(disease):
     return dict(

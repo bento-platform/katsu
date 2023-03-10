@@ -28,14 +28,14 @@ PHENOPACKETS_ON_FHIR_MAPPING = {
             }
         },
         "biosamples": {
-                "title": "Biosamples",
-                "code": {
-                    "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
-                    "version": "0.1.0",
-                    "code": "biosamples",
-                    "display": "Biosamples"
-                }
-            },
+            "title": "Biosamples",
+            "code": {
+                "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
+                "version": "0.1.0",
+                "code": "biosamples",
+                "display": "Biosamples"
+            }
+        },
         "variants": {
             "title": "Variants",
             "code": {

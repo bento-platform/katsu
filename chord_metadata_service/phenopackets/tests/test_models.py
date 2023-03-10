@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.db.utils import IntegrityError
 from django.test import TestCase
 from django.db.models import Q
 
@@ -8,8 +7,8 @@ from chord_metadata_service.phenopackets.filters import (
     filter_ontology,
     filter_extra_properties_datatype,
     PhenotypicFeatureFilter,
-    DiseaseFilter,
-    PhenopacketFilter, DiagnosisFilter, GenomicInterpretationFilter, filter_json_array
+    PhenopacketFilter,
+    GenomicInterpretationFilter
 )
 
 from . import constants as c
@@ -37,7 +36,7 @@ class BiosampleTest(TestCase):
         biosample_one = m.Biosample.objects.get(
             tumor_progression__label='Primary Malignant Neoplasm',
             sampled_tissue__label__icontains='urinary bladder'
-            )
+        )
         self.assertEqual(biosample_one.id, 'biosample_id:1')
 
     def test_string_representations(self):
@@ -114,7 +113,7 @@ class ProcedureTest(TestCase):
     def test_procedure(self):
         procedure_query_1 = m.Procedure.objects.filter(
             body_site__label__icontains='arm'
-            )
+        )
         procedure_query_2 = m.Procedure.objects.filter(code__id='NCIT:C28743')
         self.assertEqual(procedure_query_1.count(), 2)
         self.assertEqual(procedure_query_2.count(), 2)
@@ -222,17 +221,18 @@ class DiagnosisTest(TestCase):
         self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
 
         # With VariantInterpretation
-        self.variant_descriptor = m.VariationDescriptor.objects.create(**c.valid_variant_descriptor(self.gene_descriptor))
+        self.variant_descriptor = m.VariationDescriptor.objects.create(
+            **c.valid_variant_descriptor(self.gene_descriptor))
         self.variant_interpretation = m.VariantInterpretation.objects.create(**c.valid_variant_interpretation(
-                variant_descriptor=self.variant_descriptor
+            variant_descriptor=self.variant_descriptor
         ))
 
         self.genomic_interpretation_1 = m.GenomicInterpretation.objects.create(
             **c.valid_genomic_interpretation(self.gene_descriptor, self.variant_interpretation)
-            )
+        )
         self.genomic_interpretation_2 = m.GenomicInterpretation.objects.create(
             **c.valid_genomic_interpretation(self.gene_descriptor)
-            )
+        )
         self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_ONTOLOGY))
         self.diagnosis.genomic_interpretations.set([
             self.genomic_interpretation_1,
@@ -250,7 +250,7 @@ class DiagnosisTest(TestCase):
     def test_diagnosis_str(self):
         self.assertEqual(str(self.diagnosis), str(self.diagnosis.id))
 
-    def _test_disease_filter(self, filter:Q, count: int):
+    def _test_disease_filter(self, filter: Q, count: int):
         result = m.Diagnosis.objects.all().filter(filter)
         self.assertEqual(result.count(), count)
 
@@ -275,7 +275,7 @@ class InterpretationTest(TestCase):
     def test_interpretation(self):
         interpretation_qs = m.Interpretation.objects.filter(
             progress_status='IN_PROGRESS'
-            )
+        )
         self.assertEqual(interpretation_qs.count(), 1)
         # TODO: test diagnosis filters
         # interpretation_qs = m.Interpretation.objects.filter()
@@ -332,7 +332,6 @@ class PhenopacketTest(TestCase):
         self.phenotypic_feature_2 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
-
 
     def test_phenopacket(self):
         phenopacket = m.Phenopacket.objects.filter(id="phenopacket_id:1")

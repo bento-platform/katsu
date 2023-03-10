@@ -22,7 +22,7 @@ from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.logger import logger
-from chord_metadata_service.restapi.utils import get_field_bins, queryset_stats_for_field
+from chord_metadata_service.restapi.utils import queryset_stats_for_field
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
@@ -321,18 +321,18 @@ def phenopacket_query_results(query, params, options=None):
         # Results displayed as 4/5 columns:
         # "individuals ID", "table ID" (optional), [Alternate ids list], number of experiments, [Biosamples list...]
         return queryset.values(
-                *fields,
-                alternate_ids=Coalesce(F("subject__alternate_ids"), [])
-            ).annotate(
-                # Weird bug with Django 4.1 here: num_experiments must come before the use of ArrayAgg or biosamples
-                # is considered as an ArrayField...
-                num_experiments=Count("biosamples__experiment"),
-                # Postgre specific: aggregates multiple values in a list
-                biosamples=Coalesce(
-                    ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
-                    []
-                )
+            *fields,
+            alternate_ids=Coalesce(F("subject__alternate_ids"), [])
+        ).annotate(
+            # Weird bug with Django 4.1 here: num_experiments must come before the use of ArrayAgg or biosamples
+            # is considered as an ArrayField...
+            num_experiments=Count("biosamples__experiment"),
+            # Postgre specific: aggregates multiple values in a list
+            biosamples=Coalesce(
+                ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
+                []
             )
+        )
 
     # To expand further on this query : the select_related call
     # will join on these tables we'd call anyway, thus 2 less request

@@ -43,13 +43,12 @@ TIME_INTERVAL = {
 }
 
 TIME_ELEMENT = {
-    "description": "This element intends to bundle all of the various ways of denoting time or age in phenopackets schema.",
+    "description": "This element intends to bundle all of the various ways of denoting time or age in phenopackets "
+                   "schema.",
     "properties": {
         "gestational_age": GESTATIONAL_AGE,
         "age": AGE,
         "age_range": AGE_RANGE,
         "ontology_class": ontology_class("indicates the age of the individual as an ontology class"),
         "timestamp": TIME_STAMP,
-        "interval": TIME_INTERVAL
-    }
-}
+        "interval": TIME_INTERVAL}}

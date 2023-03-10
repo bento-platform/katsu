@@ -221,7 +221,6 @@ GENE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENE_
 # TODO: Search? Probably not
 HTS_FILE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_HTS_FILE_SCHEMA, {})
 
-
 BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_BIOSAMPLE_SCHEMA, {
     "properties": {
         "id": {
@@ -427,7 +426,9 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                 }}}),
             "search": {
                 "database": {
-                    "relation": models.Phenopacket._meta.get_field("interpretations").remote_field.through._meta.db_table,
+                    "relation": (
+                        models.Phenopacket._meta.get_field("interpretations").remote_field.through._meta.db_table
+                    ),
                     "relationship": {
                         "type": "ONE_TO_MANY",
                         "parent_foreign_key": "phenopacket_id",

@@ -2,6 +2,7 @@ import json
 from django.core.management.base import BaseCommand
 from humps import decamelize
 
+
 class Command(BaseCommand):
 
     help = "Converts the keys of a json document from camelCase to snake_case"

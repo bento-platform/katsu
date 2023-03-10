@@ -24,7 +24,10 @@ def describe_schema(schema, descriptions):
                                                        descriptions["properties"].get(p, None))
                                     for p in schema["properties"]}
 
-    elif all(("type" in schema and schema["type"] == "array", "items" in schema, isinstance(descriptions, dict), "items" in descriptions)):
+    elif all(("type" in schema and schema["type"] == "array",
+              "items" in schema,
+              isinstance(descriptions, dict),
+              "items" in descriptions)):
         new_schema["items"] = describe_schema(schema["items"], descriptions["items"])
 
     return new_schema

@@ -1,8 +1,7 @@
 import logging
-from django.db.models.signals import post_save, post_delete, pre_save
-from django.db import transaction
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from chord_metadata_service.patients.models import Individual, VitalStatus
+from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.patients.indices import (
     build_individual_index,
     remove_individual_index

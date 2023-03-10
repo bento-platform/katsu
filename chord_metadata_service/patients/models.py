@@ -2,8 +2,7 @@ from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin, BaseTimeStamp
-from chord_metadata_service.restapi.validators import ontology_validator, age_or_age_range_validator, \
-    JsonSchemaValidator
+from chord_metadata_service.restapi.validators import ontology_validator, JsonSchemaValidator
 from .values import Sex, KaryotypicSex, PatientStatus
 from .validators import comorbid_condition_validator
 from ..restapi.schemas import TIME_ELEMENT_SCHEMA
@@ -47,7 +46,7 @@ class Individual(BaseTimeStamp, IndexableMixin):
                                         help_text="The vital status of the individual e.g. whether they are alive or"
                                                   " the time and cause of death")
 
-    sex = models.CharField(choices=SEX, max_length=200,  blank=True, null=True,
+    sex = models.CharField(choices=SEX, max_length=200, blank=True, null=True,
                            help_text='Observed apparent sex of the individual.')
     karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200, default=KaryotypicSex.UNKNOWN_KARYOTYPE,
                                       help_text='The karyotypic sex of the individual.')

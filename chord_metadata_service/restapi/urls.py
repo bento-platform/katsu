@@ -13,12 +13,12 @@ from chord_metadata_service.phenopackets.autocomplete_views import (
 )
 from chord_metadata_service.resources import api_views as resources_views
 from .api_views import (
-     overview,
-     mcode_overview,
-     public_search_fields,
-     public_overview,
-     public_dataset,
-     search_overview
+    overview,
+    mcode_overview,
+    public_search_fields,
+    public_overview,
+    public_dataset,
+    search_overview
 )
 from chord_metadata_service.restapi.routers import BatchListRouter
 

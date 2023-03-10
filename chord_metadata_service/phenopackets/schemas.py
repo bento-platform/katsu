@@ -21,7 +21,7 @@ from chord_metadata_service.restapi.schema_utils import (
     enum_of,
     named_one_of,
     string_with_format,
-    describe_schema, id_of
+    describe_schema
 )
 
 from . import descriptions
@@ -376,17 +376,23 @@ PHENOPACKET_TREATMENT = describe_schema({
         "agent": ONTOLOGY_CLASS,
         "route_of_administration": ONTOLOGY_CLASS,
         "dose_intervals": array_of(DOSE_INTERVAL),
-        "drug_type": enum_of(["UNKNOWN_DRUG_TYPE", "PRESCRIPTION", "EHR_MEDICATION_LIST", "ADMINISTRATION_RELATED_TO_PROCEDURE"]),
+        "drug_type": enum_of([
+            "UNKNOWN_DRUG_TYPE",
+            "PRESCRIPTION",
+            "EHR_MEDICATION_LIST",
+            "ADMINISTRATION_RELATED_TO_PROCEDURE"
+        ]),
         "cumulative_dose": PHENOPACKET_QUANTITY_SCHEMA
     },
     "required": ["agent"]
-}, {}) #TODO: add description
+}, {})  # TODO: add description
 
 PHENOPACKET_RADIATION_THERAPY = describe_schema({
     "$schema": DRAFT_07,
     # "$id": pheno_base_uri("radiation_therapy"),
     "title": "Phenopacket radiation therapy",
-    "description": "Radiation therapy (or radiotherapy) uses ionizing radiation, generally as part of cancer treatment to control or kill malignant cells.",
+    "description": "Radiation therapy (or radiotherapy) uses ionizing radiation, generally as part of cancer "
+                   "treatment to control or kill malignant cells.",
     "type": "object",
     "properties": {
         "modality": ONTOLOGY_CLASS,
@@ -401,7 +407,8 @@ PHENOPACKET_THERAPEUTIC_REGIMEN = describe_schema({
     "$schema": DRAFT_07,
     # "$id": pheno_base_uri("therapeutic_regimen"),
     "title": "Phenopacket therapeutic regimen",
-    "description": "This element represents a therapeutic regimen which will involve a specified set of treatments for a particular condition.",
+    "description": "This element represents a therapeutic regimen which will involve a specified set of treatments "
+                   "for a particular condition.",
     "type": "object",
     "properties": {
         "start_time": TIME_ELEMENT_SCHEMA,
@@ -489,7 +496,8 @@ EXTENSION_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
     # "$id": pheno_base_uri("extension"),
     "title": "Extension schema",
-    "description": "The Extension class provides a means to extend descriptions with other attributes unique to a content provider",
+    "description": "The Extension class provides a means to extend descriptions with other attributes unique to a "
+                   "content provider",
     "type": "object",
     "properties": {
         "name": base_type(SCHEMA_TYPES.STRING),
@@ -551,10 +559,12 @@ PHENOPACKET_VARIANT_INTERPRETATION = describe_schema({
     "$schema": DRAFT_07,
     # "$id": pheno_base_uri("variant_interpretation"),
     "title": "Phenopacket variant interpretation schema",
-    "description": "This element represents the interpretation of a variant according to the American College of Medical Genetics (ACMG) guidelines.",
+    "description": "This element represents the interpretation of a variant according to the American College of "
+                   "Medical Genetics (ACMG) guidelines.",
     "type": "object",
     "properties": {
-        "acmg_pathogenicity_classification": enum_of(["NOT_PROVIDED", "BENIGN", "LIKELY_BENIGN", "UNCERTAIN_SIGNIFICANCE", "LIKELY_PATHOGENIC", "PATHOGENIC"]),
+        "acmg_pathogenicity_classification": enum_of(["NOT_PROVIDED", "BENIGN", "LIKELY_BENIGN",
+                                                      "UNCERTAIN_SIGNIFICANCE", "LIKELY_PATHOGENIC", "PATHOGENIC"]),
         "therapeutic_actionability": enum_of(["UNKNOWN_ACTIONABILITY", "NOT_ACTIONABLE", "ACTIONABLE"]),
         "variation_descriptor": VARIANT_DESCRIPTOR
     },
@@ -597,7 +607,8 @@ PHENOPACKET_INTERPRETATION_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
     # "$id": pheno_base_uri("interpretation"),
     "title": "Phenopacket interpretation schema",
-    "description": "This message intends to represent the interpretation of a genomic analysis, such as the report from a diagnostic laboratory.",
+    "description": "This message intends to represent the interpretation of a genomic analysis, such as the report "
+                   "from a diagnostic laboratory.",
     "type": "object",
     "properties": {
         "id": base_type(SCHEMA_TYPES.STRING),
