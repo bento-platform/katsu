@@ -1,6 +1,6 @@
 from django.db.models import Prefetch
 from django.http import JsonResponse
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
 from rest_framework import generics, serializers, viewsets
 from rest_framework.decorators import action, api_view, throttle_classes
 from rest_framework.response import Response
@@ -44,7 +44,6 @@ from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
     ChemotherapySerializer,
     ComorbiditySerializer,
-    DonorRelatedClinicalDataSerializer,
     DonorSerializer,
     FollowUpSerializer,
     HormoneTherapySerializer,
@@ -56,6 +55,9 @@ from chord_metadata_service.mohpackets.serializers import (
     SpecimenSerializer,
     SurgerySerializer,
     TreatmentSerializer,
+)
+from chord_metadata_service.mohpackets.serializers_nested import (
+    DonorRelatedClinicalDataSerializer,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 from chord_metadata_service.mohpackets.utils import get_authorized_datasets
