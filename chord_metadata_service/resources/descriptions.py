@@ -55,12 +55,12 @@ RESOURCE = {
             "help": "The full name of the resource or ontology referred to by the id element."
         },
         "namespacePrefix": "Prefix for objects from this resource. In the case of ontology resources, this should be "
-                            "the CURIE prefix.",
+                           "the CURIE prefix.",
         "url": "Resource URL. In the case of ontologies, this should be an OBO or OWL file. Other resources should "
                "link to the official or top-level url.",
         "version": "The version of the resource or ontology used to make the annotation.",
-        "iriPrefix":  "The IRI prefix, when used with the namespace prefix and an object ID, should resolve the term "
-                       "or object from the resource in question.",
+        "iriPrefix": "The IRI prefix, when used with the namespace prefix and an object ID, should resolve the term "
+        "or object from the resource in question.",
         **EXTRA_PROPERTIES
     }
 }

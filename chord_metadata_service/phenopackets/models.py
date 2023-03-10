@@ -9,7 +9,6 @@ from chord_metadata_service.restapi.models import IndexableMixin, BaseTimeStamp
 from chord_metadata_service.restapi.schema_utils import validation_schema_list
 from chord_metadata_service.restapi.validators import (
     JsonSchemaValidator,
-    age_or_age_range_validator,
     ontology_validator,
     ontology_list_validator
 )
@@ -17,12 +16,11 @@ from . import descriptions as d
 from .schemas import (
     EXPRESSION_SCHEMA,
     EXTENSION_SCHEMA,
-    ONE_OF_MEDICAL_ACTION,
     PHENOPACKET_EVIDENCE_SCHEMA,
     PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA,
-    PHENOPACKET_MEASUREMENT_VALUE_SCHEMA,
     PHENOPACKET_UPDATE_SCHEMA,
-    VCF_RECORD_SCHEMA, PHENOPACKET_PROCEDURE_SCHEMA, PHENOPACKET_MEASUREMENT_SCHEMA, PHENOPACKET_DISEASE_SCHEMA,
+    VCF_RECORD_SCHEMA,
+    PHENOPACKET_MEASUREMENT_SCHEMA,
     PHENOPACKET_MEDICAL_ACTION_SCHEMA,
 )
 from ..restapi.schemas import TIME_ELEMENT_SCHEMA
@@ -43,8 +41,10 @@ class MetaData(BaseTimeStamp):
     FHIR: Metadata
     """
 
-    created_by = models.CharField(max_length=200, blank=True, null=True, default=None, help_text=rec_help(d.META_DATA, "created_by"))
-    submitted_by = models.CharField(max_length=200, blank=True, null=True, default=None, help_text=rec_help(d.META_DATA, "submitted_by"))
+    created_by = models.CharField(max_length=200, blank=True, null=True, default=None,
+                                  help_text=rec_help(d.META_DATA, "created_by"))
+    submitted_by = models.CharField(max_length=200, blank=True, null=True, default=None,
+                                    help_text=rec_help(d.META_DATA, "submitted_by"))
     resources = models.ManyToManyField(Resource, help_text=rec_help(d.META_DATA, "resources"))
     updates = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(
         schema=validation_schema_list(PHENOPACKET_UPDATE_SCHEMA), formats=['date-time'])],
@@ -132,6 +132,7 @@ class File(BaseTimeStamp, IndexableMixin):
 
     def __str__(self):
         return str(self.uri)
+
 
 class HtsFile(BaseTimeStamp, IndexableMixin):
     """
@@ -337,10 +338,14 @@ class VariantInterpretation(BaseTimeStamp):
         ('NOT_ACTIONABLE', 'NOT_ACTIONABLE'),
         ('ACTIONABLE', 'ACTIONABLE'),
     )
-    acmg_pathogenicity_classification = models.CharField(max_length=200, choices=VARIANT_INTERPRETATION_STATUS, default='NOT_PROVIDED',
-                                                         help_text=rec_help(d.VARIANT_INTERPRETATION, "acmg_pathogenicity_classification"))
-    therapeutic_actionability = models.CharField(max_length=200, choices=THERAPEUTIC_ACTIONABILITY_CHOICES, default='UNKNOWN_ACTIONABILITY',
-                                                 help_text=rec_help(d.VARIANT_INTERPRETATION, "therapeutic_actionability"))
+    acmg_pathogenicity_classification = models.CharField(max_length=200, choices=VARIANT_INTERPRETATION_STATUS,
+                                                         default='NOT_PROVIDED',
+                                                         help_text=rec_help(d.VARIANT_INTERPRETATION,
+                                                                            "acmg_pathogenicity_classification"))
+    therapeutic_actionability = models.CharField(max_length=200, choices=THERAPEUTIC_ACTIONABILITY_CHOICES,
+                                                 default='UNKNOWN_ACTIONABILITY',
+                                                 help_text=rec_help(d.VARIANT_INTERPRETATION,
+                                                                    "therapeutic_actionability"))
     variation_descriptor = models.ForeignKey(VariationDescriptor, on_delete=models.CASCADE,
                                              help_text=rec_help(d.VARIANT_INTERPRETATION, "variant"))
 
@@ -365,15 +370,17 @@ class GenomicInterpretation(BaseTimeStamp):
     )
     subject_or_biosample_id = models.CharField(
         max_length=200, blank=True, help_text="Id of the patient or biosample of the subject being interpreted")
-    interpretation_status = models.CharField(max_length=200, choices=GENOMIC_INTERPRETATION_STATUS, default="UNKNOWN_STATUS",
+    interpretation_status = models.CharField(max_length=200, choices=GENOMIC_INTERPRETATION_STATUS,
+                                             default="UNKNOWN_STATUS",
                                              help_text='How the call of this GenomicInterpretation was interpreted.')
 
     # Corresponds to 'call' field in schema in case of GeneDescriptor
-    gene_descriptor = models.ForeignKey(GeneDescriptor, on_delete=models.CASCADE, null=True,
-                                        blank=True, help_text="Corresponds to 'call' field in schema in case of GeneDescriptor")
+    gene_descriptor = models.ForeignKey(GeneDescriptor, on_delete=models.CASCADE, null=True, blank=True,
+                                        help_text="Corresponds to 'call' field in schema in case of GeneDescriptor")
     # Corresponds to 'call' field in schema in case of VariantInterpretation
-    variant_interpretation = models.ForeignKey(VariantInterpretation, on_delete=models.CASCADE, null=True,
-                                               blank=True, help_text="Corresponds to 'call' field in schema in case of VariantInterpretation")
+    variant_interpretation = models.ForeignKey(VariantInterpretation, on_delete=models.CASCADE, null=True,blank=True,
+                                               help_text="Corresponds to 'call' field in schema in case of "
+                                                         "VariantInterpretation")
 
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
