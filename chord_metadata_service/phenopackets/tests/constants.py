@@ -66,10 +66,14 @@ VALID_INDIVIDUAL_2 = {
     "time_at_last_encounter": {
         "age_range": {
             "start": {
-                "age": "P30Y"
+                "age": {
+                    "iso8601duration": "P30Y"
+                }
             },
             "end": {
-                "age": "P35Y"
+                "age": {
+                    "iso8601duration": "P35Y"
+                }
             }
         }
     }

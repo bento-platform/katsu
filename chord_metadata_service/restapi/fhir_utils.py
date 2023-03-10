@@ -65,24 +65,31 @@ def codeable_concepts_fields(field_list, profile, obj):
     return concept_extensions
 
 
-def fhir_age(obj, mapping, field):
+def fhir_age(time_element: dict, mapping):
     """ Generic function to convert Age or AgeRange of TimeElement to FHIR Age. """
 
     age_extension = extension.Extension()
     age_extension.url = mapping
 
-    if "age_range" in obj[field]:
+    if "age_range" in time_element:
         age_extension.valueRange = range_.Range()
         age_extension.valueRange.low = quantity.Quantity()
-        age_extension.valueRange.low.unit = obj[field]['start']['age']["iso8601duration"]
+        age_extension.valueRange.low.unit = time_element['start']['age']["iso8601duration"]
         age_extension.valueRange.high = quantity.Quantity()
-        age_extension.valueRange.high.unit = obj[field]['end']['age']["iso8601duration"]
-    elif "age" in obj[field]:
+        age_extension.valueRange.high.unit = time_element['end']['age']["iso8601duration"]
+    elif "age" in time_element:
         age_extension.valueAge = age.Age()
-        age_extension.valueAge.unit = obj[field]['age']["iso8601duration"]
+        age_extension.valueAge.unit = time_element['age']["iso8601duration"]
     else:
         raise ValueError("FHIR age may only be represented from TimeElement.age or TimeElement.age_range")
     return age_extension
+
+
+def fhir_birth_date(obj: dict, mapping):
+    birth_date_extension = extension.Extension()
+    birth_date_extension.url = mapping
+    birth_date_extension.valueDate = fhirdate.FHIRDate(obj.get('date_of_birth', None))
+    return birth_date_extension
 
 
 def check_disease_onset(disease):
@@ -133,6 +140,12 @@ def fhir_patient(obj):
         coding.code = obj.get('taxonomy', None).get('id', None)
         taxonomy_extension.valueCodeableConcept.coding.append(coding)
         patient.extension.append(taxonomy_extension)
+
+    # birthdate
+    birth_date_extension = fhir_birth_date(
+        obj, PHENOPACKETS_ON_FHIR_MAPPING['individual']['birth_date']
+    )
+    patient.extension.append(birth_date_extension)
     return patient.as_json()
 
 
@@ -159,7 +172,7 @@ def fhir_observation(obj):
     observation.code = fhir_codeable_concept(obj['type'])
     # required by FHIR specs but omitted by phenopackets, for now set for unknown
     observation.status = 'unknown'
-    if 'negated' in obj.keys():
+    if 'excluded' in obj.keys():
         observation.interpretation = fhir_codeable_concept(
             {"label": "Positive", "id": "POS"}
         )
@@ -241,8 +254,7 @@ def fhir_specimen(obj):
     # time_of_collection
     if 'time_of_collection' in obj.keys():
         ind_age_at_collection_extension = fhir_age(
-            obj, PHENOPACKETS_ON_FHIR_MAPPING['biosample']['collected'],
-            'time_of_collection'
+            obj['time_of_collection'], PHENOPACKETS_ON_FHIR_MAPPING['biosample']['collected'],
         )
         specimen.extension.append(ind_age_at_collection_extension)
     concept_extensions = codeable_concepts_fields(

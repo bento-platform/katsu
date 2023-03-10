@@ -93,28 +93,16 @@ def parse_duration(duration: str | dict):
 
 def parse_individual_age(age_obj: dict) -> int:
     """ Parses two possible age representations and returns average age or age as integer. """
-    # AGE OPTIONS
-    # "age": {
-    #     "age": "P96Y"
-    # }
-    # AND
-    # "age": {
-    #     "start": {
-    #         "age": "P45Y"
-    #     },
-    #     "end": {
-    #         "age": "P49Y"
-    #     }
-    # }
 
-    if "start" in age_obj:
-        start_age = parse_duration(age_obj["start"]["age"])
-        end_age = parse_duration(age_obj["end"]["age"])
+    if "age_range" in age_obj:
+        age_obj = age_obj["age_range"]
+        start_age = parse_duration(age_obj["start"]["age"]["iso8601duration"])
+        end_age = parse_duration(age_obj["end"]["age"]["iso8601duration"])
         # for the duration calculate the average age
         return (start_age + end_age) // 2
 
     if "age" in age_obj:
-        return parse_duration(age_obj["age"])
+        return parse_duration(age_obj["age"]["iso8601duration"])
 
     raise ValueError(f"Error: {age_obj} format not supported")
 
@@ -369,12 +357,12 @@ def compute_binned_ages(individual_queryset, bin_size: int) -> list[int]:
     Returns a list of values floored to the closest decade (e.g. 25 --> 20)
     """
 
-    a = individual_queryset.filter(age_numeric__isnull=True).values('age')
+    a = individual_queryset.filter(age_numeric__isnull=True).values('time_at_last_encounter')
     binned_ages = []
     for r in a.iterator():  # reduce memory footprint (no caching)
-        if r["age"] is None:
+        if r["time_at_last_encounter"] is None:
             continue
-        age = parse_individual_age(r["age"])
+        age = parse_individual_age(r["time_at_last_encounter"])
         binned_ages.append(age - age % bin_size)
 
     return binned_ages

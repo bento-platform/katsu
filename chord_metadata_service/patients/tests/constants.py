@@ -70,6 +70,11 @@ VALID_INDIVIDUAL_2 = {
         "label": "human"
     },
     "date_of_birth": "1967-01-01",
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P50Y"
+        }
+    },
     "sex": "MALE",
 }
 

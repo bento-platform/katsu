@@ -81,8 +81,12 @@ class FHIRIndividualTest(APITestCase):
         self.assertEqual(get_resp_obj['patients'][0]['resourceType'], 'Patient')
         self.assertIsInstance(get_resp_obj['patients'][0]['extension'], list)
         self.assertEqual(get_resp_obj['patients'][1]['extension'][0]['url'],
-                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-age')
-        self.assertIsInstance(get_resp_obj['patients'][1]['extension'][0]['valueAge'], dict)
+                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-karyotypic-sex')
+        self.assertEqual(get_resp_obj['patients'][1]['extension'][1]['url'],
+                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-taxonomy')
+        self.assertEqual(get_resp_obj['patients'][1]['extension'][2]['url'],
+                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-birthdate')
+        self.assertIsInstance(get_resp_obj['patients'][1]['extension'][2]['valueDate'], str)
 
 
 class FHIRPhenotypicFeatureTest(APITestCase):
