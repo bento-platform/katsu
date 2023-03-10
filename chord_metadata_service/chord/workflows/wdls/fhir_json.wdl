@@ -4,8 +4,8 @@ workflow fhir_json {
     File? conditions
     File? specimens
 
-    call identity_task {
-        input: json_in = patients
+    call copy_task {
+        input: json_in = patients, out_name = "patients.json"
     }
 
     call optional_fhir_json_task as ofjt1 {
@@ -19,15 +19,16 @@ workflow fhir_json {
     }
 }
 
-task identity_task {
+task copy_task {
     File json_in
+    String out_name
 
     command {
-        true
+        cp "${json_in}" "${out_name}"
     }
 
     output {
-        File json_out = "${json_in}"
+        File json_out = "${out_name}"
     }
 }
 

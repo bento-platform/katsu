@@ -16,7 +16,14 @@ __all__ = ["Experiment", "ExperimentResult", "Instrument"]
 
 
 class Experiment(models.Model, IndexableMixin):
-    """ Class to store Experiment information """
+    """
+    Class to store Experiment information. This model is primarily designed for genomic experiments; it is thus
+    linked to a specific bisample.
+
+    Experiments can be linked via a many-to-many relationship to ExperimentResults; many-to-many because a result
+    may be derived from multiple experiments. Consider, for example, the results of a pairwise analysis derived from
+    two Experiments, each of which was performed on a different Biosample.
+    """
 
     id = CharField(primary_key=True, max_length=200, help_text=rec_help(d.EXPERIMENT, "id"))
     # STUDY TYPE
@@ -51,6 +58,8 @@ class Experiment(models.Model, IndexableMixin):
     biosample = models.ForeignKey(Biosample, on_delete=models.CASCADE, help_text=rec_help(d.EXPERIMENT, "biosample"))
     table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
     # EXPERIMENT RESULT
+    #  - Many-to-many because experiment results can contain analyses involving multiple experiments,
+    #    e.g., a pairwise analysis
     experiment_results = models.ManyToManyField("ExperimentResult", blank=True,
                                                 help_text=rec_help(d.EXPERIMENT, "experiment_results"))
     # INSTRUMENT

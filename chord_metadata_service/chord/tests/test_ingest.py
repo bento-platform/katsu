@@ -153,6 +153,12 @@ class IngestTest(TestCase):
 
         biosamples = list(p.biosamples.all().order_by("id"))
         self.assertEqual(len(biosamples), 5)
+
+        # Make sure biosamples are properly associated with phenopacket subject
+        #  - Some test biosamples exclude individual_id; these should be properly associated too
+        for bs in biosamples:
+            self.assertEqual(bs.individual_id, p.subject.id)
+
         # TODO: More
 
     def test_reingesting_updating_phenopackets_json(self):

@@ -277,8 +277,21 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
 
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
 
+    subject = phenopacket_data.get("subject")
+
     phenotypic_features = phenopacket_data.get("phenotypic_features", [])
-    biosamples = phenopacket_data.get("biosamples", [])
+
+    # Pre-process biosamples; historically (<2.17.3) we were running into issues because a missing individual_id in
+    # the biosample meant it would be left as None rather than properly associated with a specified subject.
+    #   - Here, we tag the biosample with the subject's ID if a subject is specified, since the Phenopacket spec
+    #     explicitly says of the biosamples field:
+    #       "This field describes samples that have been derived from the patient who is the object of the Phenopacket"
+    biosamples = [
+        {**bs, "individual_id": subject["id"]} if subject else bs
+        for bs in phenopacket_data.get("biosamples", [])
+    ]
+
+    # Pull other fields out of the phenopacket input
     diseases = phenopacket_data.get("diseases", [])
     meta_data = phenopacket_data["meta_data"]  # required to be present, so no .get()
     resources = meta_data.get("resources", [])
@@ -290,7 +303,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
     # - or, if it already exists, *update* the extra properties if needed.
     #   This is one of the few cases of 'updating' something that exists in Katsu.
     subject_obj: Optional[pm.Individual] = None
-    if subject := phenopacket_data.get("subject"):  # we have a dictionary of subject data in the phenopacket
+    if subject:  # we have a dictionary of subject data in the phenopacket
         subject_obj = update_or_create_subject(subject)
 
     # Get or create all phenotypic features in the phenopacket

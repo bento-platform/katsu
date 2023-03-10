@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+
+# Wait for database to start
+./wait_for_db.bash
 
 # Run migrations; make migrations for other apps if needed
 python manage.py makemigrations

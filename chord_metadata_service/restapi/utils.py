@@ -14,6 +14,7 @@ from django.conf import settings
 
 from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.experiments import models as experiments_models
+from chord_metadata_service.logger import logger
 
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
@@ -307,13 +308,16 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
     """
     Computes counts of distinct values for a queryset.
     """
+
     # values() restrict the table of results to this COLUMN
     # annotate() creates a `total` column for the aggregation
     # Count("*") aggregates results including nulls
+
     annotated_queryset = queryset.values(field).annotate(total=Count("*"))
     num_missing = 0
 
-    stats: dict[str, int] = dict()
+    stats: dict[str, int] = {}
+
     for item in annotated_queryset:
         key = item[field]
         if key is None:
@@ -394,11 +398,17 @@ def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
     stats = stats_for_field(model, field_name, add_missing=True)
 
     # Enforce values order from config and apply policies
-    labels: list[str] = field_props["config"]["enum"]
+    labels: Optional[list[str]] = field_props["config"].get("enum")
+    derived_labels: bool = labels is None
+
     # Special case: for some fields, values are based on what's present in the
-    # dataset. Apply lexical sort, and exclude the "missing" value which will
-    # be appended at the end if it is set.
-    if labels is None:
+    # dataset (enum is null in the public JSON).
+    # - Here, apply lexical sort, and exclude the "missing" value which will
+    #   be appended at the end if it is set.
+    # - Note that in this situation, we explictly MUST remove rounded-down 0-counts
+    #   (below the threshold) below, otherwise we LEAK that there is 1 <= x <= threshold
+    #   matching entries in the DB.
+    if derived_labels:
         labels = sorted(
             [k for k in stats.keys() if k != "missing"],
             key=lambda x: x.lower()
@@ -408,12 +418,21 @@ def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
     bins: list[BinWithValue] = []
 
     for category in labels:
-        v = stats.get(category, 0)
-        if v and v <= threshold:
-            v = 0
+        v: int = stats.get(category, 0)
+
+        # Censor small counts by rounding them to 0
+        if v <= threshold:
+            # We cannot append 0-counts for derived labels, since that indicates
+            # there is a non-0 count for this label in the database - i.e., if the label is pulled
+            # from the values in the database, someone could otherwise learn 1 <= this field <= threshold
+            # given it being present at all.
+            if derived_labels:
+                continue
+            v = 0  # Otherwise (pre-made labels, so we aren't leaking anything), censor the small count
+
         bins.append({"label": category, "value": v})
 
-    if stats["missing"] > 0:
+    if stats["missing"]:
         bins.append({"label": "missing", "value": stats["missing"]})
 
     return bins
@@ -626,6 +645,8 @@ def filter_queryset_field_value(qs, field_props, value: str):
         condition = {f"{field}__startswith": val}
     else:
         raise NotImplementedError()
+
+    logger.debug(f"Filtering {model}.{field} with {condition}")
 
     return qs.filter(**condition)
 

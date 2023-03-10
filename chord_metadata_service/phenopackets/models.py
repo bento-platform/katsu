@@ -95,9 +95,10 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
     evidence = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=PHENOPACKET_EVIDENCE_SCHEMA)],
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "evidence"))
     biosample = models.ForeignKey(
-        "Biosample", on_delete=models.SET_NULL, blank=True, null=True, related_name='phenotypic_features')
+        "Biosample", on_delete=models.CASCADE, blank=True, null=True, related_name='phenotypic_features')
+    # Phenotypic features can be attached directly to phenopackets, rather than through biosamples
     phenopacket = models.ForeignKey(
-        "Phenopacket", on_delete=models.SET_NULL, blank=True, null=True, related_name='phenotypic_features')
+        "Phenopacket", on_delete=models.CASCADE, blank=True, null=True, related_name='phenotypic_features')
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "extra_properties"))
 
     def __str__(self):
