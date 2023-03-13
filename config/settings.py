@@ -66,11 +66,13 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework",
     "drf_spectacular",
-    "debug_toolbar",
     # Local
     # -----
     "chord_metadata_service.mohpackets.apps.MohpacketsConfig",
 ]
+
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
