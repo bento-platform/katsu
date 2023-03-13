@@ -4,9 +4,1115 @@ info:
   version: 1.0.0
   description: This is the RESTful API for the MoH Service.
 paths:
+  /moh/v1/authorized/biomarkers/:
+    get:
+      operationId: authorized_biomarkers_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_follow_up_id
+        schema:
+          type: string
+      - in: query
+        name: test_interval
+        schema:
+          type: integer
+      - in: query
+        name: psa_level
+        schema:
+          type: integer
+      - in: query
+        name: ca125
+        schema:
+          type: integer
+      - in: query
+        name: cea
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Biomarker'
+          description: ''
+  /moh/v1/authorized/chemotherapies/:
+    get:
+      operationId: authorized_chemotherapies_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy_dosage_units
+        schema:
+          type: string
+      - in: query
+        name: cumulative_drug_dosage_prescribed
+        schema:
+          type: integer
+      - in: query
+        name: cumulative_drug_dosage_actual
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chemotherapy'
+          description: ''
+  /moh/v1/authorized/comorbidities/:
+    get:
+      operationId: authorized_comorbidities_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: prior_malignancy
+        schema:
+          type: string
+      - in: query
+        name: laterality_of_prior_malignancy
+        schema:
+          type: string
+      - in: query
+        name: age_at_comorbidity_diagnosis
+        schema:
+          type: integer
+      - in: query
+        name: comorbidity_type_code
+        schema:
+          type: string
+      - in: query
+        name: comorbidity_treatment_status
+        schema:
+          type: string
+      - in: query
+        name: comorbidity_treatment
+        schema:
+          type: string
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comorbidity'
+          description: ''
+  /moh/v1/authorized/donor_with_clinical_data/:
+    get:
+      operationId: authorized_donor_with_clinical_data_list
+      description: |-
+        This viewset provides access to Donor model and its related clinical data.
+        It uses the DonorWithClinicalDataSerializer for serialization.
+
+        The viewset pre-fetches related objects using the `prefetch_related` method
+        to minimize database queries. This ensures that all the related objects are
+        available in a single database query, improving the performance of the viewset.
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DonorWithClinicalData'
+          description: ''
+  /moh/v1/authorized/donors/:
+    get:
+      operationId: authorized_donors_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: is_deceased
+        schema:
+          type: boolean
+      - in: query
+        name: cause_of_death
+        schema:
+          type: string
+      - in: query
+        name: date_of_birth
+        schema:
+          type: string
+      - in: query
+        name: date_of_death
+        schema:
+          type: string
+      - in: query
+        name: primary_site
+        schema:
+          type: string
+      - in: query
+        name: age
+        schema:
+          type: number
+      - in: query
+        name: max_age
+        schema:
+          type: number
+      - in: query
+        name: min_age
+        schema:
+          type: number
+      - in: query
+        name: donors
+        schema:
+          type: string
+      - in: query
+        name: primary_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: speciman
+        schema:
+          type: string
+      - in: query
+        name: sample_registration
+        schema:
+          type: string
+      - in: query
+        name: treatment
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy
+        schema:
+          type: string
+      - in: query
+        name: hormone_therapy
+        schema:
+          type: string
+      - in: query
+        name: radiation
+        schema:
+          type: string
+      - in: query
+        name: immunotherapy
+        schema:
+          type: string
+      - in: query
+        name: surgery
+        schema:
+          type: string
+      - in: query
+        name: follow_up
+        schema:
+          type: string
+      - in: query
+        name: biomarker
+        schema:
+          type: string
+      - in: query
+        name: comorbidity
+        schema:
+          type: string
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Donor'
+          description: ''
+  /moh/v1/authorized/follow_ups/:
+    get:
+      operationId: authorized_follow_ups_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: submitter_follow_up_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: date_of_followup
+        schema:
+          type: string
+      - in: query
+        name: lost_to_followup
+        schema:
+          type: boolean
+      - in: query
+        name: lost_to_followup_reason
+        schema:
+          type: string
+      - in: query
+        name: disease_status_at_followup
+        schema:
+          type: string
+      - in: query
+        name: relapse_type
+        schema:
+          type: string
+      - in: query
+        name: date_of_relapse
+        schema:
+          type: string
+      - in: query
+        name: method_of_progression_status
+        schema:
+          type: string
+      - in: query
+        name: anatomic_site_progression_or_recurrence
+        schema:
+          type: string
+      - in: query
+        name: recurrence_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: recurrence_t_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_n_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_m_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_stage_group
+        schema:
+          type: string
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FollowUp'
+          description: ''
+  /moh/v1/authorized/hormone_therapies/:
+    get:
+      operationId: authorized_hormone_therapies_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - in: query
+        name: hormone_drug_dosage_units
+        schema:
+          type: string
+      - in: query
+        name: cumulative_drug_dosage_prescribed
+        schema:
+          type: integer
+      - in: query
+        name: cumulative_drug_dosage_actual
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HormoneTherapy'
+          description: ''
+  /moh/v1/authorized/immunotherapies/:
+    get:
+      operationId: authorized_immunotherapies_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: immunotherapy_type
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Immunotherapy'
+          description: ''
+  /moh/v1/authorized/primary_diagnoses/:
+    get:
+      operationId: authorized_primary_diagnoses_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: date_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: cancer_type_code
+        schema:
+          type: string
+      - in: query
+        name: basis_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: lymph_nodes_examined_status
+        schema:
+          type: string
+      - in: query
+        name: lymph_nodes_examined_method
+        schema:
+          type: string
+      - in: query
+        name: number_lymph_nodes_positive
+        schema:
+          type: integer
+      - in: query
+        name: clinical_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: clinical_t_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_n_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_m_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_stage_group
+        schema:
+          type: string
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrimaryDiagnosis'
+          description: ''
+  /moh/v1/authorized/programs/:
+    get:
+      operationId: authorized_programs_list
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: created
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: updated
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProgramList'
+          description: ''
+  /moh/v1/authorized/radiations/:
+    get:
+      operationId: authorized_radiations_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_modality
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_type
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_fractions
+        schema:
+          type: integer
+      - in: query
+        name: radiation_therapy_dosage
+        schema:
+          type: integer
+      - in: query
+        name: anatomical_site_irradiated
+        schema:
+          type: string
+      - in: query
+        name: radiation_boost
+        schema:
+          type: boolean
+      - in: query
+        name: reference_radiation_treatment_id
+        schema:
+          type: string
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Radiation'
+          description: ''
+  /moh/v1/authorized/sample_registrations/:
+    get:
+      operationId: authorized_sample_registrations_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: submitter_sample_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: gender
+        schema:
+          type: string
+      - in: query
+        name: sex_at_birth
+        schema:
+          type: string
+      - in: query
+        name: specimen_tissue_source
+        schema:
+          type: string
+      - in: query
+        name: tumour_normal_designation
+        schema:
+          type: string
+      - in: query
+        name: specimen_type
+        schema:
+          type: string
+      - in: query
+        name: sample_type
+        schema:
+          type: string
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SampleRegistration'
+          description: ''
+  /moh/v1/authorized/specimens/:
+    get:
+      operationId: authorized_specimens_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: pathological_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: pathological_t_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_n_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_m_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_stage_group
+        schema:
+          type: string
+      - in: query
+        name: specimen_collection_date
+        schema:
+          type: string
+      - in: query
+        name: specimen_storage
+        schema:
+          type: string
+      - in: query
+        name: tumour_histological_type
+        schema:
+          type: string
+      - in: query
+        name: specimen_anatomic_location
+        schema:
+          type: string
+      - in: query
+        name: reference_pathology_confirmed_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: reference_pathology_confirmed_tumour_presence
+        schema:
+          type: string
+      - in: query
+        name: tumour_grading_system
+        schema:
+          type: string
+      - in: query
+        name: tumour_grade
+        schema:
+          type: string
+      - in: query
+        name: percent_tumour_cells_range
+        schema:
+          type: string
+      - in: query
+        name: percent_tumour_cells_measurement_method
+        schema:
+          type: string
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Specimen'
+          description: ''
+  /moh/v1/authorized/surgeries/:
+    get:
+      operationId: authorized_surgeries_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: surgery_type
+        schema:
+          type: string
+      - in: query
+        name: surgery_site
+        schema:
+          type: string
+      - in: query
+        name: surgery_location
+        schema:
+          type: string
+      - in: query
+        name: tumour_length
+        schema:
+          type: integer
+      - in: query
+        name: tumour_width
+        schema:
+          type: integer
+      - in: query
+        name: greatest_dimension_tumour
+        schema:
+          type: integer
+      - in: query
+        name: tumour_focality
+        schema:
+          type: string
+      - in: query
+        name: residual_tumour_classification
+        schema:
+          type: string
+      - in: query
+        name: margin_types_involved
+        schema:
+          type: string
+      - in: query
+        name: margin_types_not_involved
+        schema:
+          type: string
+      - in: query
+        name: margin_types_not_assessed
+        schema:
+          type: string
+      - in: query
+        name: lymphovascular_invasion
+        schema:
+          type: string
+      - in: query
+        name: perineural_invasion
+        schema:
+          type: string
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Surgery'
+          description: ''
+  /moh/v1/authorized/treatments/:
+    get:
+      operationId: authorized_treatments_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
+      parameters:
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: treatment_type
+        schema:
+          type: string
+      - in: query
+        name: is_primary_treatment
+        schema:
+          type: string
+      - in: query
+        name: treatment_start_date
+        schema:
+          type: string
+      - in: query
+        name: treatment_end_date
+        schema:
+          type: string
+      - in: query
+        name: treatment_setting
+        schema:
+          type: string
+      - in: query
+        name: treatment_intent
+        schema:
+          type: string
+      - in: query
+        name: days_per_cycle
+        schema:
+          type: integer
+      - in: query
+        name: number_of_cycles
+        schema:
+          type: integer
+      - in: query
+        name: response_to_treatment_criteria_method
+        schema:
+          type: string
+      - in: query
+        name: response_to_treatment
+        schema:
+          type: string
+      tags:
+      - authorized
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Treatment'
+          description: ''
   /moh/v1/discovery/biomarkers/:
     get:
       operationId: discovery_biomarkers_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: program_id
@@ -64,6 +1170,15 @@ paths:
   /moh/v1/discovery/chemotherapies/:
     get:
       operationId: discovery_chemotherapies_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: program_id
@@ -113,6 +1228,15 @@ paths:
   /moh/v1/discovery/comorbidities/:
     get:
       operationId: discovery_comorbidities_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: program_id
@@ -162,6 +1286,15 @@ paths:
   /moh/v1/discovery/donors/:
     get:
       operationId: discovery_donors_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: submitter_donor_id
@@ -271,6 +1404,15 @@ paths:
   /moh/v1/discovery/follow_ups/:
     get:
       operationId: discovery_follow_ups_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: submitter_follow_up_id
@@ -360,6 +1502,15 @@ paths:
   /moh/v1/discovery/hormone_therapies/:
     get:
       operationId: discovery_hormone_therapies_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: program_id
@@ -409,6 +1560,15 @@ paths:
   /moh/v1/discovery/immunotherapies/:
     get:
       operationId: discovery_immunotherapies_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: program_id
@@ -468,6 +1628,15 @@ paths:
   /moh/v1/discovery/primary_diagnoses/:
     get:
       operationId: discovery_primary_diagnoses_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: submitter_primary_diagnosis_id
@@ -541,6 +1710,15 @@ paths:
   /moh/v1/discovery/radiations/:
     get:
       operationId: discovery_radiations_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: program_id
@@ -598,6 +1776,15 @@ paths:
   /moh/v1/discovery/sample_registrations/:
     get:
       operationId: discovery_sample_registrations_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: submitter_sample_id
@@ -655,6 +1842,15 @@ paths:
   /moh/v1/discovery/specimens/:
     get:
       operationId: discovery_specimens_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: submitter_specimen_id
@@ -748,6 +1944,15 @@ paths:
   /moh/v1/discovery/surgeries/:
     get:
       operationId: discovery_surgeries_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: program_id
@@ -833,6 +2038,15 @@ paths:
   /moh/v1/discovery/treatments/:
     get:
       operationId: discovery_treatments_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
       parameters:
       - in: query
         name: submitter_treatment_id
@@ -903,2980 +2117,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/model/biomarkers/:
-    get:
-      operationId: model_biomarkers_list
-      parameters:
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_specimen_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_primary_diagnosis_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_treatment_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_follow_up_id
-        schema:
-          type: string
-      - in: query
-        name: test_interval
-        schema:
-          type: integer
-      - in: query
-        name: psa_level
-        schema:
-          type: integer
-      - in: query
-        name: ca125
-        schema:
-          type: integer
-      - in: query
-        name: cea
-        schema:
-          type: integer
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedBiomarkerList'
-          description: ''
-    post:
-      operationId: model_biomarkers_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BiomarkerRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/BiomarkerRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/BiomarkerRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Biomarker'
-          description: ''
-  /moh/v1/model/biomarkers/{id}/:
-    get:
-      operationId: model_biomarkers_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this biomarker.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Biomarker'
-          description: ''
-    put:
-      operationId: model_biomarkers_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this biomarker.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BiomarkerRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/BiomarkerRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/BiomarkerRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Biomarker'
-          description: ''
-    patch:
-      operationId: model_biomarkers_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this biomarker.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedBiomarkerRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedBiomarkerRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedBiomarkerRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Biomarker'
-          description: ''
-    delete:
-      operationId: model_biomarkers_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this biomarker.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/chemotherapies/:
-    get:
-      operationId: model_chemotherapies_list
-      parameters:
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_treatment_id
-        schema:
-          type: string
-      - in: query
-        name: drug_name
-        schema:
-          type: string
-      - in: query
-        name: drug_rxnormcui
-        schema:
-          type: string
-      - in: query
-        name: chemotherapy_dosage_units
-        schema:
-          type: string
-      - in: query
-        name: cumulative_drug_dosage_prescribed
-        schema:
-          type: integer
-      - in: query
-        name: cumulative_drug_dosage_actual
-        schema:
-          type: integer
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedChemotherapyList'
-          description: ''
-    post:
-      operationId: model_chemotherapies_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChemotherapyRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ChemotherapyRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ChemotherapyRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Chemotherapy'
-          description: ''
-  /moh/v1/model/chemotherapies/{id}/:
-    get:
-      operationId: model_chemotherapies_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this chemotherapy.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Chemotherapy'
-          description: ''
-    put:
-      operationId: model_chemotherapies_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this chemotherapy.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChemotherapyRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ChemotherapyRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ChemotherapyRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Chemotherapy'
-          description: ''
-    patch:
-      operationId: model_chemotherapies_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this chemotherapy.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedChemotherapyRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedChemotherapyRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedChemotherapyRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Chemotherapy'
-          description: ''
-    delete:
-      operationId: model_chemotherapies_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this chemotherapy.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/comorbidities/:
-    get:
-      operationId: model_comorbidities_list
-      parameters:
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: prior_malignancy
-        schema:
-          type: string
-      - in: query
-        name: laterality_of_prior_malignancy
-        schema:
-          type: string
-      - in: query
-        name: age_at_comorbidity_diagnosis
-        schema:
-          type: integer
-      - in: query
-        name: comorbidity_type_code
-        schema:
-          type: string
-      - in: query
-        name: comorbidity_treatment_status
-        schema:
-          type: string
-      - in: query
-        name: comorbidity_treatment
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedComorbidityList'
-          description: ''
-    post:
-      operationId: model_comorbidities_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ComorbidityRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ComorbidityRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ComorbidityRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Comorbidity'
-          description: ''
-  /moh/v1/model/comorbidities/{id}/:
-    get:
-      operationId: model_comorbidities_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this comorbidity.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Comorbidity'
-          description: ''
-    put:
-      operationId: model_comorbidities_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this comorbidity.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ComorbidityRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ComorbidityRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ComorbidityRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Comorbidity'
-          description: ''
-    patch:
-      operationId: model_comorbidities_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this comorbidity.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedComorbidityRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedComorbidityRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedComorbidityRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Comorbidity'
-          description: ''
-    delete:
-      operationId: model_comorbidities_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this comorbidity.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/donors/:
-    get:
-      operationId: model_donors_list
-      parameters:
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: is_deceased
-        schema:
-          type: boolean
-      - in: query
-        name: cause_of_death
-        schema:
-          type: string
-      - in: query
-        name: date_of_birth
-        schema:
-          type: string
-      - in: query
-        name: date_of_death
-        schema:
-          type: string
-      - in: query
-        name: primary_site
-        schema:
-          type: string
-      - in: query
-        name: age
-        schema:
-          type: number
-      - in: query
-        name: max_age
-        schema:
-          type: number
-      - in: query
-        name: min_age
-        schema:
-          type: number
-      - in: query
-        name: donors
-        schema:
-          type: string
-      - in: query
-        name: primary_diagnosis
-        schema:
-          type: string
-      - in: query
-        name: speciman
-        schema:
-          type: string
-      - in: query
-        name: sample_registration
-        schema:
-          type: string
-      - in: query
-        name: treatment
-        schema:
-          type: string
-      - in: query
-        name: chemotherapy
-        schema:
-          type: string
-      - in: query
-        name: hormone_therapy
-        schema:
-          type: string
-      - in: query
-        name: radiation
-        schema:
-          type: string
-      - in: query
-        name: immunotherapy
-        schema:
-          type: string
-      - in: query
-        name: surgery
-        schema:
-          type: string
-      - in: query
-        name: follow_up
-        schema:
-          type: string
-      - in: query
-        name: biomarker
-        schema:
-          type: string
-      - in: query
-        name: comorbidity
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedDonorList'
-          description: ''
-    post:
-      operationId: model_donors_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DonorRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/DonorRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/DonorRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Donor'
-          description: ''
-  /moh/v1/model/donors/{submitter_donor_id}/:
-    get:
-      operationId: model_donors_retrieve
-      parameters:
-      - in: path
-        name: submitter_donor_id
-        schema:
-          type: string
-        description: A unique value identifying this donor.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Donor'
-          description: ''
-    put:
-      operationId: model_donors_update
-      parameters:
-      - in: path
-        name: submitter_donor_id
-        schema:
-          type: string
-        description: A unique value identifying this donor.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DonorRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/DonorRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/DonorRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Donor'
-          description: ''
-    patch:
-      operationId: model_donors_partial_update
-      parameters:
-      - in: path
-        name: submitter_donor_id
-        schema:
-          type: string
-        description: A unique value identifying this donor.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedDonorRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedDonorRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedDonorRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Donor'
-          description: ''
-    delete:
-      operationId: model_donors_destroy
-      parameters:
-      - in: path
-        name: submitter_donor_id
-        schema:
-          type: string
-        description: A unique value identifying this donor.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/follow_ups/:
-    get:
-      operationId: model_follow_ups_list
-      parameters:
-      - in: query
-        name: submitter_follow_up_id
-        schema:
-          type: string
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_primary_diagnosis_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_treatment_id
-        schema:
-          type: string
-      - in: query
-        name: date_of_followup
-        schema:
-          type: string
-      - in: query
-        name: lost_to_followup
-        schema:
-          type: boolean
-      - in: query
-        name: lost_to_followup_reason
-        schema:
-          type: string
-      - in: query
-        name: disease_status_at_followup
-        schema:
-          type: string
-      - in: query
-        name: relapse_type
-        schema:
-          type: string
-      - in: query
-        name: date_of_relapse
-        schema:
-          type: string
-      - in: query
-        name: method_of_progression_status
-        schema:
-          type: string
-      - in: query
-        name: anatomic_site_progression_or_recurrence
-        schema:
-          type: string
-      - in: query
-        name: recurrence_tumour_staging_system
-        schema:
-          type: string
-      - in: query
-        name: recurrence_t_category
-        schema:
-          type: string
-      - in: query
-        name: recurrence_n_category
-        schema:
-          type: string
-      - in: query
-        name: recurrence_m_category
-        schema:
-          type: string
-      - in: query
-        name: recurrence_stage_group
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedFollowUpList'
-          description: ''
-    post:
-      operationId: model_follow_ups_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FollowUpRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/FollowUpRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/FollowUpRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FollowUp'
-          description: ''
-  /moh/v1/model/follow_ups/{submitter_follow_up_id}/:
-    get:
-      operationId: model_follow_ups_retrieve
-      parameters:
-      - in: path
-        name: submitter_follow_up_id
-        schema:
-          type: string
-        description: A unique value identifying this follow up.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FollowUp'
-          description: ''
-    put:
-      operationId: model_follow_ups_update
-      parameters:
-      - in: path
-        name: submitter_follow_up_id
-        schema:
-          type: string
-        description: A unique value identifying this follow up.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FollowUpRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/FollowUpRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/FollowUpRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FollowUp'
-          description: ''
-    patch:
-      operationId: model_follow_ups_partial_update
-      parameters:
-      - in: path
-        name: submitter_follow_up_id
-        schema:
-          type: string
-        description: A unique value identifying this follow up.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedFollowUpRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedFollowUpRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedFollowUpRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FollowUp'
-          description: ''
-    delete:
-      operationId: model_follow_ups_destroy
-      parameters:
-      - in: path
-        name: submitter_follow_up_id
-        schema:
-          type: string
-        description: A unique value identifying this follow up.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/hormone_therapies/:
-    get:
-      operationId: model_hormone_therapies_list
-      parameters:
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_treatment_id
-        schema:
-          type: string
-      - in: query
-        name: drug_name
-        schema:
-          type: string
-      - in: query
-        name: drug_rxnormcui
-        schema:
-          type: string
-      - in: query
-        name: hormone_drug_dosage_units
-        schema:
-          type: string
-      - in: query
-        name: cumulative_drug_dosage_prescribed
-        schema:
-          type: integer
-      - in: query
-        name: cumulative_drug_dosage_actual
-        schema:
-          type: integer
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedHormoneTherapyList'
-          description: ''
-    post:
-      operationId: model_hormone_therapies_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/HormoneTherapyRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/HormoneTherapyRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/HormoneTherapyRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HormoneTherapy'
-          description: ''
-  /moh/v1/model/hormone_therapies/{id}/:
-    get:
-      operationId: model_hormone_therapies_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this hormone therapy.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HormoneTherapy'
-          description: ''
-    put:
-      operationId: model_hormone_therapies_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this hormone therapy.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/HormoneTherapyRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/HormoneTherapyRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/HormoneTherapyRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HormoneTherapy'
-          description: ''
-    patch:
-      operationId: model_hormone_therapies_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this hormone therapy.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedHormoneTherapyRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedHormoneTherapyRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedHormoneTherapyRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HormoneTherapy'
-          description: ''
-    delete:
-      operationId: model_hormone_therapies_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this hormone therapy.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/immunotherapies/:
-    get:
-      operationId: model_immunotherapies_list
-      parameters:
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_treatment_id
-        schema:
-          type: string
-      - in: query
-        name: immunotherapy_type
-        schema:
-          type: string
-      - in: query
-        name: drug_name
-        schema:
-          type: string
-      - in: query
-        name: drug_rxnormcui
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedImmunotherapyList'
-          description: ''
-    post:
-      operationId: model_immunotherapies_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ImmunotherapyRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ImmunotherapyRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ImmunotherapyRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Immunotherapy'
-          description: ''
-  /moh/v1/model/immunotherapies/{id}/:
-    get:
-      operationId: model_immunotherapies_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this immunotherapy.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Immunotherapy'
-          description: ''
-    put:
-      operationId: model_immunotherapies_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this immunotherapy.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ImmunotherapyRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ImmunotherapyRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ImmunotherapyRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Immunotherapy'
-          description: ''
-    patch:
-      operationId: model_immunotherapies_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this immunotherapy.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedImmunotherapyRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedImmunotherapyRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedImmunotherapyRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Immunotherapy'
-          description: ''
-    delete:
-      operationId: model_immunotherapies_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this immunotherapy.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/primary_diagnoses/:
-    get:
-      operationId: model_primary_diagnoses_list
-      parameters:
-      - in: query
-        name: submitter_primary_diagnosis_id
-        schema:
-          type: string
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: date_of_diagnosis
-        schema:
-          type: string
-      - in: query
-        name: cancer_type_code
-        schema:
-          type: string
-      - in: query
-        name: basis_of_diagnosis
-        schema:
-          type: string
-      - in: query
-        name: lymph_nodes_examined_status
-        schema:
-          type: string
-      - in: query
-        name: lymph_nodes_examined_method
-        schema:
-          type: string
-      - in: query
-        name: number_lymph_nodes_positive
-        schema:
-          type: integer
-      - in: query
-        name: clinical_tumour_staging_system
-        schema:
-          type: string
-      - in: query
-        name: clinical_t_category
-        schema:
-          type: string
-      - in: query
-        name: clinical_n_category
-        schema:
-          type: string
-      - in: query
-        name: clinical_m_category
-        schema:
-          type: string
-      - in: query
-        name: clinical_stage_group
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedPrimaryDiagnosisList'
-          description: ''
-    post:
-      operationId: model_primary_diagnoses_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PrimaryDiagnosis'
-          description: ''
-  /moh/v1/model/primary_diagnoses/{submitter_primary_diagnosis_id}/:
-    get:
-      operationId: model_primary_diagnoses_retrieve
-      parameters:
-      - in: path
-        name: submitter_primary_diagnosis_id
-        schema:
-          type: string
-        description: A unique value identifying this primary diagnosis.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PrimaryDiagnosis'
-          description: ''
-    put:
-      operationId: model_primary_diagnoses_update
-      parameters:
-      - in: path
-        name: submitter_primary_diagnosis_id
-        schema:
-          type: string
-        description: A unique value identifying this primary diagnosis.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PrimaryDiagnosisRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PrimaryDiagnosis'
-          description: ''
-    patch:
-      operationId: model_primary_diagnoses_partial_update
-      parameters:
-      - in: path
-        name: submitter_primary_diagnosis_id
-        schema:
-          type: string
-        description: A unique value identifying this primary diagnosis.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPrimaryDiagnosisRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedPrimaryDiagnosisRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedPrimaryDiagnosisRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PrimaryDiagnosis'
-          description: ''
-    delete:
-      operationId: model_primary_diagnoses_destroy
-      parameters:
-      - in: path
-        name: submitter_primary_diagnosis_id
-        schema:
-          type: string
-        description: A unique value identifying this primary diagnosis.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/programs/:
-    get:
-      operationId: model_programs_list
-      parameters:
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: name
-        schema:
-          type: string
-      - in: query
-        name: created
-        schema:
-          type: string
-          format: date-time
-      - in: query
-        name: updated
-        schema:
-          type: string
-          format: date-time
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedProgramList'
-          description: ''
-    post:
-      operationId: model_programs_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProgramRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ProgramRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ProgramRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Program'
-          description: ''
-  /moh/v1/model/programs/{program_id}/:
-    get:
-      operationId: model_programs_retrieve
-      parameters:
-      - in: path
-        name: program_id
-        schema:
-          type: string
-        description: A unique value identifying this program.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Program'
-          description: ''
-    put:
-      operationId: model_programs_update
-      parameters:
-      - in: path
-        name: program_id
-        schema:
-          type: string
-        description: A unique value identifying this program.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProgramRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ProgramRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ProgramRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Program'
-          description: ''
-    patch:
-      operationId: model_programs_partial_update
-      parameters:
-      - in: path
-        name: program_id
-        schema:
-          type: string
-        description: A unique value identifying this program.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedProgramRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedProgramRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedProgramRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Program'
-          description: ''
-    delete:
-      operationId: model_programs_destroy
-      parameters:
-      - in: path
-        name: program_id
-        schema:
-          type: string
-        description: A unique value identifying this program.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/radiations/:
-    get:
-      operationId: model_radiations_list
-      parameters:
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_treatment_id
-        schema:
-          type: string
-      - in: query
-        name: radiation_therapy_modality
-        schema:
-          type: string
-      - in: query
-        name: radiation_therapy_type
-        schema:
-          type: string
-      - in: query
-        name: radiation_therapy_fractions
-        schema:
-          type: integer
-      - in: query
-        name: radiation_therapy_dosage
-        schema:
-          type: integer
-      - in: query
-        name: anatomical_site_irradiated
-        schema:
-          type: string
-      - in: query
-        name: radiation_boost
-        schema:
-          type: boolean
-      - in: query
-        name: reference_radiation_treatment_id
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedRadiationList'
-          description: ''
-    post:
-      operationId: model_radiations_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RadiationRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/RadiationRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/RadiationRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Radiation'
-          description: ''
-  /moh/v1/model/radiations/{id}/:
-    get:
-      operationId: model_radiations_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this radiation.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Radiation'
-          description: ''
-    put:
-      operationId: model_radiations_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this radiation.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RadiationRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/RadiationRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/RadiationRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Radiation'
-          description: ''
-    patch:
-      operationId: model_radiations_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this radiation.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedRadiationRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedRadiationRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedRadiationRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Radiation'
-          description: ''
-    delete:
-      operationId: model_radiations_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this radiation.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/sample_registrations/:
-    get:
-      operationId: model_sample_registrations_list
-      parameters:
-      - in: query
-        name: submitter_sample_id
-        schema:
-          type: string
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_specimen_id
-        schema:
-          type: string
-      - in: query
-        name: gender
-        schema:
-          type: string
-      - in: query
-        name: sex_at_birth
-        schema:
-          type: string
-      - in: query
-        name: specimen_tissue_source
-        schema:
-          type: string
-      - in: query
-        name: tumour_normal_designation
-        schema:
-          type: string
-      - in: query
-        name: specimen_type
-        schema:
-          type: string
-      - in: query
-        name: sample_type
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedSampleRegistrationList'
-          description: ''
-    post:
-      operationId: model_sample_registrations_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SampleRegistrationRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SampleRegistrationRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SampleRegistrationRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SampleRegistration'
-          description: ''
-  /moh/v1/model/sample_registrations/{submitter_sample_id}/:
-    get:
-      operationId: model_sample_registrations_retrieve
-      parameters:
-      - in: path
-        name: submitter_sample_id
-        schema:
-          type: string
-        description: A unique value identifying this sample registration.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SampleRegistration'
-          description: ''
-    put:
-      operationId: model_sample_registrations_update
-      parameters:
-      - in: path
-        name: submitter_sample_id
-        schema:
-          type: string
-        description: A unique value identifying this sample registration.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SampleRegistrationRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SampleRegistrationRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SampleRegistrationRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SampleRegistration'
-          description: ''
-    patch:
-      operationId: model_sample_registrations_partial_update
-      parameters:
-      - in: path
-        name: submitter_sample_id
-        schema:
-          type: string
-        description: A unique value identifying this sample registration.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedSampleRegistrationRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedSampleRegistrationRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedSampleRegistrationRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SampleRegistration'
-          description: ''
-    delete:
-      operationId: model_sample_registrations_destroy
-      parameters:
-      - in: path
-        name: submitter_sample_id
-        schema:
-          type: string
-        description: A unique value identifying this sample registration.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/specimens/:
-    get:
-      operationId: model_specimens_list
-      parameters:
-      - in: query
-        name: submitter_specimen_id
-        schema:
-          type: string
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_primary_diagnosis_id
-        schema:
-          type: string
-      - in: query
-        name: pathological_tumour_staging_system
-        schema:
-          type: string
-      - in: query
-        name: pathological_t_category
-        schema:
-          type: string
-      - in: query
-        name: pathological_n_category
-        schema:
-          type: string
-      - in: query
-        name: pathological_m_category
-        schema:
-          type: string
-      - in: query
-        name: pathological_stage_group
-        schema:
-          type: string
-      - in: query
-        name: specimen_collection_date
-        schema:
-          type: string
-      - in: query
-        name: specimen_storage
-        schema:
-          type: string
-      - in: query
-        name: tumour_histological_type
-        schema:
-          type: string
-      - in: query
-        name: specimen_anatomic_location
-        schema:
-          type: string
-      - in: query
-        name: reference_pathology_confirmed_diagnosis
-        schema:
-          type: string
-      - in: query
-        name: reference_pathology_confirmed_tumour_presence
-        schema:
-          type: string
-      - in: query
-        name: tumour_grading_system
-        schema:
-          type: string
-      - in: query
-        name: tumour_grade
-        schema:
-          type: string
-      - in: query
-        name: percent_tumour_cells_range
-        schema:
-          type: string
-      - in: query
-        name: percent_tumour_cells_measurement_method
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedSpecimenList'
-          description: ''
-    post:
-      operationId: model_specimens_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SpecimenRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SpecimenRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SpecimenRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Specimen'
-          description: ''
-  /moh/v1/model/specimens/{submitter_specimen_id}/:
-    get:
-      operationId: model_specimens_retrieve
-      parameters:
-      - in: path
-        name: submitter_specimen_id
-        schema:
-          type: string
-        description: A unique value identifying this specimen.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Specimen'
-          description: ''
-    put:
-      operationId: model_specimens_update
-      parameters:
-      - in: path
-        name: submitter_specimen_id
-        schema:
-          type: string
-        description: A unique value identifying this specimen.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SpecimenRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SpecimenRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SpecimenRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Specimen'
-          description: ''
-    patch:
-      operationId: model_specimens_partial_update
-      parameters:
-      - in: path
-        name: submitter_specimen_id
-        schema:
-          type: string
-        description: A unique value identifying this specimen.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedSpecimenRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedSpecimenRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedSpecimenRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Specimen'
-          description: ''
-    delete:
-      operationId: model_specimens_destroy
-      parameters:
-      - in: path
-        name: submitter_specimen_id
-        schema:
-          type: string
-        description: A unique value identifying this specimen.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/surgeries/:
-    get:
-      operationId: model_surgeries_list
-      parameters:
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_specimen_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_treatment_id
-        schema:
-          type: string
-      - in: query
-        name: surgery_type
-        schema:
-          type: string
-      - in: query
-        name: surgery_site
-        schema:
-          type: string
-      - in: query
-        name: surgery_location
-        schema:
-          type: string
-      - in: query
-        name: tumour_length
-        schema:
-          type: integer
-      - in: query
-        name: tumour_width
-        schema:
-          type: integer
-      - in: query
-        name: greatest_dimension_tumour
-        schema:
-          type: integer
-      - in: query
-        name: tumour_focality
-        schema:
-          type: string
-      - in: query
-        name: residual_tumour_classification
-        schema:
-          type: string
-      - in: query
-        name: margin_types_involved
-        schema:
-          type: string
-      - in: query
-        name: margin_types_not_involved
-        schema:
-          type: string
-      - in: query
-        name: margin_types_not_assessed
-        schema:
-          type: string
-      - in: query
-        name: lymphovascular_invasion
-        schema:
-          type: string
-      - in: query
-        name: perineural_invasion
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedSurgeryList'
-          description: ''
-    post:
-      operationId: model_surgeries_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SurgeryRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SurgeryRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SurgeryRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Surgery'
-          description: ''
-  /moh/v1/model/surgeries/{id}/:
-    get:
-      operationId: model_surgeries_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this surgery.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Surgery'
-          description: ''
-    put:
-      operationId: model_surgeries_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this surgery.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SurgeryRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SurgeryRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SurgeryRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Surgery'
-          description: ''
-    patch:
-      operationId: model_surgeries_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this surgery.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedSurgeryRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedSurgeryRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedSurgeryRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Surgery'
-          description: ''
-    delete:
-      operationId: model_surgeries_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this surgery.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
-  /moh/v1/model/treatments/:
-    get:
-      operationId: model_treatments_list
-      parameters:
-      - in: query
-        name: submitter_treatment_id
-        schema:
-          type: string
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: submitter_primary_diagnosis_id
-        schema:
-          type: string
-      - in: query
-        name: treatment_type
-        schema:
-          type: string
-      - in: query
-        name: is_primary_treatment
-        schema:
-          type: string
-      - in: query
-        name: treatment_start_date
-        schema:
-          type: string
-      - in: query
-        name: treatment_end_date
-        schema:
-          type: string
-      - in: query
-        name: treatment_setting
-        schema:
-          type: string
-      - in: query
-        name: treatment_intent
-        schema:
-          type: string
-      - in: query
-        name: days_per_cycle
-        schema:
-          type: integer
-      - in: query
-        name: number_of_cycles
-        schema:
-          type: integer
-      - in: query
-        name: response_to_treatment_criteria_method
-        schema:
-          type: string
-      - in: query
-        name: response_to_treatment
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedTreatmentList'
-          description: ''
-    post:
-      operationId: model_treatments_create
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TreatmentRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/TreatmentRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/TreatmentRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Treatment'
-          description: ''
-  /moh/v1/model/treatments/{submitter_treatment_id}/:
-    get:
-      operationId: model_treatments_retrieve
-      parameters:
-      - in: path
-        name: submitter_treatment_id
-        schema:
-          type: string
-        description: A unique value identifying this treatment.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Treatment'
-          description: ''
-    put:
-      operationId: model_treatments_update
-      parameters:
-      - in: path
-        name: submitter_treatment_id
-        schema:
-          type: string
-        description: A unique value identifying this treatment.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TreatmentRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/TreatmentRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/TreatmentRequest'
-        required: true
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Treatment'
-          description: ''
-    patch:
-      operationId: model_treatments_partial_update
-      parameters:
-      - in: path
-        name: submitter_treatment_id
-        schema:
-          type: string
-        description: A unique value identifying this treatment.
-        required: true
-      tags:
-      - model
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedTreatmentRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedTreatmentRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedTreatmentRequest'
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Treatment'
-          description: ''
-    delete:
-      operationId: model_treatments_destroy
-      parameters:
-      - in: path
-        name: submitter_treatment_id
-        schema:
-          type: string
-        description: A unique value identifying this treatment.
-        required: true
-      tags:
-      - model
-      security:
-      - basicAuth: []
-      - cookieAuth: []
-      - tokenAuth: []
-      responses:
-        '204':
-          description: No response body
 components:
   schemas:
     AnatomicalSiteIrradiatedEnum:
@@ -4004,54 +2244,6 @@ components:
       required:
       - program_id
       - submitter_donor_id
-    BiomarkerRequest:
-      type: object
-      properties:
-        test_interval:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        psa_level:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        ca125:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        cea:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_specimen_id:
-          type: string
-          minLength: 1
-          nullable: true
-        submitter_primary_diagnosis_id:
-          type: string
-          minLength: 1
-          nullable: true
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-          nullable: true
-        submitter_follow_up_id:
-          type: string
-          minLength: 1
-          nullable: true
-      required:
-      - program_id
-      - submitter_donor_id
     BlankEnum:
       enum:
       - ''
@@ -4091,45 +2283,6 @@ components:
           type: string
         submitter_treatment_id:
           type: string
-      required:
-      - chemotherapy_dosage_units
-      - drug_name
-      - drug_rxnormcui
-      - program_id
-      - submitter_donor_id
-      - submitter_treatment_id
-    ChemotherapyRequest:
-      type: object
-      properties:
-        chemotherapy_dosage_units:
-          $ref: '#/components/schemas/DosageUnitsEnum'
-        drug_name:
-          type: string
-          minLength: 1
-          maxLength: 255
-        drug_rxnormcui:
-          type: string
-          minLength: 1
-          maxLength: 64
-        cumulative_drug_dosage_prescribed:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        cumulative_drug_dosage_actual:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_treatment_id:
-          type: string
-          minLength: 1
       required:
       - chemotherapy_dosage_units
       - drug_name
@@ -4177,55 +2330,16 @@ components:
       - prior_malignancy
       - program_id
       - submitter_donor_id
-    ComorbidityRequest:
-      type: object
-      properties:
-        prior_malignancy:
-          $ref: '#/components/schemas/uBooleanEnum'
-        laterality_of_prior_malignancy:
-          oneOf:
-          - $ref: '#/components/schemas/LateralityOfPriorMalignancyEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        comorbidity_type_code:
-          type: string
-          maxLength: 64
-          pattern: ^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$
-        comorbidity_treatment_status:
-          oneOf:
-          - $ref: '#/components/schemas/uBooleanEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        comorbidity_treatment:
-          type: string
-          maxLength: 255
-        age_at_comorbidity_diagnosis:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-      required:
-      - comorbidity_treatment
-      - comorbidity_treatment_status
-      - comorbidity_type_code
-      - laterality_of_prior_malignancy
-      - prior_malignancy
-      - program_id
-      - submitter_donor_id
     Discovery:
       type: object
       description: |-
-        This serializer is used to return the discovery_count.
+        This serializer is used to return the discovery_donor.
         It also override the list serializer to a single object
       properties:
-        discovery_count:
+        discovery_donor:
           type: integer
       required:
-      - discovery_count
+      - discovery_donor
     DiseaseStatusAtFollowupEnum:
       enum:
       - Complete remission
@@ -4272,21 +2386,23 @@ components:
       - primary_site
       - program_id
       - submitter_donor_id
-    DonorRequest:
+    DonorWithClinicalData:
       type: object
       properties:
         submitter_donor_id:
           type: string
-          minLength: 1
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
+        program_id:
+          type: string
+        is_deceased:
+          type: boolean
         cause_of_death:
           oneOf:
           - $ref: '#/components/schemas/CauseOfDeathEnum'
           - $ref: '#/components/schemas/BlankEnum'
         date_of_birth:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         date_of_death:
@@ -4297,11 +2413,21 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PrimarySiteEnum'
-        is_deceased:
-          type: boolean
-        program_id:
-          type: string
-          minLength: 1
+        primary_diagnoses:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedPrimaryDiagnosis'
+          readOnly: true
+        comorbidities:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedComorbidity'
+          readOnly: true
+        biomarkers:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedBiomarker'
+          readOnly: true
       required:
       - cause_of_death
       - date_of_birth
@@ -4399,93 +2525,6 @@ components:
       - relapse_type
       - submitter_donor_id
       - submitter_follow_up_id
-    FollowUpRequest:
-      type: object
-      properties:
-        submitter_follow_up_id:
-          type: string
-          minLength: 1
-          maxLength: 64
-        date_of_followup:
-          type: string
-          minLength: 1
-          maxLength: 32
-          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        lost_to_followup_reason:
-          oneOf:
-          - $ref: '#/components/schemas/LostToFollowupReasonEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        disease_status_at_followup:
-          $ref: '#/components/schemas/DiseaseStatusAtFollowupEnum'
-        relapse_type:
-          oneOf:
-          - $ref: '#/components/schemas/RelapseTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        date_of_relapse:
-          type: string
-          maxLength: 32
-          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        method_of_progression_status:
-          oneOf:
-          - $ref: '#/components/schemas/MethodOfProgressionStatusEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        anatomic_site_progression_or_recurrence:
-          type: string
-          maxLength: 32
-          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
-        recurrence_tumour_staging_system:
-          oneOf:
-          - $ref: '#/components/schemas/StagingSystemEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        recurrence_t_category:
-          oneOf:
-          - $ref: '#/components/schemas/TCategoryEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        recurrence_n_category:
-          oneOf:
-          - $ref: '#/components/schemas/NCategoryEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        recurrence_m_category:
-          oneOf:
-          - $ref: '#/components/schemas/MCategoryEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        recurrence_stage_group:
-          oneOf:
-          - $ref: '#/components/schemas/StageGroupEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        lost_to_followup:
-          type: boolean
-          nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_primary_diagnosis_id:
-          type: string
-          minLength: 1
-          nullable: true
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-          nullable: true
-      required:
-      - anatomic_site_progression_or_recurrence
-      - date_of_followup
-      - date_of_relapse
-      - disease_status_at_followup
-      - lost_to_followup_reason
-      - method_of_progression_status
-      - program_id
-      - recurrence_m_category
-      - recurrence_n_category
-      - recurrence_stage_group
-      - recurrence_t_category
-      - recurrence_tumour_staging_system
-      - relapse_type
-      - submitter_donor_id
-      - submitter_follow_up_id
     GenderEnum:
       enum:
       - Man
@@ -4529,45 +2568,6 @@ components:
       - program_id
       - submitter_donor_id
       - submitter_treatment_id
-    HormoneTherapyRequest:
-      type: object
-      properties:
-        hormone_drug_dosage_units:
-          $ref: '#/components/schemas/DosageUnitsEnum'
-        drug_name:
-          type: string
-          minLength: 1
-          maxLength: 255
-        drug_rxnormcui:
-          type: string
-          minLength: 1
-          maxLength: 64
-        cumulative_drug_dosage_prescribed:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        cumulative_drug_dosage_actual:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-      required:
-      - drug_name
-      - drug_rxnormcui
-      - hormone_drug_dosage_units
-      - program_id
-      - submitter_donor_id
-      - submitter_treatment_id
     Immunotherapy:
       type: object
       properties:
@@ -4588,35 +2588,6 @@ components:
           type: string
         submitter_treatment_id:
           type: string
-      required:
-      - drug_name
-      - drug_rxnormcui
-      - immunotherapy_type
-      - program_id
-      - submitter_donor_id
-      - submitter_treatment_id
-    ImmunotherapyRequest:
-      type: object
-      properties:
-        immunotherapy_type:
-          $ref: '#/components/schemas/ImmunotherapyTypeEnum'
-        drug_name:
-          type: string
-          minLength: 1
-          maxLength: 255
-        drug_rxnormcui:
-          type: string
-          minLength: 1
-          maxLength: 64
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_treatment_id:
-          type: string
-          minLength: 1
       required:
       - drug_name
       - drug_rxnormcui
@@ -4741,289 +2712,12 @@ components:
       - N4
       - NX
       type: string
-    PaginatedBiomarkerList:
+    NestedBiomarker:
       type: object
       properties:
-        count:
+        id:
           type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Biomarker'
-    PaginatedChemotherapyList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Chemotherapy'
-    PaginatedComorbidityList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Comorbidity'
-    PaginatedDonorList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Donor'
-    PaginatedFollowUpList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/FollowUp'
-    PaginatedHormoneTherapyList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/HormoneTherapy'
-    PaginatedImmunotherapyList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Immunotherapy'
-    PaginatedPrimaryDiagnosisList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/PrimaryDiagnosis'
-    PaginatedProgramList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Program'
-    PaginatedRadiationList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Radiation'
-    PaginatedSampleRegistrationList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/SampleRegistration'
-    PaginatedSpecimenList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Specimen'
-    PaginatedSurgeryList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Surgery'
-    PaginatedTreatmentList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Treatment'
-    PatchedBiomarkerRequest:
-      type: object
-      properties:
+          readOnly: true
         test_interval:
           type: integer
           maximum: 32767
@@ -5044,40 +2738,19 @@ components:
           maximum: 32767
           minimum: 0
           nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_specimen_id:
-          type: string
-          minLength: 1
-          nullable: true
-        submitter_primary_diagnosis_id:
-          type: string
-          minLength: 1
-          nullable: true
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-          nullable: true
-        submitter_follow_up_id:
-          type: string
-          minLength: 1
-          nullable: true
-    PatchedChemotherapyRequest:
+    NestedChemotherapy:
       type: object
       properties:
+        id:
+          type: integer
+          readOnly: true
         chemotherapy_dosage_units:
           $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
-          minLength: 1
           maxLength: 255
         drug_rxnormcui:
           type: string
-          minLength: 1
           maxLength: 64
         cumulative_drug_dosage_prescribed:
           type: integer
@@ -5089,16 +2762,11 @@ components:
           maximum: 32767
           minimum: 0
           nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-    PatchedComorbidityRequest:
+      required:
+      - chemotherapy_dosage_units
+      - drug_name
+      - drug_rxnormcui
+    NestedComorbidity:
       type: object
       properties:
         prior_malignancy:
@@ -5107,6 +2775,11 @@ components:
           oneOf:
           - $ref: '#/components/schemas/LateralityOfPriorMalignancyEnum'
           - $ref: '#/components/schemas/BlankEnum'
+        age_at_comorbidity_diagnosis:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
         comorbidity_type_code:
           type: string
           maxLength: 64
@@ -5118,59 +2791,22 @@ components:
         comorbidity_treatment:
           type: string
           maxLength: 255
-        age_at_comorbidity_diagnosis:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-    PatchedDonorRequest:
+      required:
+      - comorbidity_treatment
+      - comorbidity_treatment_status
+      - comorbidity_type_code
+      - laterality_of_prior_malignancy
+      - prior_malignancy
+    NestedFollowUp:
       type: object
       properties:
-        submitter_donor_id:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
-        cause_of_death:
-          oneOf:
-          - $ref: '#/components/schemas/CauseOfDeathEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        date_of_birth:
-          type: string
-          minLength: 1
-          maxLength: 32
-          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        date_of_death:
-          type: string
-          maxLength: 32
-          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        primary_site:
-          type: array
-          items:
-            $ref: '#/components/schemas/PrimarySiteEnum'
-        is_deceased:
-          type: boolean
-        program_id:
-          type: string
-          minLength: 1
-    PatchedFollowUpRequest:
-      type: object
-      properties:
-        submitter_follow_up_id:
-          type: string
-          minLength: 1
-          maxLength: 64
         date_of_followup:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        lost_to_followup:
+          type: boolean
+          nullable: true
         lost_to_followup_reason:
           oneOf:
           - $ref: '#/components/schemas/LostToFollowupReasonEnum'
@@ -5213,35 +2849,37 @@ components:
           oneOf:
           - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
-        lost_to_followup:
-          type: boolean
-          nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_primary_diagnosis_id:
-          type: string
-          minLength: 1
-          nullable: true
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-          nullable: true
-    PatchedHormoneTherapyRequest:
+        biomarkers:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedBiomarker'
+          readOnly: true
+      required:
+      - anatomic_site_progression_or_recurrence
+      - date_of_followup
+      - date_of_relapse
+      - disease_status_at_followup
+      - lost_to_followup_reason
+      - method_of_progression_status
+      - recurrence_m_category
+      - recurrence_n_category
+      - recurrence_stage_group
+      - recurrence_t_category
+      - recurrence_tumour_staging_system
+      - relapse_type
+    NestedHormoneTherapy:
       type: object
       properties:
+        id:
+          type: integer
+          readOnly: true
         hormone_drug_dosage_units:
           $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
-          minLength: 1
           maxLength: 255
         drug_rxnormcui:
           type: string
-          minLength: 1
           maxLength: 64
         cumulative_drug_dosage_prescribed:
           type: integer
@@ -5253,56 +2891,53 @@ components:
           maximum: 32767
           minimum: 0
           nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-    PatchedImmunotherapyRequest:
+      required:
+      - drug_name
+      - drug_rxnormcui
+      - hormone_drug_dosage_units
+    NestedImmunotherapy:
       type: object
       properties:
+        id:
+          type: integer
+          readOnly: true
         immunotherapy_type:
           $ref: '#/components/schemas/ImmunotherapyTypeEnum'
         drug_name:
           type: string
-          minLength: 1
           maxLength: 255
         drug_rxnormcui:
           type: string
-          minLength: 1
           maxLength: 64
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-    PatchedPrimaryDiagnosisRequest:
+      required:
+      - drug_name
+      - drug_rxnormcui
+      - immunotherapy_type
+    NestedPrimaryDiagnosis:
       type: object
       properties:
         submitter_primary_diagnosis_id:
           type: string
-          minLength: 1
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
         date_of_diagnosis:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        cancer_type_code:
+          type: string
+          maxLength: 64
         basis_of_diagnosis:
           $ref: '#/components/schemas/BasisOfDiagnosisEnum'
         lymph_nodes_examined_status:
           $ref: '#/components/schemas/LymphNodesExaminedStatusEnum'
         lymph_nodes_examined_method:
           $ref: '#/components/schemas/LymphNodesExaminedMethodEnum'
+        number_lymph_nodes_positive:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
         clinical_tumour_staging_system:
           oneOf:
           - $ref: '#/components/schemas/StagingSystemEnum'
@@ -5323,42 +2958,39 @@ components:
           oneOf:
           - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
-        cancer_type_code:
-          type: string
-          minLength: 1
-          maxLength: 64
-        number_lymph_nodes_positive:
+        specimens:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedSpecimen'
+          readOnly: true
+        treatments:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedTreatment'
+          readOnly: true
+        biomarkers:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedBiomarker'
+          readOnly: true
+      required:
+      - basis_of_diagnosis
+      - cancer_type_code
+      - clinical_m_category
+      - clinical_n_category
+      - clinical_stage_group
+      - clinical_t_category
+      - clinical_tumour_staging_system
+      - date_of_diagnosis
+      - lymph_nodes_examined_method
+      - lymph_nodes_examined_status
+      - submitter_primary_diagnosis_id
+    NestedRadiation:
+      type: object
+      properties:
+        id:
           type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-    PatchedProgramRequest:
-      type: object
-      properties:
-        program_id:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
-        name:
-          type: string
-          minLength: 1
-          maxLength: 255
-        created:
-          type: string
-          format: date-time
-        updated:
-          type: string
-          format: date-time
-    PatchedRadiationRequest:
-      type: object
-      properties:
+          readOnly: true
         radiation_therapy_modality:
           $ref: '#/components/schemas/RadiationTherapyModalityEnum'
         radiation_therapy_type:
@@ -5379,21 +3011,17 @@ components:
         reference_radiation_treatment_id:
           type: string
           maxLength: 64
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-    PatchedSampleRegistrationRequest:
+      required:
+      - anatomical_site_irradiated
+      - radiation_therapy_dosage
+      - radiation_therapy_fractions
+      - radiation_therapy_modality
+      - radiation_therapy_type
+    NestedSampleRegistration:
       type: object
       properties:
         submitter_sample_id:
           type: string
-          minLength: 1
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
         gender:
@@ -5408,23 +3036,17 @@ components:
           $ref: '#/components/schemas/SpecimenTypeEnum'
         sample_type:
           $ref: '#/components/schemas/SampleTypeEnum'
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_specimen_id:
-          type: string
-          minLength: 1
-    PatchedSpecimenRequest:
+      required:
+      - gender
+      - sample_type
+      - sex_at_birth
+      - specimen_tissue_source
+      - specimen_type
+      - submitter_sample_id
+      - tumour_normal_designation
+    NestedSpecimen:
       type: object
       properties:
-        submitter_specimen_id:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
         pathological_tumour_staging_system:
           oneOf:
           - $ref: '#/components/schemas/StagingSystemEnum'
@@ -5447,7 +3069,6 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
         specimen_collection_date:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         specimen_storage:
@@ -5484,18 +3105,38 @@ components:
           oneOf:
           - $ref: '#/components/schemas/PercentTumourCellsMeasurementMethodEnum'
           - $ref: '#/components/schemas/BlankEnum'
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_primary_diagnosis_id:
-          type: string
-          minLength: 1
-    PatchedSurgeryRequest:
+        sample_registrations:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedSampleRegistration'
+          readOnly: true
+        biomarkers:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedBiomarker'
+          readOnly: true
+      required:
+      - pathological_m_category
+      - pathological_n_category
+      - pathological_stage_group
+      - pathological_t_category
+      - pathological_tumour_staging_system
+      - percent_tumour_cells_measurement_method
+      - percent_tumour_cells_range
+      - reference_pathology_confirmed_diagnosis
+      - reference_pathology_confirmed_tumour_presence
+      - specimen_anatomic_location
+      - specimen_collection_date
+      - specimen_storage
+      - tumour_grade
+      - tumour_grading_system
+      - tumour_histological_type
+    NestedSurgery:
       type: object
       properties:
+        id:
+          type: integer
+          readOnly: true
         surgery_type:
           $ref: '#/components/schemas/SurgeryTypeEnum'
         surgery_site:
@@ -5555,51 +3196,41 @@ components:
           maximum: 32767
           minimum: 0
           nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
         submitter_specimen_id:
           type: string
-          minLength: 1
           nullable: true
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-    PatchedTreatmentRequest:
+      required:
+      - lymphovascular_invasion
+      - margin_types_involved
+      - margin_types_not_assessed
+      - margin_types_not_involved
+      - perineural_invasion
+      - residual_tumour_classification
+      - surgery_location
+      - surgery_site
+      - surgery_type
+      - tumour_focality
+    NestedTreatment:
       type: object
       properties:
         submitter_treatment_id:
           type: string
-          minLength: 1
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
-        treatment_type:
-          type: array
-          items:
-            $ref: '#/components/schemas/TreatmentTypeEnum'
         is_primary_treatment:
           $ref: '#/components/schemas/uBooleanEnum'
         treatment_start_date:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         treatment_end_date:
           type: string
-          minLength: 1
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         treatment_setting:
           $ref: '#/components/schemas/TreatmentSettingEnum'
         treatment_intent:
           $ref: '#/components/schemas/TreatmentIntentEnum'
-        response_to_treatment_criteria_method:
-          $ref: '#/components/schemas/ResponseToTreatmentCriteriaMethodEnum'
-        response_to_treatment:
-          $ref: '#/components/schemas/ResponseToTreatmentEnum'
         days_per_cycle:
           type: integer
           maximum: 32767
@@ -5610,15 +3241,69 @@ components:
           maximum: 32767
           minimum: 0
           nullable: true
-        program_id:
+        response_to_treatment_criteria_method:
+          $ref: '#/components/schemas/ResponseToTreatmentCriteriaMethodEnum'
+        chemotherapies:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedChemotherapy'
+          readOnly: true
+        hormone_therapies:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedHormoneTherapy'
+          readOnly: true
+        immunotherapies:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedImmunotherapy'
+          readOnly: true
+        radiation:
+          allOf:
+          - $ref: '#/components/schemas/NestedRadiation'
+          readOnly: true
+        surgery:
+          allOf:
+          - $ref: '#/components/schemas/NestedSurgery'
+          readOnly: true
+        followups:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedFollowUp'
+          readOnly: true
+        biomarkers:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedBiomarker'
+          readOnly: true
+      required:
+      - is_primary_treatment
+      - response_to_treatment_criteria_method
+      - submitter_treatment_id
+      - treatment_end_date
+      - treatment_intent
+      - treatment_setting
+      - treatment_start_date
+    PaginatedProgramList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
           type: string
-          minLength: 1
-        submitter_donor_id:
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
           type: string
-          minLength: 1
-        submitter_primary_diagnosis_id:
-          type: string
-          minLength: 1
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Program'
     PercentTumourCellsMeasurementMethodEnum:
       enum:
       - Genomics
@@ -5689,74 +3374,6 @@ components:
           type: string
         submitter_donor_id:
           type: string
-      required:
-      - basis_of_diagnosis
-      - cancer_type_code
-      - clinical_m_category
-      - clinical_n_category
-      - clinical_stage_group
-      - clinical_t_category
-      - clinical_tumour_staging_system
-      - date_of_diagnosis
-      - lymph_nodes_examined_method
-      - lymph_nodes_examined_status
-      - program_id
-      - submitter_donor_id
-      - submitter_primary_diagnosis_id
-    PrimaryDiagnosisRequest:
-      type: object
-      properties:
-        submitter_primary_diagnosis_id:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
-        date_of_diagnosis:
-          type: string
-          minLength: 1
-          maxLength: 32
-          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        basis_of_diagnosis:
-          $ref: '#/components/schemas/BasisOfDiagnosisEnum'
-        lymph_nodes_examined_status:
-          $ref: '#/components/schemas/LymphNodesExaminedStatusEnum'
-        lymph_nodes_examined_method:
-          $ref: '#/components/schemas/LymphNodesExaminedMethodEnum'
-        clinical_tumour_staging_system:
-          oneOf:
-          - $ref: '#/components/schemas/StagingSystemEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        clinical_t_category:
-          oneOf:
-          - $ref: '#/components/schemas/TCategoryEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        clinical_n_category:
-          oneOf:
-          - $ref: '#/components/schemas/NCategoryEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        clinical_m_category:
-          oneOf:
-          - $ref: '#/components/schemas/MCategoryEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        clinical_stage_group:
-          oneOf:
-          - $ref: '#/components/schemas/StageGroupEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        cancer_type_code:
-          type: string
-          minLength: 1
-          maxLength: 64
-        number_lymph_nodes_positive:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
       required:
       - basis_of_diagnosis
       - cancer_type_code
@@ -5863,27 +3480,6 @@ components:
       required:
       - name
       - program_id
-    ProgramRequest:
-      type: object
-      properties:
-        program_id:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
-        name:
-          type: string
-          minLength: 1
-          maxLength: 255
-        created:
-          type: string
-          format: date-time
-        updated:
-          type: string
-          format: date-time
-      required:
-      - name
-      - program_id
     Radiation:
       type: object
       properties:
@@ -5916,47 +3512,6 @@ components:
           type: string
         submitter_treatment_id:
           type: string
-      required:
-      - anatomical_site_irradiated
-      - program_id
-      - radiation_therapy_dosage
-      - radiation_therapy_fractions
-      - radiation_therapy_modality
-      - radiation_therapy_type
-      - submitter_donor_id
-      - submitter_treatment_id
-    RadiationRequest:
-      type: object
-      properties:
-        radiation_therapy_modality:
-          $ref: '#/components/schemas/RadiationTherapyModalityEnum'
-        radiation_therapy_type:
-          $ref: '#/components/schemas/RadiationTherapyTypeEnum'
-        anatomical_site_irradiated:
-          $ref: '#/components/schemas/AnatomicalSiteIrradiatedEnum'
-        radiation_therapy_fractions:
-          type: integer
-          maximum: 32767
-          minimum: 0
-        radiation_therapy_dosage:
-          type: integer
-          maximum: 32767
-          minimum: 0
-        radiation_boost:
-          type: boolean
-          nullable: true
-        reference_radiation_treatment_id:
-          type: string
-          maxLength: 64
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_treatment_id:
-          type: string
-          minLength: 1
       required:
       - anatomical_site_irradiated
       - program_id
@@ -6074,46 +3629,6 @@ components:
       - submitter_sample_id
       - submitter_specimen_id
       - tumour_normal_designation
-    SampleRegistrationRequest:
-      type: object
-      properties:
-        submitter_sample_id:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
-        gender:
-          $ref: '#/components/schemas/GenderEnum'
-        sex_at_birth:
-          $ref: '#/components/schemas/SexAtBirthEnum'
-        specimen_tissue_source:
-          $ref: '#/components/schemas/SpecimenTissueSourceEnum'
-        tumour_normal_designation:
-          $ref: '#/components/schemas/TumourNormalDesignationEnum'
-        specimen_type:
-          $ref: '#/components/schemas/SpecimenTypeEnum'
-        sample_type:
-          $ref: '#/components/schemas/SampleTypeEnum'
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_specimen_id:
-          type: string
-          minLength: 1
-      required:
-      - gender
-      - program_id
-      - sample_type
-      - sex_at_birth
-      - specimen_tissue_source
-      - specimen_type
-      - submitter_donor_id
-      - submitter_sample_id
-      - submitter_specimen_id
-      - tumour_normal_designation
     SampleTypeEnum:
       enum:
       - Amplified DNA
@@ -6204,102 +3719,6 @@ components:
           type: string
         submitter_primary_diagnosis_id:
           type: string
-      required:
-      - pathological_m_category
-      - pathological_n_category
-      - pathological_stage_group
-      - pathological_t_category
-      - pathological_tumour_staging_system
-      - percent_tumour_cells_measurement_method
-      - percent_tumour_cells_range
-      - program_id
-      - reference_pathology_confirmed_diagnosis
-      - reference_pathology_confirmed_tumour_presence
-      - specimen_anatomic_location
-      - specimen_collection_date
-      - specimen_storage
-      - submitter_donor_id
-      - submitter_primary_diagnosis_id
-      - submitter_specimen_id
-      - tumour_grade
-      - tumour_grading_system
-      - tumour_histological_type
-    SpecimenRequest:
-      type: object
-      properties:
-        submitter_specimen_id:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
-        pathological_tumour_staging_system:
-          oneOf:
-          - $ref: '#/components/schemas/StagingSystemEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        pathological_t_category:
-          oneOf:
-          - $ref: '#/components/schemas/TCategoryEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        pathological_n_category:
-          oneOf:
-          - $ref: '#/components/schemas/NCategoryEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        pathological_m_category:
-          oneOf:
-          - $ref: '#/components/schemas/MCategoryEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        pathological_stage_group:
-          oneOf:
-          - $ref: '#/components/schemas/StageGroupEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        specimen_collection_date:
-          type: string
-          minLength: 1
-          maxLength: 32
-          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        specimen_storage:
-          $ref: '#/components/schemas/SpecimenStorageEnum'
-        tumour_histological_type:
-          type: string
-          maxLength: 128
-          pattern: ^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$
-        specimen_anatomic_location:
-          type: string
-          maxLength: 32
-          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
-        reference_pathology_confirmed_diagnosis:
-          oneOf:
-          - $ref: '#/components/schemas/ReferencePathologyEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        reference_pathology_confirmed_tumour_presence:
-          oneOf:
-          - $ref: '#/components/schemas/ReferencePathologyEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        tumour_grading_system:
-          oneOf:
-          - $ref: '#/components/schemas/TumourGradingSystemEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        tumour_grade:
-          oneOf:
-          - $ref: '#/components/schemas/TumourGradeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        percent_tumour_cells_range:
-          oneOf:
-          - $ref: '#/components/schemas/PercentTumourCellsRangeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        percent_tumour_cells_measurement_method:
-          oneOf:
-          - $ref: '#/components/schemas/PercentTumourCellsMeasurementMethodEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_primary_diagnosis_id:
-          type: string
-          minLength: 1
       required:
       - pathological_m_category
       - pathological_n_category
@@ -6584,95 +4003,6 @@ components:
       - Metastatic
       - Primary
       type: string
-    SurgeryRequest:
-      type: object
-      properties:
-        surgery_type:
-          $ref: '#/components/schemas/SurgeryTypeEnum'
-        surgery_site:
-          type: string
-          maxLength: 255
-          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
-        surgery_location:
-          oneOf:
-          - $ref: '#/components/schemas/SurgeryLocationEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        tumour_focality:
-          oneOf:
-          - $ref: '#/components/schemas/TumourFocalityEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        residual_tumour_classification:
-          oneOf:
-          - $ref: '#/components/schemas/ResidualTumourClassificationEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        margin_types_involved:
-          type: array
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/MarginTypesEnum'
-            - $ref: '#/components/schemas/BlankEnum'
-        margin_types_not_involved:
-          type: array
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/MarginTypesEnum'
-            - $ref: '#/components/schemas/BlankEnum'
-        margin_types_not_assessed:
-          type: array
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/MarginTypesEnum'
-            - $ref: '#/components/schemas/BlankEnum'
-        lymphovascular_invasion:
-          oneOf:
-          - $ref: '#/components/schemas/LymphovascularInvasionEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        perineural_invasion:
-          oneOf:
-          - $ref: '#/components/schemas/PerineuralInvasionEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        tumour_length:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        tumour_width:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        greatest_dimension_tumour:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_specimen_id:
-          type: string
-          minLength: 1
-          nullable: true
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-      required:
-      - lymphovascular_invasion
-      - margin_types_involved
-      - margin_types_not_assessed
-      - margin_types_not_involved
-      - perineural_invasion
-      - program_id
-      - residual_tumour_classification
-      - submitter_donor_id
-      - submitter_treatment_id
-      - surgery_location
-      - surgery_site
-      - surgery_type
-      - tumour_focality
     SurgeryTypeEnum:
       enum:
       - Axillary Clearance
@@ -6843,70 +4173,6 @@ components:
       - Curative
       - Palliative
       type: string
-    TreatmentRequest:
-      type: object
-      properties:
-        submitter_treatment_id:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
-        treatment_type:
-          type: array
-          items:
-            $ref: '#/components/schemas/TreatmentTypeEnum'
-        is_primary_treatment:
-          $ref: '#/components/schemas/uBooleanEnum'
-        treatment_start_date:
-          type: string
-          minLength: 1
-          maxLength: 32
-          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        treatment_end_date:
-          type: string
-          minLength: 1
-          maxLength: 32
-          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        treatment_setting:
-          $ref: '#/components/schemas/TreatmentSettingEnum'
-        treatment_intent:
-          $ref: '#/components/schemas/TreatmentIntentEnum'
-        response_to_treatment_criteria_method:
-          $ref: '#/components/schemas/ResponseToTreatmentCriteriaMethodEnum'
-        response_to_treatment:
-          $ref: '#/components/schemas/ResponseToTreatmentEnum'
-        days_per_cycle:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        number_of_cycles:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        program_id:
-          type: string
-          minLength: 1
-        submitter_donor_id:
-          type: string
-          minLength: 1
-        submitter_primary_diagnosis_id:
-          type: string
-          minLength: 1
-      required:
-      - is_primary_treatment
-      - program_id
-      - response_to_treatment
-      - response_to_treatment_criteria_method
-      - submitter_donor_id
-      - submitter_primary_diagnosis_id
-      - submitter_treatment_id
-      - treatment_end_date
-      - treatment_intent
-      - treatment_setting
-      - treatment_start_date
-      - treatment_type
     TreatmentSettingEnum:
       enum:
       - Adjuvant
