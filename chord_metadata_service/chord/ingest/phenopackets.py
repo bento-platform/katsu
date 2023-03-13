@@ -218,7 +218,7 @@ def get_or_create_disease(disease) -> pm.Disease:
     d_obj, _ = pm.Disease.objects.get_or_create(
         term=disease["term"],
         disease_stage=disease.get("disease_stage", []),
-        clinical_tnm_finding=disease.get("tnm_finding", []),
+        clinical_tnm_finding=disease.get("clinical_tnm_finding", []),
         extra_properties=disease.get("extra_properties", {}),
         **query_and_check_nulls(disease, "onset")
     )
@@ -320,9 +320,9 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate
 
     # Create phenopacket metadata object
     meta_data_obj = pm.MetaData(
-        created_by=meta_data.get("created_by"),
+        created_by=meta_data["created_by"],
         submitted_by=meta_data.get("submitted_by"),
-        phenopacket_schema_version="1.0.0-RC3",
+        phenopacket_schema_version="2.0.0",
         external_references=meta_data.get("external_references", []),
         extra_properties=meta_data.get("extra_properties", {}),
     )

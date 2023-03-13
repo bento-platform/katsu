@@ -5,7 +5,7 @@ from typing import Tuple
 __all__ = [
     "Sex",
     "KaryotypicSex",
-    "PatientStatus"
+    "PatientStatus",
 ]
 
 

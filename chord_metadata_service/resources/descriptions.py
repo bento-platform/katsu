@@ -59,7 +59,7 @@ RESOURCE = {
         "url": "Resource URL. In the case of ontologies, this should be an OBO or OWL file. Other resources should "
                "link to the official or top-level url.",
         "version": "The version of the resource or ontology used to make the annotation.",
-        "iriPrefix": "The IRI prefix, when used with the namespace prefix and an object ID, should resolve the term "
+        "iri_prefix": "The IRI prefix, when used with the namespace prefix and an object ID, should resolve the term "
         "or object from the resource in question.",
         **EXTRA_PROPERTIES
     }

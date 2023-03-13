@@ -4,6 +4,11 @@
     "subject": {
       "id": "ind:NA20509001",
       "date_of_birth": "1986-10-22T00:00:00Z",
+      "time_at_last_encounter": {
+        "age": {
+          "iso8601duration": "P45Y"
+        }
+      },
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -55,6 +60,11 @@
     "subject": {
       "id": "ind:NA20509002",
       "date_of_birth": "1950-11-22T00:00:00Z",
+      "time_at_last_encounter": {
+        "age": {
+          "iso8601duration": "P25Y3M2D"
+        }
+      },
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -106,6 +116,11 @@
     "subject": {
       "id": "ind:NA20509003",
       "date_of_birth": "1930-11-22T00:00:00Z",
+      "time_at_last_encounter": {
+        "age": {
+          "iso8601duration": "P15Y"
+        }
+      },
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -156,8 +171,13 @@
     "id": "pheno-4",
     "subject": {
       "id": "ind:NA20509004",
-      "sex": "MALE",
-      "karyotypic_sex": "XY",
+      "sex": "FEMALE",
+      "karyotypic_sex": "XX",
+      "time_at_last_encounter": {
+        "age": {
+          "iso8601duration": "P5Y"
+        }
+      },
       "taxonomy": {
         "id": "NCBITaxon:9606",
         "label": "Homo sapiens"
@@ -206,6 +226,11 @@
     "subject": {
       "id": "ind:NA20509005",
       "date_of_birth": "1976-11-22T00:00:00Z",
+      "time_at_last_encounter": {
+        "age": {
+          "iso8601duration": "P48Y"
+        }
+      },
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -260,6 +285,11 @@
       "id": "ind:NA20509006",
       "sex": "MALE",
       "karyotypic_sex": "XY",
+      "time_at_last_encounter": {
+        "age": {
+          "iso8601duration": "P45Y"
+        }
+      },
       "taxonomy": {
         "id": "NCBITaxon:9606",
         "label": "Homo sapiens"
@@ -302,6 +332,11 @@
       "id": "ind:NA20509007",
       "sex": "MALE",
       "karyotypic_sex": "XY",
+      "time_at_last_encounter": {
+        "age": {
+          "iso8601duration": "P45Y"
+        }
+      },
       "taxonomy": {
         "id": "NCBITaxon:9606",
         "label": "Homo sapiens"

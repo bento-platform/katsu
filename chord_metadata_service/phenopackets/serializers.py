@@ -10,7 +10,10 @@ from .models import (
     Phenopacket,
     GenomicInterpretation,
     Diagnosis,
-    Interpretation, VariantInterpretation, VariationDescriptor, GeneDescriptor,
+    Interpretation,
+    VariantInterpretation,
+    VariationDescriptor,
+    GeneDescriptor,
 )
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.experiments.serializers import ExperimentSerializer

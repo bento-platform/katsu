@@ -24,7 +24,7 @@ class Resource(models.Model):
     namespace_prefix = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "namespacePrefix"))
     url = models.URLField(max_length=200, help_text=rec_help(d.RESOURCE, "url"))
     version = models.CharField(max_length=200, help_text=rec_help(d.RESOURCE, "version"))
-    iri_prefix = models.URLField(max_length=200, help_text=rec_help(d.RESOURCE, "iriPrefix"))
+    iri_prefix = models.URLField(max_length=200, help_text=rec_help(d.RESOURCE, "iri_prefix"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.RESOURCE, "extra_properties"))
 
     created = models.DateTimeField(auto_now=True)
