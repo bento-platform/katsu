@@ -1,5 +1,5 @@
 from drf_spectacular.utils import extend_schema, extend_schema_serializer
-from rest_framework import mixins, serializers, viewsets
+from rest_framework import serializers
 from rest_framework.response import Response
 
 from chord_metadata_service.mohpackets.api_base import (
@@ -21,7 +21,7 @@ from chord_metadata_service.mohpackets.api_base import (
 """
     This module inheriting from the base views and adding the discovery mixin,
     which returns the number of donors only.
-    
+
     The discovery feature can help users without authorization explore the
     available data without exposing the details.
 """

@@ -1,7 +1,4 @@
-from django.core.exceptions import ImproperlyConfigured
-from drf_spectacular.utils import extend_schema, extend_schema_serializer
-from rest_framework import mixins, serializers, viewsets
-from rest_framework.response import Response
+from rest_framework import mixins, viewsets
 
 from chord_metadata_service.mohpackets.filters import (
     BiomarkerFilter,
@@ -56,7 +53,7 @@ from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 
 """
     This module contains the base view class for discovery and authorized views.
-     
+
     The queryset filter is not implemented in this base class to force its implementation
     in the discovery and authorized views. Implementing the queryset filter in
     each view provides more control over the data that is returned and helps to

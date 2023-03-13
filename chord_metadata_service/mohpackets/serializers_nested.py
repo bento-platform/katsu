@@ -26,7 +26,6 @@ from chord_metadata_service.mohpackets.serializers import (
     HormoneTherapySerializer,
     ImmunotherapySerializer,
     PrimaryDiagnosisSerializer,
-    ProgramSerializer,
     RadiationSerializer,
     SampleRegistrationSerializer,
     SpecimenSerializer,
@@ -37,7 +36,7 @@ from chord_metadata_service.mohpackets.serializers import (
 """
     This module provides serializers for the Donor model and its related clinical data.
     All the other objects are nested under the Donor model, and foreign keys are
-    replaced with nested objects. For instance, the DonorSerializer includes a 
+    replaced with nested objects. For instance, the DonorSerializer includes a
     nested PrimaryDiagnosisSerializer, which in turn includes a nested SpecimenSerializer, and so on.
 
     BioMarkers have unique relationships that require nesting at multiple levels.
