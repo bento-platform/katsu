@@ -11,7 +11,6 @@ from chord_metadata_service.mohpackets.models import (
     HormoneTherapy,
     Immunotherapy,
     PrimaryDiagnosis,
-    Program,
     Radiation,
     SampleRegistration,
     Specimen,
@@ -293,7 +292,7 @@ class NestedPrimaryDiagnosisSerializer(PrimaryDiagnosisSerializer):
         ]
 
 
-class DonorRelatedClinicalDataSerializer(DonorSerializer):
+class DonorWithClinicalDataSerializer(DonorSerializer):
     primary_diagnoses = serializers.SerializerMethodField()
     comorbidities = serializers.SerializerMethodField()
     biomarkers = serializers.SerializerMethodField()
