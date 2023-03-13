@@ -37,7 +37,7 @@ from chord_metadata_service.mohpackets.api_base import (
 @extend_schema_serializer(many=False)
 class DiscoverySerializer(serializers.Serializer):
     """
-    This serializer is used to return the discovery_count.
+    This serializer is used to return the discovery_donor.
     It also override the list serializer to a single object
     """
 
@@ -45,11 +45,22 @@ class DiscoverySerializer(serializers.Serializer):
 
 
 class DiscoveryMixin:
+    """
+    This mixin should be used for viewsets that need to expose
+    discovery information about the donor they represent.
+
+    Methods
+    -------
+    list(request, *args, **kwargs)
+        Returns a response that contains the number of unique donors in the
+        queryset.
+    """
+
     @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         count = queryset.values_list("submitter_donor_id").distinct().count()
-        return Response({"discovery_count": count})
+        return Response({"discovery_donor": count})
 
 
 ###############################################
