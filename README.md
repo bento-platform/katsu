@@ -51,7 +51,7 @@ This will install all the packages listed in the requirements.txt file.
 
 ## Step 4: Set up the PostgreSQL database
 
-Replace "dbname", "username", and "password" with the value in local.py:
+Replace "dbname", "username", and "password" with the value in [local.py](config/settings/local.py):
 
 ```sql
 sudo -u postgres psql
@@ -81,3 +81,30 @@ This will start the development server on port 8000. You can access the server b
 ## Step 7: Ingest some data (optional)
 
 Mock data are available [here](chord_metadata_service/mohpackets/data/README.md)
+
+## Tests
+
+Run all tests and linting checks for the whole project:
+
+```bash
+tox -c tox-candig.ini
+```
+
+Run all tests for mohpackets:
+
+```bash
+python manage.py test chord_metadata_service.mohpackets
+```
+
+Run each test:
+
+```bash
+python manage.py test chord_metadata_service.mohpackets.tests.<test_name>
+```
+
+Test and create `coverage` HTML report:
+
+```bash
+tox -c tox-candig.ini
+coverage html
+```
