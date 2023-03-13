@@ -38,8 +38,8 @@ from chord_metadata_service.mohpackets.api_views import (
     BiomarkerViewSet,
     ChemotherapyViewSet,
     ComorbidityViewSet,
-    DonorRelatedClinicalDataViewSet,
     DonorViewSet,
+    DonorWithClinicalDataViewSet,
     FollowUpViewSet,
     HormoneTherapyViewSet,
     ImmunotherapyViewSet,
@@ -69,7 +69,7 @@ router.register(r"surgeries", SurgeryViewSet)
 router.register(r"follow_ups", FollowUpViewSet)
 router.register(r"biomarkers", BiomarkerViewSet)
 router.register(r"comorbidities", ComorbidityViewSet)
-# urlpatterns = router.urls
+router.register(r"donor_with_clinical_data", DonorWithClinicalDataViewSet)
 
 # ================== DISCOVERY API ================== #
 discovery_router = routers.SimpleRouter()
@@ -86,6 +86,7 @@ discovery_router.register(r"surgeries", DiscoverySurgeryViewSet)
 discovery_router.register(r"follow_ups", DiscoveryFollowUpViewSet)
 discovery_router.register(r"biomarkers", DiscoveryBiomarkerViewSet)
 discovery_router.register(r"comorbidities", DiscoveryComorbidityViewSet)
+
 
 # ================== INGEST API ================== #
 ingest_patterns = [
@@ -106,11 +107,10 @@ ingest_patterns = [
 ]
 
 urlpatterns = [
-    path("model/", include(router.urls)),
+    path("authorized/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
     path("ingest/", include(ingest_patterns)),
     path("delete/all", delete_all),
     path("version_check", version_check),
     path("discovery/overview", moh_overview),
-    path("model/a/", DonorRelatedClinicalDataViewSet.as_view({"get": "list"})),
 ]
