@@ -20,11 +20,14 @@ from .logger import logger
 from .resources import ingest_resource
 from .schema import schema_validation
 from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, workflow_file_output_to_path
+from typing import Any, Optional, Union, Callable, TypeVar
+from django.db.models import Model
 
-from typing import Any, Optional, Union
+# Generic TypeVar for django db models
+T = TypeVar('T', bound=Model)
 
 
-def _get_or_create_opt(key: str, data: dict, create_func):
+def _get_or_create_opt(key: str, data: dict, create_func: Callable[..., T]) -> Optional[T]:
     """
     Helper function to get or create DB objects if a key is in a dict
     """
