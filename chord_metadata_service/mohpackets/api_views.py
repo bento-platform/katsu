@@ -57,7 +57,7 @@ from chord_metadata_service.mohpackets.serializers import (
     TreatmentSerializer,
 )
 from chord_metadata_service.mohpackets.serializers_nested import (
-    DonorRelatedClinicalDataSerializer,
+    DonorWithClinicalDataSerializer,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 from chord_metadata_service.mohpackets.utils import get_authorized_datasets
@@ -310,9 +310,17 @@ def moh_overview(_request):
     )
 
 
-class DonorRelatedClinicalDataViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = DonorRelatedClinicalDataSerializer
-    # queryset = Donor.objects.all()
+class DonorWithClinicalDataViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    This viewset provides access to Donor model and its related clinical data.
+    It uses the DonorWithClinicalDataSerializer for serialization.
+
+    The viewset pre-fetches related objects using the `prefetch_related` method
+    to minimize database queries. This ensures that all the related objects are
+    available in a single database query, improving the performance of the viewset.
+    """
+
+    serializer_class = DonorWithClinicalDataSerializer
     donor_biomarkers_prefetch = Prefetch(
         "biomarker_set",
         queryset=Biomarker.objects.filter(
