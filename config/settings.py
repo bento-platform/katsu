@@ -71,21 +71,22 @@ INSTALLED_APPS = [
     "chord_metadata_service.mohpackets.apps.MohpacketsConfig",
 ]
 
-# Turn this off temporarily until we separate the settings for local and prod
-if False:
-    INSTALLED_APPS.append("debug_toolbar")
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# Turn this off temporarily until we separate the settings for local and prod
+if False:
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
 CORS_ALLOWED_ORIGINS = []
 
