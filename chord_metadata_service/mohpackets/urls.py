@@ -1,6 +1,24 @@
 from django.urls import include, path
 from rest_framework import routers
 
+from chord_metadata_service.mohpackets.api_authorized import (
+    AuthorizedBiomarkerViewSet,
+    AuthorizedChemotherapyViewSet,
+    AuthorizedComorbidityViewSet,
+    AuthorizedDonorViewSet,
+    AuthorizedDonorWithClinicalDataViewSet,
+    AuthorizedFollowUpViewSet,
+    AuthorizedHormoneTherapyViewSet,
+    AuthorizedImmunotherapyViewSet,
+    AuthorizedPrimaryDiagnosisViewSet,
+    AuthorizedProgramViewSet,
+    AuthorizedRadiationViewSet,
+    AuthorizedSampleRegistrationViewSet,
+    AuthorizedSpecimenViewSet,
+    AuthorizedSurgeryViewSet,
+    AuthorizedTreatmentViewSet,
+    moh_overview,
+)
 from chord_metadata_service.mohpackets.api_discovery import (
     DiscoveryBiomarkerViewSet,
     DiscoveryChemotherapyViewSet,
@@ -34,42 +52,24 @@ from chord_metadata_service.mohpackets.api_ingest import (
     ingest_treatments,
     version_check,
 )
-from chord_metadata_service.mohpackets.api_views import (
-    BiomarkerViewSet,
-    ChemotherapyViewSet,
-    ComorbidityViewSet,
-    DonorViewSet,
-    DonorWithClinicalDataViewSet,
-    FollowUpViewSet,
-    HormoneTherapyViewSet,
-    ImmunotherapyViewSet,
-    PrimaryDiagnosisViewSet,
-    ProgramViewSet,
-    RadiationViewSet,
-    SampleRegistrationViewSet,
-    SpecimenViewSet,
-    SurgeryViewSet,
-    TreatmentViewSet,
-    moh_overview,
-)
 
-# ================== MOH API ================== #
+# ================== AUTHORIZED API ================== #
 router = routers.SimpleRouter()
-router.register(r"programs", ProgramViewSet)
-router.register(r"donors", DonorViewSet)
-router.register(r"specimens", SpecimenViewSet)
-router.register(r"sample_registrations", SampleRegistrationViewSet)
-router.register(r"primary_diagnoses", PrimaryDiagnosisViewSet)
-router.register(r"treatments", TreatmentViewSet)
-router.register(r"chemotherapies", ChemotherapyViewSet)
-router.register(r"hormone_therapies", HormoneTherapyViewSet)
-router.register(r"radiations", RadiationViewSet)
-router.register(r"immunotherapies", ImmunotherapyViewSet)
-router.register(r"surgeries", SurgeryViewSet)
-router.register(r"follow_ups", FollowUpViewSet)
-router.register(r"biomarkers", BiomarkerViewSet)
-router.register(r"comorbidities", ComorbidityViewSet)
-router.register(r"donor_with_clinical_data", DonorWithClinicalDataViewSet)
+router.register(r"programs", AuthorizedProgramViewSet, basename="authorized_program")
+router.register(r"donors", AuthorizedDonorViewSet)
+router.register(r"specimens", AuthorizedSpecimenViewSet)
+router.register(r"sample_registrations", AuthorizedSampleRegistrationViewSet)
+router.register(r"primary_diagnoses", AuthorizedPrimaryDiagnosisViewSet)
+router.register(r"treatments", AuthorizedTreatmentViewSet)
+router.register(r"chemotherapies", AuthorizedChemotherapyViewSet)
+router.register(r"hormone_therapies", AuthorizedHormoneTherapyViewSet)
+router.register(r"radiations", AuthorizedRadiationViewSet)
+router.register(r"immunotherapies", AuthorizedImmunotherapyViewSet)
+router.register(r"surgeries", AuthorizedSurgeryViewSet)
+router.register(r"follow_ups", AuthorizedFollowUpViewSet)
+router.register(r"biomarkers", AuthorizedBiomarkerViewSet)
+router.register(r"comorbidities", AuthorizedComorbidityViewSet)
+router.register(r"donor_with_clinical_data", AuthorizedDonorWithClinicalDataViewSet)
 
 # ================== DISCOVERY API ================== #
 discovery_router = routers.SimpleRouter()
