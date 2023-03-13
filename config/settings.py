@@ -71,7 +71,8 @@ INSTALLED_APPS = [
     "chord_metadata_service.mohpackets.apps.MohpacketsConfig",
 ]
 
-if DEBUG:
+# Turn this off temporarily until we separate the settings for local and prod
+if False:
     INSTALLED_APPS.append("debug_toolbar")
 
 MIDDLEWARE = [
