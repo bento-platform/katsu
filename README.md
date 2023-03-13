@@ -16,7 +16,6 @@ NOTE: If you want to run as docker container, please refer to the [docker guide]
 Before you start, make sure you have the following installed on your machine:
 
 - Python 3.8 or later
-- pip (the Python package installer)
 - PostgreSQL
 
 ### Step 1: Clone the repository
