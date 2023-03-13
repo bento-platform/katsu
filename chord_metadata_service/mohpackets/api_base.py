@@ -12,6 +12,7 @@ from chord_metadata_service.mohpackets.filters import (
     HormoneTherapyFilter,
     ImmunotherapyFilter,
     PrimaryDiagnosisFilter,
+    ProgramFilter,
     RadiationFilter,
     SampleRegistrationFilter,
     SpecimenFilter,
@@ -33,6 +34,7 @@ from chord_metadata_service.mohpackets.models import (
     Surgery,
     Treatment,
 )
+from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
 from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
 from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
@@ -43,6 +45,7 @@ from chord_metadata_service.mohpackets.serializers import (
     HormoneTherapySerializer,
     ImmunotherapySerializer,
     PrimaryDiagnosisSerializer,
+    ProgramSerializer,
     RadiationSerializer,
     SampleRegistrationSerializer,
     SpecimenSerializer,
@@ -54,8 +57,8 @@ from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 """
     This module contains the base view class for discovery and authorized views.
      
-    The queryset is not implemented in this base class to force its implementation
-    in the discovery and authorized views. Implementing the queryset in
+    The queryset filter is not implemented in this base class to force its implementation
+    in the discovery and authorized views. Implementing the queryset filter in
     each view provides more control over the data that is returned and helps to
     prevent unintentional exposure of unauthorized data.
 """
@@ -65,6 +68,14 @@ from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 #           BASE API VIEWS             #
 #                                      #
 ########################################
+
+
+class BaseProgramViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = ProgramSerializer
+    filterset_class = ProgramFilter
+    permission_classes = [CanDIGAdminOrReadOnly]
+    pagination_class = StandardResultsSetPagination
+    throttle_classes = [MoHRateThrottle]
 
 
 class BaseDonorViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
