@@ -41,7 +41,7 @@ class DiscoverySerializer(serializers.Serializer):
     It also override the list serializer to a single object
     """
 
-    discovery_count = serializers.IntegerField()
+    discovery_donor = serializers.IntegerField()
 
 
 class DiscoveryMixin:
