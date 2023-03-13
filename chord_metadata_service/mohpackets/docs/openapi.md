@@ -13,15 +13,24 @@ This is the RESTful API for the MoH Service.
 * API Key (tokenAuth)
     - Parameter Name: **Authorization**, in: header. Token-based authentication with required prefix "Token"
 
-<h1 id="moh-service-api-discovery">discovery</h1>
+<h1 id="moh-service-api-authorized">authorized</h1>
 
-## discovery_biomarkers_list
+## authorized_biomarkers_list
 
-<a id="opIddiscovery_biomarkers_list"></a>
+<a id="opIdauthorized_biomarkers_list"></a>
 
-`GET /moh/v1/discovery/biomarkers/`
+`GET /moh/v1/authorized/biomarkers/`
 
-<h3 id="discovery_biomarkers_list-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
+
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
+
+<h3 id="authorized_biomarkers_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -41,18 +50,39 @@ This is the RESTful API for the MoH Service.
 > 200 Response
 
 ```json
-{
-  "discovery_count": 0
-}
+[
+  {
+    "id": 0,
+    "test_interval": 32767,
+    "psa_level": 32767,
+    "ca125": 32767,
+    "cea": 32767,
+    "program_id": "string",
+    "submitter_donor_id": "string",
+    "submitter_specimen_id": "string",
+    "submitter_primary_diagnosis_id": "string",
+    "submitter_treatment_id": "string",
+    "submitter_follow_up_id": "string"
+  }
+]
 ```
 
-## discovery_chemotherapies_list
+## authorized_chemotherapies_list
 
-<a id="opIddiscovery_chemotherapies_list"></a>
+<a id="opIdauthorized_chemotherapies_list"></a>
 
-`GET /moh/v1/discovery/chemotherapies/`
+`GET /moh/v1/authorized/chemotherapies/`
 
-<h3 id="discovery_chemotherapies_list-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
+
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
+
+<h3 id="authorized_chemotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -70,18 +100,37 @@ This is the RESTful API for the MoH Service.
 > 200 Response
 
 ```json
-{
-  "discovery_count": 0
-}
+[
+  {
+    "id": 0,
+    "chemotherapy_dosage_units": "mg/m2",
+    "drug_name": "string",
+    "drug_rxnormcui": "string",
+    "cumulative_drug_dosage_prescribed": 32767,
+    "cumulative_drug_dosage_actual": 32767,
+    "program_id": "string",
+    "submitter_donor_id": "string",
+    "submitter_treatment_id": "string"
+  }
+]
 ```
 
-## discovery_comorbidities_list
+## authorized_comorbidities_list
 
-<a id="opIddiscovery_comorbidities_list"></a>
+<a id="opIdauthorized_comorbidities_list"></a>
 
-`GET /moh/v1/discovery/comorbidities/`
+`GET /moh/v1/authorized/comorbidities/`
 
-<h3 id="discovery_comorbidities_list-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
+
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
+
+<h3 id="authorized_comorbidities_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -99,386 +148,33 @@ This is the RESTful API for the MoH Service.
 > 200 Response
 
 ```json
-{
-  "discovery_count": 0
-}
+[
+  {
+    "id": 0,
+    "prior_malignancy": "Yes",
+    "laterality_of_prior_malignancy": "Bilateral",
+    "comorbidity_type_code": "string",
+    "comorbidity_treatment_status": "Yes",
+    "comorbidity_treatment": "string",
+    "age_at_comorbidity_diagnosis": 32767,
+    "program_id": "string",
+    "submitter_donor_id": "string"
+  }
+]
 ```
 
-## discovery_donors_list
+## authorized_donor_with_clinical_data_list
 
-<a id="opIddiscovery_donors_list"></a>
+<a id="opIdauthorized_donor_with_clinical_data_list"></a>
 
-`GET /moh/v1/discovery/donors/`
+`GET /moh/v1/authorized/donor_with_clinical_data/`
 
-<h3 id="discovery_donors_list-parameters">Parameters</h3>
+This viewset provides access to Donor model and its related clinical data.
+It uses the DonorWithClinicalDataSerializer for serialization.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_donor_id|query|string|false|none|
-|program_id|query|string|false|none|
-|is_deceased|query|boolean|false|none|
-|cause_of_death|query|string|false|none|
-|date_of_birth|query|string|false|none|
-|date_of_death|query|string|false|none|
-|primary_site|query|string|false|none|
-|age|query|number|false|none|
-|max_age|query|number|false|none|
-|min_age|query|number|false|none|
-|donors|query|string|false|none|
-|primary_diagnosis|query|string|false|none|
-|speciman|query|string|false|none|
-|sample_registration|query|string|false|none|
-|treatment|query|string|false|none|
-|chemotherapy|query|string|false|none|
-|hormone_therapy|query|string|false|none|
-|radiation|query|string|false|none|
-|immunotherapy|query|string|false|none|
-|surgery|query|string|false|none|
-|follow_up|query|string|false|none|
-|biomarker|query|string|false|none|
-|comorbidity|query|string|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "discovery_count": 0
-}
-```
-
-## discovery_follow_ups_list
-
-<a id="opIddiscovery_follow_ups_list"></a>
-
-`GET /moh/v1/discovery/follow_ups/`
-
-<h3 id="discovery_follow_ups_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|query|string|false|none|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_primary_diagnosis_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|date_of_followup|query|string|false|none|
-|lost_to_followup|query|boolean|false|none|
-|lost_to_followup_reason|query|string|false|none|
-|disease_status_at_followup|query|string|false|none|
-|relapse_type|query|string|false|none|
-|date_of_relapse|query|string|false|none|
-|method_of_progression_status|query|string|false|none|
-|anatomic_site_progression_or_recurrence|query|string|false|none|
-|recurrence_tumour_staging_system|query|string|false|none|
-|recurrence_t_category|query|string|false|none|
-|recurrence_n_category|query|string|false|none|
-|recurrence_m_category|query|string|false|none|
-|recurrence_stage_group|query|string|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "discovery_count": 0
-}
-```
-
-## discovery_hormone_therapies_list
-
-<a id="opIddiscovery_hormone_therapies_list"></a>
-
-`GET /moh/v1/discovery/hormone_therapies/`
-
-<h3 id="discovery_hormone_therapies_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|drug_name|query|string|false|none|
-|drug_rxnormcui|query|string|false|none|
-|hormone_drug_dosage_units|query|string|false|none|
-|cumulative_drug_dosage_prescribed|query|integer|false|none|
-|cumulative_drug_dosage_actual|query|integer|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "discovery_count": 0
-}
-```
-
-## discovery_immunotherapies_list
-
-<a id="opIddiscovery_immunotherapies_list"></a>
-
-`GET /moh/v1/discovery/immunotherapies/`
-
-<h3 id="discovery_immunotherapies_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|immunotherapy_type|query|string|false|none|
-|drug_name|query|string|false|none|
-|drug_rxnormcui|query|string|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "discovery_count": 0
-}
-```
-
-## discovery_overview_retrieve
-
-<a id="opIddiscovery_overview_retrieve"></a>
-
-`GET /moh/v1/discovery/overview`
-
-MoH Overview schema
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "cohort_count": 0,
-  "individual_count": 0
-}
-```
-
-## discovery_primary_diagnoses_list
-
-<a id="opIddiscovery_primary_diagnoses_list"></a>
-
-`GET /moh/v1/discovery/primary_diagnoses/`
-
-<h3 id="discovery_primary_diagnoses_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|query|string|false|none|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|date_of_diagnosis|query|string|false|none|
-|cancer_type_code|query|string|false|none|
-|basis_of_diagnosis|query|string|false|none|
-|lymph_nodes_examined_status|query|string|false|none|
-|lymph_nodes_examined_method|query|string|false|none|
-|number_lymph_nodes_positive|query|integer|false|none|
-|clinical_tumour_staging_system|query|string|false|none|
-|clinical_t_category|query|string|false|none|
-|clinical_n_category|query|string|false|none|
-|clinical_m_category|query|string|false|none|
-|clinical_stage_group|query|string|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "discovery_count": 0
-}
-```
-
-## discovery_radiations_list
-
-<a id="opIddiscovery_radiations_list"></a>
-
-`GET /moh/v1/discovery/radiations/`
-
-<h3 id="discovery_radiations_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|radiation_therapy_modality|query|string|false|none|
-|radiation_therapy_type|query|string|false|none|
-|radiation_therapy_fractions|query|integer|false|none|
-|radiation_therapy_dosage|query|integer|false|none|
-|anatomical_site_irradiated|query|string|false|none|
-|radiation_boost|query|boolean|false|none|
-|reference_radiation_treatment_id|query|string|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "discovery_count": 0
-}
-```
-
-## discovery_sample_registrations_list
-
-<a id="opIddiscovery_sample_registrations_list"></a>
-
-`GET /moh/v1/discovery/sample_registrations/`
-
-<h3 id="discovery_sample_registrations_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_sample_id|query|string|false|none|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_specimen_id|query|string|false|none|
-|gender|query|string|false|none|
-|sex_at_birth|query|string|false|none|
-|specimen_tissue_source|query|string|false|none|
-|tumour_normal_designation|query|string|false|none|
-|specimen_type|query|string|false|none|
-|sample_type|query|string|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "discovery_count": 0
-}
-```
-
-## discovery_specimens_list
-
-<a id="opIddiscovery_specimens_list"></a>
-
-`GET /moh/v1/discovery/specimens/`
-
-<h3 id="discovery_specimens_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|query|string|false|none|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_primary_diagnosis_id|query|string|false|none|
-|pathological_tumour_staging_system|query|string|false|none|
-|pathological_t_category|query|string|false|none|
-|pathological_n_category|query|string|false|none|
-|pathological_m_category|query|string|false|none|
-|pathological_stage_group|query|string|false|none|
-|specimen_collection_date|query|string|false|none|
-|specimen_storage|query|string|false|none|
-|tumour_histological_type|query|string|false|none|
-|specimen_anatomic_location|query|string|false|none|
-|reference_pathology_confirmed_diagnosis|query|string|false|none|
-|reference_pathology_confirmed_tumour_presence|query|string|false|none|
-|tumour_grading_system|query|string|false|none|
-|tumour_grade|query|string|false|none|
-|percent_tumour_cells_range|query|string|false|none|
-|percent_tumour_cells_measurement_method|query|string|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "discovery_count": 0
-}
-```
-
-## discovery_surgeries_list
-
-<a id="opIddiscovery_surgeries_list"></a>
-
-`GET /moh/v1/discovery/surgeries/`
-
-<h3 id="discovery_surgeries_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_specimen_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|surgery_type|query|string|false|none|
-|surgery_site|query|string|false|none|
-|surgery_location|query|string|false|none|
-|tumour_length|query|integer|false|none|
-|tumour_width|query|integer|false|none|
-|greatest_dimension_tumour|query|integer|false|none|
-|tumour_focality|query|string|false|none|
-|residual_tumour_classification|query|string|false|none|
-|margin_types_involved|query|string|false|none|
-|margin_types_not_involved|query|string|false|none|
-|margin_types_not_assessed|query|string|false|none|
-|lymphovascular_invasion|query|string|false|none|
-|perineural_invasion|query|string|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "discovery_count": 0
-}
-```
-
-## discovery_treatments_list
-
-<a id="opIddiscovery_treatments_list"></a>
-
-`GET /moh/v1/discovery/treatments/`
-
-<h3 id="discovery_treatments_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_treatment_id|query|string|false|none|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_primary_diagnosis_id|query|string|false|none|
-|treatment_type|query|string|false|none|
-|is_primary_treatment|query|string|false|none|
-|treatment_start_date|query|string|false|none|
-|treatment_end_date|query|string|false|none|
-|treatment_setting|query|string|false|none|
-|treatment_intent|query|string|false|none|
-|days_per_cycle|query|integer|false|none|
-|number_of_cycles|query|integer|false|none|
-|response_to_treatment_criteria_method|query|string|false|none|
-|response_to_treatment|query|string|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "discovery_count": 0
-}
-```
-
-<h1 id="moh-service-api-model">model</h1>
-
-## model_a_list
-
-<a id="opIdmodel_a_list"></a>
-
-`GET /moh/v1/model/a/`
+The viewset pre-fetches related objects using the `prefetch_related` method
+to minimize database queries. This ensures that all the related objects are
+available in a single database query, improving the performance of the viewset.
 
 > Example responses
 
@@ -692,247 +388,22 @@ MoH Overview schema
 ]
 ```
 
-## model_biomarkers_list
+## authorized_donors_list
 
-<a id="opIdmodel_biomarkers_list"></a>
+<a id="opIdauthorized_donors_list"></a>
 
-`GET /moh/v1/model/biomarkers/`
+`GET /moh/v1/authorized/donors/`
 
-<h3 id="model_biomarkers_list-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_specimen_id|query|string|false|none|
-|submitter_primary_diagnosis_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|submitter_follow_up_id|query|string|false|none|
-|test_interval|query|integer|false|none|
-|psa_level|query|integer|false|none|
-|ca125|query|integer|false|none|
-|cea|query|integer|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
 
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string",
-      "submitter_follow_up_id": "string"
-    }
-  ]
-}
-```
-
-## model_biomarkers_retrieve
-
-<a id="opIdmodel_biomarkers_retrieve"></a>
-
-`GET /moh/v1/model/biomarkers/{id}/`
-
-<h3 id="model_biomarkers_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this biomarker.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "test_interval": 32767,
-  "psa_level": 32767,
-  "ca125": 32767,
-  "cea": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string",
-  "submitter_follow_up_id": "string"
-}
-```
-
-## model_chemotherapies_list
-
-<a id="opIdmodel_chemotherapies_list"></a>
-
-`GET /moh/v1/model/chemotherapies/`
-
-<h3 id="model_chemotherapies_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|submitter_treatment_id|query|string|false|none|
-|drug_name|query|string|false|none|
-|drug_rxnormcui|query|string|false|none|
-|chemotherapy_dosage_units|query|string|false|none|
-|cumulative_drug_dosage_prescribed|query|integer|false|none|
-|cumulative_drug_dosage_actual|query|integer|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "chemotherapy_dosage_units": "mg/m2",
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "cumulative_drug_dosage_prescribed": 32767,
-      "cumulative_drug_dosage_actual": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-```
-
-## model_chemotherapies_retrieve
-
-<a id="opIdmodel_chemotherapies_retrieve"></a>
-
-`GET /moh/v1/model/chemotherapies/{id}/`
-
-<h3 id="model_chemotherapies_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this chemotherapy.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## model_comorbidities_list
-
-<a id="opIdmodel_comorbidities_list"></a>
-
-`GET /moh/v1/model/comorbidities/`
-
-<h3 id="model_comorbidities_list-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|query|string|false|none|
-|submitter_donor_id|query|string|false|none|
-|prior_malignancy|query|string|false|none|
-|laterality_of_prior_malignancy|query|string|false|none|
-|age_at_comorbidity_diagnosis|query|integer|false|none|
-|comorbidity_type_code|query|string|false|none|
-|comorbidity_treatment_status|query|string|false|none|
-|comorbidity_treatment|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "prior_malignancy": "Yes",
-      "laterality_of_prior_malignancy": "Bilateral",
-      "comorbidity_type_code": "string",
-      "comorbidity_treatment_status": "Yes",
-      "comorbidity_treatment": "string",
-      "age_at_comorbidity_diagnosis": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ]
-}
-```
-
-## model_comorbidities_retrieve
-
-<a id="opIdmodel_comorbidities_retrieve"></a>
-
-`GET /moh/v1/model/comorbidities/{id}/`
-
-<h3 id="model_comorbidities_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this comorbidity.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "prior_malignancy": "Yes",
-  "laterality_of_prior_malignancy": "Bilateral",
-  "comorbidity_type_code": "string",
-  "comorbidity_treatment_status": "Yes",
-  "comorbidity_treatment": "string",
-  "age_at_comorbidity_diagnosis": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## model_donors_list
-
-<a id="opIdmodel_donors_list"></a>
-
-`GET /moh/v1/model/donors/`
-
-<h3 id="model_donors_list-parameters">Parameters</h3>
+<h3 id="authorized_donors_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -959,71 +430,43 @@ MoH Overview schema
 |follow_up|query|string|false|none|
 |biomarker|query|string|false|none|
 |comorbidity|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_donor_id": "string",
-      "cause_of_death": "Died of cancer",
-      "date_of_birth": "string",
-      "date_of_death": "string",
-      "primary_site": [
-        "Accessory sinuses"
-      ],
-      "is_deceased": true,
-      "program_id": "string"
-    }
-  ]
-}
+[
+  {
+    "submitter_donor_id": "string",
+    "cause_of_death": "Died of cancer",
+    "date_of_birth": "string",
+    "date_of_death": "string",
+    "primary_site": [
+      "Accessory sinuses"
+    ],
+    "is_deceased": true,
+    "program_id": "string"
+  }
+]
 ```
 
-## model_donors_retrieve
+## authorized_follow_ups_list
 
-<a id="opIdmodel_donors_retrieve"></a>
+<a id="opIdauthorized_follow_ups_list"></a>
 
-`GET /moh/v1/model/donors/{submitter_donor_id}/`
+`GET /moh/v1/authorized/follow_ups/`
 
-<h3 id="model_donors_retrieve-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_donor_id|path|string|true|A unique value identifying this donor.|
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
 
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_donor_id": "string",
-  "cause_of_death": "Died of cancer",
-  "date_of_birth": "string",
-  "date_of_death": "string",
-  "primary_site": [
-    "Accessory sinuses"
-  ],
-  "is_deceased": true,
-  "program_id": "string"
-}
-```
-
-## model_follow_ups_list
-
-<a id="opIdmodel_follow_ups_list"></a>
-
-`GET /moh/v1/model/follow_ups/`
-
-<h3 id="model_follow_ups_list-parameters">Parameters</h3>
+<h3 id="authorized_follow_ups_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1045,89 +488,52 @@ MoH Overview schema
 |recurrence_n_category|query|string|false|none|
 |recurrence_m_category|query|string|false|none|
 |recurrence_stage_group|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_follow_up_id": "string",
-      "date_of_followup": "string",
-      "lost_to_followup_reason": "Completed study",
-      "disease_status_at_followup": "Complete remission",
-      "relapse_type": "Distant recurrence/metastasis",
-      "date_of_relapse": "string",
-      "method_of_progression_status": "Imaging (procedure)",
-      "anatomic_site_progression_or_recurrence": "string",
-      "recurrence_tumour_staging_system": "AJCC 8th edition",
-      "recurrence_t_category": "T0",
-      "recurrence_n_category": "N0",
-      "recurrence_m_category": "M0",
-      "recurrence_stage_group": "Occult Carcinoma",
-      "lost_to_followup": true,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
+[
+  {
+    "submitter_follow_up_id": "string",
+    "date_of_followup": "string",
+    "lost_to_followup_reason": "Completed study",
+    "disease_status_at_followup": "Complete remission",
+    "relapse_type": "Distant recurrence/metastasis",
+    "date_of_relapse": "string",
+    "method_of_progression_status": "Imaging (procedure)",
+    "anatomic_site_progression_or_recurrence": "string",
+    "recurrence_tumour_staging_system": "AJCC 8th edition",
+    "recurrence_t_category": "T0",
+    "recurrence_n_category": "N0",
+    "recurrence_m_category": "M0",
+    "recurrence_stage_group": "Occult Carcinoma",
+    "lost_to_followup": true,
+    "program_id": "string",
+    "submitter_donor_id": "string",
+    "submitter_primary_diagnosis_id": "string",
+    "submitter_treatment_id": "string"
+  }
+]
 ```
 
-## model_follow_ups_retrieve
+## authorized_hormone_therapies_list
 
-<a id="opIdmodel_follow_ups_retrieve"></a>
+<a id="opIdauthorized_hormone_therapies_list"></a>
 
-`GET /moh/v1/model/follow_ups/{submitter_follow_up_id}/`
+`GET /moh/v1/authorized/hormone_therapies/`
 
-<h3 id="model_follow_ups_retrieve-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
 
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_follow_up_id": "string",
-  "date_of_followup": "string",
-  "lost_to_followup_reason": "Completed study",
-  "disease_status_at_followup": "Complete remission",
-  "relapse_type": "Distant recurrence/metastasis",
-  "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": "AJCC 8th edition",
-  "recurrence_t_category": "T0",
-  "recurrence_n_category": "N0",
-  "recurrence_m_category": "M0",
-  "recurrence_stage_group": "Occult Carcinoma",
-  "lost_to_followup": true,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## model_hormone_therapies_list
-
-<a id="opIdmodel_hormone_therapies_list"></a>
-
-`GET /moh/v1/model/hormone_therapies/`
-
-<h3 id="model_hormone_therapies_list-parameters">Parameters</h3>
+<h3 id="authorized_hormone_therapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1139,71 +545,43 @@ MoH Overview schema
 |hormone_drug_dosage_units|query|string|false|none|
 |cumulative_drug_dosage_prescribed|query|integer|false|none|
 |cumulative_drug_dosage_actual|query|integer|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "hormone_drug_dosage_units": "mg/m2",
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "cumulative_drug_dosage_prescribed": 32767,
-      "cumulative_drug_dosage_actual": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
+[
+  {
+    "id": 0,
+    "hormone_drug_dosage_units": "mg/m2",
+    "drug_name": "string",
+    "drug_rxnormcui": "string",
+    "cumulative_drug_dosage_prescribed": 32767,
+    "cumulative_drug_dosage_actual": 32767,
+    "program_id": "string",
+    "submitter_donor_id": "string",
+    "submitter_treatment_id": "string"
+  }
+]
 ```
 
-## model_hormone_therapies_retrieve
+## authorized_immunotherapies_list
 
-<a id="opIdmodel_hormone_therapies_retrieve"></a>
+<a id="opIdauthorized_immunotherapies_list"></a>
 
-`GET /moh/v1/model/hormone_therapies/{id}/`
+`GET /moh/v1/authorized/immunotherapies/`
 
-<h3 id="model_hormone_therapies_retrieve-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this hormone therapy.|
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
 
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "hormone_drug_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## model_immunotherapies_list
-
-<a id="opIdmodel_immunotherapies_list"></a>
-
-`GET /moh/v1/model/immunotherapies/`
-
-<h3 id="model_immunotherapies_list-parameters">Parameters</h3>
+<h3 id="authorized_immunotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1213,67 +591,41 @@ MoH Overview schema
 |immunotherapy_type|query|string|false|none|
 |drug_name|query|string|false|none|
 |drug_rxnormcui|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "immunotherapy_type": "Cell-based",
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
+[
+  {
+    "id": 0,
+    "immunotherapy_type": "Cell-based",
+    "drug_name": "string",
+    "drug_rxnormcui": "string",
+    "program_id": "string",
+    "submitter_donor_id": "string",
+    "submitter_treatment_id": "string"
+  }
+]
 ```
 
-## model_immunotherapies_retrieve
+## authorized_primary_diagnoses_list
 
-<a id="opIdmodel_immunotherapies_retrieve"></a>
+<a id="opIdauthorized_primary_diagnoses_list"></a>
 
-`GET /moh/v1/model/immunotherapies/{id}/`
+`GET /moh/v1/authorized/primary_diagnoses/`
 
-<h3 id="model_immunotherapies_retrieve-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this immunotherapy.|
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
 
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "immunotherapy_type": "Cell-based",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## model_primary_diagnoses_list
-
-<a id="opIdmodel_primary_diagnoses_list"></a>
-
-`GET /moh/v1/model/primary_diagnoses/`
-
-<h3 id="model_primary_diagnoses_list-parameters">Parameters</h3>
+<h3 id="authorized_primary_diagnoses_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1291,81 +643,39 @@ MoH Overview schema
 |clinical_n_category|query|string|false|none|
 |clinical_m_category|query|string|false|none|
 |clinical_stage_group|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_primary_diagnosis_id": "string",
-      "date_of_diagnosis": "string",
-      "basis_of_diagnosis": "Clinical investigation",
-      "lymph_nodes_examined_status": "Cannot be determined",
-      "lymph_nodes_examined_method": "Imaging",
-      "clinical_tumour_staging_system": "AJCC 8th edition",
-      "clinical_t_category": "T0",
-      "clinical_n_category": "N0",
-      "clinical_m_category": "M0",
-      "clinical_stage_group": "Occult Carcinoma",
-      "cancer_type_code": "string",
-      "number_lymph_nodes_positive": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ]
-}
+[
+  {
+    "submitter_primary_diagnosis_id": "string",
+    "date_of_diagnosis": "string",
+    "basis_of_diagnosis": "Clinical investigation",
+    "lymph_nodes_examined_status": "Cannot be determined",
+    "lymph_nodes_examined_method": "Imaging",
+    "clinical_tumour_staging_system": "AJCC 8th edition",
+    "clinical_t_category": "T0",
+    "clinical_n_category": "N0",
+    "clinical_m_category": "M0",
+    "clinical_stage_group": "Occult Carcinoma",
+    "cancer_type_code": "string",
+    "number_lymph_nodes_positive": 32767,
+    "program_id": "string",
+    "submitter_donor_id": "string"
+  }
+]
 ```
 
-## model_primary_diagnoses_retrieve
+## authorized_programs_list
 
-<a id="opIdmodel_primary_diagnoses_retrieve"></a>
+<a id="opIdauthorized_programs_list"></a>
 
-`GET /moh/v1/model/primary_diagnoses/{submitter_primary_diagnosis_id}/`
+`GET /moh/v1/authorized/programs/`
 
-<h3 id="model_primary_diagnoses_retrieve-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_primary_diagnosis_id": "string",
-  "date_of_diagnosis": "string",
-  "basis_of_diagnosis": "Clinical investigation",
-  "lymph_nodes_examined_status": "Cannot be determined",
-  "lymph_nodes_examined_method": "Imaging",
-  "clinical_tumour_staging_system": "AJCC 8th edition",
-  "clinical_t_category": "T0",
-  "clinical_n_category": "N0",
-  "clinical_m_category": "M0",
-  "clinical_stage_group": "Occult Carcinoma",
-  "cancer_type_code": "string",
-  "number_lymph_nodes_positive": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## model_programs_list
-
-<a id="opIdmodel_programs_list"></a>
-
-`GET /moh/v1/model/programs/`
-
-<h3 id="model_programs_list-parameters">Parameters</h3>
+<h3 id="authorized_programs_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1396,38 +706,22 @@ MoH Overview schema
 }
 ```
 
-## model_programs_retrieve
+## authorized_radiations_list
 
-<a id="opIdmodel_programs_retrieve"></a>
+<a id="opIdauthorized_radiations_list"></a>
 
-`GET /moh/v1/model/programs/{program_id}/`
+`GET /moh/v1/authorized/radiations/`
 
-<h3 id="model_programs_retrieve-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|path|string|true|A unique value identifying this program.|
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
 
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "program_id": "string",
-  "name": "string",
-  "created": "2019-08-24T14:15:22Z",
-  "updated": "2019-08-24T14:15:22Z"
-}
-```
-
-## model_radiations_list
-
-<a id="opIdmodel_radiations_list"></a>
-
-`GET /moh/v1/model/radiations/`
-
-<h3 id="model_radiations_list-parameters">Parameters</h3>
+<h3 id="authorized_radiations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1441,75 +735,45 @@ MoH Overview schema
 |anatomical_site_irradiated|query|string|false|none|
 |radiation_boost|query|boolean|false|none|
 |reference_radiation_treatment_id|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-      "radiation_therapy_type": "External",
-      "anatomical_site_irradiated": "Cervical lymph node group",
-      "radiation_therapy_fractions": 32767,
-      "radiation_therapy_dosage": 32767,
-      "radiation_boost": true,
-      "reference_radiation_treatment_id": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
+[
+  {
+    "id": 0,
+    "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+    "radiation_therapy_type": "External",
+    "anatomical_site_irradiated": "Cervical lymph node group",
+    "radiation_therapy_fractions": 32767,
+    "radiation_therapy_dosage": 32767,
+    "radiation_boost": true,
+    "reference_radiation_treatment_id": "string",
+    "program_id": "string",
+    "submitter_donor_id": "string",
+    "submitter_treatment_id": "string"
+  }
+]
 ```
 
-## model_radiations_retrieve
+## authorized_sample_registrations_list
 
-<a id="opIdmodel_radiations_retrieve"></a>
+<a id="opIdauthorized_sample_registrations_list"></a>
 
-`GET /moh/v1/model/radiations/{id}/`
+`GET /moh/v1/authorized/sample_registrations/`
 
-<h3 id="model_radiations_retrieve-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this radiation.|
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
 
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-  "radiation_therapy_type": "External",
-  "anatomical_site_irradiated": "Cervical lymph node group",
-  "radiation_therapy_fractions": 32767,
-  "radiation_therapy_dosage": 32767,
-  "radiation_boost": true,
-  "reference_radiation_treatment_id": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## model_sample_registrations_list
-
-<a id="opIdmodel_sample_registrations_list"></a>
-
-`GET /moh/v1/model/sample_registrations/`
-
-<h3 id="model_sample_registrations_list-parameters">Parameters</h3>
+<h3 id="authorized_sample_registrations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1523,73 +787,44 @@ MoH Overview schema
 |tumour_normal_designation|query|string|false|none|
 |specimen_type|query|string|false|none|
 |sample_type|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_sample_id": "string",
-      "gender": "Man",
-      "sex_at_birth": "Male",
-      "specimen_tissue_source": "Amniotic fluid",
-      "tumour_normal_designation": "Normal",
-      "specimen_type": "Cell line - derived from normal",
-      "sample_type": "Amplified DNA",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string"
-    }
-  ]
-}
+[
+  {
+    "submitter_sample_id": "string",
+    "gender": "Man",
+    "sex_at_birth": "Male",
+    "specimen_tissue_source": "Amniotic fluid",
+    "tumour_normal_designation": "Normal",
+    "specimen_type": "Cell line - derived from normal",
+    "sample_type": "Amplified DNA",
+    "program_id": "string",
+    "submitter_donor_id": "string",
+    "submitter_specimen_id": "string"
+  }
+]
 ```
 
-## model_sample_registrations_retrieve
+## authorized_specimens_list
 
-<a id="opIdmodel_sample_registrations_retrieve"></a>
+<a id="opIdauthorized_specimens_list"></a>
 
-`GET /moh/v1/model/sample_registrations/{submitter_sample_id}/`
+`GET /moh/v1/authorized/specimens/`
 
-<h3 id="model_sample_registrations_retrieve-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
 
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_sample_id": "string",
-  "gender": "Man",
-  "sex_at_birth": "Male",
-  "specimen_tissue_source": "Amniotic fluid",
-  "tumour_normal_designation": "Normal",
-  "specimen_type": "Cell line - derived from normal",
-  "sample_type": "Amplified DNA",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string"
-}
-```
-
-## model_specimens_list
-
-<a id="opIdmodel_specimens_list"></a>
-
-`GET /moh/v1/model/specimens/`
-
-<h3 id="model_specimens_list-parameters">Parameters</h3>
+<h3 id="authorized_specimens_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1612,91 +847,53 @@ MoH Overview schema
 |tumour_grade|query|string|false|none|
 |percent_tumour_cells_range|query|string|false|none|
 |percent_tumour_cells_measurement_method|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_specimen_id": "string",
-      "pathological_tumour_staging_system": "AJCC 8th edition",
-      "pathological_t_category": "T0",
-      "pathological_n_category": "N0",
-      "pathological_m_category": "M0",
-      "pathological_stage_group": "Occult Carcinoma",
-      "specimen_collection_date": "string",
-      "specimen_storage": "Cut slide",
-      "tumour_histological_type": "string",
-      "specimen_anatomic_location": "string",
-      "reference_pathology_confirmed_diagnosis": "Yes",
-      "reference_pathology_confirmed_tumour_presence": "Yes",
-      "tumour_grading_system": "FNCLCC grading system",
-      "tumour_grade": "Low grade",
-      "percent_tumour_cells_range": "0-19%",
-      "percent_tumour_cells_measurement_method": "Genomics",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
-    }
-  ]
-}
+[
+  {
+    "submitter_specimen_id": "string",
+    "pathological_tumour_staging_system": "AJCC 8th edition",
+    "pathological_t_category": "T0",
+    "pathological_n_category": "N0",
+    "pathological_m_category": "M0",
+    "pathological_stage_group": "Occult Carcinoma",
+    "specimen_collection_date": "string",
+    "specimen_storage": "Cut slide",
+    "tumour_histological_type": "string",
+    "specimen_anatomic_location": "string",
+    "reference_pathology_confirmed_diagnosis": "Yes",
+    "reference_pathology_confirmed_tumour_presence": "Yes",
+    "tumour_grading_system": "FNCLCC grading system",
+    "tumour_grade": "Low grade",
+    "percent_tumour_cells_range": "0-19%",
+    "percent_tumour_cells_measurement_method": "Genomics",
+    "program_id": "string",
+    "submitter_donor_id": "string",
+    "submitter_primary_diagnosis_id": "string"
+  }
+]
 ```
 
-## model_specimens_retrieve
+## authorized_surgeries_list
 
-<a id="opIdmodel_specimens_retrieve"></a>
+<a id="opIdauthorized_surgeries_list"></a>
 
-`GET /moh/v1/model/specimens/{submitter_specimen_id}/`
+`GET /moh/v1/authorized/surgeries/`
 
-<h3 id="model_specimens_retrieve-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
 
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_specimen_id": "string",
-  "pathological_tumour_staging_system": "AJCC 8th edition",
-  "pathological_t_category": "T0",
-  "pathological_n_category": "N0",
-  "pathological_m_category": "M0",
-  "pathological_stage_group": "Occult Carcinoma",
-  "specimen_collection_date": "string",
-  "specimen_storage": "Cut slide",
-  "tumour_histological_type": "string",
-  "specimen_anatomic_location": "string",
-  "reference_pathology_confirmed_diagnosis": "Yes",
-  "reference_pathology_confirmed_tumour_presence": "Yes",
-  "tumour_grading_system": "FNCLCC grading system",
-  "tumour_grade": "Low grade",
-  "percent_tumour_cells_range": "0-19%",
-  "percent_tumour_cells_measurement_method": "Genomics",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-```
-
-## model_surgeries_list
-
-<a id="opIdmodel_surgeries_list"></a>
-
-`GET /moh/v1/model/surgeries/`
-
-<h3 id="model_surgeries_list-parameters">Parameters</h3>
+<h3 id="authorized_surgeries_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1717,101 +914,58 @@ MoH Overview schema
 |margin_types_not_assessed|query|string|false|none|
 |lymphovascular_invasion|query|string|false|none|
 |perineural_invasion|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "surgery_type": "Axillary Clearance",
-      "surgery_site": "string",
-      "surgery_location": "Local recurrence",
-      "tumour_focality": "Cannot be assessed",
-      "residual_tumour_classification": "Not applicable",
-      "margin_types_involved": [
-        "Circumferential resection margin"
-      ],
-      "margin_types_not_involved": [
-        "Circumferential resection margin"
-      ],
-      "margin_types_not_assessed": [
-        "Circumferential resection margin"
-      ],
-      "lymphovascular_invasion": "Absent",
-      "perineural_invasion": "Absent",
-      "tumour_length": 32767,
-      "tumour_width": 32767,
-      "greatest_dimension_tumour": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
+[
+  {
+    "id": 0,
+    "surgery_type": "Axillary Clearance",
+    "surgery_site": "string",
+    "surgery_location": "Local recurrence",
+    "tumour_focality": "Cannot be assessed",
+    "residual_tumour_classification": "Not applicable",
+    "margin_types_involved": [
+      "Circumferential resection margin"
+    ],
+    "margin_types_not_involved": [
+      "Circumferential resection margin"
+    ],
+    "margin_types_not_assessed": [
+      "Circumferential resection margin"
+    ],
+    "lymphovascular_invasion": "Absent",
+    "perineural_invasion": "Absent",
+    "tumour_length": 32767,
+    "tumour_width": 32767,
+    "greatest_dimension_tumour": 32767,
+    "program_id": "string",
+    "submitter_donor_id": "string",
+    "submitter_specimen_id": "string",
+    "submitter_treatment_id": "string"
+  }
+]
 ```
 
-## model_surgeries_retrieve
+## authorized_treatments_list
 
-<a id="opIdmodel_surgeries_retrieve"></a>
+<a id="opIdauthorized_treatments_list"></a>
 
-`GET /moh/v1/model/surgeries/{id}/`
+`GET /moh/v1/authorized/treatments/`
 
-<h3 id="model_surgeries_retrieve-parameters">Parameters</h3>
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this surgery.|
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
 
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "surgery_type": "Axillary Clearance",
-  "surgery_site": "string",
-  "surgery_location": "Local recurrence",
-  "tumour_focality": "Cannot be assessed",
-  "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": [
-    "Circumferential resection margin"
-  ],
-  "margin_types_not_involved": [
-    "Circumferential resection margin"
-  ],
-  "margin_types_not_assessed": [
-    "Circumferential resection margin"
-  ],
-  "lymphovascular_invasion": "Absent",
-  "perineural_invasion": "Absent",
-  "tumour_length": 32767,
-  "tumour_width": 32767,
-  "greatest_dimension_tumour": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## model_treatments_list
-
-<a id="opIdmodel_treatments_list"></a>
-
-`GET /moh/v1/model/treatments/`
-
-<h3 id="model_treatments_list-parameters">Parameters</h3>
+<h3 id="authorized_treatments_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1829,52 +983,65 @@ MoH Overview schema
 |number_of_cycles|query|integer|false|none|
 |response_to_treatment_criteria_method|query|string|false|none|
 |response_to_treatment|query|string|false|none|
-|page|query|integer|false|A page number within the paginated result set.|
-|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_treatment_id": "string",
-      "treatment_type": [
-        "Ablation"
-      ],
-      "is_primary_treatment": "Yes",
-      "treatment_start_date": "string",
-      "treatment_end_date": "string",
-      "treatment_setting": "Adjuvant",
-      "treatment_intent": "Curative",
-      "response_to_treatment_criteria_method": "RECIST 1.1",
-      "response_to_treatment": "Complete response",
-      "days_per_cycle": 32767,
-      "number_of_cycles": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
-    }
-  ]
-}
+[
+  {
+    "submitter_treatment_id": "string",
+    "treatment_type": [
+      "Ablation"
+    ],
+    "is_primary_treatment": "Yes",
+    "treatment_start_date": "string",
+    "treatment_end_date": "string",
+    "treatment_setting": "Adjuvant",
+    "treatment_intent": "Curative",
+    "response_to_treatment_criteria_method": "RECIST 1.1",
+    "response_to_treatment": "Complete response",
+    "days_per_cycle": 32767,
+    "number_of_cycles": 32767,
+    "program_id": "string",
+    "submitter_donor_id": "string",
+    "submitter_primary_diagnosis_id": "string"
+  }
+]
 ```
 
-## model_treatments_retrieve
+<h1 id="moh-service-api-discovery">discovery</h1>
 
-<a id="opIdmodel_treatments_retrieve"></a>
+## discovery_biomarkers_list
 
-`GET /moh/v1/model/treatments/{submitter_treatment_id}/`
+<a id="opIddiscovery_biomarkers_list"></a>
 
-<h3 id="model_treatments_retrieve-parameters">Parameters</h3>
+`GET /moh/v1/discovery/biomarkers/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_biomarkers_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|submitter_treatment_id|path|string|true|A unique value identifying this treatment.|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_specimen_id|query|string|false|none|
+|submitter_primary_diagnosis_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|submitter_follow_up_id|query|string|false|none|
+|test_interval|query|integer|false|none|
+|psa_level|query|integer|false|none|
+|ca125|query|integer|false|none|
+|cea|query|integer|false|none|
 
 > Example responses
 
@@ -1882,22 +1049,541 @@ MoH Overview schema
 
 ```json
 {
-  "submitter_treatment_id": "string",
-  "treatment_type": [
-    "Ablation"
-  ],
-  "is_primary_treatment": "Yes",
-  "treatment_start_date": "string",
-  "treatment_end_date": "string",
-  "treatment_setting": "Adjuvant",
-  "treatment_intent": "Curative",
-  "response_to_treatment_criteria_method": "RECIST 1.1",
-  "response_to_treatment": "Complete response",
-  "days_per_cycle": 32767,
-  "number_of_cycles": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
+  "discovery_donor": 0
+}
+```
+
+## discovery_chemotherapies_list
+
+<a id="opIddiscovery_chemotherapies_list"></a>
+
+`GET /moh/v1/discovery/chemotherapies/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_chemotherapies_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|drug_name|query|string|false|none|
+|drug_rxnormcui|query|string|false|none|
+|chemotherapy_dosage_units|query|string|false|none|
+|cumulative_drug_dosage_prescribed|query|integer|false|none|
+|cumulative_drug_dosage_actual|query|integer|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
+}
+```
+
+## discovery_comorbidities_list
+
+<a id="opIddiscovery_comorbidities_list"></a>
+
+`GET /moh/v1/discovery/comorbidities/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_comorbidities_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|prior_malignancy|query|string|false|none|
+|laterality_of_prior_malignancy|query|string|false|none|
+|age_at_comorbidity_diagnosis|query|integer|false|none|
+|comorbidity_type_code|query|string|false|none|
+|comorbidity_treatment_status|query|string|false|none|
+|comorbidity_treatment|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
+}
+```
+
+## discovery_donors_list
+
+<a id="opIddiscovery_donors_list"></a>
+
+`GET /moh/v1/discovery/donors/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_donors_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_donor_id|query|string|false|none|
+|program_id|query|string|false|none|
+|is_deceased|query|boolean|false|none|
+|cause_of_death|query|string|false|none|
+|date_of_birth|query|string|false|none|
+|date_of_death|query|string|false|none|
+|primary_site|query|string|false|none|
+|age|query|number|false|none|
+|max_age|query|number|false|none|
+|min_age|query|number|false|none|
+|donors|query|string|false|none|
+|primary_diagnosis|query|string|false|none|
+|speciman|query|string|false|none|
+|sample_registration|query|string|false|none|
+|treatment|query|string|false|none|
+|chemotherapy|query|string|false|none|
+|hormone_therapy|query|string|false|none|
+|radiation|query|string|false|none|
+|immunotherapy|query|string|false|none|
+|surgery|query|string|false|none|
+|follow_up|query|string|false|none|
+|biomarker|query|string|false|none|
+|comorbidity|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
+}
+```
+
+## discovery_follow_ups_list
+
+<a id="opIddiscovery_follow_ups_list"></a>
+
+`GET /moh/v1/discovery/follow_ups/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_follow_ups_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_follow_up_id|query|string|false|none|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_primary_diagnosis_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|date_of_followup|query|string|false|none|
+|lost_to_followup|query|boolean|false|none|
+|lost_to_followup_reason|query|string|false|none|
+|disease_status_at_followup|query|string|false|none|
+|relapse_type|query|string|false|none|
+|date_of_relapse|query|string|false|none|
+|method_of_progression_status|query|string|false|none|
+|anatomic_site_progression_or_recurrence|query|string|false|none|
+|recurrence_tumour_staging_system|query|string|false|none|
+|recurrence_t_category|query|string|false|none|
+|recurrence_n_category|query|string|false|none|
+|recurrence_m_category|query|string|false|none|
+|recurrence_stage_group|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
+}
+```
+
+## discovery_hormone_therapies_list
+
+<a id="opIddiscovery_hormone_therapies_list"></a>
+
+`GET /moh/v1/discovery/hormone_therapies/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_hormone_therapies_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|drug_name|query|string|false|none|
+|drug_rxnormcui|query|string|false|none|
+|hormone_drug_dosage_units|query|string|false|none|
+|cumulative_drug_dosage_prescribed|query|integer|false|none|
+|cumulative_drug_dosage_actual|query|integer|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
+}
+```
+
+## discovery_immunotherapies_list
+
+<a id="opIddiscovery_immunotherapies_list"></a>
+
+`GET /moh/v1/discovery/immunotherapies/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_immunotherapies_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|immunotherapy_type|query|string|false|none|
+|drug_name|query|string|false|none|
+|drug_rxnormcui|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
+}
+```
+
+## discovery_overview_retrieve
+
+<a id="opIddiscovery_overview_retrieve"></a>
+
+`GET /moh/v1/discovery/overview`
+
+MoH Overview schema
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "cohort_count": 0,
+  "individual_count": 0
+}
+```
+
+## discovery_primary_diagnoses_list
+
+<a id="opIddiscovery_primary_diagnoses_list"></a>
+
+`GET /moh/v1/discovery/primary_diagnoses/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_primary_diagnoses_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_primary_diagnosis_id|query|string|false|none|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|date_of_diagnosis|query|string|false|none|
+|cancer_type_code|query|string|false|none|
+|basis_of_diagnosis|query|string|false|none|
+|lymph_nodes_examined_status|query|string|false|none|
+|lymph_nodes_examined_method|query|string|false|none|
+|number_lymph_nodes_positive|query|integer|false|none|
+|clinical_tumour_staging_system|query|string|false|none|
+|clinical_t_category|query|string|false|none|
+|clinical_n_category|query|string|false|none|
+|clinical_m_category|query|string|false|none|
+|clinical_stage_group|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
+}
+```
+
+## discovery_radiations_list
+
+<a id="opIddiscovery_radiations_list"></a>
+
+`GET /moh/v1/discovery/radiations/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_radiations_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|radiation_therapy_modality|query|string|false|none|
+|radiation_therapy_type|query|string|false|none|
+|radiation_therapy_fractions|query|integer|false|none|
+|radiation_therapy_dosage|query|integer|false|none|
+|anatomical_site_irradiated|query|string|false|none|
+|radiation_boost|query|boolean|false|none|
+|reference_radiation_treatment_id|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
+}
+```
+
+## discovery_sample_registrations_list
+
+<a id="opIddiscovery_sample_registrations_list"></a>
+
+`GET /moh/v1/discovery/sample_registrations/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_sample_registrations_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_sample_id|query|string|false|none|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_specimen_id|query|string|false|none|
+|gender|query|string|false|none|
+|sex_at_birth|query|string|false|none|
+|specimen_tissue_source|query|string|false|none|
+|tumour_normal_designation|query|string|false|none|
+|specimen_type|query|string|false|none|
+|sample_type|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
+}
+```
+
+## discovery_specimens_list
+
+<a id="opIddiscovery_specimens_list"></a>
+
+`GET /moh/v1/discovery/specimens/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_specimens_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_specimen_id|query|string|false|none|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_primary_diagnosis_id|query|string|false|none|
+|pathological_tumour_staging_system|query|string|false|none|
+|pathological_t_category|query|string|false|none|
+|pathological_n_category|query|string|false|none|
+|pathological_m_category|query|string|false|none|
+|pathological_stage_group|query|string|false|none|
+|specimen_collection_date|query|string|false|none|
+|specimen_storage|query|string|false|none|
+|tumour_histological_type|query|string|false|none|
+|specimen_anatomic_location|query|string|false|none|
+|reference_pathology_confirmed_diagnosis|query|string|false|none|
+|reference_pathology_confirmed_tumour_presence|query|string|false|none|
+|tumour_grading_system|query|string|false|none|
+|tumour_grade|query|string|false|none|
+|percent_tumour_cells_range|query|string|false|none|
+|percent_tumour_cells_measurement_method|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
+}
+```
+
+## discovery_surgeries_list
+
+<a id="opIddiscovery_surgeries_list"></a>
+
+`GET /moh/v1/discovery/surgeries/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_surgeries_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_specimen_id|query|string|false|none|
+|submitter_treatment_id|query|string|false|none|
+|surgery_type|query|string|false|none|
+|surgery_site|query|string|false|none|
+|surgery_location|query|string|false|none|
+|tumour_length|query|integer|false|none|
+|tumour_width|query|integer|false|none|
+|greatest_dimension_tumour|query|integer|false|none|
+|tumour_focality|query|string|false|none|
+|residual_tumour_classification|query|string|false|none|
+|margin_types_involved|query|string|false|none|
+|margin_types_not_involved|query|string|false|none|
+|margin_types_not_assessed|query|string|false|none|
+|lymphovascular_invasion|query|string|false|none|
+|perineural_invasion|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
+}
+```
+
+## discovery_treatments_list
+
+<a id="opIddiscovery_treatments_list"></a>
+
+`GET /moh/v1/discovery/treatments/`
+
+This mixin should be used for viewsets that need to expose
+discovery information about the donor they represent.
+
+Methods
+-------
+list(request, *args, **kwargs)
+    Returns a response that contains the number of unique donors in the
+    queryset.
+
+<h3 id="discovery_treatments_list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|submitter_treatment_id|query|string|false|none|
+|program_id|query|string|false|none|
+|submitter_donor_id|query|string|false|none|
+|submitter_primary_diagnosis_id|query|string|false|none|
+|treatment_type|query|string|false|none|
+|is_primary_treatment|query|string|false|none|
+|treatment_start_date|query|string|false|none|
+|treatment_end_date|query|string|false|none|
+|treatment_setting|query|string|false|none|
+|treatment_intent|query|string|false|none|
+|days_per_cycle|query|integer|false|none|
+|number_of_cycles|query|integer|false|none|
+|response_to_treatment_criteria_method|query|string|false|none|
+|response_to_treatment|query|string|false|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "discovery_donor": 0
 }
 ```
 
@@ -2220,19 +1906,19 @@ continued
 
 ```json
 {
-  "discovery_count": 0
+  "discovery_donor": 0
 }
 
 ```
 
-This serializer is used to return the discovery_count.
+This serializer is used to return the discovery_donor.
 It also override the list serializer to a single object
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|discovery_count|integer|true|none|none|
+|discovery_donor|integer|true|none|none|
 
 <h2 id="tocS_DiseaseStatusAtFollowupEnum">DiseaseStatusAtFollowupEnum</h2>
 
@@ -2316,12 +2002,12 @@ continued
 |is_deceased|boolean|true|none|none|
 |program_id|string|true|none|none|
 
-<h2 id="tocS_DonorRelatedClinicalData">DonorRelatedClinicalData</h2>
+<h2 id="tocS_DonorWithClinicalData">DonorWithClinicalData</h2>
 
-<a id="schemadonorrelatedclinicaldata"></a>
-<a id="schema_DonorRelatedClinicalData"></a>
-<a id="tocSdonorrelatedclinicaldata"></a>
-<a id="tocsdonorrelatedclinicaldata"></a>
+<a id="schemadonorwithclinicaldata"></a>
+<a id="schema_DonorWithClinicalData"></a>
+<a id="tocSdonorwithclinicaldata"></a>
+<a id="tocsdonorwithclinicaldata"></a>
 
 ```json
 {
@@ -4498,324 +4184,6 @@ continued
 |followups|[[NestedFollowUp](#schemanestedfollowup)]|false|read-only|none|
 |biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
 
-<h2 id="tocS_PaginatedBiomarkerList">PaginatedBiomarkerList</h2>
-
-<a id="schemapaginatedbiomarkerlist"></a>
-<a id="schema_PaginatedBiomarkerList"></a>
-<a id="tocSpaginatedbiomarkerlist"></a>
-<a id="tocspaginatedbiomarkerlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string",
-      "submitter_follow_up_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Biomarker](#schemabiomarker)]|false|none|none|
-
-<h2 id="tocS_PaginatedChemotherapyList">PaginatedChemotherapyList</h2>
-
-<a id="schemapaginatedchemotherapylist"></a>
-<a id="schema_PaginatedChemotherapyList"></a>
-<a id="tocSpaginatedchemotherapylist"></a>
-<a id="tocspaginatedchemotherapylist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "chemotherapy_dosage_units": "mg/m2",
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "cumulative_drug_dosage_prescribed": 32767,
-      "cumulative_drug_dosage_actual": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Chemotherapy](#schemachemotherapy)]|false|none|none|
-
-<h2 id="tocS_PaginatedComorbidityList">PaginatedComorbidityList</h2>
-
-<a id="schemapaginatedcomorbiditylist"></a>
-<a id="schema_PaginatedComorbidityList"></a>
-<a id="tocSpaginatedcomorbiditylist"></a>
-<a id="tocspaginatedcomorbiditylist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "prior_malignancy": "Yes",
-      "laterality_of_prior_malignancy": "Bilateral",
-      "comorbidity_type_code": "string",
-      "comorbidity_treatment_status": "Yes",
-      "comorbidity_treatment": "string",
-      "age_at_comorbidity_diagnosis": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Comorbidity](#schemacomorbidity)]|false|none|none|
-
-<h2 id="tocS_PaginatedDonorList">PaginatedDonorList</h2>
-
-<a id="schemapaginateddonorlist"></a>
-<a id="schema_PaginatedDonorList"></a>
-<a id="tocSpaginateddonorlist"></a>
-<a id="tocspaginateddonorlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_donor_id": "string",
-      "cause_of_death": "Died of cancer",
-      "date_of_birth": "string",
-      "date_of_death": "string",
-      "primary_site": [
-        "Accessory sinuses"
-      ],
-      "is_deceased": true,
-      "program_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Donor](#schemadonor)]|false|none|none|
-
-<h2 id="tocS_PaginatedFollowUpList">PaginatedFollowUpList</h2>
-
-<a id="schemapaginatedfollowuplist"></a>
-<a id="schema_PaginatedFollowUpList"></a>
-<a id="tocSpaginatedfollowuplist"></a>
-<a id="tocspaginatedfollowuplist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_follow_up_id": "string",
-      "date_of_followup": "string",
-      "lost_to_followup_reason": "Completed study",
-      "disease_status_at_followup": "Complete remission",
-      "relapse_type": "Distant recurrence/metastasis",
-      "date_of_relapse": "string",
-      "method_of_progression_status": "Imaging (procedure)",
-      "anatomic_site_progression_or_recurrence": "string",
-      "recurrence_tumour_staging_system": "AJCC 8th edition",
-      "recurrence_t_category": "T0",
-      "recurrence_n_category": "N0",
-      "recurrence_m_category": "M0",
-      "recurrence_stage_group": "Occult Carcinoma",
-      "lost_to_followup": true,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[FollowUp](#schemafollowup)]|false|none|none|
-
-<h2 id="tocS_PaginatedHormoneTherapyList">PaginatedHormoneTherapyList</h2>
-
-<a id="schemapaginatedhormonetherapylist"></a>
-<a id="schema_PaginatedHormoneTherapyList"></a>
-<a id="tocSpaginatedhormonetherapylist"></a>
-<a id="tocspaginatedhormonetherapylist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "hormone_drug_dosage_units": "mg/m2",
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "cumulative_drug_dosage_prescribed": 32767,
-      "cumulative_drug_dosage_actual": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[HormoneTherapy](#schemahormonetherapy)]|false|none|none|
-
-<h2 id="tocS_PaginatedImmunotherapyList">PaginatedImmunotherapyList</h2>
-
-<a id="schemapaginatedimmunotherapylist"></a>
-<a id="schema_PaginatedImmunotherapyList"></a>
-<a id="tocSpaginatedimmunotherapylist"></a>
-<a id="tocspaginatedimmunotherapylist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "immunotherapy_type": "Cell-based",
-      "drug_name": "string",
-      "drug_rxnormcui": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Immunotherapy](#schemaimmunotherapy)]|false|none|none|
-
-<h2 id="tocS_PaginatedPrimaryDiagnosisList">PaginatedPrimaryDiagnosisList</h2>
-
-<a id="schemapaginatedprimarydiagnosislist"></a>
-<a id="schema_PaginatedPrimaryDiagnosisList"></a>
-<a id="tocSpaginatedprimarydiagnosislist"></a>
-<a id="tocspaginatedprimarydiagnosislist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_primary_diagnosis_id": "string",
-      "date_of_diagnosis": "string",
-      "basis_of_diagnosis": "Clinical investigation",
-      "lymph_nodes_examined_status": "Cannot be determined",
-      "lymph_nodes_examined_method": "Imaging",
-      "clinical_tumour_staging_system": "AJCC 8th edition",
-      "clinical_t_category": "T0",
-      "clinical_n_category": "N0",
-      "clinical_m_category": "M0",
-      "clinical_stage_group": "Occult Carcinoma",
-      "cancer_type_code": "string",
-      "number_lymph_nodes_positive": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[PrimaryDiagnosis](#schemaprimarydiagnosis)]|false|none|none|
-
 <h2 id="tocS_PaginatedProgramList">PaginatedProgramList</h2>
 
 <a id="schemapaginatedprogramlist"></a>
@@ -4848,231 +4216,6 @@ continued
 |next|string(uri)¦null|false|none|none|
 |previous|string(uri)¦null|false|none|none|
 |results|[[Program](#schemaprogram)]|false|none|none|
-
-<h2 id="tocS_PaginatedRadiationList">PaginatedRadiationList</h2>
-
-<a id="schemapaginatedradiationlist"></a>
-<a id="schema_PaginatedRadiationList"></a>
-<a id="tocSpaginatedradiationlist"></a>
-<a id="tocspaginatedradiationlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-      "radiation_therapy_type": "External",
-      "anatomical_site_irradiated": "Cervical lymph node group",
-      "radiation_therapy_fractions": 32767,
-      "radiation_therapy_dosage": 32767,
-      "radiation_boost": true,
-      "reference_radiation_treatment_id": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Radiation](#schemaradiation)]|false|none|none|
-
-<h2 id="tocS_PaginatedSampleRegistrationList">PaginatedSampleRegistrationList</h2>
-
-<a id="schemapaginatedsampleregistrationlist"></a>
-<a id="schema_PaginatedSampleRegistrationList"></a>
-<a id="tocSpaginatedsampleregistrationlist"></a>
-<a id="tocspaginatedsampleregistrationlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_sample_id": "string",
-      "gender": "Man",
-      "sex_at_birth": "Male",
-      "specimen_tissue_source": "Amniotic fluid",
-      "tumour_normal_designation": "Normal",
-      "specimen_type": "Cell line - derived from normal",
-      "sample_type": "Amplified DNA",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[SampleRegistration](#schemasampleregistration)]|false|none|none|
-
-<h2 id="tocS_PaginatedSpecimenList">PaginatedSpecimenList</h2>
-
-<a id="schemapaginatedspecimenlist"></a>
-<a id="schema_PaginatedSpecimenList"></a>
-<a id="tocSpaginatedspecimenlist"></a>
-<a id="tocspaginatedspecimenlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_specimen_id": "string",
-      "pathological_tumour_staging_system": "AJCC 8th edition",
-      "pathological_t_category": "T0",
-      "pathological_n_category": "N0",
-      "pathological_m_category": "M0",
-      "pathological_stage_group": "Occult Carcinoma",
-      "specimen_collection_date": "string",
-      "specimen_storage": "Cut slide",
-      "tumour_histological_type": "string",
-      "specimen_anatomic_location": "string",
-      "reference_pathology_confirmed_diagnosis": "Yes",
-      "reference_pathology_confirmed_tumour_presence": "Yes",
-      "tumour_grading_system": "FNCLCC grading system",
-      "tumour_grade": "Low grade",
-      "percent_tumour_cells_range": "0-19%",
-      "percent_tumour_cells_measurement_method": "Genomics",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Specimen](#schemaspecimen)]|false|none|none|
-
-<h2 id="tocS_PaginatedSurgeryList">PaginatedSurgeryList</h2>
-
-<a id="schemapaginatedsurgerylist"></a>
-<a id="schema_PaginatedSurgeryList"></a>
-<a id="tocSpaginatedsurgerylist"></a>
-<a id="tocspaginatedsurgerylist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "id": 0,
-      "surgery_type": "Axillary Clearance",
-      "surgery_site": "string",
-      "surgery_location": "Local recurrence",
-      "tumour_focality": "Cannot be assessed",
-      "residual_tumour_classification": "Not applicable",
-      "margin_types_involved": [
-        "Circumferential resection margin"
-      ],
-      "margin_types_not_involved": [
-        "Circumferential resection margin"
-      ],
-      "margin_types_not_assessed": [
-        "Circumferential resection margin"
-      ],
-      "lymphovascular_invasion": "Absent",
-      "perineural_invasion": "Absent",
-      "tumour_length": 32767,
-      "tumour_width": 32767,
-      "greatest_dimension_tumour": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Surgery](#schemasurgery)]|false|none|none|
-
-<h2 id="tocS_PaginatedTreatmentList">PaginatedTreatmentList</h2>
-
-<a id="schemapaginatedtreatmentlist"></a>
-<a id="schema_PaginatedTreatmentList"></a>
-<a id="tocSpaginatedtreatmentlist"></a>
-<a id="tocspaginatedtreatmentlist"></a>
-
-```json
-{
-  "count": 123,
-  "next": "http://api.example.org/accounts/?page=4",
-  "previous": "http://api.example.org/accounts/?page=2",
-  "results": [
-    {
-      "submitter_treatment_id": "string",
-      "treatment_type": [
-        "Ablation"
-      ],
-      "is_primary_treatment": "Yes",
-      "treatment_start_date": "string",
-      "treatment_end_date": "string",
-      "treatment_setting": "Adjuvant",
-      "treatment_intent": "Curative",
-      "response_to_treatment_criteria_method": "RECIST 1.1",
-      "response_to_treatment": "Complete response",
-      "days_per_cycle": 32767,
-      "number_of_cycles": 32767,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|count|integer|false|none|none|
-|next|string(uri)¦null|false|none|none|
-|previous|string(uri)¦null|false|none|none|
-|results|[[Treatment](#schematreatment)]|false|none|none|
 
 <h2 id="tocS_PercentTumourCellsMeasurementMethodEnum">PercentTumourCellsMeasurementMethodEnum</h2>
 
