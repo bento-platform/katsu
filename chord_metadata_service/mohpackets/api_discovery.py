@@ -2,60 +2,28 @@ from drf_spectacular.utils import extend_schema, extend_schema_serializer
 from rest_framework import mixins, serializers, viewsets
 from rest_framework.response import Response
 
-from chord_metadata_service.mohpackets.filters import (
-    BiomarkerFilter,
-    ChemotherapyFilter,
-    ComorbidityFilter,
-    DonorFilter,
-    FollowUpFilter,
-    HormoneTherapyFilter,
-    ImmunotherapyFilter,
-    PrimaryDiagnosisFilter,
-    RadiationFilter,
-    SampleRegistrationFilter,
-    SpecimenFilter,
-    SurgeryFilter,
-    TreatmentFilter,
+from chord_metadata_service.mohpackets.api_base import (
+    BaseBiomarkerViewSet,
+    BaseChemotherapyViewSet,
+    BaseComorbidityViewSet,
+    BaseDonorViewSet,
+    BaseFollowUpViewSet,
+    BaseHormoneTherapyViewSet,
+    BaseImmunotherapyViewSet,
+    BasePrimaryDiagnosisViewSet,
+    BaseRadiationViewSet,
+    BaseSampleRegistrationViewSet,
+    BaseSpecimenViewSet,
+    BaseSurgeryViewSet,
+    BaseTreatmentViewSet,
 )
-from chord_metadata_service.mohpackets.models import (
-    Biomarker,
-    Chemotherapy,
-    Comorbidity,
-    Donor,
-    FollowUp,
-    HormoneTherapy,
-    Immunotherapy,
-    PrimaryDiagnosis,
-    Radiation,
-    SampleRegistration,
-    Specimen,
-    Surgery,
-    Treatment,
-)
-from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
-from chord_metadata_service.mohpackets.serializers import (
-    BiomarkerSerializer,
-    ChemotherapySerializer,
-    ComorbiditySerializer,
-    DonorSerializer,
-    FollowUpSerializer,
-    HormoneTherapySerializer,
-    ImmunotherapySerializer,
-    PrimaryDiagnosisSerializer,
-    RadiationSerializer,
-    SampleRegistrationSerializer,
-    SpecimenSerializer,
-    SurgerySerializer,
-    TreatmentSerializer,
-)
-from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 
 """
-    This Views module based on the api_views.py module, but only contains
-    the ListModelMixin, meaning the user cannot use any create, update,
-    or view details APIs.
-    It overrides the list function to return the count of patients for discovery purposes.
-    NOTE: This is a temporary solution until we implement Beacon discovery features.
+    This module inheriting from the base views and adding the discovery mixin,
+    which returns the number of donors only.
+    
+    The discovery feature can help users without authorization explore the
+    available data without exposing the details.
 """
 
 
@@ -76,14 +44,12 @@ class DiscoverySerializer(serializers.Serializer):
     discovery_count = serializers.IntegerField()
 
 
-def get_discovery_response(self):
-    """
-    This function returns the count of unique submitter_donor_ids
-    (aka the number of patients the queryset has).
-    """
-    queryset = self.filter_queryset(self.get_queryset())
-    count = queryset.values_list("submitter_donor_id").distinct().count()
-    return Response({"discovery_count": count})
+class DiscoveryMixin:
+    @extend_schema(responses=DiscoverySerializer(many=False))
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        count = queryset.values_list("submitter_donor_id").distinct().count()
+        return Response({"discovery_count": count})
 
 
 ###############################################
@@ -93,159 +59,53 @@ def get_discovery_response(self):
 ###############################################
 
 
-class DiscoveryDonorViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = DonorSerializer
-    filterset_class = DonorFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = Donor.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoveryDonorViewSet(DiscoveryMixin, BaseDonorViewSet):
+    pass
 
 
-class DiscoverySpecimenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = SpecimenSerializer
-    filterset_class = SpecimenFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = Specimen.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoverySpecimenViewSet(DiscoveryMixin, BaseSpecimenViewSet):
+    pass
 
 
-class DiscoverySampleRegistrationViewSet(
-    mixins.ListModelMixin, viewsets.GenericViewSet
-):
-    serializer_class = SampleRegistrationSerializer
-    filterset_class = SampleRegistrationFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = SampleRegistration.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoverySampleRegistrationViewSet(DiscoveryMixin, BaseSampleRegistrationViewSet):
+    pass
 
 
-class DiscoveryPrimaryDiagnosisViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = PrimaryDiagnosisSerializer
-    filterset_class = PrimaryDiagnosisFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = PrimaryDiagnosis.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoveryPrimaryDiagnosisViewSet(DiscoveryMixin, BasePrimaryDiagnosisViewSet):
+    pass
 
 
-class DiscoveryTreatmentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = TreatmentSerializer
-    filterset_class = TreatmentFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = Treatment.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoveryTreatmentViewSet(DiscoveryMixin, BaseTreatmentViewSet):
+    pass
 
 
-class DiscoveryChemotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = ChemotherapySerializer
-    filterset_class = ChemotherapyFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = Chemotherapy.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoveryChemotherapyViewSet(DiscoveryMixin, BaseChemotherapyViewSet):
+    pass
 
 
-class DiscoveryHormoneTherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = HormoneTherapySerializer
-    filterset_class = HormoneTherapyFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = HormoneTherapy.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoveryHormoneTherapyViewSet(DiscoveryMixin, BaseHormoneTherapyViewSet):
+    pass
 
 
-class DiscoveryRadiationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = RadiationSerializer
-    filterset_class = RadiationFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = Radiation.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoveryRadiationViewSet(DiscoveryMixin, BaseRadiationViewSet):
+    pass
 
 
-class DiscoveryImmunotherapyViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = ImmunotherapySerializer
-    filterset_class = ImmunotherapyFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = Immunotherapy.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoveryImmunotherapyViewSet(DiscoveryMixin, BaseImmunotherapyViewSet):
+    pass
 
 
-class DiscoverySurgeryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = SurgerySerializer
-    filterset_class = SurgeryFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = Surgery.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoverySurgeryViewSet(DiscoveryMixin, BaseSurgeryViewSet):
+    pass
 
 
-class DiscoveryFollowUpViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = FollowUpSerializer
-    filterset_class = FollowUpFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = FollowUp.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoveryFollowUpViewSet(DiscoveryMixin, BaseFollowUpViewSet):
+    pass
 
 
-class DiscoveryBiomarkerViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = BiomarkerSerializer
-    filterset_class = BiomarkerFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = Biomarker.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoveryBiomarkerViewSet(DiscoveryMixin, BaseBiomarkerViewSet):
+    pass
 
 
-class DiscoveryComorbidityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = ComorbiditySerializer
-    filterset_class = ComorbidityFilter
-    permission_classes = [CanDIGAdminOrReadOnly]
-    throttle_classes = [MoHRateThrottle]
-    queryset = Comorbidity.objects.all()
-
-    @extend_schema(responses=DiscoverySerializer(many=False))
-    def list(self, request, *args, **kwargs):
-        return get_discovery_response(self)
+class DiscoveryComorbidityViewSet(DiscoveryMixin, BaseComorbidityViewSet):
+    pass
