@@ -21,7 +21,7 @@ class CanDIGAdminOrReadOnly(BasePermission):
         if request.method in SAFE_METHODS:
             return True
         else:
-            if settings.CANDIG_AUTHORIZATION == "OPA":
+            if settings.KATSU_AUTHORIZATION == "OPA":
                 opa_url = settings.CANDIG_OPA_URL
                 opa_secret = settings.CANDIG_OPA_SECRET
                 opa_site_admin = settings.CANDIG_OPA_SITE_ADMIN_KEY
@@ -31,6 +31,6 @@ class CanDIGAdminOrReadOnly(BasePermission):
                     admin_secret=opa_secret,
                     site_admin_key=opa_site_admin,
                 )
-            elif settings.CANDIG_AUTHORIZATION == "LOCAL_SETTING_NO_AUTH":
+            elif settings.KATSU_AUTHORIZATION == "LOCAL_SETTING_NO_AUTH":
                 return True
             return False

@@ -27,6 +27,7 @@ SECRET_KEY = "django-insecure-30bq59j6h_8^_%c#t4&d@1spzp@z(p1z8)h$a@1s*0^=bv!i2b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Modify this for local development
 FAKE_AUTHORIZED_DATASETS = ["SYNTHETIC-POG"]
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "docker.localhost"]
@@ -36,7 +37,7 @@ if host_container_name:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS))
 
 # CANDIG SETTINGS
-CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "LOCAL_SETTING_NO_AUTH")
+KATSU_AUTHORIZATION = os.getenv("KATSU_AUTHORIZATION", "LOCAL_SETTING_NO_AUTH")
 CANDIG_OPA_URL = os.getenv("OPA_URL", "LOCAL_SETTING_NO_OPA_URL")
 CANDIG_OPA_SITE_ADMIN_KEY = os.getenv(
     "OPA_SITE_ADMIN_KEY", "LOCAL_SETTING_NO_SITE_ADMIN_KEY"
