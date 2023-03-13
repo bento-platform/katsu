@@ -1,22 +1,27 @@
 
-<h1 id="metadata-service-api">Metadata Service API v1.0.0</h1>
+<h1 id="moh-service-api">MoH Service API v1.0.0</h1>
 
-Metadata Service provides a phenotypic description of an Individual in the context of biomedical research.
+This is the RESTful API for the MoH Service.
 
 # Authentication
 
-* API Key (BentoRemoteUserAuthentication)
-    - Parameter Name: **api_key**, in: header. 
+- HTTP Authentication, scheme: basic
 
-<h1 id="metadata-service-api-api">api</h1>
+* API Key (cookieAuth)
+    - Parameter Name: **sessionid**, in: cookie. 
 
-## api_v1_discovery_biomarkers_list
+* API Key (tokenAuth)
+    - Parameter Name: **Authorization**, in: header. Token-based authentication with required prefix "Token"
 
-<a id="opIdapi_v1_discovery_biomarkers_list"></a>
+<h1 id="moh-service-api-discovery">discovery</h1>
 
-`GET /api/v1/discovery/biomarkers/`
+## discovery_biomarkers_list
 
-<h3 id="api_v1_discovery_biomarkers_list-parameters">Parameters</h3>
+<a id="opIddiscovery_biomarkers_list"></a>
+
+`GET /moh/v1/discovery/biomarkers/`
+
+<h3 id="discovery_biomarkers_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -41,13 +46,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_chemotherapies_list
+## discovery_chemotherapies_list
 
-<a id="opIdapi_v1_discovery_chemotherapies_list"></a>
+<a id="opIddiscovery_chemotherapies_list"></a>
 
-`GET /api/v1/discovery/chemotherapies/`
+`GET /moh/v1/discovery/chemotherapies/`
 
-<h3 id="api_v1_discovery_chemotherapies_list-parameters">Parameters</h3>
+<h3 id="discovery_chemotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -70,13 +75,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_comorbidities_list
+## discovery_comorbidities_list
 
-<a id="opIdapi_v1_discovery_comorbidities_list"></a>
+<a id="opIddiscovery_comorbidities_list"></a>
 
-`GET /api/v1/discovery/comorbidities/`
+`GET /moh/v1/discovery/comorbidities/`
 
-<h3 id="api_v1_discovery_comorbidities_list-parameters">Parameters</h3>
+<h3 id="discovery_comorbidities_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -99,13 +104,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_donors_list
+## discovery_donors_list
 
-<a id="opIdapi_v1_discovery_donors_list"></a>
+<a id="opIddiscovery_donors_list"></a>
 
-`GET /api/v1/discovery/donors/`
+`GET /moh/v1/discovery/donors/`
 
-<h3 id="api_v1_discovery_donors_list-parameters">Parameters</h3>
+<h3 id="discovery_donors_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -143,13 +148,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_follow_ups_list
+## discovery_follow_ups_list
 
-<a id="opIdapi_v1_discovery_follow_ups_list"></a>
+<a id="opIddiscovery_follow_ups_list"></a>
 
-`GET /api/v1/discovery/follow_ups/`
+`GET /moh/v1/discovery/follow_ups/`
 
-<h3 id="api_v1_discovery_follow_ups_list-parameters">Parameters</h3>
+<h3 id="discovery_follow_ups_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -182,13 +187,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_hormone_therapies_list
+## discovery_hormone_therapies_list
 
-<a id="opIdapi_v1_discovery_hormone_therapies_list"></a>
+<a id="opIddiscovery_hormone_therapies_list"></a>
 
-`GET /api/v1/discovery/hormone_therapies/`
+`GET /moh/v1/discovery/hormone_therapies/`
 
-<h3 id="api_v1_discovery_hormone_therapies_list-parameters">Parameters</h3>
+<h3 id="discovery_hormone_therapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -211,13 +216,13 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_immunotherapies_list
+## discovery_immunotherapies_list
 
-<a id="opIdapi_v1_discovery_immunotherapies_list"></a>
+<a id="opIddiscovery_immunotherapies_list"></a>
 
-`GET /api/v1/discovery/immunotherapies/`
+`GET /moh/v1/discovery/immunotherapies/`
 
-<h3 id="api_v1_discovery_immunotherapies_list-parameters">Parameters</h3>
+<h3 id="discovery_immunotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -238,11 +243,11 @@ Metadata Service provides a phenotypic description of an Individual in the conte
 }
 ```
 
-## api_v1_discovery_overview_retrieve
+## discovery_overview_retrieve
 
-<a id="opIdapi_v1_discovery_overview_retrieve"></a>
+<a id="opIddiscovery_overview_retrieve"></a>
 
-`GET /api/v1/discovery/overview`
+`GET /moh/v1/discovery/overview`
 
 MoH Overview schema
 
@@ -257,13 +262,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_primary_diagnoses_list
+## discovery_primary_diagnoses_list
 
-<a id="opIdapi_v1_discovery_primary_diagnoses_list"></a>
+<a id="opIddiscovery_primary_diagnoses_list"></a>
 
-`GET /api/v1/discovery/primary_diagnoses/`
+`GET /moh/v1/discovery/primary_diagnoses/`
 
-<h3 id="api_v1_discovery_primary_diagnoses_list-parameters">Parameters</h3>
+<h3 id="discovery_primary_diagnoses_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -292,13 +297,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_radiations_list
+## discovery_radiations_list
 
-<a id="opIdapi_v1_discovery_radiations_list"></a>
+<a id="opIddiscovery_radiations_list"></a>
 
-`GET /api/v1/discovery/radiations/`
+`GET /moh/v1/discovery/radiations/`
 
-<h3 id="api_v1_discovery_radiations_list-parameters">Parameters</h3>
+<h3 id="discovery_radiations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -323,13 +328,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_sample_registrations_list
+## discovery_sample_registrations_list
 
-<a id="opIdapi_v1_discovery_sample_registrations_list"></a>
+<a id="opIddiscovery_sample_registrations_list"></a>
 
-`GET /api/v1/discovery/sample_registrations/`
+`GET /moh/v1/discovery/sample_registrations/`
 
-<h3 id="api_v1_discovery_sample_registrations_list-parameters">Parameters</h3>
+<h3 id="discovery_sample_registrations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -354,13 +359,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_specimens_list
+## discovery_specimens_list
 
-<a id="opIdapi_v1_discovery_specimens_list"></a>
+<a id="opIddiscovery_specimens_list"></a>
 
-`GET /api/v1/discovery/specimens/`
+`GET /moh/v1/discovery/specimens/`
 
-<h3 id="api_v1_discovery_specimens_list-parameters">Parameters</h3>
+<h3 id="discovery_specimens_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -394,13 +399,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_surgeries_list
+## discovery_surgeries_list
 
-<a id="opIdapi_v1_discovery_surgeries_list"></a>
+<a id="opIddiscovery_surgeries_list"></a>
 
-`GET /api/v1/discovery/surgeries/`
+`GET /moh/v1/discovery/surgeries/`
 
-<h3 id="api_v1_discovery_surgeries_list-parameters">Parameters</h3>
+<h3 id="discovery_surgeries_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -432,13 +437,13 @@ MoH Overview schema
 }
 ```
 
-## api_v1_discovery_treatments_list
+## discovery_treatments_list
 
-<a id="opIdapi_v1_discovery_treatments_list"></a>
+<a id="opIddiscovery_treatments_list"></a>
 
-`GET /api/v1/discovery/treatments/`
+`GET /moh/v1/discovery/treatments/`
 
-<h3 id="api_v1_discovery_treatments_list-parameters">Parameters</h3>
+<h3 id="discovery_treatments_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -467,295 +472,233 @@ MoH Overview schema
 }
 ```
 
-## api_v1_ingest_biomarkers_create
+<h1 id="moh-service-api-model">model</h1>
 
-<a id="opIdapi_v1_ingest_biomarkers_create"></a>
+## model_a_list
 
-`POST /api/v1/ingest/biomarkers`
+<a id="opIdmodel_a_list"></a>
 
-<h3 id="api_v1_ingest_biomarkers_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
+`GET /moh/v1/model/a/`
 
 > Example responses
 
-> 201 Response
+> 200 Response
 
 ```json
-"string"
+[
+  {
+    "submitter_donor_id": "string",
+    "program_id": "string",
+    "is_deceased": true,
+    "cause_of_death": "Died of cancer",
+    "date_of_birth": "string",
+    "date_of_death": "string",
+    "primary_site": [
+      "Accessory sinuses"
+    ],
+    "primary_diagnoses": [
+      {
+        "submitter_primary_diagnosis_id": "string",
+        "date_of_diagnosis": "string",
+        "cancer_type_code": "string",
+        "basis_of_diagnosis": "Clinical investigation",
+        "lymph_nodes_examined_status": "Cannot be determined",
+        "lymph_nodes_examined_method": "Imaging",
+        "number_lymph_nodes_positive": 32767,
+        "clinical_tumour_staging_system": "AJCC 8th edition",
+        "clinical_t_category": "T0",
+        "clinical_n_category": "N0",
+        "clinical_m_category": "M0",
+        "clinical_stage_group": "Occult Carcinoma",
+        "specimens": [
+          {
+            "pathological_tumour_staging_system": "AJCC 8th edition",
+            "pathological_t_category": "T0",
+            "pathological_n_category": "N0",
+            "pathological_m_category": "M0",
+            "pathological_stage_group": "Occult Carcinoma",
+            "specimen_collection_date": "string",
+            "specimen_storage": "Cut slide",
+            "tumour_histological_type": "string",
+            "specimen_anatomic_location": "string",
+            "reference_pathology_confirmed_diagnosis": "Yes",
+            "reference_pathology_confirmed_tumour_presence": "Yes",
+            "tumour_grading_system": "FNCLCC grading system",
+            "tumour_grade": "Low grade",
+            "percent_tumour_cells_range": "0-19%",
+            "percent_tumour_cells_measurement_method": "Genomics",
+            "sample_registrations": [
+              {
+                "submitter_sample_id": "string",
+                "gender": "Man",
+                "sex_at_birth": "Male",
+                "specimen_tissue_source": "Amniotic fluid",
+                "tumour_normal_designation": "Normal",
+                "specimen_type": "Cell line - derived from normal",
+                "sample_type": "Amplified DNA"
+              }
+            ],
+            "biomarkers": [
+              {
+                "id": 0,
+                "test_interval": 32767,
+                "psa_level": 32767,
+                "ca125": 32767,
+                "cea": 32767
+              }
+            ]
+          }
+        ],
+        "treatments": [
+          {
+            "submitter_treatment_id": "string",
+            "is_primary_treatment": "Yes",
+            "treatment_start_date": "string",
+            "treatment_end_date": "string",
+            "treatment_setting": "Adjuvant",
+            "treatment_intent": "Curative",
+            "days_per_cycle": 32767,
+            "number_of_cycles": 32767,
+            "response_to_treatment_criteria_method": "RECIST 1.1",
+            "chemotherapies": [
+              {
+                "id": 0,
+                "chemotherapy_dosage_units": "mg/m2",
+                "drug_name": "string",
+                "drug_rxnormcui": "string",
+                "cumulative_drug_dosage_prescribed": 32767,
+                "cumulative_drug_dosage_actual": 32767
+              }
+            ],
+            "hormone_therapies": [
+              {
+                "id": 0,
+                "hormone_drug_dosage_units": "mg/m2",
+                "drug_name": "string",
+                "drug_rxnormcui": "string",
+                "cumulative_drug_dosage_prescribed": 32767,
+                "cumulative_drug_dosage_actual": 32767
+              }
+            ],
+            "immunotherapies": [
+              {
+                "id": 0,
+                "immunotherapy_type": "Cell-based",
+                "drug_name": "string",
+                "drug_rxnormcui": "string"
+              }
+            ],
+            "radiation": {
+              "id": 0,
+              "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+              "radiation_therapy_type": "External",
+              "anatomical_site_irradiated": "Cervical lymph node group",
+              "radiation_therapy_fractions": 32767,
+              "radiation_therapy_dosage": 32767,
+              "radiation_boost": true,
+              "reference_radiation_treatment_id": "string"
+            },
+            "surgery": {
+              "id": 0,
+              "surgery_type": "Axillary Clearance",
+              "surgery_site": "string",
+              "surgery_location": "Local recurrence",
+              "tumour_focality": "Cannot be assessed",
+              "residual_tumour_classification": "Not applicable",
+              "margin_types_involved": [
+                "Circumferential resection margin"
+              ],
+              "margin_types_not_involved": [
+                "Circumferential resection margin"
+              ],
+              "margin_types_not_assessed": [
+                "Circumferential resection margin"
+              ],
+              "lymphovascular_invasion": "Absent",
+              "perineural_invasion": "Absent",
+              "tumour_length": 32767,
+              "tumour_width": 32767,
+              "greatest_dimension_tumour": 32767,
+              "submitter_specimen_id": "string"
+            },
+            "followups": [
+              {
+                "date_of_followup": "string",
+                "lost_to_followup": true,
+                "lost_to_followup_reason": "Completed study",
+                "disease_status_at_followup": "Complete remission",
+                "relapse_type": "Distant recurrence/metastasis",
+                "date_of_relapse": "string",
+                "method_of_progression_status": "Imaging (procedure)",
+                "anatomic_site_progression_or_recurrence": "string",
+                "recurrence_tumour_staging_system": "AJCC 8th edition",
+                "recurrence_t_category": "T0",
+                "recurrence_n_category": "N0",
+                "recurrence_m_category": "M0",
+                "recurrence_stage_group": "Occult Carcinoma",
+                "biomarkers": [
+                  {
+                    "id": 0,
+                    "test_interval": 32767,
+                    "psa_level": 32767,
+                    "ca125": 32767,
+                    "cea": 32767
+                  }
+                ]
+              }
+            ],
+            "biomarkers": [
+              {
+                "id": 0,
+                "test_interval": 32767,
+                "psa_level": 32767,
+                "ca125": 32767,
+                "cea": 32767
+              }
+            ]
+          }
+        ],
+        "biomarkers": [
+          {
+            "id": 0,
+            "test_interval": 32767,
+            "psa_level": 32767,
+            "ca125": 32767,
+            "cea": 32767
+          }
+        ]
+      }
+    ],
+    "comorbidities": [
+      {
+        "prior_malignancy": "Yes",
+        "laterality_of_prior_malignancy": "Bilateral",
+        "age_at_comorbidity_diagnosis": 32767,
+        "comorbidity_type_code": "string",
+        "comorbidity_treatment_status": "Yes",
+        "comorbidity_treatment": "string"
+      }
+    ],
+    "biomarkers": [
+      {
+        "id": 0,
+        "test_interval": 32767,
+        "psa_level": 32767,
+        "ca125": 32767,
+        "cea": 32767
+      }
+    ]
+  }
+]
 ```
 
-## api_v1_ingest_chemotherapies_create
+## model_biomarkers_list
 
-<a id="opIdapi_v1_ingest_chemotherapies_create"></a>
+<a id="opIdmodel_biomarkers_list"></a>
 
-`POST /api/v1/ingest/chemotherapies`
+`GET /moh/v1/model/biomarkers/`
 
-<h3 id="api_v1_ingest_chemotherapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_comorbidities_create
-
-<a id="opIdapi_v1_ingest_comorbidities_create"></a>
-
-`POST /api/v1/ingest/comorbidities`
-
-<h3 id="api_v1_ingest_comorbidities_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_donors_create
-
-<a id="opIdapi_v1_ingest_donors_create"></a>
-
-`POST /api/v1/ingest/donors`
-
-<h3 id="api_v1_ingest_donors_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_follow_ups_create
-
-<a id="opIdapi_v1_ingest_follow_ups_create"></a>
-
-`POST /api/v1/ingest/follow_ups`
-
-<h3 id="api_v1_ingest_follow_ups_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_hormone_therapies_create
-
-<a id="opIdapi_v1_ingest_hormone_therapies_create"></a>
-
-`POST /api/v1/ingest/hormone_therapies`
-
-<h3 id="api_v1_ingest_hormone_therapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_immunotherapies_create
-
-<a id="opIdapi_v1_ingest_immunotherapies_create"></a>
-
-`POST /api/v1/ingest/immunotherapies`
-
-<h3 id="api_v1_ingest_immunotherapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_primary_diagnoses_create
-
-<a id="opIdapi_v1_ingest_primary_diagnoses_create"></a>
-
-`POST /api/v1/ingest/primary_diagnoses`
-
-<h3 id="api_v1_ingest_primary_diagnoses_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_programs_create
-
-<a id="opIdapi_v1_ingest_programs_create"></a>
-
-`POST /api/v1/ingest/programs`
-
-<h3 id="api_v1_ingest_programs_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_radiations_create
-
-<a id="opIdapi_v1_ingest_radiations_create"></a>
-
-`POST /api/v1/ingest/radiations`
-
-<h3 id="api_v1_ingest_radiations_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_sample_registrations_create
-
-<a id="opIdapi_v1_ingest_sample_registrations_create"></a>
-
-`POST /api/v1/ingest/sample_registrations`
-
-<h3 id="api_v1_ingest_sample_registrations_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_specimens_create
-
-<a id="opIdapi_v1_ingest_specimens_create"></a>
-
-`POST /api/v1/ingest/specimens`
-
-<h3 id="api_v1_ingest_specimens_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_surgeries_create
-
-<a id="opIdapi_v1_ingest_surgeries_create"></a>
-
-`POST /api/v1/ingest/surgeries`
-
-<h3 id="api_v1_ingest_surgeries_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-## api_v1_ingest_treatments_create
-
-<a id="opIdapi_v1_ingest_treatments_create"></a>
-
-`POST /api/v1/ingest/treatments`
-
-<h3 id="api_v1_ingest_treatments_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[IngestRequestRequest](#schemaingestrequestrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-"string"
-```
-
-<h1 id="metadata-service-api-biomarkers">biomarkers</h1>
-
-## biomarkers_list
-
-<a id="opIdbiomarkers_list"></a>
-
-`GET /api/v1/moh/biomarkers/`
-
-<h3 id="biomarkers_list-parameters">Parameters</h3>
+<h3 id="model_biomarkers_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -799,45 +742,13 @@ MoH Overview schema
 }
 ```
 
-## biomarkers_create
+## model_biomarkers_retrieve
 
-<a id="opIdbiomarkers_create"></a>
+<a id="opIdmodel_biomarkers_retrieve"></a>
 
-`POST /api/v1/moh/biomarkers/`
+`GET /moh/v1/model/biomarkers/{id}/`
 
-<h3 id="biomarkers_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[BiomarkerRequest](#schemabiomarkerrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "test_interval": 32767,
-  "psa_level": 32767,
-  "ca125": 32767,
-  "cea": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string",
-  "submitter_follow_up_id": "string"
-}
-```
-
-## biomarkers_retrieve
-
-<a id="opIdbiomarkers_retrieve"></a>
-
-`GET /api/v1/moh/biomarkers/{id}/`
-
-<h3 id="biomarkers_retrieve-parameters">Parameters</h3>
+<h3 id="model_biomarkers_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -863,93 +774,13 @@ MoH Overview schema
 }
 ```
 
-## biomarkers_update
+## model_chemotherapies_list
 
-<a id="opIdbiomarkers_update"></a>
+<a id="opIdmodel_chemotherapies_list"></a>
 
-`PUT /api/v1/moh/biomarkers/{id}/`
+`GET /moh/v1/model/chemotherapies/`
 
-<h3 id="biomarkers_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this biomarker.|
-|body|body|[BiomarkerRequest](#schemabiomarkerrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "test_interval": 32767,
-  "psa_level": 32767,
-  "ca125": 32767,
-  "cea": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string",
-  "submitter_follow_up_id": "string"
-}
-```
-
-## biomarkers_partial_update
-
-<a id="opIdbiomarkers_partial_update"></a>
-
-`PATCH /api/v1/moh/biomarkers/{id}/`
-
-<h3 id="biomarkers_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this biomarker.|
-|body|body|[PatchedBiomarkerRequest](#schemapatchedbiomarkerrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "test_interval": 32767,
-  "psa_level": 32767,
-  "ca125": 32767,
-  "cea": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string",
-  "submitter_follow_up_id": "string"
-}
-```
-
-## biomarkers_destroy
-
-<a id="opIdbiomarkers_destroy"></a>
-
-`DELETE /api/v1/moh/biomarkers/{id}/`
-
-<h3 id="biomarkers_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this biomarker.|
-
-<h1 id="metadata-service-api-chemotherapies">chemotherapies</h1>
-
-## chemotherapies_list
-
-<a id="opIdchemotherapies_list"></a>
-
-`GET /api/v1/moh/chemotherapies/`
-
-<h3 id="chemotherapies_list-parameters">Parameters</h3>
+<h3 id="model_chemotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -989,43 +820,13 @@ MoH Overview schema
 }
 ```
 
-## chemotherapies_create
+## model_chemotherapies_retrieve
 
-<a id="opIdchemotherapies_create"></a>
+<a id="opIdmodel_chemotherapies_retrieve"></a>
 
-`POST /api/v1/moh/chemotherapies/`
+`GET /moh/v1/model/chemotherapies/{id}/`
 
-<h3 id="chemotherapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[ChemotherapyRequest](#schemachemotherapyrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## chemotherapies_retrieve
-
-<a id="opIdchemotherapies_retrieve"></a>
-
-`GET /api/v1/moh/chemotherapies/{id}/`
-
-<h3 id="chemotherapies_retrieve-parameters">Parameters</h3>
+<h3 id="model_chemotherapies_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1049,89 +850,13 @@ MoH Overview schema
 }
 ```
 
-## chemotherapies_update
+## model_comorbidities_list
 
-<a id="opIdchemotherapies_update"></a>
+<a id="opIdmodel_comorbidities_list"></a>
 
-`PUT /api/v1/moh/chemotherapies/{id}/`
+`GET /moh/v1/model/comorbidities/`
 
-<h3 id="chemotherapies_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this chemotherapy.|
-|body|body|[ChemotherapyRequest](#schemachemotherapyrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## chemotherapies_partial_update
-
-<a id="opIdchemotherapies_partial_update"></a>
-
-`PATCH /api/v1/moh/chemotherapies/{id}/`
-
-<h3 id="chemotherapies_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this chemotherapy.|
-|body|body|[PatchedChemotherapyRequest](#schemapatchedchemotherapyrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## chemotherapies_destroy
-
-<a id="opIdchemotherapies_destroy"></a>
-
-`DELETE /api/v1/moh/chemotherapies/{id}/`
-
-<h3 id="chemotherapies_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this chemotherapy.|
-
-<h1 id="metadata-service-api-comorbidities">comorbidities</h1>
-
-## comorbidities_list
-
-<a id="opIdcomorbidities_list"></a>
-
-`GET /api/v1/moh/comorbidities/`
-
-<h3 id="comorbidities_list-parameters">Parameters</h3>
+<h3 id="model_comorbidities_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1171,43 +896,13 @@ MoH Overview schema
 }
 ```
 
-## comorbidities_create
+## model_comorbidities_retrieve
 
-<a id="opIdcomorbidities_create"></a>
+<a id="opIdmodel_comorbidities_retrieve"></a>
 
-`POST /api/v1/moh/comorbidities/`
+`GET /moh/v1/model/comorbidities/{id}/`
 
-<h3 id="comorbidities_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[ComorbidityRequest](#schemacomorbidityrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "prior_malignancy": "Yes",
-  "laterality_of_prior_malignancy": "Bilateral",
-  "comorbidity_type_code": "string",
-  "comorbidity_treatment_status": "Yes",
-  "comorbidity_treatment": "string",
-  "age_at_comorbidity_diagnosis": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## comorbidities_retrieve
-
-<a id="opIdcomorbidities_retrieve"></a>
-
-`GET /api/v1/moh/comorbidities/{id}/`
-
-<h3 id="comorbidities_retrieve-parameters">Parameters</h3>
+<h3 id="model_comorbidities_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1231,89 +926,13 @@ MoH Overview schema
 }
 ```
 
-## comorbidities_update
+## model_donors_list
 
-<a id="opIdcomorbidities_update"></a>
+<a id="opIdmodel_donors_list"></a>
 
-`PUT /api/v1/moh/comorbidities/{id}/`
+`GET /moh/v1/model/donors/`
 
-<h3 id="comorbidities_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this comorbidity.|
-|body|body|[ComorbidityRequest](#schemacomorbidityrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "prior_malignancy": "Yes",
-  "laterality_of_prior_malignancy": "Bilateral",
-  "comorbidity_type_code": "string",
-  "comorbidity_treatment_status": "Yes",
-  "comorbidity_treatment": "string",
-  "age_at_comorbidity_diagnosis": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## comorbidities_partial_update
-
-<a id="opIdcomorbidities_partial_update"></a>
-
-`PATCH /api/v1/moh/comorbidities/{id}/`
-
-<h3 id="comorbidities_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this comorbidity.|
-|body|body|[PatchedComorbidityRequest](#schemapatchedcomorbidityrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "prior_malignancy": "Yes",
-  "laterality_of_prior_malignancy": "Bilateral",
-  "comorbidity_type_code": "string",
-  "comorbidity_treatment_status": "Yes",
-  "comorbidity_treatment": "string",
-  "age_at_comorbidity_diagnosis": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## comorbidities_destroy
-
-<a id="opIdcomorbidities_destroy"></a>
-
-`DELETE /api/v1/moh/comorbidities/{id}/`
-
-<h3 id="comorbidities_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this comorbidity.|
-
-<h1 id="metadata-service-api-donors">donors</h1>
-
-## donors_list
-
-<a id="opIddonors_list"></a>
-
-`GET /api/v1/moh/donors/`
-
-<h3 id="donors_list-parameters">Parameters</h3>
+<h3 id="model_donors_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1358,7 +977,9 @@ MoH Overview schema
       "cause_of_death": "Died of cancer",
       "date_of_birth": "string",
       "date_of_death": "string",
-      "primary_site": "Accessory sinuses",
+      "primary_site": [
+        "Accessory sinuses"
+      ],
       "is_deceased": true,
       "program_id": "string"
     }
@@ -1366,41 +987,13 @@ MoH Overview schema
 }
 ```
 
-## donors_create
+## model_donors_retrieve
 
-<a id="opIddonors_create"></a>
+<a id="opIdmodel_donors_retrieve"></a>
 
-`POST /api/v1/moh/donors/`
+`GET /moh/v1/model/donors/{submitter_donor_id}/`
 
-<h3 id="donors_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[DonorRequest](#schemadonorrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "submitter_donor_id": "string",
-  "cause_of_death": "Died of cancer",
-  "date_of_birth": "string",
-  "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
-  "is_deceased": true,
-  "program_id": "string"
-}
-```
-
-## donors_retrieve
-
-<a id="opIddonors_retrieve"></a>
-
-`GET /api/v1/moh/donors/{submitter_donor_id}/`
-
-<h3 id="donors_retrieve-parameters">Parameters</h3>
+<h3 id="model_donors_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1416,91 +1009,21 @@ MoH Overview schema
   "cause_of_death": "Died of cancer",
   "date_of_birth": "string",
   "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
+  "primary_site": [
+    "Accessory sinuses"
+  ],
   "is_deceased": true,
   "program_id": "string"
 }
 ```
 
-## donors_update
+## model_follow_ups_list
 
-<a id="opIddonors_update"></a>
+<a id="opIdmodel_follow_ups_list"></a>
 
-`PUT /api/v1/moh/donors/{submitter_donor_id}/`
+`GET /moh/v1/model/follow_ups/`
 
-<h3 id="donors_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_donor_id|path|string|true|A unique value identifying this donor.|
-|body|body|[DonorRequest](#schemadonorrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_donor_id": "string",
-  "cause_of_death": "Died of cancer",
-  "date_of_birth": "string",
-  "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
-  "is_deceased": true,
-  "program_id": "string"
-}
-```
-
-## donors_partial_update
-
-<a id="opIddonors_partial_update"></a>
-
-`PATCH /api/v1/moh/donors/{submitter_donor_id}/`
-
-<h3 id="donors_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_donor_id|path|string|true|A unique value identifying this donor.|
-|body|body|[PatchedDonorRequest](#schemapatcheddonorrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_donor_id": "string",
-  "cause_of_death": "Died of cancer",
-  "date_of_birth": "string",
-  "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
-  "is_deceased": true,
-  "program_id": "string"
-}
-```
-
-## donors_destroy
-
-<a id="opIddonors_destroy"></a>
-
-`DELETE /api/v1/moh/donors/{submitter_donor_id}/`
-
-<h3 id="donors_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_donor_id|path|string|true|A unique value identifying this donor.|
-
-<h1 id="metadata-service-api-follow_ups">follow_ups</h1>
-
-## follow_ups_list
-
-<a id="opIdfollow_ups_list"></a>
-
-`GET /api/v1/moh/follow_ups/`
-
-<h3 id="follow_ups_list-parameters">Parameters</h3>
+<h3 id="model_follow_ups_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1542,7 +1065,7 @@ MoH Overview schema
       "disease_status_at_followup": "Complete remission",
       "relapse_type": "Distant recurrence/metastasis",
       "date_of_relapse": "string",
-      "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+      "method_of_progression_status": "Imaging (procedure)",
       "anatomic_site_progression_or_recurrence": "string",
       "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
@@ -1559,52 +1082,13 @@ MoH Overview schema
 }
 ```
 
-## follow_ups_create
+## model_follow_ups_retrieve
 
-<a id="opIdfollow_ups_create"></a>
+<a id="opIdmodel_follow_ups_retrieve"></a>
 
-`POST /api/v1/moh/follow_ups/`
+`GET /moh/v1/model/follow_ups/{submitter_follow_up_id}/`
 
-<h3 id="follow_ups_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[FollowUpRequest](#schemafollowuprequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "submitter_follow_up_id": "string",
-  "date_of_followup": "string",
-  "lost_to_followup_reason": "Completed study",
-  "disease_status_at_followup": "Complete remission",
-  "relapse_type": "Distant recurrence/metastasis",
-  "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": "AJCC 8th edition",
-  "recurrence_t_category": "T0",
-  "recurrence_n_category": "N0",
-  "recurrence_m_category": "M0",
-  "recurrence_stage_group": "Occult Carcinoma",
-  "lost_to_followup": true,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## follow_ups_retrieve
-
-<a id="opIdfollow_ups_retrieve"></a>
-
-`GET /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
-
-<h3 id="follow_ups_retrieve-parameters">Parameters</h3>
+<h3 id="model_follow_ups_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1622,7 +1106,7 @@ MoH Overview schema
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
   "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+  "method_of_progression_status": "Imaging (procedure)",
   "anatomic_site_progression_or_recurrence": "string",
   "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
@@ -1637,107 +1121,13 @@ MoH Overview schema
 }
 ```
 
-## follow_ups_update
+## model_hormone_therapies_list
 
-<a id="opIdfollow_ups_update"></a>
+<a id="opIdmodel_hormone_therapies_list"></a>
 
-`PUT /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
+`GET /moh/v1/model/hormone_therapies/`
 
-<h3 id="follow_ups_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
-|body|body|[FollowUpRequest](#schemafollowuprequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_follow_up_id": "string",
-  "date_of_followup": "string",
-  "lost_to_followup_reason": "Completed study",
-  "disease_status_at_followup": "Complete remission",
-  "relapse_type": "Distant recurrence/metastasis",
-  "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": "AJCC 8th edition",
-  "recurrence_t_category": "T0",
-  "recurrence_n_category": "N0",
-  "recurrence_m_category": "M0",
-  "recurrence_stage_group": "Occult Carcinoma",
-  "lost_to_followup": true,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## follow_ups_partial_update
-
-<a id="opIdfollow_ups_partial_update"></a>
-
-`PATCH /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
-
-<h3 id="follow_ups_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
-|body|body|[PatchedFollowUpRequest](#schemapatchedfollowuprequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_follow_up_id": "string",
-  "date_of_followup": "string",
-  "lost_to_followup_reason": "Completed study",
-  "disease_status_at_followup": "Complete remission",
-  "relapse_type": "Distant recurrence/metastasis",
-  "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": "AJCC 8th edition",
-  "recurrence_t_category": "T0",
-  "recurrence_n_category": "N0",
-  "recurrence_m_category": "M0",
-  "recurrence_stage_group": "Occult Carcinoma",
-  "lost_to_followup": true,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## follow_ups_destroy
-
-<a id="opIdfollow_ups_destroy"></a>
-
-`DELETE /api/v1/moh/follow_ups/{submitter_follow_up_id}/`
-
-<h3 id="follow_ups_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|path|string|true|A unique value identifying this follow up.|
-
-<h1 id="metadata-service-api-hormone_therapies">hormone_therapies</h1>
-
-## hormone_therapies_list
-
-<a id="opIdhormone_therapies_list"></a>
-
-`GET /api/v1/moh/hormone_therapies/`
-
-<h3 id="hormone_therapies_list-parameters">Parameters</h3>
+<h3 id="model_hormone_therapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1764,10 +1154,9 @@ MoH Overview schema
   "results": [
     {
       "id": 0,
-      "chemotherapy_dosage_units": "mg/m2",
+      "hormone_drug_dosage_units": "mg/m2",
       "drug_name": "string",
       "drug_rxnormcui": "string",
-      "hormone_drug_dosage_units": "string",
       "cumulative_drug_dosage_prescribed": 32767,
       "cumulative_drug_dosage_actual": 32767,
       "program_id": "string",
@@ -1778,44 +1167,13 @@ MoH Overview schema
 }
 ```
 
-## hormone_therapies_create
+## model_hormone_therapies_retrieve
 
-<a id="opIdhormone_therapies_create"></a>
+<a id="opIdmodel_hormone_therapies_retrieve"></a>
 
-`POST /api/v1/moh/hormone_therapies/`
+`GET /moh/v1/model/hormone_therapies/{id}/`
 
-<h3 id="hormone_therapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[HormoneTherapyRequest](#schemahormonetherapyrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## hormone_therapies_retrieve
-
-<a id="opIdhormone_therapies_retrieve"></a>
-
-`GET /api/v1/moh/hormone_therapies/{id}/`
-
-<h3 id="hormone_therapies_retrieve-parameters">Parameters</h3>
+<h3 id="model_hormone_therapies_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1828,10 +1186,9 @@ MoH Overview schema
 ```json
 {
   "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
+  "hormone_drug_dosage_units": "mg/m2",
   "drug_name": "string",
   "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
   "cumulative_drug_dosage_prescribed": 32767,
   "cumulative_drug_dosage_actual": 32767,
   "program_id": "string",
@@ -1840,91 +1197,13 @@ MoH Overview schema
 }
 ```
 
-## hormone_therapies_update
+## model_immunotherapies_list
 
-<a id="opIdhormone_therapies_update"></a>
+<a id="opIdmodel_immunotherapies_list"></a>
 
-`PUT /api/v1/moh/hormone_therapies/{id}/`
+`GET /moh/v1/model/immunotherapies/`
 
-<h3 id="hormone_therapies_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this hormone therapy.|
-|body|body|[HormoneTherapyRequest](#schemahormonetherapyrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## hormone_therapies_partial_update
-
-<a id="opIdhormone_therapies_partial_update"></a>
-
-`PATCH /api/v1/moh/hormone_therapies/{id}/`
-
-<h3 id="hormone_therapies_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this hormone therapy.|
-|body|body|[PatchedHormoneTherapyRequest](#schemapatchedhormonetherapyrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## hormone_therapies_destroy
-
-<a id="opIdhormone_therapies_destroy"></a>
-
-`DELETE /api/v1/moh/hormone_therapies/{id}/`
-
-<h3 id="hormone_therapies_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this hormone therapy.|
-
-<h1 id="metadata-service-api-immunotherapies">immunotherapies</h1>
-
-## immunotherapies_list
-
-<a id="opIdimmunotherapies_list"></a>
-
-`GET /api/v1/moh/immunotherapies/`
-
-<h3 id="immunotherapies_list-parameters">Parameters</h3>
+<h3 id="model_immunotherapies_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1960,41 +1239,13 @@ MoH Overview schema
 }
 ```
 
-## immunotherapies_create
+## model_immunotherapies_retrieve
 
-<a id="opIdimmunotherapies_create"></a>
+<a id="opIdmodel_immunotherapies_retrieve"></a>
 
-`POST /api/v1/moh/immunotherapies/`
+`GET /moh/v1/model/immunotherapies/{id}/`
 
-<h3 id="immunotherapies_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[ImmunotherapyRequest](#schemaimmunotherapyrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "immunotherapy_type": "Cell-based",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## immunotherapies_retrieve
-
-<a id="opIdimmunotherapies_retrieve"></a>
-
-`GET /api/v1/moh/immunotherapies/{id}/`
-
-<h3 id="immunotherapies_retrieve-parameters">Parameters</h3>
+<h3 id="model_immunotherapies_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2016,85 +1267,13 @@ MoH Overview schema
 }
 ```
 
-## immunotherapies_update
+## model_primary_diagnoses_list
 
-<a id="opIdimmunotherapies_update"></a>
+<a id="opIdmodel_primary_diagnoses_list"></a>
 
-`PUT /api/v1/moh/immunotherapies/{id}/`
+`GET /moh/v1/model/primary_diagnoses/`
 
-<h3 id="immunotherapies_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this immunotherapy.|
-|body|body|[ImmunotherapyRequest](#schemaimmunotherapyrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "immunotherapy_type": "Cell-based",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## immunotherapies_partial_update
-
-<a id="opIdimmunotherapies_partial_update"></a>
-
-`PATCH /api/v1/moh/immunotherapies/{id}/`
-
-<h3 id="immunotherapies_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this immunotherapy.|
-|body|body|[PatchedImmunotherapyRequest](#schemapatchedimmunotherapyrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "immunotherapy_type": "Cell-based",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## immunotherapies_destroy
-
-<a id="opIdimmunotherapies_destroy"></a>
-
-`DELETE /api/v1/moh/immunotherapies/{id}/`
-
-<h3 id="immunotherapies_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this immunotherapy.|
-
-<h1 id="metadata-service-api-primary_diagnoses">primary_diagnoses</h1>
-
-## primary_diagnoses_list
-
-<a id="opIdprimary_diagnoses_list"></a>
-
-`GET /api/v1/moh/primary_diagnoses/`
-
-<h3 id="primary_diagnoses_list-parameters">Parameters</h3>
+<h3 id="model_primary_diagnoses_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2145,48 +1324,13 @@ MoH Overview schema
 }
 ```
 
-## primary_diagnoses_create
+## model_primary_diagnoses_retrieve
 
-<a id="opIdprimary_diagnoses_create"></a>
+<a id="opIdmodel_primary_diagnoses_retrieve"></a>
 
-`POST /api/v1/moh/primary_diagnoses/`
+`GET /moh/v1/model/primary_diagnoses/{submitter_primary_diagnosis_id}/`
 
-<h3 id="primary_diagnoses_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[PrimaryDiagnosisRequest](#schemaprimarydiagnosisrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "submitter_primary_diagnosis_id": "string",
-  "date_of_diagnosis": "string",
-  "basis_of_diagnosis": "Clinical investigation",
-  "lymph_nodes_examined_status": "Cannot be determined",
-  "lymph_nodes_examined_method": "Imaging",
-  "clinical_tumour_staging_system": "AJCC 8th edition",
-  "clinical_t_category": "T0",
-  "clinical_n_category": "N0",
-  "clinical_m_category": "M0",
-  "clinical_stage_group": "Occult Carcinoma",
-  "cancer_type_code": "string",
-  "number_lymph_nodes_positive": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## primary_diagnoses_retrieve
-
-<a id="opIdprimary_diagnoses_retrieve"></a>
-
-`GET /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
-
-<h3 id="primary_diagnoses_retrieve-parameters">Parameters</h3>
+<h3 id="model_primary_diagnoses_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2215,99 +1359,13 @@ MoH Overview schema
 }
 ```
 
-## primary_diagnoses_update
+## model_programs_list
 
-<a id="opIdprimary_diagnoses_update"></a>
+<a id="opIdmodel_programs_list"></a>
 
-`PUT /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
+`GET /moh/v1/model/programs/`
 
-<h3 id="primary_diagnoses_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
-|body|body|[PrimaryDiagnosisRequest](#schemaprimarydiagnosisrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_primary_diagnosis_id": "string",
-  "date_of_diagnosis": "string",
-  "basis_of_diagnosis": "Clinical investigation",
-  "lymph_nodes_examined_status": "Cannot be determined",
-  "lymph_nodes_examined_method": "Imaging",
-  "clinical_tumour_staging_system": "AJCC 8th edition",
-  "clinical_t_category": "T0",
-  "clinical_n_category": "N0",
-  "clinical_m_category": "M0",
-  "clinical_stage_group": "Occult Carcinoma",
-  "cancer_type_code": "string",
-  "number_lymph_nodes_positive": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## primary_diagnoses_partial_update
-
-<a id="opIdprimary_diagnoses_partial_update"></a>
-
-`PATCH /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
-
-<h3 id="primary_diagnoses_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
-|body|body|[PatchedPrimaryDiagnosisRequest](#schemapatchedprimarydiagnosisrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_primary_diagnosis_id": "string",
-  "date_of_diagnosis": "string",
-  "basis_of_diagnosis": "Clinical investigation",
-  "lymph_nodes_examined_status": "Cannot be determined",
-  "lymph_nodes_examined_method": "Imaging",
-  "clinical_tumour_staging_system": "AJCC 8th edition",
-  "clinical_t_category": "T0",
-  "clinical_n_category": "N0",
-  "clinical_m_category": "M0",
-  "clinical_stage_group": "Occult Carcinoma",
-  "cancer_type_code": "string",
-  "number_lymph_nodes_positive": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-```
-
-## primary_diagnoses_destroy
-
-<a id="opIdprimary_diagnoses_destroy"></a>
-
-`DELETE /api/v1/moh/primary_diagnoses/{submitter_primary_diagnosis_id}/`
-
-<h3 id="primary_diagnoses_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|path|string|true|A unique value identifying this primary diagnosis.|
-
-<h1 id="metadata-service-api-programs">programs</h1>
-
-## programs_list
-
-<a id="opIdprograms_list"></a>
-
-`GET /api/v1/moh/programs/`
-
-<h3 id="programs_list-parameters">Parameters</h3>
+<h3 id="model_programs_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2338,38 +1396,13 @@ MoH Overview schema
 }
 ```
 
-## programs_create
+## model_programs_retrieve
 
-<a id="opIdprograms_create"></a>
+<a id="opIdmodel_programs_retrieve"></a>
 
-`POST /api/v1/moh/programs/`
+`GET /moh/v1/model/programs/{program_id}/`
 
-<h3 id="programs_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[ProgramRequest](#schemaprogramrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "program_id": "string",
-  "name": "string",
-  "created": "2019-08-24T14:15:22Z",
-  "updated": "2019-08-24T14:15:22Z"
-}
-```
-
-## programs_retrieve
-
-<a id="opIdprograms_retrieve"></a>
-
-`GET /api/v1/moh/programs/{program_id}/`
-
-<h3 id="programs_retrieve-parameters">Parameters</h3>
+<h3 id="model_programs_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2388,79 +1421,13 @@ MoH Overview schema
 }
 ```
 
-## programs_update
+## model_radiations_list
 
-<a id="opIdprograms_update"></a>
+<a id="opIdmodel_radiations_list"></a>
 
-`PUT /api/v1/moh/programs/{program_id}/`
+`GET /moh/v1/model/radiations/`
 
-<h3 id="programs_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|path|string|true|A unique value identifying this program.|
-|body|body|[ProgramRequest](#schemaprogramrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "program_id": "string",
-  "name": "string",
-  "created": "2019-08-24T14:15:22Z",
-  "updated": "2019-08-24T14:15:22Z"
-}
-```
-
-## programs_partial_update
-
-<a id="opIdprograms_partial_update"></a>
-
-`PATCH /api/v1/moh/programs/{program_id}/`
-
-<h3 id="programs_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|path|string|true|A unique value identifying this program.|
-|body|body|[PatchedProgramRequest](#schemapatchedprogramrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "program_id": "string",
-  "name": "string",
-  "created": "2019-08-24T14:15:22Z",
-  "updated": "2019-08-24T14:15:22Z"
-}
-```
-
-## programs_destroy
-
-<a id="opIdprograms_destroy"></a>
-
-`DELETE /api/v1/moh/programs/{program_id}/`
-
-<h3 id="programs_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|program_id|path|string|true|A unique value identifying this program.|
-
-<h1 id="metadata-service-api-radiations">radiations</h1>
-
-## radiations_list
-
-<a id="opIdradiations_list"></a>
-
-`GET /api/v1/moh/radiations/`
-
-<h3 id="radiations_list-parameters">Parameters</h3>
+<h3 id="model_radiations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2504,45 +1471,13 @@ MoH Overview schema
 }
 ```
 
-## radiations_create
+## model_radiations_retrieve
 
-<a id="opIdradiations_create"></a>
+<a id="opIdmodel_radiations_retrieve"></a>
 
-`POST /api/v1/moh/radiations/`
+`GET /moh/v1/model/radiations/{id}/`
 
-<h3 id="radiations_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[RadiationRequest](#schemaradiationrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-  "radiation_therapy_type": "External",
-  "anatomical_site_irradiated": "Cervical lymph node group",
-  "radiation_therapy_fractions": 32767,
-  "radiation_therapy_dosage": 32767,
-  "radiation_boost": true,
-  "reference_radiation_treatment_id": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## radiations_retrieve
-
-<a id="opIdradiations_retrieve"></a>
-
-`GET /api/v1/moh/radiations/{id}/`
-
-<h3 id="radiations_retrieve-parameters">Parameters</h3>
+<h3 id="model_radiations_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2568,93 +1503,13 @@ MoH Overview schema
 }
 ```
 
-## radiations_update
+## model_sample_registrations_list
 
-<a id="opIdradiations_update"></a>
+<a id="opIdmodel_sample_registrations_list"></a>
 
-`PUT /api/v1/moh/radiations/{id}/`
+`GET /moh/v1/model/sample_registrations/`
 
-<h3 id="radiations_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this radiation.|
-|body|body|[RadiationRequest](#schemaradiationrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-  "radiation_therapy_type": "External",
-  "anatomical_site_irradiated": "Cervical lymph node group",
-  "radiation_therapy_fractions": 32767,
-  "radiation_therapy_dosage": 32767,
-  "radiation_boost": true,
-  "reference_radiation_treatment_id": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## radiations_partial_update
-
-<a id="opIdradiations_partial_update"></a>
-
-`PATCH /api/v1/moh/radiations/{id}/`
-
-<h3 id="radiations_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this radiation.|
-|body|body|[PatchedRadiationRequest](#schemapatchedradiationrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-  "radiation_therapy_type": "External",
-  "anatomical_site_irradiated": "Cervical lymph node group",
-  "radiation_therapy_fractions": 32767,
-  "radiation_therapy_dosage": 32767,
-  "radiation_boost": true,
-  "reference_radiation_treatment_id": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## radiations_destroy
-
-<a id="opIdradiations_destroy"></a>
-
-`DELETE /api/v1/moh/radiations/{id}/`
-
-<h3 id="radiations_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this radiation.|
-
-<h1 id="metadata-service-api-sample_registrations">sample_registrations</h1>
-
-## sample_registrations_list
-
-<a id="opIdsample_registrations_list"></a>
-
-`GET /api/v1/moh/sample_registrations/`
-
-<h3 id="sample_registrations_list-parameters">Parameters</h3>
+<h3 id="model_sample_registrations_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2697,44 +1552,13 @@ MoH Overview schema
 }
 ```
 
-## sample_registrations_create
+## model_sample_registrations_retrieve
 
-<a id="opIdsample_registrations_create"></a>
+<a id="opIdmodel_sample_registrations_retrieve"></a>
 
-`POST /api/v1/moh/sample_registrations/`
+`GET /moh/v1/model/sample_registrations/{submitter_sample_id}/`
 
-<h3 id="sample_registrations_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[SampleRegistrationRequest](#schemasampleregistrationrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "submitter_sample_id": "string",
-  "gender": "Man",
-  "sex_at_birth": "Male",
-  "specimen_tissue_source": "Amniotic fluid",
-  "tumour_normal_designation": "Normal",
-  "specimen_type": "Cell line - derived from normal",
-  "sample_type": "Amplified DNA",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string"
-}
-```
-
-## sample_registrations_retrieve
-
-<a id="opIdsample_registrations_retrieve"></a>
-
-`GET /api/v1/moh/sample_registrations/{submitter_sample_id}/`
-
-<h3 id="sample_registrations_retrieve-parameters">Parameters</h3>
+<h3 id="model_sample_registrations_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2759,91 +1583,13 @@ MoH Overview schema
 }
 ```
 
-## sample_registrations_update
+## model_specimens_list
 
-<a id="opIdsample_registrations_update"></a>
+<a id="opIdmodel_specimens_list"></a>
 
-`PUT /api/v1/moh/sample_registrations/{submitter_sample_id}/`
+`GET /moh/v1/model/specimens/`
 
-<h3 id="sample_registrations_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
-|body|body|[SampleRegistrationRequest](#schemasampleregistrationrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_sample_id": "string",
-  "gender": "Man",
-  "sex_at_birth": "Male",
-  "specimen_tissue_source": "Amniotic fluid",
-  "tumour_normal_designation": "Normal",
-  "specimen_type": "Cell line - derived from normal",
-  "sample_type": "Amplified DNA",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string"
-}
-```
-
-## sample_registrations_partial_update
-
-<a id="opIdsample_registrations_partial_update"></a>
-
-`PATCH /api/v1/moh/sample_registrations/{submitter_sample_id}/`
-
-<h3 id="sample_registrations_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
-|body|body|[PatchedSampleRegistrationRequest](#schemapatchedsampleregistrationrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_sample_id": "string",
-  "gender": "Man",
-  "sex_at_birth": "Male",
-  "specimen_tissue_source": "Amniotic fluid",
-  "tumour_normal_designation": "Normal",
-  "specimen_type": "Cell line - derived from normal",
-  "sample_type": "Amplified DNA",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string"
-}
-```
-
-## sample_registrations_destroy
-
-<a id="opIdsample_registrations_destroy"></a>
-
-`DELETE /api/v1/moh/sample_registrations/{submitter_sample_id}/`
-
-<h3 id="sample_registrations_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_sample_id|path|string|true|A unique value identifying this sample registration.|
-
-<h1 id="metadata-service-api-specimens">specimens</h1>
-
-## specimens_list
-
-<a id="opIdspecimens_list"></a>
-
-`GET /api/v1/moh/specimens/`
-
-<h3 id="specimens_list-parameters">Parameters</h3>
+<h3 id="model_specimens_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2904,53 +1650,13 @@ MoH Overview schema
 }
 ```
 
-## specimens_create
+## model_specimens_retrieve
 
-<a id="opIdspecimens_create"></a>
+<a id="opIdmodel_specimens_retrieve"></a>
 
-`POST /api/v1/moh/specimens/`
+`GET /moh/v1/model/specimens/{submitter_specimen_id}/`
 
-<h3 id="specimens_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[SpecimenRequest](#schemaspecimenrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "submitter_specimen_id": "string",
-  "pathological_tumour_staging_system": "AJCC 8th edition",
-  "pathological_t_category": "T0",
-  "pathological_n_category": "N0",
-  "pathological_m_category": "M0",
-  "pathological_stage_group": "Occult Carcinoma",
-  "specimen_collection_date": "string",
-  "specimen_storage": "Cut slide",
-  "tumour_histological_type": "string",
-  "specimen_anatomic_location": "string",
-  "reference_pathology_confirmed_diagnosis": "Yes",
-  "reference_pathology_confirmed_tumour_presence": "Yes",
-  "tumour_grading_system": "FNCLCC grading system",
-  "tumour_grade": "Low grade",
-  "percent_tumour_cells_range": "0-19%",
-  "percent_tumour_cells_measurement_method": "Genomics",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-```
-
-## specimens_retrieve
-
-<a id="opIdspecimens_retrieve"></a>
-
-`GET /api/v1/moh/specimens/{submitter_specimen_id}/`
-
-<h3 id="specimens_retrieve-parameters">Parameters</h3>
+<h3 id="model_specimens_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -2984,109 +1690,13 @@ MoH Overview schema
 }
 ```
 
-## specimens_update
+## model_surgeries_list
 
-<a id="opIdspecimens_update"></a>
+<a id="opIdmodel_surgeries_list"></a>
 
-`PUT /api/v1/moh/specimens/{submitter_specimen_id}/`
+`GET /moh/v1/model/surgeries/`
 
-<h3 id="specimens_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
-|body|body|[SpecimenRequest](#schemaspecimenrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_specimen_id": "string",
-  "pathological_tumour_staging_system": "AJCC 8th edition",
-  "pathological_t_category": "T0",
-  "pathological_n_category": "N0",
-  "pathological_m_category": "M0",
-  "pathological_stage_group": "Occult Carcinoma",
-  "specimen_collection_date": "string",
-  "specimen_storage": "Cut slide",
-  "tumour_histological_type": "string",
-  "specimen_anatomic_location": "string",
-  "reference_pathology_confirmed_diagnosis": "Yes",
-  "reference_pathology_confirmed_tumour_presence": "Yes",
-  "tumour_grading_system": "FNCLCC grading system",
-  "tumour_grade": "Low grade",
-  "percent_tumour_cells_range": "0-19%",
-  "percent_tumour_cells_measurement_method": "Genomics",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-```
-
-## specimens_partial_update
-
-<a id="opIdspecimens_partial_update"></a>
-
-`PATCH /api/v1/moh/specimens/{submitter_specimen_id}/`
-
-<h3 id="specimens_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
-|body|body|[PatchedSpecimenRequest](#schemapatchedspecimenrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_specimen_id": "string",
-  "pathological_tumour_staging_system": "AJCC 8th edition",
-  "pathological_t_category": "T0",
-  "pathological_n_category": "N0",
-  "pathological_m_category": "M0",
-  "pathological_stage_group": "Occult Carcinoma",
-  "specimen_collection_date": "string",
-  "specimen_storage": "Cut slide",
-  "tumour_histological_type": "string",
-  "specimen_anatomic_location": "string",
-  "reference_pathology_confirmed_diagnosis": "Yes",
-  "reference_pathology_confirmed_tumour_presence": "Yes",
-  "tumour_grading_system": "FNCLCC grading system",
-  "tumour_grade": "Low grade",
-  "percent_tumour_cells_range": "0-19%",
-  "percent_tumour_cells_measurement_method": "Genomics",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-```
-
-## specimens_destroy
-
-<a id="opIdspecimens_destroy"></a>
-
-`DELETE /api/v1/moh/specimens/{submitter_specimen_id}/`
-
-<h3 id="specimens_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|path|string|true|A unique value identifying this specimen.|
-
-<h1 id="metadata-service-api-surgeries">surgeries</h1>
-
-## surgeries_list
-
-<a id="opIdsurgeries_list"></a>
-
-`GET /api/v1/moh/surgeries/`
-
-<h3 id="surgeries_list-parameters">Parameters</h3>
+<h3 id="model_surgeries_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3127,9 +1737,15 @@ MoH Overview schema
       "surgery_location": "Local recurrence",
       "tumour_focality": "Cannot be assessed",
       "residual_tumour_classification": "Not applicable",
-      "margin_types_involved": "Circumferential resection margin",
-      "margin_types_not_involved": "Circumferential resection margin",
-      "margin_types_not_assessed": "Circumferential resection margin",
+      "margin_types_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_assessed": [
+        "Circumferential resection margin"
+      ],
       "lymphovascular_invasion": "Absent",
       "perineural_invasion": "Absent",
       "tumour_length": 32767,
@@ -3144,52 +1760,13 @@ MoH Overview schema
 }
 ```
 
-## surgeries_create
+## model_surgeries_retrieve
 
-<a id="opIdsurgeries_create"></a>
+<a id="opIdmodel_surgeries_retrieve"></a>
 
-`POST /api/v1/moh/surgeries/`
+`GET /moh/v1/model/surgeries/{id}/`
 
-<h3 id="surgeries_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[SurgeryRequest](#schemasurgeryrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "id": 0,
-  "surgery_type": "Axillary Clearance",
-  "surgery_site": "string",
-  "surgery_location": "Local recurrence",
-  "tumour_focality": "Cannot be assessed",
-  "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
-  "lymphovascular_invasion": "Absent",
-  "perineural_invasion": "Absent",
-  "tumour_length": 32767,
-  "tumour_width": 32767,
-  "greatest_dimension_tumour": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## surgeries_retrieve
-
-<a id="opIdsurgeries_retrieve"></a>
-
-`GET /api/v1/moh/surgeries/{id}/`
-
-<h3 id="surgeries_retrieve-parameters">Parameters</h3>
+<h3 id="model_surgeries_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3207,9 +1784,15 @@ MoH Overview schema
   "surgery_location": "Local recurrence",
   "tumour_focality": "Cannot be assessed",
   "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
+  "margin_types_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_assessed": [
+    "Circumferential resection margin"
+  ],
   "lymphovascular_invasion": "Absent",
   "perineural_invasion": "Absent",
   "tumour_length": 32767,
@@ -3222,107 +1805,13 @@ MoH Overview schema
 }
 ```
 
-## surgeries_update
+## model_treatments_list
 
-<a id="opIdsurgeries_update"></a>
+<a id="opIdmodel_treatments_list"></a>
 
-`PUT /api/v1/moh/surgeries/{id}/`
+`GET /moh/v1/model/treatments/`
 
-<h3 id="surgeries_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this surgery.|
-|body|body|[SurgeryRequest](#schemasurgeryrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "surgery_type": "Axillary Clearance",
-  "surgery_site": "string",
-  "surgery_location": "Local recurrence",
-  "tumour_focality": "Cannot be assessed",
-  "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
-  "lymphovascular_invasion": "Absent",
-  "perineural_invasion": "Absent",
-  "tumour_length": 32767,
-  "tumour_width": 32767,
-  "greatest_dimension_tumour": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## surgeries_partial_update
-
-<a id="opIdsurgeries_partial_update"></a>
-
-`PATCH /api/v1/moh/surgeries/{id}/`
-
-<h3 id="surgeries_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this surgery.|
-|body|body|[PatchedSurgeryRequest](#schemapatchedsurgeryrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "id": 0,
-  "surgery_type": "Axillary Clearance",
-  "surgery_site": "string",
-  "surgery_location": "Local recurrence",
-  "tumour_focality": "Cannot be assessed",
-  "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
-  "lymphovascular_invasion": "Absent",
-  "perineural_invasion": "Absent",
-  "tumour_length": 32767,
-  "tumour_width": 32767,
-  "greatest_dimension_tumour": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_treatment_id": "string"
-}
-```
-
-## surgeries_destroy
-
-<a id="opIdsurgeries_destroy"></a>
-
-`DELETE /api/v1/moh/surgeries/{id}/`
-
-<h3 id="surgeries_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id|path|integer|true|A unique integer value identifying this surgery.|
-
-<h1 id="metadata-service-api-treatments">treatments</h1>
-
-## treatments_list
-
-<a id="opIdtreatments_list"></a>
-
-`GET /api/v1/moh/treatments/`
-
-<h3 id="treatments_list-parameters">Parameters</h3>
+<h3 id="model_treatments_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3355,7 +1844,9 @@ MoH Overview schema
   "results": [
     {
       "submitter_treatment_id": "string",
-      "treatment_type": "Ablation",
+      "treatment_type": [
+        "Ablation"
+      ],
       "is_primary_treatment": "Yes",
       "treatment_start_date": "string",
       "treatment_end_date": "string",
@@ -3373,48 +1864,13 @@ MoH Overview schema
 }
 ```
 
-## treatments_create
+## model_treatments_retrieve
 
-<a id="opIdtreatments_create"></a>
+<a id="opIdmodel_treatments_retrieve"></a>
 
-`POST /api/v1/moh/treatments/`
+`GET /moh/v1/model/treatments/{submitter_treatment_id}/`
 
-<h3 id="treatments_create-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[TreatmentRequest](#schematreatmentrequest)|true|none|
-
-> Example responses
-
-> 201 Response
-
-```json
-{
-  "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
-  "is_primary_treatment": "Yes",
-  "treatment_start_date": "string",
-  "treatment_end_date": "string",
-  "treatment_setting": "Adjuvant",
-  "treatment_intent": "Curative",
-  "response_to_treatment_criteria_method": "RECIST 1.1",
-  "response_to_treatment": "Complete response",
-  "days_per_cycle": 32767,
-  "number_of_cycles": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-```
-
-## treatments_retrieve
-
-<a id="opIdtreatments_retrieve"></a>
-
-`GET /api/v1/moh/treatments/{submitter_treatment_id}/`
-
-<h3 id="treatments_retrieve-parameters">Parameters</h3>
+<h3 id="model_treatments_retrieve-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -3427,7 +1883,9 @@ MoH Overview schema
 ```json
 {
   "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
+  "treatment_type": [
+    "Ablation"
+  ],
   "is_primary_treatment": "Yes",
   "treatment_start_date": "string",
   "treatment_end_date": "string",
@@ -3442,90 +1900,6 @@ MoH Overview schema
   "submitter_primary_diagnosis_id": "string"
 }
 ```
-
-## treatments_update
-
-<a id="opIdtreatments_update"></a>
-
-`PUT /api/v1/moh/treatments/{submitter_treatment_id}/`
-
-<h3 id="treatments_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_treatment_id|path|string|true|A unique value identifying this treatment.|
-|body|body|[TreatmentRequest](#schematreatmentrequest)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
-  "is_primary_treatment": "Yes",
-  "treatment_start_date": "string",
-  "treatment_end_date": "string",
-  "treatment_setting": "Adjuvant",
-  "treatment_intent": "Curative",
-  "response_to_treatment_criteria_method": "RECIST 1.1",
-  "response_to_treatment": "Complete response",
-  "days_per_cycle": 32767,
-  "number_of_cycles": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-```
-
-## treatments_partial_update
-
-<a id="opIdtreatments_partial_update"></a>
-
-`PATCH /api/v1/moh/treatments/{submitter_treatment_id}/`
-
-<h3 id="treatments_partial_update-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_treatment_id|path|string|true|A unique value identifying this treatment.|
-|body|body|[PatchedTreatmentRequest](#schemapatchedtreatmentrequest)|false|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-{
-  "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
-  "is_primary_treatment": "Yes",
-  "treatment_start_date": "string",
-  "treatment_end_date": "string",
-  "treatment_setting": "Adjuvant",
-  "treatment_intent": "Curative",
-  "response_to_treatment_criteria_method": "RECIST 1.1",
-  "response_to_treatment": "Complete response",
-  "days_per_cycle": 32767,
-  "number_of_cycles": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-```
-
-## treatments_destroy
-
-<a id="opIdtreatments_destroy"></a>
-
-`DELETE /api/v1/moh/treatments/{submitter_treatment_id}/`
-
-<h3 id="treatments_destroy-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|submitter_treatment_id|path|string|true|A unique value identifying this treatment.|
 
 # Schemas
 
@@ -3689,44 +2063,6 @@ MoH Overview schema
 |submitter_treatment_id|string¦null|false|none|none|
 |submitter_follow_up_id|string¦null|false|none|none|
 
-<h2 id="tocS_BiomarkerRequest">BiomarkerRequest</h2>
-
-<a id="schemabiomarkerrequest"></a>
-<a id="schema_BiomarkerRequest"></a>
-<a id="tocSbiomarkerrequest"></a>
-<a id="tocsbiomarkerrequest"></a>
-
-```json
-{
-  "test_interval": 32767,
-  "psa_level": 32767,
-  "ca125": 32767,
-  "cea": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string",
-  "submitter_follow_up_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|test_interval|integer¦null|false|none|none|
-|psa_level|integer¦null|false|none|none|
-|ca125|integer¦null|false|none|none|
-|cea|integer¦null|false|none|none|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-|submitter_specimen_id|string¦null|false|none|none|
-|submitter_primary_diagnosis_id|string¦null|false|none|none|
-|submitter_treatment_id|string¦null|false|none|none|
-|submitter_follow_up_id|string¦null|false|none|none|
-
 <h2 id="tocS_BlankEnum">BlankEnum</h2>
 
 <a id="schemablankenum"></a>
@@ -3796,69 +2132,7 @@ MoH Overview schema
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|integer|false|read-only|none|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|true|none|none|
-|drug_name|string|true|none|none|
-|drug_rxnormcui|string|true|none|none|
-|cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
-|cumulative_drug_dosage_actual|integer¦null|false|none|none|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-|submitter_treatment_id|string|true|none|none|
-
-<h2 id="tocS_ChemotherapyDosageUnitsEnum">ChemotherapyDosageUnitsEnum</h2>
-
-<a id="schemachemotherapydosageunitsenum"></a>
-<a id="schema_ChemotherapyDosageUnitsEnum"></a>
-<a id="tocSchemotherapydosageunitsenum"></a>
-<a id="tocschemotherapydosageunitsenum"></a>
-
-```json
-"mg/m2"
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|*anonymous*|string|false|none|none|
-
-#### Enumerated Values
-
-|Property|Value|
-|---|---|
-|*anonymous*|mg/m2|
-|*anonymous*|IU/m2|
-|*anonymous*|ug/m2|
-|*anonymous*|g/m2|
-|*anonymous*|mg/kg|
-
-<h2 id="tocS_ChemotherapyRequest">ChemotherapyRequest</h2>
-
-<a id="schemachemotherapyrequest"></a>
-<a id="schema_ChemotherapyRequest"></a>
-<a id="tocSchemotherapyrequest"></a>
-<a id="tocschemotherapyrequest"></a>
-
-```json
-{
-  "chemotherapy_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|true|none|none|
+|chemotherapy_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|none|
 |drug_name|string|true|none|none|
 |drug_rxnormcui|string|true|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
@@ -3894,74 +2168,6 @@ MoH Overview schema
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|integer|false|read-only|none|
-|prior_malignancy|[uBooleanEnum](#schemaubooleanenum)|true|none|none|
-|laterality_of_prior_malignancy|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[LateralityOfPriorMalignancyEnum](#schemalateralityofpriormalignancyenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|comorbidity_type_code|string|true|none|none|
-|comorbidity_treatment_status|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[uBooleanEnum](#schemaubooleanenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|comorbidity_treatment|string|true|none|none|
-|age_at_comorbidity_diagnosis|integer¦null|false|none|none|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-
-<h2 id="tocS_ComorbidityRequest">ComorbidityRequest</h2>
-
-<a id="schemacomorbidityrequest"></a>
-<a id="schema_ComorbidityRequest"></a>
-<a id="tocScomorbidityrequest"></a>
-<a id="tocscomorbidityrequest"></a>
-
-```json
-{
-  "prior_malignancy": "Yes",
-  "laterality_of_prior_malignancy": "Bilateral",
-  "comorbidity_type_code": "string",
-  "comorbidity_treatment_status": "Yes",
-  "comorbidity_treatment": "string",
-  "age_at_comorbidity_diagnosis": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
 |prior_malignancy|[uBooleanEnum](#schemaubooleanenum)|true|none|none|
 |laterality_of_prior_malignancy|any|true|none|none|
 
@@ -4072,7 +2278,9 @@ It also override the list serializer to a single object
   "cause_of_death": "Died of cancer",
   "date_of_birth": "string",
   "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
+  "primary_site": [
+    "Accessory sinuses"
+  ],
   "is_deceased": true,
   "program_id": "string"
 }
@@ -4104,26 +2312,220 @@ continued
 |---|---|---|---|---|
 |date_of_birth|string|true|none|none|
 |date_of_death|string|true|none|none|
-|primary_site|[PrimarySiteEnum](#schemaprimarysiteenum)|true|none|none|
+|primary_site|[[PrimarySiteEnum](#schemaprimarysiteenum)]|true|none|none|
 |is_deceased|boolean|true|none|none|
 |program_id|string|true|none|none|
 
-<h2 id="tocS_DonorRequest">DonorRequest</h2>
+<h2 id="tocS_DonorRelatedClinicalData">DonorRelatedClinicalData</h2>
 
-<a id="schemadonorrequest"></a>
-<a id="schema_DonorRequest"></a>
-<a id="tocSdonorrequest"></a>
-<a id="tocsdonorrequest"></a>
+<a id="schemadonorrelatedclinicaldata"></a>
+<a id="schema_DonorRelatedClinicalData"></a>
+<a id="tocSdonorrelatedclinicaldata"></a>
+<a id="tocsdonorrelatedclinicaldata"></a>
 
 ```json
 {
   "submitter_donor_id": "string",
+  "program_id": "string",
+  "is_deceased": true,
   "cause_of_death": "Died of cancer",
   "date_of_birth": "string",
   "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
-  "is_deceased": true,
-  "program_id": "string"
+  "primary_site": [
+    "Accessory sinuses"
+  ],
+  "primary_diagnoses": [
+    {
+      "submitter_primary_diagnosis_id": "string",
+      "date_of_diagnosis": "string",
+      "cancer_type_code": "string",
+      "basis_of_diagnosis": "Clinical investigation",
+      "lymph_nodes_examined_status": "Cannot be determined",
+      "lymph_nodes_examined_method": "Imaging",
+      "number_lymph_nodes_positive": 32767,
+      "clinical_tumour_staging_system": "AJCC 8th edition",
+      "clinical_t_category": "T0",
+      "clinical_n_category": "N0",
+      "clinical_m_category": "M0",
+      "clinical_stage_group": "Occult Carcinoma",
+      "specimens": [
+        {
+          "pathological_tumour_staging_system": "AJCC 8th edition",
+          "pathological_t_category": "T0",
+          "pathological_n_category": "N0",
+          "pathological_m_category": "M0",
+          "pathological_stage_group": "Occult Carcinoma",
+          "specimen_collection_date": "string",
+          "specimen_storage": "Cut slide",
+          "tumour_histological_type": "string",
+          "specimen_anatomic_location": "string",
+          "reference_pathology_confirmed_diagnosis": "Yes",
+          "reference_pathology_confirmed_tumour_presence": "Yes",
+          "tumour_grading_system": "FNCLCC grading system",
+          "tumour_grade": "Low grade",
+          "percent_tumour_cells_range": "0-19%",
+          "percent_tumour_cells_measurement_method": "Genomics",
+          "sample_registrations": [
+            {
+              "submitter_sample_id": "string",
+              "gender": "Man",
+              "sex_at_birth": "Male",
+              "specimen_tissue_source": "Amniotic fluid",
+              "tumour_normal_designation": "Normal",
+              "specimen_type": "Cell line - derived from normal",
+              "sample_type": "Amplified DNA"
+            }
+          ],
+          "biomarkers": [
+            {
+              "id": 0,
+              "test_interval": 32767,
+              "psa_level": 32767,
+              "ca125": 32767,
+              "cea": 32767
+            }
+          ]
+        }
+      ],
+      "treatments": [
+        {
+          "submitter_treatment_id": "string",
+          "is_primary_treatment": "Yes",
+          "treatment_start_date": "string",
+          "treatment_end_date": "string",
+          "treatment_setting": "Adjuvant",
+          "treatment_intent": "Curative",
+          "days_per_cycle": 32767,
+          "number_of_cycles": 32767,
+          "response_to_treatment_criteria_method": "RECIST 1.1",
+          "chemotherapies": [
+            {
+              "id": 0,
+              "chemotherapy_dosage_units": "mg/m2",
+              "drug_name": "string",
+              "drug_rxnormcui": "string",
+              "cumulative_drug_dosage_prescribed": 32767,
+              "cumulative_drug_dosage_actual": 32767
+            }
+          ],
+          "hormone_therapies": [
+            {
+              "id": 0,
+              "hormone_drug_dosage_units": "mg/m2",
+              "drug_name": "string",
+              "drug_rxnormcui": "string",
+              "cumulative_drug_dosage_prescribed": 32767,
+              "cumulative_drug_dosage_actual": 32767
+            }
+          ],
+          "immunotherapies": [
+            {
+              "id": 0,
+              "immunotherapy_type": "Cell-based",
+              "drug_name": "string",
+              "drug_rxnormcui": "string"
+            }
+          ],
+          "radiation": {
+            "id": 0,
+            "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+            "radiation_therapy_type": "External",
+            "anatomical_site_irradiated": "Cervical lymph node group",
+            "radiation_therapy_fractions": 32767,
+            "radiation_therapy_dosage": 32767,
+            "radiation_boost": true,
+            "reference_radiation_treatment_id": "string"
+          },
+          "surgery": {
+            "id": 0,
+            "surgery_type": "Axillary Clearance",
+            "surgery_site": "string",
+            "surgery_location": "Local recurrence",
+            "tumour_focality": "Cannot be assessed",
+            "residual_tumour_classification": "Not applicable",
+            "margin_types_involved": [
+              "Circumferential resection margin"
+            ],
+            "margin_types_not_involved": [
+              "Circumferential resection margin"
+            ],
+            "margin_types_not_assessed": [
+              "Circumferential resection margin"
+            ],
+            "lymphovascular_invasion": "Absent",
+            "perineural_invasion": "Absent",
+            "tumour_length": 32767,
+            "tumour_width": 32767,
+            "greatest_dimension_tumour": 32767,
+            "submitter_specimen_id": "string"
+          },
+          "followups": [
+            {
+              "date_of_followup": "string",
+              "lost_to_followup": true,
+              "lost_to_followup_reason": "Completed study",
+              "disease_status_at_followup": "Complete remission",
+              "relapse_type": "Distant recurrence/metastasis",
+              "date_of_relapse": "string",
+              "method_of_progression_status": "Imaging (procedure)",
+              "anatomic_site_progression_or_recurrence": "string",
+              "recurrence_tumour_staging_system": "AJCC 8th edition",
+              "recurrence_t_category": "T0",
+              "recurrence_n_category": "N0",
+              "recurrence_m_category": "M0",
+              "recurrence_stage_group": "Occult Carcinoma",
+              "biomarkers": [
+                {
+                  "id": 0,
+                  "test_interval": 32767,
+                  "psa_level": 32767,
+                  "ca125": 32767,
+                  "cea": 32767
+                }
+              ]
+            }
+          ],
+          "biomarkers": [
+            {
+              "id": 0,
+              "test_interval": 32767,
+              "psa_level": 32767,
+              "ca125": 32767,
+              "cea": 32767
+            }
+          ]
+        }
+      ],
+      "biomarkers": [
+        {
+          "id": 0,
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767
+        }
+      ]
+    }
+  ],
+  "comorbidities": [
+    {
+      "prior_malignancy": "Yes",
+      "laterality_of_prior_malignancy": "Bilateral",
+      "age_at_comorbidity_diagnosis": 32767,
+      "comorbidity_type_code": "string",
+      "comorbidity_treatment_status": "Yes",
+      "comorbidity_treatment": "string"
+    }
+  ],
+  "biomarkers": [
+    {
+      "id": 0,
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767
+    }
+  ]
 }
 
 ```
@@ -4133,6 +2535,8 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_donor_id|string|true|none|none|
+|program_id|string|true|none|none|
+|is_deceased|boolean|true|none|none|
 |cause_of_death|any|true|none|none|
 
 oneOf
@@ -4153,9 +2557,38 @@ continued
 |---|---|---|---|---|
 |date_of_birth|string|true|none|none|
 |date_of_death|string|true|none|none|
-|primary_site|[PrimarySiteEnum](#schemaprimarysiteenum)|true|none|none|
-|is_deceased|boolean|true|none|none|
-|program_id|string|true|none|none|
+|primary_site|[[PrimarySiteEnum](#schemaprimarysiteenum)]|true|none|none|
+|primary_diagnoses|[[NestedPrimaryDiagnosis](#schemanestedprimarydiagnosis)]|false|read-only|none|
+|comorbidities|[[NestedComorbidity](#schemanestedcomorbidity)]|false|read-only|none|
+|biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
+
+<h2 id="tocS_DosageUnitsEnum">DosageUnitsEnum</h2>
+
+<a id="schemadosageunitsenum"></a>
+<a id="schema_DosageUnitsEnum"></a>
+<a id="tocSdosageunitsenum"></a>
+<a id="tocsdosageunitsenum"></a>
+
+```json
+"mg/m2"
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|string|false|none|none|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|*anonymous*|mg/m2|
+|*anonymous*|IU/m2|
+|*anonymous*|ug/m2|
+|*anonymous*|g/m2|
+|*anonymous*|mg/kg|
 
 <h2 id="tocS_FollowUp">FollowUp</h2>
 
@@ -4172,197 +2605,7 @@ continued
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
   "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": "AJCC 8th edition",
-  "recurrence_t_category": "T0",
-  "recurrence_n_category": "N0",
-  "recurrence_m_category": "M0",
-  "recurrence_stage_group": "Occult Carcinoma",
-  "lost_to_followup": true,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|string|true|none|none|
-|date_of_followup|string|true|none|none|
-|lost_to_followup_reason|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[LostToFollowupReasonEnum](#schemalosttofollowupreasonenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|disease_status_at_followup|[DiseaseStatusAtFollowupEnum](#schemadiseasestatusatfollowupenum)|true|none|none|
-|relapse_type|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[RelapseTypeEnum](#schemarelapsetypeenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|date_of_relapse|string|true|none|none|
-|method_of_progression_status|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MethodOfProgressionStatusEnum](#schemamethodofprogressionstatusenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|anatomic_site_progression_or_recurrence|string|true|none|none|
-|recurrence_tumour_staging_system|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StagingSystemEnum](#schemastagingsystemenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|recurrence_t_category|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|recurrence_n_category|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[NCategoryEnum](#schemancategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|recurrence_m_category|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MCategoryEnum](#schemamcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|recurrence_stage_group|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StageGroupEnum](#schemastagegroupenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|lost_to_followup|boolean¦null|false|none|none|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-|submitter_primary_diagnosis_id|string¦null|false|none|none|
-|submitter_treatment_id|string¦null|false|none|none|
-
-<h2 id="tocS_FollowUpRequest">FollowUpRequest</h2>
-
-<a id="schemafollowuprequest"></a>
-<a id="schema_FollowUpRequest"></a>
-<a id="tocSfollowuprequest"></a>
-<a id="tocsfollowuprequest"></a>
-
-```json
-{
-  "submitter_follow_up_id": "string",
-  "date_of_followup": "string",
-  "lost_to_followup_reason": "Completed study",
-  "disease_status_at_followup": "Complete remission",
-  "relapse_type": "Distant recurrence/metastasis",
-  "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+  "method_of_progression_status": "Imaging (procedure)",
   "anatomic_site_progression_or_recurrence": "string",
   "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
@@ -4573,10 +2816,9 @@ continued
 ```json
 {
   "id": 0,
-  "chemotherapy_dosage_units": "mg/m2",
+  "hormone_drug_dosage_units": "mg/m2",
   "drug_name": "string",
   "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
   "cumulative_drug_dosage_prescribed": 32767,
   "cumulative_drug_dosage_actual": 32767,
   "program_id": "string",
@@ -4591,46 +2833,9 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|integer|false|read-only|none|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|true|none|none|
+|hormone_drug_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|none|
 |drug_name|string|true|none|none|
 |drug_rxnormcui|string|true|none|none|
-|hormone_drug_dosage_units|string|true|none|none|
-|cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
-|cumulative_drug_dosage_actual|integer¦null|false|none|none|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-|submitter_treatment_id|string|true|none|none|
-
-<h2 id="tocS_HormoneTherapyRequest">HormoneTherapyRequest</h2>
-
-<a id="schemahormonetherapyrequest"></a>
-<a id="schema_HormoneTherapyRequest"></a>
-<a id="tocShormonetherapyrequest"></a>
-<a id="tocshormonetherapyrequest"></a>
-
-```json
-{
-  "chemotherapy_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|true|none|none|
-|drug_name|string|true|none|none|
-|drug_rxnormcui|string|true|none|none|
-|hormone_drug_dosage_units|string|true|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
 |cumulative_drug_dosage_actual|integer¦null|false|none|none|
 |program_id|string|true|none|none|
@@ -4669,36 +2874,6 @@ continued
 |submitter_donor_id|string|true|none|none|
 |submitter_treatment_id|string|true|none|none|
 
-<h2 id="tocS_ImmunotherapyRequest">ImmunotherapyRequest</h2>
-
-<a id="schemaimmunotherapyrequest"></a>
-<a id="schema_ImmunotherapyRequest"></a>
-<a id="tocSimmunotherapyrequest"></a>
-<a id="tocsimmunotherapyrequest"></a>
-
-```json
-{
-  "immunotherapy_type": "Cell-based",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|immunotherapy_type|[ImmunotherapyTypeEnum](#schemaimmunotherapytypeenum)|true|none|none|
-|drug_name|string|true|none|none|
-|drug_rxnormcui|string|true|none|none|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-|submitter_treatment_id|string|true|none|none|
-
 <h2 id="tocS_ImmunotherapyTypeEnum">ImmunotherapyTypeEnum</h2>
 
 <a id="schemaimmunotherapytypeenum"></a>
@@ -4725,32 +2900,6 @@ continued
 |*anonymous*|Immune checkpoint inhibitors|
 |*anonymous*|Monoclonal antibodies other than immune checkpoint inhibitors|
 |*anonymous*|Other immunomodulatory substances|
-
-<h2 id="tocS_IngestRequestRequest">IngestRequestRequest</h2>
-
-<a id="schemaingestrequestrequest"></a>
-<a id="schema_IngestRequestRequest"></a>
-<a id="tocSingestrequestrequest"></a>
-<a id="tocsingestrequestrequest"></a>
-
-```json
-{
-  "data": [
-    {
-      "property1": null,
-      "property2": null
-    }
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|data|[object]|true|none|none|
-|» **additionalProperties**|any|false|none|none|
 
 <h2 id="tocS_LateralityOfPriorMalignancyEnum">LateralityOfPriorMalignancyEnum</h2>
 
@@ -4972,7 +3121,7 @@ continued
 <a id="tocsmethodofprogressionstatusenum"></a>
 
 ```json
-"Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)"
+"Imaging (procedure)"
 
 ```
 
@@ -4986,7 +3135,12 @@ continued
 
 |Property|Value|
 |---|---|
-|*anonymous*|Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)|
+|*anonymous*|Imaging (procedure)|
+|*anonymous*|Histopathology test (procedure)|
+|*anonymous*|Assessment of symptom control (procedure)|
+|*anonymous*|Physical examination procedure (procedure)|
+|*anonymous*|Tumor marker measurement (procedure)|
+|*anonymous*|Laboratory data interpretation (procedure)|
 
 <h2 id="tocS_NCategoryEnum">NCategoryEnum</h2>
 
@@ -5036,6 +3190,1313 @@ continued
 |*anonymous*|N3c|
 |*anonymous*|N4|
 |*anonymous*|NX|
+
+<h2 id="tocS_NestedBiomarker">NestedBiomarker</h2>
+
+<a id="schemanestedbiomarker"></a>
+<a id="schema_NestedBiomarker"></a>
+<a id="tocSnestedbiomarker"></a>
+<a id="tocsnestedbiomarker"></a>
+
+```json
+{
+  "id": 0,
+  "test_interval": 32767,
+  "psa_level": 32767,
+  "ca125": 32767,
+  "cea": 32767
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|id|integer|false|read-only|none|
+|test_interval|integer¦null|false|none|none|
+|psa_level|integer¦null|false|none|none|
+|ca125|integer¦null|false|none|none|
+|cea|integer¦null|false|none|none|
+
+<h2 id="tocS_NestedChemotherapy">NestedChemotherapy</h2>
+
+<a id="schemanestedchemotherapy"></a>
+<a id="schema_NestedChemotherapy"></a>
+<a id="tocSnestedchemotherapy"></a>
+<a id="tocsnestedchemotherapy"></a>
+
+```json
+{
+  "id": 0,
+  "chemotherapy_dosage_units": "mg/m2",
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "cumulative_drug_dosage_prescribed": 32767,
+  "cumulative_drug_dosage_actual": 32767
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|id|integer|false|read-only|none|
+|chemotherapy_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|none|
+|drug_name|string|true|none|none|
+|drug_rxnormcui|string|true|none|none|
+|cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
+|cumulative_drug_dosage_actual|integer¦null|false|none|none|
+
+<h2 id="tocS_NestedComorbidity">NestedComorbidity</h2>
+
+<a id="schemanestedcomorbidity"></a>
+<a id="schema_NestedComorbidity"></a>
+<a id="tocSnestedcomorbidity"></a>
+<a id="tocsnestedcomorbidity"></a>
+
+```json
+{
+  "prior_malignancy": "Yes",
+  "laterality_of_prior_malignancy": "Bilateral",
+  "age_at_comorbidity_diagnosis": 32767,
+  "comorbidity_type_code": "string",
+  "comorbidity_treatment_status": "Yes",
+  "comorbidity_treatment": "string"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|prior_malignancy|[uBooleanEnum](#schemaubooleanenum)|true|none|none|
+|laterality_of_prior_malignancy|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[LateralityOfPriorMalignancyEnum](#schemalateralityofpriormalignancyenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|age_at_comorbidity_diagnosis|integer¦null|false|none|none|
+|comorbidity_type_code|string|true|none|none|
+|comorbidity_treatment_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[uBooleanEnum](#schemaubooleanenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|comorbidity_treatment|string|true|none|none|
+
+<h2 id="tocS_NestedFollowUp">NestedFollowUp</h2>
+
+<a id="schemanestedfollowup"></a>
+<a id="schema_NestedFollowUp"></a>
+<a id="tocSnestedfollowup"></a>
+<a id="tocsnestedfollowup"></a>
+
+```json
+{
+  "date_of_followup": "string",
+  "lost_to_followup": true,
+  "lost_to_followup_reason": "Completed study",
+  "disease_status_at_followup": "Complete remission",
+  "relapse_type": "Distant recurrence/metastasis",
+  "date_of_relapse": "string",
+  "method_of_progression_status": "Imaging (procedure)",
+  "anatomic_site_progression_or_recurrence": "string",
+  "recurrence_tumour_staging_system": "AJCC 8th edition",
+  "recurrence_t_category": "T0",
+  "recurrence_n_category": "N0",
+  "recurrence_m_category": "M0",
+  "recurrence_stage_group": "Occult Carcinoma",
+  "biomarkers": [
+    {
+      "id": 0,
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|date_of_followup|string|true|none|none|
+|lost_to_followup|boolean¦null|false|none|none|
+|lost_to_followup_reason|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[LostToFollowupReasonEnum](#schemalosttofollowupreasonenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|disease_status_at_followup|[DiseaseStatusAtFollowupEnum](#schemadiseasestatusatfollowupenum)|true|none|none|
+|relapse_type|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[RelapseTypeEnum](#schemarelapsetypeenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|date_of_relapse|string|true|none|none|
+|method_of_progression_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[MethodOfProgressionStatusEnum](#schemamethodofprogressionstatusenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|anatomic_site_progression_or_recurrence|string|true|none|none|
+|recurrence_tumour_staging_system|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[StagingSystemEnum](#schemastagingsystemenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|recurrence_t_category|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|recurrence_n_category|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NCategoryEnum](#schemancategoryenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|recurrence_m_category|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[MCategoryEnum](#schemamcategoryenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|recurrence_stage_group|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[StageGroupEnum](#schemastagegroupenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
+
+<h2 id="tocS_NestedHormoneTherapy">NestedHormoneTherapy</h2>
+
+<a id="schemanestedhormonetherapy"></a>
+<a id="schema_NestedHormoneTherapy"></a>
+<a id="tocSnestedhormonetherapy"></a>
+<a id="tocsnestedhormonetherapy"></a>
+
+```json
+{
+  "id": 0,
+  "hormone_drug_dosage_units": "mg/m2",
+  "drug_name": "string",
+  "drug_rxnormcui": "string",
+  "cumulative_drug_dosage_prescribed": 32767,
+  "cumulative_drug_dosage_actual": 32767
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|id|integer|false|read-only|none|
+|hormone_drug_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|none|
+|drug_name|string|true|none|none|
+|drug_rxnormcui|string|true|none|none|
+|cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
+|cumulative_drug_dosage_actual|integer¦null|false|none|none|
+
+<h2 id="tocS_NestedImmunotherapy">NestedImmunotherapy</h2>
+
+<a id="schemanestedimmunotherapy"></a>
+<a id="schema_NestedImmunotherapy"></a>
+<a id="tocSnestedimmunotherapy"></a>
+<a id="tocsnestedimmunotherapy"></a>
+
+```json
+{
+  "id": 0,
+  "immunotherapy_type": "Cell-based",
+  "drug_name": "string",
+  "drug_rxnormcui": "string"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|id|integer|false|read-only|none|
+|immunotherapy_type|[ImmunotherapyTypeEnum](#schemaimmunotherapytypeenum)|true|none|none|
+|drug_name|string|true|none|none|
+|drug_rxnormcui|string|true|none|none|
+
+<h2 id="tocS_NestedPrimaryDiagnosis">NestedPrimaryDiagnosis</h2>
+
+<a id="schemanestedprimarydiagnosis"></a>
+<a id="schema_NestedPrimaryDiagnosis"></a>
+<a id="tocSnestedprimarydiagnosis"></a>
+<a id="tocsnestedprimarydiagnosis"></a>
+
+```json
+{
+  "submitter_primary_diagnosis_id": "string",
+  "date_of_diagnosis": "string",
+  "cancer_type_code": "string",
+  "basis_of_diagnosis": "Clinical investigation",
+  "lymph_nodes_examined_status": "Cannot be determined",
+  "lymph_nodes_examined_method": "Imaging",
+  "number_lymph_nodes_positive": 32767,
+  "clinical_tumour_staging_system": "AJCC 8th edition",
+  "clinical_t_category": "T0",
+  "clinical_n_category": "N0",
+  "clinical_m_category": "M0",
+  "clinical_stage_group": "Occult Carcinoma",
+  "specimens": [
+    {
+      "pathological_tumour_staging_system": "AJCC 8th edition",
+      "pathological_t_category": "T0",
+      "pathological_n_category": "N0",
+      "pathological_m_category": "M0",
+      "pathological_stage_group": "Occult Carcinoma",
+      "specimen_collection_date": "string",
+      "specimen_storage": "Cut slide",
+      "tumour_histological_type": "string",
+      "specimen_anatomic_location": "string",
+      "reference_pathology_confirmed_diagnosis": "Yes",
+      "reference_pathology_confirmed_tumour_presence": "Yes",
+      "tumour_grading_system": "FNCLCC grading system",
+      "tumour_grade": "Low grade",
+      "percent_tumour_cells_range": "0-19%",
+      "percent_tumour_cells_measurement_method": "Genomics",
+      "sample_registrations": [
+        {
+          "submitter_sample_id": "string",
+          "gender": "Man",
+          "sex_at_birth": "Male",
+          "specimen_tissue_source": "Amniotic fluid",
+          "tumour_normal_designation": "Normal",
+          "specimen_type": "Cell line - derived from normal",
+          "sample_type": "Amplified DNA"
+        }
+      ],
+      "biomarkers": [
+        {
+          "id": 0,
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767
+        }
+      ]
+    }
+  ],
+  "treatments": [
+    {
+      "submitter_treatment_id": "string",
+      "is_primary_treatment": "Yes",
+      "treatment_start_date": "string",
+      "treatment_end_date": "string",
+      "treatment_setting": "Adjuvant",
+      "treatment_intent": "Curative",
+      "days_per_cycle": 32767,
+      "number_of_cycles": 32767,
+      "response_to_treatment_criteria_method": "RECIST 1.1",
+      "chemotherapies": [
+        {
+          "id": 0,
+          "chemotherapy_dosage_units": "mg/m2",
+          "drug_name": "string",
+          "drug_rxnormcui": "string",
+          "cumulative_drug_dosage_prescribed": 32767,
+          "cumulative_drug_dosage_actual": 32767
+        }
+      ],
+      "hormone_therapies": [
+        {
+          "id": 0,
+          "hormone_drug_dosage_units": "mg/m2",
+          "drug_name": "string",
+          "drug_rxnormcui": "string",
+          "cumulative_drug_dosage_prescribed": 32767,
+          "cumulative_drug_dosage_actual": 32767
+        }
+      ],
+      "immunotherapies": [
+        {
+          "id": 0,
+          "immunotherapy_type": "Cell-based",
+          "drug_name": "string",
+          "drug_rxnormcui": "string"
+        }
+      ],
+      "radiation": {
+        "id": 0,
+        "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+        "radiation_therapy_type": "External",
+        "anatomical_site_irradiated": "Cervical lymph node group",
+        "radiation_therapy_fractions": 32767,
+        "radiation_therapy_dosage": 32767,
+        "radiation_boost": true,
+        "reference_radiation_treatment_id": "string"
+      },
+      "surgery": {
+        "id": 0,
+        "surgery_type": "Axillary Clearance",
+        "surgery_site": "string",
+        "surgery_location": "Local recurrence",
+        "tumour_focality": "Cannot be assessed",
+        "residual_tumour_classification": "Not applicable",
+        "margin_types_involved": [
+          "Circumferential resection margin"
+        ],
+        "margin_types_not_involved": [
+          "Circumferential resection margin"
+        ],
+        "margin_types_not_assessed": [
+          "Circumferential resection margin"
+        ],
+        "lymphovascular_invasion": "Absent",
+        "perineural_invasion": "Absent",
+        "tumour_length": 32767,
+        "tumour_width": 32767,
+        "greatest_dimension_tumour": 32767,
+        "submitter_specimen_id": "string"
+      },
+      "followups": [
+        {
+          "date_of_followup": "string",
+          "lost_to_followup": true,
+          "lost_to_followup_reason": "Completed study",
+          "disease_status_at_followup": "Complete remission",
+          "relapse_type": "Distant recurrence/metastasis",
+          "date_of_relapse": "string",
+          "method_of_progression_status": "Imaging (procedure)",
+          "anatomic_site_progression_or_recurrence": "string",
+          "recurrence_tumour_staging_system": "AJCC 8th edition",
+          "recurrence_t_category": "T0",
+          "recurrence_n_category": "N0",
+          "recurrence_m_category": "M0",
+          "recurrence_stage_group": "Occult Carcinoma",
+          "biomarkers": [
+            {
+              "id": 0,
+              "test_interval": 32767,
+              "psa_level": 32767,
+              "ca125": 32767,
+              "cea": 32767
+            }
+          ]
+        }
+      ],
+      "biomarkers": [
+        {
+          "id": 0,
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767
+        }
+      ]
+    }
+  ],
+  "biomarkers": [
+    {
+      "id": 0,
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|submitter_primary_diagnosis_id|string|true|none|none|
+|date_of_diagnosis|string|true|none|none|
+|cancer_type_code|string|true|none|none|
+|basis_of_diagnosis|[BasisOfDiagnosisEnum](#schemabasisofdiagnosisenum)|true|none|none|
+|lymph_nodes_examined_status|[LymphNodesExaminedStatusEnum](#schemalymphnodesexaminedstatusenum)|true|none|none|
+|lymph_nodes_examined_method|[LymphNodesExaminedMethodEnum](#schemalymphnodesexaminedmethodenum)|true|none|none|
+|number_lymph_nodes_positive|integer¦null|false|none|none|
+|clinical_tumour_staging_system|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[StagingSystemEnum](#schemastagingsystemenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|clinical_t_category|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|clinical_n_category|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NCategoryEnum](#schemancategoryenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|clinical_m_category|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[MCategoryEnum](#schemamcategoryenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|clinical_stage_group|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[StageGroupEnum](#schemastagegroupenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|specimens|[[NestedSpecimen](#schemanestedspecimen)]|false|read-only|none|
+|treatments|[[NestedTreatment](#schemanestedtreatment)]|false|read-only|none|
+|biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
+
+<h2 id="tocS_NestedRadiation">NestedRadiation</h2>
+
+<a id="schemanestedradiation"></a>
+<a id="schema_NestedRadiation"></a>
+<a id="tocSnestedradiation"></a>
+<a id="tocsnestedradiation"></a>
+
+```json
+{
+  "id": 0,
+  "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+  "radiation_therapy_type": "External",
+  "anatomical_site_irradiated": "Cervical lymph node group",
+  "radiation_therapy_fractions": 32767,
+  "radiation_therapy_dosage": 32767,
+  "radiation_boost": true,
+  "reference_radiation_treatment_id": "string"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|id|integer|false|read-only|none|
+|radiation_therapy_modality|[RadiationTherapyModalityEnum](#schemaradiationtherapymodalityenum)|true|none|none|
+|radiation_therapy_type|[RadiationTherapyTypeEnum](#schemaradiationtherapytypeenum)|true|none|none|
+|anatomical_site_irradiated|[AnatomicalSiteIrradiatedEnum](#schemaanatomicalsiteirradiatedenum)|true|none|none|
+|radiation_therapy_fractions|integer|true|none|none|
+|radiation_therapy_dosage|integer|true|none|none|
+|radiation_boost|boolean¦null|false|none|none|
+|reference_radiation_treatment_id|string|false|none|none|
+
+<h2 id="tocS_NestedSampleRegistration">NestedSampleRegistration</h2>
+
+<a id="schemanestedsampleregistration"></a>
+<a id="schema_NestedSampleRegistration"></a>
+<a id="tocSnestedsampleregistration"></a>
+<a id="tocsnestedsampleregistration"></a>
+
+```json
+{
+  "submitter_sample_id": "string",
+  "gender": "Man",
+  "sex_at_birth": "Male",
+  "specimen_tissue_source": "Amniotic fluid",
+  "tumour_normal_designation": "Normal",
+  "specimen_type": "Cell line - derived from normal",
+  "sample_type": "Amplified DNA"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|submitter_sample_id|string|true|none|none|
+|gender|[GenderEnum](#schemagenderenum)|true|none|none|
+|sex_at_birth|[SexAtBirthEnum](#schemasexatbirthenum)|true|none|none|
+|specimen_tissue_source|[SpecimenTissueSourceEnum](#schemaspecimentissuesourceenum)|true|none|none|
+|tumour_normal_designation|[TumourNormalDesignationEnum](#schematumournormaldesignationenum)|true|none|none|
+|specimen_type|[SpecimenTypeEnum](#schemaspecimentypeenum)|true|none|none|
+|sample_type|[SampleTypeEnum](#schemasampletypeenum)|true|none|none|
+
+<h2 id="tocS_NestedSpecimen">NestedSpecimen</h2>
+
+<a id="schemanestedspecimen"></a>
+<a id="schema_NestedSpecimen"></a>
+<a id="tocSnestedspecimen"></a>
+<a id="tocsnestedspecimen"></a>
+
+```json
+{
+  "pathological_tumour_staging_system": "AJCC 8th edition",
+  "pathological_t_category": "T0",
+  "pathological_n_category": "N0",
+  "pathological_m_category": "M0",
+  "pathological_stage_group": "Occult Carcinoma",
+  "specimen_collection_date": "string",
+  "specimen_storage": "Cut slide",
+  "tumour_histological_type": "string",
+  "specimen_anatomic_location": "string",
+  "reference_pathology_confirmed_diagnosis": "Yes",
+  "reference_pathology_confirmed_tumour_presence": "Yes",
+  "tumour_grading_system": "FNCLCC grading system",
+  "tumour_grade": "Low grade",
+  "percent_tumour_cells_range": "0-19%",
+  "percent_tumour_cells_measurement_method": "Genomics",
+  "sample_registrations": [
+    {
+      "submitter_sample_id": "string",
+      "gender": "Man",
+      "sex_at_birth": "Male",
+      "specimen_tissue_source": "Amniotic fluid",
+      "tumour_normal_designation": "Normal",
+      "specimen_type": "Cell line - derived from normal",
+      "sample_type": "Amplified DNA"
+    }
+  ],
+  "biomarkers": [
+    {
+      "id": 0,
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|pathological_tumour_staging_system|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[StagingSystemEnum](#schemastagingsystemenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|pathological_t_category|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|pathological_n_category|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NCategoryEnum](#schemancategoryenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|pathological_m_category|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[MCategoryEnum](#schemamcategoryenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|pathological_stage_group|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[StageGroupEnum](#schemastagegroupenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|specimen_collection_date|string|true|none|none|
+|specimen_storage|[SpecimenStorageEnum](#schemaspecimenstorageenum)|true|none|none|
+|tumour_histological_type|string|true|none|none|
+|specimen_anatomic_location|string|true|none|none|
+|reference_pathology_confirmed_diagnosis|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ReferencePathologyEnum](#schemareferencepathologyenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|reference_pathology_confirmed_tumour_presence|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ReferencePathologyEnum](#schemareferencepathologyenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|tumour_grading_system|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TumourGradingSystemEnum](#schematumourgradingsystemenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|tumour_grade|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TumourGradeEnum](#schematumourgradeenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|percent_tumour_cells_range|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[PercentTumourCellsRangeEnum](#schemapercenttumourcellsrangeenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|percent_tumour_cells_measurement_method|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[PercentTumourCellsMeasurementMethodEnum](#schemapercenttumourcellsmeasurementmethodenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|sample_registrations|[[NestedSampleRegistration](#schemanestedsampleregistration)]|false|read-only|none|
+|biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
+
+<h2 id="tocS_NestedSurgery">NestedSurgery</h2>
+
+<a id="schemanestedsurgery"></a>
+<a id="schema_NestedSurgery"></a>
+<a id="tocSnestedsurgery"></a>
+<a id="tocsnestedsurgery"></a>
+
+```json
+{
+  "id": 0,
+  "surgery_type": "Axillary Clearance",
+  "surgery_site": "string",
+  "surgery_location": "Local recurrence",
+  "tumour_focality": "Cannot be assessed",
+  "residual_tumour_classification": "Not applicable",
+  "margin_types_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_assessed": [
+    "Circumferential resection margin"
+  ],
+  "lymphovascular_invasion": "Absent",
+  "perineural_invasion": "Absent",
+  "tumour_length": 32767,
+  "tumour_width": 32767,
+  "greatest_dimension_tumour": 32767,
+  "submitter_specimen_id": "string"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|id|integer|false|read-only|none|
+|surgery_type|[SurgeryTypeEnum](#schemasurgerytypeenum)|true|none|none|
+|surgery_site|string|true|none|none|
+|surgery_location|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SurgeryLocationEnum](#schemasurgerylocationenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|tumour_focality|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TumourFocalityEnum](#schematumourfocalityenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|residual_tumour_classification|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ResidualTumourClassificationEnum](#schemaresidualtumourclassificationenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|margin_types_involved|[oneOf]|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[MarginTypesEnum](#schemamargintypesenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|margin_types_not_involved|[oneOf]|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[MarginTypesEnum](#schemamargintypesenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|margin_types_not_assessed|[oneOf]|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[MarginTypesEnum](#schemamargintypesenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|lymphovascular_invasion|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[LymphovascularInvasionEnum](#schemalymphovascularinvasionenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|perineural_invasion|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[PerineuralInvasionEnum](#schemaperineuralinvasionenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|tumour_length|integer¦null|false|none|none|
+|tumour_width|integer¦null|false|none|none|
+|greatest_dimension_tumour|integer¦null|false|none|none|
+|submitter_specimen_id|string¦null|false|none|none|
+
+<h2 id="tocS_NestedTreatment">NestedTreatment</h2>
+
+<a id="schemanestedtreatment"></a>
+<a id="schema_NestedTreatment"></a>
+<a id="tocSnestedtreatment"></a>
+<a id="tocsnestedtreatment"></a>
+
+```json
+{
+  "submitter_treatment_id": "string",
+  "is_primary_treatment": "Yes",
+  "treatment_start_date": "string",
+  "treatment_end_date": "string",
+  "treatment_setting": "Adjuvant",
+  "treatment_intent": "Curative",
+  "days_per_cycle": 32767,
+  "number_of_cycles": 32767,
+  "response_to_treatment_criteria_method": "RECIST 1.1",
+  "chemotherapies": [
+    {
+      "id": 0,
+      "chemotherapy_dosage_units": "mg/m2",
+      "drug_name": "string",
+      "drug_rxnormcui": "string",
+      "cumulative_drug_dosage_prescribed": 32767,
+      "cumulative_drug_dosage_actual": 32767
+    }
+  ],
+  "hormone_therapies": [
+    {
+      "id": 0,
+      "hormone_drug_dosage_units": "mg/m2",
+      "drug_name": "string",
+      "drug_rxnormcui": "string",
+      "cumulative_drug_dosage_prescribed": 32767,
+      "cumulative_drug_dosage_actual": 32767
+    }
+  ],
+  "immunotherapies": [
+    {
+      "id": 0,
+      "immunotherapy_type": "Cell-based",
+      "drug_name": "string",
+      "drug_rxnormcui": "string"
+    }
+  ],
+  "radiation": {
+    "id": 0,
+    "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+    "radiation_therapy_type": "External",
+    "anatomical_site_irradiated": "Cervical lymph node group",
+    "radiation_therapy_fractions": 32767,
+    "radiation_therapy_dosage": 32767,
+    "radiation_boost": true,
+    "reference_radiation_treatment_id": "string"
+  },
+  "surgery": {
+    "id": 0,
+    "surgery_type": "Axillary Clearance",
+    "surgery_site": "string",
+    "surgery_location": "Local recurrence",
+    "tumour_focality": "Cannot be assessed",
+    "residual_tumour_classification": "Not applicable",
+    "margin_types_involved": [
+      "Circumferential resection margin"
+    ],
+    "margin_types_not_involved": [
+      "Circumferential resection margin"
+    ],
+    "margin_types_not_assessed": [
+      "Circumferential resection margin"
+    ],
+    "lymphovascular_invasion": "Absent",
+    "perineural_invasion": "Absent",
+    "tumour_length": 32767,
+    "tumour_width": 32767,
+    "greatest_dimension_tumour": 32767,
+    "submitter_specimen_id": "string"
+  },
+  "followups": [
+    {
+      "date_of_followup": "string",
+      "lost_to_followup": true,
+      "lost_to_followup_reason": "Completed study",
+      "disease_status_at_followup": "Complete remission",
+      "relapse_type": "Distant recurrence/metastasis",
+      "date_of_relapse": "string",
+      "method_of_progression_status": "Imaging (procedure)",
+      "anatomic_site_progression_or_recurrence": "string",
+      "recurrence_tumour_staging_system": "AJCC 8th edition",
+      "recurrence_t_category": "T0",
+      "recurrence_n_category": "N0",
+      "recurrence_m_category": "M0",
+      "recurrence_stage_group": "Occult Carcinoma",
+      "biomarkers": [
+        {
+          "id": 0,
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767
+        }
+      ]
+    }
+  ],
+  "biomarkers": [
+    {
+      "id": 0,
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|submitter_treatment_id|string|true|none|none|
+|is_primary_treatment|[uBooleanEnum](#schemaubooleanenum)|true|none|none|
+|treatment_start_date|string|true|none|none|
+|treatment_end_date|string|true|none|none|
+|treatment_setting|[TreatmentSettingEnum](#schematreatmentsettingenum)|true|none|none|
+|treatment_intent|[TreatmentIntentEnum](#schematreatmentintentenum)|true|none|none|
+|days_per_cycle|integer¦null|false|none|none|
+|number_of_cycles|integer¦null|false|none|none|
+|response_to_treatment_criteria_method|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|true|none|none|
+|chemotherapies|[[NestedChemotherapy](#schemanestedchemotherapy)]|false|read-only|none|
+|hormone_therapies|[[NestedHormoneTherapy](#schemanestedhormonetherapy)]|false|read-only|none|
+|immunotherapies|[[NestedImmunotherapy](#schemanestedimmunotherapy)]|false|read-only|none|
+|radiation|[NestedRadiation](#schemanestedradiation)|false|read-only|none|
+|surgery|[NestedSurgery](#schemanestedsurgery)|false|read-only|none|
+|followups|[[NestedFollowUp](#schemanestedfollowup)]|false|read-only|none|
+|biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
 
 <h2 id="tocS_PaginatedBiomarkerList">PaginatedBiomarkerList</h2>
 
@@ -5171,7 +4632,9 @@ continued
       "cause_of_death": "Died of cancer",
       "date_of_birth": "string",
       "date_of_death": "string",
-      "primary_site": "Accessory sinuses",
+      "primary_site": [
+        "Accessory sinuses"
+      ],
       "is_deceased": true,
       "program_id": "string"
     }
@@ -5209,7 +4672,7 @@ continued
       "disease_status_at_followup": "Complete remission",
       "relapse_type": "Distant recurrence/metastasis",
       "date_of_relapse": "string",
-      "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
+      "method_of_progression_status": "Imaging (procedure)",
       "anatomic_site_progression_or_recurrence": "string",
       "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
@@ -5251,10 +4714,9 @@ continued
   "results": [
     {
       "id": 0,
-      "chemotherapy_dosage_units": "mg/m2",
+      "hormone_drug_dosage_units": "mg/m2",
       "drug_name": "string",
       "drug_rxnormcui": "string",
-      "hormone_drug_dosage_units": "string",
       "cumulative_drug_dosage_prescribed": 32767,
       "cumulative_drug_dosage_actual": 32767,
       "program_id": "string",
@@ -5534,9 +4996,15 @@ continued
       "surgery_location": "Local recurrence",
       "tumour_focality": "Cannot be assessed",
       "residual_tumour_classification": "Not applicable",
-      "margin_types_involved": "Circumferential resection margin",
-      "margin_types_not_involved": "Circumferential resection margin",
-      "margin_types_not_assessed": "Circumferential resection margin",
+      "margin_types_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_assessed": [
+        "Circumferential resection margin"
+      ],
       "lymphovascular_invasion": "Absent",
       "perineural_invasion": "Absent",
       "tumour_length": 32767,
@@ -5576,7 +5044,9 @@ continued
   "results": [
     {
       "submitter_treatment_id": "string",
-      "treatment_type": "Ablation",
+      "treatment_type": [
+        "Ablation"
+      ],
       "is_primary_treatment": "Yes",
       "treatment_start_date": "string",
       "treatment_end_date": "string",
@@ -5603,1161 +5073,6 @@ continued
 |next|string(uri)¦null|false|none|none|
 |previous|string(uri)¦null|false|none|none|
 |results|[[Treatment](#schematreatment)]|false|none|none|
-
-<h2 id="tocS_PatchedBiomarkerRequest">PatchedBiomarkerRequest</h2>
-
-<a id="schemapatchedbiomarkerrequest"></a>
-<a id="schema_PatchedBiomarkerRequest"></a>
-<a id="tocSpatchedbiomarkerrequest"></a>
-<a id="tocspatchedbiomarkerrequest"></a>
-
-```json
-{
-  "test_interval": 32767,
-  "psa_level": 32767,
-  "ca125": 32767,
-  "cea": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string",
-  "submitter_follow_up_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|test_interval|integer¦null|false|none|none|
-|psa_level|integer¦null|false|none|none|
-|ca125|integer¦null|false|none|none|
-|cea|integer¦null|false|none|none|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-|submitter_specimen_id|string¦null|false|none|none|
-|submitter_primary_diagnosis_id|string¦null|false|none|none|
-|submitter_treatment_id|string¦null|false|none|none|
-|submitter_follow_up_id|string¦null|false|none|none|
-
-<h2 id="tocS_PatchedChemotherapyRequest">PatchedChemotherapyRequest</h2>
-
-<a id="schemapatchedchemotherapyrequest"></a>
-<a id="schema_PatchedChemotherapyRequest"></a>
-<a id="tocSpatchedchemotherapyrequest"></a>
-<a id="tocspatchedchemotherapyrequest"></a>
-
-```json
-{
-  "chemotherapy_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|false|none|none|
-|drug_name|string|false|none|none|
-|drug_rxnormcui|string|false|none|none|
-|cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
-|cumulative_drug_dosage_actual|integer¦null|false|none|none|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-|submitter_treatment_id|string|false|none|none|
-
-<h2 id="tocS_PatchedComorbidityRequest">PatchedComorbidityRequest</h2>
-
-<a id="schemapatchedcomorbidityrequest"></a>
-<a id="schema_PatchedComorbidityRequest"></a>
-<a id="tocSpatchedcomorbidityrequest"></a>
-<a id="tocspatchedcomorbidityrequest"></a>
-
-```json
-{
-  "prior_malignancy": "Yes",
-  "laterality_of_prior_malignancy": "Bilateral",
-  "comorbidity_type_code": "string",
-  "comorbidity_treatment_status": "Yes",
-  "comorbidity_treatment": "string",
-  "age_at_comorbidity_diagnosis": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|prior_malignancy|[uBooleanEnum](#schemaubooleanenum)|false|none|none|
-|laterality_of_prior_malignancy|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[LateralityOfPriorMalignancyEnum](#schemalateralityofpriormalignancyenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|comorbidity_type_code|string|false|none|none|
-|comorbidity_treatment_status|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[uBooleanEnum](#schemaubooleanenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|comorbidity_treatment|string|false|none|none|
-|age_at_comorbidity_diagnosis|integer¦null|false|none|none|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-
-<h2 id="tocS_PatchedDonorRequest">PatchedDonorRequest</h2>
-
-<a id="schemapatcheddonorrequest"></a>
-<a id="schema_PatchedDonorRequest"></a>
-<a id="tocSpatcheddonorrequest"></a>
-<a id="tocspatcheddonorrequest"></a>
-
-```json
-{
-  "submitter_donor_id": "string",
-  "cause_of_death": "Died of cancer",
-  "date_of_birth": "string",
-  "date_of_death": "string",
-  "primary_site": "Accessory sinuses",
-  "is_deceased": true,
-  "program_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_donor_id|string|false|none|none|
-|cause_of_death|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[CauseOfDeathEnum](#schemacauseofdeathenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|date_of_birth|string|false|none|none|
-|date_of_death|string|false|none|none|
-|primary_site|[PrimarySiteEnum](#schemaprimarysiteenum)|false|none|none|
-|is_deceased|boolean|false|none|none|
-|program_id|string|false|none|none|
-
-<h2 id="tocS_PatchedFollowUpRequest">PatchedFollowUpRequest</h2>
-
-<a id="schemapatchedfollowuprequest"></a>
-<a id="schema_PatchedFollowUpRequest"></a>
-<a id="tocSpatchedfollowuprequest"></a>
-<a id="tocspatchedfollowuprequest"></a>
-
-```json
-{
-  "submitter_follow_up_id": "string",
-  "date_of_followup": "string",
-  "lost_to_followup_reason": "Completed study",
-  "disease_status_at_followup": "Complete remission",
-  "relapse_type": "Distant recurrence/metastasis",
-  "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)Histopathology test (procedure)Assessment of symptom control (procedure)Physical examination procedure (procedure)Tumor marker measurement (procedure)Laboratory data interpretation (procedure)",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": "AJCC 8th edition",
-  "recurrence_t_category": "T0",
-  "recurrence_n_category": "N0",
-  "recurrence_m_category": "M0",
-  "recurrence_stage_group": "Occult Carcinoma",
-  "lost_to_followup": true,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_follow_up_id|string|false|none|none|
-|date_of_followup|string|false|none|none|
-|lost_to_followup_reason|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[LostToFollowupReasonEnum](#schemalosttofollowupreasonenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|disease_status_at_followup|[DiseaseStatusAtFollowupEnum](#schemadiseasestatusatfollowupenum)|false|none|none|
-|relapse_type|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[RelapseTypeEnum](#schemarelapsetypeenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|date_of_relapse|string|false|none|none|
-|method_of_progression_status|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MethodOfProgressionStatusEnum](#schemamethodofprogressionstatusenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|anatomic_site_progression_or_recurrence|string|false|none|none|
-|recurrence_tumour_staging_system|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StagingSystemEnum](#schemastagingsystemenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|recurrence_t_category|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|recurrence_n_category|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[NCategoryEnum](#schemancategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|recurrence_m_category|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MCategoryEnum](#schemamcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|recurrence_stage_group|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StageGroupEnum](#schemastagegroupenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|lost_to_followup|boolean¦null|false|none|none|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-|submitter_primary_diagnosis_id|string¦null|false|none|none|
-|submitter_treatment_id|string¦null|false|none|none|
-
-<h2 id="tocS_PatchedHormoneTherapyRequest">PatchedHormoneTherapyRequest</h2>
-
-<a id="schemapatchedhormonetherapyrequest"></a>
-<a id="schema_PatchedHormoneTherapyRequest"></a>
-<a id="tocSpatchedhormonetherapyrequest"></a>
-<a id="tocspatchedhormonetherapyrequest"></a>
-
-```json
-{
-  "chemotherapy_dosage_units": "mg/m2",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "hormone_drug_dosage_units": "string",
-  "cumulative_drug_dosage_prescribed": 32767,
-  "cumulative_drug_dosage_actual": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|chemotherapy_dosage_units|[ChemotherapyDosageUnitsEnum](#schemachemotherapydosageunitsenum)|false|none|none|
-|drug_name|string|false|none|none|
-|drug_rxnormcui|string|false|none|none|
-|hormone_drug_dosage_units|string|false|none|none|
-|cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
-|cumulative_drug_dosage_actual|integer¦null|false|none|none|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-|submitter_treatment_id|string|false|none|none|
-
-<h2 id="tocS_PatchedImmunotherapyRequest">PatchedImmunotherapyRequest</h2>
-
-<a id="schemapatchedimmunotherapyrequest"></a>
-<a id="schema_PatchedImmunotherapyRequest"></a>
-<a id="tocSpatchedimmunotherapyrequest"></a>
-<a id="tocspatchedimmunotherapyrequest"></a>
-
-```json
-{
-  "immunotherapy_type": "Cell-based",
-  "drug_name": "string",
-  "drug_rxnormcui": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|immunotherapy_type|[ImmunotherapyTypeEnum](#schemaimmunotherapytypeenum)|false|none|none|
-|drug_name|string|false|none|none|
-|drug_rxnormcui|string|false|none|none|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-|submitter_treatment_id|string|false|none|none|
-
-<h2 id="tocS_PatchedPrimaryDiagnosisRequest">PatchedPrimaryDiagnosisRequest</h2>
-
-<a id="schemapatchedprimarydiagnosisrequest"></a>
-<a id="schema_PatchedPrimaryDiagnosisRequest"></a>
-<a id="tocSpatchedprimarydiagnosisrequest"></a>
-<a id="tocspatchedprimarydiagnosisrequest"></a>
-
-```json
-{
-  "submitter_primary_diagnosis_id": "string",
-  "date_of_diagnosis": "string",
-  "basis_of_diagnosis": "Clinical investigation",
-  "lymph_nodes_examined_status": "Cannot be determined",
-  "lymph_nodes_examined_method": "Imaging",
-  "clinical_tumour_staging_system": "AJCC 8th edition",
-  "clinical_t_category": "T0",
-  "clinical_n_category": "N0",
-  "clinical_m_category": "M0",
-  "clinical_stage_group": "Occult Carcinoma",
-  "cancer_type_code": "string",
-  "number_lymph_nodes_positive": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|string|false|none|none|
-|date_of_diagnosis|string|false|none|none|
-|basis_of_diagnosis|[BasisOfDiagnosisEnum](#schemabasisofdiagnosisenum)|false|none|none|
-|lymph_nodes_examined_status|[LymphNodesExaminedStatusEnum](#schemalymphnodesexaminedstatusenum)|false|none|none|
-|lymph_nodes_examined_method|[LymphNodesExaminedMethodEnum](#schemalymphnodesexaminedmethodenum)|false|none|none|
-|clinical_tumour_staging_system|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StagingSystemEnum](#schemastagingsystemenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|clinical_t_category|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|clinical_n_category|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[NCategoryEnum](#schemancategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|clinical_m_category|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MCategoryEnum](#schemamcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|clinical_stage_group|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StageGroupEnum](#schemastagegroupenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|cancer_type_code|string|false|none|none|
-|number_lymph_nodes_positive|integer¦null|false|none|none|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-
-<h2 id="tocS_PatchedProgramRequest">PatchedProgramRequest</h2>
-
-<a id="schemapatchedprogramrequest"></a>
-<a id="schema_PatchedProgramRequest"></a>
-<a id="tocSpatchedprogramrequest"></a>
-<a id="tocspatchedprogramrequest"></a>
-
-```json
-{
-  "program_id": "string",
-  "name": "string",
-  "created": "2019-08-24T14:15:22Z",
-  "updated": "2019-08-24T14:15:22Z"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|program_id|string|false|none|none|
-|name|string|false|none|none|
-|created|string(date-time)|false|none|none|
-|updated|string(date-time)|false|none|none|
-
-<h2 id="tocS_PatchedRadiationRequest">PatchedRadiationRequest</h2>
-
-<a id="schemapatchedradiationrequest"></a>
-<a id="schema_PatchedRadiationRequest"></a>
-<a id="tocSpatchedradiationrequest"></a>
-<a id="tocspatchedradiationrequest"></a>
-
-```json
-{
-  "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-  "radiation_therapy_type": "External",
-  "anatomical_site_irradiated": "Cervical lymph node group",
-  "radiation_therapy_fractions": 32767,
-  "radiation_therapy_dosage": 32767,
-  "radiation_boost": true,
-  "reference_radiation_treatment_id": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|radiation_therapy_modality|[RadiationTherapyModalityEnum](#schemaradiationtherapymodalityenum)|false|none|none|
-|radiation_therapy_type|[RadiationTherapyTypeEnum](#schemaradiationtherapytypeenum)|false|none|none|
-|anatomical_site_irradiated|[AnatomicalSiteIrradiatedEnum](#schemaanatomicalsiteirradiatedenum)|false|none|none|
-|radiation_therapy_fractions|integer|false|none|none|
-|radiation_therapy_dosage|integer|false|none|none|
-|radiation_boost|boolean¦null|false|none|none|
-|reference_radiation_treatment_id|string|false|none|none|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-|submitter_treatment_id|string|false|none|none|
-
-<h2 id="tocS_PatchedSampleRegistrationRequest">PatchedSampleRegistrationRequest</h2>
-
-<a id="schemapatchedsampleregistrationrequest"></a>
-<a id="schema_PatchedSampleRegistrationRequest"></a>
-<a id="tocSpatchedsampleregistrationrequest"></a>
-<a id="tocspatchedsampleregistrationrequest"></a>
-
-```json
-{
-  "submitter_sample_id": "string",
-  "gender": "Man",
-  "sex_at_birth": "Male",
-  "specimen_tissue_source": "Amniotic fluid",
-  "tumour_normal_designation": "Normal",
-  "specimen_type": "Cell line - derived from normal",
-  "sample_type": "Amplified DNA",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_sample_id|string|false|none|none|
-|gender|[GenderEnum](#schemagenderenum)|false|none|none|
-|sex_at_birth|[SexAtBirthEnum](#schemasexatbirthenum)|false|none|none|
-|specimen_tissue_source|[SpecimenTissueSourceEnum](#schemaspecimentissuesourceenum)|false|none|none|
-|tumour_normal_designation|[TumourNormalDesignationEnum](#schematumournormaldesignationenum)|false|none|none|
-|specimen_type|[SpecimenTypeEnum](#schemaspecimentypeenum)|false|none|none|
-|sample_type|[SampleTypeEnum](#schemasampletypeenum)|false|none|none|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-|submitter_specimen_id|string|false|none|none|
-
-<h2 id="tocS_PatchedSpecimenRequest">PatchedSpecimenRequest</h2>
-
-<a id="schemapatchedspecimenrequest"></a>
-<a id="schema_PatchedSpecimenRequest"></a>
-<a id="tocSpatchedspecimenrequest"></a>
-<a id="tocspatchedspecimenrequest"></a>
-
-```json
-{
-  "submitter_specimen_id": "string",
-  "pathological_tumour_staging_system": "AJCC 8th edition",
-  "pathological_t_category": "T0",
-  "pathological_n_category": "N0",
-  "pathological_m_category": "M0",
-  "pathological_stage_group": "Occult Carcinoma",
-  "specimen_collection_date": "string",
-  "specimen_storage": "Cut slide",
-  "tumour_histological_type": "string",
-  "specimen_anatomic_location": "string",
-  "reference_pathology_confirmed_diagnosis": "Yes",
-  "reference_pathology_confirmed_tumour_presence": "Yes",
-  "tumour_grading_system": "FNCLCC grading system",
-  "tumour_grade": "Low grade",
-  "percent_tumour_cells_range": "0-19%",
-  "percent_tumour_cells_measurement_method": "Genomics",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|string|false|none|none|
-|pathological_tumour_staging_system|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StagingSystemEnum](#schemastagingsystemenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|pathological_t_category|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|pathological_n_category|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[NCategoryEnum](#schemancategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|pathological_m_category|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MCategoryEnum](#schemamcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|pathological_stage_group|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StageGroupEnum](#schemastagegroupenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|specimen_collection_date|string|false|none|none|
-|specimen_storage|[SpecimenStorageEnum](#schemaspecimenstorageenum)|false|none|none|
-|tumour_histological_type|string|false|none|none|
-|specimen_anatomic_location|string|false|none|none|
-|reference_pathology_confirmed_diagnosis|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[ReferencePathologyEnum](#schemareferencepathologyenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|reference_pathology_confirmed_tumour_presence|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[ReferencePathologyEnum](#schemareferencepathologyenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|tumour_grading_system|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TumourGradingSystemEnum](#schematumourgradingsystemenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|tumour_grade|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TumourGradeEnum](#schematumourgradeenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|percent_tumour_cells_range|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[PercentTumourCellsRangeEnum](#schemapercenttumourcellsrangeenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|percent_tumour_cells_measurement_method|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[PercentTumourCellsMeasurementMethodEnum](#schemapercenttumourcellsmeasurementmethodenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-|submitter_primary_diagnosis_id|string|false|none|none|
-
-<h2 id="tocS_PatchedSurgeryRequest">PatchedSurgeryRequest</h2>
-
-<a id="schemapatchedsurgeryrequest"></a>
-<a id="schema_PatchedSurgeryRequest"></a>
-<a id="tocSpatchedsurgeryrequest"></a>
-<a id="tocspatchedsurgeryrequest"></a>
-
-```json
-{
-  "surgery_type": "Axillary Clearance",
-  "surgery_site": "string",
-  "surgery_location": "Local recurrence",
-  "tumour_focality": "Cannot be assessed",
-  "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
-  "lymphovascular_invasion": "Absent",
-  "perineural_invasion": "Absent",
-  "tumour_length": 32767,
-  "tumour_width": 32767,
-  "greatest_dimension_tumour": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|surgery_type|[SurgeryTypeEnum](#schemasurgerytypeenum)|false|none|none|
-|surgery_site|string|false|none|none|
-|surgery_location|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[SurgeryLocationEnum](#schemasurgerylocationenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|tumour_focality|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TumourFocalityEnum](#schematumourfocalityenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|residual_tumour_classification|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[ResidualTumourClassificationEnum](#schemaresidualtumourclassificationenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|margin_types_involved|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MarginTypesEnum](#schemamargintypesenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|margin_types_not_involved|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MarginTypesEnum](#schemamargintypesenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|margin_types_not_assessed|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MarginTypesEnum](#schemamargintypesenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|lymphovascular_invasion|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[LymphovascularInvasionEnum](#schemalymphovascularinvasionenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|perineural_invasion|any|false|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[PerineuralInvasionEnum](#schemaperineuralinvasionenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|tumour_length|integer¦null|false|none|none|
-|tumour_width|integer¦null|false|none|none|
-|greatest_dimension_tumour|integer¦null|false|none|none|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-|submitter_specimen_id|string¦null|false|none|none|
-|submitter_treatment_id|string|false|none|none|
-
-<h2 id="tocS_PatchedTreatmentRequest">PatchedTreatmentRequest</h2>
-
-<a id="schemapatchedtreatmentrequest"></a>
-<a id="schema_PatchedTreatmentRequest"></a>
-<a id="tocSpatchedtreatmentrequest"></a>
-<a id="tocspatchedtreatmentrequest"></a>
-
-```json
-{
-  "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
-  "is_primary_treatment": "Yes",
-  "treatment_start_date": "string",
-  "treatment_end_date": "string",
-  "treatment_setting": "Adjuvant",
-  "treatment_intent": "Curative",
-  "response_to_treatment_criteria_method": "RECIST 1.1",
-  "response_to_treatment": "Complete response",
-  "days_per_cycle": 32767,
-  "number_of_cycles": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_treatment_id|string|false|none|none|
-|treatment_type|[TreatmentTypeEnum](#schematreatmenttypeenum)|false|none|none|
-|is_primary_treatment|[uBooleanEnum](#schemaubooleanenum)|false|none|none|
-|treatment_start_date|string|false|none|none|
-|treatment_end_date|string|false|none|none|
-|treatment_setting|[TreatmentSettingEnum](#schematreatmentsettingenum)|false|none|none|
-|treatment_intent|[TreatmentIntentEnum](#schematreatmentintentenum)|false|none|none|
-|response_to_treatment_criteria_method|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|false|none|none|
-|response_to_treatment|[ResponseToTreatmentEnum](#schemaresponsetotreatmentenum)|false|none|none|
-|days_per_cycle|integer¦null|false|none|none|
-|number_of_cycles|integer¦null|false|none|none|
-|program_id|string|false|none|none|
-|submitter_donor_id|string|false|none|none|
-|submitter_primary_diagnosis_id|string|false|none|none|
 
 <h2 id="tocS_PercentTumourCellsMeasurementMethodEnum">PercentTumourCellsMeasurementMethodEnum</h2>
 
@@ -6846,137 +5161,6 @@ continued
 <a id="schema_PrimaryDiagnosis"></a>
 <a id="tocSprimarydiagnosis"></a>
 <a id="tocsprimarydiagnosis"></a>
-
-```json
-{
-  "submitter_primary_diagnosis_id": "string",
-  "date_of_diagnosis": "string",
-  "basis_of_diagnosis": "Clinical investigation",
-  "lymph_nodes_examined_status": "Cannot be determined",
-  "lymph_nodes_examined_method": "Imaging",
-  "clinical_tumour_staging_system": "AJCC 8th edition",
-  "clinical_t_category": "T0",
-  "clinical_n_category": "N0",
-  "clinical_m_category": "M0",
-  "clinical_stage_group": "Occult Carcinoma",
-  "cancer_type_code": "string",
-  "number_lymph_nodes_positive": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_primary_diagnosis_id|string|true|none|none|
-|date_of_diagnosis|string|true|none|none|
-|basis_of_diagnosis|[BasisOfDiagnosisEnum](#schemabasisofdiagnosisenum)|true|none|none|
-|lymph_nodes_examined_status|[LymphNodesExaminedStatusEnum](#schemalymphnodesexaminedstatusenum)|true|none|none|
-|lymph_nodes_examined_method|[LymphNodesExaminedMethodEnum](#schemalymphnodesexaminedmethodenum)|true|none|none|
-|clinical_tumour_staging_system|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StagingSystemEnum](#schemastagingsystemenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|clinical_t_category|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|clinical_n_category|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[NCategoryEnum](#schemancategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|clinical_m_category|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MCategoryEnum](#schemamcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|clinical_stage_group|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StageGroupEnum](#schemastagegroupenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|cancer_type_code|string|true|none|none|
-|number_lymph_nodes_positive|integer¦null|false|none|none|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-
-<h2 id="tocS_PrimaryDiagnosisRequest">PrimaryDiagnosisRequest</h2>
-
-<a id="schemaprimarydiagnosisrequest"></a>
-<a id="schema_PrimaryDiagnosisRequest"></a>
-<a id="tocSprimarydiagnosisrequest"></a>
-<a id="tocsprimarydiagnosisrequest"></a>
 
 ```json
 {
@@ -7221,32 +5405,6 @@ continued
 |created|string(date-time)|false|none|none|
 |updated|string(date-time)|false|none|none|
 
-<h2 id="tocS_ProgramRequest">ProgramRequest</h2>
-
-<a id="schemaprogramrequest"></a>
-<a id="schema_ProgramRequest"></a>
-<a id="tocSprogramrequest"></a>
-<a id="tocsprogramrequest"></a>
-
-```json
-{
-  "program_id": "string",
-  "name": "string",
-  "created": "2019-08-24T14:15:22Z",
-  "updated": "2019-08-24T14:15:22Z"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|program_id|string|true|none|none|
-|name|string|true|none|none|
-|created|string(date-time)|false|none|none|
-|updated|string(date-time)|false|none|none|
-
 <h2 id="tocS_Radiation">Radiation</h2>
 
 <a id="schemaradiation"></a>
@@ -7276,44 +5434,6 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|integer|false|read-only|none|
-|radiation_therapy_modality|[RadiationTherapyModalityEnum](#schemaradiationtherapymodalityenum)|true|none|none|
-|radiation_therapy_type|[RadiationTherapyTypeEnum](#schemaradiationtherapytypeenum)|true|none|none|
-|anatomical_site_irradiated|[AnatomicalSiteIrradiatedEnum](#schemaanatomicalsiteirradiatedenum)|true|none|none|
-|radiation_therapy_fractions|integer|true|none|none|
-|radiation_therapy_dosage|integer|true|none|none|
-|radiation_boost|boolean¦null|false|none|none|
-|reference_radiation_treatment_id|string|false|none|none|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-|submitter_treatment_id|string|true|none|none|
-
-<h2 id="tocS_RadiationRequest">RadiationRequest</h2>
-
-<a id="schemaradiationrequest"></a>
-<a id="schema_RadiationRequest"></a>
-<a id="tocSradiationrequest"></a>
-<a id="tocsradiationrequest"></a>
-
-```json
-{
-  "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-  "radiation_therapy_type": "External",
-  "anatomical_site_irradiated": "Cervical lymph node group",
-  "radiation_therapy_fractions": 32767,
-  "radiation_therapy_dosage": 32767,
-  "radiation_boost": true,
-  "reference_radiation_treatment_id": "string",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
 |radiation_therapy_modality|[RadiationTherapyModalityEnum](#schemaradiationtherapymodalityenum)|true|none|none|
 |radiation_therapy_type|[RadiationTherapyTypeEnum](#schemaradiationtherapytypeenum)|true|none|none|
 |anatomical_site_irradiated|[AnatomicalSiteIrradiatedEnum](#schemaanatomicalsiteirradiatedenum)|true|none|none|
@@ -7575,44 +5695,6 @@ continued
 |submitter_donor_id|string|true|none|none|
 |submitter_specimen_id|string|true|none|none|
 
-<h2 id="tocS_SampleRegistrationRequest">SampleRegistrationRequest</h2>
-
-<a id="schemasampleregistrationrequest"></a>
-<a id="schema_SampleRegistrationRequest"></a>
-<a id="tocSsampleregistrationrequest"></a>
-<a id="tocssampleregistrationrequest"></a>
-
-```json
-{
-  "submitter_sample_id": "string",
-  "gender": "Man",
-  "sex_at_birth": "Male",
-  "specimen_tissue_source": "Amniotic fluid",
-  "tumour_normal_designation": "Normal",
-  "specimen_type": "Cell line - derived from normal",
-  "sample_type": "Amplified DNA",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_sample_id|string|true|none|none|
-|gender|[GenderEnum](#schemagenderenum)|true|none|none|
-|sex_at_birth|[SexAtBirthEnum](#schemasexatbirthenum)|true|none|none|
-|specimen_tissue_source|[SpecimenTissueSourceEnum](#schemaspecimentissuesourceenum)|true|none|none|
-|tumour_normal_designation|[TumourNormalDesignationEnum](#schematumournormaldesignationenum)|true|none|none|
-|specimen_type|[SpecimenTypeEnum](#schemaspecimentypeenum)|true|none|none|
-|sample_type|[SampleTypeEnum](#schemasampletypeenum)|true|none|none|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-|submitter_specimen_id|string|true|none|none|
-
 <h2 id="tocS_SampleTypeEnum">SampleTypeEnum</h2>
 
 <a id="schemasampletypeenum"></a>
@@ -7678,249 +5760,6 @@ continued
 <a id="schema_Specimen"></a>
 <a id="tocSspecimen"></a>
 <a id="tocsspecimen"></a>
-
-```json
-{
-  "submitter_specimen_id": "string",
-  "pathological_tumour_staging_system": "AJCC 8th edition",
-  "pathological_t_category": "T0",
-  "pathological_n_category": "N0",
-  "pathological_m_category": "M0",
-  "pathological_stage_group": "Occult Carcinoma",
-  "specimen_collection_date": "string",
-  "specimen_storage": "Cut slide",
-  "tumour_histological_type": "string",
-  "specimen_anatomic_location": "string",
-  "reference_pathology_confirmed_diagnosis": "Yes",
-  "reference_pathology_confirmed_tumour_presence": "Yes",
-  "tumour_grading_system": "FNCLCC grading system",
-  "tumour_grade": "Low grade",
-  "percent_tumour_cells_range": "0-19%",
-  "percent_tumour_cells_measurement_method": "Genomics",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_specimen_id|string|true|none|none|
-|pathological_tumour_staging_system|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StagingSystemEnum](#schemastagingsystemenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|pathological_t_category|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|pathological_n_category|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[NCategoryEnum](#schemancategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|pathological_m_category|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MCategoryEnum](#schemamcategoryenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|pathological_stage_group|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[StageGroupEnum](#schemastagegroupenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|specimen_collection_date|string|true|none|none|
-|specimen_storage|[SpecimenStorageEnum](#schemaspecimenstorageenum)|true|none|none|
-|tumour_histological_type|string|true|none|none|
-|specimen_anatomic_location|string|true|none|none|
-|reference_pathology_confirmed_diagnosis|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[ReferencePathologyEnum](#schemareferencepathologyenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|reference_pathology_confirmed_tumour_presence|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[ReferencePathologyEnum](#schemareferencepathologyenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|tumour_grading_system|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TumourGradingSystemEnum](#schematumourgradingsystemenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|tumour_grade|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TumourGradeEnum](#schematumourgradeenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|percent_tumour_cells_range|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[PercentTumourCellsRangeEnum](#schemapercenttumourcellsrangeenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|percent_tumour_cells_measurement_method|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[PercentTumourCellsMeasurementMethodEnum](#schemapercenttumourcellsmeasurementmethodenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-|submitter_primary_diagnosis_id|string|true|none|none|
-
-<h2 id="tocS_SpecimenRequest">SpecimenRequest</h2>
-
-<a id="schemaspecimenrequest"></a>
-<a id="schema_SpecimenRequest"></a>
-<a id="tocSspecimenrequest"></a>
-<a id="tocsspecimenrequest"></a>
 
 ```json
 {
@@ -8443,9 +6282,15 @@ continued
   "surgery_location": "Local recurrence",
   "tumour_focality": "Cannot be assessed",
   "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
+  "margin_types_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_involved": [
+    "Circumferential resection margin"
+  ],
+  "margin_types_not_assessed": [
+    "Circumferential resection margin"
+  ],
   "lymphovascular_invasion": "Absent",
   "perineural_invasion": "Absent",
   "tumour_length": 32767,
@@ -8520,7 +6365,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_involved|any|true|none|none|
+|margin_types_involved|[oneOf]|true|none|none|
 
 oneOf
 
@@ -8538,7 +6383,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_involved|any|true|none|none|
+|margin_types_not_involved|[oneOf]|true|none|none|
 
 oneOf
 
@@ -8556,7 +6401,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_assessed|any|true|none|none|
+|margin_types_not_assessed|[oneOf]|true|none|none|
 
 oneOf
 
@@ -8643,194 +6488,6 @@ continued
 |*anonymous*|Local recurrence|
 |*anonymous*|Metastatic|
 |*anonymous*|Primary|
-
-<h2 id="tocS_SurgeryRequest">SurgeryRequest</h2>
-
-<a id="schemasurgeryrequest"></a>
-<a id="schema_SurgeryRequest"></a>
-<a id="tocSsurgeryrequest"></a>
-<a id="tocssurgeryrequest"></a>
-
-```json
-{
-  "surgery_type": "Axillary Clearance",
-  "surgery_site": "string",
-  "surgery_location": "Local recurrence",
-  "tumour_focality": "Cannot be assessed",
-  "residual_tumour_classification": "Not applicable",
-  "margin_types_involved": "Circumferential resection margin",
-  "margin_types_not_involved": "Circumferential resection margin",
-  "margin_types_not_assessed": "Circumferential resection margin",
-  "lymphovascular_invasion": "Absent",
-  "perineural_invasion": "Absent",
-  "tumour_length": 32767,
-  "tumour_width": 32767,
-  "greatest_dimension_tumour": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_treatment_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|surgery_type|[SurgeryTypeEnum](#schemasurgerytypeenum)|true|none|none|
-|surgery_site|string|true|none|none|
-|surgery_location|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[SurgeryLocationEnum](#schemasurgerylocationenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|tumour_focality|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[TumourFocalityEnum](#schematumourfocalityenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|residual_tumour_classification|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[ResidualTumourClassificationEnum](#schemaresidualtumourclassificationenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|margin_types_involved|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MarginTypesEnum](#schemamargintypesenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|margin_types_not_involved|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MarginTypesEnum](#schemamargintypesenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|margin_types_not_assessed|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[MarginTypesEnum](#schemamargintypesenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|lymphovascular_invasion|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[LymphovascularInvasionEnum](#schemalymphovascularinvasionenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|perineural_invasion|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[PerineuralInvasionEnum](#schemaperineuralinvasionenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|tumour_length|integer¦null|false|none|none|
-|tumour_width|integer¦null|false|none|none|
-|greatest_dimension_tumour|integer¦null|false|none|none|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-|submitter_specimen_id|string¦null|false|none|none|
-|submitter_treatment_id|string|true|none|none|
 
 <h2 id="tocS_SurgeryTypeEnum">SurgeryTypeEnum</h2>
 
@@ -8989,7 +6646,9 @@ continued
 ```json
 {
   "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
+  "treatment_type": [
+    "Ablation"
+  ],
   "is_primary_treatment": "Yes",
   "treatment_start_date": "string",
   "treatment_end_date": "string",
@@ -9011,7 +6670,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_treatment_id|string|true|none|none|
-|treatment_type|[TreatmentTypeEnum](#schematreatmenttypeenum)|true|none|none|
+|treatment_type|[[TreatmentTypeEnum](#schematreatmenttypeenum)]|true|none|none|
 |is_primary_treatment|[uBooleanEnum](#schemaubooleanenum)|true|none|none|
 |treatment_start_date|string|true|none|none|
 |treatment_end_date|string|true|none|none|
@@ -9049,52 +6708,6 @@ continued
 |---|---|
 |*anonymous*|Curative|
 |*anonymous*|Palliative|
-
-<h2 id="tocS_TreatmentRequest">TreatmentRequest</h2>
-
-<a id="schematreatmentrequest"></a>
-<a id="schema_TreatmentRequest"></a>
-<a id="tocStreatmentrequest"></a>
-<a id="tocstreatmentrequest"></a>
-
-```json
-{
-  "submitter_treatment_id": "string",
-  "treatment_type": "Ablation",
-  "is_primary_treatment": "Yes",
-  "treatment_start_date": "string",
-  "treatment_end_date": "string",
-  "treatment_setting": "Adjuvant",
-  "treatment_intent": "Curative",
-  "response_to_treatment_criteria_method": "RECIST 1.1",
-  "response_to_treatment": "Complete response",
-  "days_per_cycle": 32767,
-  "number_of_cycles": 32767,
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_treatment_id|string|true|none|none|
-|treatment_type|[TreatmentTypeEnum](#schematreatmenttypeenum)|true|none|none|
-|is_primary_treatment|[uBooleanEnum](#schemaubooleanenum)|true|none|none|
-|treatment_start_date|string|true|none|none|
-|treatment_end_date|string|true|none|none|
-|treatment_setting|[TreatmentSettingEnum](#schematreatmentsettingenum)|true|none|none|
-|treatment_intent|[TreatmentIntentEnum](#schematreatmentintentenum)|true|none|none|
-|response_to_treatment_criteria_method|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|true|none|none|
-|response_to_treatment|[ResponseToTreatmentEnum](#schemaresponsetotreatmentenum)|true|none|none|
-|days_per_cycle|integer¦null|false|none|none|
-|number_of_cycles|integer¦null|false|none|none|
-|program_id|string|true|none|none|
-|submitter_donor_id|string|true|none|none|
-|submitter_primary_diagnosis_id|string|true|none|none|
 
 <h2 id="tocS_TreatmentSettingEnum">TreatmentSettingEnum</h2>
 
