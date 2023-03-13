@@ -54,7 +54,9 @@ class AuthorizedMixin:
 
     def get_queryset(self):
         authorized_datasets = get_authorized_datasets(self.request)
-        filtered_queryset = super().get_queryset().filter(name__in=authorized_datasets)
+        filtered_queryset = (
+            super().get_queryset().filter(program_id__name__in=authorized_datasets)
+        )
         return filtered_queryset
 
 
