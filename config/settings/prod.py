@@ -1,9 +1,9 @@
-host_container_name = os.environ.get("HOST_CONTAINER_NAME")
+import os
 
-from .base import *
+from .dev import *
 
-if host_container_name:
-    ALLOWED_HOSTS.append(host_container_name)
-    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS))
+DEBUG = False
+
+ALLOWED_HOSTS = [os.environ.get("HOST_CONTAINER_NAME")]
 
 SECRET_KEY = ""
