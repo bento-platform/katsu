@@ -1,12 +1,12 @@
 from .base import *
 
 DEBUG = True
-# Modify this for local development
+
 FAKE_AUTHORIZED_DATASETS = ["SYNTHETIC-POG"]
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
-# CANDIG SETTINGS
+# LOCAL SETTINGS
 KATSU_AUTHORIZATION = "LOCAL_SETTING_NO_AUTH"
 CANDIG_OPA_URL = "LOCAL_SETTING_NO_OPA_URL"
 CANDIG_OPA_SITE_ADMIN_KEY = "LOCAL_SETTING_NO_SITE_ADMIN_KEY"
@@ -16,13 +16,12 @@ INSTALLED_APPS.append("debug_toolbar")
 
 MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "metadata",
-        "USER": "admin",
-        "PASSWORD": "admin",
+        "NAME": "katsu_local",
+        "USER": "admin_local",
+        "PASSWORD": "password_local",
         "HOST": "localhost",
         "PORT": "5432",
     }
