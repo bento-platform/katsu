@@ -40,7 +40,7 @@ DATABASES = {
 }
 
 # Debug toolbar settings
-
+# ----------------------
 if DEBUG:
     import socket
 
