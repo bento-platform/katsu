@@ -1,42 +1,53 @@
 import logging
+import os
 
 from authx.auth import get_opa_datasets
 from django.conf import settings
 
-"""
-    This module contains various utility functions.
-"""
 logger = logging.getLogger(__name__)
 
 
 def get_authorized_datasets(request):
     """
     Returns a list of datasets that the user is authorized to see.
-    NOTE: this function required the OPA service to be running, otherwise it will raise an exception.
+
+    If the Django settings module is set to a development or production environment,
+    this function retrieves the authorized datasets from the OPA service using the
+    authorization header in the request. If the OPA service is not available or if
+    the authorization fails, this function raises a ValueError.
+
+    If the Django settings module is set to a local environment, this function returns
+    a default list of authorized datasets from the Django settings.
+
+    Otherwise, this function raises a ValueError.
     """
-    if settings.KATSU_AUTHORIZATION == "OPA" and "Authorization" in request.headers:
+    settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
+
+    # Check for production or development environment
+    if "dev" in settings_module or "prod" in settings_module:
+        auth_header = request.headers.get("Authorization")
+        if not auth_header:
+            raise ValueError("No authorization header found")
+
         opa_url = settings.CANDIG_OPA_URL
         opa_secret = settings.CANDIG_OPA_SECRET
         try:
-            opa_res_datasets = get_opa_datasets(
+            authorized_datasets = get_opa_datasets(
                 request, opa_url=opa_url, admin_secret=opa_secret
             )
-            return opa_res_datasets
         except Exception as e:
             logging.exception(f"An error occurred in get_authorized_datasets: {e}")
             raise ValueError("Error retrieving authorized datasets")
 
-    if (
-        settings.KATSU_AUTHORIZATION == "LOCAL_SETTING_NO_AUTH"
-        or "Authorization" not in request.headers
-    ):
-        # NOTE: THIS IS FOR LOCAL TESTING ONLY
-        # If the request is not coming from auth stack (i.e. we call the API directly)
-        # then we return a fake authorized dataset list.
+    # Check for local environment
+    elif "local" in settings_module:
+        authorized_datasets = settings.FAKE_AUTHORIZED_DATASETS
         logger.info(
-            f"No authorization header found, using default authorized datasets {settings.FAKE_AUTHORIZED_DATASETS}"
+            f"Local settings detected, using default authorized datasets {authorized_datasets}"
         )
-        return settings.FAKE_AUTHORIZED_DATASETS
 
-    # If none of the above, raise a ValueError
-    raise ValueError("Invalid or missing authorization settings.")
+    # Invalid settings module
+    else:
+        raise ValueError("Invalid or missing authorization settings.")
+
+    return authorized_datasets
