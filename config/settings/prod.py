@@ -1,5 +1,3 @@
-import os
-
 from .dev import *
 
 DEBUG = False
