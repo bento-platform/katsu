@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework",
     "drf_spectacular",
+    "debug_toolbar",
     # Local
     # -----
     "chord_metadata_service.mohpackets.apps.MohpacketsConfig",
@@ -75,6 +76,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -208,6 +210,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# DRF settings
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.BasicAuthentication",
@@ -224,6 +228,8 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {"moh_rate_limit": "60/minute"},
 }
+
+# DRF Spectacular settings
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "MoH Service API",
@@ -265,3 +271,14 @@ SPECTACULAR_SETTINGS = {
         "DosageUnitsEnum": "chord_metadata_service.mohpackets.permissible_values.DOSAGE_UNITS",
     },
 }
+
+# Debug toolbar settings
+
+if DEBUG:
+    import socket
+
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + [
+        "127.0.0.1",
+        "10.0.2.2",
+    ]

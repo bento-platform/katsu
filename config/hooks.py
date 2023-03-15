@@ -7,6 +7,8 @@ def preprocessing_filter_path(endpoints):
     filtered = []
     for (path, path_regex, method, callback) in endpoints:
         # only include endpoints that start with discovery and model
-        if path.startswith("/moh/v1/discovery") or path.startswith("/moh/v1/model"):
+        if path.startswith("/moh/v1/discovery") or path.startswith(
+            "/moh/v1/authorized"
+        ):
             filtered.append((path, path_regex, method, callback))
     return filtered

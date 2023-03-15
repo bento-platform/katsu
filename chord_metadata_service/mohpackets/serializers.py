@@ -32,8 +32,6 @@ from .models import (
     is to specify a model on its Meta attribute. For reference, see:
     https://www.django-rest-framework.org/api-guide/serializers/#modelserializer
 
-    NOTES: There is no validation in the serializers yet. Currently, it will be
-    handled by the ingest process. Additional validations can be added here if needed.
 """
 
 
