@@ -17,7 +17,6 @@ from chord_metadata_service.mohpackets.api_authorized import (
     AuthorizedSpecimenViewSet,
     AuthorizedSurgeryViewSet,
     AuthorizedTreatmentViewSet,
-    moh_overview,
 )
 from chord_metadata_service.mohpackets.api_discovery import (
     DiscoveryBiomarkerViewSet,
@@ -33,6 +32,11 @@ from chord_metadata_service.mohpackets.api_discovery import (
     DiscoverySpecimenViewSet,
     DiscoverySurgeryViewSet,
     DiscoveryTreatmentViewSet,
+    cancer_type_count,
+    cohort_count,
+    gender_count,
+    individual_count,
+    treatment_type_count,
 )
 from chord_metadata_service.mohpackets.api_ingest import (
     delete_all,
@@ -107,10 +111,16 @@ ingest_patterns = [
 ]
 
 urlpatterns = [
-    path("authorized/", include(router.urls)),
+    path("model/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
     path("ingest/", include(ingest_patterns)),
     path("delete/all", delete_all),
     path("version_check", version_check),
-    path("discovery/overview", moh_overview),
+    path("discovery/overview/", include([
+        path("cohort_count", cohort_count),
+        path("individual_count", individual_count),
+        path("gender_count", gender_count),
+        path("cancer_type_count", cancer_type_count),
+        path("treatment_type_count", treatment_type_count),
+    ])),
 ]

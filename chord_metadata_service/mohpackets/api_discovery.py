@@ -1,5 +1,6 @@
-from drf_spectacular.utils import extend_schema, extend_schema_serializer
+from drf_spectacular.utils import extend_schema, extend_schema_serializer, inline_serializer
 from rest_framework import serializers
+from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 
 from chord_metadata_service.mohpackets.api_base import (
@@ -17,6 +18,13 @@ from chord_metadata_service.mohpackets.api_base import (
     BaseSurgeryViewSet,
     BaseTreatmentViewSet,
 )
+from chord_metadata_service.mohpackets.models import (
+    Donor,
+    Program,
+    SampleRegistration,
+    Treatment,
+)
+from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 
 """
     This module inheriting from the base views and adding the discovery mixin,
@@ -61,6 +69,23 @@ class DiscoveryMixin:
         queryset = self.filter_queryset(self.get_queryset())
         count = queryset.values_list("submitter_donor_id").distinct().count()
         return Response({"discovery_donor": count})
+    
+
+def count_terms(terms):
+    """
+    Return a dictionary of counts for every term, used in discovery endpoints.
+    """
+    # Unnest list if nested
+    if isinstance(terms[0], list):
+        terms = sum(terms, []) 
+    
+    counts = {}
+    for term in terms:
+        if term not in counts.keys():
+            counts[term] = 1
+        else:
+            counts[term] += 1
+    return counts
 
 
 ###############################################
@@ -120,3 +145,112 @@ class DiscoveryBiomarkerViewSet(DiscoveryMixin, BaseBiomarkerViewSet):
 
 class DiscoveryComorbidityViewSet(DiscoveryMixin, BaseComorbidityViewSet):
     pass
+
+
+###############################################
+#                                             #
+#       CUSTOM DISCOVERY API ENDPOINTS        #
+#                                             #
+###############################################
+
+@extend_schema(
+    description="MoH Cohorts count",
+    responses={
+        200: inline_serializer(
+            name="moh_overview_cohort_count_response",
+            fields={
+                "cohort_count": serializers.IntegerField(),
+            },
+        )
+    },
+)
+@api_view(["GET"])
+@throttle_classes([MoHRateThrottle])
+def cohort_count(_request):
+    """
+    Return the number of cohorts in the database.
+    """
+    return Response({"cohort_count": Program.objects.count()})
+
+
+@extend_schema(
+    description="MoH Individuals count",
+    responses={
+        200: inline_serializer(
+            name="moh_overview_individual_count_response",
+            fields={
+                "individual_count": serializers.IntegerField(),
+            },
+        )
+    },
+)
+@api_view(["GET"])
+@throttle_classes([MoHRateThrottle])
+def individual_count(_request):
+    """
+    Return the number of indivuals in the database.
+    """
+    return Response({"individual_count": Donor.objects.count()})
+
+
+@extend_schema(
+    description="MoH Gender count",
+    responses={
+        200: inline_serializer(
+            name="moh_overview_gender_count_response",
+            fields={
+                "gender_count": serializers.IntegerField(),
+            },
+        )
+    },
+)
+@api_view(["GET"])
+@throttle_classes([MoHRateThrottle])
+def gender_count(_request):
+    """
+    Return the count for every gender in the database.
+    """
+    genders = SampleRegistration.objects.values_list('gender', flat=True)
+    return Response(count_terms(genders))
+
+
+@extend_schema(
+    description="MoH Cancer types count",
+    responses={
+        200: inline_serializer(
+            name="moh_overview_cancer_type_count_response",
+            fields={
+                "cancer_type_count": serializers.IntegerField(),
+            },
+        )
+    },
+)
+@api_view(["GET"])
+@throttle_classes([MoHRateThrottle])
+def cancer_type_count(_request):
+    """
+    Return the count for every cancer type in the database.
+    """
+    primary_sites = Donor.objects.values_list('primary_site', flat=True)
+    return Response(count_terms(primary_sites))
+
+
+@extend_schema(
+    description="MoH Treatments type count",
+    responses={
+        200: inline_serializer(
+            name="moh_overview_treatment_type_count_response",
+            fields={
+                "treatment_type_count": serializers.IntegerField(),
+            },
+        )
+    },
+)
+@api_view(["GET"])
+@throttle_classes([MoHRateThrottle])
+def treatment_type_count(_request):
+    """
+    Return the count for every treatment type in the database.
+    """
+    treatment_types = Treatment.objects.values_list('treatment_type', flat=True)
+    return Response(count_terms(treatment_types))
