@@ -4,7 +4,12 @@ from os.path import exists
 from .base import *
 
 DEBUG = True
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "docker.localhost"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "docker.localhost",
+    os.environ.get("HOST_CONTAINER_NAME"),
+]
 
 # CANDIG SETTINGS
 KATSU_AUTHORIZATION = os.getenv("KATSU_AUTHORIZATION")
