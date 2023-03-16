@@ -1,3 +1,5 @@
+from collections import Counter
+
 from drf_spectacular.utils import extend_schema, extend_schema_serializer, inline_serializer
 from rest_framework import serializers
 from rest_framework.decorators import api_view, throttle_classes
@@ -73,19 +75,12 @@ class DiscoveryMixin:
 
 def count_terms(terms):
     """
-    Return a dictionary of counts for every term, used in discovery endpoints.
+    Return a dictionary of counts for every term in a list, used in overview endpoints.
     """
     # Unnest list if nested
     if isinstance(terms[0], list):
         terms = sum(terms, []) 
-    
-    counts = {}
-    for term in terms:
-        if term not in counts.keys():
-            counts[term] = 1
-        else:
-            counts[term] += 1
-    return counts
+    return Counter(terms)
 
 
 ###############################################
@@ -149,9 +144,10 @@ class DiscoveryComorbidityViewSet(DiscoveryMixin, BaseComorbidityViewSet):
 
 ###############################################
 #                                             #
-#       CUSTOM DISCOVERY API ENDPOINTS        #
+#        CUSTOM OVERVIEW API ENDPOINTS        #
 #                                             #
 ###############################################
+
 
 @extend_schema(
     description="MoH Cohorts count",
