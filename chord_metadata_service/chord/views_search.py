@@ -305,47 +305,8 @@ def mcodepacket_query_results(query, params, options=None):
     return queryset
 
 
-''' def phenopacket_query_results(query, params, options=None):
-    queryset = Phenopacket.objects \
-        .filter(id__in=data_type_results(query, params, "id"))
-
-    output_format = options.get("output") if options else None
-    if output_format == OUTPUT_FORMAT_VALUES_LIST:
-        return get_values_list(queryset, options)
-
-    if output_format == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
-        fields = ["subject_id"]
-        if "add_field" in options:
-            fields.append(options["add_field"])
-
-        # Results displayed as 4/5 columns:
-        # "individuals ID", "table ID" (optional), [Alternate ids list], number of experiments, [Biosamples list...]
-        return queryset.values(
-                *fields,
-                alternate_ids=Coalesce(F("subject__alternate_ids"), [])
-            ).annotate(
-                # Weird bug with Django 4.1 here: num_experiments must come before the use of ArrayAgg or biosamples
-                # is considered as an ArrayField...
-                num_experiments=Count("biosamples__experiment"),
-                # Postgre specific: aggregates multiple values in a list
-                biosamples=Coalesce(
-                    ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
-                    []
-                )
-            )
-
-    # To expand further on this query : the select_related call
-    # will join on these tables we'd call anyway, thus 2 less request
-    # to the DB. prefetch_related works on M2M relationships and makes
-    # sure that, for instance, when querying diseases, we won't make multiple call
-    # for the same set of data
-    return queryset.select_related(*PHENOPACKET_SELECT_REL) \
-        .prefetch_related(*PHENOPACKET_PREFETCH) '''
-
 def retrieve_simple_filter():
-    #e_type= Coalesce(ArrayAgg("biosamples__experiment__experiment_type",filter=Q(biosamples__experiment__experiment_type__isnull=False)),[])
     i_type = Coalesce(ArrayAgg("biosamples__experiment__id", filter=Q(biosamples__experiment__id__isnull=False)), [])
-    # print(type(i_type), "type")
     return i_type
 
 def phenopacket_query_results(query, params, options=None):
