@@ -10,7 +10,7 @@ COMORBID_CONDITION = customize_schema(
     second_typeof=ONTOLOGY_CLASS,
     first_property="clinical_status",
     second_property="code",
-    schema_id="chord_metadata_service:comorbid_condition_schema",
+    schema_id="katsu:comorbid_condition_schema",
     title="Comorbid Condition schema",
     description="Comorbid condition schema."
 )

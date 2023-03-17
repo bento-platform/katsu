@@ -262,11 +262,16 @@ METADATA_WORKFLOWS = {
                     "id": "cbioportal_archive",
                     "type": "file",
                     "map_from_input": "dataset_id",
-                    "value": "{}.tar"
+                    "value": "{}.tar",
                 }
             ]
         }
     }
 }
+
+# Tag all workflows with their purpose (ingestion/analysis/export)
+for purpose, workflows in METADATA_WORKFLOWS.items():
+    for wf in workflows.values():
+        wf["purpose"] = purpose
 
 WORKFLOWS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "wdls")

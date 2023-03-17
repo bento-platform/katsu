@@ -50,7 +50,8 @@ Katsu Metadata Service is a service to store epigenomic metadata.
     * Data model: [mCODE data elements](https://mcodeinitiative.org/)
 
 4. Experiments service handles experiment related data.
-    * Data model: derived from [IHEC Metadata Experiment](https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments)
+    * Data model: derived from 
+      [IHEC Metadata Experiment](https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments)
 
 5. Resources service handles metadata about ontologies used for data annotation.
     * Data model: derived from Phenopackets Resource profile
@@ -63,7 +64,8 @@ Katsu Metadata Service is a service to store epigenomic metadata.
 
 ## REST API highlights
 
-* Swagger schema docs can be found [here](https://editor.swagger.io/?url=https://raw.githubusercontent.com/bento-platform/katsu/develop/swagger_schema.json).
+* Swagger schema docs can be found 
+  [here](https://editor.swagger.io/?url=https://raw.githubusercontent.com/bento-platform/katsu/develop/swagger_schema.json).
 
 * Standard api delivers data in snake_case.
 To retrieved data in json compliant with phenopackets that uses camelCase append `?format=phenopackets` .
@@ -89,11 +91,12 @@ git submodule update --init
 The service uses PostgreSQL database for data storage.
 
 * Create and activate virtual environment
-* Run: `pip install -r requirements.txt`
+* Install Poetry (for dependency management) in the virtual environment: `pip install poetry`
+* Install dependencies with `poetry install`
 * To configure the application (such as the DB credentials) we are using python-dotenv:
     - Take a look at the .env-sample file at the root of the project
     - You can export these in your virtualenv or simply `cp .env-sample .env`
-    - python-dotenv can handle either (a local .env will override env vars though)
+    - `python-dotenv` can handle either (a local .env will override environment variables though)
 
 
 * Run:
@@ -396,12 +399,13 @@ DJANGO_SETTINGS_MODULE=chord_metadata_service.metadata.settings django-admin she
 ## Configuring public overview and public search fields
 
 There are several public APIs to return data overview and perform a search that returns only objects count.
-The implementation of public APIs relies on a project customized configuration file `config.json` that must be placed in the base directory.
-Currently, there is an `example.config.json` located  in `/katsu/chord_metadata_service` directory which is set to be the project base directory.
-The file can be copied, renamed to `config.json` and modified.
+The implementation of public APIs relies on a project customized configuration file `config.json` that must be placed in 
+the base directory.  Currently, there is an `example.config.json` located  in `/katsu/chord_metadata_service` directory 
+which is set to be the project base directory. The file can be copied, renamed to `config.json` and modified.
 
 The `config.json` contains fields that data providers would like to make open for public access.
-If the `config.json` is not set up/created it means there is no public data and no data will be available via these APIs.
+If the `config.json` is not set up/created it means there is no public data and no data will be available via 
+these APIs.
 
 Refer to the documentation for a detailed description of the config file and
 public API endpoints.
