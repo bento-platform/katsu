@@ -28,7 +28,7 @@ class TokenAuthentication(BaseAuthentication):
                 # )
                 authorized_datasets = get_opa_datasets(request)
             except Exception as e:
-                raise AuthenticationFailed("Error retrieving authorized datasets: {e}")
+                raise AuthenticationFailed(f"Error retrieving authorized datasets: {e}")
 
             # Check if the user is authorized to access any datasets.
             # By default, user has 2 or 5 datasets, so it has to be more than 5.
