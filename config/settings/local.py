@@ -27,6 +27,12 @@ DATABASES = {
     }
 }
 
+LOCAL_AUTHORIZED_DATASET = [
+    {"username": "user1", "datasets": ["SYNTHETIC-POG"]},
+    {"username": "user2", "datasets": ["SYNTHETIC-POG", "SYNTHETIC-BIO-CAN"]},
+]
+
+
 # Debug toolbar settings
 
 if DEBUG:
