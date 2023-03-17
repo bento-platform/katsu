@@ -1,7 +1,11 @@
+import os
+
 from django.db.models import Prefetch
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import mixins, serializers, viewsets
+from rest_framework import mixins, serializers, status, viewsets
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 
 from chord_metadata_service.mohpackets.api_base import (
@@ -19,6 +23,11 @@ from chord_metadata_service.mohpackets.api_base import (
     BaseSpecimenViewSet,
     BaseSurgeryViewSet,
     BaseTreatmentViewSet,
+)
+from chord_metadata_service.mohpackets.authentication import (
+    DevAuthentication,
+    LocalAuthentication,
+    TokenAuthentication,
 )
 from chord_metadata_service.mohpackets.models import Biomarker, Donor, Program
 from chord_metadata_service.mohpackets.serializers_nested import (
@@ -52,6 +61,17 @@ class AuthorizedMixin:
         authorized to see.
     """
 
+    # if settings is local.py, then use LocalAuthentication
+    # else use DevAuthentication
+    settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
+    auth_methods = []
+    # Check for production or development environment
+    if "dev" in settings_module or "prod" in settings_module:
+        auth_methods.append(DevAuthentication)
+    else:
+        auth_methods.append(LocalAuthentication)
+    authentication_classes = auth_methods
+
     def get_queryset(self):
         authorized_datasets = get_authorized_datasets(self.request)
         filtered_queryset = (
@@ -67,12 +87,12 @@ class AuthorizedMixin:
 ##############################################
 
 
-class AuthorizedProgramViewSet(BaseProgramViewSet):
+class AuthorizedProgramViewSet(AuthorizedMixin, BaseProgramViewSet):
     def get_queryset(self):
         """
         Filter by the datasets that the user is authorized to see.
         """
-        authorized_datasets = get_authorized_datasets(self.request)
+        authorized_datasets = self.request.authorized_datasets
         queryset = Program.objects.filter(name__in=authorized_datasets)
         return queryset
 
