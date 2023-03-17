@@ -17,16 +17,16 @@ class TokenAuthentication(BaseAuthentication):
         if not auth:
             raise exceptions.AuthenticationFailed("Authorization required")
         else:
-            # opa_url = settings.CANDIG_OPA_URL
-            # opa_secret = settings.CANDIG_OPA_SECRET
+            opa_url = settings.CANDIG_OPA_URL
+            opa_secret = settings.CANDIG_OPA_SECRET
             # opa_url = "http://docker.localhost:8181"
             # opa_secret = "IWyF4ST38829tuyxLYyYQ"
             # Call the get_opa_datasets function to get the authorized datasets
             try:
-                # authorized_datasets = get_opa_datasets(
-                #     request, opa_url=opa_url, admin_secret=opa_secret
-                # )
-                authorized_datasets = get_opa_datasets(request)
+                authorized_datasets = get_opa_datasets(
+                    request, opa_url=opa_url, admin_secret=opa_secret
+                )
+                # authorized_datasets = get_opa_datasets(request)
             except Exception as e:
                 raise AuthenticationFailed(f"Error retrieving authorized datasets: {e}")
 
