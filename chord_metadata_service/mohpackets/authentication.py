@@ -33,7 +33,9 @@ class TokenAuthentication(BaseAuthentication):
             # Check if the user is authorized to access any datasets.
             # By default, user has 2 or 5 datasets, so it has to be more than 5.
             if len(authorized_datasets) < 6:
-                raise Exception("User is not authorized to access any datasets")
+                raise Exception(
+                    f"Retrieved {authorized_datasets}. User should have access to additional datasets"
+                )
             else:
                 # add dataset to request
                 request.authorized_datasets = authorized_datasets
