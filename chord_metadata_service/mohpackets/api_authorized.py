@@ -25,7 +25,6 @@ from chord_metadata_service.mohpackets.api_base import (
     BaseTreatmentViewSet,
 )
 from chord_metadata_service.mohpackets.authentication import (
-    DevAuthentication,
     LocalAuthentication,
     TokenAuthentication,
 )
@@ -67,7 +66,7 @@ class AuthorizedMixin:
     auth_methods = []
     # Check for production or development environment
     if "dev" in settings_module or "prod" in settings_module:
-        auth_methods.append(DevAuthentication)
+        auth_methods.append(TokenAuthentication)
     else:
         auth_methods.append(LocalAuthentication)
     authentication_classes = auth_methods
