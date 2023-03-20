@@ -11,6 +11,10 @@ ALLOWED_HOSTS = [
     os.environ.get("HOST_CONTAINER_NAME"),
 ]
 
+INSTALLED_APPS.append("debug_toolbar")
+
+MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+
 # CANDIG SETTINGS
 KATSU_AUTHORIZATION = os.getenv("KATSU_AUTHORIZATION")
 CANDIG_OPA_URL = os.getenv("OPA_URL")
