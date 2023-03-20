@@ -1,3 +1,5 @@
+import logging
+
 from authx.auth import get_opa_datasets
 from django.conf import settings
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
@@ -5,6 +7,8 @@ from drf_spectacular.plumbing import build_bearer_security_scheme_object
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed
+
+logger = logging.getLogger(__name__)
 
 
 class TokenAuthentication(BaseAuthentication):
@@ -25,16 +29,19 @@ class TokenAuthentication(BaseAuthentication):
                 # todo: see why this didn't work
                 authorized_datasets = get_opa_datasets(request)
             except Exception as e:
+                logging.exception(f"An error occurred in get_authorized_datasets: {e}")
                 raise AuthenticationFailed(f"Error retrieving authorized datasets: {e}")
 
             # Check if the user is authorized to access any datasets.
             # By default, user has 2 or 5 datasets, so it has to be more than 5.
             if len(authorized_datasets) < 6:
                 # todo: put this in the log
-                raise Exception(
-                    f"Retrieved {authorized_datasets}. User should have access to additional datasets. "
+                logging.exception(
+                    f"Retrieved {authorized_datasets}. "
+                    "User should have access to additional datasets. "
                     "Either token is expired or user is not authorized."
                 )
+                raise Exception(f"User is not authorized to access any datasets. ")
             else:
                 # add dataset to request
                 request.authorized_datasets = authorized_datasets
