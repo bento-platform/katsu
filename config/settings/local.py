@@ -2,8 +2,6 @@ from .base import *
 
 DEBUG = True
 
-FAKE_AUTHORIZED_DATASETS = ["SYNTHETIC-POG"]
-
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 INSTALLED_APPS.append("debug_toolbar")
