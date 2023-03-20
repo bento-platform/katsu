@@ -117,11 +117,9 @@ LOGGING = {
 
 CACHES = {
     "default": {
-        # "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     }
 }
-CACHE_TIME = 0
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
