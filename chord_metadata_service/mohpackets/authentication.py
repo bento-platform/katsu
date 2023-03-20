@@ -42,7 +42,7 @@ class TokenAuthentication(BaseAuthentication):
                 return None
 
     def authenticate_header(self, request):
-        return 'Basic realm="%s"' % self.www_authenticate_realm
+        return None
 
 
 class LocalAuthentication(BaseAuthentication):
