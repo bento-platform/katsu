@@ -4,7 +4,6 @@ from authx.auth import get_opa_datasets
 from django.conf import settings
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from drf_spectacular.plumbing import build_bearer_security_scheme_object
-from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed
 
@@ -24,7 +23,7 @@ class TokenAuthentication(BaseAuthentication):
                 logger.exception(
                     f"An error occurred in OPA get_authorized_datasets: {e}"
                 )
-                raise AuthenticationFailed(f"Error retrieving datasets from OPA.")
+                raise AuthenticationFailed("Error retrieving datasets from OPA.")
 
             # Check if the user is authorized to access any datasets.
             # By default, user has 2 or 5 datasets, so it has to be more than 5.
@@ -33,7 +32,7 @@ class TokenAuthentication(BaseAuthentication):
                     f"Retrieved {authorized_datasets}. "
                     "Either token is expired or user doesn't have any datasets added"
                 )
-                raise Exception(f"User is not authorized to access any datasets.")
+                raise Exception("User is not authorized to access any datasets.")
             else:
                 # add dataset to request
                 request.authorized_datasets = authorized_datasets
