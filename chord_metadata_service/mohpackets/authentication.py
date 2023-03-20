@@ -41,6 +41,9 @@ class TokenAuthentication(BaseAuthentication):
                 request.authorized_datasets = authorized_datasets
                 return None
 
+    def authenticate_header(self, request):
+        return self.keyword
+
 
 class LocalAuthentication(BaseAuthentication):
     def authenticate(self, request):
