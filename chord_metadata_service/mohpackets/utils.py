@@ -1,8 +1,4 @@
 import logging
-import os
-
-from authx.auth import get_opa_datasets
-from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
