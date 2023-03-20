@@ -25,13 +25,13 @@ from chord_metadata_service.mohpackets.models import (
     HormoneTherapy,
     Immunotherapy,
     PrimaryDiagnosis,
+    Program,
     Radiation,
     SampleRegistration,
     Specimen,
     Surgery,
     Treatment,
 )
-from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
 from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
 from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
@@ -71,8 +71,8 @@ class BaseProgramViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = ProgramSerializer
     filterset_class = ProgramFilter
     permission_classes = [CanDIGAdminOrReadOnly]
-    pagination_class = StandardResultsSetPagination
     throttle_classes = [MoHRateThrottle]
+    queryset = Program.objects.all()
 
 
 class BaseDonorViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
