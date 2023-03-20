@@ -33,23 +33,18 @@ class TokenAuthentication(BaseAuthentication):
                     f"Retrieved {authorized_datasets}. "
                     "Either token is expired or user doesn't have any datasets added"
                 )
-                raise AuthenticationFailed(
-                    f"User is not authorized to access any datasets."
-                )
+                raise Exception(f"User is not authorized to access any datasets.")
             else:
                 # add dataset to request
                 request.authorized_datasets = authorized_datasets
                 return None
-
-    def authenticate_header(self, request):
-        return None
 
 
 class LocalAuthentication(BaseAuthentication):
     def authenticate(self, request):
         auth = get_authorization_header(request).split()
         if not auth:
-            raise exceptions.AuthenticationFailed("Authorization required")
+            raise AuthenticationFailed("Authorization required")
         username = auth[1].decode("utf-8")
         # get authorized datasets from local settings
         authorized_datasets = [
