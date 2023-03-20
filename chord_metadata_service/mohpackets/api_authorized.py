@@ -3,7 +3,6 @@ import os
 from django.db.models import Prefetch
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import mixins, serializers, viewsets
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 
@@ -23,14 +22,16 @@ from chord_metadata_service.mohpackets.api_base import (
     BaseSurgeryViewSet,
     BaseTreatmentViewSet,
 )
-from chord_metadata_service.mohpackets.authentication import LocalAuthentication
+from chord_metadata_service.mohpackets.authentication import (
+    LocalAuthentication,
+    TokenAuthentication,
+)
 from chord_metadata_service.mohpackets.models import Biomarker, Donor, Program
 from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
-from chord_metadata_service.mohpackets.utils import get_authorized_datasets
 
 """
     This module inheriting from the base views and adding the authorized mixin,
@@ -71,7 +72,7 @@ class AuthorizedMixin:
     authentication_classes = auth_methods
 
     def get_queryset(self):
-        authorized_datasets = get_authorized_datasets(self.request)
+        authorized_datasets = self.request.authorized_datasets
         filtered_queryset = (
             super().get_queryset().filter(program_id__name__in=authorized_datasets)
         )
@@ -91,8 +92,8 @@ class AuthorizedProgramViewSet(AuthorizedMixin, BaseProgramViewSet):
         Filter by the datasets that the user is authorized to see.
         """
         authorized_datasets = self.request.authorized_datasets
-        queryset = Program.objects.filter(name__in=authorized_datasets)
-        return queryset
+        filtered_queryset = Program.objects.filter(name__in=authorized_datasets)
+        return filtered_queryset
 
 
 class AuthorizedDonorViewSet(AuthorizedMixin, BaseDonorViewSet):
