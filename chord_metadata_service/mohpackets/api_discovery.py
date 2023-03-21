@@ -318,20 +318,20 @@ def diagnosis_age_count(_request):
     age_counts = defaultdict(int)
     for age in ages.values():
         if age <= 19:
-            age_counts['0-19'] += 1
+            age_counts["0-19"] += 1
         elif age <= 29:
-            age_counts['20-29'] += 1
+            age_counts["20-29"] += 1
         elif age <= 39:
-            age_counts['30-39'] += 1
+            age_counts["30-39"] += 1
         elif age <= 49:
-            age_counts['40-49'] += 1
+            age_counts["40-49"] += 1
         elif age <= 59:
-            age_counts['50-59'] += 1
+            age_counts["50-59"] += 1
         elif age <= 69:
-            age_counts['60-69'] += 1
+            age_counts["60-69"] += 1
         elif age <= 79:
-            age_counts['70-79'] += 1
+            age_counts["70-79"] += 1
         else:
-            age_counts['80+'] += 1
+            age_counts["80+"] += 1
 
     return Response(age_counts)
