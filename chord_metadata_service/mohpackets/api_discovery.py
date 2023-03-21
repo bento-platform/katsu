@@ -1,7 +1,6 @@
 from collections import Counter, defaultdict
 from datetime import datetime as dt
 
-from django.db.models import Count, Min
 from drf_spectacular.utils import extend_schema, extend_schema_serializer, inline_serializer
 from rest_framework import serializers
 from rest_framework.decorators import api_view, throttle_classes
@@ -171,6 +170,26 @@ def cohort_count(_request):
     """
     return Response({"cohort_count": Program.objects.count()})
 
+@extend_schema(
+    description="MoH patients per cohort count",
+    responses={
+        200: inline_serializer(
+            name="moh_overview_patient_per_cohort_response",
+            fields={
+                "patients_per_cohort_count": serializers.IntegerField(),
+            },
+        )
+    },
+)
+@api_view(["GET"])
+@throttle_classes([MoHRateThrottle])
+def patient_per_cohort_count(_request):
+    """
+    Return the number of patients per cohort in the database.
+    """
+    cohorts = Donor.objects.values_list("program_id", flat=True)
+    return Response(count_terms(cohorts))
+
 
 @extend_schema(
     description="MoH individuals count",
@@ -289,7 +308,7 @@ def diagnosis_age_count(_request):
     birth_dates = {date["submitter_donor_id"]: date["date_of_birth"] for date in birth_dates}
     ages = {}
     for donor, diagnosis_date in min_dates.items():
-        if birth_dates[donor] in birth_dates.values():
+        if donor in birth_dates.keys():
             birth_date = dt.strptime(birth_dates[donor][:-3], "%Y-%m")
             ages[donor] = (diagnosis_date - birth_date).days // 365.25
         else:

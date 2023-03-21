@@ -35,6 +35,7 @@ from chord_metadata_service.mohpackets.api_discovery import (
     diagnosis_age_count,
     cancer_type_count,
     cohort_count,
+    patient_per_cohort_count,
     gender_count,
     individual_count,
     treatment_type_count,
@@ -119,6 +120,7 @@ urlpatterns = [
     path("version_check", version_check),
     path("discovery/overview/", include([
         path("cohort_count", cohort_count),
+        path("patients_per_cohort", patient_per_cohort_count),
         path("individual_count", individual_count),
         path("gender_count", gender_count),
         path("cancer_type_count", cancer_type_count),
