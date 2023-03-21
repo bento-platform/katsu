@@ -32,6 +32,7 @@ from chord_metadata_service.mohpackets.api_discovery import (
     DiscoverySpecimenViewSet,
     DiscoverySurgeryViewSet,
     DiscoveryTreatmentViewSet,
+    diagnosis_age_count,
     cancer_type_count,
     cohort_count,
     gender_count,
@@ -122,5 +123,6 @@ urlpatterns = [
         path("gender_count", gender_count),
         path("cancer_type_count", cancer_type_count),
         path("treatment_type_count", treatment_type_count),
+        path("diagnosis_age_count", diagnosis_age_count)
     ])),
 ]

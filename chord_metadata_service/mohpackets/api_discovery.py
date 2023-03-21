@@ -1,5 +1,7 @@
-from collections import Counter
+from collections import Counter, defaultdict
+from datetime import datetime as dt
 
+from django.db.models import Count, Min
 from drf_spectacular.utils import extend_schema, extend_schema_serializer, inline_serializer
 from rest_framework import serializers
 from rest_framework.decorators import api_view, throttle_classes
@@ -22,6 +24,7 @@ from chord_metadata_service.mohpackets.api_base import (
 )
 from chord_metadata_service.mohpackets.models import (
     Donor,
+    PrimaryDiagnosis,
     Program,
     SampleRegistration,
     Treatment,
@@ -71,15 +74,15 @@ class DiscoveryMixin:
         queryset = self.filter_queryset(self.get_queryset())
         count = queryset.values_list("submitter_donor_id").distinct().count()
         return Response({"discovery_donor": count})
-    
+
 
 def count_terms(terms):
     """
-    Return a dictionary of counts for every term in a list, used in overview endpoints.
+    Return a dictionary of counts for every term in a list, used in overview endpoints
+    for fields with lists as entries.
     """
-    # Unnest list if nested
-    if isinstance(terms[0], list):
-        terms = sum(terms, []) 
+    if isinstance(terms[0], list):  # Unnest list if nested
+        terms = sum(terms, [])
     return Counter(terms)
 
 
@@ -150,7 +153,7 @@ class DiscoveryComorbidityViewSet(DiscoveryMixin, BaseComorbidityViewSet):
 
 
 @extend_schema(
-    description="MoH Cohorts count",
+    description="MoH cohorts count",
     responses={
         200: inline_serializer(
             name="moh_overview_cohort_count_response",
@@ -170,7 +173,7 @@ def cohort_count(_request):
 
 
 @extend_schema(
-    description="MoH Individuals count",
+    description="MoH individuals count",
     responses={
         200: inline_serializer(
             name="moh_overview_individual_count_response",
@@ -184,13 +187,13 @@ def cohort_count(_request):
 @throttle_classes([MoHRateThrottle])
 def individual_count(_request):
     """
-    Return the number of indivuals in the database.
+    Return the number of individuals in the database.
     """
     return Response({"individual_count": Donor.objects.count()})
 
 
 @extend_schema(
-    description="MoH Gender count",
+    description="MoH gender count",
     responses={
         200: inline_serializer(
             name="moh_overview_gender_count_response",
@@ -206,12 +209,12 @@ def gender_count(_request):
     """
     Return the count for every gender in the database.
     """
-    genders = SampleRegistration.objects.values_list('gender', flat=True)
+    genders = SampleRegistration.objects.values_list("gender", flat=True)
     return Response(count_terms(genders))
 
 
 @extend_schema(
-    description="MoH Cancer types count",
+    description="MoH cancer types count",
     responses={
         200: inline_serializer(
             name="moh_overview_cancer_type_count_response",
@@ -227,8 +230,8 @@ def cancer_type_count(_request):
     """
     Return the count for every cancer type in the database.
     """
-    primary_sites = Donor.objects.values_list('primary_site', flat=True)
-    return Response(count_terms(primary_sites))
+    cancer_types = Donor.objects.values_list("primary_site", flat=True)
+    return Response(count_terms(cancer_types))
 
 
 @extend_schema(
@@ -248,5 +251,67 @@ def treatment_type_count(_request):
     """
     Return the count for every treatment type in the database.
     """
-    treatment_types = Treatment.objects.values_list('treatment_type', flat=True)
+    treatment_types = Treatment.objects.values_list("treatment_type", flat=True)
     return Response(count_terms(treatment_types))
+
+
+@extend_schema(
+    description="MoH Diagnosis age count",
+    responses={
+        200: inline_serializer(
+            name="moh_overview_diagnosis_age_count_response",
+            fields={
+                "age_range_count": serializers.IntegerField(),
+            },
+        )
+    },
+)
+@api_view(["GET"])
+@throttle_classes([MoHRateThrottle])
+def diagnosis_age_count(_request):
+    """
+    Return the count for age of diagnosis in the database.
+    """
+    # Find the earliest diagnosis date per donor
+    diagnosis_dates = PrimaryDiagnosis.objects.values("submitter_donor_id", "date_of_diagnosis")
+    min_dates = {}
+    for date in diagnosis_dates:
+        donor = date["submitter_donor_id"]
+        cur_date = dt.strptime(date["date_of_diagnosis"], "%Y-%m")
+        if donor not in min_dates.keys():
+            min_dates[donor] = cur_date
+        else:
+            if cur_date < min_dates[donor]:
+                min_dates[donor] = cur_date
+    
+    # Calculate donor's age of diagnosis
+    birth_dates = Donor.objects.values("submitter_donor_id", "date_of_birth")
+    birth_dates = {date["submitter_donor_id"]: date["date_of_birth"] for date in birth_dates}
+    ages = {}
+    for donor, diagnosis_date in min_dates.items():
+        if birth_dates[donor] in birth_dates.values():
+            birth_date = dt.strptime(birth_dates[donor][:-3], "%Y-%m")
+            ages[donor] = (diagnosis_date - birth_date).days // 365.25
+        else:
+            ages[donor] = None
+    
+    age_counts = defaultdict(int)
+    for age in ages.values():
+        if age <= 19:
+            age_counts['0-19'] += 1
+        elif age <= 29:
+            age_counts['20-29'] += 1
+        elif age <= 39:
+            age_counts['30-39'] += 1        
+        elif age <= 49:
+            age_counts['40-49'] += 1
+        elif age <= 59:
+            age_counts['50-59'] += 1
+        elif age <= 69:
+            age_counts['60-69'] += 1
+        elif age <= 79:
+            age_counts['70-79'] += 1
+        else:
+            age_counts['80+'] += 1
+
+    return Response(age_counts)
