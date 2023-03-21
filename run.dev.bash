@@ -13,10 +13,7 @@
 python manage.py makemigrations admin auth
 python manage.py migrate
 
-# Set the internal port unless it's been externally configured
-if [[ -z "${INTERNAL_PORT}" ]]; then
-  # Set default internal port to 8000
-  INTERNAL_PORT=8000
-fi
+# Set default internal port to 8000
+: "${INTERNAL_PORT:=8000}"
 
 python manage.py runserver "0.0.0.0:${INTERNAL_PORT}"
