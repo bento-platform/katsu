@@ -3,11 +3,8 @@
 # Set .gitconfig for development
 /set_gitconfig.bash
 
-# Source the development virtual environment
-source /env/bin/activate
-
-# Update dependencies and install module locally (similar to pip install -e: "editable mode")
-poetry install
+# Update dependencies and install module locally
+/poetry_user_install_dev.bash
 
 # Wait for database to start
 ./wait_for_db.bash
