@@ -10,11 +10,12 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import configparser
+
 import datetime
 import os
 import sys
 import django
+import toml
 
 from pathlib import Path
 
@@ -22,21 +23,19 @@ sys.path.insert(0, os.path.abspath('..'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'chord_metadata_service.metadata.settings'
 django.setup()
 
-config = configparser.ConfigParser()
-config.read(os.path.join(Path(os.path.dirname(os.path.realpath(__file__))).parent,
-                         "chord_metadata_service",
-                         "package.cfg"))
+with open(Path(__file__).parent.parent / "pyproject.toml", "r") as cfh:
+    config = toml.load(cfh)
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Katsu Metadata service'
-author = config["package"]["authors"]
+author = ", ".join(config["tool"]["poetry"]["authors"])
 # noinspection PyShadowingBuiltins
 copyright = f"{datetime.datetime.now().year} {author}"
 
 # The full version, including alpha/beta/rc tags
-release = config["package"]["version"]
+release = config["tool"]["poetry"]["version"]
 
 version = ".".join(release.split(".")[:2])
 
@@ -53,7 +52,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**/site-packages/*']
 
 
 # -- Options for HTML output -------------------------------------------------
