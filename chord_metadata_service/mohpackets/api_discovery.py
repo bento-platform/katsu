@@ -170,6 +170,7 @@ def cohort_count(_request):
     """
     return Response({"cohort_count": Program.objects.count()})
 
+
 @extend_schema(
     description="MoH patients per cohort count",
     responses={
@@ -302,7 +303,7 @@ def diagnosis_age_count(_request):
         else:
             if cur_date < min_dates[donor]:
                 min_dates[donor] = cur_date
-    
+
     # Calculate donor's age of diagnosis
     birth_dates = Donor.objects.values("submitter_donor_id", "date_of_birth")
     birth_dates = {date["submitter_donor_id"]: date["date_of_birth"] for date in birth_dates}
@@ -313,7 +314,7 @@ def diagnosis_age_count(_request):
             ages[donor] = (diagnosis_date - birth_date).days // 365.25
         else:
             ages[donor] = None
-    
+
     age_counts = defaultdict(int)
     for age in ages.values():
         if age <= 19:
@@ -321,7 +322,7 @@ def diagnosis_age_count(_request):
         elif age <= 29:
             age_counts['20-29'] += 1
         elif age <= 39:
-            age_counts['30-39'] += 1        
+            age_counts['30-39'] += 1
         elif age <= 49:
             age_counts['40-49'] += 1
         elif age <= 59:
