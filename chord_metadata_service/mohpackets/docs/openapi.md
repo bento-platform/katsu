@@ -5,13 +5,7 @@ This is the RESTful API for the MoH Service.
 
 # Authentication
 
-- HTTP Authentication, scheme: basic
-
-* API Key (cookieAuth)
-    - Parameter Name: **sessionid**, in: cookie. 
-
-* API Key (tokenAuth)
-    - Parameter Name: **Authorization**, in: header. Token-based authentication with required prefix "Token"
+- HTTP Authentication, scheme: bearer
 
 <h1 id="moh-service-api-authorized">authorized</h1>
 
@@ -21,14 +15,17 @@ This is the RESTful API for the MoH Service.
 
 `GET /moh/v1/authorized/biomarkers/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_biomarkers_list-parameters">Parameters</h3>
 
@@ -44,27 +41,34 @@ get_queryset()
 |psa_level|query|integer|false|none|
 |ca125|query|integer|false|none|
 |cea|query|integer|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "id": 0,
-    "test_interval": 32767,
-    "psa_level": 32767,
-    "ca125": 32767,
-    "cea": 32767,
-    "program_id": "string",
-    "submitter_donor_id": "string",
-    "submitter_specimen_id": "string",
-    "submitter_primary_diagnosis_id": "string",
-    "submitter_treatment_id": "string",
-    "submitter_follow_up_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_specimen_id": "string",
+      "submitter_primary_diagnosis_id": "string",
+      "submitter_treatment_id": "string",
+      "submitter_follow_up_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_chemotherapies_list
@@ -73,14 +77,17 @@ get_queryset()
 
 `GET /moh/v1/authorized/chemotherapies/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_chemotherapies_list-parameters">Parameters</h3>
 
@@ -94,25 +101,32 @@ get_queryset()
 |chemotherapy_dosage_units|query|string|false|none|
 |cumulative_drug_dosage_prescribed|query|integer|false|none|
 |cumulative_drug_dosage_actual|query|integer|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "id": 0,
-    "chemotherapy_dosage_units": "mg/m2",
-    "drug_name": "string",
-    "drug_rxnormcui": "string",
-    "cumulative_drug_dosage_prescribed": 32767,
-    "cumulative_drug_dosage_actual": 32767,
-    "program_id": "string",
-    "submitter_donor_id": "string",
-    "submitter_treatment_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "chemotherapy_dosage_units": "mg/m2",
+      "drug_name": "string",
+      "drug_rxnormcui": "string",
+      "cumulative_drug_dosage_prescribed": 32767,
+      "cumulative_drug_dosage_actual": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_comorbidities_list
@@ -121,14 +135,17 @@ get_queryset()
 
 `GET /moh/v1/authorized/comorbidities/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_comorbidities_list-parameters">Parameters</h3>
 
@@ -142,25 +159,32 @@ get_queryset()
 |comorbidity_type_code|query|string|false|none|
 |comorbidity_treatment_status|query|string|false|none|
 |comorbidity_treatment|query|string|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "id": 0,
-    "prior_malignancy": "Yes",
-    "laterality_of_prior_malignancy": "Bilateral",
-    "comorbidity_type_code": "string",
-    "comorbidity_treatment_status": "Yes",
-    "comorbidity_treatment": "string",
-    "age_at_comorbidity_diagnosis": 32767,
-    "program_id": "string",
-    "submitter_donor_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "prior_malignancy": "Yes",
+      "laterality_of_prior_malignancy": "Bilateral",
+      "comorbidity_type_code": "string",
+      "comorbidity_treatment_status": "Yes",
+      "comorbidity_treatment": "string",
+      "age_at_comorbidity_diagnosis": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_donor_with_clinical_data_list
@@ -394,14 +418,17 @@ available in a single database query, improving the performance of the viewset.
 
 `GET /moh/v1/authorized/donors/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_donors_list-parameters">Parameters</h3>
 
@@ -430,25 +457,32 @@ get_queryset()
 |follow_up|query|string|false|none|
 |biomarker|query|string|false|none|
 |comorbidity|query|string|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "submitter_donor_id": "string",
-    "cause_of_death": "Died of cancer",
-    "date_of_birth": "string",
-    "date_of_death": "string",
-    "primary_site": [
-      "Accessory sinuses"
-    ],
-    "is_deceased": true,
-    "program_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_donor_id": "string",
+      "cause_of_death": "Died of cancer",
+      "date_of_birth": "string",
+      "date_of_death": "string",
+      "primary_site": [
+        "Accessory sinuses"
+      ],
+      "is_deceased": true,
+      "program_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_follow_ups_list
@@ -457,14 +491,17 @@ get_queryset()
 
 `GET /moh/v1/authorized/follow_ups/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_follow_ups_list-parameters">Parameters</h3>
 
@@ -488,34 +525,41 @@ get_queryset()
 |recurrence_n_category|query|string|false|none|
 |recurrence_m_category|query|string|false|none|
 |recurrence_stage_group|query|string|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "submitter_follow_up_id": "string",
-    "date_of_followup": "string",
-    "lost_to_followup_reason": "Completed study",
-    "disease_status_at_followup": "Complete remission",
-    "relapse_type": "Distant recurrence/metastasis",
-    "date_of_relapse": "string",
-    "method_of_progression_status": "Imaging (procedure)",
-    "anatomic_site_progression_or_recurrence": "string",
-    "recurrence_tumour_staging_system": "AJCC 8th edition",
-    "recurrence_t_category": "T0",
-    "recurrence_n_category": "N0",
-    "recurrence_m_category": "M0",
-    "recurrence_stage_group": "Occult Carcinoma",
-    "lost_to_followup": true,
-    "program_id": "string",
-    "submitter_donor_id": "string",
-    "submitter_primary_diagnosis_id": "string",
-    "submitter_treatment_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_follow_up_id": "string",
+      "date_of_followup": "string",
+      "lost_to_followup_reason": "Completed study",
+      "disease_status_at_followup": "Complete remission",
+      "relapse_type": "Distant recurrence/metastasis",
+      "date_of_relapse": "string",
+      "method_of_progression_status": "Imaging (procedure)",
+      "anatomic_site_progression_or_recurrence": "string",
+      "recurrence_tumour_staging_system": "AJCC 8th edition",
+      "recurrence_t_category": "T0",
+      "recurrence_n_category": "N0",
+      "recurrence_m_category": "M0",
+      "recurrence_stage_group": "Occult Carcinoma",
+      "lost_to_followup": true,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_primary_diagnosis_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_hormone_therapies_list
@@ -524,14 +568,17 @@ get_queryset()
 
 `GET /moh/v1/authorized/hormone_therapies/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_hormone_therapies_list-parameters">Parameters</h3>
 
@@ -545,25 +592,32 @@ get_queryset()
 |hormone_drug_dosage_units|query|string|false|none|
 |cumulative_drug_dosage_prescribed|query|integer|false|none|
 |cumulative_drug_dosage_actual|query|integer|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "id": 0,
-    "hormone_drug_dosage_units": "mg/m2",
-    "drug_name": "string",
-    "drug_rxnormcui": "string",
-    "cumulative_drug_dosage_prescribed": 32767,
-    "cumulative_drug_dosage_actual": 32767,
-    "program_id": "string",
-    "submitter_donor_id": "string",
-    "submitter_treatment_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "hormone_drug_dosage_units": "mg/m2",
+      "drug_name": "string",
+      "drug_rxnormcui": "string",
+      "cumulative_drug_dosage_prescribed": 32767,
+      "cumulative_drug_dosage_actual": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_immunotherapies_list
@@ -572,14 +626,17 @@ get_queryset()
 
 `GET /moh/v1/authorized/immunotherapies/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_immunotherapies_list-parameters">Parameters</h3>
 
@@ -591,23 +648,30 @@ get_queryset()
 |immunotherapy_type|query|string|false|none|
 |drug_name|query|string|false|none|
 |drug_rxnormcui|query|string|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "id": 0,
-    "immunotherapy_type": "Cell-based",
-    "drug_name": "string",
-    "drug_rxnormcui": "string",
-    "program_id": "string",
-    "submitter_donor_id": "string",
-    "submitter_treatment_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "immunotherapy_type": "Cell-based",
+      "drug_name": "string",
+      "drug_rxnormcui": "string",
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_primary_diagnoses_list
@@ -616,14 +680,17 @@ get_queryset()
 
 `GET /moh/v1/authorized/primary_diagnoses/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_primary_diagnoses_list-parameters">Parameters</h3>
 
@@ -643,30 +710,37 @@ get_queryset()
 |clinical_n_category|query|string|false|none|
 |clinical_m_category|query|string|false|none|
 |clinical_stage_group|query|string|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "submitter_primary_diagnosis_id": "string",
-    "date_of_diagnosis": "string",
-    "basis_of_diagnosis": "Clinical investigation",
-    "lymph_nodes_examined_status": "Cannot be determined",
-    "lymph_nodes_examined_method": "Imaging",
-    "clinical_tumour_staging_system": "AJCC 8th edition",
-    "clinical_t_category": "T0",
-    "clinical_n_category": "N0",
-    "clinical_m_category": "M0",
-    "clinical_stage_group": "Occult Carcinoma",
-    "cancer_type_code": "string",
-    "number_lymph_nodes_positive": 32767,
-    "program_id": "string",
-    "submitter_donor_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_primary_diagnosis_id": "string",
+      "date_of_diagnosis": "string",
+      "basis_of_diagnosis": "Clinical investigation",
+      "lymph_nodes_examined_status": "Cannot be determined",
+      "lymph_nodes_examined_method": "Imaging",
+      "clinical_tumour_staging_system": "AJCC 8th edition",
+      "clinical_t_category": "T0",
+      "clinical_n_category": "N0",
+      "clinical_m_category": "M0",
+      "clinical_stage_group": "Occult Carcinoma",
+      "cancer_type_code": "string",
+      "number_lymph_nodes_positive": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_programs_list
@@ -674,6 +748,18 @@ get_queryset()
 <a id="opIdauthorized_programs_list"></a>
 
 `GET /moh/v1/authorized/programs/`
+
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
+
+Methods
+-------
+get_queryset()
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_programs_list-parameters">Parameters</h3>
 
@@ -712,14 +798,17 @@ get_queryset()
 
 `GET /moh/v1/authorized/radiations/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_radiations_list-parameters">Parameters</h3>
 
@@ -735,27 +824,34 @@ get_queryset()
 |anatomical_site_irradiated|query|string|false|none|
 |radiation_boost|query|boolean|false|none|
 |reference_radiation_treatment_id|query|string|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "id": 0,
-    "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-    "radiation_therapy_type": "External",
-    "anatomical_site_irradiated": "Cervical lymph node group",
-    "radiation_therapy_fractions": 32767,
-    "radiation_therapy_dosage": 32767,
-    "radiation_boost": true,
-    "reference_radiation_treatment_id": "string",
-    "program_id": "string",
-    "submitter_donor_id": "string",
-    "submitter_treatment_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+      "radiation_therapy_type": "External",
+      "anatomical_site_irradiated": "Cervical lymph node group",
+      "radiation_therapy_fractions": 32767,
+      "radiation_therapy_dosage": 32767,
+      "radiation_boost": true,
+      "reference_radiation_treatment_id": "string",
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_sample_registrations_list
@@ -764,14 +860,17 @@ get_queryset()
 
 `GET /moh/v1/authorized/sample_registrations/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_sample_registrations_list-parameters">Parameters</h3>
 
@@ -787,26 +886,33 @@ get_queryset()
 |tumour_normal_designation|query|string|false|none|
 |specimen_type|query|string|false|none|
 |sample_type|query|string|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "submitter_sample_id": "string",
-    "gender": "Man",
-    "sex_at_birth": "Male",
-    "specimen_tissue_source": "Amniotic fluid",
-    "tumour_normal_designation": "Normal",
-    "specimen_type": "Cell line - derived from normal",
-    "sample_type": "Amplified DNA",
-    "program_id": "string",
-    "submitter_donor_id": "string",
-    "submitter_specimen_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_sample_id": "string",
+      "gender": "Man",
+      "sex_at_birth": "Male",
+      "specimen_tissue_source": "Amniotic fluid",
+      "tumour_normal_designation": "Normal",
+      "specimen_type": "Cell line - derived from normal",
+      "sample_type": "Amplified DNA",
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_specimen_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_specimens_list
@@ -815,14 +921,17 @@ get_queryset()
 
 `GET /moh/v1/authorized/specimens/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_specimens_list-parameters">Parameters</h3>
 
@@ -847,35 +956,42 @@ get_queryset()
 |tumour_grade|query|string|false|none|
 |percent_tumour_cells_range|query|string|false|none|
 |percent_tumour_cells_measurement_method|query|string|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "submitter_specimen_id": "string",
-    "pathological_tumour_staging_system": "AJCC 8th edition",
-    "pathological_t_category": "T0",
-    "pathological_n_category": "N0",
-    "pathological_m_category": "M0",
-    "pathological_stage_group": "Occult Carcinoma",
-    "specimen_collection_date": "string",
-    "specimen_storage": "Cut slide",
-    "tumour_histological_type": "string",
-    "specimen_anatomic_location": "string",
-    "reference_pathology_confirmed_diagnosis": "Yes",
-    "reference_pathology_confirmed_tumour_presence": "Yes",
-    "tumour_grading_system": "FNCLCC grading system",
-    "tumour_grade": "Low grade",
-    "percent_tumour_cells_range": "0-19%",
-    "percent_tumour_cells_measurement_method": "Genomics",
-    "program_id": "string",
-    "submitter_donor_id": "string",
-    "submitter_primary_diagnosis_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_specimen_id": "string",
+      "pathological_tumour_staging_system": "AJCC 8th edition",
+      "pathological_t_category": "T0",
+      "pathological_n_category": "N0",
+      "pathological_m_category": "M0",
+      "pathological_stage_group": "Occult Carcinoma",
+      "specimen_collection_date": "string",
+      "specimen_storage": "Cut slide",
+      "tumour_histological_type": "string",
+      "specimen_anatomic_location": "string",
+      "reference_pathology_confirmed_diagnosis": "Yes",
+      "reference_pathology_confirmed_tumour_presence": "Yes",
+      "tumour_grading_system": "FNCLCC grading system",
+      "tumour_grade": "Low grade",
+      "percent_tumour_cells_range": "0-19%",
+      "percent_tumour_cells_measurement_method": "Genomics",
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_primary_diagnosis_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_surgeries_list
@@ -884,14 +1000,17 @@ get_queryset()
 
 `GET /moh/v1/authorized/surgeries/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_surgeries_list-parameters">Parameters</h3>
 
@@ -914,40 +1033,47 @@ get_queryset()
 |margin_types_not_assessed|query|string|false|none|
 |lymphovascular_invasion|query|string|false|none|
 |perineural_invasion|query|string|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "id": 0,
-    "surgery_type": "Axillary Clearance",
-    "surgery_site": "string",
-    "surgery_location": "Local recurrence",
-    "tumour_focality": "Cannot be assessed",
-    "residual_tumour_classification": "Not applicable",
-    "margin_types_involved": [
-      "Circumferential resection margin"
-    ],
-    "margin_types_not_involved": [
-      "Circumferential resection margin"
-    ],
-    "margin_types_not_assessed": [
-      "Circumferential resection margin"
-    ],
-    "lymphovascular_invasion": "Absent",
-    "perineural_invasion": "Absent",
-    "tumour_length": 32767,
-    "tumour_width": 32767,
-    "greatest_dimension_tumour": 32767,
-    "program_id": "string",
-    "submitter_donor_id": "string",
-    "submitter_specimen_id": "string",
-    "submitter_treatment_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "surgery_type": "Axillary Clearance",
+      "surgery_site": "string",
+      "surgery_location": "Local recurrence",
+      "tumour_focality": "Cannot be assessed",
+      "residual_tumour_classification": "Not applicable",
+      "margin_types_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_assessed": [
+        "Circumferential resection margin"
+      ],
+      "lymphovascular_invasion": "Absent",
+      "perineural_invasion": "Absent",
+      "tumour_length": 32767,
+      "tumour_width": 32767,
+      "greatest_dimension_tumour": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_specimen_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
 ```
 
 ## authorized_treatments_list
@@ -956,14 +1082,17 @@ get_queryset()
 
 `GET /moh/v1/authorized/treatments/`
 
-This mixin should be used for viewsets that need to restrict
-access to certain objects based on the user's permissions.
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
 
 Methods
 -------
 get_queryset()
-    Returns a queryset that includes only the objects that the user is
-    authorized to see.
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
 
 <h3 id="authorized_treatments_list-parameters">Parameters</h3>
 
@@ -983,32 +1112,39 @@ get_queryset()
 |number_of_cycles|query|integer|false|none|
 |response_to_treatment_criteria_method|query|string|false|none|
 |response_to_treatment|query|string|false|none|
+|page|query|integer|false|A page number within the paginated result set.|
+|page_size|query|integer|false|Number of results to return per page.|
 
 > Example responses
 
 > 200 Response
 
 ```json
-[
-  {
-    "submitter_treatment_id": "string",
-    "treatment_type": [
-      "Ablation"
-    ],
-    "is_primary_treatment": "Yes",
-    "treatment_start_date": "string",
-    "treatment_end_date": "string",
-    "treatment_setting": "Adjuvant",
-    "treatment_intent": "Curative",
-    "response_to_treatment_criteria_method": "RECIST 1.1",
-    "response_to_treatment": "Complete response",
-    "days_per_cycle": 32767,
-    "number_of_cycles": 32767,
-    "program_id": "string",
-    "submitter_donor_id": "string",
-    "submitter_primary_diagnosis_id": "string"
-  }
-]
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_treatment_id": "string",
+      "treatment_type": [
+        "Ablation"
+      ],
+      "is_primary_treatment": "Yes",
+      "treatment_start_date": "string",
+      "treatment_end_date": "string",
+      "treatment_setting": "Adjuvant",
+      "treatment_intent": "Curative",
+      "response_to_treatment_criteria_method": "RECIST 1.1",
+      "response_to_treatment": "Complete response",
+      "days_per_cycle": 32767,
+      "number_of_cycles": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_primary_diagnosis_id": "string"
+    }
+  ]
+}
 ```
 
 <h1 id="moh-service-api-discovery">discovery</h1>
@@ -4184,6 +4320,324 @@ continued
 |followups|[[NestedFollowUp](#schemanestedfollowup)]|false|read-only|none|
 |biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
 
+<h2 id="tocS_PaginatedBiomarkerList">PaginatedBiomarkerList</h2>
+
+<a id="schemapaginatedbiomarkerlist"></a>
+<a id="schema_PaginatedBiomarkerList"></a>
+<a id="tocSpaginatedbiomarkerlist"></a>
+<a id="tocspaginatedbiomarkerlist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_specimen_id": "string",
+      "submitter_primary_diagnosis_id": "string",
+      "submitter_treatment_id": "string",
+      "submitter_follow_up_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[Biomarker](#schemabiomarker)]|false|none|none|
+
+<h2 id="tocS_PaginatedChemotherapyList">PaginatedChemotherapyList</h2>
+
+<a id="schemapaginatedchemotherapylist"></a>
+<a id="schema_PaginatedChemotherapyList"></a>
+<a id="tocSpaginatedchemotherapylist"></a>
+<a id="tocspaginatedchemotherapylist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "chemotherapy_dosage_units": "mg/m2",
+      "drug_name": "string",
+      "drug_rxnormcui": "string",
+      "cumulative_drug_dosage_prescribed": 32767,
+      "cumulative_drug_dosage_actual": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[Chemotherapy](#schemachemotherapy)]|false|none|none|
+
+<h2 id="tocS_PaginatedComorbidityList">PaginatedComorbidityList</h2>
+
+<a id="schemapaginatedcomorbiditylist"></a>
+<a id="schema_PaginatedComorbidityList"></a>
+<a id="tocSpaginatedcomorbiditylist"></a>
+<a id="tocspaginatedcomorbiditylist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "prior_malignancy": "Yes",
+      "laterality_of_prior_malignancy": "Bilateral",
+      "comorbidity_type_code": "string",
+      "comorbidity_treatment_status": "Yes",
+      "comorbidity_treatment": "string",
+      "age_at_comorbidity_diagnosis": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[Comorbidity](#schemacomorbidity)]|false|none|none|
+
+<h2 id="tocS_PaginatedDonorList">PaginatedDonorList</h2>
+
+<a id="schemapaginateddonorlist"></a>
+<a id="schema_PaginatedDonorList"></a>
+<a id="tocSpaginateddonorlist"></a>
+<a id="tocspaginateddonorlist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_donor_id": "string",
+      "cause_of_death": "Died of cancer",
+      "date_of_birth": "string",
+      "date_of_death": "string",
+      "primary_site": [
+        "Accessory sinuses"
+      ],
+      "is_deceased": true,
+      "program_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[Donor](#schemadonor)]|false|none|none|
+
+<h2 id="tocS_PaginatedFollowUpList">PaginatedFollowUpList</h2>
+
+<a id="schemapaginatedfollowuplist"></a>
+<a id="schema_PaginatedFollowUpList"></a>
+<a id="tocSpaginatedfollowuplist"></a>
+<a id="tocspaginatedfollowuplist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_follow_up_id": "string",
+      "date_of_followup": "string",
+      "lost_to_followup_reason": "Completed study",
+      "disease_status_at_followup": "Complete remission",
+      "relapse_type": "Distant recurrence/metastasis",
+      "date_of_relapse": "string",
+      "method_of_progression_status": "Imaging (procedure)",
+      "anatomic_site_progression_or_recurrence": "string",
+      "recurrence_tumour_staging_system": "AJCC 8th edition",
+      "recurrence_t_category": "T0",
+      "recurrence_n_category": "N0",
+      "recurrence_m_category": "M0",
+      "recurrence_stage_group": "Occult Carcinoma",
+      "lost_to_followup": true,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_primary_diagnosis_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[FollowUp](#schemafollowup)]|false|none|none|
+
+<h2 id="tocS_PaginatedHormoneTherapyList">PaginatedHormoneTherapyList</h2>
+
+<a id="schemapaginatedhormonetherapylist"></a>
+<a id="schema_PaginatedHormoneTherapyList"></a>
+<a id="tocSpaginatedhormonetherapylist"></a>
+<a id="tocspaginatedhormonetherapylist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "hormone_drug_dosage_units": "mg/m2",
+      "drug_name": "string",
+      "drug_rxnormcui": "string",
+      "cumulative_drug_dosage_prescribed": 32767,
+      "cumulative_drug_dosage_actual": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[HormoneTherapy](#schemahormonetherapy)]|false|none|none|
+
+<h2 id="tocS_PaginatedImmunotherapyList">PaginatedImmunotherapyList</h2>
+
+<a id="schemapaginatedimmunotherapylist"></a>
+<a id="schema_PaginatedImmunotherapyList"></a>
+<a id="tocSpaginatedimmunotherapylist"></a>
+<a id="tocspaginatedimmunotherapylist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "immunotherapy_type": "Cell-based",
+      "drug_name": "string",
+      "drug_rxnormcui": "string",
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[Immunotherapy](#schemaimmunotherapy)]|false|none|none|
+
+<h2 id="tocS_PaginatedPrimaryDiagnosisList">PaginatedPrimaryDiagnosisList</h2>
+
+<a id="schemapaginatedprimarydiagnosislist"></a>
+<a id="schema_PaginatedPrimaryDiagnosisList"></a>
+<a id="tocSpaginatedprimarydiagnosislist"></a>
+<a id="tocspaginatedprimarydiagnosislist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_primary_diagnosis_id": "string",
+      "date_of_diagnosis": "string",
+      "basis_of_diagnosis": "Clinical investigation",
+      "lymph_nodes_examined_status": "Cannot be determined",
+      "lymph_nodes_examined_method": "Imaging",
+      "clinical_tumour_staging_system": "AJCC 8th edition",
+      "clinical_t_category": "T0",
+      "clinical_n_category": "N0",
+      "clinical_m_category": "M0",
+      "clinical_stage_group": "Occult Carcinoma",
+      "cancer_type_code": "string",
+      "number_lymph_nodes_positive": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[PrimaryDiagnosis](#schemaprimarydiagnosis)]|false|none|none|
+
 <h2 id="tocS_PaginatedProgramList">PaginatedProgramList</h2>
 
 <a id="schemapaginatedprogramlist"></a>
@@ -4216,6 +4670,231 @@ continued
 |next|string(uri)¦null|false|none|none|
 |previous|string(uri)¦null|false|none|none|
 |results|[[Program](#schemaprogram)]|false|none|none|
+
+<h2 id="tocS_PaginatedRadiationList">PaginatedRadiationList</h2>
+
+<a id="schemapaginatedradiationlist"></a>
+<a id="schema_PaginatedRadiationList"></a>
+<a id="tocSpaginatedradiationlist"></a>
+<a id="tocspaginatedradiationlist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+      "radiation_therapy_type": "External",
+      "anatomical_site_irradiated": "Cervical lymph node group",
+      "radiation_therapy_fractions": 32767,
+      "radiation_therapy_dosage": 32767,
+      "radiation_boost": true,
+      "reference_radiation_treatment_id": "string",
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[Radiation](#schemaradiation)]|false|none|none|
+
+<h2 id="tocS_PaginatedSampleRegistrationList">PaginatedSampleRegistrationList</h2>
+
+<a id="schemapaginatedsampleregistrationlist"></a>
+<a id="schema_PaginatedSampleRegistrationList"></a>
+<a id="tocSpaginatedsampleregistrationlist"></a>
+<a id="tocspaginatedsampleregistrationlist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_sample_id": "string",
+      "gender": "Man",
+      "sex_at_birth": "Male",
+      "specimen_tissue_source": "Amniotic fluid",
+      "tumour_normal_designation": "Normal",
+      "specimen_type": "Cell line - derived from normal",
+      "sample_type": "Amplified DNA",
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_specimen_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[SampleRegistration](#schemasampleregistration)]|false|none|none|
+
+<h2 id="tocS_PaginatedSpecimenList">PaginatedSpecimenList</h2>
+
+<a id="schemapaginatedspecimenlist"></a>
+<a id="schema_PaginatedSpecimenList"></a>
+<a id="tocSpaginatedspecimenlist"></a>
+<a id="tocspaginatedspecimenlist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_specimen_id": "string",
+      "pathological_tumour_staging_system": "AJCC 8th edition",
+      "pathological_t_category": "T0",
+      "pathological_n_category": "N0",
+      "pathological_m_category": "M0",
+      "pathological_stage_group": "Occult Carcinoma",
+      "specimen_collection_date": "string",
+      "specimen_storage": "Cut slide",
+      "tumour_histological_type": "string",
+      "specimen_anatomic_location": "string",
+      "reference_pathology_confirmed_diagnosis": "Yes",
+      "reference_pathology_confirmed_tumour_presence": "Yes",
+      "tumour_grading_system": "FNCLCC grading system",
+      "tumour_grade": "Low grade",
+      "percent_tumour_cells_range": "0-19%",
+      "percent_tumour_cells_measurement_method": "Genomics",
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_primary_diagnosis_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[Specimen](#schemaspecimen)]|false|none|none|
+
+<h2 id="tocS_PaginatedSurgeryList">PaginatedSurgeryList</h2>
+
+<a id="schemapaginatedsurgerylist"></a>
+<a id="schema_PaginatedSurgeryList"></a>
+<a id="tocSpaginatedsurgerylist"></a>
+<a id="tocspaginatedsurgerylist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "id": 0,
+      "surgery_type": "Axillary Clearance",
+      "surgery_site": "string",
+      "surgery_location": "Local recurrence",
+      "tumour_focality": "Cannot be assessed",
+      "residual_tumour_classification": "Not applicable",
+      "margin_types_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_assessed": [
+        "Circumferential resection margin"
+      ],
+      "lymphovascular_invasion": "Absent",
+      "perineural_invasion": "Absent",
+      "tumour_length": 32767,
+      "tumour_width": 32767,
+      "greatest_dimension_tumour": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_specimen_id": "string",
+      "submitter_treatment_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[Surgery](#schemasurgery)]|false|none|none|
+
+<h2 id="tocS_PaginatedTreatmentList">PaginatedTreatmentList</h2>
+
+<a id="schemapaginatedtreatmentlist"></a>
+<a id="schema_PaginatedTreatmentList"></a>
+<a id="tocSpaginatedtreatmentlist"></a>
+<a id="tocspaginatedtreatmentlist"></a>
+
+```json
+{
+  "count": 123,
+  "next": "http://api.example.org/accounts/?page=4",
+  "previous": "http://api.example.org/accounts/?page=2",
+  "results": [
+    {
+      "submitter_treatment_id": "string",
+      "treatment_type": [
+        "Ablation"
+      ],
+      "is_primary_treatment": "Yes",
+      "treatment_start_date": "string",
+      "treatment_end_date": "string",
+      "treatment_setting": "Adjuvant",
+      "treatment_intent": "Curative",
+      "response_to_treatment_criteria_method": "RECIST 1.1",
+      "response_to_treatment": "Complete response",
+      "days_per_cycle": 32767,
+      "number_of_cycles": 32767,
+      "program_id": "string",
+      "submitter_donor_id": "string",
+      "submitter_primary_diagnosis_id": "string"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|count|integer|false|none|none|
+|next|string(uri)¦null|false|none|none|
+|previous|string(uri)¦null|false|none|none|
+|results|[[Treatment](#schematreatment)]|false|none|none|
 
 <h2 id="tocS_PercentTumourCellsMeasurementMethodEnum">PercentTumourCellsMeasurementMethodEnum</h2>
 
