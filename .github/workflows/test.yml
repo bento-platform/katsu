@@ -17,7 +17,6 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9, '3.10']
-        node-version: [16.x]
     services:
       postgres:
         image: postgres:13
@@ -30,7 +29,7 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Set up Python ${{ matrix.python-version }}
