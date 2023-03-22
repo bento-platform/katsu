@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - develop
-      - ${{ github.head_ref || github.ref_name }} 
+      - ${{ github.ref }}
 
 jobs:
   generate-moh-schema:
