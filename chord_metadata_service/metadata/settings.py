@@ -77,11 +77,13 @@ FORCE_SCRIPT_NAME = os.getenv("CHORD_METADATA_SUB_PATH", "")
 KATSU_PHENOPACKET_LABEL = os.getenv("KATSU_PHENOPACKET_LABEL", "Clinical Data")
 
 # Additional allowed hosts, comma-delimited (no spaces!)
-# Use HOST_CONTAINER_NAME as a backup value for backwards compatibility.
+# Use HOST_CONTAINER_NAME as a separate value for backwards compatibility.
 ADDITIONAL_ALLOWED_HOSTS = [
-    v for v in os.environ.get("KATSU_ALLOWED_HOSTS", os.environ.get("HOST_CONTAINER_NAME", "")).split(",")
+    v for v in os.environ.get("KATSU_ALLOWED_HOSTS", "").split(",")
     if v.strip()
 ]
+if container_name := os.environ.get("HOST_CONTAINER_NAME", "").strip():
+    ADDITIONAL_ALLOWED_HOSTS.append(container_name)
 
 CHORD_HOST = urlparse(CHORD_URL or "").netloc
 logging.info(f"CHORD_HOST: {CHORD_HOST}")

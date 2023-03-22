@@ -1,11 +1,14 @@
 from django.urls import path
 
-from . import views_ingest, views_search, views_export
+from . import views_search
+from .export import views as views_export
+from .ingest import views as views_ingest
+from .workflows import views as views_workflow
 
 urlpatterns = [
-    path('workflows', views_ingest.workflow_list, name="workflows"),
-    path('workflows/<slug:workflow_id>', views_ingest.workflow_item, name="workflow-detail"),
-    path('workflows/<slug:workflow_id>.wdl', views_ingest.workflow_file, name="workflow-file"),
+    path('workflows', views_workflow.workflow_list, name="workflows"),
+    path('workflows/<slug:workflow_id>', views_workflow.workflow_item, name="workflow-detail"),
+    path('workflows/<slug:workflow_id>.wdl', views_workflow.workflow_file, name="workflow-file"),
 
     path('private/ingest', views_ingest.ingest, name="ingest"),
     path('private/export', views_export.export, name="export"),

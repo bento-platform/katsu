@@ -1,7 +1,7 @@
 import uuid
 
 from django.test import TestCase
-from chord_metadata_service.chord.views_ingest import TABLE_ID_OVERRIDES
+from chord_metadata_service.chord.ingest.views import TABLE_ID_OVERRIDES
 from dateutil.parser import isoparse
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
