@@ -15,6 +15,7 @@ INDIVIDUAL = {
         "age": "The age or age range of the individual.",
         "sex": "The phenotypic sex of an individual, as would be determined by a midwife or physician at birth.",
         "karyotypic_sex": "The karyotypic sex of an individual.",
+        "gender": "Self-identified gender",
         "taxonomy": ontology_class("specified when more than one organism may be studied. It is advised that codes"
                                    "from the NCBI Taxonomy resource are used, e.g. NCBITaxon:9606 for humans"),
 
