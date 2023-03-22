@@ -6,7 +6,7 @@ on:
       - develop
   pull_request:
     branches:
-      - develop
+      - $default-branch
 
 jobs:
   generate-moh-schema:
