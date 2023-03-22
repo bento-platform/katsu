@@ -188,9 +188,7 @@ def moh_overview(_request):
     )
 
 
-class AuthorizedDonorWithClinicalDataViewSet(
-    mixins.ListModelMixin, viewsets.GenericViewSet
-):
+class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
     """
     This viewset provides access to Donor model and its related clinical data.
     It uses the DonorWithClinicalDataSerializer for serialization.
