@@ -1,10 +1,13 @@
 from chord_metadata_service.restapi.schema_utils import DATE_TIME, DRAFT_07, SCHEMA_TYPES, array_of, base_type, \
-    customize_schema, enum_of, tag_ids_and_describe
+    customize_schema, enum_of, base_schema_uri, tag_ids_and_describe
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA, TIME_ELEMENT_SCHEMA, \
     CURIE_SCHEMA
-
+from pathlib import Path
 from .descriptions import INDIVIDUAL, VITAL_STATUS
 from .values import Sex, KaryotypicSex
+
+
+base_uri = base_schema_uri(Path("/chord_metadata_service/patients"))
 
 
 COMORBID_CONDITION = customize_schema(

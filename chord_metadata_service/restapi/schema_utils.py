@@ -3,6 +3,7 @@ from bento_lib.search import queries as q
 from typing import List, Optional
 from django.db import models
 from jsonschema.validators import RefResolver
+from pathlib import Path
 
 from .description_utils import describe_schema
 
@@ -397,6 +398,19 @@ def named_one_of(prop_name: str, prop_schema: dict):
         },
         "required": [prop_name]
     }
+
+
+def get_schema_base_path(name: str):
+    return Path(f"/chord_metadata_service/{name}")
+
+
+def base_schema_uri(path: Path):
+    # Creates a valid file URI for json-schema
+    return f"{path.as_uri()}/"
+
+
+def sub_schema_uri(base_uri: str, name: str):
+    return f"{base_uri}{name}"
 
 
 DATE_TIME = string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME)
