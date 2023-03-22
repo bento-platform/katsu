@@ -1,7 +1,6 @@
 # Individual schemas for validation of JSONField values
 import json
 import jsonschema
-import os
 from pathlib import Path
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.schemas import RESOURCE_SCHEMA
