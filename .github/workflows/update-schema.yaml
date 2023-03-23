@@ -55,7 +55,7 @@ jobs:
           script: |
             const fs = require('fs');
             const { Octokit } = require('@octokit/rest');
-            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+            const octokit = new Octokit({ auth: "${{ secrets.GITHUB_TOKEN }}" });
 
             // Read the updated files
             const schemaYml = fs.readFileSync('./chord_metadata_service/mohpackets/docs/schema.yml', 'utf8');
