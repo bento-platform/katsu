@@ -54,6 +54,23 @@ class SCHEMA_STRING_FORMATS(Enum):
     IRI_REFERENCE = "iri-reference"
 
 
+def get_schema_base_path(name: str):
+    return Path(f"/chord_metadata_service/{name}")
+
+
+def base_schema_uri(path: Path):
+    # Creates a valid file URI for json-schema
+    return f"{path.as_uri()}/"
+
+
+def sub_schema_uri(base_uri: str, name: str):
+    return f"{base_uri}{name}"
+
+
+base_path = get_schema_base_path(Path(__file__).parent.name)
+base_uri = base_schema_uri(base_path)
+
+
 def merge_schema_dictionaries(dict1: dict, dict2: dict):
     """
     Merges two dictionaries with the ~same structure (in this case, keys that
@@ -171,7 +188,7 @@ def tag_schema_with_nested_ids(schema: dict):
         return {
             **schema,
             "properties": {
-                k: tag_schema_with_nested_ids({**v, "$id": f"{schema_id}:{k}"} if "$id" not in v else v)
+                k: tag_schema_with_nested_ids({**v, "$id": f"{schema_id}/{k}"} if "$id" not in v else v)
                 for k, v in schema["properties"].items()
             },
         } if "properties" in schema else schema
@@ -181,7 +198,7 @@ def tag_schema_with_nested_ids(schema: dict):
             **schema,
             "items": tag_schema_with_nested_ids({
                 **schema["items"],
-                "$id": f"{schema_id}:item",
+                "$id": f"{schema_id}/item",
             } if "$id" not in schema["items"] else schema["items"]),
         } if "items" in schema else schema
 
@@ -334,7 +351,7 @@ def validation_schema_list(schema):
 
     return {
         "$schema": DRAFT_07,
-        "$id": "chord_metadata_service:schema_list",
+        "$id": sub_schema_uri(base_uri, "schema_list"),
         "title": "Schema list",
         "type": "array",
         "items": schema
@@ -398,19 +415,6 @@ def named_one_of(prop_name: str, prop_schema: dict):
         },
         "required": [prop_name]
     }
-
-
-def get_schema_base_path(name: str):
-    return Path(f"/chord_metadata_service/{name}")
-
-
-def base_schema_uri(path: Path):
-    # Creates a valid file URI for json-schema
-    return f"{path.as_uri()}/"
-
-
-def sub_schema_uri(base_uri: str, name: str):
-    return f"{base_uri}{name}"
 
 
 DATE_TIME = string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME)

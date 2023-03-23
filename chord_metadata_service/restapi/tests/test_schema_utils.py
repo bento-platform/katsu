@@ -45,10 +45,10 @@ class TestSchemaMerge(TestCase):
     def test_id_tag(self):
         tagged = tag_schema_with_nested_ids(SCHEMA_1)
 
-        self.assertEqual(tagged["properties"]["key1"]["$id"], "schema1:key1")
-        self.assertEqual(tagged["properties"]["key1"]["items"]["$id"], "schema1:key1:item")
-        self.assertEqual(tagged["properties"]["key2"]["$id"], "schema1:key2")
-        self.assertEqual(tagged["properties"]["key2"]["properties"]["key1"]["$id"], "schema1:key2:key1")
+        self.assertEqual(tagged["properties"]["key1"]["$id"], "schema1/key1")
+        self.assertEqual(tagged["properties"]["key1"]["items"]["$id"], "schema1/key1/item")
+        self.assertEqual(tagged["properties"]["key2"]["$id"], "schema1/key2")
+        self.assertEqual(tagged["properties"]["key2"]["properties"]["key1"]["$id"], "schema1/key2/key1")
 
     def test_id_raises(self):
         with self.assertRaises(ValueError):

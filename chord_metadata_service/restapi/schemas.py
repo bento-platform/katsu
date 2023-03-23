@@ -1,7 +1,8 @@
+from pathlib import Path
 from . import descriptions
 from .description_utils import EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
 from .schema_utils import DATE_TIME, DRAFT_07, SCHEMA_TYPES, base_type, tag_ids_and_describe, \
-    tag_schema_with_nested_ids, named_one_of
+    tag_schema_with_nested_ids, named_one_of, get_schema_base_path, base_schema_uri, sub_schema_uri
 
 # Individual schemas for validation of JSONField values
 
@@ -23,10 +24,12 @@ __all__ = [
 
 # ======================== Phenopackets based schemas =========================
 
+base_path = get_schema_base_path(Path(__file__).parent.name)
+base_uri = base_schema_uri(base_path)
 
 ONTOLOGY_CLASS = tag_ids_and_describe({
     "$schema": DRAFT_07,
-    "$id": "katsu:common:ontology_class",
+    "$id": sub_schema_uri(base_uri, "ontology_class"),
     "title": "Ontology class schema",
     "type": "object",
     "properties": {
@@ -39,7 +42,7 @@ ONTOLOGY_CLASS = tag_ids_and_describe({
 
 ONTOLOGY_CLASS_LIST = {
     "$schema": DRAFT_07,
-    "$id": "katsu:common:ontology_class_list",
+    "$id": sub_schema_uri(base_uri, "ontology_class_list"),
     "title": "Ontology class list",
     "description": "Ontology class list",
     "type": "array",
@@ -48,7 +51,7 @@ ONTOLOGY_CLASS_LIST = {
 
 CURIE_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": "katsu:common:CURIE",
+    "$id": sub_schema_uri(base_uri, "curie"),
     "title": "Curie style string",
     "description": ("A [W3C Compact URI](https://www.w3.org/TR/curie/) formatted string. "
                     "A CURIE string has the structure ``prefix``:``reference``, as defined by the W3C syntax."),
@@ -59,7 +62,7 @@ CURIE_SCHEMA = {
 
 KEY_VALUE_OBJECT = {
     "$schema": DRAFT_07,
-    "$id": "katsu:common:key_value_object",
+    "$id": sub_schema_uri(base_uri, "key_value_object"),
     "title": "Key-value object",
     "description": "The schema represents a key-value object.",
     "type": "object",
@@ -71,20 +74,20 @@ KEY_VALUE_OBJECT = {
 
 EXTRA_PROPERTIES_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
-    "$id": "katsu:common:extra_properties",
+    "$id": sub_schema_uri(base_uri, "extra_properties"),
     "type": "object"
 }, EXTRA_PROPERTIES)
 
 
 AGE_STRING = tag_ids_and_describe({
     "$schema": DRAFT_07,
-    "$id": "katsu:common:age_string",
+    "$id": sub_schema_uri(base_uri, "age_string"),
     "type": "string"
 }, descriptions.AGE)
 
 AGE = tag_ids_and_describe({
     "$schema": DRAFT_07,
-    "$id": "katsu:common:age",
+    "$id": sub_schema_uri(base_uri, "age"),
     "title": "Age schema",
     "type": "object",
     "properties": {
@@ -97,7 +100,7 @@ AGE = tag_ids_and_describe({
 
 AGE_RANGE = tag_ids_and_describe({
     "$schema": DRAFT_07,
-    "$id": "katsu:common:age_range",
+    "$id": sub_schema_uri(base_uri, "age_range"),
     "title": "Age range schema",
     "type": "object",
     "properties": {
@@ -111,7 +114,7 @@ AGE_RANGE = tag_ids_and_describe({
 
 AGE_OR_AGE_RANGE = {
     "$schema": DRAFT_07,
-    "$id": "katsu:common:age_or_age_range",
+    "$id": sub_schema_uri(base_uri, "age_or_age_range"),
     "title": "Age schema",
     "description": "An age object describing the age of the individual at the time of collection of biospecimens or "
                    "phenotypic observations.",
@@ -125,7 +128,7 @@ AGE_OR_AGE_RANGE = {
 
 TIME_INTERVAL = {
     "$schema": DRAFT_07,
-    "$id": "katsu:common:time_interval",
+    "$id": sub_schema_uri(base_uri, "time_interval"),
     "title": "Age schema",
     "description": "An age object describing the age of the individual at the time of collection of biospecimens or "
                    "phenotypic observations.",
@@ -141,7 +144,7 @@ TIME_INTERVAL = {
 
 DISEASE_ONSET = {
     "$schema": DRAFT_07,
-    "$id": "katsu:common:disease_onset",
+    "$id": sub_schema_uri(base_uri, "disease_onset"),
     "title": "Onset age",
     "description": "Schema for the age of the onset of the disease.",
     "type": "object",
@@ -155,7 +158,7 @@ DISEASE_ONSET = {
 
 GESTATIONAL_AGE = tag_ids_and_describe({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:gestational_age",
+    "$id": sub_schema_uri(base_uri, "gestational_age"),
     "title": "Gestational age schema",
     "type": "object",
     "properties": {
@@ -168,7 +171,7 @@ GESTATIONAL_AGE = tag_ids_and_describe({
 
 TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
-    "$id": "katsu:phenopackets:time_element",
+    "$id": sub_schema_uri(base_uri, "time_element"),
     "title": "Time element schema",
     "type": "object",
     "oneOf": [
@@ -188,7 +191,7 @@ TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
 
 FHIR_BUNDLE_SCHEMA = tag_schema_with_nested_ids({
     "$schema": DRAFT_07,
-    "$id": "katsu:common:fhir_bundle",
+    "$id": sub_schema_uri(base_uri, "fhir_bundle"),
     "description": "FHIR Bundle schema",
     "type": "object",
     "properties": {

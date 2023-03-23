@@ -221,7 +221,7 @@ PHENOPACKET_TYPED_QUANTITY_SCHEMA = {
 
 PHENOPACKET_VALUE_SCHEMA = {
     "$schema": DRAFT_07,
-    # "$id": pheno_base_uri("value"),
+    "$id": sub_schema_uri(base_uri, "value"),
     "title": "Value schema",
     "type": "object",
     "oneOf": [

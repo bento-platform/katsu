@@ -1,14 +1,17 @@
+from pathlib import Path
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
-from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe
-
+from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, get_schema_base_path, base_schema_uri, \
+    sub_schema_uri
 
 __all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
 
+base_path = get_schema_base_path(Path(__file__).parent.name)
+base_uri = base_schema_uri(base_path)
 
 EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:experiments:experiment_result",
+    "$id": sub_schema_uri(base_uri, "experiment_result"),
     "title": "Experiment result schema",
     "description": "Schema for describing information about analysis of sequencing data in a file format.",
     "type": "object",
@@ -51,7 +54,7 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
 
 INSTRUMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:experiments:instrument",
+    "$id": sub_schema_uri(base_uri, "instrument"),
     "title": "Instrument schema",
     "description": "Schema for describing an instrument used for a sequencing experiment.",
     "type": "object",
@@ -75,7 +78,7 @@ INSTRUMENT_SCHEMA = tag_ids_and_describe({
 
 EXPERIMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:experiments:experiment",
+    "$id": sub_schema_uri(base_uri, "experiment"),
     "title": "Experiment schema",
     "description": "Schema for describing an experiment.",
     "type": "object",

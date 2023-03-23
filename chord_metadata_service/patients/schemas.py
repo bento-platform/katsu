@@ -1,5 +1,5 @@
 from chord_metadata_service.restapi.schema_utils import DATE_TIME, DRAFT_07, SCHEMA_TYPES, array_of, base_type, \
-    customize_schema, enum_of, base_schema_uri, tag_ids_and_describe
+    customize_schema, enum_of, base_schema_uri, tag_ids_and_describe, get_schema_base_path, sub_schema_uri
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA, TIME_ELEMENT_SCHEMA, \
     CURIE_SCHEMA
 from pathlib import Path
@@ -7,7 +7,8 @@ from .descriptions import INDIVIDUAL, VITAL_STATUS
 from .values import Sex, KaryotypicSex
 
 
-base_uri = base_schema_uri(Path("/chord_metadata_service/patients"))
+base_path = get_schema_base_path(Path(__file__).parent.name)
+base_uri = base_schema_uri(base_path)
 
 
 COMORBID_CONDITION = customize_schema(
@@ -22,7 +23,7 @@ COMORBID_CONDITION = customize_schema(
 
 VITAL_STATUS_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
-    "$id": "katsu:patients:individual",
+    "$id": sub_schema_uri(base_uri, "vital_status"),
     "type": "object",
     "properties": {
         "status": enum_of(["UNKNOWN_STATUS", "ALIVE", "DECEASED"]),
@@ -35,7 +36,7 @@ VITAL_STATUS_SCHEMA = tag_ids_and_describe({
 
 INDIVIDUAL_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
-    "$id": "katsu:patients:individual",
+    "$id": sub_schema_uri(base_uri, "individual"),
     "type": "object",
     "properties": {
         # Phenopacket V2 Individual fields

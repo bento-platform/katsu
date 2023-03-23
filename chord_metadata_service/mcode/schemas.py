@@ -1,12 +1,19 @@
+from pathlib import Path
 from chord_metadata_service.restapi.schema_utils import (
     customize_schema,
     tag_schema_with_nested_ids,
     tag_ids_and_describe,
+    base_schema_uri,
+    get_schema_base_path,
+    sub_schema_uri
 )
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ONTOLOGY_CLASS_LIST, EXTRA_PROPERTIES_SCHEMA
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_GENE_SCHEMA
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from . import descriptions as d
+
+base_path = get_schema_base_path(Path(__file__).parent.name)
+base_uri = base_schema_uri(base_path)
 
 # ========================= mCode/FHIR based schemas =========================
 
@@ -15,7 +22,7 @@ from . import descriptions as d
 # FHIR Quantity https://www.hl7.org/fhir/datatypes.html#Quantity
 QUANTITY = tag_schema_with_nested_ids({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:quantity",
+    "$id": sub_schema_uri(base_uri, "quantity"),
     "title": "Quantity schema",
     "description": "Schema for the datatype Quantity.",
     "type": "object",
@@ -43,7 +50,7 @@ QUANTITY = tag_schema_with_nested_ids({
 # FHIR CodeableConcept https://www.hl7.org/fhir/datatypes.html#CodeableConcept
 CODEABLE_CONCEPT = tag_schema_with_nested_ids({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:codeable_concept",
+    "$id": sub_schema_uri(base_uri, "codeable_concept"),
     "title": "Codeable Concept schema",
     "description": "Schema for the datatype Concept.",
     "type": "object",
@@ -71,7 +78,7 @@ CODEABLE_CONCEPT = tag_schema_with_nested_ids({
 # FHIR Period https://www.hl7.org/fhir/datatypes.html#Period
 PERIOD = tag_schema_with_nested_ids({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:period",
+    "$id": sub_schema_uri(base_uri, "period"),
     "title": "Period",
     "description": "Period schema.",
     "type": "object",
@@ -91,7 +98,7 @@ PERIOD = tag_schema_with_nested_ids({
 # FHIR Ratio https://www.hl7.org/fhir/datatypes.html#Ratio
 RATIO = tag_schema_with_nested_ids({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:ratio",
+    "$id": sub_schema_uri(base_uri, "ratio"),
     "title": "Ratio",
     "description": "Ratio schema.",
     "type": "object",
@@ -106,7 +113,7 @@ RATIO = tag_schema_with_nested_ids({
 
 TIME_OR_PERIOD = tag_schema_with_nested_ids({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:time_or_period",
+    "$id": sub_schema_uri(base_uri, "time_or_period"),
     "title": "Time of Period",
     "description": "Time of Period schema.",
     "type": "object",
@@ -123,7 +130,7 @@ TIME_OR_PERIOD = tag_schema_with_nested_ids({
 
 TUMOR_MARKER_DATA_VALUE = tag_schema_with_nested_ids({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:tumor_marker_data_value",
+    "$id": sub_schema_uri(base_uri, "tumor_marker_data_value"),
     "title": "Tumor marker data value",
     "description": "Tumor marker data value schema.",
     "type": "object",
@@ -145,7 +152,7 @@ COMPLEX_ONTOLOGY = customize_schema(
     second_typeof=ONTOLOGY_CLASS,
     first_property="data_value",
     second_property="staging_system",
-    schema_id="katsu:mcode:complex_ontology",
+    schema_id=sub_schema_uri(base_uri, "complex_ontology"),
     title="Complex ontology",
     description="Complex object to combine data value and staging system.",
     required=["data_value"]
@@ -157,7 +164,7 @@ COMPLEX_ONTOLOGY = customize_schema(
 
 MCODE_GENETIC_SPECIMEN_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:genetic_specimen",
+    "$id": sub_schema_uri(base_uri, "genetic_specimen"),
     "type": "object",
     "properties": {
         "id": {
@@ -174,7 +181,7 @@ MCODE_GENETIC_SPECIMEN_SCHEMA = tag_ids_and_describe({
 
 MCODE_CANCER_GENETIC_VARIANT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:cancer_genetic_variant",
+    "$id": sub_schema_uri(base_uri, "cancer_genetic_variant"),
     "type": "object",
     "properties": {
         "id": {
@@ -203,7 +210,7 @@ MCODE_CANCER_GENETIC_VARIANT_SCHEMA = tag_ids_and_describe({
 
 MCODE_GENOMIC_REGION_STUDIED_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:genomic_region_studied",
+    "$id": sub_schema_uri(base_uri, "genomic_region_studied"),
     "type": "object",
     "properties": {
         "id": {
@@ -230,7 +237,7 @@ MCODE_GENOMIC_REGION_STUDIED_SCHEMA = tag_ids_and_describe({
 
 MCODE_GENOMICS_REPORT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:genomics_report",
+    "$id": sub_schema_uri(base_uri, "genomics_report"),
     "type": "object",
     "properties": {
         "id": {
@@ -258,7 +265,7 @@ MCODE_GENOMICS_REPORT_SCHEMA = tag_ids_and_describe({
 
 MCODE_LABS_VITAL_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:labs_vital",
+    "$id": sub_schema_uri(base_uri, "labs_vital"),
     "type": "object",
     "properties": {
         "id": {
@@ -277,7 +284,7 @@ MCODE_LABS_VITAL_SCHEMA = tag_ids_and_describe({
 
 MCODE_TNM_STAGING_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:tnm_staging",
+    "$id": sub_schema_uri(base_uri, "tnm_staging"),
     "type": "object",
     "properties": {
         "id": {
@@ -313,7 +320,7 @@ MCODE_TNM_STAGING_SCHEMA = tag_ids_and_describe({
 
 MCODE_CANCER_CONDITION_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:cancer_condition",
+    "$id": sub_schema_uri(base_uri, "cancer_condition"),
     "type": "object",
     "properties": {
         "id": {
@@ -346,7 +353,7 @@ MCODE_CANCER_CONDITION_SCHEMA = tag_ids_and_describe({
 
 MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:cancer_related_procedure",
+    "$id": sub_schema_uri(base_uri, "cancer_related_procedure"),
     "type": "object",
     "properties": {
         "id": {
@@ -378,7 +385,7 @@ MCODE_CANCER_RELATED_PROCEDURE_SCHEMA = tag_ids_and_describe({
 
 MCODE_MEDICATION_STATEMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:medication",
+    "$id": sub_schema_uri(base_uri, "medication"),
     "type": "object",
     "properties": {
         "id": {
@@ -403,7 +410,7 @@ MCODE_MEDICATION_STATEMENT_SCHEMA = tag_ids_and_describe({
 
 MCODE_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:mcode:mcode",
+    "$id": sub_schema_uri(base_uri, "mcode"),
     "title": "Metadata service customized mcode schema",
     "description": "Schema for describe mcode data elements in metadata service.",
     "type": "object",
