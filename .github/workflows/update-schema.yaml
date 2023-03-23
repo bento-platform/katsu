@@ -3,10 +3,10 @@ name: Docs
 on:
   push:
     branches:
-      - develop
+       - ${{ github.ref }}
   pull_request:
-    branches-ignore:
-      - develop
+    branches:
+       - ${{ github.ref }}
 
 jobs:
   generate-moh-schema:
