@@ -65,10 +65,11 @@ jobs:
             await octokit.repos.createOrUpdateFileContents({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              path: encodeURI('chord_metadata_service/mohpackets/docs/schema.yml'),
+              path: 'chord_metadata_service/mohpackets/docs/schema.yml',
               message: 'Update schema.yml',
               content: Buffer.from(schemaYml).toString('base64'),
-              sha: context.payload.after
+              sha: context.payload.after,
+              branch: ${{ github.name_ref }}
             });
 
 
