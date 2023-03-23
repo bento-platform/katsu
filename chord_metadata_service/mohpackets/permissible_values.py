@@ -720,6 +720,7 @@ MALIGNANCY_LATERALITY = [
     "Right",
     "Unilateral, Side not specified",
     "Unknown",
+    "Unspecified",
 ]
 
 REGEX_PATTERNS = {
