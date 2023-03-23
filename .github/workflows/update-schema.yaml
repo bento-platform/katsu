@@ -47,34 +47,34 @@ jobs:
           npx widdershins ./chord_metadata_service/mohpackets/docs/schema.yml -o ./chord_metadata_service/mohpackets/docs/openapi.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true
 
       - name: Update schema.yml and openapi.md in repo
-          uses: actions/github-script@v6
-          with:
-            script: |
-              const fs = require('fs');
-              const { Octokit } = require('@octokit/rest');
-              const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const { Octokit } = require('@octokit/rest');
+            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-              // Read the updated files
-              const schemaYml = fs.readFileSync('./chord_metadata_service/mohpackets/docs/schema.yml', 'utf8');
-              const openApiMd = fs.readFileSync('./chord_metadata_service/mohpackets/docs/openapi.md', 'utf8');
+            // Read the updated files
+            const schemaYml = fs.readFileSync('./chord_metadata_service/mohpackets/docs/schema.yml', 'utf8');
+            const openApiMd = fs.readFileSync('./chord_metadata_service/mohpackets/docs/openapi.md', 'utf8');
 
-              // Commit and push changes
-              await octokit.repos.createOrUpdateFileContents({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: 'chord_metadata_service/mohpackets/docs/schema.yml',
-                message: 'Update schema.yml',
-                content: Buffer.from(schemaYml).toString('base64'),
-                sha: context.payload.after
-              });
+            // Commit and push changes
+            await octokit.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'chord_metadata_service/mohpackets/docs/schema.yml',
+              message: 'Update schema.yml',
+              content: Buffer.from(schemaYml).toString('base64'),
+              sha: context.payload.after
+            });
 
-              await octokit.repos.createOrUpdateFileContents({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: 'chord_metadata_service/mohpackets/docs/openapi.md',
-                message: 'Update openapi.md',
-                content: Buffer.from(openApiMd).toString('base64'),
-                sha: context.payload.after
-              });
-            env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            await octokit.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'chord_metadata_service/mohpackets/docs/openapi.md',
+              message: 'Update openapi.md',
+              content: Buffer.from(openApiMd).toString('base64'),
+              sha: context.payload.after
+            });
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
