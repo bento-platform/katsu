@@ -2781,7 +2781,6 @@ continued
 |*anonymous*|Right|
 |*anonymous*|Unilateral, Side not specified|
 |*anonymous*|Unknown|
-|*anonymous*|extra|
 
 <h2 id="tocS_LostToFollowupReasonEnum">LostToFollowupReasonEnum</h2>
 
