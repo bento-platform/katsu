@@ -76,5 +76,4 @@ jobs:
               content: Buffer.from(openApiMd).toString('base64'),
               sha: context.payload.after
             });
-          env:
-            GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
