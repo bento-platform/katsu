@@ -2809,6 +2809,7 @@ components:
       - Right
       - Unilateral, Side not specified
       - Unknown
+      - testing_value
       type: string
     LostToFollowupReasonEnum:
       enum:
