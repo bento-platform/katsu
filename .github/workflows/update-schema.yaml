@@ -63,7 +63,7 @@ jobs:
 
             // Commit and push changes
             // Update the file
-            await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+            await octokit.request('PUT /repos/{owner}/{repo}/contents/:path', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               path: 'chord_metadata_service/mohpackets/docs/schema.yml',
