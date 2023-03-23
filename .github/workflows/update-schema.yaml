@@ -51,4 +51,4 @@ jobs:
             chord_metadata_service/mohpackets/docs/openapi.md
           commit-msg: Updated openapi.md
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref_name }}
+          # branch: ${{ github.ref_name }}
