@@ -2,8 +2,6 @@ name: Docs
 
 on:
   push:
-    branches-ignore:
-      - 'develop'
 
 jobs:
   generate-moh-schema:
@@ -53,4 +51,4 @@ jobs:
             chord_metadata_service/mohpackets/docs/openapi.md
           commit-msg: Updated openapi.md
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${GITHUB_REF##*/}
+          branch: ${{ github.ref }}
