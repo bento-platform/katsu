@@ -245,6 +245,16 @@ tox
 coverage html
 ```
 
+### Developing and debugging inside a container with VS Code (*Bento*)
+
+The development Docker image includes metadata for the 
+[`devcontainer.json`](https://code.visualstudio.com/docs/devcontainers/attach-container)
+specification. Using VS Code, you can attach to a running instance of a `*-dev` Katsu container
+and launch the `Attach Debugger (Bento)` task to set breakpoints and step through code, as well
+as interacting with and Git-committing inside the container via a remote terminal using the 
+pre-configured `bento_user` user, if the `BENTO_GIT_NAME` and `BENTO_GIT_EMAIL` environment
+variables are set.
+
 ### Terminal Commands
 
 Katsu ships with a variety of command-line helpers to facilitate common actions
