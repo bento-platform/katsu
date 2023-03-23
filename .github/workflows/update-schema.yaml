@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - develop
-      - ${{ github.ref }}
+  pull_request:
+    branches-ignore:
+      - develop
 
 jobs:
   generate-moh-schema:
