@@ -71,12 +71,4 @@ jobs:
               sha: context.payload.after
             });
 
-            # await octokit.repos.createOrUpdateFileContents({
-            #   owner: context.repo.owner,
-            #   repo: context.repo.repo,
-            #   path: 'chord_metadata_service/mohpackets/docs/openapi.md',
-            #   message: 'Update openapi.md',
-            #   content: Buffer.from(openApiMd).toString('base64'),
-            #   sha: context.payload.after
-            # });
 
