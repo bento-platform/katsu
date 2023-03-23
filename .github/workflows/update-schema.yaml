@@ -62,14 +62,16 @@ jobs:
             const openApiMd = fs.readFileSync('./chord_metadata_service/mohpackets/docs/openapi.md', 'utf8');
 
             // Commit and push changes
-            await octokit.repos.createOrUpdateFileContents({
+            // Update the file
+            await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              path: encodeURI('chord_metadata_service//mohpackets//docs//schema.yml'),
+              path: 'chord_metadata_service/mohpackets/docs/schema.yml',
               message: 'Update schema.yml',
               content: Buffer.from(schemaYml).toString('base64'),
               sha: context.payload.after,
               branch: context.ref
             });
+
 
 
