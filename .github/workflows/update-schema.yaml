@@ -71,7 +71,7 @@ jobs:
               path: 'chord_metadata_service/mohpackets/docs/openapi.md',
               ref: context.ref
             });
-            const openApiData = data.sha;
+            const openApiSha = openApiData.sha;
 
             // Read the updated files
             const schemaYml = fs.readFileSync('./chord_metadata_service/mohpackets/docs/schema.yml', 'utf8');
@@ -94,7 +94,7 @@ jobs:
               path: 'openapi.md',
               message: 'Update openapi.md',
               content: Buffer.from(openApiMd).toString('base64'),
-              sha: openApiData,
+              sha: openApiSha,
               branch: context.ref
             });
 
