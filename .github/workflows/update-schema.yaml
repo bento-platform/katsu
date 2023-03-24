@@ -57,13 +57,22 @@ jobs:
             const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({ auth: "${{ secrets.GITHUB_TOKEN }}" });
             // Get the current contents of the file
-            const { data } = await octokit.repos.getContent({
+            const { schemaData } = await octokit.repos.getContent({
               owner: context.repo.owner,
               repo: context.repo.repo,
               path: 'chord_metadata_service/mohpackets/docs/schema.yml',
               ref: context.ref
             });
-            const currentSha = data.sha;
+            const schemaSha = schemaData.sha;
+
+            const { openApiData } = await octokit.repos.getContent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'chord_metadata_service/mohpackets/docs/openapi.md',
+              ref: context.ref
+            });
+            const openApiData = data.sha;
+
             // Read the updated files
             const schemaYml = fs.readFileSync('./chord_metadata_service/mohpackets/docs/schema.yml', 'utf8');
             const openApiMd = fs.readFileSync('./chord_metadata_service/mohpackets/docs/openapi.md', 'utf8');
@@ -75,18 +84,9 @@ jobs:
               path: 'schema.yml',
               message: 'Update schema.yml',
               content: Buffer.from(schemaYml).toString('base64'),
-              sha: currentSha,
+              sha: schemaSha,
               branch: context.ref
             });
-
-            // Get the current contents of the file
-            const { data } = await octokit.repos.getContent({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'chord_metadata_service/mohpackets/docs/schema.yml',
-              ref: context.ref
-            });
-            const currentSha2 = data.sha;
 
             await octokit.request('PUT /repos/{owner}/{repo}/contents/chord_metadata_service/mohpackets/docs/{path}', {
               owner: context.repo.owner,
@@ -94,7 +94,7 @@ jobs:
               path: 'openapi.md',
               message: 'Update openapi.md',
               content: Buffer.from(openApiMd).toString('base64'),
-              sha: currentSha2,
+              sha: openApiData,
               branch: context.ref
             });
 
