@@ -8,17 +8,14 @@ paths:
     get:
       operationId: authorized_biomarkers_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: program_id
@@ -60,44 +57,33 @@ paths:
         name: cea
         schema:
           type: integer
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedBiomarkerList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Biomarker'
           description: ''
   /moh/v1/authorized/chemotherapies/:
     get:
       operationId: authorized_chemotherapies_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: program_id
@@ -131,44 +117,33 @@ paths:
         name: cumulative_drug_dosage_actual
         schema:
           type: integer
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedChemotherapyList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chemotherapy'
           description: ''
   /moh/v1/authorized/comorbidities/:
     get:
       operationId: authorized_comorbidities_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: program_id
@@ -202,28 +177,20 @@ paths:
         name: comorbidity_treatment
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedComorbidityList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comorbidity'
           description: ''
   /moh/v1/authorized/donor_with_clinical_data/:
     get:
@@ -235,137 +202,34 @@ paths:
         The viewset pre-fetches related objects using the `prefetch_related` method
         to minimize database queries. This ensures that all the related objects are
         available in a single database query, improving the performance of the viewset.
-      parameters:
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: program_id
-        schema:
-          type: string
-      - in: query
-        name: is_deceased
-        schema:
-          type: boolean
-      - in: query
-        name: cause_of_death
-        schema:
-          type: string
-      - in: query
-        name: date_of_birth
-        schema:
-          type: string
-      - in: query
-        name: date_of_death
-        schema:
-          type: string
-      - in: query
-        name: primary_site
-        schema:
-          type: string
-      - in: query
-        name: age
-        schema:
-          type: number
-      - in: query
-        name: max_age
-        schema:
-          type: number
-      - in: query
-        name: min_age
-        schema:
-          type: number
-      - in: query
-        name: donors
-        schema:
-          type: string
-      - in: query
-        name: primary_diagnosis
-        schema:
-          type: string
-      - in: query
-        name: speciman
-        schema:
-          type: string
-      - in: query
-        name: sample_registration
-        schema:
-          type: string
-      - in: query
-        name: treatment
-        schema:
-          type: string
-      - in: query
-        name: chemotherapy
-        schema:
-          type: string
-      - in: query
-        name: hormone_therapy
-        schema:
-          type: string
-      - in: query
-        name: radiation
-        schema:
-          type: string
-      - in: query
-        name: immunotherapy
-        schema:
-          type: string
-      - in: query
-        name: surgery
-        schema:
-          type: string
-      - in: query
-        name: follow_up
-        schema:
-          type: string
-      - in: query
-        name: biomarker
-        schema:
-          type: string
-      - in: query
-        name: comorbidity
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedDonorWithClinicalDataList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/DonorWithClinicalData'
           description: ''
   /moh/v1/authorized/donors/:
     get:
       operationId: authorized_donors_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: submitter_donor_id
@@ -459,44 +323,33 @@ paths:
         name: comorbidity
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedDonorList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Donor'
           description: ''
   /moh/v1/authorized/follow_ups/:
     get:
       operationId: authorized_follow_ups_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: submitter_follow_up_id
@@ -570,44 +423,33 @@ paths:
         name: recurrence_stage_group
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedFollowUpList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/FollowUp'
           description: ''
   /moh/v1/authorized/hormone_therapies/:
     get:
       operationId: authorized_hormone_therapies_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: program_id
@@ -641,44 +483,33 @@ paths:
         name: cumulative_drug_dosage_actual
         schema:
           type: integer
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedHormoneTherapyList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/HormoneTherapy'
           description: ''
   /moh/v1/authorized/immunotherapies/:
     get:
       operationId: authorized_immunotherapies_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: program_id
@@ -704,44 +535,33 @@ paths:
         name: drug_rxnormcui
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedImmunotherapyList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Immunotherapy'
           description: ''
   /moh/v1/authorized/primary_diagnoses/:
     get:
       operationId: authorized_primary_diagnoses_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: submitter_primary_diagnosis_id
@@ -799,44 +619,24 @@ paths:
         name: clinical_stage_group
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedPrimaryDiagnosisList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrimaryDiagnosis'
           description: ''
   /moh/v1/authorized/programs/:
     get:
       operationId: authorized_programs_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
       parameters:
       - in: query
         name: program_id
@@ -871,7 +671,9 @@ paths:
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -883,17 +685,14 @@ paths:
     get:
       operationId: authorized_radiations_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: program_id
@@ -935,44 +734,33 @@ paths:
         name: reference_radiation_treatment_id
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedRadiationList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Radiation'
           description: ''
   /moh/v1/authorized/sample_registrations/:
     get:
       operationId: authorized_sample_registrations_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: submitter_sample_id
@@ -1014,44 +802,33 @@ paths:
         name: sample_type
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSampleRegistrationList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/SampleRegistration'
           description: ''
   /moh/v1/authorized/specimens/:
     get:
       operationId: authorized_specimens_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: submitter_specimen_id
@@ -1129,44 +906,33 @@ paths:
         name: percent_tumour_cells_measurement_method
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSpecimenList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Specimen'
           description: ''
   /moh/v1/authorized/surgeries/:
     get:
       operationId: authorized_surgeries_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: program_id
@@ -1236,44 +1002,33 @@ paths:
         name: perineural_invasion
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSurgeryList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Surgery'
           description: ''
   /moh/v1/authorized/treatments/:
     get:
       operationId: authorized_treatments_list
       description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
 
         Methods
         -------
         get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: submitter_treatment_id
@@ -1331,28 +1086,20 @@ paths:
         name: response_to_treatment
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       tags:
       - authorized
       security:
-      - localAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedTreatmentList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Treatment'
           description: ''
   /moh/v1/discovery/biomarkers/:
     get:
@@ -1409,6 +1156,10 @@ paths:
           type: integer
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -1463,6 +1214,10 @@ paths:
           type: integer
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -1517,6 +1272,10 @@ paths:
           type: string
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -1631,6 +1390,10 @@ paths:
           type: string
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -1725,6 +1488,10 @@ paths:
           type: string
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -1779,6 +1546,10 @@ paths:
           type: integer
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -1825,6 +1596,10 @@ paths:
           type: string
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -1839,6 +1614,9 @@ paths:
       tags:
       - discovery
       security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       - {}
       responses:
         '200':
@@ -1918,6 +1696,10 @@ paths:
           type: string
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -1980,6 +1762,10 @@ paths:
           type: string
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -2042,6 +1828,10 @@ paths:
           type: string
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -2140,6 +1930,10 @@ paths:
           type: string
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -2230,6 +2024,10 @@ paths:
           type: string
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -2308,6 +2106,10 @@ paths:
           type: string
       tags:
       - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -3482,186 +3284,6 @@ components:
       - treatment_intent
       - treatment_setting
       - treatment_start_date
-    PaginatedBiomarkerList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Biomarker'
-    PaginatedChemotherapyList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Chemotherapy'
-    PaginatedComorbidityList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Comorbidity'
-    PaginatedDonorList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Donor'
-    PaginatedDonorWithClinicalDataList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/DonorWithClinicalData'
-    PaginatedFollowUpList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/FollowUp'
-    PaginatedHormoneTherapyList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/HormoneTherapy'
-    PaginatedImmunotherapyList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Immunotherapy'
-    PaginatedPrimaryDiagnosisList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/PrimaryDiagnosis'
     PaginatedProgramList:
       type: object
       properties:
@@ -3682,106 +3304,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Program'
-    PaginatedRadiationList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Radiation'
-    PaginatedSampleRegistrationList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/SampleRegistration'
-    PaginatedSpecimenList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Specimen'
-    PaginatedSurgeryList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Surgery'
-    PaginatedTreatmentList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Treatment'
     PercentTumourCellsMeasurementMethodEnum:
       enum:
       - Genomics
@@ -4738,6 +4260,15 @@ components:
       - Unknown
       type: string
   securitySchemes:
-    localAuth:
+    basicAuth:
       type: http
-      scheme: bearer
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
