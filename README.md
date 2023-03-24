@@ -152,4 +152,4 @@ Inside Katsu, the flow of the request/response can be broken down into the follo
 
 ## REST API
 
-You can find the schema documentation [here](chord_metadata_service/mohpackets/docs/README.md)
+You can find the schema documentation [here](chord_metadata_service/mohpackets/docs/README.MD)
