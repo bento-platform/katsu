@@ -52,7 +52,8 @@ __all__ = [
     "PHENOPACKET_RADIATION_THERAPY",
     "PHENOPACKET_THERAPEUTIC_REGIMEN",
     "PHENOPACKET_MEDICAL_ACTION_SCHEMA",
-    "PHENOPACKET_REF_RESOLVER"
+    "PHENOPACKET_REF_RESOLVER",
+    "VRS_VARIATION_SCHEMA"
 ]
 
 base_path = get_schema_base_path(Path(__file__).parent.name)
@@ -71,9 +72,9 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": base_type(SCHEMA_TYPES.STRING),
+        "reference": base_type(SCHEMA_TYPES.STRING),
         "description": base_type(SCHEMA_TYPES.STRING)
-    },
-    "required": ["id"]
+    }
 }, descriptions.EXTERNAL_REFERENCE)
 
 PHENOPACKET_UPDATE_SCHEMA = describe_schema({
@@ -610,7 +611,13 @@ PHENOPACKET_INTERPRETATION_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "id": base_type(SCHEMA_TYPES.STRING),
-        "progress_status": enum_of(["UNKNOWN_PROGRESS", "IN_PROGRESS", "COMPLETED", "SOLVED", "UNSOLVED"]),
+        "progress_status": enum_of([
+            "UNKNOWN_PROGRESS",
+            "IN_PROGRESS",
+            "COMPLETED",
+            "SOLVED",
+            "UNSOLVED"
+        ]),
         "diagnosis": PHENOPACKET_DIAGNOSIS_SCHEMA,
         "summary": base_type(SCHEMA_TYPES.STRING),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
@@ -641,9 +648,9 @@ PHENOPACKET_SCHEMA = describe_schema({
 }, descriptions.PHENOPACKET)
 
 # For efficient validation of VRS
-PHENOPACKET_REF_RESOLVER = jsonschema.RefResolver.from_schema({
+PHENOPACKET_REF_RESOLVER: jsonschema.RefResolver = jsonschema.RefResolver.from_schema({
     **PHENOPACKET_SCHEMA,
     "definitions": vrs_schema_definitions.get("definitions")
 })
 
-print("")
+_, VRS_VARIATION_SCHEMA = PHENOPACKET_REF_RESOLVER.resolve("#/definitions/Variation")

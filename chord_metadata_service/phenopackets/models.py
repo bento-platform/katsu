@@ -23,6 +23,7 @@ from .schemas import (
     PHENOPACKET_MEASUREMENT_SCHEMA,
     PHENOPACKET_MEDICAL_ACTION_SCHEMA,
 )
+from .validators import vrs_variation_validator
 from ..restapi.schemas import TIME_ELEMENT_SCHEMA
 
 
@@ -116,9 +117,9 @@ class Procedure(BaseTimeStamp, IndexableMixin):
     code = JSONField(validators=[ontology_validator], help_text=rec_help(d.PROCEDURE, "code"))
     body_site = JSONField(blank=True, null=True, validators=[ontology_validator],
                           help_text=rec_help(d.PROCEDURE, "body_site"))
-    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "extra_properties"))
     performed = JSONField(blank=True, null=True, validators=[
         JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
+    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "extra_properties"))
 
     def __str__(self):
         return str(self.id)
@@ -297,7 +298,8 @@ class GeneDescriptor(BaseTimeStamp):
 
 class VariationDescriptor(BaseTimeStamp):
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "id"))
-    variation = models.JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT_DESCRIPTOR, "variation"))
+    variation = models.JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT_DESCRIPTOR, "variation"),
+                                 validators=[vrs_variation_validator])
     label = models.CharField(blank=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "label"))
     description = models.CharField(blank=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "description"))
     gene_context = models.ForeignKey(GeneDescriptor, blank=True, null=True, on_delete=models.CASCADE,
@@ -325,18 +327,30 @@ class VariationDescriptor(BaseTimeStamp):
 
 
 class VariantInterpretation(BaseTimeStamp):
+    # Acmg pathogenicity classification choices
+    NOT_PROVIDED = 'NOT_PROVIDED'
+    BENIGN = 'BENIGN'
+    LIKELY_BENIGN = 'LIKELY_BENIGN'
+    UNCERTAIN_SIGNIFICANCE = 'UNCERTAIN_SIGNIFICANCE'
+    LIKELY_PATHOGENIC = 'LIKELY_PATHOGENIC'
+    PATHOGENIC = 'PATHOGENIC'
     VARIANT_INTERPRETATION_STATUS = (
-        ('NOT_PROVIDED', 'NOT_PROVIDED'),
-        ('BENIGN', 'BENIGN'),
-        ('LIKELY_BENIGN', 'LIKELY_BENIGN'),
-        ('UNCERTAIN_SIGNIFICANCE', 'UNCERTAIN_SIGNIFICANCE'),
-        ('LIKELY_PATHOGENIC', 'LIKELY_PATHOGENIC'),
-        ('PATHOGENIC', 'PATHOGENIC')
+        (NOT_PROVIDED, 'Not provided'),
+        (BENIGN, 'Benign'),
+        (LIKELY_BENIGN, 'Likely benign'),
+        (UNCERTAIN_SIGNIFICANCE, 'Uncertain significance'),
+        (LIKELY_PATHOGENIC, 'Likely pathogenic'),
+        (PATHOGENIC, 'Pathogenic')
     )
+
+    # Therapeutic actionability choices
+    UNKNOWN_ACTIONABILITY = 'UNKNOWN_ACTIONABILITY'
+    NOT_ACTIONABLE = 'NOT_ACTIONABLE'
+    ACTIONABLE = 'ACTIONABLE'
     THERAPEUTIC_ACTIONABILITY_CHOICES = (
-        ('UNKNOWN_ACTIONABILITY', 'UNKNOWN_ACTIONABILITY'),
-        ('NOT_ACTIONABLE', 'NOT_ACTIONABLE'),
-        ('ACTIONABLE', 'ACTIONABLE'),
+        (UNKNOWN_ACTIONABILITY, 'Unknown actionability'),
+        (NOT_ACTIONABLE, 'Not actionable'),
+        (ACTIONABLE, 'Actionable'),
     )
     acmg_pathogenicity_classification = models.CharField(max_length=200, choices=VARIANT_INTERPRETATION_STATUS,
                                                          default='NOT_PROVIDED',
@@ -360,13 +374,17 @@ class GenomicInterpretation(BaseTimeStamp):
 
     FHIR: Observation
     """
-
+    UNKNOWN_STATUS = 'UNKNOWN_STATUS'
+    REJECTED = 'REJECTED'
+    CANDIDATE = 'CANDIDATE'
+    CONTRIBUTORY = 'CONTRIBUTORY'
+    CAUSATIVE = 'CAUSATIVE'
     GENOMIC_INTERPRETATION_STATUS = (
-        ('UNKNOWN_STATUS', 'UNKNOWN_STATUS'),
-        ('REJECTED', 'REJECTED'),
-        ('CANDIDATE', 'CANDIDATE'),
-        ('CONTRIBUTORY', 'CONTRIBUTORY'),
-        ('CAUSATIVE', 'CAUSATIVE')
+        (UNKNOWN_STATUS, 'Unknown status'),
+        (REJECTED, 'Rejected'),
+        (CANDIDATE, 'Candidate'),
+        (CONTRIBUTORY, 'Contributory'),
+        (CAUSATIVE, 'Causative')
     )
     subject_or_biosample_id = models.CharField(
         max_length=200, blank=True, help_text="Id of the patient or biosample of the subject being interpreted")
@@ -418,14 +436,18 @@ class Interpretation(BaseTimeStamp):
 
     FHIR: DiagnosticReport
     """
-
-    PROGRESS_STATUS = (
-        ('UNKNOWN_PROGRESS', 'UNKNOWN_PROGRESS'),
-        ('IN_PROGRESS', 'IN_PROGRESS'),
-        ('COMPLETED', 'COMPLETED'),
-        ('SOLVED', 'SOLVED'),
-        ('UNSOLVED', 'UNSOLVED'),
-    )
+    UNKNOWN_PROGRESS = "UNKNOWN_PROGRESS"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    SOLVED = "SOLVED"
+    UNSOLVED = "UNSOLVED"
+    PROGRESS_STATUS = [
+        (UNKNOWN_PROGRESS, 'Unknown Progress'),
+        (IN_PROGRESS, 'In Progress'),
+        (COMPLETED, 'Completed'),
+        (SOLVED, 'Solved'),
+        (UNSOLVED, 'Unsolved'),
+    ]
 
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for the interpretation.')
     progress_status = models.CharField(choices=PROGRESS_STATUS, max_length=200, blank=True,
