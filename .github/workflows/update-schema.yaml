@@ -57,13 +57,13 @@ jobs:
             const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({ auth: "${{ secrets.GITHUB_TOKEN }}" });
             // Get the current contents of the file
-            const { schemaData } = await octokit.repos.getContent({
+            const { data } = await octokit.repos.getContent({
               owner: context.repo.owner,
               repo: context.repo.repo,
               path: 'chord_metadata_service/mohpackets/docs/schema.yml',
               ref: context.ref
             });
-            const schemaSha = schemaData.sha;
+            const schemaSha = data.sha;
 
 
             // Read the updated files
