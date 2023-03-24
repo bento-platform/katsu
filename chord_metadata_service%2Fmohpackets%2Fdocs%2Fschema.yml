@@ -1,0 +1,4744 @@
+openapi: 3.0.3
+info:
+  title: MoH Service API
+  version: 1.0.0
+  description: This is the RESTful API for the MoH Service.
+paths:
+  /moh/v1/authorized/biomarkers/:
+    get:
+      operationId: authorized_biomarkers_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_follow_up_id
+        schema:
+          type: string
+      - in: query
+        name: test_interval
+        schema:
+          type: integer
+      - in: query
+        name: psa_level
+        schema:
+          type: integer
+      - in: query
+        name: ca125
+        schema:
+          type: integer
+      - in: query
+        name: cea
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBiomarkerList'
+          description: ''
+  /moh/v1/authorized/chemotherapies/:
+    get:
+      operationId: authorized_chemotherapies_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy_dosage_units
+        schema:
+          type: string
+      - in: query
+        name: cumulative_drug_dosage_prescribed
+        schema:
+          type: integer
+      - in: query
+        name: cumulative_drug_dosage_actual
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChemotherapyList'
+          description: ''
+  /moh/v1/authorized/comorbidities/:
+    get:
+      operationId: authorized_comorbidities_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: prior_malignancy
+        schema:
+          type: string
+      - in: query
+        name: laterality_of_prior_malignancy
+        schema:
+          type: string
+      - in: query
+        name: age_at_comorbidity_diagnosis
+        schema:
+          type: integer
+      - in: query
+        name: comorbidity_type_code
+        schema:
+          type: string
+      - in: query
+        name: comorbidity_treatment_status
+        schema:
+          type: string
+      - in: query
+        name: comorbidity_treatment
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedComorbidityList'
+          description: ''
+  /moh/v1/authorized/donor_with_clinical_data/:
+    get:
+      operationId: authorized_donor_with_clinical_data_list
+      description: |-
+        This viewset provides access to Donor model and its related clinical data.
+        It uses the DonorWithClinicalDataSerializer for serialization.
+
+        The viewset pre-fetches related objects using the `prefetch_related` method
+        to minimize database queries. This ensures that all the related objects are
+        available in a single database query, improving the performance of the viewset.
+      parameters:
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: is_deceased
+        schema:
+          type: boolean
+      - in: query
+        name: cause_of_death
+        schema:
+          type: string
+      - in: query
+        name: date_of_birth
+        schema:
+          type: string
+      - in: query
+        name: date_of_death
+        schema:
+          type: string
+      - in: query
+        name: primary_site
+        schema:
+          type: string
+      - in: query
+        name: age
+        schema:
+          type: number
+      - in: query
+        name: max_age
+        schema:
+          type: number
+      - in: query
+        name: min_age
+        schema:
+          type: number
+      - in: query
+        name: donors
+        schema:
+          type: string
+      - in: query
+        name: primary_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: speciman
+        schema:
+          type: string
+      - in: query
+        name: sample_registration
+        schema:
+          type: string
+      - in: query
+        name: treatment
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy
+        schema:
+          type: string
+      - in: query
+        name: hormone_therapy
+        schema:
+          type: string
+      - in: query
+        name: radiation
+        schema:
+          type: string
+      - in: query
+        name: immunotherapy
+        schema:
+          type: string
+      - in: query
+        name: surgery
+        schema:
+          type: string
+      - in: query
+        name: follow_up
+        schema:
+          type: string
+      - in: query
+        name: biomarker
+        schema:
+          type: string
+      - in: query
+        name: comorbidity
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDonorWithClinicalDataList'
+          description: ''
+  /moh/v1/authorized/donors/:
+    get:
+      operationId: authorized_donors_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: is_deceased
+        schema:
+          type: boolean
+      - in: query
+        name: cause_of_death
+        schema:
+          type: string
+      - in: query
+        name: date_of_birth
+        schema:
+          type: string
+      - in: query
+        name: date_of_death
+        schema:
+          type: string
+      - in: query
+        name: primary_site
+        schema:
+          type: string
+      - in: query
+        name: age
+        schema:
+          type: number
+      - in: query
+        name: max_age
+        schema:
+          type: number
+      - in: query
+        name: min_age
+        schema:
+          type: number
+      - in: query
+        name: donors
+        schema:
+          type: string
+      - in: query
+        name: primary_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: speciman
+        schema:
+          type: string
+      - in: query
+        name: sample_registration
+        schema:
+          type: string
+      - in: query
+        name: treatment
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy
+        schema:
+          type: string
+      - in: query
+        name: hormone_therapy
+        schema:
+          type: string
+      - in: query
+        name: radiation
+        schema:
+          type: string
+      - in: query
+        name: immunotherapy
+        schema:
+          type: string
+      - in: query
+        name: surgery
+        schema:
+          type: string
+      - in: query
+        name: follow_up
+        schema:
+          type: string
+      - in: query
+        name: biomarker
+        schema:
+          type: string
+      - in: query
+        name: comorbidity
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDonorList'
+          description: ''
+  /moh/v1/authorized/follow_ups/:
+    get:
+      operationId: authorized_follow_ups_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: submitter_follow_up_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: date_of_followup
+        schema:
+          type: string
+      - in: query
+        name: lost_to_followup
+        schema:
+          type: boolean
+      - in: query
+        name: lost_to_followup_reason
+        schema:
+          type: string
+      - in: query
+        name: disease_status_at_followup
+        schema:
+          type: string
+      - in: query
+        name: relapse_type
+        schema:
+          type: string
+      - in: query
+        name: date_of_relapse
+        schema:
+          type: string
+      - in: query
+        name: method_of_progression_status
+        schema:
+          type: string
+      - in: query
+        name: anatomic_site_progression_or_recurrence
+        schema:
+          type: string
+      - in: query
+        name: recurrence_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: recurrence_t_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_n_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_m_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_stage_group
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFollowUpList'
+          description: ''
+  /moh/v1/authorized/hormone_therapies/:
+    get:
+      operationId: authorized_hormone_therapies_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - in: query
+        name: hormone_drug_dosage_units
+        schema:
+          type: string
+      - in: query
+        name: cumulative_drug_dosage_prescribed
+        schema:
+          type: integer
+      - in: query
+        name: cumulative_drug_dosage_actual
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedHormoneTherapyList'
+          description: ''
+  /moh/v1/authorized/immunotherapies/:
+    get:
+      operationId: authorized_immunotherapies_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: immunotherapy_type
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedImmunotherapyList'
+          description: ''
+  /moh/v1/authorized/primary_diagnoses/:
+    get:
+      operationId: authorized_primary_diagnoses_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: date_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: cancer_type_code
+        schema:
+          type: string
+      - in: query
+        name: basis_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: lymph_nodes_examined_status
+        schema:
+          type: string
+      - in: query
+        name: lymph_nodes_examined_method
+        schema:
+          type: string
+      - in: query
+        name: number_lymph_nodes_positive
+        schema:
+          type: integer
+      - in: query
+        name: clinical_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: clinical_t_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_n_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_m_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_stage_group
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPrimaryDiagnosisList'
+          description: ''
+  /moh/v1/authorized/programs/:
+    get:
+      operationId: authorized_programs_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: created
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: updated
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProgramList'
+          description: ''
+  /moh/v1/authorized/radiations/:
+    get:
+      operationId: authorized_radiations_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_modality
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_type
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_fractions
+        schema:
+          type: integer
+      - in: query
+        name: radiation_therapy_dosage
+        schema:
+          type: integer
+      - in: query
+        name: anatomical_site_irradiated
+        schema:
+          type: string
+      - in: query
+        name: radiation_boost
+        schema:
+          type: boolean
+      - in: query
+        name: reference_radiation_treatment_id
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRadiationList'
+          description: ''
+  /moh/v1/authorized/sample_registrations/:
+    get:
+      operationId: authorized_sample_registrations_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: submitter_sample_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: gender
+        schema:
+          type: string
+      - in: query
+        name: sex_at_birth
+        schema:
+          type: string
+      - in: query
+        name: specimen_tissue_source
+        schema:
+          type: string
+      - in: query
+        name: tumour_normal_designation
+        schema:
+          type: string
+      - in: query
+        name: specimen_type
+        schema:
+          type: string
+      - in: query
+        name: sample_type
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSampleRegistrationList'
+          description: ''
+  /moh/v1/authorized/specimens/:
+    get:
+      operationId: authorized_specimens_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: pathological_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: pathological_t_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_n_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_m_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_stage_group
+        schema:
+          type: string
+      - in: query
+        name: specimen_collection_date
+        schema:
+          type: string
+      - in: query
+        name: specimen_storage
+        schema:
+          type: string
+      - in: query
+        name: tumour_histological_type
+        schema:
+          type: string
+      - in: query
+        name: specimen_anatomic_location
+        schema:
+          type: string
+      - in: query
+        name: reference_pathology_confirmed_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: reference_pathology_confirmed_tumour_presence
+        schema:
+          type: string
+      - in: query
+        name: tumour_grading_system
+        schema:
+          type: string
+      - in: query
+        name: tumour_grade
+        schema:
+          type: string
+      - in: query
+        name: percent_tumour_cells_range
+        schema:
+          type: string
+      - in: query
+        name: percent_tumour_cells_measurement_method
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSpecimenList'
+          description: ''
+  /moh/v1/authorized/surgeries/:
+    get:
+      operationId: authorized_surgeries_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: surgery_type
+        schema:
+          type: string
+      - in: query
+        name: surgery_site
+        schema:
+          type: string
+      - in: query
+        name: surgery_location
+        schema:
+          type: string
+      - in: query
+        name: tumour_length
+        schema:
+          type: integer
+      - in: query
+        name: tumour_width
+        schema:
+          type: integer
+      - in: query
+        name: greatest_dimension_tumour
+        schema:
+          type: integer
+      - in: query
+        name: tumour_focality
+        schema:
+          type: string
+      - in: query
+        name: residual_tumour_classification
+        schema:
+          type: string
+      - in: query
+        name: margin_types_involved
+        schema:
+          type: string
+      - in: query
+        name: margin_types_not_involved
+        schema:
+          type: string
+      - in: query
+        name: margin_types_not_assessed
+        schema:
+          type: string
+      - in: query
+        name: lymphovascular_invasion
+        schema:
+          type: string
+      - in: query
+        name: perineural_invasion
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSurgeryList'
+          description: ''
+  /moh/v1/authorized/treatments/:
+    get:
+      operationId: authorized_treatments_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: treatment_type
+        schema:
+          type: string
+      - in: query
+        name: is_primary_treatment
+        schema:
+          type: string
+      - in: query
+        name: treatment_start_date
+        schema:
+          type: string
+      - in: query
+        name: treatment_end_date
+        schema:
+          type: string
+      - in: query
+        name: treatment_setting
+        schema:
+          type: string
+      - in: query
+        name: treatment_intent
+        schema:
+          type: string
+      - in: query
+        name: days_per_cycle
+        schema:
+          type: integer
+      - in: query
+        name: number_of_cycles
+        schema:
+          type: integer
+      - in: query
+        name: response_to_treatment_criteria_method
+        schema:
+          type: string
+      - in: query
+        name: response_to_treatment
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTreatmentList'
+          description: ''
+  /moh/v1/discovery/biomarkers/:
+    get:
+      operationId: discovery_biomarkers_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_follow_up_id
+        schema:
+          type: string
+      - in: query
+        name: test_interval
+        schema:
+          type: integer
+      - in: query
+        name: psa_level
+        schema:
+          type: integer
+      - in: query
+        name: ca125
+        schema:
+          type: integer
+      - in: query
+        name: cea
+        schema:
+          type: integer
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/chemotherapies/:
+    get:
+      operationId: discovery_chemotherapies_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy_dosage_units
+        schema:
+          type: string
+      - in: query
+        name: cumulative_drug_dosage_prescribed
+        schema:
+          type: integer
+      - in: query
+        name: cumulative_drug_dosage_actual
+        schema:
+          type: integer
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/comorbidities/:
+    get:
+      operationId: discovery_comorbidities_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: prior_malignancy
+        schema:
+          type: string
+      - in: query
+        name: laterality_of_prior_malignancy
+        schema:
+          type: string
+      - in: query
+        name: age_at_comorbidity_diagnosis
+        schema:
+          type: integer
+      - in: query
+        name: comorbidity_type_code
+        schema:
+          type: string
+      - in: query
+        name: comorbidity_treatment_status
+        schema:
+          type: string
+      - in: query
+        name: comorbidity_treatment
+        schema:
+          type: string
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/donors/:
+    get:
+      operationId: discovery_donors_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: is_deceased
+        schema:
+          type: boolean
+      - in: query
+        name: cause_of_death
+        schema:
+          type: string
+      - in: query
+        name: date_of_birth
+        schema:
+          type: string
+      - in: query
+        name: date_of_death
+        schema:
+          type: string
+      - in: query
+        name: primary_site
+        schema:
+          type: string
+      - in: query
+        name: age
+        schema:
+          type: number
+      - in: query
+        name: max_age
+        schema:
+          type: number
+      - in: query
+        name: min_age
+        schema:
+          type: number
+      - in: query
+        name: donors
+        schema:
+          type: string
+      - in: query
+        name: primary_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: speciman
+        schema:
+          type: string
+      - in: query
+        name: sample_registration
+        schema:
+          type: string
+      - in: query
+        name: treatment
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy
+        schema:
+          type: string
+      - in: query
+        name: hormone_therapy
+        schema:
+          type: string
+      - in: query
+        name: radiation
+        schema:
+          type: string
+      - in: query
+        name: immunotherapy
+        schema:
+          type: string
+      - in: query
+        name: surgery
+        schema:
+          type: string
+      - in: query
+        name: follow_up
+        schema:
+          type: string
+      - in: query
+        name: biomarker
+        schema:
+          type: string
+      - in: query
+        name: comorbidity
+        schema:
+          type: string
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/follow_ups/:
+    get:
+      operationId: discovery_follow_ups_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: submitter_follow_up_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: date_of_followup
+        schema:
+          type: string
+      - in: query
+        name: lost_to_followup
+        schema:
+          type: boolean
+      - in: query
+        name: lost_to_followup_reason
+        schema:
+          type: string
+      - in: query
+        name: disease_status_at_followup
+        schema:
+          type: string
+      - in: query
+        name: relapse_type
+        schema:
+          type: string
+      - in: query
+        name: date_of_relapse
+        schema:
+          type: string
+      - in: query
+        name: method_of_progression_status
+        schema:
+          type: string
+      - in: query
+        name: anatomic_site_progression_or_recurrence
+        schema:
+          type: string
+      - in: query
+        name: recurrence_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: recurrence_t_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_n_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_m_category
+        schema:
+          type: string
+      - in: query
+        name: recurrence_stage_group
+        schema:
+          type: string
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/hormone_therapies/:
+    get:
+      operationId: discovery_hormone_therapies_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      - in: query
+        name: hormone_drug_dosage_units
+        schema:
+          type: string
+      - in: query
+        name: cumulative_drug_dosage_prescribed
+        schema:
+          type: integer
+      - in: query
+        name: cumulative_drug_dosage_actual
+        schema:
+          type: integer
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/immunotherapies/:
+    get:
+      operationId: discovery_immunotherapies_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: immunotherapy_type
+        schema:
+          type: string
+      - in: query
+        name: drug_name
+        schema:
+          type: string
+      - in: query
+        name: drug_rxnormcui
+        schema:
+          type: string
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/overview:
+    get:
+      operationId: discovery_overview_retrieve
+      description: MoH Overview schema
+      tags:
+      - discovery
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moh_overview_schema_response'
+          description: ''
+  /moh/v1/discovery/primary_diagnoses/:
+    get:
+      operationId: discovery_primary_diagnoses_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: date_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: cancer_type_code
+        schema:
+          type: string
+      - in: query
+        name: basis_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: lymph_nodes_examined_status
+        schema:
+          type: string
+      - in: query
+        name: lymph_nodes_examined_method
+        schema:
+          type: string
+      - in: query
+        name: number_lymph_nodes_positive
+        schema:
+          type: integer
+      - in: query
+        name: clinical_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: clinical_t_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_n_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_m_category
+        schema:
+          type: string
+      - in: query
+        name: clinical_stage_group
+        schema:
+          type: string
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/radiations/:
+    get:
+      operationId: discovery_radiations_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_modality
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_type
+        schema:
+          type: string
+      - in: query
+        name: radiation_therapy_fractions
+        schema:
+          type: integer
+      - in: query
+        name: radiation_therapy_dosage
+        schema:
+          type: integer
+      - in: query
+        name: anatomical_site_irradiated
+        schema:
+          type: string
+      - in: query
+        name: radiation_boost
+        schema:
+          type: boolean
+      - in: query
+        name: reference_radiation_treatment_id
+        schema:
+          type: string
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/sample_registrations/:
+    get:
+      operationId: discovery_sample_registrations_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: submitter_sample_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: gender
+        schema:
+          type: string
+      - in: query
+        name: sex_at_birth
+        schema:
+          type: string
+      - in: query
+        name: specimen_tissue_source
+        schema:
+          type: string
+      - in: query
+        name: tumour_normal_designation
+        schema:
+          type: string
+      - in: query
+        name: specimen_type
+        schema:
+          type: string
+      - in: query
+        name: sample_type
+        schema:
+          type: string
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/specimens/:
+    get:
+      operationId: discovery_specimens_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: pathological_tumour_staging_system
+        schema:
+          type: string
+      - in: query
+        name: pathological_t_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_n_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_m_category
+        schema:
+          type: string
+      - in: query
+        name: pathological_stage_group
+        schema:
+          type: string
+      - in: query
+        name: specimen_collection_date
+        schema:
+          type: string
+      - in: query
+        name: specimen_storage
+        schema:
+          type: string
+      - in: query
+        name: tumour_histological_type
+        schema:
+          type: string
+      - in: query
+        name: specimen_anatomic_location
+        schema:
+          type: string
+      - in: query
+        name: reference_pathology_confirmed_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: reference_pathology_confirmed_tumour_presence
+        schema:
+          type: string
+      - in: query
+        name: tumour_grading_system
+        schema:
+          type: string
+      - in: query
+        name: tumour_grade
+        schema:
+          type: string
+      - in: query
+        name: percent_tumour_cells_range
+        schema:
+          type: string
+      - in: query
+        name: percent_tumour_cells_measurement_method
+        schema:
+          type: string
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/surgeries/:
+    get:
+      operationId: discovery_surgeries_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_specimen_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: surgery_type
+        schema:
+          type: string
+      - in: query
+        name: surgery_site
+        schema:
+          type: string
+      - in: query
+        name: surgery_location
+        schema:
+          type: string
+      - in: query
+        name: tumour_length
+        schema:
+          type: integer
+      - in: query
+        name: tumour_width
+        schema:
+          type: integer
+      - in: query
+        name: greatest_dimension_tumour
+        schema:
+          type: integer
+      - in: query
+        name: tumour_focality
+        schema:
+          type: string
+      - in: query
+        name: residual_tumour_classification
+        schema:
+          type: string
+      - in: query
+        name: margin_types_involved
+        schema:
+          type: string
+      - in: query
+        name: margin_types_not_involved
+        schema:
+          type: string
+      - in: query
+        name: margin_types_not_assessed
+        schema:
+          type: string
+      - in: query
+        name: lymphovascular_invasion
+        schema:
+          type: string
+      - in: query
+        name: perineural_invasion
+        schema:
+          type: string
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v1/discovery/treatments/:
+    get:
+      operationId: discovery_treatments_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: submitter_treatment_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_primary_diagnosis_id
+        schema:
+          type: string
+      - in: query
+        name: treatment_type
+        schema:
+          type: string
+      - in: query
+        name: is_primary_treatment
+        schema:
+          type: string
+      - in: query
+        name: treatment_start_date
+        schema:
+          type: string
+      - in: query
+        name: treatment_end_date
+        schema:
+          type: string
+      - in: query
+        name: treatment_setting
+        schema:
+          type: string
+      - in: query
+        name: treatment_intent
+        schema:
+          type: string
+      - in: query
+        name: days_per_cycle
+        schema:
+          type: integer
+      - in: query
+        name: number_of_cycles
+        schema:
+          type: integer
+      - in: query
+        name: response_to_treatment_criteria_method
+        schema:
+          type: string
+      - in: query
+        name: response_to_treatment
+        schema:
+          type: string
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+components:
+  schemas:
+    AnatomicalSiteIrradiatedEnum:
+      enum:
+      - Cervical lymph node group
+      - Entire lymph node of thorax
+      - Axillary lymph node group
+      - Supraclavicular lymph node group
+      - Internal mammary lymph node group
+      - Abdominal lymph node group
+      - Pelvic lymph node group
+      - Structure of lymph node
+      - Entire eye
+      - Pituitary structure
+      - Brain structure
+      - Brain part
+      - Spinal cord structure
+      - Nasopharyngeal structure
+      - Oral cavity structure
+      - Oropharyngeal structure
+      - Laryngeal structure
+      - Hypopharyngeal structure
+      - Nasal sinus structure
+      - Salivary gland structure
+      - Thyroid structure
+      - Entire head and neck
+      - Entire lung
+      - Mesothelium structure
+      - Entire thorax
+      - Entire breast
+      - Breast part
+      - Chest wall structure
+      - Entire esophagus
+      - Stomach structure
+      - Small intestinal structure
+      - Colon structure
+      - Rectum structure
+      - Anal structure
+      - Liver structure
+      - Biliary tract structure
+      - Gallbladder structure
+      - Pancreatic structure
+      - Abdominal structure
+      - Entire urinary bladder
+      - Bladder part
+      - Kidney structure
+      - Ureteric structure
+      - Entire prostate
+      - Prostate part
+      - Urethral structure
+      - Penile structure
+      - Testis structure
+      - Scrotal structure
+      - Ovarian structure
+      - Fallopian tube structure
+      - Uterine structure
+      - Cervix uteri structure
+      - Vaginal structure
+      - Vulval structure
+      - Bone structure of cranium
+      - Entire vertebral column
+      - Shoulder region structure
+      - Bone structure of rib
+      - Hip region structure
+      - Entire bony pelvis
+      - Pelvic structure
+      - Bone structure of extremity
+      - Skin structure
+      - Soft tissues
+      - Entire body as a whole
+      type: string
+    BasisOfDiagnosisEnum:
+      enum:
+      - Clinical investigation
+      - Clinical
+      - Cytology
+      - Death certificate only
+      - Histology of a metastasis
+      - Histology of a primary tumour
+      - Specific tumour markers
+      - Unknown
+      type: string
+    Biomarker:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        test_interval:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        psa_level:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        ca125:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cea:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_specimen_id:
+          type: string
+          nullable: true
+        submitter_primary_diagnosis_id:
+          type: string
+          nullable: true
+        submitter_treatment_id:
+          type: string
+          nullable: true
+        submitter_follow_up_id:
+          type: string
+          nullable: true
+      required:
+      - program_id
+      - submitter_donor_id
+    BlankEnum:
+      enum:
+      - ''
+    CauseOfDeathEnum:
+      enum:
+      - Died of cancer
+      - Died of other reasons
+      - Unknown
+      type: string
+    Chemotherapy:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        chemotherapy_dosage_units:
+          $ref: '#/components/schemas/DosageUnitsEnum'
+        drug_name:
+          type: string
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          maxLength: 64
+        cumulative_drug_dosage_prescribed:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cumulative_drug_dosage_actual:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_treatment_id:
+          type: string
+      required:
+      - chemotherapy_dosage_units
+      - drug_name
+      - drug_rxnormcui
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+    Comorbidity:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        prior_malignancy:
+          $ref: '#/components/schemas/uBooleanEnum'
+        laterality_of_prior_malignancy:
+          oneOf:
+          - $ref: '#/components/schemas/LateralityOfPriorMalignancyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        comorbidity_type_code:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$
+        comorbidity_treatment_status:
+          oneOf:
+          - $ref: '#/components/schemas/uBooleanEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        comorbidity_treatment:
+          type: string
+          maxLength: 255
+        age_at_comorbidity_diagnosis:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+      required:
+      - comorbidity_treatment
+      - comorbidity_treatment_status
+      - comorbidity_type_code
+      - laterality_of_prior_malignancy
+      - prior_malignancy
+      - program_id
+      - submitter_donor_id
+    Discovery:
+      type: object
+      description: |-
+        This serializer is used to return the discovery_donor.
+        It also override the list serializer to a single object
+      properties:
+        discovery_donor:
+          type: integer
+      required:
+      - discovery_donor
+    DiseaseStatusAtFollowupEnum:
+      enum:
+      - Complete remission
+      - Distant progression
+      - Loco-regional progression
+      - No evidence of disease
+      - Partial remission
+      - Progression NOS
+      - Relapse or recurrence
+      - Stable
+      type: string
+    Donor:
+      type: object
+      properties:
+        submitter_donor_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        cause_of_death:
+          oneOf:
+          - $ref: '#/components/schemas/CauseOfDeathEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        date_of_birth:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        date_of_death:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        primary_site:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrimarySiteEnum'
+        is_deceased:
+          type: boolean
+        program_id:
+          type: string
+      required:
+      - cause_of_death
+      - date_of_birth
+      - date_of_death
+      - is_deceased
+      - primary_site
+      - program_id
+      - submitter_donor_id
+    DonorWithClinicalData:
+      type: object
+      properties:
+        submitter_donor_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        program_id:
+          type: string
+        is_deceased:
+          type: boolean
+        cause_of_death:
+          oneOf:
+          - $ref: '#/components/schemas/CauseOfDeathEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        date_of_birth:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        date_of_death:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        primary_site:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrimarySiteEnum'
+        primary_diagnoses:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedPrimaryDiagnosis'
+          readOnly: true
+        comorbidities:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedComorbidity'
+          readOnly: true
+        biomarkers:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedBiomarker'
+          readOnly: true
+      required:
+      - cause_of_death
+      - date_of_birth
+      - date_of_death
+      - is_deceased
+      - primary_site
+      - program_id
+      - submitter_donor_id
+    DosageUnitsEnum:
+      enum:
+      - mg/m2
+      - IU/m2
+      - ug/m2
+      - g/m2
+      - mg/kg
+      type: string
+    FollowUp:
+      type: object
+      properties:
+        submitter_follow_up_id:
+          type: string
+          maxLength: 64
+        date_of_followup:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        lost_to_followup_reason:
+          oneOf:
+          - $ref: '#/components/schemas/LostToFollowupReasonEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        disease_status_at_followup:
+          $ref: '#/components/schemas/DiseaseStatusAtFollowupEnum'
+        relapse_type:
+          oneOf:
+          - $ref: '#/components/schemas/RelapseTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        date_of_relapse:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        method_of_progression_status:
+          oneOf:
+          - $ref: '#/components/schemas/MethodOfProgressionStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        anatomic_site_progression_or_recurrence:
+          type: string
+          maxLength: 32
+          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
+        recurrence_tumour_staging_system:
+          oneOf:
+          - $ref: '#/components/schemas/StagingSystemEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        recurrence_t_category:
+          oneOf:
+          - $ref: '#/components/schemas/TCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        recurrence_n_category:
+          oneOf:
+          - $ref: '#/components/schemas/NCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        recurrence_m_category:
+          oneOf:
+          - $ref: '#/components/schemas/MCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        recurrence_stage_group:
+          oneOf:
+          - $ref: '#/components/schemas/StageGroupEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        lost_to_followup:
+          type: boolean
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_primary_diagnosis_id:
+          type: string
+          nullable: true
+        submitter_treatment_id:
+          type: string
+          nullable: true
+      required:
+      - anatomic_site_progression_or_recurrence
+      - date_of_followup
+      - date_of_relapse
+      - disease_status_at_followup
+      - lost_to_followup_reason
+      - method_of_progression_status
+      - program_id
+      - recurrence_m_category
+      - recurrence_n_category
+      - recurrence_stage_group
+      - recurrence_t_category
+      - recurrence_tumour_staging_system
+      - relapse_type
+      - submitter_donor_id
+      - submitter_follow_up_id
+    GenderEnum:
+      enum:
+      - Man
+      - Woman
+      - Non-binary
+      type: string
+    HormoneTherapy:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        hormone_drug_dosage_units:
+          $ref: '#/components/schemas/DosageUnitsEnum'
+        drug_name:
+          type: string
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          maxLength: 64
+        cumulative_drug_dosage_prescribed:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cumulative_drug_dosage_actual:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_treatment_id:
+          type: string
+      required:
+      - drug_name
+      - drug_rxnormcui
+      - hormone_drug_dosage_units
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+    Immunotherapy:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        immunotherapy_type:
+          $ref: '#/components/schemas/ImmunotherapyTypeEnum'
+        drug_name:
+          type: string
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          maxLength: 64
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_treatment_id:
+          type: string
+      required:
+      - drug_name
+      - drug_rxnormcui
+      - immunotherapy_type
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+    ImmunotherapyTypeEnum:
+      enum:
+      - Cell-based
+      - Immune checkpoint inhibitors
+      - Monoclonal antibodies other than immune checkpoint inhibitors
+      - Other immunomodulatory substances
+      type: string
+    LateralityOfPriorMalignancyEnum:
+      enum:
+      - Bilateral
+      - Left
+      - Midline
+      - Not applicable
+      - Right
+      - Unilateral, Side not specified
+      - Unknown
+      - test
+      type: string
+    LostToFollowupReasonEnum:
+      enum:
+      - Completed study
+      - Discharged to palliative care
+      - Lost contact
+      - Not applicable
+      - Unknown
+      - Withdrew from study
+      type: string
+    LymphNodesExaminedMethodEnum:
+      enum:
+      - Imaging
+      - Lymph node dissection/pathological exam
+      - Physical palpation of patient
+      type: string
+    LymphNodesExaminedStatusEnum:
+      enum:
+      - Cannot be determined
+      - 'No'
+      - No lymph nodes found in resected specimen
+      - Not applicable
+      - 'Yes'
+      type: string
+    LymphovascularInvasionEnum:
+      enum:
+      - Absent
+      - Both lymphatic and small vessel and venous (large vessel) invasion
+      - Lymphatic and small vessel invasion only
+      - Not applicable
+      - Present
+      - Venous (large vessel) invasion only
+      - Unknown
+      type: string
+    MCategoryEnum:
+      enum:
+      - M0
+      - M0(i+)
+      - M1
+      - M1a
+      - M1a(0)
+      - M1a(1)
+      - M1b
+      - M1b(0)
+      - M1b(1)
+      - M1c
+      - M1c(0)
+      - M1c(1)
+      - M1d
+      - M1d(0)
+      - M1d(1)
+      - M1e
+      - MX
+      type: string
+    MarginTypesEnum:
+      enum:
+      - Circumferential resection margin
+      - Common bile duct margin
+      - Distal margin
+      - Not applicable
+      - Proximal margin
+      - Unknown
+      type: string
+    MethodOfProgressionStatusEnum:
+      enum:
+      - Imaging (procedure)
+      - Histopathology test (procedure)
+      - Assessment of symptom control (procedure)
+      - Physical examination procedure (procedure)
+      - Tumor marker measurement (procedure)
+      - Laboratory data interpretation (procedure)
+      type: string
+    NCategoryEnum:
+      enum:
+      - N0
+      - N0a
+      - N0a (biopsy)
+      - N0b
+      - N0b (no biopsy)
+      - N0(i+)
+      - N0(i-)
+      - N0(mol+)
+      - N0(mol-)
+      - N1
+      - N1a
+      - N1a(sn)
+      - N1b
+      - N1c
+      - N1mi
+      - N2
+      - N2a
+      - N2b
+      - N2c
+      - N2mi
+      - N3
+      - N3a
+      - N3b
+      - N3c
+      - N4
+      - NX
+      type: string
+    NestedBiomarker:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        test_interval:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        psa_level:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        ca125:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cea:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+    NestedChemotherapy:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        chemotherapy_dosage_units:
+          $ref: '#/components/schemas/DosageUnitsEnum'
+        drug_name:
+          type: string
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          maxLength: 64
+        cumulative_drug_dosage_prescribed:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cumulative_drug_dosage_actual:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+      required:
+      - chemotherapy_dosage_units
+      - drug_name
+      - drug_rxnormcui
+    NestedComorbidity:
+      type: object
+      properties:
+        prior_malignancy:
+          $ref: '#/components/schemas/uBooleanEnum'
+        laterality_of_prior_malignancy:
+          oneOf:
+          - $ref: '#/components/schemas/LateralityOfPriorMalignancyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        age_at_comorbidity_diagnosis:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        comorbidity_type_code:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$
+        comorbidity_treatment_status:
+          oneOf:
+          - $ref: '#/components/schemas/uBooleanEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        comorbidity_treatment:
+          type: string
+          maxLength: 255
+      required:
+      - comorbidity_treatment
+      - comorbidity_treatment_status
+      - comorbidity_type_code
+      - laterality_of_prior_malignancy
+      - prior_malignancy
+    NestedFollowUp:
+      type: object
+      properties:
+        date_of_followup:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        lost_to_followup:
+          type: boolean
+          nullable: true
+        lost_to_followup_reason:
+          oneOf:
+          - $ref: '#/components/schemas/LostToFollowupReasonEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        disease_status_at_followup:
+          $ref: '#/components/schemas/DiseaseStatusAtFollowupEnum'
+        relapse_type:
+          oneOf:
+          - $ref: '#/components/schemas/RelapseTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        date_of_relapse:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        method_of_progression_status:
+          oneOf:
+          - $ref: '#/components/schemas/MethodOfProgressionStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        anatomic_site_progression_or_recurrence:
+          type: string
+          maxLength: 32
+          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
+        recurrence_tumour_staging_system:
+          oneOf:
+          - $ref: '#/components/schemas/StagingSystemEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        recurrence_t_category:
+          oneOf:
+          - $ref: '#/components/schemas/TCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        recurrence_n_category:
+          oneOf:
+          - $ref: '#/components/schemas/NCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        recurrence_m_category:
+          oneOf:
+          - $ref: '#/components/schemas/MCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        recurrence_stage_group:
+          oneOf:
+          - $ref: '#/components/schemas/StageGroupEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        biomarkers:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedBiomarker'
+          readOnly: true
+      required:
+      - anatomic_site_progression_or_recurrence
+      - date_of_followup
+      - date_of_relapse
+      - disease_status_at_followup
+      - lost_to_followup_reason
+      - method_of_progression_status
+      - recurrence_m_category
+      - recurrence_n_category
+      - recurrence_stage_group
+      - recurrence_t_category
+      - recurrence_tumour_staging_system
+      - relapse_type
+    NestedHormoneTherapy:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        hormone_drug_dosage_units:
+          $ref: '#/components/schemas/DosageUnitsEnum'
+        drug_name:
+          type: string
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          maxLength: 64
+        cumulative_drug_dosage_prescribed:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cumulative_drug_dosage_actual:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+      required:
+      - drug_name
+      - drug_rxnormcui
+      - hormone_drug_dosage_units
+    NestedImmunotherapy:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        immunotherapy_type:
+          $ref: '#/components/schemas/ImmunotherapyTypeEnum'
+        drug_name:
+          type: string
+          maxLength: 255
+        drug_rxnormcui:
+          type: string
+          maxLength: 64
+      required:
+      - drug_name
+      - drug_rxnormcui
+      - immunotherapy_type
+    NestedPrimaryDiagnosis:
+      type: object
+      properties:
+        submitter_primary_diagnosis_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        date_of_diagnosis:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        cancer_type_code:
+          type: string
+          maxLength: 64
+        basis_of_diagnosis:
+          $ref: '#/components/schemas/BasisOfDiagnosisEnum'
+        lymph_nodes_examined_status:
+          $ref: '#/components/schemas/LymphNodesExaminedStatusEnum'
+        lymph_nodes_examined_method:
+          $ref: '#/components/schemas/LymphNodesExaminedMethodEnum'
+        number_lymph_nodes_positive:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        clinical_tumour_staging_system:
+          oneOf:
+          - $ref: '#/components/schemas/StagingSystemEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        clinical_t_category:
+          oneOf:
+          - $ref: '#/components/schemas/TCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        clinical_n_category:
+          oneOf:
+          - $ref: '#/components/schemas/NCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        clinical_m_category:
+          oneOf:
+          - $ref: '#/components/schemas/MCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        clinical_stage_group:
+          oneOf:
+          - $ref: '#/components/schemas/StageGroupEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        specimens:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedSpecimen'
+          readOnly: true
+        treatments:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedTreatment'
+          readOnly: true
+        biomarkers:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedBiomarker'
+          readOnly: true
+      required:
+      - basis_of_diagnosis
+      - cancer_type_code
+      - clinical_m_category
+      - clinical_n_category
+      - clinical_stage_group
+      - clinical_t_category
+      - clinical_tumour_staging_system
+      - date_of_diagnosis
+      - lymph_nodes_examined_method
+      - lymph_nodes_examined_status
+      - submitter_primary_diagnosis_id
+    NestedRadiation:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        radiation_therapy_modality:
+          $ref: '#/components/schemas/RadiationTherapyModalityEnum'
+        radiation_therapy_type:
+          $ref: '#/components/schemas/RadiationTherapyTypeEnum'
+        anatomical_site_irradiated:
+          $ref: '#/components/schemas/AnatomicalSiteIrradiatedEnum'
+        radiation_therapy_fractions:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        radiation_therapy_dosage:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        radiation_boost:
+          type: boolean
+          nullable: true
+        reference_radiation_treatment_id:
+          type: string
+          maxLength: 64
+      required:
+      - anatomical_site_irradiated
+      - radiation_therapy_dosage
+      - radiation_therapy_fractions
+      - radiation_therapy_modality
+      - radiation_therapy_type
+    NestedSampleRegistration:
+      type: object
+      properties:
+        submitter_sample_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        gender:
+          $ref: '#/components/schemas/GenderEnum'
+        sex_at_birth:
+          $ref: '#/components/schemas/SexAtBirthEnum'
+        specimen_tissue_source:
+          $ref: '#/components/schemas/SpecimenTissueSourceEnum'
+        tumour_normal_designation:
+          $ref: '#/components/schemas/TumourNormalDesignationEnum'
+        specimen_type:
+          $ref: '#/components/schemas/SpecimenTypeEnum'
+        sample_type:
+          $ref: '#/components/schemas/SampleTypeEnum'
+      required:
+      - gender
+      - sample_type
+      - sex_at_birth
+      - specimen_tissue_source
+      - specimen_type
+      - submitter_sample_id
+      - tumour_normal_designation
+    NestedSpecimen:
+      type: object
+      properties:
+        pathological_tumour_staging_system:
+          oneOf:
+          - $ref: '#/components/schemas/StagingSystemEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        pathological_t_category:
+          oneOf:
+          - $ref: '#/components/schemas/TCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        pathological_n_category:
+          oneOf:
+          - $ref: '#/components/schemas/NCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        pathological_m_category:
+          oneOf:
+          - $ref: '#/components/schemas/MCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        pathological_stage_group:
+          oneOf:
+          - $ref: '#/components/schemas/StageGroupEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        specimen_collection_date:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        specimen_storage:
+          $ref: '#/components/schemas/SpecimenStorageEnum'
+        tumour_histological_type:
+          type: string
+          maxLength: 128
+          pattern: ^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$
+        specimen_anatomic_location:
+          type: string
+          maxLength: 32
+          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
+        reference_pathology_confirmed_diagnosis:
+          oneOf:
+          - $ref: '#/components/schemas/ReferencePathologyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        reference_pathology_confirmed_tumour_presence:
+          oneOf:
+          - $ref: '#/components/schemas/ReferencePathologyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        tumour_grading_system:
+          oneOf:
+          - $ref: '#/components/schemas/TumourGradingSystemEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        tumour_grade:
+          oneOf:
+          - $ref: '#/components/schemas/TumourGradeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        percent_tumour_cells_range:
+          oneOf:
+          - $ref: '#/components/schemas/PercentTumourCellsRangeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        percent_tumour_cells_measurement_method:
+          oneOf:
+          - $ref: '#/components/schemas/PercentTumourCellsMeasurementMethodEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        sample_registrations:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedSampleRegistration'
+          readOnly: true
+        biomarkers:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedBiomarker'
+          readOnly: true
+      required:
+      - pathological_m_category
+      - pathological_n_category
+      - pathological_stage_group
+      - pathological_t_category
+      - pathological_tumour_staging_system
+      - percent_tumour_cells_measurement_method
+      - percent_tumour_cells_range
+      - reference_pathology_confirmed_diagnosis
+      - reference_pathology_confirmed_tumour_presence
+      - specimen_anatomic_location
+      - specimen_collection_date
+      - specimen_storage
+      - tumour_grade
+      - tumour_grading_system
+      - tumour_histological_type
+    NestedSurgery:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        surgery_type:
+          $ref: '#/components/schemas/SurgeryTypeEnum'
+        surgery_site:
+          type: string
+          maxLength: 255
+          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
+        surgery_location:
+          oneOf:
+          - $ref: '#/components/schemas/SurgeryLocationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        tumour_focality:
+          oneOf:
+          - $ref: '#/components/schemas/TumourFocalityEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        residual_tumour_classification:
+          oneOf:
+          - $ref: '#/components/schemas/ResidualTumourClassificationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        margin_types_involved:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+        margin_types_not_involved:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+        margin_types_not_assessed:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+        lymphovascular_invasion:
+          oneOf:
+          - $ref: '#/components/schemas/LymphovascularInvasionEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        perineural_invasion:
+          oneOf:
+          - $ref: '#/components/schemas/PerineuralInvasionEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        tumour_length:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        tumour_width:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        greatest_dimension_tumour:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        submitter_specimen_id:
+          type: string
+          nullable: true
+      required:
+      - lymphovascular_invasion
+      - margin_types_involved
+      - margin_types_not_assessed
+      - margin_types_not_involved
+      - perineural_invasion
+      - residual_tumour_classification
+      - surgery_location
+      - surgery_site
+      - surgery_type
+      - tumour_focality
+    NestedTreatment:
+      type: object
+      properties:
+        submitter_treatment_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        is_primary_treatment:
+          $ref: '#/components/schemas/uBooleanEnum'
+        treatment_start_date:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        treatment_end_date:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        treatment_setting:
+          $ref: '#/components/schemas/TreatmentSettingEnum'
+        treatment_intent:
+          $ref: '#/components/schemas/TreatmentIntentEnum'
+        days_per_cycle:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        number_of_cycles:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        response_to_treatment_criteria_method:
+          $ref: '#/components/schemas/ResponseToTreatmentCriteriaMethodEnum'
+        chemotherapies:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedChemotherapy'
+          readOnly: true
+        hormone_therapies:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedHormoneTherapy'
+          readOnly: true
+        immunotherapies:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedImmunotherapy'
+          readOnly: true
+        radiation:
+          allOf:
+          - $ref: '#/components/schemas/NestedRadiation'
+          readOnly: true
+        surgery:
+          allOf:
+          - $ref: '#/components/schemas/NestedSurgery'
+          readOnly: true
+        followups:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedFollowUp'
+          readOnly: true
+        biomarkers:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedBiomarker'
+          readOnly: true
+      required:
+      - is_primary_treatment
+      - response_to_treatment_criteria_method
+      - submitter_treatment_id
+      - treatment_end_date
+      - treatment_intent
+      - treatment_setting
+      - treatment_start_date
+    PaginatedBiomarkerList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Biomarker'
+    PaginatedChemotherapyList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chemotherapy'
+    PaginatedComorbidityList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comorbidity'
+    PaginatedDonorList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Donor'
+    PaginatedDonorWithClinicalDataList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DonorWithClinicalData'
+    PaginatedFollowUpList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FollowUp'
+    PaginatedHormoneTherapyList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/HormoneTherapy'
+    PaginatedImmunotherapyList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Immunotherapy'
+    PaginatedPrimaryDiagnosisList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrimaryDiagnosis'
+    PaginatedProgramList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Program'
+    PaginatedRadiationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Radiation'
+    PaginatedSampleRegistrationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SampleRegistration'
+    PaginatedSpecimenList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Specimen'
+    PaginatedSurgeryList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Surgery'
+    PaginatedTreatmentList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Treatment'
+    PercentTumourCellsMeasurementMethodEnum:
+      enum:
+      - Genomics
+      - Image analysis
+      - Pathology estimate by percent nuclei
+      - Unknown
+      type: string
+    PercentTumourCellsRangeEnum:
+      enum:
+      - 0-19%
+      - 20-50%
+      - 51-100%
+      type: string
+    PerineuralInvasionEnum:
+      enum:
+      - Absent
+      - Cannot be assessed
+      - Not applicable
+      - Present
+      - Unknown
+      type: string
+    PrimaryDiagnosis:
+      type: object
+      properties:
+        submitter_primary_diagnosis_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        date_of_diagnosis:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        basis_of_diagnosis:
+          $ref: '#/components/schemas/BasisOfDiagnosisEnum'
+        lymph_nodes_examined_status:
+          $ref: '#/components/schemas/LymphNodesExaminedStatusEnum'
+        lymph_nodes_examined_method:
+          $ref: '#/components/schemas/LymphNodesExaminedMethodEnum'
+        clinical_tumour_staging_system:
+          oneOf:
+          - $ref: '#/components/schemas/StagingSystemEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        clinical_t_category:
+          oneOf:
+          - $ref: '#/components/schemas/TCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        clinical_n_category:
+          oneOf:
+          - $ref: '#/components/schemas/NCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        clinical_m_category:
+          oneOf:
+          - $ref: '#/components/schemas/MCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        clinical_stage_group:
+          oneOf:
+          - $ref: '#/components/schemas/StageGroupEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        cancer_type_code:
+          type: string
+          maxLength: 64
+        number_lymph_nodes_positive:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+      required:
+      - basis_of_diagnosis
+      - cancer_type_code
+      - clinical_m_category
+      - clinical_n_category
+      - clinical_stage_group
+      - clinical_t_category
+      - clinical_tumour_staging_system
+      - date_of_diagnosis
+      - lymph_nodes_examined_method
+      - lymph_nodes_examined_status
+      - program_id
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+    PrimarySiteEnum:
+      enum:
+      - Accessory sinuses
+      - Adrenal gland
+      - Anus and anal canal
+      - Base of tongue
+      - Bladder
+      - Bones, joints and articular cartilage of limbs
+      - Bones, joints and articular cartilage of other and unspecified sites
+      - Brain
+      - Breast
+      - Bronchus and lung
+      - Cervix uteri
+      - Colon
+      - Connective, subcutaneous and other soft tissues
+      - Corpus uteri
+      - Esophagus
+      - Eye and adnexa
+      - Floor of mouth
+      - Gallbladder
+      - Gum
+      - Heart, mediastinum, and pleura
+      - Hematopoietic and reticuloendothelial systems
+      - Hypopharynx
+      - Kidney
+      - Larynx
+      - Lip
+      - Liver and intrahepatic bile ducts
+      - Lymph nodes
+      - Meninges
+      - Nasal cavity and middle ear
+      - Nasopharynx
+      - Oropharynx
+      - Other and ill-defined digestive organs
+      - Other and ill-defined sites
+      - Other and ill-defined sites in lip, oral cavity and pharynx
+      - Other and ill-defined sites within respiratory system and intrathoracic organs
+      - Other and unspecified female genital organs
+      - Other and unspecified major salivary glands
+      - Other and unspecified male genital organs
+      - Other and unspecified parts of biliary tract
+      - Other and unspecified parts of mouth
+      - Other and unspecified parts of tongue
+      - Other and unspecified urinary organs
+      - Other endocrine glands and related structures
+      - Ovary
+      - Palate
+      - Pancreas
+      - Parotid gland
+      - Penis
+      - Peripheral nerves and autonomic nervous system
+      - Placenta
+      - Prostate gland
+      - Pyriform sinus
+      - Rectosigmoid junction
+      - Rectum
+      - Renal pelvis
+      - Retroperitoneum and peritoneum
+      - Skin
+      - Small intestine
+      - Spinal cord, cranial nerves, and other parts of central nervous system
+      - Stomach
+      - Testis
+      - Thymus
+      - Thyroid gland
+      - Tonsil
+      - Trachea
+      - Unknown primary site
+      - Ureter
+      - Uterus, NOS
+      - Vagina
+      - Vulva
+      type: string
+    Program:
+      type: object
+      properties:
+        program_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        name:
+          type: string
+          maxLength: 255
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+      required:
+      - name
+      - program_id
+    Radiation:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        radiation_therapy_modality:
+          $ref: '#/components/schemas/RadiationTherapyModalityEnum'
+        radiation_therapy_type:
+          $ref: '#/components/schemas/RadiationTherapyTypeEnum'
+        anatomical_site_irradiated:
+          $ref: '#/components/schemas/AnatomicalSiteIrradiatedEnum'
+        radiation_therapy_fractions:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        radiation_therapy_dosage:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        radiation_boost:
+          type: boolean
+          nullable: true
+        reference_radiation_treatment_id:
+          type: string
+          maxLength: 64
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_treatment_id:
+          type: string
+      required:
+      - anatomical_site_irradiated
+      - program_id
+      - radiation_therapy_dosage
+      - radiation_therapy_fractions
+      - radiation_therapy_modality
+      - radiation_therapy_type
+      - submitter_donor_id
+      - submitter_treatment_id
+    RadiationTherapyModalityEnum:
+      enum:
+      - Megavoltage radiation therapy using photons (procedure)
+      - Teleradiotherapy using electrons (procedure)
+      - Teleradiotherapy protons (procedure)
+      - Teleradiotherapy neutrons (procedure)
+      - Brachytherapy (procedure)
+      - Other
+      type: string
+    RadiationTherapyTypeEnum:
+      enum:
+      - External
+      - Internal
+      type: string
+    ReferencePathologyEnum:
+      enum:
+      - 'Yes'
+      - 'No'
+      - Not done
+      - Unknown
+      type: string
+    RelapseTypeEnum:
+      enum:
+      - Distant recurrence/metastasis
+      - Local recurrence
+      - Local recurrence and distant metastasis
+      - Progression (liquid tumours)
+      - Biochemical progression
+      type: string
+    ResidualTumourClassificationEnum:
+      enum:
+      - Not applicable
+      - RX
+      - R0
+      - R1
+      - R2
+      - Unknown
+      type: string
+    ResponseToTreatmentCriteriaMethodEnum:
+      enum:
+      - RECIST 1.1
+      - iRECIST
+      - Cheson CLL 2012 Oncology Response Criteria
+      - Response Assessment in Neuro-Oncology (RANO)
+      - AML Response Criteria
+      - Physician Assessed Response Criteria
+      type: string
+    ResponseToTreatmentEnum:
+      enum:
+      - Complete response
+      - Partial response
+      - Progressive disease
+      - Stable disease
+      - Immune complete response (iCR)
+      - Immune partial response (iPR)
+      - Immune uncomfirmed progressive disease (iUPD)
+      - Immune confirmed progressive disease (iCPD)
+      - Immune stable disease (iSD)
+      - Complete remission
+      - Partial remission
+      - Minor response
+      - Complete remission without measurable residual disease (CR MRD-)
+      - Complete remission with incomplete hematologic recovery (CRi)
+      - Morphologic leukemia-free state
+      - Primary refractory disease
+      - Hematologic relapse (after CR MRD-, CR, CRi)
+      - Molecular relapse (after CR MRD-)
+      - Physician assessed complete response
+      - Physician assessed partial response
+      - Physician assessed stable disease
+      - No evidence of disease (NED)
+      type: string
+    SampleRegistration:
+      type: object
+      properties:
+        submitter_sample_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        gender:
+          $ref: '#/components/schemas/GenderEnum'
+        sex_at_birth:
+          $ref: '#/components/schemas/SexAtBirthEnum'
+        specimen_tissue_source:
+          $ref: '#/components/schemas/SpecimenTissueSourceEnum'
+        tumour_normal_designation:
+          $ref: '#/components/schemas/TumourNormalDesignationEnum'
+        specimen_type:
+          $ref: '#/components/schemas/SpecimenTypeEnum'
+        sample_type:
+          $ref: '#/components/schemas/SampleTypeEnum'
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_specimen_id:
+          type: string
+      required:
+      - gender
+      - program_id
+      - sample_type
+      - sex_at_birth
+      - specimen_tissue_source
+      - specimen_type
+      - submitter_donor_id
+      - submitter_sample_id
+      - submitter_specimen_id
+      - tumour_normal_designation
+    SampleTypeEnum:
+      enum:
+      - Amplified DNA
+      - ctDNA
+      - Other DNA enrichments
+      - Other RNA fractions
+      - polyA+ RNA
+      - Protein
+      - rRNA-depleted RNA
+      - Total DNA
+      - Total RNA
+      type: string
+    SexAtBirthEnum:
+      enum:
+      - Male
+      - Female
+      - Other
+      - Unknown
+      type: string
+    Specimen:
+      type: object
+      properties:
+        submitter_specimen_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        pathological_tumour_staging_system:
+          oneOf:
+          - $ref: '#/components/schemas/StagingSystemEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        pathological_t_category:
+          oneOf:
+          - $ref: '#/components/schemas/TCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        pathological_n_category:
+          oneOf:
+          - $ref: '#/components/schemas/NCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        pathological_m_category:
+          oneOf:
+          - $ref: '#/components/schemas/MCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        pathological_stage_group:
+          oneOf:
+          - $ref: '#/components/schemas/StageGroupEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        specimen_collection_date:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        specimen_storage:
+          $ref: '#/components/schemas/SpecimenStorageEnum'
+        tumour_histological_type:
+          type: string
+          maxLength: 128
+          pattern: ^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$
+        specimen_anatomic_location:
+          type: string
+          maxLength: 32
+          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
+        reference_pathology_confirmed_diagnosis:
+          oneOf:
+          - $ref: '#/components/schemas/ReferencePathologyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        reference_pathology_confirmed_tumour_presence:
+          oneOf:
+          - $ref: '#/components/schemas/ReferencePathologyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        tumour_grading_system:
+          oneOf:
+          - $ref: '#/components/schemas/TumourGradingSystemEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        tumour_grade:
+          oneOf:
+          - $ref: '#/components/schemas/TumourGradeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        percent_tumour_cells_range:
+          oneOf:
+          - $ref: '#/components/schemas/PercentTumourCellsRangeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        percent_tumour_cells_measurement_method:
+          oneOf:
+          - $ref: '#/components/schemas/PercentTumourCellsMeasurementMethodEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_primary_diagnosis_id:
+          type: string
+      required:
+      - pathological_m_category
+      - pathological_n_category
+      - pathological_stage_group
+      - pathological_t_category
+      - pathological_tumour_staging_system
+      - percent_tumour_cells_measurement_method
+      - percent_tumour_cells_range
+      - program_id
+      - reference_pathology_confirmed_diagnosis
+      - reference_pathology_confirmed_tumour_presence
+      - specimen_anatomic_location
+      - specimen_collection_date
+      - specimen_storage
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+      - submitter_specimen_id
+      - tumour_grade
+      - tumour_grading_system
+      - tumour_histological_type
+    SpecimenStorageEnum:
+      enum:
+      - Cut slide
+      - Frozen in -70 freezer
+      - Frozen in liquid nitrogen
+      - Frozen in vapour phase
+      - Not Applicable
+      - Other
+      - Paraffin block
+      - RNA later frozen
+      - Unknown
+      type: string
+    SpecimenTissueSourceEnum:
+      enum:
+      - Amniotic fluid
+      - Bile Fluid
+      - Whole blood
+      - Blood arterial
+      - Cord blood
+      - Blood venous
+      - Bone
+      - Serum, Convalescent
+      - Cerebral spinal fluid
+      - Cervical Mucus
+      - Duodenal fluid
+      - Blood, Fetal
+      - Fluid, Abdomen
+      - Genital vaginal
+      - Fluid, Hydrocele
+      - Fluid, Joint
+      - Fluid, Kidney
+      - Fluid, Lumbar Sac
+      - Marrow
+      - Pancreatic fluid
+      - Fluid, Pericardial
+      - Placenta
+      - Pleural fluid (thoracentesis fluid)
+      - Saliva
+      - Skin
+      - Seminal fluid
+      - Fluid, synovial (Joint fluid)
+      - Sputum
+      - Tissue
+      - Vitreous Fluid
+      - Wound
+      type: string
+    SpecimenTypeEnum:
+      enum:
+      - Cell line - derived from normal
+      - Cell line - derived from metastatic tumour
+      - Cell line - derived from primary tumour
+      - Cell line - derived from xenograft tumour
+      - Metastatic tumour - additional metastatic
+      - Metastatic tumour - metastasis local to lymph node
+      - Metastatic tumour - metastasis to distant location
+      - Metastatic tumour
+      - Normal - tissue adjacent to primary tumour
+      - Normal
+      - Primary tumour - additional new primary
+      - Primary tumour - adjacent to normal
+      - Primary tumour
+      - Recurrent tumour
+      - Xenograft - derived from primary tumour
+      - Xenograft - derived from metastatic tumour
+      - Xenograft - derived from tumour cell line
+      type: string
+    StageGroupEnum:
+      enum:
+      - Occult Carcinoma
+      - Stage 0
+      - Stage 0a
+      - Stage 0is
+      - Stage 1
+      - Stage 1A
+      - Stage 1B
+      - Stage A
+      - Stage B
+      - Stage C
+      - Stage I
+      - Stage IA
+      - Stage IA1
+      - Stage IA2
+      - Stage IA3
+      - Stage IAB
+      - Stage IAE
+      - Stage IAES
+      - Stage IAS
+      - Stage IB
+      - Stage IB1
+      - Stage IB2
+      - Stage IBE
+      - Stage IBES
+      - Stage IBS
+      - Stage IC
+      - Stage IE
+      - Stage IEA
+      - Stage IEB
+      - Stage IES
+      - Stage II
+      - Stage II bulky
+      - Stage IIA
+      - Stage IIA1
+      - Stage IIA2
+      - Stage IIAE
+      - Stage IIAES
+      - Stage IIAS
+      - Stage IIB
+      - Stage IIBE
+      - Stage IIBES
+      - Stage IIBS
+      - Stage IIC
+      - Stage IIE
+      - Stage IIEA
+      - Stage IIEB
+      - Stage IIES
+      - Stage III
+      - Stage IIIA
+      - Stage IIIA1
+      - Stage IIIA2
+      - Stage IIIAE
+      - Stage IIIAES
+      - Stage IIIAS
+      - Stage IIIB
+      - Stage IIIBE
+      - Stage IIIBES
+      - Stage IIIBS
+      - Stage IIIC
+      - Stage IIIC1
+      - Stage IIIC2
+      - Stage IIID
+      - Stage IIIE
+      - Stage IIIES
+      - Stage IIIS
+      - Stage IIS
+      - Stage IS
+      - Stage IV
+      - Stage IVA
+      - Stage IVA1
+      - Stage IVA2
+      - Stage IVAE
+      - Stage IVAES
+      - Stage IVAS
+      - Stage IVB
+      - Stage IVBE
+      - Stage IVBES
+      - Stage IVBS
+      - Stage IVC
+      - Stage IVE
+      - Stage IVES
+      - Stage IVS
+      - In situ
+      - Localized
+      - Regionalized
+      - Distant
+      type: string
+    StagingSystemEnum:
+      enum:
+      - AJCC 8th edition
+      - AJCC 7th edition
+      - AJCC 6th edition
+      - Ann Arbor staging system
+      - Binet staging system
+      - Durie-Salmon staging system
+      - FIGO staging system
+      - Lugano staging system
+      - Rai staging system
+      - Revised International staging system (RISS)
+      - SEER staging system
+      - St Jude staging system
+      type: string
+    Surgery:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        surgery_type:
+          $ref: '#/components/schemas/SurgeryTypeEnum'
+        surgery_site:
+          type: string
+          maxLength: 255
+          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
+        surgery_location:
+          oneOf:
+          - $ref: '#/components/schemas/SurgeryLocationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        tumour_focality:
+          oneOf:
+          - $ref: '#/components/schemas/TumourFocalityEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        residual_tumour_classification:
+          oneOf:
+          - $ref: '#/components/schemas/ResidualTumourClassificationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        margin_types_involved:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+        margin_types_not_involved:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+        margin_types_not_assessed:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/MarginTypesEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+        lymphovascular_invasion:
+          oneOf:
+          - $ref: '#/components/schemas/LymphovascularInvasionEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        perineural_invasion:
+          oneOf:
+          - $ref: '#/components/schemas/PerineuralInvasionEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        tumour_length:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        tumour_width:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        greatest_dimension_tumour:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_specimen_id:
+          type: string
+          nullable: true
+        submitter_treatment_id:
+          type: string
+      required:
+      - lymphovascular_invasion
+      - margin_types_involved
+      - margin_types_not_assessed
+      - margin_types_not_involved
+      - perineural_invasion
+      - program_id
+      - residual_tumour_classification
+      - submitter_donor_id
+      - submitter_treatment_id
+      - surgery_location
+      - surgery_site
+      - surgery_type
+      - tumour_focality
+    SurgeryLocationEnum:
+      enum:
+      - Local recurrence
+      - Metastatic
+      - Primary
+      type: string
+    SurgeryTypeEnum:
+      enum:
+      - Axillary Clearance
+      - Axillary lymph nodes sampling
+      - Biopsy
+      - Bypass Gastrojejunostomy
+      - Cholecystectomy
+      - Cholecystojejunostomy
+      - Completion gastrectomy
+      - Debridement of pancreatic and peripancreatic necrosis
+      - Debulking
+      - Distal subtotal pancreatectomy
+      - Drainage of abscess
+      - Duodenal preserving pancreatic head resection
+      - Endoscopic biopsy
+      - Endoscopic brushings of GIT
+      - Enucleation
+      - Esophageal bypass surgery/jejunostomy only
+      - Exploratory laparotomy
+      - Fine needle aspiration biopsy
+      - Gastric Antrectomy
+      - Hepaticojejunostomy
+      - Ivor Lewis subtotal esophagectomy
+      - Laparotomy (Open and Shut)
+      - Left thoracoabdominal incision
+      - Lobectomy
+      - Mammoplasty
+      - Mastectomy
+      - McKeown esophagectomy
+      - Merendino procedure
+      - Minimally invasive esophagectomy
+      - Pancreaticoduodenectomy
+      - Pancreaticojejunostomy, side-to-side anastomosis
+      - Pneumonectomy
+      - Proximal subtotal gastrectomy
+      - Pylorus-sparing Whipple operation
+      - Radical pancreaticoduodenectomy
+      - Reexcision
+      - Segmentectomy
+      - Sentinal Lymph Node Biopsy
+      - Spleen preserving distal pancreatectomy
+      - Splenectomy
+      - Subtotal pancreatectomy
+      - Thoracotomy (Open & Shut)
+      - Total gastrectomy
+      - Total gastrectomy with extended lymphadenectomy
+      - Total pancreatectomy
+      - Transhiatal esophagectomy
+      - Triple bypass of pancreas
+      - Wedge/localised gastric resection
+      - Wide Local Excision
+      type: string
+    TCategoryEnum:
+      enum:
+      - T0
+      - T1
+      - T1a
+      - T1a1
+      - T1a2
+      - T1a(s)
+      - T1a(m)
+      - T1b
+      - T1b1
+      - T1b2
+      - T1b(s)
+      - T1b(m)
+      - T1c
+      - T1d
+      - T1mi
+      - T2
+      - T2(s)
+      - T2(m)
+      - T2a
+      - T2a1
+      - T2a2
+      - T2b
+      - T2c
+      - T2d
+      - T3
+      - T3(s)
+      - T3(m)
+      - T3a
+      - T3b
+      - T3c
+      - T3d
+      - T3e
+      - T4
+      - T4a
+      - T4a(s)
+      - T4a(m)
+      - T4b
+      - T4b(s)
+      - T4b(m)
+      - T4c
+      - T4d
+      - T4e
+      - Ta
+      - Tis
+      - Tis(DCIS)
+      - Tis(LAMN)
+      - Tis(LCIS)
+      - Tis(Paget)
+      - Tis(Paget’s)
+      - Tis pu
+      - Tis pd
+      - TX
+      type: string
+    Treatment:
+      type: object
+      properties:
+        submitter_treatment_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        treatment_type:
+          type: array
+          items:
+            $ref: '#/components/schemas/TreatmentTypeEnum'
+        is_primary_treatment:
+          $ref: '#/components/schemas/uBooleanEnum'
+        treatment_start_date:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        treatment_end_date:
+          type: string
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        treatment_setting:
+          $ref: '#/components/schemas/TreatmentSettingEnum'
+        treatment_intent:
+          $ref: '#/components/schemas/TreatmentIntentEnum'
+        response_to_treatment_criteria_method:
+          $ref: '#/components/schemas/ResponseToTreatmentCriteriaMethodEnum'
+        response_to_treatment:
+          $ref: '#/components/schemas/ResponseToTreatmentEnum'
+        days_per_cycle:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        number_of_cycles:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+        submitter_primary_diagnosis_id:
+          type: string
+      required:
+      - is_primary_treatment
+      - program_id
+      - response_to_treatment
+      - response_to_treatment_criteria_method
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+      - submitter_treatment_id
+      - treatment_end_date
+      - treatment_intent
+      - treatment_setting
+      - treatment_start_date
+      - treatment_type
+    TreatmentIntentEnum:
+      enum:
+      - Curative
+      - Palliative
+      type: string
+    TreatmentSettingEnum:
+      enum:
+      - Adjuvant
+      - Advanced/Metastatic
+      - Neoadjuvant
+      - Not applicable
+      type: string
+    TreatmentTypeEnum:
+      enum:
+      - Ablation
+      - Bone marrow transplant
+      - Chemotherapy
+      - Endoscopic therapy
+      - Hormonal therapy
+      - Immunotherapy
+      - No treatment
+      - Other targeting molecular therapy
+      - Photodynamic therapy
+      - Radiation therapy
+      - Stem cell transplant
+      - Surgery
+      type: string
+    TumourFocalityEnum:
+      enum:
+      - Cannot be assessed
+      - Multifocal
+      - Not applicable
+      - Unifocal
+      - Unknown
+      type: string
+    TumourGradeEnum:
+      enum:
+      - Low grade
+      - High grade
+      - GX
+      - G1
+      - G2
+      - G3
+      - G4
+      - Low
+      - High
+      - Grade I
+      - Grade II
+      - Grade III
+      - Grade IV
+      - Grade Group 1
+      - Grade Group 2
+      - Grade Group 3
+      - Grade Group 4
+      - Grade Group 5
+      type: string
+    TumourGradingSystemEnum:
+      enum:
+      - FNCLCC grading system
+      - Four-tier grading system
+      - Gleason grade group system
+      - Grading system for GISTs
+      - Grading system for GNETs
+      - ISUP grading system
+      - Nuclear grading system for DCIS
+      - Scarff-Bloom-Richardson grading system
+      - Three-tier grading system
+      - Two-tier grading system
+      - WHO grading system for CNS tumours
+      type: string
+    TumourNormalDesignationEnum:
+      enum:
+      - Normal
+      - Tumour
+      type: string
+    moh_overview_schema_response:
+      type: object
+      properties:
+        cohort_count:
+          type: integer
+        individual_count:
+          type: integer
+      required:
+      - cohort_count
+      - individual_count
+    uBooleanEnum:
+      enum:
+      - 'Yes'
+      - 'No'
+      - Unknown
+      type: string
+  securitySchemes:
+    localAuth:
+      type: http
+      scheme: bearer
