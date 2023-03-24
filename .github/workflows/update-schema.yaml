@@ -68,6 +68,7 @@ jobs:
               path: 'schema.yml',
               message: 'Update schema.yml',
               content: Buffer.from(schemaYml).toString('base64'),
+              sha: context.payload.after,
               branch: context.ref
             });
 
