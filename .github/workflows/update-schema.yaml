@@ -60,7 +60,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               path: 'chord_metadata_service/mohpackets/docs/schema.yml',
-              sha: context.payload.after
+              sha: context.payload.after,
               ref: context.ref
             });
 
