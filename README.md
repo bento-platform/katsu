@@ -4,6 +4,12 @@
 ![Lint Status](https://github.com/CanDIG/katsu/workflows/Lint/badge.svg)
 [![codecov](https://codecov.io/gh/CanDIG/katsu/branch/master/graph/badge.svg)](https://codecov.io/gh/CanDIG/katsu)
 
+## Table of Contents
+
+- [Installation Guide](#installation-guide) <!-- omit in toc -->
+- [Tests](#tests)
+- [Authentication and Authorization](#authentication-and-authorization)
+- [REST API](#rest-api)
 
 ## Installation Guide
 
