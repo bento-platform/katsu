@@ -79,4 +79,14 @@ jobs:
               branch: context.ref
             });
 
+            await octokit.request('PUT /repos/{owner}/{repo}/contents/chord_metadata_service/mohpackets/docs/{path}', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'openapi.md',
+              message: 'Update openapi.md',
+              content: Buffer.from(openApiMd).toString('base64'),
+              sha: currentSha,
+              branch: context.ref
+            });
+
 
