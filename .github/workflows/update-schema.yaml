@@ -73,11 +73,11 @@ jobs:
             const openApiSha = await getFileSha('openapi.md');
 
             // Read the content of updated files
-            const schemaYml = fs.readFileSync('./${repoPath}schema.yml', 'utf8');
-            const openApiMd = fs.readFileSync('./${repoPath}openapi.md', 'utf8');
+            const schemaYml = fs.readFileSync(`./${repoPath}schema.yml`, 'utf8');
+            const openApiMd = fs.readFileSync(`./${repoPath}openapi.md`, 'utf8');
 
             // Commit and push changes
-            await octokit.request('PUT /repos/{owner}/{repo}/contents/${repoPath}{path}', {
+            await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               path: 'schema.yml',
@@ -87,7 +87,7 @@ jobs:
               branch: context.ref
             });
 
-            await octokit.request('PUT /repos/{owner}/{repo}/contents/${repoPath}{path}', {
+            await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               path: 'openapi.md',
