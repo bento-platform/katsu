@@ -65,6 +65,14 @@ jobs:
             });
             const schemaSha = schemaData.sha;
 
+            const { data : openApiData } = await octokit.repos.getContent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'chord_metadata_service/mohpackets/docs/openapi.md',
+              ref: context.ref
+            });
+            const openApiSha = openApiData.sha;
+
 
             // Read the updated files
             const schemaYml = fs.readFileSync('./chord_metadata_service/mohpackets/docs/schema.yml', 'utf8');
@@ -78,6 +86,16 @@ jobs:
               message: 'Update schema.yml',
               content: Buffer.from(schemaYml).toString('base64'),
               sha: schemaSha,
+              branch: context.ref
+            });
+
+            await octokit.request('PUT /repos/{owner}/{repo}/contents/chord_metadata_service/mohpackets/docs/{path}', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'openapi.md',
+              message: 'Update openapi.md',
+              content: Buffer.from(openApiMd).toString('base64'),
+              sha: openApiSha,
               branch: context.ref
             });
 
