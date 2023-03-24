@@ -13,7 +13,7 @@
 
 ## Installation Guide
 
-This guide will walk you through the steps to insctall and run Katsu on your local machine.
+This guide will walk you through the steps to install and run Katsu on your local machine.
 
 NOTE: If you want to run as docker container, please refer to the [docker guide](https://github.com/CanDIG/CanDIGv2/blob/develop/docs/install-docker.md)
 
