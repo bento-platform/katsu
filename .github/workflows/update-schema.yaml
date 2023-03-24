@@ -79,13 +79,22 @@ jobs:
               branch: context.ref
             });
 
+            // Get the current contents of the file
+            const { data } = await octokit.repos.getContent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'chord_metadata_service/mohpackets/docs/schema.yml',
+              ref: context.ref
+            });
+            const currentSha2 = data.sha;
+
             await octokit.request('PUT /repos/{owner}/{repo}/contents/chord_metadata_service/mohpackets/docs/{path}', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               path: 'openapi.md',
               message: 'Update openapi.md',
               content: Buffer.from(openApiMd).toString('base64'),
-              sha: currentSha,
+              sha: currentSha2,
               branch: context.ref
             });
 
