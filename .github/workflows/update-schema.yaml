@@ -49,37 +49,35 @@ jobs:
       - name: Install octokit/rest
         run: npm install @octokit/rest
 
-      - name: Update schema.yml and openapi.md in repo
+      - name: Update schema.yml and openapi.md on PR
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
             const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({ auth: "${{ secrets.GITHUB_TOKEN }}" });
-            // Get the current contents of the file
-            const { data : schemaData } = await octokit.repos.getContent({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'chord_metadata_service/mohpackets/docs/schema.yml',
-              ref: context.ref
-            });
-            const schemaSha = schemaData.sha;
 
-            const { data : openApiData } = await octokit.repos.getContent({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'chord_metadata_service/mohpackets/docs/openapi.md',
-              ref: context.ref
-            });
-            const openApiSha = openApiData.sha;
+            // get SHA from each file
+            const repoPath = 'chord_metadata_service/mohpackets/docs/';
+            const getFileSha = async (path) => {
+              const { data } = await octokit.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: `${repoPath}${path}`,
+                ref: context.ref
+              });
+              return data.sha;
+            }
+            
+            const schemaSha = await getFileSha('schema.yml');
+            const openApiSha = await getFileSha('openapi.md');
 
-
-            // Read the updated files
-            const schemaYml = fs.readFileSync('./chord_metadata_service/mohpackets/docs/schema.yml', 'utf8');
-            const openApiMd = fs.readFileSync('./chord_metadata_service/mohpackets/docs/openapi.md', 'utf8');
+            // Read the content of updated files
+            const schemaYml = fs.readFileSync('./${repoPath}schema.yml', 'utf8');
+            const openApiMd = fs.readFileSync('./${repoPath}openapi.md', 'utf8');
 
             // Commit and push changes
-            await octokit.request('PUT /repos/{owner}/{repo}/contents/chord_metadata_service/mohpackets/docs/{path}', {
+            await octokit.request('PUT /repos/{owner}/{repo}/contents/${repoPath}{path}', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               path: 'schema.yml',
@@ -89,7 +87,7 @@ jobs:
               branch: context.ref
             });
 
-            await octokit.request('PUT /repos/{owner}/{repo}/contents/chord_metadata_service/mohpackets/docs/{path}', {
+            await octokit.request('PUT /repos/{owner}/{repo}/contents/${repoPath}{path}', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               path: 'openapi.md',
