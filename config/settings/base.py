@@ -10,45 +10,26 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-import os
-from os.path import exists
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
+# Base settings
+# -------------
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-30bq59j6h_8^_%c#t4&d@1spzp@z(p1z8)h$a@1s*0^=bv!i2b"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-# Modify this for local development
-FAKE_AUTHORIZED_DATASETS = ["SYNTHETIC-POG"]
-
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "docker.localhost"]
-host_container_name = os.environ.get("HOST_CONTAINER_NAME")
-if host_container_name:
-    ALLOWED_HOSTS.append(host_container_name)
-    ALLOWED_HOSTS = list(set(ALLOWED_HOSTS))
-
-# CANDIG SETTINGS
-KATSU_AUTHORIZATION = os.getenv("KATSU_AUTHORIZATION", "LOCAL_SETTING_NO_AUTH")
-CANDIG_OPA_URL = os.getenv("OPA_URL", "LOCAL_SETTING_NO_OPA_URL")
-CANDIG_OPA_SITE_ADMIN_KEY = os.getenv(
-    "OPA_SITE_ADMIN_KEY", "LOCAL_SETTING_NO_SITE_ADMIN_KEY"
-)
-CANDIG_OPA_SECRET = "LOCAL_SETTING_NO_OPA_SECRET"
-if exists("/run/secrets/opa-root-token"):
-    with open("/run/secrets/opa-root-token", "r") as f:
-        CANDIG_OPA_SECRET = f.read()
-
+ALLOWED_HOSTS = []
 
 # Application definition
+# ----------------------
 
 INSTALLED_APPS = [
     # Django default
@@ -66,7 +47,6 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework",
     "drf_spectacular",
-    "debug_toolbar",
     # Local
     # -----
     "chord_metadata_service.mohpackets.apps.MohpacketsConfig",
@@ -76,7 +56,6 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -132,31 +111,6 @@ LOGGING = {
     },
 }
 
-# function to read docker secret password file
-def get_secret(path):
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return f.readline().strip()
-    except (FileNotFoundError, PermissionError) as err:
-        print("Error reading secret file: %s" % err)
-        raise
-
-
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_DATABASE", "metadata"),
-        "USER": os.environ.get("POSTGRES_USER", "admin"),
-        "PASSWORD": get_secret(os.environ.get("POSTGRES_PASSWORD_FILE"))
-        if os.environ.get("POSTGRES_PASSWORD_FILE")
-        else os.environ.get("POSTGRES_PASSWORD", "admin"),
-        "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
-        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
-    }
-}
 
 # Cache
 # https://docs.djangoproject.com/en/4.1/topics/cache/
@@ -210,7 +164,9 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+
 # DRF settings
+# ------------
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -230,6 +186,7 @@ REST_FRAMEWORK = {
 }
 
 # DRF Spectacular settings
+# ------------------------
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "MoH Service API",
@@ -271,14 +228,3 @@ SPECTACULAR_SETTINGS = {
         "DosageUnitsEnum": "chord_metadata_service.mohpackets.permissible_values.DOSAGE_UNITS",
     },
 }
-
-# Debug toolbar settings
-
-if DEBUG:
-    import socket
-
-    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + [
-        "127.0.0.1",
-        "10.0.2.2",
-    ]
