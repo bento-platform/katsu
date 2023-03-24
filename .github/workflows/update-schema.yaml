@@ -56,7 +56,14 @@ jobs:
             const fs = require('fs');
             const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({ auth: "${{ secrets.GITHUB_TOKEN }}" });
-
+            // Get the current contents of the file
+            const { data } = await octokit.repos.getContent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'chord_metadata_service/mohpackets/docs/schema.yml',
+              ref: context.ref
+            });
+            const currentSha = data.sha;
             // Read the updated files
             const schemaYml = fs.readFileSync('./chord_metadata_service/mohpackets/docs/schema.yml', 'utf8');
             const openApiMd = fs.readFileSync('./chord_metadata_service/mohpackets/docs/openapi.md', 'utf8');
@@ -68,7 +75,7 @@ jobs:
               path: 'schema.yml',
               message: 'Update schema.yml',
               content: Buffer.from(schemaYml).toString('base64'),
-              sha: context.payload.after,
+              sha: currentSha,
               branch: context.ref
             });
 
