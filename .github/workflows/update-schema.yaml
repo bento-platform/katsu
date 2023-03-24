@@ -57,12 +57,12 @@ jobs:
             const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({ auth: "${{ secrets.GITHUB_TOKEN }}" });
             // Get the current contents of the file
-          const { sha:schemaSha } = await octokit.repos.getContent({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            path: 'chord_metadata_service/mohpackets/docs/schema.yml',
-            ref: context.ref
-          });
+            const { sha:schemaSha } = await octokit.repos.getContent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'chord_metadata_service/mohpackets/docs/schema.yml',
+              ref: context.ref
+            });
 
 
 
