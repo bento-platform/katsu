@@ -147,7 +147,7 @@ Inside Katsu, the flow of the request/response can be broken down into the follo
         B -->|Discovery| C[Count Queryset]
         B -->|Authorized| D[Authorized Queryset]
         C --> E[Response]
-        D --> E[Response]
+        D --> F[Response]
 ```
 
 ## REST API
