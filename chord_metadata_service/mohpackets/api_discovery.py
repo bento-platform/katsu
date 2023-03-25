@@ -297,11 +297,14 @@ def diagnosis_age_count(_request):
     min_dates = {}
     for date in diagnosis_dates:
         donor = date["submitter_donor_id"]
-        cur_date = dt.strptime(date["date_of_diagnosis"], "%Y-%m")
+        cur_date = (dt.strptime(date["date_of_diagnosis"], "%Y-%m").date()
+                    if date["date_of_diagnosis"] != '' 
+                    else '')
         if donor not in min_dates.keys():
             min_dates[donor] = cur_date
         else:
-            if cur_date < min_dates[donor]:
+            if ((min_dates[donor] != '' and cur_date < min_dates[donor]) or
+                (min_dates[donor] == '' and cur_date != '')):
                 min_dates[donor] = cur_date
 
     # Calculate donor's age of diagnosis
@@ -309,15 +312,17 @@ def diagnosis_age_count(_request):
     birth_dates = {date["submitter_donor_id"]: date["date_of_birth"] for date in birth_dates}
     ages = {}
     for donor, diagnosis_date in min_dates.items():
-        if donor in birth_dates.keys():
-            birth_date = dt.strptime(birth_dates[donor][:-3], "%Y-%m")
+        if birth_dates[donor] != '' and diagnosis_date != '':
+            birth_date = dt.strptime(birth_dates[donor], "%Y-%m").date()
             ages[donor] = (diagnosis_date - birth_date).days // 365.25
         else:
-            ages[donor] = None
+            ages[donor] = ''
 
     age_counts = defaultdict(int)
     for age in ages.values():
-        if age <= 19:
+        if age == '':
+            age_counts["NA"] += 1
+        elif age <= 19:
             age_counts["0-19"] += 1
         elif age <= 29:
             age_counts["20-29"] += 1

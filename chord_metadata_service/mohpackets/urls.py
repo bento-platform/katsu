@@ -113,7 +113,7 @@ ingest_patterns = [
 ]
 
 urlpatterns = [
-    path("model/", include(router.urls)),
+    path("authorized/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
     path("ingest/", include(ingest_patterns)),
     path("delete/all", delete_all),
