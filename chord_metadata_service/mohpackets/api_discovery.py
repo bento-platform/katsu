@@ -298,13 +298,13 @@ def diagnosis_age_count(_request):
     for date in diagnosis_dates:
         donor = date["submitter_donor_id"]
         cur_date = (dt.strptime(date["date_of_diagnosis"], "%Y-%m").date()
-                    if date["date_of_diagnosis"] != '' 
+                    if date["date_of_diagnosis"] != ''
                     else '')
         if donor not in min_dates.keys():
             min_dates[donor] = cur_date
         else:
             if ((min_dates[donor] != '' and cur_date < min_dates[donor]) or
-                (min_dates[donor] == '' and cur_date != '')):
+               (min_dates[donor] == '' and cur_date != '')):
                 min_dates[donor] = cur_date
 
     # Calculate donor's age of diagnosis
