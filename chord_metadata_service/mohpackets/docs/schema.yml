@@ -1607,10 +1607,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/overview:
+  /moh/v1/discovery/overview/cancer_type_count:
     get:
-      operationId: discovery_overview_retrieve
-      description: MoH Overview schema
+      operationId: discovery_overview_cancer_type_count_retrieve
+      description: MoH cancer types count
       tags:
       - discovery
       security:
@@ -1623,7 +1623,115 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/moh_overview_schema_response'
+                $ref: '#/components/schemas/moh_overview_cancer_type_count_response'
+          description: ''
+  /moh/v1/discovery/overview/cohort_count:
+    get:
+      operationId: discovery_overview_cohort_count_retrieve
+      description: MoH cohorts count
+      tags:
+      - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moh_overview_cohort_count_response'
+          description: ''
+  /moh/v1/discovery/overview/diagnosis_age_count:
+    get:
+      operationId: discovery_overview_diagnosis_age_count_retrieve
+      description: MoH Diagnosis age count
+      tags:
+      - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moh_overview_diagnosis_age_count_response'
+          description: ''
+  /moh/v1/discovery/overview/gender_count:
+    get:
+      operationId: discovery_overview_gender_count_retrieve
+      description: MoH gender count
+      tags:
+      - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moh_overview_gender_count_response'
+          description: ''
+  /moh/v1/discovery/overview/individual_count:
+    get:
+      operationId: discovery_overview_individual_count_retrieve
+      description: MoH individuals count
+      tags:
+      - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moh_overview_individual_count_response'
+          description: ''
+  /moh/v1/discovery/overview/patients_per_cohort:
+    get:
+      operationId: discovery_overview_patients_per_cohort_retrieve
+      description: MoH patients per cohort count
+      tags:
+      - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moh_overview_patient_per_cohort_response'
+          description: ''
+  /moh/v1/discovery/overview/treatment_type_count:
+    get:
+      operationId: discovery_overview_treatment_type_count_retrieve
+      description: MoH Treatments type count
+      tags:
+      - discovery
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moh_overview_treatment_type_count_response'
           description: ''
   /moh/v1/discovery/primary_diagnoses/:
     get:
@@ -4243,16 +4351,55 @@ components:
       - Normal
       - Tumour
       type: string
-    moh_overview_schema_response:
+    moh_overview_cancer_type_count_response:
+      type: object
+      properties:
+        cancer_type_count:
+          type: integer
+      required:
+      - cancer_type_count
+    moh_overview_cohort_count_response:
       type: object
       properties:
         cohort_count:
           type: integer
+      required:
+      - cohort_count
+    moh_overview_diagnosis_age_count_response:
+      type: object
+      properties:
+        age_range_count:
+          type: integer
+      required:
+      - age_range_count
+    moh_overview_gender_count_response:
+      type: object
+      properties:
+        gender_count:
+          type: integer
+      required:
+      - gender_count
+    moh_overview_individual_count_response:
+      type: object
+      properties:
         individual_count:
           type: integer
       required:
-      - cohort_count
       - individual_count
+    moh_overview_patient_per_cohort_response:
+      type: object
+      properties:
+        patients_per_cohort_count:
+          type: integer
+      required:
+      - patients_per_cohort_count
+    moh_overview_treatment_type_count_response:
+      type: object
+      properties:
+        treatment_type_count:
+          type: integer
+      required:
+      - treatment_type_count
     uBooleanEnum:
       enum:
       - 'Yes'

@@ -1304,13 +1304,13 @@ list(request, *args, **kwargs)
 }
 ```
 
-## discovery_overview_retrieve
+## discovery_overview_cancer_type_count_retrieve
 
-<a id="opIddiscovery_overview_retrieve"></a>
+<a id="opIddiscovery_overview_cancer_type_count_retrieve"></a>
 
-`GET /moh/v1/discovery/overview`
+`GET /moh/v1/discovery/overview/cancer_type_count`
 
-MoH Overview schema
+MoH cancer types count
 
 > Example responses
 
@@ -1318,8 +1318,115 @@ MoH Overview schema
 
 ```json
 {
-  "cohort_count": 0,
+  "cancer_type_count": 0
+}
+```
+
+## discovery_overview_cohort_count_retrieve
+
+<a id="opIddiscovery_overview_cohort_count_retrieve"></a>
+
+`GET /moh/v1/discovery/overview/cohort_count`
+
+MoH cohorts count
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "cohort_count": 0
+}
+```
+
+## discovery_overview_diagnosis_age_count_retrieve
+
+<a id="opIddiscovery_overview_diagnosis_age_count_retrieve"></a>
+
+`GET /moh/v1/discovery/overview/diagnosis_age_count`
+
+MoH Diagnosis age count
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "age_range_count": 0
+}
+```
+
+## discovery_overview_gender_count_retrieve
+
+<a id="opIddiscovery_overview_gender_count_retrieve"></a>
+
+`GET /moh/v1/discovery/overview/gender_count`
+
+MoH gender count
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "gender_count": 0
+}
+```
+
+## discovery_overview_individual_count_retrieve
+
+<a id="opIddiscovery_overview_individual_count_retrieve"></a>
+
+`GET /moh/v1/discovery/overview/individual_count`
+
+MoH individuals count
+
+> Example responses
+
+> 200 Response
+
+```json
+{
   "individual_count": 0
+}
+```
+
+## discovery_overview_patients_per_cohort_retrieve
+
+<a id="opIddiscovery_overview_patients_per_cohort_retrieve"></a>
+
+`GET /moh/v1/discovery/overview/patients_per_cohort`
+
+MoH patients per cohort count
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "patients_per_cohort_count": 0
+}
+```
+
+## discovery_overview_treatment_type_count_retrieve
+
+<a id="opIddiscovery_overview_treatment_type_count_retrieve"></a>
+
+`GET /moh/v1/discovery/overview/treatment_type_count`
+
+MoH Treatments type count
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "treatment_type_count": 0
 }
 ```
 
@@ -6042,17 +6149,36 @@ continued
 |*anonymous*|Normal|
 |*anonymous*|Tumour|
 
-<h2 id="tocS_moh_overview_schema_response">moh_overview_schema_response</h2>
+<h2 id="tocS_moh_overview_cancer_type_count_response">moh_overview_cancer_type_count_response</h2>
 
-<a id="schemamoh_overview_schema_response"></a>
-<a id="schema_moh_overview_schema_response"></a>
-<a id="tocSmoh_overview_schema_response"></a>
-<a id="tocsmoh_overview_schema_response"></a>
+<a id="schemamoh_overview_cancer_type_count_response"></a>
+<a id="schema_moh_overview_cancer_type_count_response"></a>
+<a id="tocSmoh_overview_cancer_type_count_response"></a>
+<a id="tocsmoh_overview_cancer_type_count_response"></a>
 
 ```json
 {
-  "cohort_count": 0,
-  "individual_count": 0
+  "cancer_type_count": 0
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|cancer_type_count|integer|true|none|none|
+
+<h2 id="tocS_moh_overview_cohort_count_response">moh_overview_cohort_count_response</h2>
+
+<a id="schemamoh_overview_cohort_count_response"></a>
+<a id="schema_moh_overview_cohort_count_response"></a>
+<a id="tocSmoh_overview_cohort_count_response"></a>
+<a id="tocsmoh_overview_cohort_count_response"></a>
+
+```json
+{
+  "cohort_count": 0
 }
 
 ```
@@ -6062,7 +6188,106 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |cohort_count|integer|true|none|none|
+
+<h2 id="tocS_moh_overview_diagnosis_age_count_response">moh_overview_diagnosis_age_count_response</h2>
+
+<a id="schemamoh_overview_diagnosis_age_count_response"></a>
+<a id="schema_moh_overview_diagnosis_age_count_response"></a>
+<a id="tocSmoh_overview_diagnosis_age_count_response"></a>
+<a id="tocsmoh_overview_diagnosis_age_count_response"></a>
+
+```json
+{
+  "age_range_count": 0
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|age_range_count|integer|true|none|none|
+
+<h2 id="tocS_moh_overview_gender_count_response">moh_overview_gender_count_response</h2>
+
+<a id="schemamoh_overview_gender_count_response"></a>
+<a id="schema_moh_overview_gender_count_response"></a>
+<a id="tocSmoh_overview_gender_count_response"></a>
+<a id="tocsmoh_overview_gender_count_response"></a>
+
+```json
+{
+  "gender_count": 0
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|gender_count|integer|true|none|none|
+
+<h2 id="tocS_moh_overview_individual_count_response">moh_overview_individual_count_response</h2>
+
+<a id="schemamoh_overview_individual_count_response"></a>
+<a id="schema_moh_overview_individual_count_response"></a>
+<a id="tocSmoh_overview_individual_count_response"></a>
+<a id="tocsmoh_overview_individual_count_response"></a>
+
+```json
+{
+  "individual_count": 0
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |individual_count|integer|true|none|none|
+
+<h2 id="tocS_moh_overview_patient_per_cohort_response">moh_overview_patient_per_cohort_response</h2>
+
+<a id="schemamoh_overview_patient_per_cohort_response"></a>
+<a id="schema_moh_overview_patient_per_cohort_response"></a>
+<a id="tocSmoh_overview_patient_per_cohort_response"></a>
+<a id="tocsmoh_overview_patient_per_cohort_response"></a>
+
+```json
+{
+  "patients_per_cohort_count": 0
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|patients_per_cohort_count|integer|true|none|none|
+
+<h2 id="tocS_moh_overview_treatment_type_count_response">moh_overview_treatment_type_count_response</h2>
+
+<a id="schemamoh_overview_treatment_type_count_response"></a>
+<a id="schema_moh_overview_treatment_type_count_response"></a>
+<a id="tocSmoh_overview_treatment_type_count_response"></a>
+<a id="tocsmoh_overview_treatment_type_count_response"></a>
+
+```json
+{
+  "treatment_type_count": 0
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|treatment_type_count|integer|true|none|none|
 
 <h2 id="tocS_uBooleanEnum">uBooleanEnum</h2>
 
