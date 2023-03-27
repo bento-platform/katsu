@@ -675,12 +675,20 @@ get_queryset()
 
 `GET /moh/v1/authorized/programs/`
 
+This mixin should be used for viewsets that need to restrict
+access to certain objects based on the user's permissions.
+
+Methods
+-------
+get_queryset()
+    Returns a queryset that includes only the objects that the user is
+    authorized to see.
+
 <h3 id="authorized_programs_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |program_id|query|string|false|none|
-|name|query|string|false|none|
 |created|query|string(date-time)|false|none|
 |updated|query|string(date-time)|false|none|
 |page|query|integer|false|A page number within the paginated result set.|
@@ -698,7 +706,6 @@ get_queryset()
   "results": [
     {
       "program_id": "string",
-      "name": "string",
       "created": "2019-08-24T14:15:22Z",
       "updated": "2019-08-24T14:15:22Z"
     }
@@ -4306,7 +4313,6 @@ continued
   "results": [
     {
       "program_id": "string",
-      "name": "string",
       "created": "2019-08-24T14:15:22Z",
       "updated": "2019-08-24T14:15:22Z"
     }
@@ -4639,7 +4645,6 @@ continued
 ```json
 {
   "program_id": "string",
-  "name": "string",
   "created": "2019-08-24T14:15:22Z",
   "updated": "2019-08-24T14:15:22Z"
 }
@@ -4651,7 +4656,6 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |program_id|string|true|none|none|
-|name|string|true|none|none|
 |created|string(date-time)|false|none|none|
 |updated|string(date-time)|false|none|none|
 

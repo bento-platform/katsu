@@ -637,13 +637,18 @@ paths:
   /moh/v1/authorized/programs/:
     get:
       operationId: authorized_programs_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict
+        access to certain objects based on the user's permissions.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a queryset that includes only the objects that the user is
+            authorized to see.
       parameters:
       - in: query
         name: program_id
-        schema:
-          type: string
-      - in: query
-        name: name
         schema:
           type: string
       - in: query
@@ -3576,9 +3581,6 @@ components:
           type: string
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
-        name:
-          type: string
-          maxLength: 255
         created:
           type: string
           format: date-time
@@ -3586,7 +3588,6 @@ components:
           type: string
           format: date-time
       required:
-      - name
       - program_id
     Radiation:
       type: object
