@@ -2,7 +2,7 @@
     {
         "model": "mohpackets.hormonetherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_5",
             "drug_name": "exemestane",
@@ -15,7 +15,7 @@
     {
         "model": "mohpackets.hormonetherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_5",
             "drug_name": "triptorelin",
@@ -28,7 +28,7 @@
     {
         "model": "mohpackets.hormonetherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_5",
             "drug_name": "exemestane",
@@ -41,7 +41,7 @@
     {
         "model": "mohpackets.hormonetherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_6",
             "drug_name": "exemestane",
@@ -54,7 +54,7 @@
     {
         "model": "mohpackets.hormonetherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_6",
             "drug_name": "exemestane",
@@ -67,7 +67,7 @@
     {
         "model": "mohpackets.hormonetherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_7",
             "drug_name": "degarelix",
@@ -80,7 +80,7 @@
     {
         "model": "mohpackets.hormonetherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_8",
             "drug_name": "goserelin",
