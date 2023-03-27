@@ -1,6 +1,6 @@
 [
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "submitter_treatment_id": "TREATMENT_9",
         "radiation_therapy_modality": "Brachytherapy (procedure)",
@@ -12,7 +12,7 @@
         "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_1"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "submitter_treatment_id": "TREATMENT_10",
         "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
@@ -24,7 +24,7 @@
         "reference_radiation_treatment_id": ""
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "submitter_treatment_id": "TREATMENT_11",
         "radiation_therapy_modality": "Teleradiotherapy protons (procedure)",
@@ -36,7 +36,7 @@
         "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_3"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "submitter_treatment_id": "TREATMENT_12",
         "radiation_therapy_modality": "Brachytherapy (procedure)",
@@ -48,7 +48,7 @@
         "reference_radiation_treatment_id": ""
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_3",
         "submitter_treatment_id": "TREATMENT_13",
         "radiation_therapy_modality": "Teleradiotherapy protons (procedure)",
