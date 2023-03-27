@@ -1,4 +1,4 @@
-from chord_metadata_service.metadata import settings
+import pathlib
 from bento_lib.search import queries as q
 from .description_utils import describe_schema
 from typing import List, Optional
@@ -152,8 +152,9 @@ def schema_list(schema):
     }
 
 
-if settings.CHORD_EXTRA_PROPERTIES_SCHEMAS_FILE:
-    with open(settings.CHORD_EXTRA_PROPERTIES_SCHEMAS_FILE, "r") as file:
+extra_properties_path = pathlib.Path("./extra-properties-schemas.json")
+if extra_properties_path.is_file():
+    with open(extra_properties_path, "r") as file:
         extra_properties_defs = json.load(file)
         file.close()
 
