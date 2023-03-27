@@ -3,7 +3,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_1",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "treatment_type": [
@@ -25,7 +25,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_2",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "treatment_type": [
@@ -48,7 +48,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_3",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
             "treatment_type": [
@@ -71,7 +71,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_4",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
             "treatment_type": [
@@ -93,7 +93,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_5",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
             "treatment_type": [
@@ -114,7 +114,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_6",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
             "treatment_type": [
@@ -136,7 +136,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_7",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
             "treatment_type": [
@@ -159,7 +159,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_8",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
             "treatment_type": [
@@ -181,7 +181,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_9",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
             "treatment_type": [
@@ -204,7 +204,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_10",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
             "treatment_type": [
@@ -225,7 +225,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_11",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5",
             "treatment_type": [
@@ -248,7 +248,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_12",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6",
             "treatment_type": [
@@ -270,7 +270,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_13",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_3",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7",
             "treatment_type": [
@@ -291,7 +291,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_14",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_3",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8",
             "treatment_type": [
@@ -313,7 +313,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_15",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_4",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9",
             "treatment_type": [
@@ -335,7 +335,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_16",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_4",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10",
             "treatment_type": [
@@ -357,7 +357,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_17",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_5",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11",
             "treatment_type": [
@@ -378,7 +378,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_18",
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_6",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12",
             "treatment_type": [
@@ -399,7 +399,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_19",
-            "program_id": "PROGRAM_2",
+            "program_id": "SYNTHETIC-2",
             "submitter_donor_id": "DONOR_7",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13",
             "treatment_type": [
@@ -420,7 +420,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_20",
-            "program_id": "PROGRAM_2",
+            "program_id": "SYNTHETIC-2",
             "submitter_donor_id": "DONOR_8",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14",
             "treatment_type": [
@@ -443,7 +443,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_21",
-            "program_id": "PROGRAM_2",
+            "program_id": "SYNTHETIC-2",
             "submitter_donor_id": "DONOR_9",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15",
             "treatment_type": [
@@ -464,7 +464,7 @@
         "model": "mohpackets.treatment",
         "fields": {
             "submitter_treatment_id": "TREATMENT_22",
-            "program_id": "PROGRAM_2",
+            "program_id": "SYNTHETIC-2",
             "submitter_donor_id": "DONOR_10",
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16",
             "treatment_type": [
