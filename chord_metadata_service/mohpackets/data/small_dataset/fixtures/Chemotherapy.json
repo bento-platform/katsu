@@ -2,7 +2,7 @@
     {
         "model": "mohpackets.chemotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_1",
             "drug_name": "FLUOROURACIL",
@@ -15,7 +15,7 @@
     {
         "model": "mohpackets.chemotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_1",
             "drug_name": "GEMCITABINE",
@@ -28,7 +28,7 @@
     {
         "model": "mohpackets.chemotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_1",
             "drug_name": "FLUOROURACIL",
@@ -41,7 +41,7 @@
     {
         "model": "mohpackets.chemotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_2",
             "drug_name": "GEMCITABINE",
@@ -54,7 +54,7 @@
     {
         "model": "mohpackets.chemotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_2",
             "drug_name": "NIVOLUMAB",
@@ -67,7 +67,7 @@
     {
         "model": "mohpackets.chemotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_3",
             "drug_name": "FLUOROURACIL",
@@ -80,7 +80,7 @@
     {
         "model": "mohpackets.chemotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_4",
             "drug_name": "LIPOSOMAL IRINOTECAN",
