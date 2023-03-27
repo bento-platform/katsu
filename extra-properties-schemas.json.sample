@@ -1,0 +1,9 @@
+{
+  "individual": {
+    "type": "object",
+    "properties": {
+      "allergic_to_dogs": {"type": "boolean"},
+      "comments": {"type":  "string"}
+    }
+  }
+}

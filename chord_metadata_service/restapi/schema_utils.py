@@ -1,7 +1,8 @@
+from chord_metadata_service.metadata import settings
 from bento_lib.search import queries as q
-from typing import List, Optional
-
 from .description_utils import describe_schema
+from typing import List, Optional
+import json
 
 __all__ = [
     "merge_schema_dictionaries",
@@ -12,6 +13,7 @@ __all__ = [
     "tag_ids_and_describe",
     "customize_schema",
     "schema_list",
+    "extra_properties_schema_opt"
 ]
 
 
@@ -148,3 +150,25 @@ def schema_list(schema):
         "type": "array",
         "items": schema
     }
+
+
+if settings.CHORD_EXTRA_PROPERTIES_SCHEMAS_FILE:
+    with open(settings.CHORD_EXTRA_PROPERTIES_SCHEMAS_FILE, "r") as file:
+        extra_properties_defs = json.load(file)
+        file.close()
+
+    # Check schema validity before accepting it into EXTRA_PROPERTIES_SCHEMAS
+    EXTRA_PROPERTIES_SCHEMAS = {}
+    for name, schema in extra_properties_defs.items():
+        schema = {
+            **schema,
+            "$id": f"{name}:extra_properties"
+        }
+        EXTRA_PROPERTIES_SCHEMAS[name] = schema
+
+
+def extra_properties_schema_opt(schema_name: str, parent_id: str = None) -> dict:
+    extra_schema = EXTRA_PROPERTIES_SCHEMAS.get(schema_name, EXTRA_PROPERTIES_SCHEMAS)
+    if parent_id:
+        extra_schema["$id"] = f"{parent_id}:extra_properties"
+    return extra_schema

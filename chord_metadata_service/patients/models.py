@@ -2,9 +2,11 @@ from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin
-from chord_metadata_service.restapi.validators import ontology_validator, age_or_age_range_validator
+from chord_metadata_service.restapi.validators import ontology_validator, age_or_age_range_validator, \
+    JsonSchemaValidator
 from .values import Sex, KaryotypicSex
 from .validators import comorbid_condition_validator
+from ..restapi.schema_utils import extra_properties_schema_opt
 
 
 class Individual(models.Model, IndexableMixin):
@@ -49,6 +51,7 @@ class Individual(models.Model, IndexableMixin):
     ethnicity = models.CharField(max_length=200, blank=True, help_text='A code for the person\'s ethnicity.')
     # extra
     extra_properties = JSONField(blank=True, null=True,
+                                 validators=[JsonSchemaValidator(extra_properties_schema_opt("individual"))],
                                  help_text='Extra properties that are not supported by current schema')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
