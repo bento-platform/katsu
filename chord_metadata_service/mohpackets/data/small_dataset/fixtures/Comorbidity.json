@@ -2,7 +2,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "prior_malignancy": "Yes",
             "laterality_of_prior_malignancy": "Not applicable",
@@ -15,7 +15,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "prior_malignancy": "Yes",
             "laterality_of_prior_malignancy": "Not applicable",
@@ -28,7 +28,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "prior_malignancy": "Unknown",
             "laterality_of_prior_malignancy": "Bilateral",
@@ -41,7 +41,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "prior_malignancy": "No",
             "laterality_of_prior_malignancy": "Right",
@@ -54,7 +54,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "prior_malignancy": "Yes",
             "laterality_of_prior_malignancy": "Right",
@@ -67,7 +67,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "prior_malignancy": "Unknown",
             "laterality_of_prior_malignancy": "Midline",
@@ -80,7 +80,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_3",
             "prior_malignancy": "Unknown",
             "laterality_of_prior_malignancy": "Bilateral",
@@ -93,7 +93,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_3",
             "prior_malignancy": "No",
             "laterality_of_prior_malignancy": "Not applicable",
@@ -106,7 +106,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_4",
             "prior_malignancy": "Unknown",
             "laterality_of_prior_malignancy": "Right",
@@ -119,7 +119,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_4",
             "prior_malignancy": "Unknown",
             "laterality_of_prior_malignancy": "Left",
@@ -132,7 +132,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_5",
             "prior_malignancy": "Yes",
             "laterality_of_prior_malignancy": "Midline",
@@ -145,7 +145,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_6",
             "prior_malignancy": "No",
             "laterality_of_prior_malignancy": "Bilateral",
@@ -158,7 +158,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_2",
+            "program_id": "SYNTHETIC-2",
             "submitter_donor_id": "DONOR_7",
             "prior_malignancy": "Yes",
             "laterality_of_prior_malignancy": "Midline",
@@ -171,7 +171,7 @@
     {
         "model": "mohpackets.comorbidity",
         "fields": {
-            "program_id": "PROGRAM_2",
+            "program_id": "SYNTHETIC-2",
             "submitter_donor_id": "DONOR_8",
             "prior_malignancy": "No",
             "laterality_of_prior_malignancy": "Unknown",
