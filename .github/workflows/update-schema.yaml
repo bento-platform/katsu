@@ -3,14 +3,14 @@ name: Docs
 on:
   push:
     pull_request:
-      types: [opened, synchronize, reopened]
+      types: ['opened', 'edited', 'reopened', 'synchronize', 'ready_for_review']
 
 
 jobs:
   generate-moh-schema:
     name: Update MoH schema
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    if: '! github.event.pull_request.draft'
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
