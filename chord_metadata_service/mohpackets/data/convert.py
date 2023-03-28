@@ -111,7 +111,6 @@ def replace_values(input_data, transformation_rules):
 
     Each target consists of:
         - `field_name`: name of field to update.
-        - `field_value`: new value of the field.
         - `range`: tuple of two integers, specifying the range of numbers to add to field_value.
 
     The function updates specified fields by combining field_value (e.g. "DONOR_") with a string
@@ -131,7 +130,6 @@ def replace_values(input_data, transformation_rules):
             {
             "range": [1, 1],
             "field_name": "submitter_donor_id",
-            "field_value": "DONOR_"
             }
         ]
     }
