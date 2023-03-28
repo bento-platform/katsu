@@ -19,24 +19,17 @@ class TokenAuthentication(BaseAuthentication):
             opa_secret = settings.CANDIG_OPA_SECRET
             try:
                 authorized_datasets = get_opa_datasets(request, admin_secret=opa_secret)
+                # add dataset to request
+                logger.debug(f"User is authorized to access {authorized_datasets}")
+                request.authorized_datasets = authorized_datasets
+                # TESTING THIS AUTHORIZED DATASETS
+
             except Exception as e:
                 logger.exception(
                     f"An error occurred in OPA get_authorized_datasets: {e}"
                 )
                 raise AuthenticationFailed("Error retrieving datasets from OPA.")
-
-            # Check if the user is authorized to access any datasets.
-            # By default, user has 2 or 5 datasets, so it has to be more than 5.
-            if len(authorized_datasets) < 6:
-                logger.exception(
-                    f"Retrieved {authorized_datasets}. "
-                    "Either token is expired or user doesn't have any datasets added"
-                )
-                raise Exception("User is not authorized to access any datasets.")
-            else:
-                # add dataset to request
-                request.authorized_datasets = authorized_datasets
-                return None
+        return None
 
 
 class LocalAuthentication(BaseAuthentication):
