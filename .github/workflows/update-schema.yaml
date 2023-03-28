@@ -2,9 +2,11 @@ name: Docs
 
 on:
   push:
-    branches-ignore:
-      - develop
-      - master
+    pull_request_target:
+      types: [opened, synchronize]
+      paths:
+      - 'src/*'
+    branches-ignore: '^draft-.*$'
 
 jobs:
   generate-moh-schema:
