@@ -2,14 +2,15 @@ name: Docs
 
 on:
   push:
-    pull_request_target:
-      types: [opened, synchronize]
-    branches-ignore: '^draft-.*$'
+    pull_request:
+      types: [opened, synchronize, reopened]
+
 
 jobs:
   generate-moh-schema:
     name: Update MoH schema
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
