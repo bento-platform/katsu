@@ -2,7 +2,7 @@
     {
         "model": "mohpackets.immunotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_3",
             "submitter_treatment_id": "TREATMENT_14",
             "immunotherapy_type": "Cell-based",
@@ -13,7 +13,7 @@
     {
         "model": "mohpackets.immunotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_3",
             "submitter_treatment_id": "TREATMENT_14",
             "immunotherapy_type": "Immune checkpoint inhibitors",
@@ -24,7 +24,7 @@
     {
         "model": "mohpackets.immunotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_3",
             "submitter_treatment_id": "TREATMENT_14",
             "immunotherapy_type": "Other immunomodulatory substances",
@@ -35,7 +35,7 @@
     {
         "model": "mohpackets.immunotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_4",
             "submitter_treatment_id": "TREATMENT_15",
             "immunotherapy_type": "Cell-based",
@@ -46,7 +46,7 @@
     {
         "model": "mohpackets.immunotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_4",
             "submitter_treatment_id": "TREATMENT_15",
             "immunotherapy_type": "Other immunomodulatory substances",
@@ -57,7 +57,7 @@
     {
         "model": "mohpackets.immunotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_4",
             "submitter_treatment_id": "TREATMENT_16",
             "immunotherapy_type": "Immune checkpoint inhibitors",
@@ -68,7 +68,7 @@
     {
         "model": "mohpackets.immunotherapy",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_5",
             "submitter_treatment_id": "TREATMENT_17",
             "immunotherapy_type": "Monoclonal antibodies other than immune checkpoint inhibitors",

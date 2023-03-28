@@ -32,7 +32,6 @@ class AutoDateTimeField(models.DateTimeField):
 
 class Program(models.Model):
     program_id = models.CharField(max_length=64, primary_key=True)
-    name = models.CharField(max_length=255, blank=False, null=False, unique=True)
     created = models.DateTimeField(default=timezone.now)
     updated = AutoDateTimeField(default=timezone.now)
 

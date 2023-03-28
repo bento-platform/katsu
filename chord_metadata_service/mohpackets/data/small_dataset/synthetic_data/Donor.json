@@ -1,7 +1,7 @@
 [
     {
         "submitter_donor_id": "DONOR_1",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "is_deceased": false,
         "cause_of_death": "Died of cancer",
         "date_of_birth": "2000-06-23",
@@ -15,7 +15,7 @@
     },
     {
         "submitter_donor_id": "DONOR_2",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "is_deceased": false,
         "cause_of_death": "Died of cancer",
         "date_of_birth": "2008-05-11",
@@ -28,7 +28,7 @@
     },
     {
         "submitter_donor_id": "DONOR_3",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "is_deceased": true,
         "cause_of_death": "Unknown",
         "date_of_birth": "1993-08-20",
@@ -43,7 +43,7 @@
     },
     {
         "submitter_donor_id": "DONOR_4",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "is_deceased": true,
         "cause_of_death": "Died of other reasons",
         "date_of_birth": "2001-11-02",
@@ -57,7 +57,7 @@
     },
     {
         "submitter_donor_id": "DONOR_5",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "is_deceased": true,
         "cause_of_death": "Died of other reasons",
         "date_of_birth": "1965-07-19",
@@ -69,7 +69,7 @@
     },
     {
         "submitter_donor_id": "DONOR_6",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "is_deceased": true,
         "cause_of_death": "Died of cancer",
         "date_of_birth": "1995-04-15",
@@ -82,7 +82,7 @@
     },
     {
         "submitter_donor_id": "DONOR_7",
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "is_deceased": true,
         "cause_of_death": "Died of cancer",
         "date_of_birth": "1991-04-10",
@@ -97,7 +97,7 @@
     },
     {
         "submitter_donor_id": "DONOR_8",
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "is_deceased": false,
         "cause_of_death": "Died of other reasons",
         "date_of_birth": "1972-11-24",
@@ -110,7 +110,7 @@
     },
     {
         "submitter_donor_id": "DONOR_9",
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "is_deceased": true,
         "cause_of_death": "Unknown",
         "date_of_birth": "2005-07-08",
@@ -124,7 +124,7 @@
     },
     {
         "submitter_donor_id": "DONOR_10",
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "is_deceased": true,
         "cause_of_death": "Died of other reasons",
         "date_of_birth": "1995-03-18",

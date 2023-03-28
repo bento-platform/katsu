@@ -74,7 +74,7 @@ class AuthorizedMixin:
     def get_queryset(self):
         authorized_datasets = self.request.authorized_datasets
         filtered_queryset = (
-            super().get_queryset().filter(program_id__name__in=authorized_datasets)
+            super().get_queryset().filter(program_id__in=authorized_datasets)
         )
         return filtered_queryset
 
@@ -87,13 +87,7 @@ class AuthorizedMixin:
 
 
 class AuthorizedProgramViewSet(AuthorizedMixin, BaseProgramViewSet):
-    def get_queryset(self):
-        """
-        Filter by the datasets that the user is authorized to see.
-        """
-        authorized_datasets = self.request.authorized_datasets
-        filtered_queryset = Program.objects.filter(name__in=authorized_datasets)
-        return filtered_queryset
+    pass
 
 
 class AuthorizedDonorViewSet(AuthorizedMixin, BaseDonorViewSet):

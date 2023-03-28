@@ -15,15 +15,8 @@
       "name": "program_id",
       "null_percentage": 0,
       "type": "Template",
-      "value": "PROGRAM_{__count}",
+      "value": "SYNTHETIC-{__count}",
       "formula": null
-    },
-    {
-      "name": "name",
-      "null_percentage": 0,
-      "type": "Template",
-      "value": null,
-      "formula": "[\"SYNTHETIC-BIO-CAN\",\n\"SYNTHETIC-INSPIRE\",\n\"SYNTHETIC-POG\",\n\"SYNTHETIC-IO-ALINES\",\n\"SYNTHETIC-COMPASS\"][random(0,4)]\n"
     }
   ]
 }

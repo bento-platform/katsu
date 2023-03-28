@@ -1,6 +1,6 @@
 [
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_5",
         "drug_name": "exemestane",
@@ -10,7 +10,7 @@
         "cumulative_drug_dosage_actual": "200"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_5",
         "drug_name": "triptorelin",
@@ -20,7 +20,7 @@
         "cumulative_drug_dosage_actual": "200"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_5",
         "drug_name": "exemestane",
@@ -30,7 +30,7 @@
         "cumulative_drug_dosage_actual": "200"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_6",
         "drug_name": "exemestane",
@@ -40,7 +40,7 @@
         "cumulative_drug_dosage_actual": "200"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_6",
         "drug_name": "exemestane",
@@ -50,7 +50,7 @@
         "cumulative_drug_dosage_actual": "200"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_7",
         "drug_name": "degarelix",
@@ -60,7 +60,7 @@
         "cumulative_drug_dosage_actual": "200"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_8",
         "drug_name": "goserelin",

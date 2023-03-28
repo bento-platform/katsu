@@ -2,7 +2,7 @@
     {
         "model": "mohpackets.surgery",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_6",
             "submitter_specimen_id": "SPECIMEN_18",
             "submitter_treatment_id": "TREATMENT_18",
@@ -32,7 +32,7 @@
     {
         "model": "mohpackets.surgery",
         "fields": {
-            "program_id": "PROGRAM_2",
+            "program_id": "SYNTHETIC-2",
             "submitter_donor_id": "DONOR_7",
             "submitter_specimen_id": null,
             "submitter_treatment_id": "TREATMENT_19",
@@ -60,7 +60,7 @@
     {
         "model": "mohpackets.surgery",
         "fields": {
-            "program_id": "PROGRAM_2",
+            "program_id": "SYNTHETIC-2",
             "submitter_donor_id": "DONOR_8",
             "submitter_specimen_id": null,
             "submitter_treatment_id": "TREATMENT_20",
@@ -91,7 +91,7 @@
     {
         "model": "mohpackets.surgery",
         "fields": {
-            "program_id": "PROGRAM_2",
+            "program_id": "SYNTHETIC-2",
             "submitter_donor_id": "DONOR_9",
             "submitter_specimen_id": null,
             "submitter_treatment_id": "TREATMENT_21",
@@ -117,7 +117,7 @@
     {
         "model": "mohpackets.surgery",
         "fields": {
-            "program_id": "PROGRAM_2",
+            "program_id": "SYNTHETIC-2",
             "submitter_donor_id": "DONOR_10",
             "submitter_specimen_id": null,
             "submitter_treatment_id": "TREATMENT_22",

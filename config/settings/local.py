@@ -20,8 +20,8 @@ DATABASES = {
 }
 
 LOCAL_AUTHORIZED_DATASET = [
-    {"username": "user1", "datasets": ["SYNTHETIC-POG"]},
-    {"username": "user2", "datasets": ["SYNTHETIC-POG", "SYNTHETIC-BIO-CAN"]},
+    {"username": "user1", "datasets": ["SYNTHETIC-1"]},
+    {"username": "user2", "datasets": ["SYNTHETIC-1", "SYNTHETIC-2"]},
 ]
 
 

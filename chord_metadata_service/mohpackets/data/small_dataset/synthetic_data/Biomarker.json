@@ -1,6 +1,6 @@
 [
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_specimen_id": "SPECIMEN_1",
         "submitter_primary_diagnosis_id": null,
@@ -12,7 +12,7 @@
         "cea": 11
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_specimen_id": "SPECIMEN_1",
         "submitter_primary_diagnosis_id": null,
@@ -24,7 +24,7 @@
         "cea": 10
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_specimen_id": "SPECIMEN_1",
         "submitter_primary_diagnosis_id": null,
@@ -36,7 +36,7 @@
         "cea": 12
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_specimen_id": null,
         "submitter_primary_diagnosis_id": null,
@@ -48,7 +48,7 @@
         "cea": 5
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_specimen_id": null,
         "submitter_primary_diagnosis_id": null,
@@ -60,7 +60,7 @@
         "cea": 12
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_specimen_id": null,
         "submitter_primary_diagnosis_id": null,
@@ -72,7 +72,7 @@
         "cea": 10
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_specimen_id": "SPECIMEN_1",
         "submitter_primary_diagnosis_id": null,
@@ -84,7 +84,7 @@
         "cea": 6
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_specimen_id": "SPECIMEN_1",
         "submitter_primary_diagnosis_id": null,
@@ -96,7 +96,7 @@
         "cea": 11
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_specimen_id": null,
         "submitter_primary_diagnosis_id": null,
@@ -108,7 +108,7 @@
         "cea": 11
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_specimen_id": null,
         "submitter_primary_diagnosis_id": null,
@@ -120,7 +120,7 @@
         "cea": 13
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "submitter_specimen_id": null,
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
@@ -132,7 +132,7 @@
         "cea": 11
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_3",
         "submitter_specimen_id": null,
         "submitter_primary_diagnosis_id": null,

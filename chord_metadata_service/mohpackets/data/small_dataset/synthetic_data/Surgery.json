@@ -1,6 +1,6 @@
 [
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_6",
         "submitter_specimen_id": "SPECIMEN_18",
         "submitter_treatment_id": "TREATMENT_18",
@@ -27,7 +27,7 @@
         "perineural_invasion": "Not applicable"
     },
     {
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_7",
         "submitter_specimen_id": null,
         "submitter_treatment_id": "TREATMENT_19",
@@ -52,7 +52,7 @@
         "perineural_invasion": "Present"
     },
     {
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_8",
         "submitter_specimen_id": null,
         "submitter_treatment_id": "TREATMENT_20",
@@ -80,7 +80,7 @@
         "perineural_invasion": "Not applicable"
     },
     {
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_9",
         "submitter_specimen_id": null,
         "submitter_treatment_id": "TREATMENT_21",
@@ -103,7 +103,7 @@
         "perineural_invasion": "Absent"
     },
     {
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_10",
         "submitter_specimen_id": null,
         "submitter_treatment_id": "TREATMENT_22",

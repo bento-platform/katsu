@@ -2,7 +2,7 @@
     {
         "model": "mohpackets.radiation",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "submitter_treatment_id": "TREATMENT_9",
             "radiation_therapy_modality": "Brachytherapy (procedure)",
@@ -17,7 +17,7 @@
     {
         "model": "mohpackets.radiation",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "submitter_treatment_id": "TREATMENT_10",
             "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
@@ -32,7 +32,7 @@
     {
         "model": "mohpackets.radiation",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "submitter_treatment_id": "TREATMENT_11",
             "radiation_therapy_modality": "Teleradiotherapy protons (procedure)",
@@ -47,7 +47,7 @@
     {
         "model": "mohpackets.radiation",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "submitter_treatment_id": "TREATMENT_12",
             "radiation_therapy_modality": "Brachytherapy (procedure)",
@@ -62,7 +62,7 @@
     {
         "model": "mohpackets.radiation",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_3",
             "submitter_treatment_id": "TREATMENT_13",
             "radiation_therapy_modality": "Teleradiotherapy protons (procedure)",
