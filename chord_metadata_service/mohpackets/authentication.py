@@ -22,7 +22,6 @@ class TokenAuthentication(BaseAuthentication):
                 # add dataset to request
                 logger.debug(f"User is authorized to access {authorized_datasets}")
                 request.authorized_datasets = authorized_datasets
-                # TESTING THIS AUTHORIZED DATASETS
 
             except Exception as e:
                 logger.exception(
