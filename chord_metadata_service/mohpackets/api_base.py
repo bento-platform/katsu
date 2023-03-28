@@ -25,6 +25,7 @@ from chord_metadata_service.mohpackets.models import (
     HormoneTherapy,
     Immunotherapy,
     PrimaryDiagnosis,
+    Program,
     Radiation,
     SampleRegistration,
     Specimen,
@@ -73,6 +74,7 @@ class BaseProgramViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [CanDIGAdminOrReadOnly]
     pagination_class = StandardResultsSetPagination
     throttle_classes = [MoHRateThrottle]
+    queryset = Program.objects.all()
 
 
 class BaseDonorViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):

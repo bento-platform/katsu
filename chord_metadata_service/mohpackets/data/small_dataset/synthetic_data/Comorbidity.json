@@ -1,6 +1,6 @@
 [
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "prior_malignancy": "Yes",
         "laterality_of_prior_malignancy": "Not applicable",
@@ -10,7 +10,7 @@
         "comorbidity_treatment": "Surgery"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "prior_malignancy": "Yes",
         "laterality_of_prior_malignancy": "Not applicable",
@@ -20,7 +20,7 @@
         "comorbidity_treatment": "Hormonal therapy"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "prior_malignancy": "Unknown",
         "laterality_of_prior_malignancy": "Bilateral",
@@ -30,7 +30,7 @@
         "comorbidity_treatment": "Stem cell transplant"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "prior_malignancy": "No",
         "laterality_of_prior_malignancy": "Right",
@@ -40,7 +40,7 @@
         "comorbidity_treatment": "Immunotherapy"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "prior_malignancy": "Yes",
         "laterality_of_prior_malignancy": "Right",
@@ -50,7 +50,7 @@
         "comorbidity_treatment": "Ablation"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "prior_malignancy": "Unknown",
         "laterality_of_prior_malignancy": "Midline",
@@ -60,7 +60,7 @@
         "comorbidity_treatment": "Endoscopic therapy"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_3",
         "prior_malignancy": "Unknown",
         "laterality_of_prior_malignancy": "Bilateral",
@@ -70,7 +70,7 @@
         "comorbidity_treatment": "Immunotherapy"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_3",
         "prior_malignancy": "No",
         "laterality_of_prior_malignancy": "Not applicable",
@@ -80,7 +80,7 @@
         "comorbidity_treatment": "Ablation"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_4",
         "prior_malignancy": "Unknown",
         "laterality_of_prior_malignancy": "Right",
@@ -90,7 +90,7 @@
         "comorbidity_treatment": "Radiation therapy"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_4",
         "prior_malignancy": "Unknown",
         "laterality_of_prior_malignancy": "Left",
@@ -100,7 +100,7 @@
         "comorbidity_treatment": "Immunotherapy"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_5",
         "prior_malignancy": "Yes",
         "laterality_of_prior_malignancy": "Midline",
@@ -110,7 +110,7 @@
         "comorbidity_treatment": "Radiation therapy"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_6",
         "prior_malignancy": "No",
         "laterality_of_prior_malignancy": "Bilateral",
@@ -120,7 +120,7 @@
         "comorbidity_treatment": "Bone marrow transplant"
     },
     {
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_7",
         "prior_malignancy": "Yes",
         "laterality_of_prior_malignancy": "Midline",
@@ -130,7 +130,7 @@
         "comorbidity_treatment": "Chemotherapy"
     },
     {
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_8",
         "prior_malignancy": "No",
         "laterality_of_prior_malignancy": "Unknown",

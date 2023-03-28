@@ -2,7 +2,7 @@ from .base import *
 
 DEBUG = True
 
-FAKE_AUTHORIZED_DATASETS = ["SYNTHETIC-POG"]
+FAKE_AUTHORIZED_DATASETS = ["SYNTHETIC-1"]
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 

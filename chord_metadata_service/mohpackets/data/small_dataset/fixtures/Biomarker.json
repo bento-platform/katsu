@@ -2,7 +2,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_specimen_id": "SPECIMEN_1",
             "submitter_primary_diagnosis_id": null,
@@ -17,7 +17,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_specimen_id": "SPECIMEN_1",
             "submitter_primary_diagnosis_id": null,
@@ -32,7 +32,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_specimen_id": "SPECIMEN_1",
             "submitter_primary_diagnosis_id": null,
@@ -47,7 +47,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_specimen_id": null,
             "submitter_primary_diagnosis_id": null,
@@ -62,7 +62,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_specimen_id": null,
             "submitter_primary_diagnosis_id": null,
@@ -77,7 +77,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_specimen_id": null,
             "submitter_primary_diagnosis_id": null,
@@ -92,7 +92,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_specimen_id": "SPECIMEN_1",
             "submitter_primary_diagnosis_id": null,
@@ -107,7 +107,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_specimen_id": "SPECIMEN_1",
             "submitter_primary_diagnosis_id": null,
@@ -122,7 +122,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_specimen_id": null,
             "submitter_primary_diagnosis_id": null,
@@ -137,7 +137,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_specimen_id": null,
             "submitter_primary_diagnosis_id": null,
@@ -152,7 +152,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_2",
             "submitter_specimen_id": null,
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
@@ -167,7 +167,7 @@
     {
         "model": "mohpackets.biomarker",
         "fields": {
-            "program_id": "PROGRAM_1",
+            "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_3",
             "submitter_specimen_id": null,
             "submitter_primary_diagnosis_id": null,

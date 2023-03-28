@@ -111,7 +111,6 @@ def replace_values(input_data, transformation_rules):
 
     Each target consists of:
         - `field_name`: name of field to update.
-        - `field_value`: new value of the field.
         - `range`: tuple of two integers, specifying the range of numbers to add to field_value.
 
     The function updates specified fields by combining field_value (e.g. "DONOR_") with a string
@@ -131,7 +130,6 @@ def replace_values(input_data, transformation_rules):
             {
             "range": [1, 1],
             "field_name": "submitter_donor_id",
-            "field_value": "DONOR_"
             }
         ]
     }
@@ -142,6 +140,15 @@ def replace_values(input_data, transformation_rules):
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
     }
     """
+    field_value_map = {
+        "program_id": "SYNTHETIC-",
+        "submitter_donor_id": "DONOR_",
+        "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_",
+        "submitter_specimen_id": "SPECIMEN_",
+        "submitter_treatment_id": "TREATMENT_",
+        "submitter_follow_up_id": "FOLLOW_UP_",
+    }
+
     for rule in transformation_rules:
         item_start, item_end = rule["range"]
         target_fields = rule["targets"]
@@ -152,7 +159,7 @@ def replace_values(input_data, transformation_rules):
 
             for target_field in target_fields:
                 field_name = target_field["field_name"]
-                field_value = target_field["field_value"]
+                field_value = field_value_map.get(field_name)
                 target_start, target_end = target_field["range"]
 
                 # compute the target index

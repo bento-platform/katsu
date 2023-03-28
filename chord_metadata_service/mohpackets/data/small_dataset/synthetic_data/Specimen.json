@@ -1,7 +1,7 @@
 [
     {
         "submitter_specimen_id": "SPECIMEN_1",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "pathological_tumour_staging_system": "AJCC 6th edition",
@@ -22,7 +22,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_2",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "pathological_tumour_staging_system": "Lugano staging system",
@@ -43,7 +43,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_3",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
         "pathological_tumour_staging_system": "AJCC 7th edition",
@@ -64,7 +64,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_4",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "pathological_tumour_staging_system": "AJCC 6th edition",
@@ -85,7 +85,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_5",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "pathological_tumour_staging_system": "St Jude staging system",
@@ -106,7 +106,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_6",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
         "pathological_tumour_staging_system": "Revised International staging system (RISS)",
@@ -127,7 +127,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_7",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
         "pathological_tumour_staging_system": "AJCC 6th edition",
@@ -148,7 +148,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_8",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
         "pathological_tumour_staging_system": "Binet staging system",
@@ -169,7 +169,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_9",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
         "pathological_tumour_staging_system": "Rai staging system",
@@ -190,7 +190,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_10",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
         "pathological_tumour_staging_system": "AJCC 6th edition",
@@ -211,7 +211,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_11",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5",
         "pathological_tumour_staging_system": "St Jude staging system",
@@ -232,7 +232,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_12",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_2",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6",
         "pathological_tumour_staging_system": "Ann Arbor staging system",
@@ -253,7 +253,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_13",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_3",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7",
         "pathological_tumour_staging_system": "AJCC 6th edition",
@@ -274,7 +274,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_14",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_3",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8",
         "pathological_tumour_staging_system": "Ann Arbor staging system",
@@ -295,7 +295,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_15",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_4",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9",
         "pathological_tumour_staging_system": "St Jude staging system",
@@ -316,7 +316,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_16",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_4",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10",
         "pathological_tumour_staging_system": "FIGO staging system",
@@ -337,7 +337,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_17",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_5",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11",
         "pathological_tumour_staging_system": "Rai staging system",
@@ -358,7 +358,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_18",
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_6",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12",
         "pathological_tumour_staging_system": "St Jude staging system",
@@ -379,7 +379,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_19",
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_7",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13",
         "pathological_tumour_staging_system": "AJCC 7th edition",
@@ -400,7 +400,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_20",
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_8",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14",
         "pathological_tumour_staging_system": "Revised International staging system (RISS)",
@@ -421,7 +421,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_21",
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_9",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15",
         "pathological_tumour_staging_system": "Revised International staging system (RISS)",
@@ -442,7 +442,7 @@
     },
     {
         "submitter_specimen_id": "SPECIMEN_22",
-        "program_id": "PROGRAM_2",
+        "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_10",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16",
         "pathological_tumour_staging_system": "Ann Arbor staging system",

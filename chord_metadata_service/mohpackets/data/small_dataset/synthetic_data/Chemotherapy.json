@@ -1,6 +1,6 @@
 [
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_1",
         "drug_name": "FLUOROURACIL",
@@ -10,7 +10,7 @@
         "cumulative_drug_dosage_actual": "111"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_1",
         "drug_name": "GEMCITABINE",
@@ -20,7 +20,7 @@
         "cumulative_drug_dosage_actual": "78"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_1",
         "drug_name": "FLUOROURACIL",
@@ -30,7 +30,7 @@
         "cumulative_drug_dosage_actual": "79"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_2",
         "drug_name": "GEMCITABINE",
@@ -40,7 +40,7 @@
         "cumulative_drug_dosage_actual": "78"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_2",
         "drug_name": "NIVOLUMAB",
@@ -50,7 +50,7 @@
         "cumulative_drug_dosage_actual": "100"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_3",
         "drug_name": "FLUOROURACIL",
@@ -60,7 +60,7 @@
         "cumulative_drug_dosage_actual": "94"
     },
     {
-        "program_id": "PROGRAM_1",
+        "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_1",
         "submitter_treatment_id": "TREATMENT_4",
         "drug_name": "LIPOSOMAL IRINOTECAN",
