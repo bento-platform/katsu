@@ -9,8 +9,8 @@ on:
 jobs:
   generate-moh-schema:
     name: Update MoH schema
-    runs-on: ubuntu-latest
     if: '! github.event.pull_request.draft'
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
