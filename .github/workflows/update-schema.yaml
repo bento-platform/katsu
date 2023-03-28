@@ -1,6 +1,10 @@
 name: Docs
 
 on:
+  push:
+    branches-ignore:
+      - develop
+      - master
   pull_request:
     types: ['opened', 'edited', 'reopened', 'synchronize', 'ready_for_review']
 
