@@ -47,11 +47,11 @@ class Donor(models.Model):
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    is_deceased = models.BooleanField()
-    cause_of_death = models.CharField(max_length=255, blank=True, default="")
-    date_of_birth = models.CharField(max_length=32, null=False, blank=False)
-    date_of_death = models.CharField(max_length=32, blank=True, default="")
-    primary_site = ArrayField(models.CharField(max_length=255, blank=False, null=False))
+    is_deceased = models.BooleanField(null=True)
+    cause_of_death = models.CharField(max_length=255, null=True, blank=True)
+    date_of_birth = models.CharField(max_length=32, null=True, blank=True)
+    date_of_death = models.CharField(max_length=32, null=True, blank=True)
+    primary_site = ArrayField(models.CharField(max_length=255, null=True, blank=True))
 
     class Meta:
         ordering = ["submitter_donor_id"]
@@ -74,7 +74,9 @@ class PrimaryDiagnosis(models.Model):
     lymph_nodes_examined_status = models.CharField(
         max_length=128, null=False, blank=False
     )
-    lymph_nodes_examined_method = models.CharField(max_length=64)
+    lymph_nodes_examined_method = models.CharField(
+        max_length=64,
+    )
     number_lymph_nodes_positive = models.PositiveSmallIntegerField(
         blank=True, null=True
     )
