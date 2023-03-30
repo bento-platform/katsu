@@ -146,12 +146,12 @@ class SampleRegistration(models.Model):
     submitter_specimen_id = models.ForeignKey(
         Specimen, on_delete=models.CASCADE, null=False, blank=False
     )
-    gender = models.CharField(max_length=32, null=False, blank=False)
-    sex_at_birth = models.CharField(max_length=32, null=False, blank=False)
-    specimen_tissue_source = models.CharField(max_length=255, null=False, blank=False)
-    tumour_normal_designation = models.CharField(max_length=32, null=False, blank=False)
-    specimen_type = models.CharField(max_length=255, null=False, blank=False)
-    sample_type = models.CharField(max_length=128, null=False, blank=False)
+    gender = models.CharField(max_length=32, null=True, blank=True)
+    sex_at_birth = models.CharField(max_length=32, null=True, blank=True)
+    specimen_tissue_source = models.CharField(max_length=255, null=True, blank=True)
+    tumour_normal_designation = models.CharField(max_length=32, null=True, blank=True)
+    specimen_type = models.CharField(max_length=255, null=True, blank=True)
+    sample_type = models.CharField(max_length=128, null=True, blank=True)
 
     class Meta:
         ordering = ["submitter_sample_id"]
