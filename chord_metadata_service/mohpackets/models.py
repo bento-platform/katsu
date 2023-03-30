@@ -68,25 +68,23 @@ class PrimaryDiagnosis(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    date_of_diagnosis = models.CharField(max_length=32, null=False, blank=False)
-    cancer_type_code = models.CharField(max_length=64, null=False, blank=False)
-    basis_of_diagnosis = models.CharField(max_length=128, null=False, blank=False)
+    date_of_diagnosis = models.CharField(max_length=32, null=True, blank=True)
+    cancer_type_code = models.CharField(max_length=64, null=True, blank=True)
+    basis_of_diagnosis = models.CharField(max_length=128, null=True, blank=True)
     lymph_nodes_examined_status = models.CharField(
-        max_length=128, null=False, blank=False
+        max_length=128, null=True, blank=True
     )
-    lymph_nodes_examined_method = models.CharField(
-        max_length=64,
-    )
+    lymph_nodes_examined_method = models.CharField(max_length=64, null=True, blank=True)
     number_lymph_nodes_positive = models.PositiveSmallIntegerField(
-        blank=True, null=True
+        null=True, blank=True
     )
     clinical_tumour_staging_system = models.CharField(
-        max_length=128, blank=True, default=""
+        max_length=128, null=True, blank=True
     )
-    clinical_t_category = models.CharField(max_length=64, blank=True, default="")
-    clinical_n_category = models.CharField(max_length=64, blank=True, default="")
-    clinical_m_category = models.CharField(max_length=64, blank=True, default="")
-    clinical_stage_group = models.CharField(max_length=64, blank=True, default="")
+    clinical_t_category = models.CharField(max_length=64, null=True, blank=True)
+    clinical_n_category = models.CharField(max_length=64, null=True, blank=True)
+    clinical_m_category = models.CharField(max_length=64, null=True, blank=True)
+    clinical_stage_group = models.CharField(max_length=64, null=True, blank=True)
 
     class Meta:
         ordering = ["submitter_primary_diagnosis_id"]
