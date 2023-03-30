@@ -313,27 +313,27 @@ class Surgery(models.Model):
     submitter_treatment_id = models.OneToOneField(
         Treatment, on_delete=models.CASCADE, null=False, blank=False
     )
-    surgery_type = models.CharField(max_length=255, null=False, blank=False)
-    surgery_site = models.CharField(max_length=255, blank=True, default="")
-    surgery_location = models.CharField(max_length=128, blank=True, default="")
+    surgery_type = models.CharField(max_length=255, null=True, blank=True)
+    surgery_site = models.CharField(max_length=255, null=True, blank=True)
+    surgery_location = models.CharField(max_length=128, null=True, blank=True)
     tumour_length = models.PositiveSmallIntegerField(null=True, blank=True)
     tumour_width = models.PositiveSmallIntegerField(null=True, blank=True)
     greatest_dimension_tumour = models.PositiveSmallIntegerField(null=True, blank=True)
-    tumour_focality = models.CharField(max_length=64, blank=True, default="")
+    tumour_focality = models.CharField(max_length=64, null=True, blank=True)
     residual_tumour_classification = models.CharField(
-        max_length=64, blank=True, default=""
+        max_length=64, null=True, blank=True
     )
     margin_types_involved = ArrayField(
-        models.CharField(max_length=128, blank=True, default="")
+        models.CharField(max_length=128, null=True, blank=True)
     )
     margin_types_not_involved = ArrayField(
-        models.CharField(max_length=128, blank=True, default="")
+        models.CharField(max_length=128, null=True, blank=True)
     )
     margin_types_not_assessed = ArrayField(
-        models.CharField(max_length=128, blank=True, default="")
+        models.CharField(max_length=128, null=True, blank=True)
     )
-    lymphovascular_invasion = models.CharField(max_length=255, blank=True, default="")
-    perineural_invasion = models.CharField(max_length=128, blank=True, default="")
+    lymphovascular_invasion = models.CharField(max_length=255, null=True, blank=True)
+    perineural_invasion = models.CharField(max_length=128, null=True, blank=True)
 
     class Meta:
         ordering = ["id"]
