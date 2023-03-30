@@ -105,27 +105,27 @@ class Specimen(models.Model):
         PrimaryDiagnosis, on_delete=models.CASCADE, null=False, blank=False
     )
     pathological_tumour_staging_system = models.CharField(
-        max_length=255, blank=True, default=""
+        max_length=255, null=True, blank=True
     )
-    pathological_t_category = models.CharField(max_length=64, blank=True, default="")
-    pathological_n_category = models.CharField(max_length=64, blank=True, default="")
-    pathological_m_category = models.CharField(max_length=64, blank=True, default="")
-    pathological_stage_group = models.CharField(max_length=64, blank=True, default="")
-    specimen_collection_date = models.CharField(max_length=32, null=False, blank=False)
-    specimen_storage = models.CharField(max_length=64, null=False, blank=False)
-    tumour_histological_type = models.CharField(max_length=128, blank=True, default="")
-    specimen_anatomic_location = models.CharField(max_length=32, blank=True, default="")
+    pathological_t_category = models.CharField(max_length=64, null=True, blank=True)
+    pathological_n_category = models.CharField(max_length=64, null=True, blank=True)
+    pathological_m_category = models.CharField(max_length=64, null=True, blank=True)
+    pathological_stage_group = models.CharField(max_length=64, null=True, blank=True)
+    specimen_collection_date = models.CharField(max_length=32, null=True, blank=True)
+    specimen_storage = models.CharField(max_length=64, null=True, blank=True)
+    tumour_histological_type = models.CharField(max_length=128, null=True, blank=True)
+    specimen_anatomic_location = models.CharField(max_length=32, null=True, blank=True)
     reference_pathology_confirmed_diagnosis = models.CharField(
-        max_length=32, blank=True, default=""
+        max_length=32, null=True, blank=True
     )
     reference_pathology_confirmed_tumour_presence = models.CharField(
-        max_length=32, blank=True, default=""
+        max_length=32, null=True, blank=True
     )
-    tumour_grading_system = models.CharField(max_length=128, blank=True, default="")
-    tumour_grade = models.CharField(max_length=64, blank=True, default="")
-    percent_tumour_cells_range = models.CharField(max_length=64, blank=True, default="")
+    tumour_grading_system = models.CharField(max_length=128, null=True, blank=True)
+    tumour_grade = models.CharField(max_length=64, null=True, blank=True)
+    percent_tumour_cells_range = models.CharField(max_length=64, null=True, blank=True)
     percent_tumour_cells_measurement_method = models.CharField(
-        max_length=64, blank=True, default=""
+        max_length=64, null=True, blank=True
     )
 
     class Meta:
