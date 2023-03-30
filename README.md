@@ -4,10 +4,16 @@
 ![Lint Status](https://github.com/CanDIG/katsu/workflows/Lint/badge.svg)
 [![codecov](https://codecov.io/gh/CanDIG/katsu/branch/master/graph/badge.svg)](https://codecov.io/gh/CanDIG/katsu)
 
+## Table of Contents
+
+- [Installation Guide](#installation-guide) <!-- omit in toc -->
+- [Tests](#tests)
+- [Authentication and Authorization](#authentication-and-authorization)
+- [REST API](#rest-api)
 
 ## Installation Guide
 
-This guide will walk you through the steps to insctall and run Katsu on your local machine.
+This guide will walk you through the steps to install and run Katsu on your local machine.
 
 NOTE: If you want to run as docker container, please refer to the [docker guide](https://github.com/CanDIG/CanDIGv2/blob/develop/docs/install-docker.md)
 
@@ -115,6 +121,35 @@ tox -c tox-candig.ini
 coverage html
 ```
 
+## Authentication and Authorization
+
+Katsu uses Tyk for authentication and OPA for authorization. The following diagram illustrates the flow of requests and responses:
+
+```mermaid
+    sequenceDiagram
+        User->>+Katsu: Tyk send request (with auth token)
+        Katsu->>+OPA: Forward request
+        OPA-->>-Katsu: Send authorized datasets
+        Katsu-->>-User: Send response
+```
+
+Inside Katsu, the flow of the request/response can be broken down into the following steps:
+
+- Base Queryset: receives the GET request and generates a base queryset.
+
+- Discovery: counts the patients that matches the criteria.
+
+- Authorized: passes the request to OPA, which returns authorized datasets. Katsu then use it to generate only authorized data.
+
+```mermaid
+    flowchart TD
+        A[GET Request] --> B{Base Queryset}
+        B -->|Discovery| C[Count Queryset]
+        B -->|Authorized| D[Authorized Queryset]
+        C --> E[Response]
+        D --> F[Response]
+```
+
 ## REST API
 
-You can find the schema documentation [here](chord_metadata_service/mohpackets/docs/README.md)
+You can find the schema documentation [here](chord_metadata_service/mohpackets/docs/README.MD)

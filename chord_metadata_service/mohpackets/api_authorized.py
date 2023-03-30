@@ -1,6 +1,8 @@
+import os
+
 from django.db.models import Prefetch
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import mixins, serializers, viewsets
+from rest_framework import serializers
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 
@@ -20,12 +22,16 @@ from chord_metadata_service.mohpackets.api_base import (
     BaseSurgeryViewSet,
     BaseTreatmentViewSet,
 )
+from chord_metadata_service.mohpackets.authentication import (
+    LocalAuthentication,
+    TokenAuthentication,
+)
 from chord_metadata_service.mohpackets.models import Biomarker, Donor, Program
+from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
-from chord_metadata_service.mohpackets.utils import get_authorized_datasets
 
 """
     This module inheriting from the base views and adding the authorized mixin,
@@ -42,18 +48,31 @@ from chord_metadata_service.mohpackets.utils import get_authorized_datasets
 
 class AuthorizedMixin:
     """
-    This mixin should be used for viewsets that need to restrict
-    access to certain objects based on the user's permissions.
+    This mixin should be used for viewsets that need to restrict access.
+
+    The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+    If the env is "dev" or "prod", the `TokenAuthentication` class is
+    used. Otherwise, the `LocalAuthentication` class is used.
 
     Methods
     -------
     get_queryset()
-        Returns a queryset that includes only the objects that the user is
-        authorized to see.
+        Returns a filtered queryset that includes only the objects that the user is
+        authorized to see based on their permissions.
     """
 
+    pagination_class = StandardResultsSetPagination
+    settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
+    auth_methods = []
+    # Check for production or development environment
+    if "dev" in settings_module or "prod" in settings_module:
+        auth_methods.append(TokenAuthentication)
+    else:
+        auth_methods.append(LocalAuthentication)
+    authentication_classes = auth_methods
+
     def get_queryset(self):
-        authorized_datasets = get_authorized_datasets(self.request)
+        authorized_datasets = self.request.authorized_datasets
         filtered_queryset = (
             super().get_queryset().filter(program_id__in=authorized_datasets)
         )
@@ -163,9 +182,7 @@ def moh_overview(_request):
     )
 
 
-class AuthorizedDonorWithClinicalDataViewSet(
-    mixins.ListModelMixin, viewsets.GenericViewSet
-):
+class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
     """
     This viewset provides access to Donor model and its related clinical data.
     It uses the DonorWithClinicalDataSerializer for serialization.

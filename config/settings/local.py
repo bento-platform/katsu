@@ -2,15 +2,7 @@ from .base import *
 
 DEBUG = True
 
-FAKE_AUTHORIZED_DATASETS = ["SYNTHETIC-1"]
-
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-
-# LOCAL SETTINGS
-KATSU_AUTHORIZATION = "LOCAL_SETTING_NO_AUTH"
-CANDIG_OPA_URL = "LOCAL_SETTING_NO_OPA_URL"
-CANDIG_OPA_SITE_ADMIN_KEY = "LOCAL_SETTING_NO_SITE_ADMIN_KEY"
-CANDIG_OPA_SECRET = "LOCAL_SETTING_NO_OPA_SECRET"
 
 INSTALLED_APPS.append("debug_toolbar")
 
@@ -26,6 +18,12 @@ DATABASES = {
         "PORT": "5432",
     }
 }
+
+LOCAL_AUTHORIZED_DATASET = [
+    {"username": "user1", "datasets": ["SYNTHETIC-1"]},
+    {"username": "user2", "datasets": ["SYNTHETIC-1", "SYNTHETIC-2"]},
+]
+
 
 # Debug toolbar settings
 
