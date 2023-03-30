@@ -356,27 +356,25 @@ class FollowUp(models.Model):
     submitter_treatment_id = models.ForeignKey(
         Treatment, on_delete=models.SET_NULL, blank=True, null=True
     )
-    date_of_followup = models.CharField(max_length=32, null=False, blank=False)
+    date_of_followup = models.CharField(max_length=32, null=True, blank=True)
     lost_to_followup = models.BooleanField(null=True)
-    lost_to_followup_reason = models.CharField(max_length=255, blank=True, default="")
-    disease_status_at_followup = models.CharField(
-        max_length=255, null=False, blank=False
-    )
-    relapse_type = models.CharField(max_length=128, blank=True, default="")
-    date_of_relapse = models.CharField(max_length=32, blank=True, default="")
+    lost_to_followup_reason = models.CharField(max_length=255, null=True, blank=True)
+    disease_status_at_followup = models.CharField(max_length=255, null=True, blank=True)
+    relapse_type = models.CharField(max_length=128, null=True, blank=True)
+    date_of_relapse = models.CharField(max_length=32, null=True, blank=True)
     method_of_progression_status = models.CharField(
-        max_length=255, blank=True, default=""
+        max_length=255, null=True, blank=True
     )
     anatomic_site_progression_or_recurrence = models.CharField(
-        max_length=255, blank=True, default=""
+        max_length=255, null=True, blank=True
     )
     recurrence_tumour_staging_system = models.CharField(
-        max_length=255, blank=True, default=""
+        max_length=255, null=True, blank=True
     )
-    recurrence_t_category = models.CharField(max_length=32, blank=True, default="")
-    recurrence_n_category = models.CharField(max_length=32, blank=True, default="")
-    recurrence_m_category = models.CharField(max_length=32, blank=True, default="")
-    recurrence_stage_group = models.CharField(max_length=64, blank=True, default="")
+    recurrence_t_category = models.CharField(max_length=32, null=True, blank=True)
+    recurrence_n_category = models.CharField(max_length=32, null=True, blank=True)
+    recurrence_m_category = models.CharField(max_length=32, null=True, blank=True)
+    recurrence_stage_group = models.CharField(max_length=64, null=True, blank=True)
 
     class Meta:
         ordering = ["submitter_follow_up_id"]
