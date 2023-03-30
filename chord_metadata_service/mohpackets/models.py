@@ -258,18 +258,16 @@ class Radiation(models.Model):
     submitter_treatment_id = models.OneToOneField(
         Treatment, on_delete=models.CASCADE, null=False, blank=False
     )
-    radiation_therapy_modality = models.CharField(
-        max_length=255, null=False, blank=False
+    radiation_therapy_modality = models.CharField(max_length=255, null=True, blank=True)
+    radiation_therapy_type = models.CharField(max_length=64, null=True, blank=True)
+    radiation_therapy_fractions = models.PositiveSmallIntegerField(
+        null=True, blank=True
     )
-    radiation_therapy_type = models.CharField(max_length=64, null=False, blank=False)
-    radiation_therapy_fractions = models.PositiveSmallIntegerField()
-    radiation_therapy_dosage = models.PositiveSmallIntegerField()
-    anatomical_site_irradiated = models.CharField(
-        max_length=255, null=False, blank=False
-    )
+    radiation_therapy_dosage = models.PositiveSmallIntegerField(null=True, blank=True)
+    anatomical_site_irradiated = models.CharField(max_length=255, null=True, blank=True)
     radiation_boost = models.BooleanField(null=True)
     reference_radiation_treatment_id = models.CharField(
-        max_length=64, blank=True, default=""
+        max_length=64, null=True, blank=True
     )
 
     class Meta:
