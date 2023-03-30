@@ -288,9 +288,9 @@ class Immunotherapy(models.Model):
     submitter_treatment_id = models.ForeignKey(
         Treatment, on_delete=models.CASCADE, null=False, blank=False
     )
-    immunotherapy_type = models.CharField(max_length=255, null=False, blank=False)
-    drug_name = models.CharField(max_length=255, null=False, blank=False)
-    drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
+    immunotherapy_type = models.CharField(max_length=255, null=True, blank=True)
+    drug_name = models.CharField(max_length=255, null=True, blank=True)
+    drug_rxnormcui = models.CharField(max_length=64, null=True, blank=True)
 
     class Meta:
         ordering = ["id"]
