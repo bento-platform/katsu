@@ -174,17 +174,17 @@ class Treatment(models.Model):
     treatment_type = ArrayField(
         models.CharField(max_length=255), null=False, blank=False
     )
-    is_primary_treatment = models.CharField(max_length=32, null=False, blank=False)
-    treatment_start_date = models.CharField(max_length=32, null=False, blank=False)
-    treatment_end_date = models.CharField(max_length=32, null=False, blank=False)
-    treatment_setting = models.CharField(max_length=128, null=False, blank=False)
-    treatment_intent = models.CharField(max_length=128, null=False, blank=False)
-    days_per_cycle = models.PositiveSmallIntegerField(blank=True, null=True)
-    number_of_cycles = models.PositiveSmallIntegerField(blank=True, null=True)
+    is_primary_treatment = models.CharField(max_length=32, null=True, blank=True)
+    treatment_start_date = models.CharField(max_length=32, null=True, blank=True)
+    treatment_end_date = models.CharField(max_length=32, null=True, blank=True)
+    treatment_setting = models.CharField(max_length=128, null=True, blank=True)
+    treatment_intent = models.CharField(max_length=128, null=True, blank=True)
+    days_per_cycle = models.PositiveSmallIntegerField(null=True, blank=True)
+    number_of_cycles = models.PositiveSmallIntegerField(null=True, blank=True)
     response_to_treatment_criteria_method = models.CharField(
-        max_length=255, null=False, blank=False
+        max_length=255, null=True, blank=True
     )
-    response_to_treatment = models.CharField(max_length=255, null=False, blank=False)
+    response_to_treatment = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         ordering = ["submitter_treatment_id"]
