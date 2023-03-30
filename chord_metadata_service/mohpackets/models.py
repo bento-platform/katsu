@@ -171,9 +171,7 @@ class Treatment(models.Model):
     submitter_primary_diagnosis_id = models.ForeignKey(
         PrimaryDiagnosis, on_delete=models.CASCADE, null=False, blank=False
     )
-    treatment_type = ArrayField(
-        models.CharField(max_length=255), null=False, blank=False
-    )
+    treatment_type = ArrayField(models.CharField(max_length=255), null=True, blank=True)
     is_primary_treatment = models.CharField(max_length=32, null=True, blank=True)
     treatment_start_date = models.CharField(max_length=32, null=True, blank=True)
     treatment_end_date = models.CharField(max_length=32, null=True, blank=True)
@@ -201,7 +199,9 @@ class Chemotherapy(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
+    submitter_treatment_id = models.ForeignKey(
+        Treatment, on_delete=models.CASCADE, null=False, blank=False
+    )
     drug_name = models.CharField(max_length=255, null=False, blank=False)
     drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
     chemotherapy_dosage_units = models.CharField(max_length=64, null=False, blank=False)
@@ -227,7 +227,9 @@ class HormoneTherapy(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
+    submitter_treatment_id = models.ForeignKey(
+        Treatment, on_delete=models.CASCADE, null=False, blank=False
+    )
     drug_name = models.CharField(max_length=255, null=False, blank=False)
     drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
     hormone_drug_dosage_units = models.CharField(max_length=64, null=False, blank=False)
@@ -253,7 +255,9 @@ class Radiation(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_treatment_id = models.OneToOneField(Treatment, on_delete=models.CASCADE)
+    submitter_treatment_id = models.OneToOneField(
+        Treatment, on_delete=models.CASCADE, null=False, blank=False
+    )
     radiation_therapy_modality = models.CharField(
         max_length=255, null=False, blank=False
     )
@@ -283,7 +287,9 @@ class Immunotherapy(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_treatment_id = models.ForeignKey(Treatment, on_delete=models.CASCADE)
+    submitter_treatment_id = models.ForeignKey(
+        Treatment, on_delete=models.CASCADE, null=False, blank=False
+    )
     immunotherapy_type = models.CharField(max_length=255, null=False, blank=False)
     drug_name = models.CharField(max_length=255, null=False, blank=False)
     drug_rxnormcui = models.CharField(max_length=64, null=False, blank=False)
@@ -306,7 +312,9 @@ class Surgery(models.Model):
     submitter_specimen_id = models.OneToOneField(
         Specimen, on_delete=models.CASCADE, null=True, blank=True
     )
-    submitter_treatment_id = models.OneToOneField(Treatment, on_delete=models.CASCADE)
+    submitter_treatment_id = models.OneToOneField(
+        Treatment, on_delete=models.CASCADE, null=False, blank=False
+    )
     surgery_type = models.CharField(max_length=255, null=False, blank=False)
     surgery_site = models.CharField(max_length=255, blank=True, default="")
     surgery_location = models.CharField(max_length=128, blank=True, default="")
