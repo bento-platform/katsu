@@ -423,18 +423,18 @@ class Comorbidity(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    prior_malignancy = models.CharField(max_length=32)
+    prior_malignancy = models.CharField(max_length=32, null=True, blank=True)
     laterality_of_prior_malignancy = models.CharField(
-        max_length=64, blank=True, default=""
+        max_length=64, null=True, blank=True
     )
     age_at_comorbidity_diagnosis = models.PositiveSmallIntegerField(
         null=True, blank=True
     )
-    comorbidity_type_code = models.CharField(max_length=64, blank=True, default="")
+    comorbidity_type_code = models.CharField(max_length=64, null=True, blank=True)
     comorbidity_treatment_status = models.CharField(
-        max_length=32, blank=True, default=""
+        max_length=32, null=True, blank=True
     )
-    comorbidity_treatment = models.CharField(max_length=255, blank=True, default="")
+    comorbidity_treatment = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         ordering = ["id"]
