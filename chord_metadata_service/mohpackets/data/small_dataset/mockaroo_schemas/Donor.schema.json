@@ -36,7 +36,7 @@
       "type": "Datetime",
       "min": "01/01/1960",
       "max": "01/01/2010",
-      "format": "%Y-%m-%d",
+      "format": "%Y-%m",
       "formula": null
     },
     {
@@ -46,7 +46,7 @@
       "min": "01/01/2015",
       "max": "11/16/2022",
       "format": "%Y-%m",
-      "formula": "birth_year = year(date_of_birth)\ncurr_year = year(now())\nlife_span = curr_year - birth_year\ndeath_year = date_of_birth + years(random(1, life_span))\n\nif is_deceased == true\nthen death_year\nelse \"\" end"
+      "formula": "dob = date_of_birth || now()\nbirth_year = year(dob)\ncurr_year = year(now())\nlife_span = curr_year - birth_year\ndeath_year = dob + years(random(1, life_span))\n\nif is_deceased == true && !date_of_birth.nil?\n  death_year\nelse\n  nil\nend\n\n"
     },
     {
       "name": "primary_site",
