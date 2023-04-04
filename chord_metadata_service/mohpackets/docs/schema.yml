@@ -21,6 +21,11 @@ paths:
             authorized to see based on their permissions.
       parameters:
       - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: program_id
         schema:
           type: string
@@ -100,6 +105,11 @@ paths:
             authorized to see based on their permissions.
       parameters:
       - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: program_id
         schema:
           type: string
@@ -170,6 +180,11 @@ paths:
             Returns a filtered queryset that includes only the objects that the user is
             authorized to see based on their permissions.
       parameters:
+      - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: program_id
         schema:
@@ -610,6 +625,11 @@ paths:
             authorized to see based on their permissions.
       parameters:
       - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: program_id
         schema:
           type: string
@@ -680,6 +700,11 @@ paths:
             Returns a filtered queryset that includes only the objects that the user is
             authorized to see based on their permissions.
       parameters:
+      - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: program_id
         schema:
@@ -891,6 +916,11 @@ paths:
             Returns a filtered queryset that includes only the objects that the user is
             authorized to see based on their permissions.
       parameters:
+      - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: program_id
         schema:
@@ -1165,6 +1195,11 @@ paths:
             authorized to see based on their permissions.
       parameters:
       - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: program_id
         schema:
           type: string
@@ -1364,6 +1399,11 @@ paths:
             queryset.
       parameters:
       - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: program_id
         schema:
           type: string
@@ -1426,6 +1466,11 @@ paths:
             queryset.
       parameters:
       - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: program_id
         schema:
           type: string
@@ -1479,6 +1524,11 @@ paths:
             Returns a response that contains the number of unique donors in the
             queryset.
       parameters:
+      - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: program_id
         schema:
@@ -1742,6 +1792,11 @@ paths:
             queryset.
       parameters:
       - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: program_id
         schema:
           type: string
@@ -1795,6 +1850,11 @@ paths:
             Returns a response that contains the number of unique donors in the
             queryset.
       parameters:
+      - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: program_id
         schema:
@@ -2025,6 +2085,11 @@ paths:
             queryset.
       parameters:
       - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: program_id
         schema:
           type: string
@@ -2246,6 +2311,11 @@ paths:
             Returns a response that contains the number of unique donors in the
             queryset.
       parameters:
+      - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: program_id
         schema:
@@ -2472,6 +2542,73 @@ components:
       - Soft tissues
       - Entire body as a whole
       type: string
+      description: |-
+        * `Cervical lymph node group` - Cervical lymph node group
+        * `Entire lymph node of thorax` - Entire lymph node of thorax
+        * `Axillary lymph node group` - Axillary lymph node group
+        * `Supraclavicular lymph node group` - Supraclavicular lymph node group
+        * `Internal mammary lymph node group` - Internal mammary lymph node group
+        * `Abdominal lymph node group` - Abdominal lymph node group
+        * `Pelvic lymph node group` - Pelvic lymph node group
+        * `Structure of lymph node` - Structure of lymph node
+        * `Entire eye` - Entire eye
+        * `Pituitary structure` - Pituitary structure
+        * `Brain structure` - Brain structure
+        * `Brain part` - Brain part
+        * `Spinal cord structure` - Spinal cord structure
+        * `Nasopharyngeal structure` - Nasopharyngeal structure
+        * `Oral cavity structure` - Oral cavity structure
+        * `Oropharyngeal structure` - Oropharyngeal structure
+        * `Laryngeal structure` - Laryngeal structure
+        * `Hypopharyngeal structure` - Hypopharyngeal structure
+        * `Nasal sinus structure` - Nasal sinus structure
+        * `Salivary gland structure` - Salivary gland structure
+        * `Thyroid structure` - Thyroid structure
+        * `Entire head and neck` - Entire head and neck
+        * `Entire lung` - Entire lung
+        * `Mesothelium structure` - Mesothelium structure
+        * `Entire thorax` - Entire thorax
+        * `Entire breast` - Entire breast
+        * `Breast part` - Breast part
+        * `Chest wall structure` - Chest wall structure
+        * `Entire esophagus` - Entire esophagus
+        * `Stomach structure` - Stomach structure
+        * `Small intestinal structure` - Small intestinal structure
+        * `Colon structure` - Colon structure
+        * `Rectum structure` - Rectum structure
+        * `Anal structure` - Anal structure
+        * `Liver structure` - Liver structure
+        * `Biliary tract structure` - Biliary tract structure
+        * `Gallbladder structure` - Gallbladder structure
+        * `Pancreatic structure` - Pancreatic structure
+        * `Abdominal structure` - Abdominal structure
+        * `Entire urinary bladder` - Entire urinary bladder
+        * `Bladder part` - Bladder part
+        * `Kidney structure` - Kidney structure
+        * `Ureteric structure` - Ureteric structure
+        * `Entire prostate` - Entire prostate
+        * `Prostate part` - Prostate part
+        * `Urethral structure` - Urethral structure
+        * `Penile structure` - Penile structure
+        * `Testis structure` - Testis structure
+        * `Scrotal structure` - Scrotal structure
+        * `Ovarian structure` - Ovarian structure
+        * `Fallopian tube structure` - Fallopian tube structure
+        * `Uterine structure` - Uterine structure
+        * `Cervix uteri structure` - Cervix uteri structure
+        * `Vaginal structure` - Vaginal structure
+        * `Vulval structure` - Vulval structure
+        * `Bone structure of cranium` - Bone structure of cranium
+        * `Entire vertebral column` - Entire vertebral column
+        * `Shoulder region structure` - Shoulder region structure
+        * `Bone structure of rib` - Bone structure of rib
+        * `Hip region structure` - Hip region structure
+        * `Entire bony pelvis` - Entire bony pelvis
+        * `Pelvic structure` - Pelvic structure
+        * `Bone structure of extremity` - Bone structure of extremity
+        * `Skin structure` - Skin structure
+        * `Soft tissues` - Soft tissues
+        * `Entire body as a whole` - Entire body as a whole
     BasisOfDiagnosisEnum:
       enum:
       - Clinical investigation
@@ -2483,12 +2620,21 @@ components:
       - Specific tumour markers
       - Unknown
       type: string
+      description: |-
+        * `Clinical investigation` - Clinical investigation
+        * `Clinical` - Clinical
+        * `Cytology` - Cytology
+        * `Death certificate only` - Death certificate only
+        * `Histology of a metastasis` - Histology of a metastasis
+        * `Histology of a primary tumour` - Histology of a primary tumour
+        * `Specific tumour markers` - Specific tumour markers
+        * `Unknown` - Unknown
     Biomarker:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         test_interval:
           type: integer
           maximum: 32767
@@ -2537,19 +2683,25 @@ components:
       - Died of other reasons
       - Unknown
       type: string
+      description: |-
+        * `Died of cancer` - Died of cancer
+        * `Died of other reasons` - Died of other reasons
+        * `Unknown` - Unknown
     Chemotherapy:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         chemotherapy_dosage_units:
           $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
+          nullable: true
           maxLength: 255
         drug_rxnormcui:
           type: string
+          nullable: true
           maxLength: 64
         cumulative_drug_dosage_prescribed:
           type: integer
@@ -2569,8 +2721,6 @@ components:
           type: string
       required:
       - chemotherapy_dosage_units
-      - drug_name
-      - drug_rxnormcui
       - program_id
       - submitter_donor_id
       - submitter_treatment_id
@@ -2578,8 +2728,8 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         prior_malignancy:
           $ref: '#/components/schemas/uBooleanEnum'
         laterality_of_prior_malignancy:
@@ -2635,6 +2785,15 @@ components:
       - Relapse or recurrence
       - Stable
       type: string
+      description: |-
+        * `Complete remission` - Complete remission
+        * `Distant progression` - Distant progression
+        * `Loco-regional progression` - Loco-regional progression
+        * `No evidence of disease` - No evidence of disease
+        * `Partial remission` - Partial remission
+        * `Progression NOS` - Progression NOS
+        * `Relapse or recurrence` - Relapse or recurrence
+        * `Stable` - Stable
     Donor:
       type: object
       properties:
@@ -2660,13 +2819,13 @@ components:
             $ref: '#/components/schemas/PrimarySiteEnum'
         is_deceased:
           type: boolean
+          nullable: true
         program_id:
           type: string
       required:
       - cause_of_death
       - date_of_birth
       - date_of_death
-      - is_deceased
       - primary_site
       - program_id
       - submitter_donor_id
@@ -2681,6 +2840,7 @@ components:
           type: string
         is_deceased:
           type: boolean
+          nullable: true
         cause_of_death:
           oneOf:
           - $ref: '#/components/schemas/CauseOfDeathEnum'
@@ -2716,7 +2876,6 @@ components:
       - cause_of_death
       - date_of_birth
       - date_of_death
-      - is_deceased
       - primary_site
       - program_id
       - submitter_donor_id
@@ -2728,6 +2887,12 @@ components:
       - g/m2
       - mg/kg
       type: string
+      description: |-
+        * `mg/m2` - mg/m2
+        * `IU/m2` - IU/m2
+        * `ug/m2` - ug/m2
+        * `g/m2` - g/m2
+        * `mg/kg` - mg/kg
     FollowUp:
       type: object
       properties:
@@ -2815,19 +2980,25 @@ components:
       - Woman
       - Non-binary
       type: string
+      description: |-
+        * `Man` - Man
+        * `Woman` - Woman
+        * `Non-binary` - Non-binary
     HormoneTherapy:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         hormone_drug_dosage_units:
           $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
+          nullable: true
           maxLength: 255
         drug_rxnormcui:
           type: string
+          nullable: true
           maxLength: 64
         cumulative_drug_dosage_prescribed:
           type: integer
@@ -2846,8 +3017,6 @@ components:
         submitter_treatment_id:
           type: string
       required:
-      - drug_name
-      - drug_rxnormcui
       - hormone_drug_dosage_units
       - program_id
       - submitter_donor_id
@@ -2856,15 +3025,17 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         immunotherapy_type:
           $ref: '#/components/schemas/ImmunotherapyTypeEnum'
         drug_name:
           type: string
+          nullable: true
           maxLength: 255
         drug_rxnormcui:
           type: string
+          nullable: true
           maxLength: 64
         program_id:
           type: string
@@ -2873,8 +3044,6 @@ components:
         submitter_treatment_id:
           type: string
       required:
-      - drug_name
-      - drug_rxnormcui
       - immunotherapy_type
       - program_id
       - submitter_donor_id
@@ -2886,6 +3055,11 @@ components:
       - Monoclonal antibodies other than immune checkpoint inhibitors
       - Other immunomodulatory substances
       type: string
+      description: |-
+        * `Cell-based` - Cell-based
+        * `Immune checkpoint inhibitors` - Immune checkpoint inhibitors
+        * `Monoclonal antibodies other than immune checkpoint inhibitors` - Monoclonal antibodies other than immune checkpoint inhibitors
+        * `Other immunomodulatory substances` - Other immunomodulatory substances
     LateralityOfPriorMalignancyEnum:
       enum:
       - Bilateral
@@ -2896,6 +3070,14 @@ components:
       - Unilateral, Side not specified
       - Unknown
       type: string
+      description: |-
+        * `Bilateral` - Bilateral
+        * `Left` - Left
+        * `Midline` - Midline
+        * `Not applicable` - Not applicable
+        * `Right` - Right
+        * `Unilateral, Side not specified` - Unilateral, Side not specified
+        * `Unknown` - Unknown
     LostToFollowupReasonEnum:
       enum:
       - Completed study
@@ -2905,12 +3087,23 @@ components:
       - Unknown
       - Withdrew from study
       type: string
+      description: |-
+        * `Completed study` - Completed study
+        * `Discharged to palliative care` - Discharged to palliative care
+        * `Lost contact` - Lost contact
+        * `Not applicable` - Not applicable
+        * `Unknown` - Unknown
+        * `Withdrew from study` - Withdrew from study
     LymphNodesExaminedMethodEnum:
       enum:
       - Imaging
       - Lymph node dissection/pathological exam
       - Physical palpation of patient
       type: string
+      description: |-
+        * `Imaging` - Imaging
+        * `Lymph node dissection/pathological exam` - Lymph node dissection/pathological exam
+        * `Physical palpation of patient` - Physical palpation of patient
     LymphNodesExaminedStatusEnum:
       enum:
       - Cannot be determined
@@ -2919,6 +3112,12 @@ components:
       - Not applicable
       - 'Yes'
       type: string
+      description: |-
+        * `Cannot be determined` - Cannot be determined
+        * `No` - No
+        * `No lymph nodes found in resected specimen` - No lymph nodes found in resected specimen
+        * `Not applicable` - Not applicable
+        * `Yes` - Yes
     LymphovascularInvasionEnum:
       enum:
       - Absent
@@ -2929,6 +3128,14 @@ components:
       - Venous (large vessel) invasion only
       - Unknown
       type: string
+      description: |-
+        * `Absent` - Absent
+        * `Both lymphatic and small vessel and venous (large vessel) invasion` - Both lymphatic and small vessel and venous (large vessel) invasion
+        * `Lymphatic and small vessel invasion only` - Lymphatic and small vessel invasion only
+        * `Not applicable` - Not applicable
+        * `Present` - Present
+        * `Venous (large vessel) invasion only` - Venous (large vessel) invasion only
+        * `Unknown` - Unknown
     MCategoryEnum:
       enum:
       - M0
@@ -2949,6 +3156,24 @@ components:
       - M1e
       - MX
       type: string
+      description: |-
+        * `M0` - M0
+        * `M0(i+)` - M0(i+)
+        * `M1` - M1
+        * `M1a` - M1a
+        * `M1a(0)` - M1a(0)
+        * `M1a(1)` - M1a(1)
+        * `M1b` - M1b
+        * `M1b(0)` - M1b(0)
+        * `M1b(1)` - M1b(1)
+        * `M1c` - M1c
+        * `M1c(0)` - M1c(0)
+        * `M1c(1)` - M1c(1)
+        * `M1d` - M1d
+        * `M1d(0)` - M1d(0)
+        * `M1d(1)` - M1d(1)
+        * `M1e` - M1e
+        * `MX` - MX
     MarginTypesEnum:
       enum:
       - Circumferential resection margin
@@ -2958,6 +3183,13 @@ components:
       - Proximal margin
       - Unknown
       type: string
+      description: |-
+        * `Circumferential resection margin` - Circumferential resection margin
+        * `Common bile duct margin` - Common bile duct margin
+        * `Distal margin` - Distal margin
+        * `Not applicable` - Not applicable
+        * `Proximal margin` - Proximal margin
+        * `Unknown` - Unknown
     MethodOfProgressionStatusEnum:
       enum:
       - Imaging (procedure)
@@ -2967,6 +3199,13 @@ components:
       - Tumor marker measurement (procedure)
       - Laboratory data interpretation (procedure)
       type: string
+      description: |-
+        * `Imaging (procedure)` - Imaging (procedure)
+        * `Histopathology test (procedure)` - Histopathology test (procedure)
+        * `Assessment of symptom control (procedure)` - Assessment of symptom control (procedure)
+        * `Physical examination procedure (procedure)` - Physical examination procedure (procedure)
+        * `Tumor marker measurement (procedure)` - Tumor marker measurement (procedure)
+        * `Laboratory data interpretation (procedure)` - Laboratory data interpretation (procedure)
     NCategoryEnum:
       enum:
       - N0
@@ -2996,12 +3235,39 @@ components:
       - N4
       - NX
       type: string
+      description: |-
+        * `N0` - N0
+        * `N0a` - N0a
+        * `N0a (biopsy)` - N0a (biopsy)
+        * `N0b` - N0b
+        * `N0b (no biopsy)` - N0b (no biopsy)
+        * `N0(i+)` - N0(i+)
+        * `N0(i-)` - N0(i-)
+        * `N0(mol+)` - N0(mol+)
+        * `N0(mol-)` - N0(mol-)
+        * `N1` - N1
+        * `N1a` - N1a
+        * `N1a(sn)` - N1a(sn)
+        * `N1b` - N1b
+        * `N1c` - N1c
+        * `N1mi` - N1mi
+        * `N2` - N2
+        * `N2a` - N2a
+        * `N2b` - N2b
+        * `N2c` - N2c
+        * `N2mi` - N2mi
+        * `N3` - N3
+        * `N3a` - N3a
+        * `N3b` - N3b
+        * `N3c` - N3c
+        * `N4` - N4
+        * `NX` - NX
     NestedBiomarker:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         test_interval:
           type: integer
           maximum: 32767
@@ -3026,15 +3292,17 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         chemotherapy_dosage_units:
           $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
+          nullable: true
           maxLength: 255
         drug_rxnormcui:
           type: string
+          nullable: true
           maxLength: 64
         cumulative_drug_dosage_prescribed:
           type: integer
@@ -3048,8 +3316,6 @@ components:
           nullable: true
       required:
       - chemotherapy_dosage_units
-      - drug_name
-      - drug_rxnormcui
     NestedComorbidity:
       type: object
       properties:
@@ -3155,15 +3421,17 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         hormone_drug_dosage_units:
           $ref: '#/components/schemas/DosageUnitsEnum'
         drug_name:
           type: string
+          nullable: true
           maxLength: 255
         drug_rxnormcui:
           type: string
+          nullable: true
           maxLength: 64
         cumulative_drug_dosage_prescribed:
           type: integer
@@ -3176,26 +3444,24 @@ components:
           minimum: 0
           nullable: true
       required:
-      - drug_name
-      - drug_rxnormcui
       - hormone_drug_dosage_units
     NestedImmunotherapy:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         immunotherapy_type:
           $ref: '#/components/schemas/ImmunotherapyTypeEnum'
         drug_name:
           type: string
+          nullable: true
           maxLength: 255
         drug_rxnormcui:
           type: string
+          nullable: true
           maxLength: 64
       required:
-      - drug_name
-      - drug_rxnormcui
       - immunotherapy_type
     NestedPrimaryDiagnosis:
       type: object
@@ -3210,6 +3476,7 @@ components:
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         cancer_type_code:
           type: string
+          nullable: true
           maxLength: 64
         basis_of_diagnosis:
           $ref: '#/components/schemas/BasisOfDiagnosisEnum'
@@ -3259,7 +3526,6 @@ components:
           readOnly: true
       required:
       - basis_of_diagnosis
-      - cancer_type_code
       - clinical_m_category
       - clinical_n_category
       - clinical_stage_group
@@ -3273,8 +3539,8 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         radiation_therapy_modality:
           $ref: '#/components/schemas/RadiationTherapyModalityEnum'
         radiation_therapy_type:
@@ -3285,20 +3551,21 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
+          nullable: true
         radiation_therapy_dosage:
           type: integer
           maximum: 32767
           minimum: 0
+          nullable: true
         radiation_boost:
           type: boolean
           nullable: true
         reference_radiation_treatment_id:
           type: string
+          nullable: true
           maxLength: 64
       required:
       - anatomical_site_irradiated
-      - radiation_therapy_dosage
-      - radiation_therapy_fractions
       - radiation_therapy_modality
       - radiation_therapy_type
     NestedSampleRegistration:
@@ -3419,8 +3686,8 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         surgery_type:
           $ref: '#/components/schemas/SurgeryTypeEnum'
         surgery_site:
@@ -3875,12 +4142,21 @@ components:
       - Pathology estimate by percent nuclei
       - Unknown
       type: string
+      description: |-
+        * `Genomics` - Genomics
+        * `Image analysis` - Image analysis
+        * `Pathology estimate by percent nuclei` - Pathology estimate by percent nuclei
+        * `Unknown` - Unknown
     PercentTumourCellsRangeEnum:
       enum:
       - 0-19%
       - 20-50%
       - 51-100%
       type: string
+      description: |-
+        * `0-19%` - 0-19%
+        * `20-50%` - 20-50%
+        * `51-100%` - 51-100%
     PerineuralInvasionEnum:
       enum:
       - Absent
@@ -3889,6 +4165,12 @@ components:
       - Present
       - Unknown
       type: string
+      description: |-
+        * `Absent` - Absent
+        * `Cannot be assessed` - Cannot be assessed
+        * `Not applicable` - Not applicable
+        * `Present` - Present
+        * `Unknown` - Unknown
     PrimaryDiagnosis:
       type: object
       properties:
@@ -3928,6 +4210,7 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
         cancer_type_code:
           type: string
+          nullable: true
           maxLength: 64
         number_lymph_nodes_positive:
           type: integer
@@ -3940,7 +4223,6 @@ components:
           type: string
       required:
       - basis_of_diagnosis
-      - cancer_type_code
       - clinical_m_category
       - clinical_n_category
       - clinical_stage_group
@@ -4025,6 +4307,77 @@ components:
       - Vagina
       - Vulva
       type: string
+      description: |-
+        * `Accessory sinuses` - Accessory sinuses
+        * `Adrenal gland` - Adrenal gland
+        * `Anus and anal canal` - Anus and anal canal
+        * `Base of tongue` - Base of tongue
+        * `Bladder` - Bladder
+        * `Bones, joints and articular cartilage of limbs` - Bones, joints and articular cartilage of limbs
+        * `Bones, joints and articular cartilage of other and unspecified sites` - Bones, joints and articular cartilage of other and unspecified sites
+        * `Brain` - Brain
+        * `Breast` - Breast
+        * `Bronchus and lung` - Bronchus and lung
+        * `Cervix uteri` - Cervix uteri
+        * `Colon` - Colon
+        * `Connective, subcutaneous and other soft tissues` - Connective, subcutaneous and other soft tissues
+        * `Corpus uteri` - Corpus uteri
+        * `Esophagus` - Esophagus
+        * `Eye and adnexa` - Eye and adnexa
+        * `Floor of mouth` - Floor of mouth
+        * `Gallbladder` - Gallbladder
+        * `Gum` - Gum
+        * `Heart, mediastinum, and pleura` - Heart, mediastinum, and pleura
+        * `Hematopoietic and reticuloendothelial systems` - Hematopoietic and reticuloendothelial systems
+        * `Hypopharynx` - Hypopharynx
+        * `Kidney` - Kidney
+        * `Larynx` - Larynx
+        * `Lip` - Lip
+        * `Liver and intrahepatic bile ducts` - Liver and intrahepatic bile ducts
+        * `Lymph nodes` - Lymph nodes
+        * `Meninges` - Meninges
+        * `Nasal cavity and middle ear` - Nasal cavity and middle ear
+        * `Nasopharynx` - Nasopharynx
+        * `Oropharynx` - Oropharynx
+        * `Other and ill-defined digestive organs` - Other and ill-defined digestive organs
+        * `Other and ill-defined sites` - Other and ill-defined sites
+        * `Other and ill-defined sites in lip, oral cavity and pharynx` - Other and ill-defined sites in lip, oral cavity and pharynx
+        * `Other and ill-defined sites within respiratory system and intrathoracic organs` - Other and ill-defined sites within respiratory system and intrathoracic organs
+        * `Other and unspecified female genital organs` - Other and unspecified female genital organs
+        * `Other and unspecified major salivary glands` - Other and unspecified major salivary glands
+        * `Other and unspecified male genital organs` - Other and unspecified male genital organs
+        * `Other and unspecified parts of biliary tract` - Other and unspecified parts of biliary tract
+        * `Other and unspecified parts of mouth` - Other and unspecified parts of mouth
+        * `Other and unspecified parts of tongue` - Other and unspecified parts of tongue
+        * `Other and unspecified urinary organs` - Other and unspecified urinary organs
+        * `Other endocrine glands and related structures` - Other endocrine glands and related structures
+        * `Ovary` - Ovary
+        * `Palate` - Palate
+        * `Pancreas` - Pancreas
+        * `Parotid gland` - Parotid gland
+        * `Penis` - Penis
+        * `Peripheral nerves and autonomic nervous system` - Peripheral nerves and autonomic nervous system
+        * `Placenta` - Placenta
+        * `Prostate gland` - Prostate gland
+        * `Pyriform sinus` - Pyriform sinus
+        * `Rectosigmoid junction` - Rectosigmoid junction
+        * `Rectum` - Rectum
+        * `Renal pelvis` - Renal pelvis
+        * `Retroperitoneum and peritoneum` - Retroperitoneum and peritoneum
+        * `Skin` - Skin
+        * `Small intestine` - Small intestine
+        * `Spinal cord, cranial nerves, and other parts of central nervous system` - Spinal cord, cranial nerves, and other parts of central nervous system
+        * `Stomach` - Stomach
+        * `Testis` - Testis
+        * `Thymus` - Thymus
+        * `Thyroid gland` - Thyroid gland
+        * `Tonsil` - Tonsil
+        * `Trachea` - Trachea
+        * `Unknown primary site` - Unknown primary site
+        * `Ureter` - Ureter
+        * `Uterus, NOS` - Uterus, NOS
+        * `Vagina` - Vagina
+        * `Vulva` - Vulva
     Program:
       type: object
       properties:
@@ -4044,8 +4397,8 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         radiation_therapy_modality:
           $ref: '#/components/schemas/RadiationTherapyModalityEnum'
         radiation_therapy_type:
@@ -4056,15 +4409,18 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
+          nullable: true
         radiation_therapy_dosage:
           type: integer
           maximum: 32767
           minimum: 0
+          nullable: true
         radiation_boost:
           type: boolean
           nullable: true
         reference_radiation_treatment_id:
           type: string
+          nullable: true
           maxLength: 64
         program_id:
           type: string
@@ -4075,8 +4431,6 @@ components:
       required:
       - anatomical_site_irradiated
       - program_id
-      - radiation_therapy_dosage
-      - radiation_therapy_fractions
       - radiation_therapy_modality
       - radiation_therapy_type
       - submitter_donor_id
@@ -4090,11 +4444,21 @@ components:
       - Brachytherapy (procedure)
       - Other
       type: string
+      description: |-
+        * `Megavoltage radiation therapy using photons (procedure)` - Megavoltage radiation therapy using photons (procedure)
+        * `Teleradiotherapy using electrons (procedure)` - Teleradiotherapy using electrons (procedure)
+        * `Teleradiotherapy protons (procedure)` - Teleradiotherapy protons (procedure)
+        * `Teleradiotherapy neutrons (procedure)` - Teleradiotherapy neutrons (procedure)
+        * `Brachytherapy (procedure)` - Brachytherapy (procedure)
+        * `Other` - Other
     RadiationTherapyTypeEnum:
       enum:
       - External
       - Internal
       type: string
+      description: |-
+        * `External` - External
+        * `Internal` - Internal
     ReferencePathologyEnum:
       enum:
       - 'Yes'
@@ -4102,6 +4466,11 @@ components:
       - Not done
       - Unknown
       type: string
+      description: |-
+        * `Yes` - Yes
+        * `No` - No
+        * `Not done` - Not done
+        * `Unknown` - Unknown
     RelapseTypeEnum:
       enum:
       - Distant recurrence/metastasis
@@ -4110,6 +4479,12 @@ components:
       - Progression (liquid tumours)
       - Biochemical progression
       type: string
+      description: |-
+        * `Distant recurrence/metastasis` - Distant recurrence/metastasis
+        * `Local recurrence` - Local recurrence
+        * `Local recurrence and distant metastasis` - Local recurrence and distant metastasis
+        * `Progression (liquid tumours)` - Progression (liquid tumours)
+        * `Biochemical progression` - Biochemical progression
     ResidualTumourClassificationEnum:
       enum:
       - Not applicable
@@ -4119,6 +4494,13 @@ components:
       - R2
       - Unknown
       type: string
+      description: |-
+        * `Not applicable` - Not applicable
+        * `RX` - RX
+        * `R0` - R0
+        * `R1` - R1
+        * `R2` - R2
+        * `Unknown` - Unknown
     ResponseToTreatmentCriteriaMethodEnum:
       enum:
       - RECIST 1.1
@@ -4128,6 +4510,13 @@ components:
       - AML Response Criteria
       - Physician Assessed Response Criteria
       type: string
+      description: |-
+        * `RECIST 1.1` - RECIST 1.1
+        * `iRECIST` - iRECIST
+        * `Cheson CLL 2012 Oncology Response Criteria` - Cheson CLL 2012 Oncology Response Criteria
+        * `Response Assessment in Neuro-Oncology (RANO)` - Response Assessment in Neuro-Oncology (RANO)
+        * `AML Response Criteria` - AML Response Criteria
+        * `Physician Assessed Response Criteria` - Physician Assessed Response Criteria
     ResponseToTreatmentEnum:
       enum:
       - Complete response
@@ -4153,6 +4542,29 @@ components:
       - Physician assessed stable disease
       - No evidence of disease (NED)
       type: string
+      description: |-
+        * `Complete response` - Complete response
+        * `Partial response` - Partial response
+        * `Progressive disease` - Progressive disease
+        * `Stable disease` - Stable disease
+        * `Immune complete response (iCR)` - Immune complete response (iCR)
+        * `Immune partial response (iPR)` - Immune partial response (iPR)
+        * `Immune uncomfirmed progressive disease (iUPD)` - Immune uncomfirmed progressive disease (iUPD)
+        * `Immune confirmed progressive disease (iCPD)` - Immune confirmed progressive disease (iCPD)
+        * `Immune stable disease (iSD)` - Immune stable disease (iSD)
+        * `Complete remission` - Complete remission
+        * `Partial remission` - Partial remission
+        * `Minor response` - Minor response
+        * `Complete remission without measurable residual disease (CR MRD-)` - Complete remission without measurable residual disease (CR MRD-)
+        * `Complete remission with incomplete hematologic recovery (CRi)` - Complete remission with incomplete hematologic recovery (CRi)
+        * `Morphologic leukemia-free state` - Morphologic leukemia-free state
+        * `Primary refractory disease` - Primary refractory disease
+        * `Hematologic relapse (after CR MRD-, CR, CRi)` - Hematologic relapse (after CR MRD-, CR, CRi)
+        * `Molecular relapse (after CR MRD-)` - Molecular relapse (after CR MRD-)
+        * `Physician assessed complete response` - Physician assessed complete response
+        * `Physician assessed partial response` - Physician assessed partial response
+        * `Physician assessed stable disease` - Physician assessed stable disease
+        * `No evidence of disease (NED)` - No evidence of disease (NED)
     SampleRegistration:
       type: object
       properties:
@@ -4201,6 +4613,16 @@ components:
       - Total DNA
       - Total RNA
       type: string
+      description: |-
+        * `Amplified DNA` - Amplified DNA
+        * `ctDNA` - ctDNA
+        * `Other DNA enrichments` - Other DNA enrichments
+        * `Other RNA fractions` - Other RNA fractions
+        * `polyA+ RNA` - polyA+ RNA
+        * `Protein` - Protein
+        * `rRNA-depleted RNA` - rRNA-depleted RNA
+        * `Total DNA` - Total DNA
+        * `Total RNA` - Total RNA
     SexAtBirthEnum:
       enum:
       - Male
@@ -4208,6 +4630,11 @@ components:
       - Other
       - Unknown
       type: string
+      description: |-
+        * `Male` - Male
+        * `Female` - Female
+        * `Other` - Other
+        * `Unknown` - Unknown
     Specimen:
       type: object
       properties:
@@ -4311,6 +4738,16 @@ components:
       - RNA later frozen
       - Unknown
       type: string
+      description: |-
+        * `Cut slide` - Cut slide
+        * `Frozen in -70 freezer` - Frozen in -70 freezer
+        * `Frozen in liquid nitrogen` - Frozen in liquid nitrogen
+        * `Frozen in vapour phase` - Frozen in vapour phase
+        * `Not Applicable` - Not Applicable
+        * `Other` - Other
+        * `Paraffin block` - Paraffin block
+        * `RNA later frozen` - RNA later frozen
+        * `Unknown` - Unknown
     SpecimenTissueSourceEnum:
       enum:
       - Amniotic fluid
@@ -4345,6 +4782,38 @@ components:
       - Vitreous Fluid
       - Wound
       type: string
+      description: |-
+        * `Amniotic fluid` - Amniotic fluid
+        * `Bile Fluid` - Bile Fluid
+        * `Whole blood` - Whole blood
+        * `Blood arterial` - Blood arterial
+        * `Cord blood` - Cord blood
+        * `Blood venous` - Blood venous
+        * `Bone` - Bone
+        * `Serum, Convalescent` - Serum, Convalescent
+        * `Cerebral spinal fluid` - Cerebral spinal fluid
+        * `Cervical Mucus` - Cervical Mucus
+        * `Duodenal fluid` - Duodenal fluid
+        * `Blood, Fetal` - Blood, Fetal
+        * `Fluid, Abdomen` - Fluid, Abdomen
+        * `Genital vaginal` - Genital vaginal
+        * `Fluid, Hydrocele` - Fluid, Hydrocele
+        * `Fluid, Joint` - Fluid, Joint
+        * `Fluid, Kidney` - Fluid, Kidney
+        * `Fluid, Lumbar Sac` - Fluid, Lumbar Sac
+        * `Marrow` - Marrow
+        * `Pancreatic fluid` - Pancreatic fluid
+        * `Fluid, Pericardial` - Fluid, Pericardial
+        * `Placenta` - Placenta
+        * `Pleural fluid (thoracentesis fluid)` - Pleural fluid (thoracentesis fluid)
+        * `Saliva` - Saliva
+        * `Skin` - Skin
+        * `Seminal fluid` - Seminal fluid
+        * `Fluid, synovial (Joint fluid)` - Fluid, synovial (Joint fluid)
+        * `Sputum` - Sputum
+        * `Tissue` - Tissue
+        * `Vitreous Fluid` - Vitreous Fluid
+        * `Wound` - Wound
     SpecimenTypeEnum:
       enum:
       - Cell line - derived from normal
@@ -4365,6 +4834,24 @@ components:
       - Xenograft - derived from metastatic tumour
       - Xenograft - derived from tumour cell line
       type: string
+      description: |-
+        * `Cell line - derived from normal` - Cell line - derived from normal
+        * `Cell line - derived from metastatic tumour` - Cell line - derived from metastatic tumour
+        * `Cell line - derived from primary tumour` - Cell line - derived from primary tumour
+        * `Cell line - derived from xenograft tumour` - Cell line - derived from xenograft tumour
+        * `Metastatic tumour - additional metastatic` - Metastatic tumour - additional metastatic
+        * `Metastatic tumour - metastasis local to lymph node` - Metastatic tumour - metastasis local to lymph node
+        * `Metastatic tumour - metastasis to distant location` - Metastatic tumour - metastasis to distant location
+        * `Metastatic tumour` - Metastatic tumour
+        * `Normal - tissue adjacent to primary tumour` - Normal - tissue adjacent to primary tumour
+        * `Normal` - Normal
+        * `Primary tumour - additional new primary` - Primary tumour - additional new primary
+        * `Primary tumour - adjacent to normal` - Primary tumour - adjacent to normal
+        * `Primary tumour` - Primary tumour
+        * `Recurrent tumour` - Recurrent tumour
+        * `Xenograft - derived from primary tumour` - Xenograft - derived from primary tumour
+        * `Xenograft - derived from metastatic tumour` - Xenograft - derived from metastatic tumour
+        * `Xenograft - derived from tumour cell line` - Xenograft - derived from tumour cell line
     StageGroupEnum:
       enum:
       - Occult Carcinoma
@@ -4454,6 +4941,93 @@ components:
       - Regionalized
       - Distant
       type: string
+      description: |-
+        * `Occult Carcinoma` - Occult Carcinoma
+        * `Stage 0` - Stage 0
+        * `Stage 0a` - Stage 0a
+        * `Stage 0is` - Stage 0is
+        * `Stage 1` - Stage 1
+        * `Stage 1A` - Stage 1A
+        * `Stage 1B` - Stage 1B
+        * `Stage A` - Stage A
+        * `Stage B` - Stage B
+        * `Stage C` - Stage C
+        * `Stage I` - Stage I
+        * `Stage IA` - Stage IA
+        * `Stage IA1` - Stage IA1
+        * `Stage IA2` - Stage IA2
+        * `Stage IA3` - Stage IA3
+        * `Stage IAB` - Stage IAB
+        * `Stage IAE` - Stage IAE
+        * `Stage IAES` - Stage IAES
+        * `Stage IAS` - Stage IAS
+        * `Stage IB` - Stage IB
+        * `Stage IB1` - Stage IB1
+        * `Stage IB2` - Stage IB2
+        * `Stage IBE` - Stage IBE
+        * `Stage IBES` - Stage IBES
+        * `Stage IBS` - Stage IBS
+        * `Stage IC` - Stage IC
+        * `Stage IE` - Stage IE
+        * `Stage IEA` - Stage IEA
+        * `Stage IEB` - Stage IEB
+        * `Stage IES` - Stage IES
+        * `Stage II` - Stage II
+        * `Stage II bulky` - Stage II bulky
+        * `Stage IIA` - Stage IIA
+        * `Stage IIA1` - Stage IIA1
+        * `Stage IIA2` - Stage IIA2
+        * `Stage IIAE` - Stage IIAE
+        * `Stage IIAES` - Stage IIAES
+        * `Stage IIAS` - Stage IIAS
+        * `Stage IIB` - Stage IIB
+        * `Stage IIBE` - Stage IIBE
+        * `Stage IIBES` - Stage IIBES
+        * `Stage IIBS` - Stage IIBS
+        * `Stage IIC` - Stage IIC
+        * `Stage IIE` - Stage IIE
+        * `Stage IIEA` - Stage IIEA
+        * `Stage IIEB` - Stage IIEB
+        * `Stage IIES` - Stage IIES
+        * `Stage III` - Stage III
+        * `Stage IIIA` - Stage IIIA
+        * `Stage IIIA1` - Stage IIIA1
+        * `Stage IIIA2` - Stage IIIA2
+        * `Stage IIIAE` - Stage IIIAE
+        * `Stage IIIAES` - Stage IIIAES
+        * `Stage IIIAS` - Stage IIIAS
+        * `Stage IIIB` - Stage IIIB
+        * `Stage IIIBE` - Stage IIIBE
+        * `Stage IIIBES` - Stage IIIBES
+        * `Stage IIIBS` - Stage IIIBS
+        * `Stage IIIC` - Stage IIIC
+        * `Stage IIIC1` - Stage IIIC1
+        * `Stage IIIC2` - Stage IIIC2
+        * `Stage IIID` - Stage IIID
+        * `Stage IIIE` - Stage IIIE
+        * `Stage IIIES` - Stage IIIES
+        * `Stage IIIS` - Stage IIIS
+        * `Stage IIS` - Stage IIS
+        * `Stage IS` - Stage IS
+        * `Stage IV` - Stage IV
+        * `Stage IVA` - Stage IVA
+        * `Stage IVA1` - Stage IVA1
+        * `Stage IVA2` - Stage IVA2
+        * `Stage IVAE` - Stage IVAE
+        * `Stage IVAES` - Stage IVAES
+        * `Stage IVAS` - Stage IVAS
+        * `Stage IVB` - Stage IVB
+        * `Stage IVBE` - Stage IVBE
+        * `Stage IVBES` - Stage IVBES
+        * `Stage IVBS` - Stage IVBS
+        * `Stage IVC` - Stage IVC
+        * `Stage IVE` - Stage IVE
+        * `Stage IVES` - Stage IVES
+        * `Stage IVS` - Stage IVS
+        * `In situ` - In situ
+        * `Localized` - Localized
+        * `Regionalized` - Regionalized
+        * `Distant` - Distant
     StagingSystemEnum:
       enum:
       - AJCC 8th edition
@@ -4469,12 +5043,25 @@ components:
       - SEER staging system
       - St Jude staging system
       type: string
+      description: |-
+        * `AJCC 8th edition` - AJCC 8th edition
+        * `AJCC 7th edition` - AJCC 7th edition
+        * `AJCC 6th edition` - AJCC 6th edition
+        * `Ann Arbor staging system` - Ann Arbor staging system
+        * `Binet staging system` - Binet staging system
+        * `Durie-Salmon staging system` - Durie-Salmon staging system
+        * `FIGO staging system` - FIGO staging system
+        * `Lugano staging system` - Lugano staging system
+        * `Rai staging system` - Rai staging system
+        * `Revised International staging system (RISS)` - Revised International staging system (RISS)
+        * `SEER staging system` - SEER staging system
+        * `St Jude staging system` - St Jude staging system
     Surgery:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
+          type: string
+          format: uuid
         surgery_type:
           $ref: '#/components/schemas/SurgeryTypeEnum'
         surgery_site:
@@ -4563,6 +5150,10 @@ components:
       - Metastatic
       - Primary
       type: string
+      description: |-
+        * `Local recurrence` - Local recurrence
+        * `Metastatic` - Metastatic
+        * `Primary` - Primary
     SurgeryTypeEnum:
       enum:
       - Axillary Clearance
@@ -4615,6 +5206,56 @@ components:
       - Wedge/localised gastric resection
       - Wide Local Excision
       type: string
+      description: |-
+        * `Axillary Clearance` - Axillary Clearance
+        * `Axillary lymph nodes sampling` - Axillary lymph nodes sampling
+        * `Biopsy` - Biopsy
+        * `Bypass Gastrojejunostomy` - Bypass Gastrojejunostomy
+        * `Cholecystectomy` - Cholecystectomy
+        * `Cholecystojejunostomy` - Cholecystojejunostomy
+        * `Completion gastrectomy` - Completion gastrectomy
+        * `Debridement of pancreatic and peripancreatic necrosis` - Debridement of pancreatic and peripancreatic necrosis
+        * `Debulking` - Debulking
+        * `Distal subtotal pancreatectomy` - Distal subtotal pancreatectomy
+        * `Drainage of abscess` - Drainage of abscess
+        * `Duodenal preserving pancreatic head resection` - Duodenal preserving pancreatic head resection
+        * `Endoscopic biopsy` - Endoscopic biopsy
+        * `Endoscopic brushings of GIT` - Endoscopic brushings of GIT
+        * `Enucleation` - Enucleation
+        * `Esophageal bypass surgery/jejunostomy only` - Esophageal bypass surgery/jejunostomy only
+        * `Exploratory laparotomy` - Exploratory laparotomy
+        * `Fine needle aspiration biopsy` - Fine needle aspiration biopsy
+        * `Gastric Antrectomy` - Gastric Antrectomy
+        * `Hepaticojejunostomy` - Hepaticojejunostomy
+        * `Ivor Lewis subtotal esophagectomy` - Ivor Lewis subtotal esophagectomy
+        * `Laparotomy (Open and Shut)` - Laparotomy (Open and Shut)
+        * `Left thoracoabdominal incision` - Left thoracoabdominal incision
+        * `Lobectomy` - Lobectomy
+        * `Mammoplasty` - Mammoplasty
+        * `Mastectomy` - Mastectomy
+        * `McKeown esophagectomy` - McKeown esophagectomy
+        * `Merendino procedure` - Merendino procedure
+        * `Minimally invasive esophagectomy` - Minimally invasive esophagectomy
+        * `Pancreaticoduodenectomy` - Pancreaticoduodenectomy
+        * `Pancreaticojejunostomy, side-to-side anastomosis` - Pancreaticojejunostomy, side-to-side anastomosis
+        * `Pneumonectomy` - Pneumonectomy
+        * `Proximal subtotal gastrectomy` - Proximal subtotal gastrectomy
+        * `Pylorus-sparing Whipple operation` - Pylorus-sparing Whipple operation
+        * `Radical pancreaticoduodenectomy` - Radical pancreaticoduodenectomy
+        * `Reexcision` - Reexcision
+        * `Segmentectomy` - Segmentectomy
+        * `Sentinal Lymph Node Biopsy` - Sentinal Lymph Node Biopsy
+        * `Spleen preserving distal pancreatectomy` - Spleen preserving distal pancreatectomy
+        * `Splenectomy` - Splenectomy
+        * `Subtotal pancreatectomy` - Subtotal pancreatectomy
+        * `Thoracotomy (Open & Shut)` - Thoracotomy (Open & Shut)
+        * `Total gastrectomy` - Total gastrectomy
+        * `Total gastrectomy with extended lymphadenectomy` - Total gastrectomy with extended lymphadenectomy
+        * `Total pancreatectomy` - Total pancreatectomy
+        * `Transhiatal esophagectomy` - Transhiatal esophagectomy
+        * `Triple bypass of pancreas` - Triple bypass of pancreas
+        * `Wedge/localised gastric resection` - Wedge/localised gastric resection
+        * `Wide Local Excision` - Wide Local Excision
     TCategoryEnum:
       enum:
       - T0
@@ -4670,6 +5311,59 @@ components:
       - Tis pd
       - TX
       type: string
+      description: |-
+        * `T0` - T0
+        * `T1` - T1
+        * `T1a` - T1a
+        * `T1a1` - T1a1
+        * `T1a2` - T1a2
+        * `T1a(s)` - T1a(s)
+        * `T1a(m)` - T1a(m)
+        * `T1b` - T1b
+        * `T1b1` - T1b1
+        * `T1b2` - T1b2
+        * `T1b(s)` - T1b(s)
+        * `T1b(m)` - T1b(m)
+        * `T1c` - T1c
+        * `T1d` - T1d
+        * `T1mi` - T1mi
+        * `T2` - T2
+        * `T2(s)` - T2(s)
+        * `T2(m)` - T2(m)
+        * `T2a` - T2a
+        * `T2a1` - T2a1
+        * `T2a2` - T2a2
+        * `T2b` - T2b
+        * `T2c` - T2c
+        * `T2d` - T2d
+        * `T3` - T3
+        * `T3(s)` - T3(s)
+        * `T3(m)` - T3(m)
+        * `T3a` - T3a
+        * `T3b` - T3b
+        * `T3c` - T3c
+        * `T3d` - T3d
+        * `T3e` - T3e
+        * `T4` - T4
+        * `T4a` - T4a
+        * `T4a(s)` - T4a(s)
+        * `T4a(m)` - T4a(m)
+        * `T4b` - T4b
+        * `T4b(s)` - T4b(s)
+        * `T4b(m)` - T4b(m)
+        * `T4c` - T4c
+        * `T4d` - T4d
+        * `T4e` - T4e
+        * `Ta` - Ta
+        * `Tis` - Tis
+        * `Tis(DCIS)` - Tis(DCIS)
+        * `Tis(LAMN)` - Tis(LAMN)
+        * `Tis(LCIS)` - Tis(LCIS)
+        * `Tis(Paget)` - Tis(Paget)
+        * `Tis(Paget’s)` - Tis(Paget’s)
+        * `Tis pu` - Tis pu
+        * `Tis pd` - Tis pd
+        * `TX` - TX
     Treatment:
       type: object
       properties:
@@ -4733,6 +5427,9 @@ components:
       - Curative
       - Palliative
       type: string
+      description: |-
+        * `Curative` - Curative
+        * `Palliative` - Palliative
     TreatmentSettingEnum:
       enum:
       - Adjuvant
@@ -4740,6 +5437,11 @@ components:
       - Neoadjuvant
       - Not applicable
       type: string
+      description: |-
+        * `Adjuvant` - Adjuvant
+        * `Advanced/Metastatic` - Advanced/Metastatic
+        * `Neoadjuvant` - Neoadjuvant
+        * `Not applicable` - Not applicable
     TreatmentTypeEnum:
       enum:
       - Ablation
@@ -4755,6 +5457,19 @@ components:
       - Stem cell transplant
       - Surgery
       type: string
+      description: |-
+        * `Ablation` - Ablation
+        * `Bone marrow transplant` - Bone marrow transplant
+        * `Chemotherapy` - Chemotherapy
+        * `Endoscopic therapy` - Endoscopic therapy
+        * `Hormonal therapy` - Hormonal therapy
+        * `Immunotherapy` - Immunotherapy
+        * `No treatment` - No treatment
+        * `Other targeting molecular therapy` - Other targeting molecular therapy
+        * `Photodynamic therapy` - Photodynamic therapy
+        * `Radiation therapy` - Radiation therapy
+        * `Stem cell transplant` - Stem cell transplant
+        * `Surgery` - Surgery
     TumourFocalityEnum:
       enum:
       - Cannot be assessed
@@ -4763,6 +5478,12 @@ components:
       - Unifocal
       - Unknown
       type: string
+      description: |-
+        * `Cannot be assessed` - Cannot be assessed
+        * `Multifocal` - Multifocal
+        * `Not applicable` - Not applicable
+        * `Unifocal` - Unifocal
+        * `Unknown` - Unknown
     TumourGradeEnum:
       enum:
       - Low grade
@@ -4784,6 +5505,25 @@ components:
       - Grade Group 4
       - Grade Group 5
       type: string
+      description: |-
+        * `Low grade` - Low grade
+        * `High grade` - High grade
+        * `GX` - GX
+        * `G1` - G1
+        * `G2` - G2
+        * `G3` - G3
+        * `G4` - G4
+        * `Low` - Low
+        * `High` - High
+        * `Grade I` - Grade I
+        * `Grade II` - Grade II
+        * `Grade III` - Grade III
+        * `Grade IV` - Grade IV
+        * `Grade Group 1` - Grade Group 1
+        * `Grade Group 2` - Grade Group 2
+        * `Grade Group 3` - Grade Group 3
+        * `Grade Group 4` - Grade Group 4
+        * `Grade Group 5` - Grade Group 5
     TumourGradingSystemEnum:
       enum:
       - FNCLCC grading system
@@ -4798,11 +5538,26 @@ components:
       - Two-tier grading system
       - WHO grading system for CNS tumours
       type: string
+      description: |-
+        * `FNCLCC grading system` - FNCLCC grading system
+        * `Four-tier grading system` - Four-tier grading system
+        * `Gleason grade group system` - Gleason grade group system
+        * `Grading system for GISTs` - Grading system for GISTs
+        * `Grading system for GNETs` - Grading system for GNETs
+        * `ISUP grading system` - ISUP grading system
+        * `Nuclear grading system for DCIS` - Nuclear grading system for DCIS
+        * `Scarff-Bloom-Richardson grading system` - Scarff-Bloom-Richardson grading system
+        * `Three-tier grading system` - Three-tier grading system
+        * `Two-tier grading system` - Two-tier grading system
+        * `WHO grading system for CNS tumours` - WHO grading system for CNS tumours
     TumourNormalDesignationEnum:
       enum:
       - Normal
       - Tumour
       type: string
+      description: |-
+        * `Normal` - Normal
+        * `Tumour` - Tumour
     moh_overview_cancer_type_count_response:
       type: object
       properties:
@@ -4858,6 +5613,10 @@ components:
       - 'No'
       - Unknown
       type: string
+      description: |-
+        * `Yes` - Yes
+        * `No` - No
+        * `Unknown` - Unknown
   securitySchemes:
     localAuth:
       type: http
