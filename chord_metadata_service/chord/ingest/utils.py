@@ -60,8 +60,7 @@ def workflow_http_download(tmp_dir: str, http_uri: str) -> str:
 
     if not r.ok:
         err = f"HTTP error encountered while downloading ingestion URI: {http_uri}"
-        err_extra = f"(Status: {r.status_code}; Contents: {r.content.decode('utf-8')})"
-        logger.error(f"{err} {err_extra}")
+        logger.error(f"{err} (Status: {r.status_code}; Contents: {r.content.decode('utf-8')})")
         raise IngestError(err)
 
     data_path = f"{tmp_dir}ingest_download_data"
