@@ -216,14 +216,14 @@ tzdata = ["tzdata"]
 
 [[package]]
 name = "bento-lib"
-version = "6.0.0"
+version = "6.0.1"
 description = "A set of common utilities and helpers for Bento platform services."
 category = "main"
 optional = false
 python-versions = ">=3.8.1"
 files = [
-    {file = "bento_lib-6.0.0-py3-none-any.whl", hash = "sha256:b4e143aaf3c1932dbd3c4cb2b9e7faa8ad443ccca1c470c3c74e040ffa2818bb"},
-    {file = "bento_lib-6.0.0.tar.gz", hash = "sha256:48517078bcbbb5da4b69e8cf49615325b472a9f7d91eea6d39ba14c6789e541b"},
+    {file = "bento_lib-6.0.1-py3-none-any.whl", hash = "sha256:4612e59bdc950f5aa84299b1e591d8bad37ad968c818e65e7215db593307a2f8"},
+    {file = "bento_lib-6.0.1.tar.gz", hash = "sha256:866b6ec8aa102d26c762db68ba87e17d03cd18f77b7d05b3f2e5af089247b59a"},
 ]
 
 [package.dependencies]
@@ -1928,4 +1928,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "5ecdf2d2272387abbae6b483d74ccaec0c2ec9c8c0dfc310492f3d84f45a0101"
+content-hash = "759b7e7d9226924b8ea876afb51c3b780fedf7d408e5672c660e7aa9390e24f7"
