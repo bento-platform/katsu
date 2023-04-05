@@ -48,6 +48,9 @@ jobs:
       - name: Install octokit/rest
         run: npm install @octokit/rest
 
+      - name: Print ref
+        run: echo ${{ github.ref }}
+
       - name: Update schema.yml and openapi.md
         uses: actions/github-script@v6
         with:
@@ -63,7 +66,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 path: `${repoPath}${path}`,
-                ref: context.ref
+                ref: context.ref_name
               });
               return data.sha;
             }
@@ -83,7 +86,7 @@ jobs:
               message: 'Update schema.yml',
               content: Buffer.from(schemaYml).toString('base64'),
               sha: schemaSha,
-              branch: context.ref
+              branch: context.ref_name
             });
 
             await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
@@ -93,7 +96,7 @@ jobs:
               message: 'Update openapi.md',
               content: Buffer.from(openApiMd).toString('base64'),
               sha: openApiSha,
-              branch: context.ref
+              branch: context.ref_name
             });
 
           
