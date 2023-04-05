@@ -50,8 +50,10 @@ jobs:
       #   run: npm install @octokit/rest
 
       - name: Print GitHub Action properties
-        run: |
-          console.log(`  github.ref_name: ${process.env.GITHUB_REF_NAME}`);
+        uses: actions/github-script@v6
+        with:
+          script: |
+            console.log(`  github.ref_name: ${process.env.GITHUB_REF_NAME}`);
 
 
 
