@@ -51,23 +51,7 @@ jobs:
 
       - name: Print GitHub Action properties
         run: |
-          echo "GitHub Action properties:"
-          echo "  github.actor: ${GITHUB_ACTOR}"
-          echo "  github.event_name: ${GITHUB_EVENT_NAME}"
-          echo "  github.repository: ${GITHUB_REPOSITORY}"
-          echo "  github.event_path: ${GITHUB_EVENT_PATH}"
-          echo "  github.workspace: ${GITHUB_WORKSPACE}"
-          echo "  github.sha: ${GITHUB_SHA}"
-          echo "  github.ref: ${GITHUB_REF}"
-          echo "  github.ref_name: ${GITHUB_REF_NAME}"
-          echo "  github.head_ref: ${GITHUB_HEAD_REF}"
-          echo "  github.base_ref: ${GITHUB_BASE_REF}"
-          echo "  github.event.inputs: ${GITHUB_EVENT_INPUTS}"
-          echo "  github.event.number: ${GITHUB_EVENT_NUMBER}"
-          echo "  github.event.pull_request.number: ${GITHUB_EVENT_PULL_REQUEST_NUMBER}"
-          echo "  github.event.pull_request.head.ref: ${GITHUB_EVENT_PULL_REQUEST_HEAD_REF}"
-          echo "  github.event.pull_request.base.ref: ${GITHUB_EVENT_PULL_REQUEST_BASE_REF}"
-          echo "  github.token: ${GITHUB_TOKEN}"
+          console.log(`  github.ref_name: ${process.env.GITHUB_REF_NAME}`);
 
 
 
