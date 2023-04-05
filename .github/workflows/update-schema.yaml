@@ -49,7 +49,7 @@ jobs:
         run: npm install @octokit/rest
 
       - name: Print ref
-        run: echo ${{ github.ref }}
+        run: echo ${{ github.ref_name }}
 
       - name: Update schema.yml and openapi.md
         uses: actions/github-script@v6
