@@ -63,7 +63,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 path: `${repoPath}${path}`,
-                ref: context.ref_name
+                ref: context.ref
               });
               return data.sha;
             }
@@ -83,7 +83,7 @@ jobs:
               message: 'Update schema.yml',
               content: Buffer.from(schemaYml).toString('base64'),
               sha: schemaSha,
-               branch: ${{ github.ref }}
+              branch: context.ref
             });
 
             await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
@@ -93,7 +93,7 @@ jobs:
               message: 'Update openapi.md',
               content: Buffer.from(openApiMd).toString('base64'),
               sha: openApiSha,
-               branch: ${{ github.ref }}
+              branch: context.ref
             });
 
           
