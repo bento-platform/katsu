@@ -59,6 +59,7 @@ jobs:
           echo "  github.workspace: ${GITHUB_WORKSPACE}"
           echo "  github.sha: ${GITHUB_SHA}"
           echo "  github.ref: ${GITHUB_REF}"
+          echo "  github.ref_name: ${GITHUB_REF_NAME}"
           echo "  github.head_ref: ${GITHUB_HEAD_REF}"
           echo "  github.base_ref: ${GITHUB_BASE_REF}"
           echo "  github.event.inputs: ${GITHUB_EVENT_INPUTS}"
