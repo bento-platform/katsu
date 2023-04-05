@@ -3,6 +3,7 @@ ARG alpine_version
 FROM python:${venv_python}-alpine${alpine_version}
 
 LABEL Maintainer="CanDIG Team"
+LABEL "candigv2"="chord_metadata_service"
 
 USER root
 
