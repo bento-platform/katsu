@@ -51,7 +51,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            console.log(`  github.ref_name: ${process.env.GITHUB_REF_NAME}`);
+            console.log(`  github.ref_name: ${{ github.head_ref }}`);
 
 
 
@@ -70,7 +70,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 path: `${repoPath}${path}`,
-                ref: `${process.env.GITHUB_REF_NAME}`
+                ref: `${{ github.head_ref }}`
               });
               return data.sha;
             }
@@ -90,7 +90,7 @@ jobs:
               message: 'Update schema.yml',
               content: Buffer.from(schemaYml).toString('base64'),
               sha: schemaSha,
-              branch: `${process.env.GITHUB_REF_NAME}`
+              branch: `${{ github.head_ref }}`
             });
 
             await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
@@ -100,7 +100,7 @@ jobs:
               message: 'Update openapi.md',
               content: Buffer.from(openApiMd).toString('base64'),
               sha: openApiSha,
-              branch: `${process.env.GITHUB_REF_NAME}`
+              branch: `${{ github.head_ref }}`
             });
 
           
