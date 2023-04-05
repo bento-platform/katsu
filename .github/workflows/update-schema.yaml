@@ -83,7 +83,7 @@ jobs:
               message: 'Update schema.yml',
               content: Buffer.from(schemaYml).toString('base64'),
               sha: schemaSha,
-              branch: github.head_ref
+               branch: ${{ github.ref }}
             });
 
             await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
@@ -93,7 +93,7 @@ jobs:
               message: 'Update openapi.md',
               content: Buffer.from(openApiMd).toString('base64'),
               sha: openApiSha,
-              branch: github.head_ref
+               branch: ${{ github.ref }}
             });
 
           
