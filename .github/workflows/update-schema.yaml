@@ -1,8 +1,9 @@
 name: Docs
 
 on:
-  pull_request:
-    types: [review_requested, ready_for_review]
+  # pull_request:
+  #   types: [review_requested, ready_for_review]
+  push:
 
 
 jobs:
@@ -10,94 +11,94 @@ jobs:
     name: Update MoH schema
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repo
-        uses: actions/checkout@v3
-        with:
-          submodules: true
+      # - name: Check out repo
+      #   uses: actions/checkout@v3
+      #   with:
+      #     submodules: true
 
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
+      # - name: Install Python
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: "3.10"
 
-      - name: Install dependencies
-        run: python -m pip install -r requirements-candig-dev.txt
+      # - name: Install dependencies
+      #   run: python -m pip install -r requirements-candig-dev.txt
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '16'
 
-      - name: Create package.json file
-        run: |
-          echo '{"name": "my-project", "version": "1.0.0"}' > package.json
+      # - name: Create package.json file
+      #   run: |
+      #     echo '{"name": "my-project", "version": "1.0.0"}' > package.json
           
-      - name: Install npm
-        run: npm install
+      # - name: Install npm
+      #   run: npm install
       
-      - name: Install widdershins
-        run: npm install -g widdershins
+      # - name: Install widdershins
+      #   run: npm install -g widdershins
 
-      - name: Generate new schema.yml
-        run: python manage.py spectacular --file ./chord_metadata_service/mohpackets/docs/schema.yml --validate --fail-on-warn
+      # - name: Generate new schema.yml
+      #   run: python manage.py spectacular --file ./chord_metadata_service/mohpackets/docs/schema.yml --validate --fail-on-warn
 
-      - name: Convert schema to OpenAPI documentation
-        run: |
-          npx widdershins ./chord_metadata_service/mohpackets/docs/schema.yml -o ./chord_metadata_service/mohpackets/docs/openapi.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true
+      # - name: Convert schema to OpenAPI documentation
+      #   run: |
+      #     npx widdershins ./chord_metadata_service/mohpackets/docs/schema.yml -o ./chord_metadata_service/mohpackets/docs/openapi.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true
       
-      - name: Install octokit/rest
-        run: npm install @octokit/rest
+      # - name: Install octokit/rest
+      #   run: npm install @octokit/rest
 
       - name: Print ref
-        run: echo $(basename ${{ github.ref_name }})
+        run: echo ${{ github.head_ref }}
 
-      - name: Update schema.yml and openapi.md
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const { Octokit } = require('@octokit/rest');
-            const octokit = new Octokit({ auth: "${{ secrets.GITHUB_TOKEN }}" });
+      # - name: Update schema.yml and openapi.md
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       const fs = require('fs');
+      #       const { Octokit } = require('@octokit/rest');
+      #       const octokit = new Octokit({ auth: "${{ secrets.GITHUB_TOKEN }}" });
 
-            // get SHA from each file
-            const repoPath = 'chord_metadata_service/mohpackets/docs/';
-            const getFileSha = async (path) => {
-              const { data } = await octokit.repos.getContent({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: `${repoPath}${path}`,
-                ref: context.ref_name
-              });
-              return data.sha;
-            }
+      #       // get SHA from each file
+      #       const repoPath = 'chord_metadata_service/mohpackets/docs/';
+      #       const getFileSha = async (path) => {
+      #         const { data } = await octokit.repos.getContent({
+      #           owner: context.repo.owner,
+      #           repo: context.repo.repo,
+      #           path: `${repoPath}${path}`,
+      #           ref: context.ref_name
+      #         });
+      #         return data.sha;
+      #       }
             
-            const schemaSha = await getFileSha('schema.yml');
-            const openApiSha = await getFileSha('openapi.md');
+      #       const schemaSha = await getFileSha('schema.yml');
+      #       const openApiSha = await getFileSha('openapi.md');
 
-            // Read the content of updated files
-            const schemaYml = fs.readFileSync(`./${repoPath}schema.yml`, 'utf8');
-            const openApiMd = fs.readFileSync(`./${repoPath}openapi.md`, 'utf8');
+      #       // Read the content of updated files
+      #       const schemaYml = fs.readFileSync(`./${repoPath}schema.yml`, 'utf8');
+      #       const openApiMd = fs.readFileSync(`./${repoPath}openapi.md`, 'utf8');
 
-            // Commit and push changes
-            await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'schema.yml',
-              message: 'Update schema.yml',
-              content: Buffer.from(schemaYml).toString('base64'),
-              sha: schemaSha,
-              branch: context.ref_name
-            });
+      #       // Commit and push changes
+      #       await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         path: 'schema.yml',
+      #         message: 'Update schema.yml',
+      #         content: Buffer.from(schemaYml).toString('base64'),
+      #         sha: schemaSha,
+      #         branch: context.ref_name
+      #       });
 
-            await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'openapi.md',
-              message: 'Update openapi.md',
-              content: Buffer.from(openApiMd).toString('base64'),
-              sha: openApiSha,
-              branch: context.ref_name
-            });
+      #       await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         path: 'openapi.md',
+      #         message: 'Update openapi.md',
+      #         content: Buffer.from(openApiMd).toString('base64'),
+      #         sha: openApiSha,
+      #         branch: context.ref_name
+      #       });
 
           
 
