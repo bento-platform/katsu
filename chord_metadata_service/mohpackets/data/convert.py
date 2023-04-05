@@ -45,9 +45,7 @@ def set_foreign_keys():
     """
     # Get the absolute path to the synthetic data folder
     script_dir = os.path.dirname(__file__)
-    relationships_file = os.path.join(
-        script_dir, "small_dataset/template/relationships.json"
-    )
+    relationships_file = os.path.join(script_dir, "small_dataset/relationships.json")
     no_relationships_data_folder = os.path.join(
         script_dir, "small_dataset/no_relationships_data"
     )
