@@ -47,14 +47,6 @@ jobs:
       - name: Install octokit/rest
         run: npm install @octokit/rest
 
-      - name: Print GitHub Action properties
-        uses: actions/github-script@v6
-        with:
-          script: |
-            console.log(`  github.ref_name: ${{ github.head_ref }}`);
-
-
-
       - name: Update schema.yml and openapi.md
         uses: actions/github-script@v6
         with:
