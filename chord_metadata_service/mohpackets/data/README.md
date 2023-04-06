@@ -34,7 +34,7 @@ python manage.py flush
 If you want to modify the mock data to your preferences, you can follow these steps:
 
 1. Create a [Mockaroo](https://www.mockaroo.com/) account
-2. Load the blueprints in `mockaroo_schemas`
+2. Load the blueprints from `mockaroo_schemas`
 3. Make changes
 4. Download the data as a JSON file, and put it in `no_relationships_data`
 5. Modify `relationships.json` if needed
