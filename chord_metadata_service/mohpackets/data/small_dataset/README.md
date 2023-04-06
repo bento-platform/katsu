@@ -1,6 +1,6 @@
 # Small dataset relationships
 
-This is a diagram of the relationships between the models in the dataset.
+This is a diagram of the synthetic relationships between the models in the dataset.
 
 ```mermaid
 ---
