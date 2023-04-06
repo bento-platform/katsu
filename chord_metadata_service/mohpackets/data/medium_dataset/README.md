@@ -1,4 +1,4 @@
-# Small dataset relationships
+# Medium dataset relationships
 
 This is a diagram of the synthetic relationships between the models in the dataset.
 
@@ -144,8 +144,8 @@ title: 750 Biomarkers
 ---
 graph LR;  
   Biomarker_1_640 --> FollowUp_1_640 --> Specimen_1_640 --> Donor_1_40 --> Program_1;
-  Biomarker_641_720 --> PrimaryDiagnosis_251_290 --> Donor_71_90 --> Program_3;
-  Biomarker_721_750 --> Donor_91_100 --> Program_4; 
+  Biomarker_641_720 ---> PrimaryDiagnosis_251_290 --> Donor_71_90 --> Program_3;
+  Biomarker_721_750 ----> Donor_91_100 --> Program_4; 
 ```
 
 ---
