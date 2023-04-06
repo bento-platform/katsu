@@ -7,8 +7,8 @@
 ## Table of Contents
 
 - [Installation Guide](#installation-guide) <!-- omit in toc -->
-- [Data Model](#mohccn-clinical-data-model)
 - [Tests](#tests)
+- [Data Model](#mohccn-clinical-data-model)
 - [Authentication and Authorization](#authentication-and-authorization)
 - [REST API](#rest-api)
 
