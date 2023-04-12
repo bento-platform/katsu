@@ -1,0 +1,26 @@
+[
+    {
+        "model": "mohpackets.program",
+        "fields": {
+            "program_id": "SYNTHETIC-1"
+        }
+    },
+    {
+        "model": "mohpackets.program",
+        "fields": {
+            "program_id": "SYNTHETIC-2"
+        }
+    },
+    {
+        "model": "mohpackets.program",
+        "fields": {
+            "program_id": "SYNTHETIC-3"
+        }
+    },
+    {
+        "model": "mohpackets.program",
+        "fields": {
+            "program_id": "SYNTHETIC-4"
+        }
+    }
+]
