@@ -80,13 +80,17 @@ class DonorSerializer(serializers.ModelSerializer):
         max_length=64,
         validators=[UniqueValidator(queryset=Donor.objects.all())],
     )
-    cause_of_death = CustomChoiceField(choices=val.CAUSE_OF_DEATH, allow_blank=True)
-    date_of_birth = serializers.RegexField(regex=regex["DATE"], max_length=32)
+    cause_of_death = CustomChoiceField(
+        choices=val.CAUSE_OF_DEATH, allow_blank=True, allow_null=True
+    )
+    date_of_birth = serializers.RegexField(
+        regex=regex["DATE"], max_length=32, allow_blank=True, allow_null=True
+    )
     date_of_death = serializers.RegexField(
-        regex=regex["DATE"], max_length=32, allow_blank=True
+        regex=regex["DATE"], max_length=32, allow_blank=True, allow_null=True
     )
     primary_site = serializers.ListField(
-        allow_empty=False, child=CustomChoiceField(choices=val.PRIMARY_SITE)
+        allow_null=True, child=CustomChoiceField(choices=val.PRIMARY_SITE)
     )
 
     class Meta:
