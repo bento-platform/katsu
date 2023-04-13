@@ -2,9 +2,9 @@
     {
         "submitter_donor_id": "DONOR_1",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": null,
+        "is_deceased": false,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": null,
+        "date_of_birth": "1975-06",
         "date_of_death": null,
         "primary_site": null
     },
@@ -13,190 +13,193 @@
         "program_id": "SYNTHETIC-1",
         "is_deceased": false,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "2000-09",
+        "date_of_birth": null,
         "date_of_death": null,
-        "primary_site": [
-            "Other and ill-defined sites in lip, oral cavity and pharynx",
-            "Palate"
-        ]
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_3",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
+        "is_deceased": true,
         "cause_of_death": "Died of cancer",
-        "date_of_birth": null,
+        "date_of_birth": "1967-06",
         "date_of_death": null,
         "primary_site": [
-            "Oropharynx",
-            "Other and unspecified female genital organs"
+            "Thymus"
         ]
     },
     {
         "submitter_donor_id": "DONOR_4",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": null,
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1986-05",
+        "date_of_death": "2019-05",
         "primary_site": [
-            "Prostate gland",
-            "Other and unspecified male genital organs",
-            "Bones, joints and articular cartilage of limbs",
-            "Adrenal gland"
+            "Bladder",
+            "Thymus",
+            "Other and unspecified parts of mouth",
+            "Gum",
+            "Other and unspecified urinary organs"
         ]
     },
     {
         "submitter_donor_id": "DONOR_5",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1960-03",
-        "date_of_death": "1973-03",
-        "primary_site": [
-            "Bones, joints and articular cartilage of limbs",
-            "Retroperitoneum and peritoneum",
-            "Colon",
-            "Lip"
-        ]
+        "is_deceased": null,
+        "cause_of_death": null,
+        "date_of_birth": null,
+        "date_of_death": null,
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_6",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": null,
-        "date_of_birth": "1980-07",
-        "date_of_death": "2003-07",
-        "primary_site": null
+        "is_deceased": null,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": null,
+        "date_of_death": null,
+        "primary_site": [
+            "Other and unspecified parts of biliary tract",
+            "Placenta",
+            "Connective, subcutaneous and other soft tissues",
+            "Gum",
+            "Tonsil"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_7",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": null,
-        "cause_of_death": null,
-        "date_of_birth": "1975-04",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1979-05",
+        "date_of_death": "2009-05",
         "primary_site": [
-            "Other and unspecified major salivary glands",
-            "Kidney",
-            "Other and unspecified female genital organs",
-            "Other and unspecified parts of biliary tract"
+            "Ovary",
+            "Cervix uteri",
+            "Oropharynx",
+            "Bones, joints and articular cartilage of limbs"
         ]
     },
     {
         "submitter_donor_id": "DONOR_8",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "2009-07",
+        "is_deceased": false,
+        "cause_of_death": null,
+        "date_of_birth": "1962-09",
         "date_of_death": null,
         "primary_site": [
-            "Ureter",
-            "Placenta",
-            "Palate",
-            "Renal pelvis"
+            "Accessory sinuses",
+            "Bones, joints and articular cartilage of other and unspecified sites",
+            "Bones, joints and articular cartilage of limbs",
+            "Other and unspecified major salivary glands"
         ]
     },
     {
         "submitter_donor_id": "DONOR_9",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "2007-05",
-        "date_of_death": "2011-05",
+        "is_deceased": false,
+        "cause_of_death": null,
+        "date_of_birth": "1996-10",
+        "date_of_death": null,
         "primary_site": [
-            "Other and unspecified parts of mouth",
-            "Cervix uteri",
-            "Breast"
+            "Esophagus",
+            "Trachea",
+            "Bladder",
+            "Prostate gland",
+            "Meninges"
         ]
     },
     {
         "submitter_donor_id": "DONOR_10",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": null,
+        "is_deceased": null,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1979-12",
         "date_of_death": null,
         "primary_site": [
-            "Lymph nodes",
-            "Bones, joints and articular cartilage of limbs",
-            "Other and unspecified major salivary glands"
+            "Other and ill-defined digestive organs",
+            "Unknown primary site",
+            "Brain",
+            "Rectosigmoid junction",
+            "Spinal cord, cranial nerves, and other parts of central nervous system"
         ]
     },
     {
         "submitter_donor_id": "DONOR_11",
         "program_id": "SYNTHETIC-1",
         "is_deceased": false,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1993-04",
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1960-01",
         "date_of_death": null,
         "primary_site": [
-            "Accessory sinuses",
-            "Other and unspecified parts of mouth"
+            "Cervix uteri",
+            "Renal pelvis",
+            "Rectosigmoid junction",
+            "Penis",
+            "Other and ill-defined sites in lip, oral cavity and pharynx"
         ]
     },
     {
         "submitter_donor_id": "DONOR_12",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1975-01",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "2004-10",
+        "date_of_death": "2023-10",
         "primary_site": [
-            "Oropharynx",
-            "Rectosigmoid junction",
-            "Base of tongue",
-            "Nasopharynx",
-            "Thyroid gland"
+            "Anus and anal canal",
+            "Palate",
+            "Retroperitoneum and peritoneum"
         ]
     },
     {
         "submitter_donor_id": "DONOR_13",
         "program_id": "SYNTHETIC-1",
         "is_deceased": true,
-        "cause_of_death": "Unknown",
-        "date_of_birth": null,
-        "date_of_death": null,
+        "cause_of_death": null,
+        "date_of_birth": "2009-06",
+        "date_of_death": "2023-06",
         "primary_site": [
-            "Larynx",
-            "Small intestine",
-            "Other and unspecified male genital organs",
-            "Floor of mouth"
+            "Other and unspecified male genital organs"
         ]
     },
     {
         "submitter_donor_id": "DONOR_14",
         "program_id": "SYNTHETIC-1",
         "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1998-09",
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": null,
         "date_of_death": null,
         "primary_site": [
-            "Uterus,"
+            "Nasal cavity and middle ear",
+            "Renal pelvis",
+            "Gum",
+            "Palate"
         ]
     },
     {
         "submitter_donor_id": "DONOR_15",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "2004-06",
-        "date_of_death": null,
-        "primary_site": [
-            "Parotid gland",
-            "Other and ill-defined sites within respiratory system and intrathoracic organs",
-            "Trachea"
-        ]
+        "is_deceased": true,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1964-12",
+        "date_of_death": "1994-12",
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_16",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
+        "is_deceased": false,
         "cause_of_death": "Unknown",
-        "date_of_birth": "1966-04",
-        "date_of_death": "1986-04",
+        "date_of_birth": "1960-09",
+        "date_of_death": null,
         "primary_site": [
-            "Connective, subcutaneous and other soft tissues"
+            "Other and ill-defined sites within respiratory system and intrathoracic organs",
+            "Other and ill-defined digestive organs",
+            "Penis",
+            "Small intestine",
+            "Bones, joints and articular cartilage of other and unspecified sites"
         ]
     },
     {
@@ -204,67 +207,71 @@
         "program_id": "SYNTHETIC-1",
         "is_deceased": true,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "2008-12",
-        "date_of_death": "2019-12",
+        "date_of_birth": "1990-07",
+        "date_of_death": "2012-07",
         "primary_site": [
-            "Uterus,",
-            "Eye and adnexa",
-            "Hematopoietic and reticuloendothelial systems",
-            "Bones, joints and articular cartilage of other and unspecified sites"
+            "Eye and adnexa"
         ]
     },
     {
         "submitter_donor_id": "DONOR_18",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1982-01",
-        "date_of_death": "2003-01",
-        "primary_site": null
+        "is_deceased": false,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1963-10",
+        "date_of_death": null,
+        "primary_site": [
+            "Other and ill-defined sites",
+            "Hematopoietic and reticuloendothelial systems",
+            "Lymph nodes",
+            "Other and unspecified urinary organs",
+            "Testis"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_19",
         "program_id": "SYNTHETIC-1",
         "is_deceased": false,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1998-01",
+        "cause_of_death": "Unknown",
+        "date_of_birth": "2002-04",
         "date_of_death": null,
         "primary_site": [
-            "Hypopharynx",
-            "Ureter"
+            "Trachea",
+            "Parotid gland",
+            "Corpus uteri"
         ]
     },
     {
         "submitter_donor_id": "DONOR_20",
         "program_id": "SYNTHETIC-1",
         "is_deceased": true,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1980-02",
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": null,
         "date_of_death": null,
         "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_21",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
+        "is_deceased": false,
+        "cause_of_death": "Unknown",
         "date_of_birth": null,
         "date_of_death": null,
         "primary_site": [
-            "Hypopharynx"
+            "Pyriform sinus"
         ]
     },
     {
         "submitter_donor_id": "DONOR_22",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": null,
-        "date_of_birth": null,
+        "is_deceased": null,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1963-06",
         "date_of_death": null,
         "primary_site": [
-            "Rectum",
             "Other and ill-defined sites",
-            "Meninges"
+            "Bones, joints and articular cartilage of limbs",
+            "Colon"
         ]
     },
     {
@@ -272,267 +279,277 @@
         "program_id": "SYNTHETIC-1",
         "is_deceased": true,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1964-12",
-        "date_of_death": "1965-12",
+        "date_of_birth": "2002-06",
+        "date_of_death": "2021-06",
         "primary_site": [
-            "Renal pelvis"
+            "Heart, mediastinum, and pleura",
+            "Lymph nodes",
+            "Oropharynx",
+            "Floor of mouth",
+            "Small intestine"
         ]
     },
     {
         "submitter_donor_id": "DONOR_24",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "2003-06",
-        "date_of_death": "2019-06",
+        "is_deceased": false,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "2002-02",
+        "date_of_death": null,
         "primary_site": [
-            "Bronchus and lung",
-            "Ureter"
+            "Other and unspecified male genital organs",
+            "Ovary"
         ]
     },
     {
         "submitter_donor_id": "DONOR_25",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1962-06",
+        "is_deceased": null,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1994-01",
         "date_of_death": null,
         "primary_site": [
-            "Other and unspecified urinary organs",
-            "Renal pelvis",
-            "Other and unspecified parts of tongue"
+            "Eye and adnexa",
+            "Pyriform sinus",
+            "Cervix uteri",
+            "Other and unspecified parts of biliary tract"
         ]
     },
     {
         "submitter_donor_id": "DONOR_26",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
+        "is_deceased": false,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1968-08",
+        "date_of_birth": "1995-04",
         "date_of_death": null,
         "primary_site": [
-            "Gum",
             "Other and unspecified parts of mouth",
-            "Corpus uteri",
-            "Other and unspecified parts of tongue"
+            "Pyriform sinus",
+            "Adrenal gland",
+            "Parotid gland"
         ]
     },
     {
         "submitter_donor_id": "DONOR_27",
         "program_id": "SYNTHETIC-1",
         "is_deceased": false,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1967-02",
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": null,
         "date_of_death": null,
         "primary_site": [
-            "Nasal cavity and middle ear",
-            "Other and unspecified parts of biliary tract",
-            "Renal pelvis",
-            "Liver and intrahepatic bile ducts",
-            "Skin"
+            "Pancreas",
+            "Lymph nodes",
+            "Other and ill-defined digestive organs",
+            "Floor of mouth",
+            "Hematopoietic and reticuloendothelial systems"
         ]
     },
     {
         "submitter_donor_id": "DONOR_28",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1978-01",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1990-04",
+        "date_of_death": "2016-04",
         "primary_site": [
-            "Pancreas",
-            "Spinal cord, cranial nerves, and other parts of central nervous system",
-            "Hematopoietic and reticuloendothelial systems",
-            "Gum"
+            "Gallbladder",
+            "Ovary",
+            "Other and ill-defined sites in lip, oral cavity and pharynx",
+            "Testis"
         ]
     },
     {
         "submitter_donor_id": "DONOR_29",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": null,
-        "date_of_birth": "1984-08",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1962-02",
+        "date_of_death": "1963-02",
         "primary_site": [
-            "Nasopharynx",
-            "Placenta",
-            "Penis"
+            "Oropharynx"
         ]
     },
     {
         "submitter_donor_id": "DONOR_30",
         "program_id": "SYNTHETIC-1",
         "is_deceased": null,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1980-02",
+        "cause_of_death": null,
+        "date_of_birth": "1982-12",
         "date_of_death": null,
         "primary_site": [
-            "Hematopoietic and reticuloendothelial systems",
-            "Gum"
+            "Other and ill-defined sites within respiratory system and intrathoracic organs",
+            "Base of tongue",
+            "Testis",
+            "Other and unspecified parts of biliary tract"
         ]
     },
     {
         "submitter_donor_id": "DONOR_31",
         "program_id": "SYNTHETIC-1",
         "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "2003-01",
-        "date_of_death": "2012-01",
-        "primary_site": [
-            "Breast",
-            "Other and unspecified parts of tongue",
-            "Nasopharynx",
-            "Parotid gland"
-        ]
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1961-12",
+        "date_of_death": "1982-12",
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_32",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": null,
-        "date_of_death": null,
-        "primary_site": null
+        "is_deceased": true,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "2003-09",
+        "date_of_death": "2005-09",
+        "primary_site": [
+            "Corpus uteri"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_33",
         "program_id": "SYNTHETIC-1",
         "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1977-12",
-        "date_of_death": "2004-12",
-        "primary_site": null
+        "cause_of_death": null,
+        "date_of_birth": "1998-04",
+        "date_of_death": "2014-04",
+        "primary_site": [
+            "Unknown primary site",
+            "Retroperitoneum and peritoneum",
+            "Peripheral nerves and autonomic nervous system",
+            "Anus and anal canal",
+            "Other and ill-defined sites in lip, oral cavity and pharynx"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_34",
         "program_id": "SYNTHETIC-1",
         "is_deceased": false,
         "cause_of_death": "Died of cancer",
-        "date_of_birth": "1985-07",
+        "date_of_birth": "1992-05",
         "date_of_death": null,
         "primary_site": [
-            "Rectosigmoid junction",
-            "Other endocrine glands and related structures",
-            "Floor of mouth"
+            "Lymph nodes",
+            "Tonsil",
+            "Base of tongue"
         ]
     },
     {
         "submitter_donor_id": "DONOR_35",
         "program_id": "SYNTHETIC-1",
         "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1990-08",
-        "date_of_death": "2023-08",
-        "primary_site": [
-            "Other and ill-defined sites",
-            "Small intestine"
-        ]
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1970-05",
+        "date_of_death": "1980-05",
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_36",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": null,
-        "date_of_birth": "1988-05",
+        "is_deceased": null,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1962-01",
         "date_of_death": null,
-        "primary_site": [
-            "Lymph nodes",
-            "Colon",
-            "Penis",
-            "Other and unspecified male genital organs"
-        ]
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_37",
         "program_id": "SYNTHETIC-1",
         "is_deceased": null,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": null,
+        "cause_of_death": null,
+        "date_of_birth": "2006-04",
         "date_of_death": null,
         "primary_site": [
-            "Hematopoietic and reticuloendothelial systems"
+            "Bladder",
+            "Brain",
+            "Bones, joints and articular cartilage of limbs",
+            "Gallbladder"
         ]
     },
     {
         "submitter_donor_id": "DONOR_38",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": null,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1980-12",
-        "date_of_death": null,
-        "primary_site": null
+        "is_deceased": true,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1973-04",
+        "date_of_death": "2011-04",
+        "primary_site": [
+            "Vagina",
+            "Trachea",
+            "Other and unspecified major salivary glands",
+            "Connective, subcutaneous and other soft tissues"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_39",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1988-12",
+        "is_deceased": false,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1978-10",
         "date_of_death": null,
         "primary_site": [
-            "Small intestine"
+            "Ovary",
+            "Skin",
+            "Rectosigmoid junction",
+            "Other and unspecified urinary organs",
+            "Vagina"
         ]
     },
     {
         "submitter_donor_id": "DONOR_40",
         "program_id": "SYNTHETIC-1",
         "is_deceased": true,
-        "cause_of_death": null,
-        "date_of_birth": "1988-03",
-        "date_of_death": null,
-        "primary_site": null
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1977-11",
+        "date_of_death": "1990-11",
+        "primary_site": [
+            "Other and unspecified male genital organs",
+            "Other and unspecified parts of mouth",
+            "Trachea",
+            "Oropharynx",
+            "Ovary"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_41",
         "program_id": "SYNTHETIC-2",
         "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": null,
-        "date_of_death": null,
-        "primary_site": [
-            "Oropharynx",
-            "Larynx"
-        ]
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1976-09",
+        "date_of_death": "2014-09",
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_42",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
+        "is_deceased": false,
         "cause_of_death": "Died of cancer",
-        "date_of_birth": "1980-08",
-        "date_of_death": "2007-08",
+        "date_of_birth": "2007-01",
+        "date_of_death": null,
         "primary_site": [
-            "Larynx",
-            "Other and unspecified male genital organs",
-            "Thyroid gland",
-            "Other and unspecified urinary organs",
-            "Brain"
+            "Brain",
+            "Oropharynx"
         ]
     },
     {
         "submitter_donor_id": "DONOR_43",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": null,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "2009-03",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1995-04",
+        "date_of_death": "2008-04",
         "primary_site": [
-            "Esophagus",
-            "Gum",
-            "Heart, mediastinum, and pleura",
-            "Thymus"
+            "Other and unspecified urinary organs",
+            "Nasal cavity and middle ear",
+            "Bones, joints and articular cartilage of other and unspecified sites"
         ]
     },
     {
         "submitter_donor_id": "DONOR_44",
         "program_id": "SYNTHETIC-2",
         "is_deceased": null,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "2000-03",
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1962-12",
         "date_of_death": null,
         "primary_site": [
-            "Placenta",
-            "Esophagus"
+            "Ureter"
         ]
     },
     {
@@ -540,32 +557,39 @@
         "program_id": "SYNTHETIC-2",
         "is_deceased": null,
         "cause_of_death": "Died of cancer",
-        "date_of_birth": "2000-05",
+        "date_of_birth": "1968-04",
         "date_of_death": null,
         "primary_site": [
-            "Uterus,",
-            "Other and unspecified major salivary glands"
+            "Thyroid gland",
+            "Thymus",
+            "Oropharynx"
         ]
     },
     {
         "submitter_donor_id": "DONOR_46",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1967-02",
-        "date_of_death": "1970-02",
-        "primary_site": null
+        "is_deceased": false,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1960-07",
+        "date_of_death": null,
+        "primary_site": [
+            "Other and unspecified parts of tongue",
+            "Peripheral nerves and autonomic nervous system",
+            "Parotid gland",
+            "Placenta",
+            "Adrenal gland"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_47",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1988-11",
-        "date_of_death": "1994-11",
+        "is_deceased": false,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1990-11",
+        "date_of_death": null,
         "primary_site": [
-            "Pyriform sinus",
-            "Meninges"
+            "Kidney",
+            "Placenta"
         ]
     },
     {
@@ -573,46 +597,47 @@
         "program_id": "SYNTHETIC-2",
         "is_deceased": true,
         "cause_of_death": "Died of cancer",
-        "date_of_birth": "1977-06",
-        "date_of_death": "1985-06",
+        "date_of_birth": "1997-03",
+        "date_of_death": "2003-03",
         "primary_site": [
-            "Other and ill-defined sites",
-            "Peripheral nerves and autonomic nervous system",
-            "Testis"
+            "Adrenal gland"
         ]
     },
     {
         "submitter_donor_id": "DONOR_49",
         "program_id": "SYNTHETIC-2",
         "is_deceased": false,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1980-01",
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": null,
         "date_of_death": null,
         "primary_site": [
-            "Rectum"
+            "Prostate gland",
+            "Small intestine",
+            "Placenta",
+            "Heart, mediastinum, and pleura",
+            "Nasal cavity and middle ear"
         ]
     },
     {
         "submitter_donor_id": "DONOR_50",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
+        "is_deceased": null,
         "cause_of_death": "Unknown",
-        "date_of_birth": "2000-05",
-        "date_of_death": "2007-05",
+        "date_of_birth": "1974-02",
+        "date_of_death": null,
         "primary_site": [
-            "Brain",
             "Pyriform sinus",
-            "Skin",
-            "Nasopharynx",
-            "Other and unspecified parts of biliary tract"
+            "Brain",
+            "Kidney",
+            "Connective, subcutaneous and other soft tissues"
         ]
     },
     {
         "submitter_donor_id": "DONOR_51",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1990-12",
+        "is_deceased": false,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1978-05",
         "date_of_death": null,
         "primary_site": null
     },
@@ -621,131 +646,126 @@
         "program_id": "SYNTHETIC-2",
         "is_deceased": false,
         "cause_of_death": "Unknown",
-        "date_of_birth": "1961-08",
+        "date_of_birth": "2000-09",
         "date_of_death": null,
-        "primary_site": null
+        "primary_site": [
+            "Thymus"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_53",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
-        "cause_of_death": "Unknown",
-        "date_of_birth": null,
+        "is_deceased": false,
+        "cause_of_death": null,
+        "date_of_birth": "1970-10",
         "date_of_death": null,
         "primary_site": [
-            "Skin",
-            "Ureter"
+            "Anus and anal canal",
+            "Bones, joints and articular cartilage of limbs",
+            "Adrenal gland"
         ]
     },
     {
         "submitter_donor_id": "DONOR_54",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": false,
-        "cause_of_death": null,
-        "date_of_birth": "2002-03",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1964-02",
+        "date_of_death": "1970-02",
         "primary_site": [
-            "Other and unspecified major salivary glands",
-            "Other and ill-defined sites in lip, oral cavity and pharynx",
-            "Lip",
-            "Ureter"
+            "Brain"
         ]
     },
     {
         "submitter_donor_id": "DONOR_55",
         "program_id": "SYNTHETIC-2",
         "is_deceased": false,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": null,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "2009-08",
         "date_of_death": null,
         "primary_site": [
-            "Spinal cord, cranial nerves, and other parts of central nervous system",
-            "Other and unspecified parts of biliary tract",
-            "Thyroid gland",
-            "Other and unspecified urinary organs"
+            "Gallbladder",
+            "Pancreas",
+            "Other and unspecified male genital organs",
+            "Retroperitoneum and peritoneum",
+            "Nasopharynx"
         ]
     },
     {
         "submitter_donor_id": "DONOR_56",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": false,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1968-07",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "2009-12",
+        "date_of_death": "2022-12",
         "primary_site": [
-            "Uterus,",
-            "Other and unspecified urinary organs",
-            "Lymph nodes",
-            "Bronchus and lung",
-            "Anus and anal canal"
+            "Other and unspecified female genital organs"
         ]
     },
     {
         "submitter_donor_id": "DONOR_57",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": false,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1961-10",
+        "is_deceased": true,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1971-11",
         "date_of_death": null,
-        "primary_site": null
+        "primary_site": [
+            "Other and unspecified female genital organs",
+            "Other and unspecified major salivary glands"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_58",
         "program_id": "SYNTHETIC-2",
         "is_deceased": true,
-        "cause_of_death": null,
-        "date_of_birth": "1980-02",
-        "date_of_death": "2000-02",
-        "primary_site": [
-            "Lymph nodes",
-            "Tonsil"
-        ]
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1963-10",
+        "date_of_death": "1998-10",
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_59",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1977-10",
-        "date_of_death": "1985-10",
-        "primary_site": null
+        "is_deceased": false,
+        "cause_of_death": null,
+        "date_of_birth": "1966-08",
+        "date_of_death": null,
+        "primary_site": [
+            "Larynx",
+            "Other and unspecified parts of mouth"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_60",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
-        "cause_of_death": null,
-        "date_of_birth": "2007-02",
-        "date_of_death": "2014-02",
-        "primary_site": [
-            "Penis",
-            "Brain"
-        ]
+        "is_deceased": false,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1972-04",
+        "date_of_death": null,
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_61",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
+        "is_deceased": false,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1989-04",
-        "date_of_death": "2002-04",
+        "date_of_birth": "2006-09",
+        "date_of_death": null,
         "primary_site": [
-            "Brain",
-            "Esophagus",
-            "Anus and anal canal"
+            "Other and ill-defined sites in lip, oral cavity and pharynx",
+            "Connective, subcutaneous and other soft tissues",
+            "Trachea"
         ]
     },
     {
         "submitter_donor_id": "DONOR_62",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1967-08",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1968-07",
+        "date_of_death": "2023-07",
         "primary_site": [
-            "Lip",
-            "Nasal cavity and middle ear",
-            "Trachea"
+            "Other and ill-defined digestive organs"
         ]
     },
     {
@@ -753,198 +773,217 @@
         "program_id": "SYNTHETIC-2",
         "is_deceased": false,
         "cause_of_death": "Unknown",
-        "date_of_birth": "1987-12",
+        "date_of_birth": "1961-01",
         "date_of_death": null,
-        "primary_site": null
+        "primary_site": [
+            "Uterus, NOS",
+            "Lip",
+            "Heart, mediastinum, and pleura",
+            "Parotid gland"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_64",
         "program_id": "SYNTHETIC-2",
         "is_deceased": true,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1973-09",
-        "date_of_death": "2011-09",
-        "primary_site": null
+        "date_of_birth": "1966-07",
+        "date_of_death": "2010-07",
+        "primary_site": [
+            "Stomach"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_65",
         "program_id": "SYNTHETIC-2",
         "is_deceased": false,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1991-09",
+        "date_of_birth": "1996-02",
         "date_of_death": null,
-        "primary_site": null
+        "primary_site": [
+            "Parotid gland"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_66",
         "program_id": "SYNTHETIC-2",
         "is_deceased": true,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1982-01",
-        "date_of_death": "1998-01",
-        "primary_site": [
-            "Trachea",
-            "Other and unspecified parts of tongue",
-            "Base of tongue"
-        ]
+        "date_of_birth": "2004-05",
+        "date_of_death": "2022-05",
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_67",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
-        "cause_of_death": "Unknown",
-        "date_of_birth": null,
+        "is_deceased": false,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1965-05",
         "date_of_death": null,
         "primary_site": [
-            "Other and unspecified urinary organs"
+            "Other and ill-defined sites in lip, oral cavity and pharynx",
+            "Testis",
+            "Bones, joints and articular cartilage of other and unspecified sites",
+            "Accessory sinuses",
+            "Other and unspecified parts of mouth"
         ]
     },
     {
         "submitter_donor_id": "DONOR_68",
         "program_id": "SYNTHETIC-2",
         "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": null,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1968-02",
         "date_of_death": null,
         "primary_site": [
-            "Liver and intrahepatic bile ducts",
-            "Eye and adnexa",
-            "Other and unspecified parts of biliary tract",
-            "Ovary"
+            "Bones, joints and articular cartilage of other and unspecified sites",
+            "Retroperitoneum and peritoneum",
+            "Penis",
+            "Corpus uteri",
+            "Renal pelvis"
         ]
     },
     {
         "submitter_donor_id": "DONOR_69",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
-        "cause_of_death": null,
-        "date_of_birth": "1967-04",
-        "date_of_death": "2016-04",
-        "primary_site": null
+        "is_deceased": null,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": null,
+        "date_of_death": null,
+        "primary_site": [
+            "Meninges",
+            "Retroperitoneum and peritoneum",
+            "Renal pelvis",
+            "Pancreas"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_70",
         "program_id": "SYNTHETIC-2",
         "is_deceased": false,
         "cause_of_death": "Unknown",
-        "date_of_birth": "1960-05",
+        "date_of_birth": "2006-08",
         "date_of_death": null,
-        "primary_site": [
-            "Other and unspecified parts of biliary tract",
-            "Adrenal gland",
-            "Other endocrine glands and related structures"
-        ]
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_71",
         "program_id": "SYNTHETIC-3",
         "is_deceased": false,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1973-04",
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1973-09",
         "date_of_death": null,
-        "primary_site": null
+        "primary_site": [
+            "Breast",
+            "Small intestine",
+            "Ovary",
+            "Renal pelvis",
+            "Trachea"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_72",
         "program_id": "SYNTHETIC-3",
-        "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": null,
+        "is_deceased": null,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "2004-04",
         "date_of_death": null,
-        "primary_site": null
+        "primary_site": [
+            "Placenta",
+            "Stomach",
+            "Lip"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_73",
         "program_id": "SYNTHETIC-3",
-        "is_deceased": false,
+        "is_deceased": null,
         "cause_of_death": "Unknown",
-        "date_of_birth": "1985-10",
+        "date_of_birth": "2009-08",
         "date_of_death": null,
         "primary_site": [
-            "Other and unspecified urinary organs"
+            "Larynx"
         ]
     },
     {
         "submitter_donor_id": "DONOR_74",
         "program_id": "SYNTHETIC-3",
-        "is_deceased": true,
-        "cause_of_death": null,
-        "date_of_birth": "1969-10",
-        "date_of_death": "1976-10",
+        "is_deceased": false,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "2008-09",
+        "date_of_death": null,
         "primary_site": [
-            "Liver and intrahepatic bile ducts"
+            "Adrenal gland",
+            "Brain",
+            "Rectosigmoid junction",
+            "Thymus"
         ]
     },
     {
         "submitter_donor_id": "DONOR_75",
         "program_id": "SYNTHETIC-3",
         "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1974-06",
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1990-10",
         "date_of_death": null,
         "primary_site": [
-            "Uterus,",
-            "Spinal cord, cranial nerves, and other parts of central nervous system"
+            "Pancreas",
+            "Other and unspecified urinary organs"
         ]
     },
     {
         "submitter_donor_id": "DONOR_76",
         "program_id": "SYNTHETIC-3",
-        "is_deceased": false,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1996-12",
+        "is_deceased": null,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1987-01",
         "date_of_death": null,
-        "primary_site": [
-            "Liver and intrahepatic bile ducts"
-        ]
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_77",
         "program_id": "SYNTHETIC-3",
         "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1983-10",
+        "cause_of_death": null,
+        "date_of_birth": null,
         "date_of_death": null,
         "primary_site": [
-            "Liver and intrahepatic bile ducts",
-            "Anus and anal canal"
+            "Thyroid gland",
+            "Eye and adnexa",
+            "Anus and anal canal",
+            "Bladder",
+            "Nasal cavity and middle ear"
         ]
     },
     {
         "submitter_donor_id": "DONOR_78",
         "program_id": "SYNTHETIC-3",
-        "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "2002-02",
-        "date_of_death": "2007-02",
+        "is_deceased": false,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": null,
+        "date_of_death": null,
         "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_79",
         "program_id": "SYNTHETIC-3",
         "is_deceased": false,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "2007-03",
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1963-03",
         "date_of_death": null,
-        "primary_site": [
-            "Floor of mouth",
-            "Thyroid gland",
-            "Other and ill-defined sites in lip, oral cavity and pharynx",
-            "Oropharynx"
-        ]
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_80",
         "program_id": "SYNTHETIC-3",
-        "is_deceased": true,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "2004-07",
-        "date_of_death": "2005-07",
+        "is_deceased": null,
+        "cause_of_death": null,
+        "date_of_birth": "1983-10",
+        "date_of_death": null,
         "primary_site": [
-            "Cervix uteri",
-            "Brain",
-            "Lip",
-            "Ureter"
+            "Nasopharynx",
+            "Spinal cord, cranial nerves, and other parts of central nervous system",
+            "Other and unspecified parts of tongue"
         ]
     },
     {
@@ -952,21 +991,21 @@
         "program_id": "SYNTHETIC-3",
         "is_deceased": true,
         "cause_of_death": "Unknown",
-        "date_of_birth": "1983-01",
-        "date_of_death": "1996-01",
-        "primary_site": [
-            "Oropharynx",
-            "Other endocrine glands and related structures"
-        ]
+        "date_of_birth": "1971-04",
+        "date_of_death": "2017-04",
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_82",
         "program_id": "SYNTHETIC-3",
-        "is_deceased": true,
+        "is_deceased": false,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1961-07",
-        "date_of_death": "1983-07",
+        "date_of_birth": "2003-02",
+        "date_of_death": null,
         "primary_site": [
+            "Unknown primary site",
+            "Accessory sinuses",
+            "Colon",
             "Other and unspecified parts of mouth"
         ]
     },
@@ -974,122 +1013,121 @@
         "submitter_donor_id": "DONOR_83",
         "program_id": "SYNTHETIC-3",
         "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1969-05",
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1979-05",
         "date_of_death": null,
-        "primary_site": null
+        "primary_site": [
+            "Pancreas"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_84",
         "program_id": "SYNTHETIC-3",
-        "is_deceased": false,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1985-08",
+        "is_deceased": null,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1978-07",
         "date_of_death": null,
         "primary_site": [
-            "Ureter",
-            "Accessory sinuses"
+            "Gum",
+            "Small intestine",
+            "Unknown primary site",
+            "Ureter"
         ]
     },
     {
         "submitter_donor_id": "DONOR_85",
         "program_id": "SYNTHETIC-3",
         "is_deceased": false,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1962-12",
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1977-12",
         "date_of_death": null,
         "primary_site": [
-            "Thyroid gland",
-            "Heart, mediastinum, and pleura",
-            "Peripheral nerves and autonomic nervous system",
-            "Placenta",
-            "Nasopharynx"
+            "Tonsil",
+            "Adrenal gland"
         ]
     },
     {
         "submitter_donor_id": "DONOR_86",
         "program_id": "SYNTHETIC-3",
-        "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": null,
+        "is_deceased": false,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "2004-12",
         "date_of_death": null,
         "primary_site": [
-            "Other and unspecified parts of biliary tract",
             "Hypopharynx",
-            "Eye and adnexa"
+            "Tonsil",
+            "Other and ill-defined sites in lip, oral cavity and pharynx",
+            "Gallbladder",
+            "Heart, mediastinum, and pleura"
         ]
     },
     {
         "submitter_donor_id": "DONOR_87",
         "program_id": "SYNTHETIC-3",
         "is_deceased": true,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1990-09",
-        "date_of_death": "1995-09",
-        "primary_site": null
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "1991-12",
+        "date_of_death": "2016-12",
+        "primary_site": [
+            "Larynx",
+            "Oropharynx"
+        ]
     },
     {
         "submitter_donor_id": "DONOR_88",
         "program_id": "SYNTHETIC-3",
         "is_deceased": false,
-        "cause_of_death": null,
-        "date_of_birth": "1980-05",
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "2000-10",
         "date_of_death": null,
-        "primary_site": [
-            "Oropharynx",
-            "Other and ill-defined sites in lip, oral cavity and pharynx",
-            "Small intestine"
-        ]
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_89",
         "program_id": "SYNTHETIC-3",
-        "is_deceased": false,
+        "is_deceased": true,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": null,
-        "date_of_death": null,
+        "date_of_birth": "1973-04",
+        "date_of_death": "1991-04",
         "primary_site": [
-            "Other and unspecified urinary organs",
-            "Other and ill-defined sites",
-            "Other and unspecified parts of biliary tract"
+            "Rectum",
+            "Pancreas"
         ]
     },
     {
         "submitter_donor_id": "DONOR_90",
         "program_id": "SYNTHETIC-3",
-        "is_deceased": false,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1989-04",
+        "is_deceased": null,
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": "2007-10",
         "date_of_death": null,
         "primary_site": [
-            "Rectum",
-            "Colon"
+            "Colon",
+            "Floor of mouth",
+            "Trachea",
+            "Meninges",
+            "Pyriform sinus"
         ]
     },
     {
         "submitter_donor_id": "DONOR_91",
         "program_id": "SYNTHETIC-4",
-        "is_deceased": null,
+        "is_deceased": false,
         "cause_of_death": null,
-        "date_of_birth": "1998-03",
+        "date_of_birth": "1960-10",
         "date_of_death": null,
-        "primary_site": [
-            "Other and unspecified parts of tongue",
-            "Accessory sinuses",
-            "Ovary",
-            "Penis"
-        ]
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_92",
         "program_id": "SYNTHETIC-4",
-        "is_deceased": true,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1982-12",
+        "is_deceased": false,
+        "cause_of_death": null,
+        "date_of_birth": null,
         "date_of_death": null,
         "primary_site": [
-            "Bronchus and lung",
-            "Esophagus",
+            "Nasopharynx",
+            "Other and ill-defined sites within respiratory system and intrathoracic organs",
             "Other and unspecified urinary organs"
         ]
     },
@@ -1097,102 +1135,93 @@
         "submitter_donor_id": "DONOR_93",
         "program_id": "SYNTHETIC-4",
         "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1984-07",
+        "cause_of_death": null,
+        "date_of_birth": "1978-09",
         "date_of_death": null,
-        "primary_site": [
-            "Retroperitoneum and peritoneum",
-            "Other and unspecified major salivary glands",
-            "Colon",
-            "Palate"
-        ]
+        "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_94",
         "program_id": "SYNTHETIC-4",
         "is_deceased": null,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1985-04",
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": null,
         "date_of_death": null,
         "primary_site": [
-            "Pyriform sinus",
-            "Bronchus and lung"
+            "Colon",
+            "Hematopoietic and reticuloendothelial systems"
         ]
     },
     {
         "submitter_donor_id": "DONOR_95",
         "program_id": "SYNTHETIC-4",
-        "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "2002-07",
+        "is_deceased": true,
+        "cause_of_death": "Unknown",
+        "date_of_birth": null,
         "date_of_death": null,
         "primary_site": [
-            "Lip",
-            "Other and ill-defined sites",
-            "Other and unspecified major salivary glands",
-            "Spinal cord, cranial nerves, and other parts of central nervous system",
-            "Accessory sinuses"
+            "Vulva",
+            "Bones, joints and articular cartilage of other and unspecified sites"
         ]
     },
     {
         "submitter_donor_id": "DONOR_96",
         "program_id": "SYNTHETIC-4",
-        "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": null,
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "2002-08",
+        "date_of_death": "2014-08",
         "primary_site": null
     },
     {
         "submitter_donor_id": "DONOR_97",
         "program_id": "SYNTHETIC-4",
-        "is_deceased": null,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1962-01",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": null,
+        "date_of_birth": "1975-08",
+        "date_of_death": "1978-08",
         "primary_site": [
-            "Base of tongue",
-            "Nasal cavity and middle ear"
+            "Hypopharynx",
+            "Cervix uteri",
+            "Pancreas",
+            "Nasal cavity and middle ear",
+            "Spinal cord, cranial nerves, and other parts of central nervous system"
         ]
     },
     {
         "submitter_donor_id": "DONOR_98",
         "program_id": "SYNTHETIC-4",
         "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1988-03",
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1967-11",
         "date_of_death": null,
         "primary_site": [
-            "Bones, joints and articular cartilage of other and unspecified sites",
-            "Heart, mediastinum, and pleura",
-            "Tonsil",
-            "Thymus"
+            "Placenta",
+            "Esophagus"
         ]
     },
     {
         "submitter_donor_id": "DONOR_99",
         "program_id": "SYNTHETIC-4",
-        "is_deceased": false,
-        "cause_of_death": "Unknown",
+        "is_deceased": null,
+        "cause_of_death": "Died of other reasons",
         "date_of_birth": null,
         "date_of_death": null,
         "primary_site": [
-            "Heart, mediastinum, and pleura",
-            "Larynx",
-            "Other and unspecified male genital organs"
+            "Other and ill-defined sites",
+            "Nasal cavity and middle ear",
+            "Eye and adnexa",
+            "Ovary",
+            "Base of tongue"
         ]
     },
     {
         "submitter_donor_id": "DONOR_100",
         "program_id": "SYNTHETIC-4",
-        "is_deceased": true,
-        "cause_of_death": null,
-        "date_of_birth": "1989-09",
-        "date_of_death": "2007-09",
-        "primary_site": [
-            "Other and unspecified parts of tongue",
-            "Parotid gland",
-            "Other and unspecified parts of biliary tract"
-        ]
+        "is_deceased": null,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1974-11",
+        "date_of_death": null,
+        "primary_site": null
     }
 ]
