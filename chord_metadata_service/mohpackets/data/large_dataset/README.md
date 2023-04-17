@@ -157,7 +157,7 @@ graph LR;
 
 ```mermaid
 ---
-title: 1000 FollowUps
+title: 4000 FollowUps
 ---
 graph LR;  
   FollowUp_1_400 --> Treatment_1_400 --> PrimaryDiagnosis_1_200 --> Donor_1_100 --> Program_1;
