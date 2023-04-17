@@ -65,7 +65,7 @@ INDIVIDUAL_SCHEMA = tag_ids_and_describe({
         "comorbid_condition": COMORBID_CONDITION,
         "ecog_performance_status": ONTOLOGY_CLASS,
         "karnofsky": ONTOLOGY_CLASS,
-        "extra_properties": KEY_VALUE_OBJECT,
+        "extra_properties": EXTRA_PROPERTIES_SCHEMA,
     },
     "required": ["id"]
 }, INDIVIDUAL)
