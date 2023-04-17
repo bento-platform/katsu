@@ -197,9 +197,6 @@ graph LR;
 title: 1000 Comorbidities
 ---
 graph LR;  
-  Comorbidity_1_160 --> Donor_1_40 --> Program_1;
-  Comorbidity_161_250 --> Donor_41_70 --> Program_2;
-
   Comorbidity_1_200 --> Donor_1_100 --> Program_1;
   Comorbidity_200_400 --> Donor_100_200 --> Program_2;  
   Comorbidity_400_600 --> Donor_200_300 --> Program_3;  
