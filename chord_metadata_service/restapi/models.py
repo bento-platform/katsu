@@ -1,5 +1,7 @@
 from chord_metadata_service.chord.models import Project
 from django.db import models
+from abc import ABC, abstractproperty, abstractmethod
+from enum import Enum
 
 
 class IndexableMixin:
@@ -8,16 +10,21 @@ class IndexableMixin:
         return f"{self.__class__.__name__}|{self.__str__()}"
 
 
+class SchemaType(models.TextChoices):
+    PHENOPACKET = "PHENOPACKET"
+    BIOSAMPLE = "BIOSAMPLE"
+    INDIVIDUAL = "INDIVIDUAL"
+
+
 class ExtraSchema(models.Model):
     id = models.CharField(primary_key=True, max_length=200)
-    # The json-schema $id of the parent object
-    parent_schema_id = models.CharField(max_length=200)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")
-    json_schema = models.JSONField()
+    extra_schema = models.JSONField()
+    schema_type = models.CharField(max_length=200, choices=SchemaType)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["project", "parent_schema_id"], name="unique_project_schema")
+            models.UniqueConstraint(fields=["project", "schema_type"], name="unique_project_schema")
         ]
 
 
@@ -27,6 +34,11 @@ class BaseExtraProperties(models.Model):
 
     class Meta:
         abstract = True
+
+    @property
+    @abstractmethod
+    def schema_type(self) -> SchemaType:
+        pass
 
     def clean(self):
         super().clean()

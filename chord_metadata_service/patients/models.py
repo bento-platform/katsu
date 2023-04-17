@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
-from chord_metadata_service.restapi.models import IndexableMixin
+from chord_metadata_service.restapi.models import IndexableMixin, BaseExtraProperties, SchemaType
 from chord_metadata_service.restapi.validators import ontology_validator, age_or_age_range_validator, \
     JsonSchemaValidator
 from .values import Sex, KaryotypicSex
@@ -9,8 +9,12 @@ from .validators import comorbid_condition_validator
 from ..restapi.schema_utils import extra_properties_schema_opt
 
 
-class Individual(models.Model, IndexableMixin):
+class Individual(BaseExtraProperties, IndexableMixin):
     """ Class to store demographic information about an Individual (Patient) """
+
+    @property
+    def schema_type(self) -> SchemaType:
+        return SchemaType.INDIVIDUAL
 
     SEX = Sex.as_django_values()
     KARYOTYPIC_SEX = KaryotypicSex.as_django_values()
