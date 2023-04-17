@@ -1,6 +1,7 @@
 from chord_metadata_service.restapi.schema_utils import customize_schema, tag_ids_and_describe, \
     extra_properties_schema_opt
-from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, AGE_OR_AGE_RANGE, EXTRA_PROPERTIES_SCHEMA
+from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, AGE_OR_AGE_RANGE, EXTRA_PROPERTIES_SCHEMA, \
+    KEY_VALUE_OBJECT
 
 from .descriptions import INDIVIDUAL
 from .values import Sex, KaryotypicSex
@@ -64,7 +65,7 @@ INDIVIDUAL_SCHEMA = tag_ids_and_describe({
         "comorbid_condition": COMORBID_CONDITION,
         "ecog_performance_status": ONTOLOGY_CLASS,
         "karnofsky": ONTOLOGY_CLASS,
-        "extra_properties": extra_properties_schema_opt("individual", "katsu:patients:individual"),
+        "extra_properties": KEY_VALUE_OBJECT,
     },
     "required": ["id"]
 }, INDIVIDUAL)

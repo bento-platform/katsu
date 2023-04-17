@@ -1,16 +1,17 @@
 import collections
 import uuid
+from abc import abstractmethod
 
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.resources.models import Resource
-
+from ..restapi.models import SchemaType
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
 
 
-__all__ = ["Project", "Dataset", "TableOwnership", "Table"]
+__all__ = ["Project", "Dataset", "TableOwnership", "Table", "ExtraSchema"]
 
 
 def version_default():
@@ -210,3 +211,15 @@ class Table(models.Model):
 
     def __str__(self):
         return f"{self.name} (ID: {self.ownership_record.table_id}, Type: {self.data_type})"
+
+
+class ExtraSchema(models.Model):
+    id = models.CharField(primary_key=True, max_length=200)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")
+    extra_schema = models.JSONField()
+    schema_type = models.CharField(max_length=200, choices=SchemaType.choices)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["project", "schema_type"], name="unique_project_schema")
+        ]

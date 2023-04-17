@@ -38,5 +38,4 @@ config.json
 # MacOS
 .DS_Store
 
-# Extra properties schemas
-extra-properties-schemas.json
+chord_metadata_service/vrs
