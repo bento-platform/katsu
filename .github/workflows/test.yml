@@ -44,5 +44,5 @@ jobs:
       run: |
         export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5432
         coverage run ./manage.py test
-    - name: Codecov
-      run: codecov
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v3
