@@ -1,7 +1,5 @@
-from chord_metadata_service.restapi.schema_utils import customize_schema, tag_ids_and_describe, \
-    extra_properties_schema_opt
-from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, AGE_OR_AGE_RANGE, EXTRA_PROPERTIES_SCHEMA, \
-    KEY_VALUE_OBJECT
+from chord_metadata_service.restapi.schema_utils import customize_schema, tag_ids_and_describe
+from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, AGE_OR_AGE_RANGE, EXTRA_PROPERTIES_SCHEMA
 
 from .descriptions import INDIVIDUAL
 from .values import Sex, KaryotypicSex

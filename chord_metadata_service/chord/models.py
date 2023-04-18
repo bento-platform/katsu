@@ -11,7 +11,7 @@ from ..restapi.models import SchemaType
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
 
 
-__all__ = ["Project", "Dataset", "TableOwnership", "Table", "ExtraSchema"]
+__all__ = ["Project", "Dataset", "TableOwnership", "Table", "ProjectJsonSchema"]
 
 
 def version_default():
@@ -213,13 +213,25 @@ class Table(models.Model):
         return f"{self.name} (ID: {self.ownership_record.table_id}, Type: {self.data_type})"
 
 
-class ExtraSchema(models.Model):
+class ModelFieldChoices(models.TextChoices):
+    """
+    Field choices available to ProjectJsonSchema.field.
+    Determines the field in the model to which ProjectJsonSchema.json_schema applies.
+    """
+    EXTRA_PROPERTIES = "extra_properties"
+
+    # TODO: in the future we can add new fields here, if needed.
+
+
+class ProjectJsonSchema(models.Model):
     id = models.CharField(primary_key=True, max_length=200)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")
-    extra_schema = models.JSONField()
+    json_schema = models.JSONField()
+    field = models.CharField(max_length=200, choices=ModelFieldChoices.choices,
+                             default=ModelFieldChoices.EXTRA_PROPERTIES)
     schema_type = models.CharField(max_length=200, choices=SchemaType.choices)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["project", "schema_type"], name="unique_project_schema")
+            models.UniqueConstraint(fields=["project", "schema_type", "field"], name="unique_project_schema_field")
         ]

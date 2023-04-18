@@ -9,9 +9,9 @@ class IndexableMixin:
 
 
 class SchemaType(models.TextChoices):
-    PHENOPACKET = ("PHENOPACKET", "PHENOPACKET")
-    BIOSAMPLE = ("BIOSAMPLE", "BIOSAMPLE")
-    INDIVIDUAL = ("INDIVIDUAL", "INDIVIDUAL")
+    PHENOPACKET = "PHENOPACKET", "Phenopacket"
+    BIOSAMPLE = "BIOSAMPLE", "Biosample"
+    INDIVIDUAL = "INDIVIDUAL", "Individual"
 
 
 class BaseExtraProperties(models.Model):
