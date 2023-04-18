@@ -1,4 +1,4 @@
-# Medium dataset relationships
+# Large dataset relationships
 
 This is a diagram of the synthetic relationships between the models in the dataset.
 
