@@ -11,9 +11,9 @@ from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
-from .models import Project, Dataset, TableOwnership, Table
+from .models import Project, Dataset, ProjectJsonSchema, TableOwnership, Table
 from .permissions import OverrideOrSuperUserOnly
-from .serializers import ProjectSerializer, DatasetSerializer, TableOwnershipSerializer, TableSerializer
+from .serializers import ProjectJsonSchemaSerializer, ProjectSerializer, DatasetSerializer, TableOwnershipSerializer, TableSerializer
 from .filters import AuthorizedDatasetFilter
 
 logger = logging.getLogger(__name__)
@@ -109,3 +109,15 @@ class TableViewSet(CHORDPublicModelViewSet):
         logger.info(f"Cleanup: removed {n_removed} objects in total")
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ProjectJsonSchemaViewSet(CHORDPublicModelViewSet):
+    """
+    get:
+    Return list of ProjectJsonSchema
+
+    post:
+    Create a new ProjectJsonSchema
+    """
+
+    queryset = ProjectJsonSchema.objects.all().order_by("project__identifier")
+    serializer_class = ProjectJsonSchemaSerializer

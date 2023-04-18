@@ -5,7 +5,7 @@ from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
 from chord_metadata_service.restapi.utils import transform_keys
 
-from .models import Project, Dataset, TableOwnership, Table
+from .models import Project, Dataset, ProjectJsonSchema, TableOwnership, Table
 from .schemas import LINKED_FIELD_SETS_SCHEMA
 
 
@@ -162,3 +162,11 @@ class TableSerializer(GenericSerializer):
     class Meta:
         model = Table
         fields = "__all__"
+
+
+class ProjectJsonSchemaSerializer(GenericSerializer):
+
+    class Meta:
+        model = ProjectJsonSchema
+        fields = "__all__"
+        

@@ -1,7 +1,6 @@
 import collections
 import uuid
-from abc import abstractmethod
-
+import logging
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -224,7 +223,7 @@ class ModelFieldChoices(models.TextChoices):
 
 
 class ProjectJsonSchema(models.Model):
-    id = models.CharField(primary_key=True, max_length=200)
+    id = models.CharField(primary_key=True, max_length=200, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")
     json_schema = models.JSONField()
     field = models.CharField(max_length=200, choices=ModelFieldChoices.choices,

@@ -1,13 +1,13 @@
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
-from chord_metadata_service.restapi.models import IndexableMixin, BaseExtraProperties, SchemaType
+from chord_metadata_service.restapi.models import IndexableMixin, SchemaType
 from chord_metadata_service.restapi.validators import ontology_validator, age_or_age_range_validator
 from .values import Sex, KaryotypicSex
 from .validators import comorbid_condition_validator
 
 
-class Individual(BaseExtraProperties, IndexableMixin):
+class Individual(models.Model, IndexableMixin):
     """ Class to store demographic information about an Individual (Patient) """
 
     @property

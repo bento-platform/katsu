@@ -6,7 +6,7 @@ from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.description_utils import rec_help
-from chord_metadata_service.restapi.models import IndexableMixin
+from chord_metadata_service.restapi.models import IndexableMixin, BaseExtraProperties, SchemaType
 from chord_metadata_service.restapi.schema_utils import schema_list
 from chord_metadata_service.restapi.validators import (
     JsonSchemaValidator,
@@ -290,12 +290,25 @@ class Biosample(models.Model, IndexableMixin):
         }
 
 
-class Phenopacket(models.Model, IndexableMixin):
+from django.apps import apps
+
+
+class Phenopacket(BaseExtraProperties, IndexableMixin):
     """
     Class to aggregate Individual's experiments data
 
     FHIR: Composition
     """
+
+
+    @property
+    def schema_type(self) -> SchemaType:
+        return SchemaType.PHENOPACKET
+
+    def get_project_id(self) -> str:
+        model = apps.get_model("chord.Project")
+        project = model.objects.get(datasets__table_ownership__ownership_record=self.table)
+        return project.identifier
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.PHENOPACKET, "id"))
     # if Individual instance is deleted Phenopacket instance is deleted too
