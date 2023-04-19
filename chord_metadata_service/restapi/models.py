@@ -3,6 +3,8 @@ from abc import abstractmethod
 from django.apps import apps
 from django.db import models
 from django.db.models import Q
+from django.core.exceptions import ValidationError
+from jsonschema import Draft7Validator
 
 logger = logging.getLogger(__name__)
 
@@ -28,28 +30,51 @@ class BaseExtraProperties(models.Model):
     @property
     @abstractmethod
     def schema_type(self) -> SchemaType:
+        """
+        Returns the SchemaType of the model.
+        Template method design pattern, implementation left to inheritors.
+        """
         pass
 
     @abstractmethod
     def get_project_id(self) -> str:
+        """
+        Returns the Project.identifier of the project that owns this object.
+        Template method design pattern, implementation left to inheritors.
+        """
         pass
 
-    def get_json_schemas(self):
+    def get_json_schema(self):
+        """
+        Returns a QuerySet[ProjectJsonSchema] containing schemas to validate
+        Template method design pattern, uses concrete defs of schema_type 
+        and get_project_id.
+        """
         _project_id = self.get_project_id()
+        # Use apps.get_model to avoid circular import issues.
         model = apps.get_model("chord", "ProjectJsonSchema")
-        field_schemas = model.objects.filter(
+        project_json_schema = model.objects.get(
             Q(project_id=_project_id) &
             Q(schema_type=self.schema_type)
         )
-        logger.debug("ProjectJsonSchema objects to be used", field_schemas)
-        return field_schemas
+        return project_json_schema.json_schema
+    
+    def validate_json_schema(self):
+        json_schema = self.get_json_schema()
+        validator = Draft7Validator(json_schema)
+        errors = []
+        for err in validator.iter_errors(self.extra_properties):
+            errors.append(err)
+            logger.error(f"JSON schema vaildation error on extra_properties: {err.message}")
+        return errors
 
     def clean(self):
         super().clean()
-        logger.debug("BaseExtraProperties schema validation")
-
-        # TODO: json-schema validation
+        errors = self.validate_json_schema()
+        if len(errors) > 0:
+            raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
+        # Override in order to call self.clean to validate data
         self.clean()
         return super().save(*args, **kwargs)

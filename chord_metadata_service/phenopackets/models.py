@@ -300,14 +300,13 @@ class Phenopacket(BaseExtraProperties, IndexableMixin):
     FHIR: Composition
     """
 
-
     @property
     def schema_type(self) -> SchemaType:
         return SchemaType.PHENOPACKET
 
     def get_project_id(self) -> str:
         model = apps.get_model("chord.Project")
-        project = model.objects.get(datasets__table_ownership__ownership_record=self.table)
+        project = model.objects.get(datasets__table_ownership=self.table_id)
         return project.identifier
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.PHENOPACKET, "id"))

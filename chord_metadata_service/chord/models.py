@@ -226,11 +226,9 @@ class ProjectJsonSchema(models.Model):
     id = models.CharField(primary_key=True, max_length=200, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")
     json_schema = models.JSONField()
-    field = models.CharField(max_length=200, choices=ModelFieldChoices.choices,
-                             default=ModelFieldChoices.EXTRA_PROPERTIES)
     schema_type = models.CharField(max_length=200, choices=SchemaType.choices)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["project", "schema_type", "field"], name="unique_project_schema_field")
+            models.UniqueConstraint(fields=["project", "schema_type"], name="unique_project_schema")
         ]
