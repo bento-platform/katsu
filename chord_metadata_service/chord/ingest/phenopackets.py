@@ -5,12 +5,13 @@ import uuid
 
 from dateutil.parser import isoparse
 from decimal import Decimal
-
+from django.db.models import Q
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
-from chord_metadata_service.chord.models import Table
+from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Table
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.patients.values import KaryotypicSex
+from chord_metadata_service.restapi.schema_utils import patch_project_schemas
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from .exceptions import IngestError
@@ -58,9 +59,9 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
     return pf_obj
 
 
-def validate_phenopacket(phenopacket_data: dict[str, Any], idx: Optional[int] = None) -> None:
+def validate_phenopacket(phenopacket_data: dict[str, Any], schema: dict = PHENOPACKET_SCHEMA, idx: Optional[int] = None) -> None:
     # Validate phenopacket data against phenopackets schema.
-    validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
+    validation = schema_validation(phenopacket_data, schema)
     if not validation:
         # TODO: Report more precise errors
         raise IngestError(
@@ -304,8 +305,15 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id) -> Union[list[pm.Phe
         with open(json_doc_path, "r") as jf:
             json_data = json.load(jf)
 
+    project_id = Project.objects.get(datasets__table_ownership=table_id)
+    project_schemas = ProjectJsonSchema.objects.filter(
+        Q(project_id=project_id)
+    )
+    extension_schemas = {schema.schema_type.lower(): schema.json_schema for schema in project_schemas}
+    json_schema = patch_project_schemas(PHENOPACKET_SCHEMA, extension_schemas)
+
     # First, validate all phenopackets
-    map_if_list(validate_phenopacket, json_data)
+    map_if_list(validate_phenopacket, json_data, json_schema)
 
     # Then, actually try to ingest them (if the validation passes); we don't need to re-do validation here.
     return map_if_list(ingest_phenopacket, json_data, table_id, validate=False)

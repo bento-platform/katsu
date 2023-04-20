@@ -149,3 +149,31 @@ def schema_list(schema):
         "type": "array",
         "items": schema
     }
+
+
+def patch_project_schemas(schema: dict, extension_schemas: dict[str, dict]) -> dict:
+    if "$id" not in schema:
+        raise ValueError("Schema to patch with extra_properties schemas must have valid $id")
+
+    if not isinstance(schema, dict) or "type" not in schema:
+        return schema
+
+    # Get the last term of the schema $id
+    # e.g. 'katsu:phenopackets:phenopacket' -> 'phenopacket'
+    schema_id = schema["$id"].split(":")[-1]
+    
+
+    patched_schema = {**schema}
+    if schema["type"] == "object":
+        # TODO: recursively patch schema if applicable
+        if schema_id in extension_schemas:
+            patched_schema = {
+                **schema,
+                "extra_properties": extension_schemas[schema_id]
+            }
+
+    if schema["type"] == "array":
+        # TODO: recursively patch schema if applicable
+        pass
+    
+    return patched_schema

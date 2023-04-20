@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
@@ -288,9 +289,6 @@ class Biosample(models.Model, IndexableMixin):
             'display': self.sampled_tissue.get('label')
             }
         }
-
-
-from django.apps import apps
 
 
 class Phenopacket(BaseExtraProperties, IndexableMixin):
