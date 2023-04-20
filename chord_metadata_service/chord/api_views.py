@@ -120,5 +120,5 @@ class ProjectJsonSchemaViewSet(CHORDPublicModelViewSet):
     Create a new ProjectJsonSchema
     """
 
-    queryset = ProjectJsonSchema.objects.all().order_by("project__identifier")
+    queryset = ProjectJsonSchema.objects.all().order_by("project_id")
     serializer_class = ProjectJsonSchemaSerializer
