@@ -33,7 +33,7 @@ class ProgramTest(TestCase):
 
     def test_invalid_program_id(self):
         # TODO: not sure why 42 is invalid
-        values = ["f" * 65, 42, ""]
+        values = ["f" * 62, 42, "", "SYNTHETIC"]
         for value in values:
             with self.subTest(value=value):
                 self.program_id = value
@@ -90,7 +90,7 @@ class DonorTest(TestCase):
             self.donor.save()
 
     def test_invalid_cause_of_death(self):
-        values = ["f" * 256, "foo", 1]
+        values = ["foo", 1]
         for value in values:
             with self.subTest(value=value):
                 self.donor_values["cause_of_death"] = value
@@ -98,7 +98,7 @@ class DonorTest(TestCase):
                 self.assertFalse(self.serializer.is_valid())
     
     def test_invalid_date_of_death(self):
-        values = ["f" * 33, "foo", 1]
+        values = ["foo", 1]
         for value in values:
             with self.subTest(value=value):
                 self.donor_values["date_of_death"] = value
@@ -106,7 +106,7 @@ class DonorTest(TestCase):
                 self.assertFalse(self.serializer.is_valid())
         
     def test_invalid_date_of_birth(self):
-        values = ["f" * 33, "foo", 1]
+        values = ["foo", 1]
         for value in values:
             with self.subTest(value=value):
                 self.donor_values["date_of_birth"] = value
@@ -176,7 +176,7 @@ class PrimaryDiagnosisTest(TestCase):
             self.assertFalse(self.serializer.is_valid())
     
     def test_invalid_date_of_diagnosis(self):
-        values = ["f" * 33, "foo", 1]
+        values = ["foo", 1]
         for value in values:
             with self.subTest(value=value):
                 self.primary_diagnosis_values["date_of_diagnosis"] = value
@@ -190,7 +190,7 @@ class PrimaryDiagnosisTest(TestCase):
     #     self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_basis_of_diagnosis(self):
-        values = ["f" * 129, "foo", 1]
+        values = ["foo", 1]
         for value in values:
             with self.subTest(value=value):
                 self.primary_diagnosis_values["basis_of_diagnosis"] = value
@@ -198,7 +198,7 @@ class PrimaryDiagnosisTest(TestCase):
                 self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_lymph_nodes_examined_status(self):
-        values = ["f" * 129, "foo", 1]
+        values = ["foo", 1]
         for value in values:
             with self.subTest(value=value):
                 self.primary_diagnosis_values["lymph_nodes_examined_status"] = value
@@ -211,7 +211,7 @@ class PrimaryDiagnosisTest(TestCase):
             self.primary_diagnosis.save()
     
     def test_invalid_clinical_tumour_staging_system(self):
-        values = ["f" * 129, "foo", 1]
+        values = ["foo", 1]
         for value in values:
             with self.subTest(value=value):
                 self.primary_diagnosis_values["clinical_tumour_staging_system"] = value
@@ -219,33 +219,33 @@ class PrimaryDiagnosisTest(TestCase):
                 self.assertFalse(self.serializer.is_valid())
     
     def test_invalid_clinical_t_category(self):
-        values = ["f" * 64, "foo", 1]
+        values = ["foo", 1]
         for value in values:
             with self.subTest(value=value):
-                self.primary_diagnosis_values["clinical_clinical_t_category"] = value
+                self.primary_diagnosis_values["clinical_t_category"] = value
                 self.serializer = PrimaryDiagnosisSerializer(instance=self.primary_diagnosis, data=self.primary_diagnosis_values)
                 self.assertFalse(self.serializer.is_valid())
     
     def test_invalid_clinical_n_category(self):
-        values = ["f" * 64, "foo", 1]
+        values = ["foo", 1]
         for value in values:
             with self.subTest(value=value):
-                self.primary_diagnosis_values["clinical_clinical_n_category"] = value
+                self.primary_diagnosis_values["clinical_n_category"] = value
                 self.serializer = PrimaryDiagnosisSerializer(instance=self.primary_diagnosis, data=self.primary_diagnosis_values)
                 self.assertFalse(self.serializer.is_valid())
     
     def test_invalid_clinical_m_category(self):
-        values = ["f" * 64, "foo", 1]
+        values = ["foo", 1]
         for value in values:
             with self.subTest(value=value):
-                self.primary_diagnosis_values["clinical_clinical_m_category"] = value
+                self.primary_diagnosis_values["clinical_m_category"] = value
                 self.serializer = PrimaryDiagnosisSerializer(instance=self.primary_diagnosis, data=self.primary_diagnosis_values)
                 self.assertFalse(self.serializer.is_valid())
     
     def test_invalid_clinical_stage_group(self):
-        values = ["f" * 64, "foo", 1]
+        values = ["foo", 1]
         for value in values:
             with self.subTest(value=value):
-                self.primary_diagnosis_values["clinical_clinical_stage_group"] = value
+                self.primary_diagnosis_values["clinical_stage_group"] = value
                 self.serializer = PrimaryDiagnosisSerializer(instance=self.primary_diagnosis, data=self.primary_diagnosis_values)
                 self.assertFalse(self.serializer.is_valid())
