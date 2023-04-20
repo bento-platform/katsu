@@ -169,4 +169,3 @@ class ProjectJsonSchemaSerializer(GenericSerializer):
     class Meta:
         model = ProjectJsonSchema
         fields = "__all__"
-        

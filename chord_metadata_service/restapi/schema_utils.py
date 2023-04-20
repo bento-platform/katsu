@@ -13,7 +13,6 @@ __all__ = [
     "tag_ids_and_describe",
     "customize_schema",
     "schema_list",
-    "extra_properties_schema_opt"
 ]
 
 
@@ -150,26 +149,3 @@ def schema_list(schema):
         "type": "array",
         "items": schema
     }
-
-
-extra_properties_path = pathlib.Path("./extra-properties-schemas.json")
-if extra_properties_path.is_file():
-    with open(extra_properties_path, "r") as file:
-        extra_properties_defs = json.load(file)
-        file.close()
-
-    # Check schema validity before accepting it into EXTRA_PROPERTIES_SCHEMAS
-    EXTRA_PROPERTIES_SCHEMAS = {}
-    for name, schema in extra_properties_defs.items():
-        schema = {
-            **schema,
-            "$id": f"{name}:extra_properties"
-        }
-        EXTRA_PROPERTIES_SCHEMAS[name] = schema
-
-
-def extra_properties_schema_opt(schema_name: str, parent_id: str = None) -> dict:
-    extra_schema = EXTRA_PROPERTIES_SCHEMAS.get(schema_name, EXTRA_PROPERTIES_SCHEMAS)
-    if parent_id:
-        extra_schema["$id"] = f"{parent_id}:extra_properties"
-    return extra_schema

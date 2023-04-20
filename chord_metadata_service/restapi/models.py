@@ -50,28 +50,28 @@ class BaseExtraProperties(models.Model):
         Template method design pattern, uses concrete defs of schema_type 
         and get_project_id.
         """
-        _project_id = self.get_project_id()
+        project_id = self.get_project_id()
         # Use apps.get_model to avoid circular import issues.
         model = apps.get_model("chord", "ProjectJsonSchema")
         project_json_schema = model.objects.get(
-            Q(project_id=_project_id) &
+            Q(project_id=project_id) &
             Q(schema_type=self.schema_type)
         )
-        return project_json_schema.json_schema
+        return project_id, project_json_schema.json_schema
     
     def validate_json_schema(self):
-        json_schema = self.get_json_schema()
+        project_id, json_schema = self.get_json_schema()
         validator = Draft7Validator(json_schema)
         errors = []
         for err in validator.iter_errors(self.extra_properties):
             errors.append(err)
-            logger.error(f"JSON schema vaildation error on extra_properties: {err.message}")
+            logger.error(("JSON schema vaildation error on extra_properties for type "
+                          f"{self.schema_type}, in project {project_id}: {err.message}"))
         return errors
 
     def clean(self):
         super().clean()
-        errors = self.validate_json_schema()
-        if len(errors) > 0:
+        if len(errors := self.validate_json_schema()) > 0:
             raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
