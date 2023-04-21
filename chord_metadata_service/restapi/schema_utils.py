@@ -1,3 +1,4 @@
+import logging
 from bento_lib.search import queries as q
 from .description_utils import describe_schema
 from typing import List, Optional
@@ -13,6 +14,7 @@ __all__ = [
     "schema_list",
 ]
 
+logger = logging.getLogger(__name__)
 
 def merge_schema_dictionaries(dict1: dict, dict2: dict):
     """
@@ -150,33 +152,47 @@ def schema_list(schema):
 
 
 def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, object]) -> dict:
-    if "$id" not in base_schema:
-        raise ValueError("Schema to patch with extra_properties schemas must have valid $id")
-
     if not isinstance(base_schema, dict) or "type" not in base_schema:
         return base_schema
 
-    # Get the last term of the schema $id to match with SchemaType
-    # e.g. 'katsu:phenopackets:phenopacket' -> 'phenopacket'
-    schema_id = base_schema["$id"].split(":")[-1]
-    
     patched_schema = {**base_schema}
     if patched_schema["type"] == "object":
-        # TODO: recursively patch schema if applicablex
-        if schema_id in extension_schemas:
+        # check if current object schema needs an extra_properties patch
+
+        # Get the last term of the schema $id to match with SchemaType
+        # e.g. 'katsu:phenopackets:phenopacket' -> 'phenopacket'
+        schema_id = base_schema["$id"].split(":")[-1] if "$id" in base_schema else None
+
+        if schema_id and schema_id in extension_schemas:
             ext_schema = extension_schemas[schema_id]
+            logger.debug(f"Applying ProjectJsonSchema to extra_properties of {ext_schema.schema_type}.")
+            
+            # Append or create 'required' field according to ProjectJsonSchema in use
+            required = patched_schema.get("required", [])
+            if ext_schema.required:
+                required = required + ["extra_properties"]
+            
             patched_schema = {
                 **patched_schema,
-                "extra_properties": ext_schema.json_schema,
+                "properties": {
+                    **patched_schema["properties"],
+                    "extra_properties": ext_schema.json_schema
+                },
+                "required": required
             }
-
-            if ext_schema.required:
-                default_required = patched_schema.get("required", [])
-                default_required.append("extra_properties")
-                patched_schema["required"] = default_required
+        
+        return {
+            **patched_schema,
+            "properties": {
+                k: patch_project_schemas(v, extension_schemas)
+                for k, v in patched_schema["properties"].items()
+            }
+        } if "properties" in patched_schema else patched_schema
 
     if patched_schema["type"] == "array":
-        # TODO: recursively patch schema if applicable
-        pass
+        return {
+            **patched_schema,
+            "items": patch_project_schemas(patched_schema["items"], extension_schemas)
+        } if "items" in patched_schema else patched_schema
     
     return patched_schema
