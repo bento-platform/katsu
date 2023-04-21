@@ -1,8 +1,6 @@
-import pathlib
 from bento_lib.search import queries as q
 from .description_utils import describe_schema
 from typing import List, Optional
-import json
 
 __all__ = [
     "merge_schema_dictionaries",
@@ -151,28 +149,33 @@ def schema_list(schema):
     }
 
 
-def patch_project_schemas(schema: dict, extension_schemas: dict[str, dict]) -> dict:
-    if "$id" not in schema:
+def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, object]) -> dict:
+    if "$id" not in base_schema:
         raise ValueError("Schema to patch with extra_properties schemas must have valid $id")
 
-    if not isinstance(schema, dict) or "type" not in schema:
-        return schema
+    if not isinstance(base_schema, dict) or "type" not in base_schema:
+        return base_schema
 
-    # Get the last term of the schema $id
+    # Get the last term of the schema $id to match with SchemaType
     # e.g. 'katsu:phenopackets:phenopacket' -> 'phenopacket'
-    schema_id = schema["$id"].split(":")[-1]
+    schema_id = base_schema["$id"].split(":")[-1]
     
-
-    patched_schema = {**schema}
-    if schema["type"] == "object":
-        # TODO: recursively patch schema if applicable
+    patched_schema = {**base_schema}
+    if patched_schema["type"] == "object":
+        # TODO: recursively patch schema if applicablex
         if schema_id in extension_schemas:
+            ext_schema = extension_schemas[schema_id]
             patched_schema = {
-                **schema,
-                "extra_properties": extension_schemas[schema_id]
+                **patched_schema,
+                "extra_properties": ext_schema.json_schema,
             }
 
-    if schema["type"] == "array":
+            if ext_schema.required:
+                default_required = patched_schema.get("required", [])
+                default_required.append("extra_properties")
+                patched_schema["required"] = default_required
+
+    if patched_schema["type"] == "array":
         # TODO: recursively patch schema if applicable
         pass
     

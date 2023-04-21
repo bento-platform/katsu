@@ -2,8 +2,8 @@ import logging
 from abc import abstractmethod
 from django.apps import apps
 from django.db import models
-from django.db.models import Q
-from django.core.exceptions import ValidationError
+from django.db.models import Q, QuerySet
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from jsonschema import Draft7Validator
 
 logger = logging.getLogger(__name__)
@@ -44,25 +44,35 @@ class BaseExtraProperties(models.Model):
         """
         pass
 
-    def get_json_schema(self):
+    def get_json_schema(self) -> tuple[str, QuerySet]:
         """
-        Returns a QuerySet[ProjectJsonSchema] containing schemas to validate
+        Returns a tuple (project_id, QuerySet[ProjectJsonSchema]) containing schemas to validate
         Template method design pattern, uses concrete defs of schema_type 
         and get_project_id.
         """
         project_id = self.get_project_id()
         # Use apps.get_model to avoid circular import issues.
         model = apps.get_model("chord", "ProjectJsonSchema")
-        project_json_schema = model.objects.get(
-            Q(project_id=project_id) &
-            Q(schema_type=self.schema_type)
-        )
-        return project_id, project_json_schema.json_schema
+        json_schema = None
+        try:
+            project_json_schema = model.objects.get(
+                Q(project_id=project_id) &
+                Q(schema_type=self.schema_type)
+            )
+            json_schema = project_json_schema.json_schema
+        except ObjectDoesNotExist as err:
+            logger.debug(f"No ProjectJsonSchema found for project ID {project_id} and schema type {self.schema_type}")
+        return project_id, json_schema
     
-    def validate_json_schema(self):
+    def validate_json_schema(self) -> list[str]:
         project_id, json_schema = self.get_json_schema()
-        validator = Draft7Validator(json_schema)
+        if not json_schema:
+            # Skip if no JSON schema exists for this project/schema_type combination
+            return []
+
         errors = []
+        validator = Draft7Validator(json_schema)
+
         for err in validator.iter_errors(self.extra_properties):
             errors.append(err)
             logger.error(("JSON schema vaildation error on extra_properties for type "
@@ -71,7 +81,7 @@ class BaseExtraProperties(models.Model):
 
     def clean(self):
         super().clean()
-        if len(errors := self.validate_json_schema()) > 0:
+        if self.extra_properties and len(errors := self.validate_json_schema()) > 0:
             raise ValidationError(errors)
 
     def save(self, *args, **kwargs):

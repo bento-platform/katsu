@@ -197,14 +197,14 @@ def get_or_create_hts_file(hts_file) -> pm.HtsFile:
     return hts_file
 
 
-def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, validate: bool = True,
+def ingest_phenopacket(phenopacket_data: dict[str, Any], table_id: str, json_schema:dict = PHENOPACKET_SCHEMA, validate: bool = True,
                        idx: Optional[int] = None) -> pm.Phenopacket:
     """Ingests a single phenopacket."""
 
     if validate:
         # Validate phenopacket data against phenopackets schema prior to ingestion, if specified.
         # `validate` may be false if the phenopacket has already been validated.
-        validate_phenopacket(phenopacket_data, idx)
+        validate_phenopacket(phenopacket_data, json_schema, idx)
 
     # Rough phenopackets structure:
     #  id: ...
@@ -306,14 +306,14 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id) -> Union[list[pm.Phe
             json_data = json.load(jf)
 
     project_id = Project.objects.get(datasets__table_ownership=table_id)
-    project_schemas = ProjectJsonSchema.objects.filter(
-        Q(project_id=project_id)
-    )
-    extension_schemas = {schema.schema_type.lower(): schema.json_schema for schema in project_schemas}
+    project_schemas = ProjectJsonSchema.objects.filter(project_id=project_id)
+    
+    # Map with key:schema_type and value:json_schema
+    extension_schemas = {proj_schema.schema_type.lower(): proj_schema for proj_schema in project_schemas}
     json_schema = patch_project_schemas(PHENOPACKET_SCHEMA, extension_schemas)
 
     # First, validate all phenopackets
     map_if_list(validate_phenopacket, json_data, json_schema)
 
     # Then, actually try to ingest them (if the validation passes); we don't need to re-do validation here.
-    return map_if_list(ingest_phenopacket, json_data, table_id, validate=False)
+    return map_if_list(ingest_phenopacket, json_data, table_id, json_schema=json_schema, validate=False)

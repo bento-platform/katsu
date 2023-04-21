@@ -211,19 +211,10 @@ class Table(models.Model):
         return f"{self.name} (ID: {self.ownership_record.table_id}, Type: {self.data_type})"
 
 
-class ModelFieldChoices(models.TextChoices):
-    """
-    Field choices available to ProjectJsonSchema.field.
-    Determines the field in the model to which ProjectJsonSchema.json_schema applies.
-    """
-    EXTRA_PROPERTIES = "extra_properties"
-
-    # TODO: in the future we can add new fields here, if needed.
-
-
 class ProjectJsonSchema(models.Model):
     id = models.CharField(primary_key=True, max_length=200, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")
+    required = models.BooleanField(default=False, help_text="Determines if the extra_properties field is required or not.")
     json_schema = models.JSONField()
     schema_type = models.CharField(max_length=200, choices=SchemaType.choices)
 
