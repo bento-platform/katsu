@@ -53,7 +53,9 @@ class Donor(models.Model):
     cause_of_death = models.CharField(max_length=255, null=True, blank=True)
     date_of_birth = models.CharField(max_length=32, null=True, blank=True)
     date_of_death = models.CharField(max_length=32, null=True, blank=True)
-    primary_site = ArrayField(models.CharField(max_length=255, null=True, blank=True))
+    primary_site = ArrayField(
+        models.CharField(max_length=255, null=True, blank=True), null=True, blank=True
+    )
 
     class Meta:
         ordering = ["submitter_donor_id"]

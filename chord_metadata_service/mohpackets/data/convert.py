@@ -2,15 +2,16 @@ import json
 import os
 
 
-def convert_to_fixtures():
+def convert_to_fixtures(path):
     """
     Convert synthetic data to Django fixtures.
     The data should been assigned foreign keys already.
     """
+    print("Step 2: Convert to Fixtures:\n")
     # Get the absolute path to the synthetic data folder
     script_dir = os.path.dirname(__file__)
-    synthetic_data_folder = os.path.join(script_dir, "small_dataset/synthetic_data")
-    fixtures_folder = os.path.join(script_dir, "small_dataset/fixtures")
+    synthetic_data_folder = os.path.join(script_dir, f"{path}/synthetic_data")
+    fixtures_folder = os.path.join(script_dir, f"{path}/fixtures")
 
     # Create the fixtures folder if it doesn't already exist
     os.makedirs(fixtures_folder, exist_ok=True)
@@ -36,22 +37,23 @@ def convert_to_fixtures():
         with open(os.path.join(fixtures_folder, json_file_name), "w") as fixtures_file:
             json.dump(fixtures, fixtures_file, indent=4)
 
-    print("\nSuccess! Converted files to fixtures and saved to folder fixtures.")
+    print(
+        "\nSuccess! Converted files to fixtures completed and saved to folder fixtures.\n"
+    )
 
 
-def set_foreign_keys():
+def set_foreign_keys(path):
     """
     Set foreign keys for synthetic data.
     """
+    print("\nStep 1: Set Foreign Keys:\n")
     # Get the absolute path to the synthetic data folder
     script_dir = os.path.dirname(__file__)
-    relationships_file = os.path.join(
-        script_dir, "small_dataset/template/relationships.json"
-    )
+    relationships_file = os.path.join(script_dir, f"{path}/relationships.json")
     no_relationships_data_folder = os.path.join(
-        script_dir, "small_dataset/no_relationships_data"
+        script_dir, f"{path}/no_relationships_data"
     )
-    synthetic_data_folder = os.path.join(script_dir, "small_dataset/synthetic_data")
+    synthetic_data_folder = os.path.join(script_dir, f"{path}/synthetic_data")
 
     # Create the folder if it doesn't already exist
     os.makedirs(synthetic_data_folder, exist_ok=True)
@@ -94,7 +96,8 @@ def set_foreign_keys():
 
         with open(output_path, "w") as f:
             json.dump(data_with_keys, f, indent=4)
-    print("\nSuccess! Set foreign keys and saved to folder synthetic_data.")
+    print("\nSuccess! Set foreign keys completed and saved to folder synthetic_data.")
+    print("--------------------\n")
 
 
 def replace_values(input_data, transformation_rules):
@@ -178,16 +181,20 @@ def replace_values(input_data, transformation_rules):
 
 def main():
     print("Select an option:")
-    print("1. Set Foreign Keys")
-    print("2. Convert to Django fixtures")
+    print("1. Convert small dataset")
+    print("2. Convert medium dataset")
     print("3. Exit")
 
     choice = int(input("Enter your choice [1-3]: "))
 
     if choice == 1:
-        set_foreign_keys()
+        path = "small_dataset"
+        set_foreign_keys(path)
+        convert_to_fixtures(path)
     elif choice == 2:
-        convert_to_fixtures()
+        path = "medium_dataset"
+        set_foreign_keys(path)
+        convert_to_fixtures(path)
     elif choice == 3:
         exit()
     else:

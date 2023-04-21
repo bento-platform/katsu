@@ -91,6 +91,7 @@ def backup_db():
 #                                        #
 ##########################################
 
+
 # PROGRAM
 # ---------------
 @extend_schema(
@@ -465,4 +466,4 @@ def delete_all(request):
 @api_view(["GET"])
 @permission_classes([CanDIGAdminOrReadOnly])
 def version_check(_request):
-    return JsonResponse({"version": "1.0.0"}, status=status.HTTP_200_OK)
+    return JsonResponse({"version": "1.1.0"}, status=status.HTTP_200_OK)
