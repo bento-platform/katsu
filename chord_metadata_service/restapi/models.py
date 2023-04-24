@@ -72,7 +72,6 @@ class BaseExtraProperties(models.Model):
 
         errors = []
         validator = Draft7Validator(json_schema)
-
         for err in validator.iter_errors(self.extra_properties):
             errors.append(err)
             logger.error(("JSON schema vaildation error on extra_properties for type "

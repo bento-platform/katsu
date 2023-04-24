@@ -1,7 +1,10 @@
+from django.db.utils import IntegrityError
 from django.test import TestCase
 from uuid import uuid4
+
+from chord_metadata_service.restapi.models import SchemaType
 from ..data_types import DATA_TYPE_PHENOPACKET
-from ..models import Project, Dataset, TableOwnership, Table
+from ..models import Project, Dataset, ProjectJsonSchema, TableOwnership, Table
 from .constants import VALID_DATA_USE_1
 
 
@@ -88,3 +91,48 @@ class TableTest(TestCase):
         self.assertEqual(t.dataset, self.d)
 
         self.assertEqual(str(t), f"{t.name} (ID: {TABLE_ID}, Type: {DATA_TYPE_PHENOPACKET})")
+
+
+class ProjectJsonSchemaTest(TestCase):
+    def setUp(self) -> None:
+        self.p = Project.objects.create(title="Project 1", description="")
+        self.json_schema = {
+            "type": "object",
+            "properties": {
+                "prop_a": {"type": "string"}
+            },
+            "required": ["prop_a"] 
+        }
+        self.required_pheno_schema = ProjectJsonSchema.objects.create(
+            project=self.p,
+            required=True,
+            json_schema=self.json_schema,
+            schema_type=SchemaType.PHENOPACKET
+        )
+
+    def test_project_json_schema(self):
+        proj_json_schema = ProjectJsonSchema.objects.get(id=self.required_pheno_schema.id)
+        self.assertEqual(proj_json_schema.project, self.p.identifier)
+        self.assertEqual(proj_json_schema.json_schema, self.json_schema)
+        self.assertEqual(proj_json_schema.schema_type, SchemaType.PHENOPACKET)
+    
+    def test_schema_type_constraint(self):
+        # ProjectJsonSchema must be unique for every project_id, schema_type pair
+        invalid_pjs = ProjectJsonSchema(
+            project=self.p,
+            required=False,
+            json_schema={"type": "string"},
+            schema_type=SchemaType.PHENOPACKET
+        )
+        with self.assertRaises(IntegrityError) as err:
+            invalid_pjs.save()
+        # Should succeed
+        valid_pjs = ProjectJsonSchema(
+            project=self.p,
+            required=False,
+            json_schema={"type": "string"},
+            schema_type=SchemaType.INDIVIDUAL
+        )
+        valid_pjs.save()
+        individual_proj_json_schema = ProjectJsonSchema.objects.get(id=valid_pjs.id)
+        self.assertIsNotNone(individual_proj_json_schema)
