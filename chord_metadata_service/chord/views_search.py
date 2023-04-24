@@ -305,14 +305,46 @@ def mcodepacket_query_results(query, params, options=None):
     return queryset
 
 
-def retrieve_simple_filter():
-    i_type = Coalesce(ArrayAgg("biosamples__experiment__id", filter=Q(biosamples__experiment__id__isnull=False)), [])
-    return i_type
+## v2 esta version es mejor, los datos son accurate
+def get_biosamples_l(phenopacket_id):
+    try:
+        biosamples = Phenopacket.objects.filter(subject_id=phenopacket_id)\
+            .values(
+                biosample_id=F("biosamples__id"),
+                experiment_id=F("biosamples__experiment__id"),
+                experiment_type=F("biosamples__experiment__experiment_type"),
+                study_type=F("biosamples__experiment__study_type"),
+                tissue_id=F("biosamples__sampled_tissue__id"),
+                tissue_label=F("biosamples__sampled_tissue__label")
+            )
+
+        biosamples_l = []
+
+        for b in biosamples:
+            biosamples_l.append({
+                "biosample_id": b["biosample_id"],
+                "sampled_tissue": {
+                    "id": b["tissue_id"],
+                    "label": b["tissue_label"]
+                },
+                "experiment": {
+                    "experiment_id": b["experiment_id"],
+                    "experiment_type": b["experiment_type"],
+                    "study_type": b["study_type"]
+                }
+            })
+
+        return biosamples_l
+    except Exception as e:
+        print(f"Error while getting biosamples for phenopacket_id {phenopacket_id}: {e}")
+        logger.error(f"Error while getting biosamples for phenopacket_id {phenopacket_id}: {e}")
+        return []  # Return an empty list in case of an error
+
 
 def phenopacket_query_results(query, params, options=None):
     queryset = Phenopacket.objects \
         .filter(id__in=data_type_results(query, params, "id"))
-        
+
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
         return get_values_list(queryset, options)
@@ -322,46 +354,20 @@ def phenopacket_query_results(query, params, options=None):
         if "add_field" in options:
             fields.append(options["add_field"])
 
-        # Results displayed as 4/5 columns:
-        # "individuals ID", "table ID" (optional), [Alternate ids list], number of experiments, [Biosamples list...]
-        return queryset.values(
+
+        results = queryset.values(
             *fields,
-            experiments_type = ArrayAgg("biosamples__experiment__experiment_type"),
-            experiments_id = ArrayAgg("biosamples__experiment__id"),
-            alternate_ids = Coalesce(F("subject__alternate_ids"), []),
-            biosamples_lM = ArrayAgg("biosamples__id"),
+            alternate_ids=Coalesce(F("subject__alternate_ids"), []),
         ).annotate(
-            # Weird bug with Django 4.1 here: num_experiments must come before the use of ArrayAgg or biosamples
-            # is considered as an ArrayField...
-            ex_type=retrieve_simple_filter(),
-            e_type=Coalesce(ArrayAgg("biosamples__experiment__experiment_type", filter=Q(
-                biosamples__experiment__experiment_type__isnull=False)), []),
-            studies_type=Coalesce(ArrayAgg("biosamples__experiment__study_type"), []),
-            sampled_tissues=Coalesce(ArrayAgg("biosamples__sampled_tissue"),[]),
-            i_type=Coalesce(ArrayAgg("biosamples__experiment__id", filter=Q(
-                biosamples__experiment__id__isnull=False)), []),
-            if_type=Coalesce(ArrayAgg("biosamples__experiment__biosample__id",
-                             filter=Q(biosamples__experiment__biosample__isnull=False)), []),
-            b_experiment=Coalesce(ArrayAgg("biosamples__experiment", distinct=True,
-                                           filter=Q(biosamples__experiment__isnull=False)), []),
             num_experiments=Count("biosamples__experiment"),
-
-            # jul
-            biosamples=Coalesce(
-                ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
-                []
-            ),
-
+            biosamples = Coalesce(ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)), []),
         )
 
-    # To expand further on this query : the select_related call
-    # will join on these tables we'd call anyway, thus 2 less request
-    # to the DB. prefetch_related works on M2M relationships and makes
-    # sure that, for instance, when querying diseases, we won't make multiple call
-    # for the same set of data
-    return queryset.select_related(*PHENOPACKET_SELECT_REL) \
-        .prefetch_related(*PHENOPACKET_PREFETCH)
+        for result in results:
+            phenopacket_id = result['subject_id']
+            result["biosamples_l"] = get_biosamples_l(phenopacket_id)
 
+        return results
 
 QUERY_RESULTS_FN: Dict[str, Callable] = {
     DATA_TYPE_EXPERIMENT: experiment_query_results,
@@ -447,11 +453,15 @@ def search(request, internal_data=False):
             "data_type": data_type,
             "matches": list(serializer_class(p).data for p in table_objects)
         } for table_id, table_objects in itertools.groupby(
-            queryset,
-            key=lambda o: str(o.table_id)           # object here
-        )
+            queryset if queryset is not None else [],
+            key=lambda o: str(o.table_id)  # object here
+            )
     }, start))
 
+""" for table_id, table_objects in itertools.groupby(
+            queryset,
+            key=lambda o: str(o.table_id)           # object here
+        ) """
 
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
@@ -677,9 +687,12 @@ def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[
         params=search_params["params"] + (table_id,),
         options=search_params
     )
-
+    print(queryset, "POPOPO")
+    #if not internal:
+    #    return queryset.exists(), None    # True if at least one match
     if not internal:
-        return queryset.exists(), None    # True if at least one match
+        print(queryset, "querysetUUUUUU")
+        return (queryset is not None) and queryset.exists(), None 
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
         return list(queryset), None
