@@ -43,7 +43,7 @@ router.register(r'individuals', individual_views.IndividualViewSet, basename="in
 batch_router.register(r'batch/individuals', individual_views.IndividualBatchViewSet, basename="batch/individuals")
 
 # Biosamples app urls
-router.register(r'batch/biosamples', phenopacket_views.BiosampleViewSetDos, basename="batch/biosamples")
+router.register(r'batch/biosamples', phenopacket_views.BiosampleBatchViewSet, basename="batch/biosamples")
 
 # Phenopackets app urls
 router.register(r'phenotypicfeatures', phenopacket_views.PhenotypicFeatureViewSet, basename="phenotypicfeatures")
