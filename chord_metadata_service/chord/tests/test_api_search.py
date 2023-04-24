@@ -3,7 +3,7 @@ import uuid
 
 from unittest.mock import patch
 
-from django.urls import reverse
+from django.urls import reverse, resolve
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -131,6 +131,11 @@ class TableTest(APITestCase):
         self.client.post(reverse("tableownership-list"), data=json.dumps(to), content_type="application/json")
         r = self.client.post(reverse("table-list"), data=json.dumps(tr), content_type="application/json")
         self.table = r.json()
+        
+        # Print the data
+        print("Project:", self.project)
+        print("Dataset:", self.dataset)
+        print("Table:", self.table)
 
     def test_chord_table_list(self):
         # No data type specified
@@ -535,7 +540,7 @@ class SearchTest(APITestCase):
             r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_private_table_search_bento_search_results(self):
+    ''' def test_private_table_search_bento_search_results(self):
         # Valid query to search for biosample id in list
         # Output as Bento search (a list of 4 values)
 
@@ -553,7 +558,38 @@ class SearchTest(APITestCase):
             self.assertEqual(
                 {"subject_id", "alternate_ids", "biosamples", "num_experiments"},
                 set(c["results"][0].keys()))
+            self.assertIsInstance(c["results"][0]["alternate_ids"], list) '''
+    def test_private_table_search_bento_search_results(self):
+        # Valid query to search for biosample id in list
+        # Output as Bento search (a list of 4 values)
+
+        d = {
+            "query": TEST_SEARCH_QUERY_10,
+            "output": "bento_search_result",
+        }
+        
+        for method in POST_GET:
+            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            self.assertEqual(len(c["results"]), 1)  # 1 matching phenopacket
+            self.assertEqual(len(c["results"][0]), 5)    # 5 columns by result
+            self.assertEqual(
+                {"subject_id", "alternate_ids", "biosamples", "biosamples_l", "num_experiments"},
+                set(c["results"][0].keys()))
             self.assertIsInstance(c["results"][0]["alternate_ids"], list)
+            self.assertIsInstance(c["results"][0]["biosamples_l"], list)  # Ensure biosamples_l is a list
+            # Validate the structure of each biosample in biosamples_l
+            for biosample in c["results"][0]["biosamples_l"]:
+                self.assertIn("biosample_id", biosample)
+                self.assertIn("sampled_tissue", biosample)
+                self.assertIn("id", biosample["sampled_tissue"])
+                self.assertIn("label", biosample["sampled_tissue"])
+                self.assertIn("experiment", biosample)
+                self.assertIn("experiment_id", biosample["experiment"])
+                self.assertIn("experiment_type", biosample["experiment"])
+                self.assertIn("study_type", biosample["experiment"])
+
 
     def test_private_search_bento_search_results(self):
         # Valid query to search for biosample id in list
