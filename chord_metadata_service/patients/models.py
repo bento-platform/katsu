@@ -1,18 +1,28 @@
+from django.apps import apps
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
-from chord_metadata_service.restapi.models import IndexableMixin, SchemaType
+from chord_metadata_service.restapi.models import IndexableMixin, SchemaType, BaseExtraProperties
 from chord_metadata_service.restapi.validators import ontology_validator, age_or_age_range_validator
 from .values import Sex, KaryotypicSex
 from .validators import comorbid_condition_validator
 
 
-class Individual(models.Model, IndexableMixin):
+class Individual(BaseExtraProperties, IndexableMixin):
     """ Class to store demographic information about an Individual (Patient) """
 
     @property
     def schema_type(self) -> SchemaType:
         return SchemaType.INDIVIDUAL
+    
+
+    def get_project_id(self) -> str:
+        if len(phenopackets := self.phenopackets.all()) < 1:
+            # Need to wait for phenopacket to exist
+            return None
+        model = apps.get_model("chord.Project")
+        project = model.objects.get(datasets__table_ownership=phenopackets.first().table_id)
+        return project.identifier
 
     SEX = Sex.as_django_values()
     KARYOTYPIC_SEX = KaryotypicSex.as_django_values()

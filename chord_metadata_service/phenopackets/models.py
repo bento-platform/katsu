@@ -238,7 +238,7 @@ class Disease(models.Model, IndexableMixin):
         return str(self.id)
 
 
-class Biosample(models.Model, IndexableMixin):
+class Biosample(BaseExtraProperties, IndexableMixin):
     """
     Class to describe a unit of biological material
 
@@ -289,6 +289,16 @@ class Biosample(models.Model, IndexableMixin):
             'display': self.sampled_tissue.get('label')
             }
         }
+    
+    @property
+    def schema_type(self) -> SchemaType:
+        return SchemaType.BIOSAMPLE
+    
+    def get_project_id(self) -> str:
+        model = apps.get_model("phenopackets.Phenopacket")
+        if len(phenopackets := model.objects.filter(biosamples__id=self.id)) < 1:
+            return None
+        return phenopackets.first().get_project_id()
 
 
 class Phenopacket(BaseExtraProperties, IndexableMixin):
