@@ -183,22 +183,26 @@ def main():
     print("Select an option:")
     print("1. Convert small dataset")
     print("2. Convert medium dataset")
-    print("3. Exit")
+    print("3. Convert large dataset")
+    print("4. Exit")
 
-    choice = int(input("Enter your choice [1-3]: "))
+    choice = int(input("Enter your choice [1-4]: "))
 
     if choice == 1:
         path = "small_dataset"
-        set_foreign_keys(path)
-        convert_to_fixtures(path)
     elif choice == 2:
         path = "medium_dataset"
-        set_foreign_keys(path)
-        convert_to_fixtures(path)
     elif choice == 3:
+        path = "large_dataset"
+    elif choice == 4:
+        print("Exiting...")
         exit()
     else:
         print("Invalid option. Please try again.")
+        return
+
+    set_foreign_keys(path)
+    convert_to_fixtures(path)
 
 
 if __name__ == "__main__":

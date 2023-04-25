@@ -1,0 +1,62 @@
+{
+  "id": 469100,
+  "num_rows": 800,
+  "file_format": "json",
+  "name": "Chemotherapy",
+  "array": true,
+  "columns": [
+    {
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_donor_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_treatment_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "drug_name",
+      "null_percentage": 15,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"GEMCITABINE\",\n\"NIVOLUMAB\",\n\"LIPOSOMAL IRINOTECAN\",\n\"FLUOROURACIL\",\n\"LIPOSOMAL IRINOTECAN\",\n\"FLUOROURACIL\",\n\"LEUCOVORIN\",\n\"FLUOROURACIL\",\n\"IRINOTECAN\",\n\"OXALIPLATIN\"][random(0,9)]\n"
+    },
+    {
+      "name": "drug_rxnormcui",
+      "null_percentage": 16,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"56438\",\n\"87354\",\n\"7365837\",\n\"6534648\",\n\"836494\",\n\"876459\",\n\"836754\"][random(0,6)]"
+    },
+    {
+      "name": "chemotherapy_dosage_units",
+      "null_percentage": 17,
+      "type": "Template",
+      "value": "",
+      "formula": "\"mg/m2\"\n"
+    },
+    {
+      "name": "cumulative_drug_dosage_prescribed",
+      "null_percentage": 18,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"320\",\n\"4600\",\n\"150\",\n\"780\",\n\"320\",\n\"4600\",\n\"780\",\n\"320\",\n\"4600\",\n\"150\",\n\"780\",\n\"320\"][random(0,11)]\n"
+    },
+    {
+      "name": "cumulative_drug_dosage_actual",
+      "null_percentage": 19,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"100\",\n\"90\",\n\"60\",\n\"66\",\n\"78\",\n\"94\",\n\"111\",\n\"79\"][random(0,7)]"
+    }
+  ]
+}
