@@ -4,6 +4,11 @@
 ![Lint Status](https://github.com/bento-platform/katsu/workflows/Lint/badge.svg)
 [![codecov](https://codecov.io/gh/bento-platform/katsu/branch/master/graph/badge.svg)](https://codecov.io/gh/bento-platform/katsu)
 
+<img src="docs/_static/katsu_logo_final.png" width="298" height="50" alt="Katsu logo" />
+
+A Phenopackets-based clinical and phenotypic metadata service for the Bento platform.
+
+
 ## Table of Contents
 
   * [License](#license)

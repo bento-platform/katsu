@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 
 from typing import Any, Callable
 
+from chord_metadata_service.logger import logger
 from .exceptions import IngestError
 
 __all__ = [
@@ -58,7 +59,9 @@ def workflow_http_download(tmp_dir: str, http_uri: str) -> str:
     r = requests.get(http_uri)
 
     if not r.ok:
-        raise IngestError(f"HTTP error encountered while downloading ingestion URI: {http_uri}")
+        err = f"HTTP error encountered while downloading ingestion URI: {http_uri}"
+        logger.error(f"{err} (Status: {r.status_code}; Contents: {r.content.decode('utf-8')})")
+        raise IngestError(err)
 
     data_path = f"{tmp_dir}ingest_download_data"
 
