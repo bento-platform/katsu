@@ -1,5 +1,5 @@
 from django.db.utils import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from uuid import uuid4
 
 from chord_metadata_service.restapi.models import SchemaType
@@ -93,7 +93,7 @@ class TableTest(TestCase):
         self.assertEqual(str(t), f"{t.name} (ID: {TABLE_ID}, Type: {DATA_TYPE_PHENOPACKET})")
 
 
-class ProjectJsonSchemaTest(TestCase):
+class ProjectJsonSchemaTest(TransactionTestCase):
     def setUp(self) -> None:
         self.p = Project.objects.create(title="Project 1", description="")
         self.json_schema = {
@@ -112,27 +112,28 @@ class ProjectJsonSchemaTest(TestCase):
 
     def test_project_json_schema(self):
         proj_json_schema = ProjectJsonSchema.objects.get(id=self.required_pheno_schema.id)
-        self.assertEqual(proj_json_schema.project, self.p.identifier)
+        self.assertEqual(proj_json_schema.project_id, self.p.identifier)
         self.assertEqual(proj_json_schema.json_schema, self.json_schema)
         self.assertEqual(proj_json_schema.schema_type, SchemaType.PHENOPACKET)
     
     def test_schema_type_constraint(self):
         # ProjectJsonSchema must be unique for every project_id, schema_type pair
+        # Should fail
         invalid_pjs = ProjectJsonSchema(
             project=self.p,
             required=False,
             json_schema={"type": "string"},
             schema_type=SchemaType.PHENOPACKET
         )
-        with self.assertRaises(IntegrityError) as err:
+        with self.assertRaises(IntegrityError):
             invalid_pjs.save()
+        
         # Should succeed
-        valid_pjs = ProjectJsonSchema(
+        valid_pjs = ProjectJsonSchema.objects.create(
             project=self.p,
             required=False,
             json_schema={"type": "string"},
             schema_type=SchemaType.INDIVIDUAL
         )
-        valid_pjs.save()
         individual_proj_json_schema = ProjectJsonSchema.objects.get(id=valid_pjs.id)
         self.assertIsNotNone(individual_proj_json_schema)

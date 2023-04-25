@@ -139,10 +139,19 @@ class DatasetSerializer(GenericSerializer):
         fields = '__all__'
 
 
+class ProjectJsonSchemaSerializer(GenericSerializer):
+    id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = ProjectJsonSchema
+        fields = "__all__"
+
+
 class ProjectSerializer(serializers.ModelSerializer):
     # Don't inherit GenericSerializer to not pop empty fields
 
     datasets = DatasetSerializer(read_only=True, many=True, exclude_when_nested=["project"])
+    project_schemas = ProjectJsonSchemaSerializer(read_only=True, many=True)
 
     # noinspection PyMethodMayBeStatic
     def validate_title(self, value):
@@ -161,11 +170,4 @@ class TableSerializer(GenericSerializer):
 
     class Meta:
         model = Table
-        fields = "__all__"
-
-
-class ProjectJsonSchemaSerializer(GenericSerializer):
-
-    class Meta:
-        model = ProjectJsonSchema
         fields = "__all__"
