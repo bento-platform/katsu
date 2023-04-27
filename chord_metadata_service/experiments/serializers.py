@@ -17,6 +17,7 @@ class InstrumentSerializer(GenericSerializer):
         model = Instrument
         fields = "__all__"
 
+
 # this is for dinamic field selection, allow the serializer include/exclude fields in the output
 class DynamicFieldsMixin:
     def __init__(self, *args, **kwargs):
@@ -28,14 +29,15 @@ class DynamicFieldsMixin:
             for field_name in existing - allowed:
                 self.fields.pop(field_name)
 
+
 class IndividualSerializer(DynamicFieldsMixin, GenericSerializer):
     class Meta:
         model = Individual
         fields = "__all__"
 
+
 class ExperimentSerializer(GenericSerializer):
     experiment_results = ExperimentResultSerializer(read_only=True, many=True)
-    print("experiment results serializer",experiment_results)
     instrument = InstrumentSerializer()
     biosample_individual = IndividualSerializer(source='biosample.individual', read_only=True, fields=['id'])
 
