@@ -305,8 +305,7 @@ def mcodepacket_query_results(query, params, options=None):
     return queryset
 
 
-## v2 esta version es mejor, los datos son accurate
-def get_biosamples_l(phenopacket_id):
+def get_biosamples_experiments(phenopacket_id):
     try:
         biosamples = Phenopacket.objects.filter(subject_id=phenopacket_id)\
             .values(
@@ -318,27 +317,24 @@ def get_biosamples_l(phenopacket_id):
                 tissue_label=F("biosamples__sampled_tissue__label")
             )
 
-        biosamples_l = []
-
-        for b in biosamples:
-            biosamples_l.append({
-                "biosample_id": b["biosample_id"],
-                "sampled_tissue": {
-                    "id": b["tissue_id"],
-                    "label": b["tissue_label"]
-                },
-                "experiment": {
-                    "experiment_id": b["experiment_id"],
-                    "experiment_type": b["experiment_type"],
-                    "study_type": b["study_type"]
-                }
-            })
+        biosamples_l = [{
+            "biosample_id": b["biosample_id"],
+            "sampled_tissue": {
+                "id": b["tissue_id"],
+                "label": b["tissue_label"]
+            },
+            "experiment": {
+                "experiment_id": b["experiment_id"],
+                "experiment_type": b["experiment_type"],
+                "study_type": b["study_type"]
+            }
+        } for b in biosamples if b["biosample_id"] is not None]
 
         return biosamples_l
-    except Exception as e:
-        print(f"Error while getting biosamples for phenopacket_id {phenopacket_id}: {e}")
-        logger.error(f"Error while getting biosamples for phenopacket_id {phenopacket_id}: {e}")
-        return []  # Return an empty list in case of an error
+
+    except Exception:
+        logger.exception(f"Error while getting biosamples for phenopacket_id {phenopacket_id}")
+        return []
 
 
 def phenopacket_query_results(query, params, options=None):
@@ -354,20 +350,23 @@ def phenopacket_query_results(query, params, options=None):
         if "add_field" in options:
             fields.append(options["add_field"])
 
-
         results = queryset.values(
             *fields,
             alternate_ids=Coalesce(F("subject__alternate_ids"), []),
         ).annotate(
             num_experiments=Count("biosamples__experiment"),
-            biosamples = Coalesce(ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)), []),
+            biosamples=Coalesce(ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)), []),
         )
 
         for result in results:
             phenopacket_id = result['subject_id']
-            result["biosamples_l"] = get_biosamples_l(phenopacket_id)
+            result["biosamples_l"] = get_biosamples_experiments(phenopacket_id)
 
         return results
+    else:
+        return queryset.select_related(*PHENOPACKET_SELECT_REL) \
+            .prefetch_related(*PHENOPACKET_PREFETCH)
+
 
 QUERY_RESULTS_FN: Dict[str, Callable] = {
     DATA_TYPE_EXPERIMENT: experiment_query_results,
@@ -458,10 +457,6 @@ def search(request, internal_data=False):
             )
     }, start))
 
-""" for table_id, table_objects in itertools.groupby(
-            queryset,
-            key=lambda o: str(o.table_id)           # object here
-        ) """
 
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
@@ -687,12 +682,8 @@ def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[
         params=search_params["params"] + (table_id,),
         options=search_params
     )
-    print(queryset, "POPOPO")
-    #if not internal:
-    #    return queryset.exists(), None    # True if at least one match
     if not internal:
-        print(queryset, "querysetUUUUUU")
-        return (queryset is not None) and queryset.exists(), None 
+        return queryset.exists(), None    # True if at least one match
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
         return list(queryset), None
