@@ -8,7 +8,9 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 
-from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer, BiosamplesCSVRenderer, ARGORenderer, IndividualBentoSearchRenderer)
+from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer,
+                                                          BiosamplesCSVRenderer, ARGORenderer,
+                                                          IndividualBentoSearchRenderer)
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
@@ -198,17 +200,18 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
             queryset = queryset.filter(id__in=ids_list)
 
         return queryset
-    
+
     def get_queryset(self):
         individual_ids = self.request.data.get("id", None)
         return self._get_filtered_queryset(ids_list=individual_ids)
-    
+
     def create(self, request, *args, **kwargs):
         ids_list = request.data.get('ids', [])
         queryset = self._get_filtered_queryset(ids_list=ids_list)
-    
+
         serializer = s.BiosampleSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 PHENOPACKET_PREFETCH = (
     *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
