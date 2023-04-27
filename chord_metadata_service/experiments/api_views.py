@@ -16,7 +16,6 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
 
 
-
 from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer,
     PhenopacketsRenderer,
@@ -64,6 +63,7 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     def dispatch(self, *args, **kwargs):
         return super(ExperimentViewSet, self).dispatch(*args, **kwargs)
 
+
 class BatchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """
     A viewset that only implements the 'list' action.
@@ -71,11 +71,12 @@ class BatchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """
     pass
 
+
 class ExperimentBatchViewSet(BatchViewSet):
     """
     get:
     Return a list of all existing experiments
-    
+
     post:
     return a list of experiments based on a list of ids
     """
