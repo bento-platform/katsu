@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-
+    name: Run Tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -42,8 +42,8 @@ jobs:
       run: |
         export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5432
         coverage run manage.py test chord_metadata_service/mohpackets
-    - uses: codecov/codecov-action@v3
-      with:
-        name: codecov-umbrella # optional
-        fail_ci_if_error: true # optional (default = false)
-        verbose: true # optional (default = false)
+    # - uses: codecov/codecov-action@v3
+    #   with:
+    #     name: codecov-umbrella # optional
+    #     fail_ci_if_error: true # optional (default = false)
+    #     verbose: true # optional (default = false)
