@@ -115,6 +115,7 @@ def generate_csv_response(data, filename, columns):
     dict_writer.writerows(data)
     return response
 
+
 class IndividualCSVRenderer(JSONRenderer):
     media_type = 'text/csv'
     format = 'csv'
@@ -170,6 +171,7 @@ class IndividualCSVRenderer(JSONRenderer):
         # remove underscore and capitalize column names
         return generate_csv_response(individuals, 'data.csv', columns)
 
+
 class BiosamplesCSVRenderer(JSONRenderer):
     media_type = 'text/csv'
     format = 'csv'
@@ -182,12 +184,10 @@ class BiosamplesCSVRenderer(JSONRenderer):
         for biosample in data:
             bio_obj = {
                 'id': biosample['id'],
-                ##'description': biosample['description'],
-                'description' : biosample.get('description', 'NA'),
+                'description': biosample.get('description', 'NA'),
                 'sampled_tissue': biosample.get('sampled_tissue', {}).get('label', 'NA'),
-                'individual_age_at_collection':biosample.get('individual_age_at_collection', {}).get('age', 'NA'),
+                'individual_age_at_collection': biosample.get('individual_age_at_collection', {}).get('age', 'NA'),
                 'histological_diagnosis': biosample.get('histological_diagnosis', {}).get('label', 'NA'),
-                ##'extra_properties': '; '.join([f"{k}: {v}" for k, v in biosample.get('extra_properties', {}).items()]),
                 'extra_properties': f"Material: {biosample.get('extra_properties', {}).get('material', 'NA')}",
                 'created': biosample['created'],
                 'updated': biosample['updated'],
@@ -197,6 +197,7 @@ class BiosamplesCSVRenderer(JSONRenderer):
 
         columns = biosamples[0].keys()
         return generate_csv_response(biosamples, 'biosamples.csv', columns)
+
 
 class ExperimentCSVRenderer(JSONRenderer):
     media_type = 'text/csv'
@@ -226,6 +227,7 @@ class ExperimentCSVRenderer(JSONRenderer):
 
         columns = experiments[0].keys()
         return generate_csv_response(experiments, 'experiments.csv', columns)
+
 
 class IndividualBentoSearchRenderer(JSONRenderer):
     """
