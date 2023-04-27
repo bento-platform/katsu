@@ -72,8 +72,8 @@ jobs:
         DB_PORT: ${{ env.POSTGRES_PORT }}
       run: |
         coverage run manage.py test chord_metadata_service/mohpackets
-    # - uses: codecov/codecov-action@v3
-    #   with:
-    #     name: codecov-umbrella
-    #     fail_ci_if_error: true
-    #     verbose: true
+    - uses: codecov/codecov-action@v3
+      with:
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        verbose: true
