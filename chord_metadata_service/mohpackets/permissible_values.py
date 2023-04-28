@@ -74,12 +74,13 @@ PRIMARY_SITE = [
     "Thyroid gland",
     "Tonsil",
     "Trachea",
-    "Unknown primary site",
     "Ureter",
     "Uterus, NOS",
     "Vagina",
     "Vulva",
+    "Unknown primary site",
 ]
+
 
 LOST_TO_FOLLOWUP_REASON = [
     "Completed study",
