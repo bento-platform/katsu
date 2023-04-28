@@ -81,6 +81,15 @@ PRIMARY_SITE = [
     "Vulva",
 ]
 
+LOST_TO_FOLLOWUP_REASON = [
+    "Completed study",
+    "Discharged to palliative care",
+    "Lost contact",
+    "Not applicable",
+    "Unknown",
+    "Withdrew from study",
+]
+
 TUMOUR_STAGING_SYSTEM = [
     "AJCC 8th edition",
     "AJCC 7th edition",
