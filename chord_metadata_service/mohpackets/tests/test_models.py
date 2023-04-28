@@ -39,42 +39,15 @@ from chord_metadata_service.mohpackets.serializers import (
 
 def get_invalid_ids():
     """Returns the invalid values to test in ID fields."""
-    return ["f" * 65, ""]
-
+    return ["f" * 65, "", True]
 
 def get_invalid_choices():
     """Returns the invalid values to test in choice fields."""
     return ["foo", 1, True]
 
-
 def get_invalid_dates():
     """Returns the invalid values to test in date fields."""
     return ["foo", "03", "114", "443-12", "Feb-1995", 1, True]
-
-
-def create_model(model):
-    """Returns a reusable 'placeholder' model to set up foreign key fields in test instances."""
-    if model == "program":
-        return Program.objects.create(program_id="SYNTHETIC")
-    elif model == "donor":
-        return Donor.objects.create(
-            submitter_donor_id="DONOR_1",
-            program_id=create_model("program"),
-            primary_site=["Adrenal gland"]
-        )
-    elif model == "primary_diagnosis":
-        return PrimaryDiagnosis.objects.create(
-            submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
-            program_id=create_model("program"),
-            submitter_donor_id=create_model("donor")
-        )
-    elif model == "treatment":
-        return Treatment.objects.create(
-            submitter_treatment_id="TREATMENT_1",
-            program_id=create_model("program"),
-            submitter_donor_id=create_model("donor"),
-            submitter_primary_diagnosis_id=create_model("primary_diagnosis")
-        )
 
 
 class ProgramTest(TestCase):
@@ -457,7 +430,7 @@ class TestSpecimen(TestCase):
     #             self.serializer = SpecimenSerializer(instance=self.donor, data=self.valid_values)
     #             self.assertFalse(self.serializer.is_valid())
 
-    def test_reference_pathology_confirmed_diagnosis(self):
+    def test_invalid_reference_pathology_confirmed_diagnosis(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
             with self.subTest(value=value):
@@ -465,7 +438,7 @@ class TestSpecimen(TestCase):
                 self.serializer = SpecimenSerializer(instance=self.specimen, data=self.valid_values)
                 self.assertFalse(self.serializer.is_valid())
 
-    def test_reference_pathology_confirmed_tumour_presence(self):
+    def test_invalid_reference_pathology_confirmed_tumour_presence(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
             with self.subTest(value=value):
@@ -473,7 +446,7 @@ class TestSpecimen(TestCase):
                 self.serializer = SpecimenSerializer(instance=self.specimen, data=self.valid_values)
                 self.assertFalse(self.serializer.is_valid())
 
-    def test_tumour_grading_system(self):
+    def test_invalid_tumour_grading_system(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
             with self.subTest(value=value):
@@ -481,7 +454,7 @@ class TestSpecimen(TestCase):
                 self.serializer = SpecimenSerializer(instance=self.specimen, data=self.valid_values)
                 self.assertFalse(self.serializer.is_valid())
 
-    def test_tumour_grade(self):
+    def test_invalid_tumour_grade(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
             with self.subTest(value=value):
@@ -489,7 +462,7 @@ class TestSpecimen(TestCase):
                 self.serializer = SpecimenSerializer(instance=self.specimen, data=self.valid_values)
                 self.assertFalse(self.serializer.is_valid())
 
-    def test_percent_tumour_cells_range(self):
+    def test_invalid_percent_tumour_cells_range(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
             with self.subTest(value=value):
@@ -497,7 +470,7 @@ class TestSpecimen(TestCase):
                 self.serializer = SpecimenSerializer(instance=self.specimen, data=self.valid_values)
                 self.assertFalse(self.serializer.is_valid())
 
-    def test_percent_tumour_cells_measurement_method(self):
+    def test_invalid_percent_tumour_cells_measurement_method(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
             with self.subTest(value=value):
@@ -812,7 +785,7 @@ class TestChemotherapy(TestCase):
             self.serializer = ChemotherapySerializer(instance=self.chemotherapy, data=self.valid_values)
             self.assertFalse(self.serializer.is_valid())
 
-    def chemotherapy_dosage_units(self):
+    def test_chemotherapy_dosage_units_max_length(self):
         self.chemotherapy.drug_rxnormcui = "f" * 65
         with self.assertRaises(ValidationError):
             self.chemotherapy.full_clean()
@@ -862,12 +835,12 @@ class TestHormoneTherapy(TestCase):
         self.assertEqual(self.hormone_therapy.cumulative_drug_dosage_prescribed, "200")
         self.assertEqual(self.hormone_therapy.cumulative_drug_dosage_actual, "200")
 
-    def test_drug_name(self):
+    def test_drug_name_max_length(self):
         self.hormone_therapy.drug_name = "f" * 256
         with self.assertRaises(ValidationError):
             self.hormone_therapy.full_clean()
 
-    def test_drug_rxnormcui(self):
+    def test_drug_rxnormcui_max_length(self):
         self.hormone_therapy.drug_rxnormcui = "f" * 65
         with self.assertRaises(ValidationError):
             self.hormone_therapy.full_clean()
@@ -1017,12 +990,485 @@ class TestImmunotherapy(TestCase):
             self.serializer = ImmunotherapySerializer(instance=self.immunotherapy, data=self.valid_values)
             self.assertFalse(self.serializer.is_valid())
     
-    def test_drug_name(self):
+    def test_drug_name_max_length(self):
         self.immunotherapy.drug_name = "f" * 256
         with self.assertRaises(ValidationError):
             self.immunotherapy.full_clean()
 
-    def test_drug_rxnormcui(self):
+    def test_drug_rxnormcui_max_length(self):
         self.immunotherapy.drug_rxnormcui = "f" * 65
         with self.assertRaises(ValidationError):
             self.immunotherapy.full_clean()
+
+class TestSurgery(TestCase):
+    def setUp(self):
+        self.program = Program.objects.create(program_id="SYNTHETIC")
+        self.donor = Donor.objects.create(
+            submitter_donor_id="DONOR_1",
+            program_id=self.program,
+            primary_site=["Adrenal gland"]
+        )
+        self.primary_diagnosis = PrimaryDiagnosis.objects.create(
+            submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
+            program_id=self.program,
+            submitter_donor_id=self.donor
+        )
+        self.specimen = Specimen.objects.create(
+            program_id=self.program,
+            submitter_donor_id=self.donor,
+            submitter_primary_diagnosis_id=self.primary_diagnosis
+        )
+        self.treatment = Treatment.objects.create(
+            submitter_treatment_id="TREATMENT_1",
+            program_id=self.program,
+            submitter_donor_id=self.donor,
+            submitter_primary_diagnosis_id=self.primary_diagnosis,
+        )
+        self.valid_values = {
+            "program_id": self.program,
+            "submitter_donor_id": self.donor,
+            "submitter_specimen_id": self.specimen,
+            "submitter_treatment_id": self.treatment,
+            "surgery_type": "Drainage of abscess",
+            "surgery_site": "C06",
+            "surgery_location": "Primary",
+            "tumour_length": "5",
+            "tumour_width": "7",
+            "greatest_dimension_tumour": "4",
+            "tumour_focality": "Cannot be assessed",
+            "residual_tumour_classification": "R2",
+            "margin_types_involved": [
+                "Proximal margin",
+                "Not applicable"
+            ],
+            "margin_types_not_involved": [
+                "Unknown"
+            ],
+            "lymphovascular_invasion": "Absent",
+            "margin_types_not_assessed": [
+                "Common bile duct margin",
+                "Not applicable"
+            ],
+            "perineural_invasion": "Not applicable"
+        }
+        self.surgery = Surgery.objects.create(**self.valid_values)
+
+    def test_immunotherapy_creation(self):
+        self.assertIsInstance(self.surgery, Surgery)
+
+    def test_surgery_fields(self):
+        self.assertEqual(self.surgery.program_id, self.program)
+        self.assertEqual(self.surgery.submitter_donor_id, self.donor)
+        self.assertEqual(self.surgery.submitter_specimen_id, self.specimen)
+        self.assertEqual(self.surgery.submitter_treatment_id, self.treatment)
+        self.assertEqual(self.surgery.surgery_type, "Drainage of abscess")
+        self.assertEqual(self.surgery.surgery_site, "C06")
+        self.assertEqual(self.surgery.surgery_location, "Primary")
+        self.assertEqual(self.surgery.tumour_length, "5")
+        self.assertEqual(self.surgery.tumour_width, "7")
+        self.assertEqual(self.surgery.greatest_dimension_tumour, "4")
+        self.assertEqual(self.surgery.tumour_focality, "Cannot be assessed")
+        self.assertEqual(self.surgery.residual_tumour_classification, "R2")
+        self.assertCountEqual(self.surgery.margin_types_involved, [
+                "Proximal margin",
+                "Not applicable"
+            ])
+        self.assertCountEqual(self.surgery.margin_types_not_involved, [
+                "Unknown"
+            ])
+        self.assertEqual(self.surgery.lymphovascular_invasion, "Absent")
+        self.assertCountEqual(self.surgery.margin_types_not_assessed, [
+                "Common bile duct margin",
+                "Not applicable"
+            ])
+        self.assertEqual(self.surgery.perineural_invasion, "Not applicable")
+    
+    def test_invalid_surgery_type(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["surgery_type"] = value
+            self.serializer = SurgerySerializer(instance=self.surgery, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+
+    # TODO: fix regular expression
+    # def test_specimen_surgery_site(self):
+    #     invalid_values = ["8260/3", 1]
+    #     for value in invalid_values:
+    #         with self.subTest(value=value):
+    #             self.valid_values["specimen_anatomic_location"] = value
+    #             self.serializer = SpecimenSerializer(instance=self.donor, data=self.valid_values)
+    #             self.assertFalse(self.serializer.is_valid())
+    
+    def test_invalid_surgery_location(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["surgery_location"] = value
+            self.serializer = SurgerySerializer(instance=self.surgery, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_tumour_focality(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["tumour_focality"] = value
+            self.serializer = SurgerySerializer(instance=self.surgery, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_residual_tumour_classification(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["residual_tumour_classification"] = value
+            self.serializer = SurgerySerializer(instance=self.surgery, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_margin_types_involved(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["margin_types_involved"] = value
+            self.serializer = SurgerySerializer(instance=self.surgery, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_margin_types_not_involved(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["margin_types_not_involved"] = value
+            self.serializer = SurgerySerializer(instance=self.surgery, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_margin_types_not_assessed(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["margin_types_not_assessed"] = value
+            self.serializer = SurgerySerializer(instance=self.surgery, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_lymphovascular_invasion(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["lymphovascular_invasion"] = value
+            self.serializer = SurgerySerializer(instance=self.surgery, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_perineural_invasion(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["perineural_invasion"] = value
+            self.serializer = SurgerySerializer(instance=self.surgery, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+
+
+class TestFollowUp(TestCase):
+    def setUp(self):
+        self.program = Program.objects.create(program_id="SYNTHETIC")
+        self.donor = Donor.objects.create(
+            submitter_donor_id="DONOR_1",
+            program_id=self.program,
+            primary_site=["Adrenal gland"]
+        )
+        self.primary_diagnosis = PrimaryDiagnosis.objects.create(
+            submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
+            program_id=self.program,
+            submitter_donor_id=self.donor
+        )
+        self.treatment = Treatment.objects.create(
+            submitter_treatment_id="TREATMENT_1",
+            program_id=self.program,
+            submitter_donor_id=self.donor,
+            submitter_primary_diagnosis_id=self.primary_diagnosis,
+        )
+        self.valid_values = {
+            "submitter_follow_up_id": "FOLLOW_UP_1",
+            "program_id": self.program,
+            "submitter_donor_id": self.donor,
+            "submitter_primary_diagnosis_id": self.primary_diagnosis,
+            "submitter_treatment_id": self.treatment,
+            "date_of_followup": "2022-10",
+            "lost_to_followup": True,
+            "lost_to_followup_reason": "Completed study",
+            "disease_status_at_followup": "Loco-regional progression",
+            "relapse_type": "Progression (liquid tumours)",
+            "date_of_relapse": "2022-07",
+            "method_of_progression_status": "Assessment of symptom control (procedure)",
+            "anatomic_site_progression_or_recurrence": "C18",
+            "recurrence_tumour_staging_system": "Revised International staging system (RISS)",
+            "recurrence_t_category": "T2a",
+            "recurrence_n_category": "N0a (biopsy)",
+            "recurrence_m_category": "M0(i+)",
+            "recurrence_stage_group": "Stage IBS"
+        }
+        self.followup = FollowUp.objects.create(**self.valid_values)
+    
+    def test_followup_creation(self):
+        self.assertIsInstance(self.followup, FollowUp)
+
+    def test_followup_fields(self):
+        self.assertEqual(self.followup.submitter_follow_up_id, "FOLLOW_UP_1")
+        self.assertEqual(self.followup.program_id, self.program)
+        self.assertEqual(self.followup.submitter_donor_id, self.donor)
+        self.assertEqual(self.followup.submitter_primary_diagnosis_id, self.primary_diagnosis)
+        self.assertEqual(self.followup.submitter_treatment_id, self.treatment)
+        self.assertEqual(self.followup.date_of_followup, "2022-10")
+        self.assertEqual(self.followup.lost_to_followup, True)
+        self.assertEqual(self.followup.lost_to_followup_reason, "Completed study")
+        self.assertEqual(self.followup.disease_status_at_followup, "Loco-regional progression")
+        self.assertEqual(self.followup.relapse_type, "Progression (liquid tumours)")
+        self.assertEqual(self.followup.date_of_relapse, "2022-07")
+        self.assertEqual(self.followup.method_of_progression_status, "Assessment of symptom control (procedure)")
+        self.assertEqual(self.followup.anatomic_site_progression_or_recurrence, "C18")
+        self.assertEqual(self.followup.recurrence_tumour_staging_system, "Revised International staging system (RISS)")
+        self.assertEqual(self.followup.recurrence_t_category, "T2a")
+        self.assertEqual(self.followup.recurrence_n_category, "N0a (biopsy)")
+        self.assertEqual(self.followup.recurrence_m_category, "M0(i+)")
+        self.assertEqual(self.followup.recurrence_stage_group, "Stage IBS")
+
+    def test_unique_id(self):
+        with self.assertRaises(IntegrityError):
+            self.followup = FollowUp.objects.create(**self.valid_values)
+
+    def test_invalid_id(self):
+        invalid_values = get_invalid_ids()
+        for value in invalid_values:
+            self.valid_values["submitter_follow_up_id"] = value
+            self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+    
+    def test_invalid_date_of_followup(self):
+        invalid_values = get_invalid_dates()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["date_of_followup"] = value
+                self.serializer = FollowUpSerializer(instance=self.donor, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_lost_to_followup(self):
+        self.followup.lost_to_followup = "foo"
+        with self.assertRaises(ValidationError):
+            self.followup.full_clean()
+
+    def test_invalid_lost_to_followup_reason(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["lost_to_followup_reason"] = value
+            self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_disease_status_at_followup(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["disease_status_at_followup"] = value
+            self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_relapse_type(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["relapse_type"] = value
+            self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+    
+    def test_invalid_date_of_relapse(self):
+        invalid_values = get_invalid_dates()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["date_of_relapse"] = value
+                self.serializer = FollowUpSerializer(instance=self.donor, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_method_of_progression_status(self):
+        invalid_values = get_invalid_dates()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["method_of_progression_status"] = value
+                self.serializer = FollowUpSerializer(instance=self.donor, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+
+    # TODO: fix regular expression
+    # def test_anatomic_site_progression_or_recurrence(self):
+    #     invalid_values = ["8260/3", 1]
+    #     for value in invalid_values:
+    #         with self.subTest(value=value):
+    #             self.valid_values["sanatomic_site_progression_or_recurrence"] = value
+    #             self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
+    #             self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_recurrence_tumour_staging_system(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["recurrence_tumour_staging_system"] = value
+                self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_recurrence_t_category(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["recurrence_t_category"] = value
+                self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_recurrence_n_category(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["recurrence_n_category"] = value
+                self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_recurrence_m_category(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["recurrence_m_category"] = value
+                self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_recurrence_stage_group(self):
+        invalid_values = get_invalid_dates()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["recurrence_stage_group"] = value
+                self.serializer = FollowUpSerializer(instance=self.donor, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+
+
+class TestBiomarker(TestCase):
+    def setUp(self):
+        self.program = Program.objects.create(program_id="SYNTHETIC")
+        self.donor = Donor.objects.create(
+            submitter_donor_id="DONOR_1",
+            program_id=self.program,
+            primary_site=["Adrenal gland"]
+        )
+        self.primary_diagnosis = PrimaryDiagnosis.objects.create(
+            submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
+            program_id=self.program,
+            submitter_donor_id=self.donor
+        )
+        self.specimen = Specimen.objects.create(
+            program_id=self.program,
+            submitter_donor_id=self.donor,
+            submitter_primary_diagnosis_id=self.primary_diagnosis
+        )
+        self.treatment = Treatment.objects.create(
+            submitter_treatment_id="TREATMENT_1",
+            program_id=self.program,
+            submitter_donor_id=self.donor,
+            submitter_primary_diagnosis_id=self.primary_diagnosis,
+        )
+        self.followup = FollowUp.objects.create(
+            submitter_follow_up_id="FOLLOW_UP_1",
+            program_id=self.program,
+            submitter_donor_id=self.donor
+        )
+        self.valid_values = {
+            "program_id": self.program,
+            "submitter_donor_id": self.donor,
+            "submitter_specimen_id": self.specimen,
+            "submitter_primary_diagnosis_id": self.primary_diagnosis,
+            "submitter_treatment_id": self.treatment,
+            "submitter_follow_up_id": self.followup,
+            "test_interval": 8,
+            "psa_level": 230,
+            "ca125": 29,
+            "cea": 11
+        }
+        self.biomarker = Biomarker.objects.create(**self.valid_values)
+    
+    def test_biomarker_creation(self):
+        self.assertIsInstance(self.biomarker, Biomarker)
+    
+    def test_biomarker_fields(self):
+        self.assertEqual(self.biomarker.program_id, self.program)
+        self.assertEqual(self.biomarker.submitter_donor_id, self.donor)
+        self.assertEqual(self.biomarker.submitter_specimen_id, self.specimen)
+        self.assertEqual(self.biomarker.submitter_primary_diagnosis_id, self.primary_diagnosis)
+        self.assertEqual(self.biomarker.submitter_treatment_id, self.treatment)
+        self.assertEqual(self.biomarker.submitter_follow_up_id, self.followup)
+        self.assertEqual(self.biomarker.test_interval, 8)
+        self.assertEqual(self.biomarker.psa_level, 230)
+        self.assertEqual(self.biomarker.ca125, 29)
+        self.assertEqual(self.biomarker.cea, 11)
+
+
+class TestComorbidity(TestCase):
+    def setUp(self):
+        self.program = Program.objects.create(program_id="SYNTHETIC")
+        self.donor = Donor.objects.create(
+            submitter_donor_id="DONOR_1",
+            program_id=self.program,
+            primary_site=["Adrenal gland"]
+        )
+        self.valid_values = {
+            "program_id": self.program,
+            "submitter_donor_id": self.donor,
+            "prior_malignancy": "Yes",
+            "laterality_of_prior_malignancy": "Not applicable",
+            "age_at_comorbidity_diagnosis": 35,
+            "comorbidity_type_code": "C04.0",
+            "comorbidity_treatment_status": "No",
+            "comorbidity_treatment": "Surgery"
+        }
+        self.comorbidity = Comorbidity.objects.create(**self.valid_values)
+    
+    def test_comorbidity_creation(self):
+        self.assertIsInstance(self.comorbidity, Comorbidity)
+
+    def test_comorbitidy_fields(self):
+        self.assertEqual(self.comorbidity.program_id, self.program)
+        self.assertEqual(self.comorbidity.submitter_donor_id, self.donor)
+        self.assertEqual(self.comorbidity.prior_malignancy, "Yes")
+        self.assertEqual(self.comorbidity.laterality_of_prior_malignancy, "Not applicable")
+        self.assertEqual(self.comorbidity.age_at_comorbidity_diagnosis, 35)
+        self.assertEqual(self.comorbidity.comorbidity_type_code, "C04.0")
+        self.assertEqual(self.comorbidity.comorbidity_treatment_status, "No")
+        self.assertEqual(self.comorbidity.comorbidity_treatment, "Surgery")
+    
+    def test_invalid_prior_malignancy(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["prior_malignancy"] = value
+                self.serializer = ComorbiditySerializer(instance=self.comorbidity, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+    
+    def test_invalid_laterality_of_prior_malignancy(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["laterality_of_prior_malignancy"] = value
+                self.serializer = ComorbiditySerializer(instance=self.comorbidity, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+    
+    # TODO: fix regular expression
+    # def test_comorbidity_type_code(self):
+    #     invalid_values = ["8260/3", 1]
+    #     for value in invalid_values:
+    #         with self.subTest(value=value):
+    #             self.valid_values["comorbidity_type_code"] = value
+    #             self.serializer = ComorbiditySerializer(instance=self.followup, data=self.valid_values)
+    #             self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_comorbidity_treatment_status(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["comorbidity_treatment_status"] = value
+                self.serializer = ComorbiditySerializer(instance=self.comorbidity, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+    
+    def test_comorbidity_treatment_max_length(self):
+        self.comorbidity.comorbidity_treatment = "f" * 256
+        with self.assertRaises(ValidationError):
+            self.comorbidity.full_clean()
