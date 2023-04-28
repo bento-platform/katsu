@@ -83,6 +83,7 @@ class PrimaryDiagnosis(models.Model):
     date_of_diagnosis = models.CharField(max_length=32, null=True, blank=True)
     cancer_type_code = models.CharField(max_length=64, null=True, blank=True)
     basis_of_diagnosis = models.CharField(max_length=128, null=True, blank=True)
+    laterality = models.CharField(max_length=128, null=True, blank=True)
     lymph_nodes_examined_status = models.CharField(
         max_length=128, null=True, blank=True
     )
