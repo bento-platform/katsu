@@ -99,6 +99,8 @@ TUMOUR_STAGING_SYSTEM = [
     "Binet staging system",
     "Durie-Salmon staging system",
     "FIGO staging system",
+    "International Neuroblastoma Risk Group Staging System",
+    "International Neuroblastoma Staging System",
     "Lugano staging system",
     "Rai staging system",
     "Revised International staging system (RISS)",
@@ -211,7 +213,6 @@ M_CATEGORY = [
 ]
 
 STAGE_GROUP = [
-    "Occult Carcinoma",
     "Stage 0",
     "Stage 0a",
     "Stage 0is",
@@ -297,7 +298,19 @@ STAGE_GROUP = [
     "Localized",
     "Regionalized",
     "Distant",
+    "Stage L1",
+    "Stage L2",
+    "Stage M",
+    "Stage Ms",
+    "Stage 1",
+    "Stage 2A",
+    "Stage 2B",
+    "Stage 3",
+    "Stage 4",
+    "Stage 4S",
+    "Occult Carcinoma",
 ]
+
 
 STORAGE = [
     "Cut slide",
