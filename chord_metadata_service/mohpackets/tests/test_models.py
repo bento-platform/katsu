@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.db.utils import IntegrityError
+from django.db.utils import DataError, IntegrityError
 from django.test import TestCase
 
 from chord_metadata_service.mohpackets.models import (
@@ -109,6 +109,10 @@ class DonorTest(TestCase):
             "Adrenal gland",
             "Other and ill-defined sites in lip, oral cavity and pharynx"
         ])
+    
+    # def test_empty_fields(self):
+
+
 
     def test_unique_id(self):
         with self.assertRaises(IntegrityError):
@@ -125,7 +129,9 @@ class DonorTest(TestCase):
     def test_invalid_is_deceased(self):
         self.donor.is_deceased = "foo"
         with self.assertRaises(ValidationError):
-            self.donor.full_clean()
+            self.donor.save()
+        #with self.assertRaises(ValidationError):
+        #    self.donor.save()
 
     def test_invalid_cause_of_death(self):
         invalid_values = get_invalid_choices()
@@ -769,13 +775,13 @@ class TestChemotherapy(TestCase):
 
     def test_drug_name_max_length(self):
         self.chemotherapy.drug_name = "f" * 256
-        with self.assertRaises(ValidationError):
-            self.chemotherapy.full_clean()
+        with self.assertRaises(DataError):
+            self.chemotherapy.save()
 
     def test_drug_rxnormcui_max_length(self):
         self.chemotherapy.drug_rxnormcui = "f" * 65
-        with self.assertRaises(ValidationError):
-            self.chemotherapy.full_clean()
+        with self.assertRaises(DataError):
+            self.chemotherapy.save()
 
     def test_invalid_chemotherapy_dosage_units(self):
         invalid_values = get_invalid_choices()
@@ -787,8 +793,8 @@ class TestChemotherapy(TestCase):
 
     def test_chemotherapy_dosage_units_max_length(self):
         self.chemotherapy.drug_rxnormcui = "f" * 65
-        with self.assertRaises(ValidationError):
-            self.chemotherapy.full_clean()
+        with self.assertRaises(DataError):
+            self.chemotherapy.save()
 
 
 class TestHormoneTherapy(TestCase):
@@ -837,13 +843,13 @@ class TestHormoneTherapy(TestCase):
 
     def test_drug_name_max_length(self):
         self.hormone_therapy.drug_name = "f" * 256
-        with self.assertRaises(ValidationError):
-            self.hormone_therapy.full_clean()
+        with self.assertRaises(DataError):
+            self.hormone_therapy.save()
 
     def test_drug_rxnormcui_max_length(self):
         self.hormone_therapy.drug_rxnormcui = "f" * 65
-        with self.assertRaises(ValidationError):
-            self.hormone_therapy.full_clean()
+        with self.assertRaises(DataError):
+            self.hormone_therapy.save()
 
     def test_invalid_hormone_therapy_dosage_units(self):
         invalid_values = get_invalid_choices()
@@ -856,7 +862,7 @@ class TestHormoneTherapy(TestCase):
     def chemotherapy_dosage_units(self):
         self.hormone_therapy.drug_rxnormcui = "f" * 65
         with self.assertRaises(ValidationError):
-            self.hormone_therapy.full_clean()
+            self.hormone_therapy.save()
 
 
 class TestRadiation(TestCase):
@@ -919,6 +925,10 @@ class TestRadiation(TestCase):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
             with self.subTest(value=value):
+                # print(value)
+                # self.radiation.radiation_therapy_type = value
+                # self.radiation.save()
+                
                 self.valid_values["radiation_therapy_type"] = value
             self.serializer = RadiationSerializer(instance=self.radiation, data=self.valid_values)
             self.assertFalse(self.serializer.is_valid())
@@ -932,14 +942,14 @@ class TestRadiation(TestCase):
             self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_radiation_boost(self):
-        self.donor.radiation_boost = "foo"
+        self.radiation.radiation_boost = "foo"
         with self.assertRaises(ValidationError):
-            self.donor.full_clean()
+            self.radiation.save()
 
     def test_reference_radiation_treatment_id_max_length(self):
         self.radiation.reference_radiation_treatment_id = "f" * 65
-        with self.assertRaises(ValidationError):
-            self.radiation.full_clean()
+        with self.assertRaises(DataError):
+            self.radiation.save()
 
 
 class TestImmunotherapy(TestCase):
@@ -992,13 +1002,13 @@ class TestImmunotherapy(TestCase):
     
     def test_drug_name_max_length(self):
         self.immunotherapy.drug_name = "f" * 256
-        with self.assertRaises(ValidationError):
-            self.immunotherapy.full_clean()
+        with self.assertRaises(DataError):
+            self.immunotherapy.save()
 
     def test_drug_rxnormcui_max_length(self):
         self.immunotherapy.drug_rxnormcui = "f" * 65
-        with self.assertRaises(ValidationError):
-            self.immunotherapy.full_clean()
+        with self.assertRaises(DataError):
+            self.immunotherapy.save()
 
 class TestSurgery(TestCase):
     def setUp(self):
@@ -1251,7 +1261,7 @@ class TestFollowUp(TestCase):
     def test_invalid_lost_to_followup(self):
         self.followup.lost_to_followup = "foo"
         with self.assertRaises(ValidationError):
-            self.followup.full_clean()
+            self.followup.save()
 
     def test_invalid_lost_to_followup_reason(self):
         invalid_values = get_invalid_choices()
@@ -1470,5 +1480,5 @@ class TestComorbidity(TestCase):
     
     def test_comorbidity_treatment_max_length(self):
         self.comorbidity.comorbidity_treatment = "f" * 256
-        with self.assertRaises(ValidationError):
-            self.comorbidity.full_clean()
+        with self.assertRaises(DataError):
+            self.comorbidity.save()
