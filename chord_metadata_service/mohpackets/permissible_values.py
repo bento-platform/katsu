@@ -339,6 +339,16 @@ SPECIMEN_PROCESSING = [
 
 SPECIMEN_LATERALITY = ["Left", "Not applicable", "Right", "Unknown"]
 
+PRIMARY_DIAGNOSIS_LATERALITY = [
+    "Bilateral",
+    "Left",
+    "Midline",
+    "Not a paired site",
+    "Right",
+    "Unilateral, side not specified",
+    "Unknown",
+]
+
 CONFIRMED_DIAGNOSIS_TUMOUR = ["Yes", "No", "Not done", "Unknown"]
 
 TUMOUR_GRADING_SYSTEM = [
