@@ -48,7 +48,16 @@ class Donor(models.Model):
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
+    gender = models.CharField(max_length=32, null=True, blank=True)
+    sex_at_birth = models.CharField(max_length=32, null=True, blank=True)
     is_deceased = models.BooleanField(null=True)
+    lost_to_followup_after_clinical_event_identifier = models.CharField(
+        max_lenfth=255, null=True, blank=True
+    )
+    lost_to_followup_reason = models.CharField(max_length=255, null=True, blank=True)
+    date_alive_after_lost_to_followup = models.CharField(
+        max_length=32, null=True, blank=True
+    )
     cause_of_death = models.CharField(max_length=255, null=True, blank=True)
     date_of_birth = models.CharField(max_length=32, null=True, blank=True)
     date_of_death = models.CharField(max_length=32, null=True, blank=True)
