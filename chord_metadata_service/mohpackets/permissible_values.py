@@ -388,11 +388,10 @@ SPECIMEN_TISSUE_SOURCE = [
     "Wound",
 ]
 
-
 SPECIMEN_TYPE = [
     "Cell line - derived from normal",
-    "Cell line - derived from metastatic tumour",
     "Cell line - derived from primary tumour",
+    "Cell line - derived from metastatic tumour",
     "Cell line - derived from xenograft tumour",
     "Metastatic tumour - additional metastatic",
     "Metastatic tumour - metastasis local to lymph node",
@@ -404,10 +403,12 @@ SPECIMEN_TYPE = [
     "Primary tumour - adjacent to normal",
     "Primary tumour",
     "Recurrent tumour",
+    "Tumour - unknown if derived from primary or metastatic tumour",
     "Xenograft - derived from primary tumour",
     "Xenograft - derived from metastatic tumour",
     "Xenograft - derived from tumour cell line",
 ]
+
 
 SAMPLE_TYPE = [
     "Amplified DNA",
