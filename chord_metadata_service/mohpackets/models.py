@@ -7,11 +7,10 @@ from django.utils import timezone
 """
     This module contains the MODELS for the Marathon of Hope app.
     --------------------------------
-    MOHCCN Clinical Data Model V1: Data Standards Sub-Committee (DSC)
-    Model Schema (Excel): https://docs.google.com/spreadsheets/d/1pChl2DQiynU0OdueDHW7saJiLliv31GutgNbW8XSfUk/edit#gid=0 # noqa: E501
-    Model Schema (PDF): https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/mohccn-clinical-data-model_v1_endorsed6oct-2022.pdf?Status=Master&sfvrsn=7f6bd159_7 # noqa: E501
+    MOHCCN Clinical Data Model V2: Data Standards Sub-Committee (DSC)
+    Model Schema (Excel): https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/moh-clinical-data-model-v2---feb-202381759e70b6034dcfa0b7bde4174e9822.xlsx?Status=Master&sfvrsn=2932cab_7 # noqa: E501
     ER Diagram: https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/mohccn_data_standard_er_diagram_endorsed6oct22.pdf?Status=Master&sfvrsn=dd57a75e_5 # noqa: E501
-    Schema last updated: September 2022
+    Schema last updated: Feb 15, 2023
     --------------------------------
     NOTES:
     - Permissible values are not enforced in the model.
