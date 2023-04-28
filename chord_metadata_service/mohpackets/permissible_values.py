@@ -324,6 +324,21 @@ STORAGE = [
     "Unknown",
 ]
 
+SPECIMEN_PROCESSING = [
+    "Cryopreservation in liquid nitrogen (dead tissue)",
+    "Cryopreservation in dry ice (dead tissue)",
+    "Cryopreservation of live cells in liquid nitrogen",
+    "Cryopreservation - other",
+    "Formalin fixed & paraffin embedded",
+    "Formalin fixed - buffered",
+    "Formalin fixed - unbuffered",
+    "Fresh",
+    "Other",
+    "Unknown",
+]
+
+SPECIMEN_LATERALITY = ["Left", "Not applicable", "Right", "Unknown"]
+
 CONFIRMED_DIAGNOSIS_TUMOUR = ["Yes", "No", "Not done", "Unknown"]
 
 TUMOUR_GRADING_SYSTEM = [
@@ -332,7 +347,9 @@ TUMOUR_GRADING_SYSTEM = [
     "Gleason grade group system",
     "Grading system for GISTs",
     "Grading system for GNETs",
+    "IASLC grading system",
     "ISUP grading system",
+    "Nottingham grading system",
     "Nuclear grading system for DCIS",
     "Scarff-Bloom-Richardson grading system",
     "Three-tier grading system",

@@ -125,8 +125,10 @@ class Specimen(models.Model):
     pathological_stage_group = models.CharField(max_length=64, null=True, blank=True)
     specimen_collection_date = models.CharField(max_length=32, null=True, blank=True)
     specimen_storage = models.CharField(max_length=64, null=True, blank=True)
+    specimen_processing = models.CharField(max_length=128, null=True, blank=True)
     tumour_histological_type = models.CharField(max_length=128, null=True, blank=True)
     specimen_anatomic_location = models.CharField(max_length=32, null=True, blank=True)
+    specimen_laterality = models.CharField(max_length=64, null=True, blank=True)
     reference_pathology_confirmed_diagnosis = models.CharField(
         max_length=32, null=True, blank=True
     )
