@@ -32,7 +32,6 @@ from chord_metadata_service.mohpackets.serializers import (
     ImmunotherapySerializer,
     SurgerySerializer,
     FollowUpSerializer,
-    BiomarkerSerializer,
     ComorbiditySerializer
 )
 
@@ -41,9 +40,11 @@ def get_invalid_ids():
     """Returns the invalid values to test in ID fields."""
     return ["f" * 65, "", True]
 
+
 def get_invalid_choices():
     """Returns the invalid values to test in choice fields."""
     return ["foo", 1, True]
+
 
 def get_invalid_dates():
     """Returns the invalid values to test in date fields."""
@@ -93,12 +94,11 @@ class DonorTest(TestCase):
             ]
         }
         self.donor = Donor.objects.create(**self.valid_values)
-    
+
     def test_donor_creation(self):
         self.assertIsInstance(self.donor, Donor)
 
     def test_donor_fields(self):
-        self.assertIsInstance(self.donor, Donor)
         self.assertEqual(self.donor.submitter_donor_id, "DONOR_1")
         self.assertEqual(self.donor.program_id, self.program)
         self.assertTrue(self.donor.is_deceased)
@@ -109,10 +109,14 @@ class DonorTest(TestCase):
             "Adrenal gland",
             "Other and ill-defined sites in lip, oral cavity and pharynx"
         ])
-    
-    # def test_empty_fields(self):
 
-
+    # These tests will be implemented after we decide which fields are required
+    # def test_optional_fields(self):
+    #     optional_fields = ["submitter_donor_id", "is_deceased", "cause_of_death",
+    #     "date_of_birth", "date_of_death", "primary_site"]
+    #     for field in optional_fields:
+    #         setattr(self.donor, field, None)
+    #     self.donor.save()
 
     def test_unique_id(self):
         with self.assertRaises(IntegrityError):
@@ -130,8 +134,6 @@ class DonorTest(TestCase):
         self.donor.is_deceased = "foo"
         with self.assertRaises(ValidationError):
             self.donor.save()
-        #with self.assertRaises(ValidationError):
-        #    self.donor.save()
 
     def test_invalid_cause_of_death(self):
         invalid_values = get_invalid_choices()
@@ -920,15 +922,11 @@ class TestRadiation(TestCase):
                 self.valid_values["radiation_therapy_modality"] = value
             self.serializer = RadiationSerializer(instance=self.radiation, data=self.valid_values)
             self.assertFalse(self.serializer.is_valid())
-    
+
     def test_invalid_radiation_therapy_type(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
             with self.subTest(value=value):
-                # print(value)
-                # self.radiation.radiation_therapy_type = value
-                # self.radiation.save()
-                
                 self.valid_values["radiation_therapy_type"] = value
             self.serializer = RadiationSerializer(instance=self.radiation, data=self.valid_values)
             self.assertFalse(self.serializer.is_valid())
@@ -980,7 +978,7 @@ class TestImmunotherapy(TestCase):
             "drug_rxnormcui": "8756456"
         }
         self.immunotherapy = Immunotherapy.objects.create(**self.valid_values)
-    
+
     def test_immunotherapy_creation(self):
         self.assertIsInstance(self.immunotherapy, Immunotherapy)
 
@@ -991,7 +989,7 @@ class TestImmunotherapy(TestCase):
         self.assertEqual(self.immunotherapy.immunotherapy_type, "Cell-based")
         self.assertEqual(self.immunotherapy.drug_name, "Necitumumab")
         self.assertEqual(self.immunotherapy.drug_rxnormcui, "8756456")
-    
+
     def test_invalid_immunotherapy_type(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
@@ -999,7 +997,7 @@ class TestImmunotherapy(TestCase):
                 self.valid_values["immunotherapy_type"] = value
             self.serializer = ImmunotherapySerializer(instance=self.immunotherapy, data=self.valid_values)
             self.assertFalse(self.serializer.is_valid())
-    
+
     def test_drug_name_max_length(self):
         self.immunotherapy.drug_name = "f" * 256
         with self.assertRaises(DataError):
@@ -1009,6 +1007,7 @@ class TestImmunotherapy(TestCase):
         self.immunotherapy.drug_rxnormcui = "f" * 65
         with self.assertRaises(DataError):
             self.immunotherapy.save()
+
 
 class TestSurgery(TestCase):
     def setUp(self):
@@ -1092,7 +1091,7 @@ class TestSurgery(TestCase):
                 "Not applicable"
             ])
         self.assertEqual(self.surgery.perineural_invasion, "Not applicable")
-    
+
     def test_invalid_surgery_type(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
@@ -1109,7 +1108,7 @@ class TestSurgery(TestCase):
     #             self.valid_values["specimen_anatomic_location"] = value
     #             self.serializer = SpecimenSerializer(instance=self.donor, data=self.valid_values)
     #             self.assertFalse(self.serializer.is_valid())
-    
+
     def test_invalid_surgery_location(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
@@ -1215,7 +1214,7 @@ class TestFollowUp(TestCase):
             "recurrence_stage_group": "Stage IBS"
         }
         self.followup = FollowUp.objects.create(**self.valid_values)
-    
+
     def test_followup_creation(self):
         self.assertIsInstance(self.followup, FollowUp)
 
@@ -1249,7 +1248,7 @@ class TestFollowUp(TestCase):
             self.valid_values["submitter_follow_up_id"] = value
             self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
             self.assertFalse(self.serializer.is_valid())
-    
+
     def test_invalid_date_of_followup(self):
         invalid_values = get_invalid_dates()
         for value in invalid_values:
@@ -1286,7 +1285,7 @@ class TestFollowUp(TestCase):
                 self.valid_values["relapse_type"] = value
             self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
             self.assertFalse(self.serializer.is_valid())
-    
+
     def test_invalid_date_of_relapse(self):
         invalid_values = get_invalid_dates()
         for value in invalid_values:
@@ -1395,10 +1394,10 @@ class TestBiomarker(TestCase):
             "cea": 11
         }
         self.biomarker = Biomarker.objects.create(**self.valid_values)
-    
+
     def test_biomarker_creation(self):
         self.assertIsInstance(self.biomarker, Biomarker)
-    
+
     def test_biomarker_fields(self):
         self.assertEqual(self.biomarker.program_id, self.program)
         self.assertEqual(self.biomarker.submitter_donor_id, self.donor)
@@ -1431,7 +1430,7 @@ class TestComorbidity(TestCase):
             "comorbidity_treatment": "Surgery"
         }
         self.comorbidity = Comorbidity.objects.create(**self.valid_values)
-    
+
     def test_comorbidity_creation(self):
         self.assertIsInstance(self.comorbidity, Comorbidity)
 
@@ -1444,7 +1443,7 @@ class TestComorbidity(TestCase):
         self.assertEqual(self.comorbidity.comorbidity_type_code, "C04.0")
         self.assertEqual(self.comorbidity.comorbidity_treatment_status, "No")
         self.assertEqual(self.comorbidity.comorbidity_treatment, "Surgery")
-    
+
     def test_invalid_prior_malignancy(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
@@ -1452,7 +1451,7 @@ class TestComorbidity(TestCase):
                 self.valid_values["prior_malignancy"] = value
                 self.serializer = ComorbiditySerializer(instance=self.comorbidity, data=self.valid_values)
                 self.assertFalse(self.serializer.is_valid())
-    
+
     def test_invalid_laterality_of_prior_malignancy(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
@@ -1460,7 +1459,7 @@ class TestComorbidity(TestCase):
                 self.valid_values["laterality_of_prior_malignancy"] = value
                 self.serializer = ComorbiditySerializer(instance=self.comorbidity, data=self.valid_values)
                 self.assertFalse(self.serializer.is_valid())
-    
+
     # TODO: fix regular expression
     # def test_comorbidity_type_code(self):
     #     invalid_values = ["8260/3", 1]
@@ -1477,7 +1476,7 @@ class TestComorbidity(TestCase):
                 self.valid_values["comorbidity_treatment_status"] = value
                 self.serializer = ComorbiditySerializer(instance=self.comorbidity, data=self.valid_values)
                 self.assertFalse(self.serializer.is_valid())
-    
+
     def test_comorbidity_treatment_max_length(self):
         self.comorbidity.comorbidity_treatment = "f" * 256
         with self.assertRaises(DataError):
