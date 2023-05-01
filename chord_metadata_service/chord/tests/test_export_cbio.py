@@ -6,8 +6,8 @@ from os import walk, path
 from django.db.models import F
 from django.test import TestCase
 
-from chord_metadata_service.chord import export_cbio as exp
-from chord_metadata_service.chord.export_cbio import (
+from chord_metadata_service.chord.export import cbioportal as exp
+from chord_metadata_service.chord.export.cbioportal import (
     CBIO_FILES_SET,
     MUTATION_DATA_FILENAME,
     PATIENT_DATA_FILENAME,
@@ -17,7 +17,7 @@ from chord_metadata_service.chord.export_cbio import (
     SAMPLE_DATATYPE,
 )
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.chord.export_utils import ExportFileContext
+from chord_metadata_service.chord.export.utils import ExportFileContext
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP

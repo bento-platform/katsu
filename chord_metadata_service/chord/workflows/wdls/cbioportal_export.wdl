@@ -1,8 +1,12 @@
+version 1.0
+
 workflow cbioportal {
-    String dataset_id
-    String run_dir
-    String metadata_url
-    String drs_url
+    input {
+        String dataset_id
+        String run_dir
+        String metadata_url
+        String drs_url
+    }
 
     call katsu_dataset_export {
         input: dataset_id = dataset_id,
@@ -24,34 +28,28 @@ workflow cbioportal {
 }
 
 task katsu_dataset_export {
-    #>>>>>> task inputs <<<<<<
-    String dataset_id
-    String metadata_url
-    String run_dir
-
-    #>>>>>> task constants <<<<<
-    # workaround for var interpolation. Syntax ${} confuses wdl parsers
-    # between wdl level interpolation and shell string interpolation.
-    String dollar = "$"
+    input {
+        String dataset_id
+        String metadata_url
+        String run_dir
+    }
 
     # Enclosing command with curly braces {} causes issues with parsing in this
     # command block (tested with womtool-v78). Using triple angle braces made
-    # interpolation more straightforward. According to specs, this should
-    # restrict to ~{} syntax instead of ${} for string interpolation, which is
-    # accepted by womtools but is not recognized by toil runner...
+    # interpolation more straightforward.
     command <<<
         # Export results at export_path and returns http code 200 in case of success
         RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
             -H "Content-Type: application/json" \
-            -d '{"format": "cbioportal", "object_type": "dataset", "object_id": "${dataset_id}", "output_path": "${run_dir}"}' \
-            "${metadata_url}/private/export")
+            -d '{"format": "cbioportal", "object_type": "dataset", "object_id": "~{dataset_id}", "output_path": "~{run_dir}"}' \
+            "~{metadata_url}/private/export")
 
-        if [ "${dollar}{RESPONSE}" != "204" ]
+        if [ "${RESPONSE}" != "204" ]
         then
-            echo "Error: Metadata service replied with HTTP code ${dollar}{RESPONSE}" 1>&2  # to stderr
+            echo "Error: Metadata service replied with HTTP code ${RESPONSE}" 1>&2  # to stderr
             exit 1
         fi
-        echo ${dollar}{RESPONSE}
+        echo ${RESPONSE}
     >>>
 
     output {
@@ -62,22 +60,18 @@ task katsu_dataset_export {
 }
 
 task get_maf {
-    #>>>>>>> task inputs <<<<<<<
-    String drs_url
-    String run_dir
-    String dataset_id
-
-    #>>>>>> task constants <<<<<
-    # workaround for var interpolation. Syntax ${} confuses wdl parsers
-    # between wdl level interpolation and shell string interpolation.
-    String dollar = "$"
+    input {
+        String drs_url
+        String run_dir
+        String dataset_id
+    }
 
     command <<<
         python <<CODE
         import json
         import requests
 
-        work_dir = "${run_dir}/export/${dataset_id}"
+        work_dir = "~{run_dir}/export/~{dataset_id}"
         MAF_LIST = f"{work_dir}/maf_list.txt"
         MUTATION_DATA_FILE= f"{work_dir}/data_mutations_extended.txt"
 
@@ -90,7 +84,7 @@ task get_maf {
 
                 # Request from DRS the maf file absolute local path
                 object_id = maf_uri.split("/")[-1].rstrip()
-                drs_object_url = f"${drs_url}/objects/{object_id}?internal_path=1"
+                drs_object_url = f"~{drs_url}/objects/{object_id}?internal_path=1"
                 response = requests.get(drs_object_url, verify=False)
                 r = response.json()
 

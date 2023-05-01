@@ -367,6 +367,7 @@ def public_overview(_request):
             "biosamples": biosamples_count,
             "experiments": experiments_count
         },
+        "max_query_parameters": settings.CONFIG_PUBLIC["rules"]["max_query_parameters"],
     }
 
     # Parse the public config to gather data for each field defined in the

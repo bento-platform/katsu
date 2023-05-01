@@ -1,21 +1,16 @@
 #!/bin/bash
 
-# Wait for database to start
-./wait_for_db.bash
+cd /app || exit
 
-# Run migrations; make migrations for other apps if needed
-python manage.py makemigrations
-python manage.py migrate
+# Create bento_user + home
+source /create_service_user.bash
 
-# Set the internal port unless it's been externally configured
-if [ -z "${INTERNAL_PORT}" ]; then
-  # Set default internal port to 8000
-  INTERNAL_PORT=8000
-fi
+# Create /app/tmp if it doesn't exist (say, in the local mount of the code)
+mkdir -p /app/tmp
 
-# Run the ASGI server
-uvicorn chord_metadata_service.metadata.asgi:application \
-  --workers 1 \
-  --loop uvloop \
-  --host "0.0.0.0" \
-  --port "${INTERNAL_PORT}"
+# Fix permissions on /app/tmp and /env
+chown -R bento_user:bento_user /app/tmp
+chmod -R o-rwx /app/tmp  # Remove all access from others
+
+# Drop into bento_user from root and execute the CMD specified for the image
+exec gosu bento_user "$@"

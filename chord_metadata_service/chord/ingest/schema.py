@@ -8,7 +8,7 @@ __all__ = ["schema_validation"]
 def schema_validation(obj, schema):
     v = jsonschema.Draft7Validator(schema, format_checker=jsonschema.FormatChecker())
     try:
-        jsonschema.validate(obj, schema, format_checker=jsonschema.FormatChecker())
+        v.validate(obj)
         logger.info("JSON schema validation passed.")
         return True
     except jsonschema.exceptions.ValidationError:

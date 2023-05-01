@@ -5,12 +5,12 @@ import tempfile
 import uuid
 
 from django.urls import reverse
-from chord_metadata_service.chord.export_cbio import CBIO_FILES_SET
-from chord_metadata_service.chord.export_utils import EXPORT_DIR
+from chord_metadata_service.chord.export.cbioportal import CBIO_FILES_SET
+from chord_metadata_service.chord.export.utils import EXPORT_DIR
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from ..views_ingest import METADATA_WORKFLOWS
+from ..ingest.views import METADATA_WORKFLOWS
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP

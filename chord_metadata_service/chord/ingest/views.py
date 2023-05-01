@@ -2,26 +2,24 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import traceback
 import uuid
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from jsonschema import Draft7Validator
-from rest_framework.decorators import api_view, permission_classes, renderer_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 
 from bento_lib.schemas.bento import BENTO_INGEST_SCHEMA
 from bento_lib.responses import errors
-from bento_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
+from bento_lib.workflows import workflow_exists
 
-from .ingest import WORKFLOW_INGEST_FUNCTION_MAP
-from .ingest.exceptions import IngestError
-from .models import Table
-from .workflows.metadata import METADATA_WORKFLOWS, WORKFLOWS_PATH
+from . import WORKFLOW_INGEST_FUNCTION_MAP
+from .exceptions import IngestError
+from ..models import Table
+from ..workflows.metadata import METADATA_WORKFLOWS
 
 
 BENTO_INGEST_SCHEMA_VALIDATOR = Draft7Validator(BENTO_INGEST_SCHEMA)
@@ -29,41 +27,6 @@ FROM_DERIVED_DATA = "FROM_DERIVED_DATA"
 TABLE_ID_OVERRIDES = {FROM_DERIVED_DATA}    # These special values skip the checks on the table
 
 logger = logging.getLogger(__name__)
-
-
-class WDLRenderer(BaseRenderer):
-    media_type = "text/plain"
-    format = "text"
-
-    def render(self, data, accepted_media_type=None, renderer_context=None):
-        return data.encode(self.charset)
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def workflow_list(_request):
-    return Response(METADATA_WORKFLOWS)
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def workflow_item(_request, workflow_id):
-    if not workflow_exists(workflow_id, METADATA_WORKFLOWS):
-        return Response(errors.not_found_error(f"No workflow with ID {workflow_id}"), status=404)
-
-    return Response(get_workflow(workflow_id, METADATA_WORKFLOWS))
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-@renderer_classes([WDLRenderer])
-def workflow_file(_request, workflow_id):
-    if not workflow_exists(workflow_id, METADATA_WORKFLOWS):
-        return Response(status=404, data="Not found")
-
-    wdl_path = os.path.join(WORKFLOWS_PATH, get_workflow_resource(workflow_id, METADATA_WORKFLOWS))
-    with open(wdl_path, "r") as wf:
-        return Response(wf.read())
 
 
 # Mounted on /private/, so will get protected anyway; this allows for access from WES
