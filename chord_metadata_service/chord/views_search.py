@@ -317,7 +317,7 @@ def get_biosamples_experiments(phenopacket_id):
                 tissue_label=F("biosamples__sampled_tissue__label")
             )
 
-        biosamples_l = [{
+        biosamples_with_experiments = [{
             "biosample_id": b["biosample_id"],
             "sampled_tissue": {
                 "id": b["tissue_id"],
@@ -330,7 +330,7 @@ def get_biosamples_experiments(phenopacket_id):
             }
         } for b in biosamples if b["biosample_id"] is not None]
 
-        return biosamples_l
+        return biosamples_with_experiments
 
     except Exception:
         logger.exception(f"Error while getting biosamples for phenopacket_id {phenopacket_id}")
@@ -360,7 +360,7 @@ def phenopacket_query_results(query, params, options=None):
 
         for result in results:
             phenopacket_id = result['subject_id']
-            result["biosamples_l"] = get_biosamples_experiments(phenopacket_id)
+            result["biosamples_with_experiments"] = get_biosamples_experiments(phenopacket_id)
 
         return results
     else:

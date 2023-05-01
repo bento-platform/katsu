@@ -551,11 +551,11 @@ class SearchTest(APITestCase):
             self.assertEqual(len(c["results"]), 1)  # 1 matching phenopacket
             self.assertEqual(len(c["results"][0]), 5)    # 5 columns by result
             self.assertEqual(
-                {"subject_id", "alternate_ids", "biosamples", "biosamples_l", "num_experiments"},
+                {"subject_id", "alternate_ids", "biosamples", "biosamples_with_experiments", "num_experiments"},
                 set(c["results"][0].keys()))
             self.assertIsInstance(c["results"][0]["alternate_ids"], list)
-            self.assertIsInstance(c["results"][0]["biosamples_l"], list)
-            for biosample in c["results"][0]["biosamples_l"]:
+            self.assertIsInstance(c["results"][0]["biosamples_with_experiments"], list)
+            for biosample in c["results"][0]["biosamples_with_experiments"]:
                 self.assertIn("biosample_id", biosample)
                 self.assertIn("sampled_tissue", biosample)
                 self.assertIn("id", biosample["sampled_tissue"])
