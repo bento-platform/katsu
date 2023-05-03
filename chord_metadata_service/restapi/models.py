@@ -45,7 +45,7 @@ class BaseExtraProperties(models.Model):
         """
         pass
 
-    def get_json_schema(self) -> Tuple[str, QuerySet | None]:
+    def get_json_schema(self) -> Tuple[str, QuerySet]:
         """
         Returns a tuple (project_id, QuerySet[ProjectJsonSchema]) containing schemas to validate
         Template method design pattern, uses concrete defs of schema_type
