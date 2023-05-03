@@ -502,7 +502,6 @@ LYMPH_NODE_METHOD = [
 ]
 
 TREATMENT_TYPE = [
-    "Ablation",
     "Bone marrow transplant",
     "Chemotherapy",
     "Endoscopic therapy",
@@ -644,6 +643,7 @@ IMMUNOTHERAPY_TYPE = [
 ]
 
 SURGERY_TYPE = [
+    "Ablation",
     "Axillary Clearance",
     "Axillary lymph nodes sampling",
     "Biopsy",
