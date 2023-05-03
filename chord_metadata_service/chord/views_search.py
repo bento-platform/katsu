@@ -37,12 +37,15 @@ from chord_metadata_service.metadata.settings import CHORD_SERVICE_ARTIFACT, CHO
 from chord_metadata_service.patients.models import Individual
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
-from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset, TableOwnership, Table
 from .permissions import ReadOnly, OverrideOrSuperUserOnly
+
+from collections import defaultdict
+
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
@@ -305,36 +308,18 @@ def mcodepacket_query_results(query, params, options=None):
     return queryset
 
 
-def get_biosamples_experiments(phenopacket_id):
-    try:
-        biosamples = Phenopacket.objects.filter(subject_id=phenopacket_id)\
-            .values(
-                biosample_id=F("biosamples__id"),
-                experiment_id=F("biosamples__experiment__id"),
-                experiment_type=F("biosamples__experiment__experiment_type"),
-                study_type=F("biosamples__experiment__study_type"),
-                tissue_id=F("biosamples__sampled_tissue__id"),
-                tissue_label=F("biosamples__sampled_tissue__label")
-            )
-
-        biosamples_with_experiments = [{
-            "biosample_id": b["biosample_id"],
-            "sampled_tissue": {
-                "id": b["tissue_id"],
-                "label": b["tissue_label"]
-            },
-            "experiment": {
-                "experiment_id": b["experiment_id"],
-                "experiment_type": b["experiment_type"],
-                "study_type": b["study_type"]
-            }
-        } for b in biosamples if b["biosample_id"] is not None]
-
-        return biosamples_with_experiments
-
-    except Exception:
-        logger.exception(f"Error while getting biosamples for phenopacket_id {phenopacket_id}")
-        return []
+def get_biosamples_experiments(phenopacket_ids):
+    biosamples = Biosample.objects.filter(phenopacket__subject_id__in=phenopacket_ids)\
+        .values(
+            subject_id=F("phenopacket__subject_id"),
+            biosample_id=F("id"),
+            experiment_id=F("experiment__id"),
+            experiment_type=F("experiment__experiment_type"),
+            study_type=F("experiment__study_type"),
+            tissue_id=F("sampled_tissue__id"),
+            tissue_label=F("sampled_tissue__label")
+        )
+    return biosamples
 
 
 def phenopacket_query_results(query, params, options=None):
@@ -358,9 +343,29 @@ def phenopacket_query_results(query, params, options=None):
             biosamples=Coalesce(ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)), []),
         )
 
+        # Get the biosamples with experiments data
+        phenopacket_ids = [result['subject_id'] for result in results]
+        biosamples_data = get_biosamples_experiments(phenopacket_ids)
+
+        # Group the biosamples data by subject_id
+        biosamples_with_experiments = defaultdict(list)
+        for b in biosamples_data:
+            biosamples_with_experiments[b["subject_id"]].append({
+                "biosample_id": b["biosample_id"],
+                "sampled_tissue": {
+                    "id": b["tissue_id"],
+                    "label": b["tissue_label"]
+                },
+                "experiment": {
+                    "experiment_id": b["experiment_id"],
+                    "experiment_type": b["experiment_type"],
+                    "study_type": b["study_type"]
+                }
+            })
+
+        # Add the biosamples_with_experiments data to the results
         for result in results:
-            phenopacket_id = result['subject_id']
-            result["biosamples_with_experiments"] = get_biosamples_experiments(phenopacket_id)
+            result["biosamples_with_experiments"] = biosamples_with_experiments[result['subject_id']]
 
         return results
     else:
