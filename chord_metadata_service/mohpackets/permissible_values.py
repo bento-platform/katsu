@@ -504,7 +504,6 @@ LYMPH_NODE_METHOD = [
 TREATMENT_TYPE = [
     "Bone marrow transplant",
     "Chemotherapy",
-    "Endoscopic therapy",
     "Hormonal therapy",
     "Immunotherapy",
     "No treatment",
