@@ -596,7 +596,14 @@ DRUG_REFERENCE_DB = [
     "NCI Thesaurus",
 ]
 
-DOSAGE_UNITS = ["mg/m2", "IU/m2", "ug/m2", "g/m2", "mg/kg"]
+DOSAGE_UNITS = [
+    "mg/m2",
+    "IU/m2",
+    "IU/kg",
+    "ug/m2",
+    "g/m2",
+    "mg/kg",
+]
 
 RADIATION_THERAPY_MODALITY = [
     "Megavoltage radiation therapy using photons (procedure)",
