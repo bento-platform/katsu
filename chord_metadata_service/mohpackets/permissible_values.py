@@ -1001,7 +1001,7 @@ DISEASE_STATUS_FOLLOWUP = [
     "Loco-regional progression",
     "No evidence of disease",
     "Partial remission",
-    "Progression NOS",
+    "Progression not otherwise specified",
     "Relapse or recurrence",
     "Stable",
 ]
