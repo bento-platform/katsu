@@ -281,6 +281,9 @@ class HormoneTherapySerializer(serializers.ModelSerializer):
     hormone_drug_dosage_units = CustomChoiceField(
         choices=val.DOSAGE_UNITS, allow_blank=True, allow_null=True
     )
+    drug_reference_database = CustomChoiceField(
+        choices=val.DRUG_REFERENCE_DB, allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model = HormoneTherapy
