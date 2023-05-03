@@ -514,7 +514,30 @@ TREATMENT_TYPE = [
     "Surgery",
 ]
 
-TREATMENT_SETTING = ["Adjuvant", "Advanced/Metastatic", "Neoadjuvant", "Not applicable"]
+TREATMENT_SETTING = [
+    "Adjuvant",
+    "Advanced/Metastatic",
+    "Neoadjuvant",
+    "Conditioning",
+    "Induction",
+    "Locally advanced",
+    "Maintenance",
+    "Mobilization",
+    "Preventative",
+    "Radiosensitization",
+    "Salvage",
+]
+
+TREATMENT_INTENT = [
+    "Curative",
+    "Palliative",
+    "Supportive",
+    "Diagnostic",
+    "Preventive",
+    "Guidance",
+    "Screening",
+    "Forensic",
+]
 
 TREATMENT_RESPONSE_METHOD = [
     "RECIST 1.1",

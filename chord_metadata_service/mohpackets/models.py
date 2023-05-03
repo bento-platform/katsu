@@ -188,6 +188,7 @@ class Treatment(models.Model):
     )
     treatment_type = ArrayField(models.CharField(max_length=255), null=True, blank=True)
     is_primary_treatment = models.CharField(max_length=32, null=True, blank=True)
+    line_of_treatment = models.IntegerField(null=True, blank=True)
     treatment_start_date = models.CharField(max_length=32, null=True, blank=True)
     treatment_end_date = models.CharField(max_length=32, null=True, blank=True)
     treatment_setting = models.CharField(max_length=128, null=True, blank=True)

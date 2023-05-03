@@ -247,7 +247,7 @@ class TreatmentSerializer(serializers.ModelSerializer):
         choices=val.TREATMENT_SETTING, allow_blank=True, allow_null=True
     )
     treatment_intent = CustomChoiceField(
-        choices=["Curative", "Palliative"], allow_blank=True, allow_null=True
+        choices=val.TREATMENT_INTENT, allow_blank=True, allow_null=True
     )
     response_to_treatment_criteria_method = CustomChoiceField(
         choices=val.TREATMENT_RESPONSE_METHOD, allow_blank=True, allow_null=True
