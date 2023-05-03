@@ -252,12 +252,12 @@ class HormoneTherapy(models.Model):
     )
     drug_reference_database = models.CharField(max_length=64, null=True, blank=True)
     drug_name = models.CharField(max_length=255, null=True, blank=True)
-    drug_rxnormcui = models.CharField(max_length=64, null=True, blank=True)
-    hormone_drug_dosage_units = models.CharField(max_length=64, null=True, blank=True)
-    cumulative_drug_dosage_prescribed = models.PositiveSmallIntegerField(
+    drug_reference_identifier = models.CharField(max_length=64, null=True, blank=True)
+    hormone_drug_dose_units = models.CharField(max_length=64, null=True, blank=True)
+    prescribed_cumulative_drug_dose = models.PositiveSmallIntegerField(
         blank=True, null=True
     )
-    cumulative_drug_dosage_actual = models.PositiveSmallIntegerField(
+    actual_cumulative_drug_dose = models.PositiveSmallIntegerField(
         blank=True, null=True
     )
 
