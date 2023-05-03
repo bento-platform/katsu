@@ -313,6 +313,15 @@ class Immunotherapy(models.Model):
     immunotherapy_type = models.CharField(max_length=255, null=True, blank=True)
     drug_name = models.CharField(max_length=255, null=True, blank=True)
     drug_reference_identifier = models.CharField(max_length=64, null=True, blank=True)
+    immunotherapy_drug_dose_units = models.CharField(
+        max_length=64, null=True, blank=True
+    )
+    prescribed_cumulative_drug_dose = models.PositiveSmallIntegerField(
+        blank=True, null=True
+    )
+    actual_cumulative_drug_dose = models.PositiveSmallIntegerField(
+        blank=True, null=True
+    )
 
     class Meta:
         ordering = ["id"]
