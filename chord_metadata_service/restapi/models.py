@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Q, QuerySet
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from jsonschema import Draft7Validator
-from typing import Tuple
+from typing import Tuple, List
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ class BaseExtraProperties(models.Model):
             logger.debug(f"No ProjectJsonSchema found for project ID {project_id} and schema type {self.schema_type}")
         return project_id, json_schema
 
-    def validate_json_schema(self) -> list[str]:
+    def validate_json_schema(self) -> List[str]:
         project_id, json_schema = self.get_json_schema()
         if not project_id or not json_schema:
             # Skip if no JSON schema exists for this project/schema_type combination
