@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models import Q, QuerySet
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from jsonschema import Draft7Validator
+from typing import Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class BaseExtraProperties(models.Model):
         """
         pass
 
-    def get_json_schema(self) -> tuple[str, QuerySet]:
+    def get_json_schema(self) -> Tuple[str, QuerySet | None]:
         """
         Returns a tuple (project_id, QuerySet[ProjectJsonSchema]) containing schemas to validate
         Template method design pattern, uses concrete defs of schema_type
