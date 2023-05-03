@@ -152,7 +152,7 @@ def schema_list(schema):
     }
 
 
-def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, object]) -> Dict:
+def patch_project_schemas(base_schema: Dict, extension_schemas: Dict[str, object]) -> Dict:
     if not isinstance(base_schema, dict) or "type" not in base_schema:
         return base_schema
 
