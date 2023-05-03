@@ -265,7 +265,7 @@ class TreatmentSerializer(serializers.ModelSerializer):
 
 
 class ChemotherapySerializer(serializers.ModelSerializer):
-    chemotherapy_dosage_units = CustomChoiceField(
+    chemotherapy_drug_dose_units = CustomChoiceField(
         choices=val.DOSAGE_UNITS, allow_blank=True, allow_null=True
     )
     drug_reference_database = CustomChoiceField(
@@ -278,7 +278,7 @@ class ChemotherapySerializer(serializers.ModelSerializer):
 
 
 class HormoneTherapySerializer(serializers.ModelSerializer):
-    hormone_drug_dosage_units = CustomChoiceField(
+    hormone_drug_dose_units = CustomChoiceField(
         choices=val.DOSAGE_UNITS, allow_blank=True, allow_null=True
     )
     drug_reference_database = CustomChoiceField(
