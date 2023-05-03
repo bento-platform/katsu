@@ -1,7 +1,7 @@
 import logging
 from bento_lib.search import queries as q
 from .description_utils import describe_schema
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 __all__ = [
     "merge_schema_dictionaries",
@@ -124,7 +124,7 @@ def tag_ids_and_describe(schema: dict, descriptions: dict):
 
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
                      schema_id: str = None, title: str = None, description: str = None,
-                     additional_properties: bool = False, required=None) -> dict:
+                     additional_properties: bool = False, required=None) -> Dict:
     return {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "$id": schema_id,
@@ -152,7 +152,7 @@ def schema_list(schema):
     }
 
 
-def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, object]) -> dict:
+def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, object]) -> Dict:
     if not isinstance(base_schema, dict) or "type" not in base_schema:
         return base_schema
 

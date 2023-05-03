@@ -6,7 +6,7 @@ import datetime
 from collections import defaultdict, Counter
 from calendar import month_abbr
 from decimal import Decimal, ROUND_HALF_EVEN
-from typing import Any, Optional, Type, TypedDict, Mapping, Generator
+from typing import Any, Optional, Type, TypedDict, Mapping, Generator, Dict
 
 from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value
 from django.db.models.functions import Cast
@@ -367,7 +367,7 @@ def compute_binned_ages(individual_queryset, bin_size: int) -> list[int]:
     return binned_ages
 
 
-def get_age_numeric_binned(individual_queryset, bin_size: int) -> dict:
+def get_age_numeric_binned(individual_queryset, bin_size: int) -> Dict:
     """
     age_numeric is computed at ingestion time of phenopackets. On some instances
     it might be unavailable and as a fallback must be computed from the age JSON field which
