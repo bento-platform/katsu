@@ -590,6 +590,12 @@ TREATMENT_STATUS = [
     "Unknown",
 ]
 
+DRUG_REFERENCE_DB = [
+    "RxNorm",
+    "PubChem",
+    "NCI Thesaurus",
+]
+
 DOSAGE_UNITS = ["mg/m2", "IU/m2", "ug/m2", "g/m2", "mg/kg"]
 
 RADIATION_THERAPY_MODALITY = [
