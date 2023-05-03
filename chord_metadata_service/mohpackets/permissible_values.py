@@ -572,6 +572,9 @@ TREATMENT_RESPONSE = [
     "Physician assessed partial response",
     "Physician assessed stable disease",
     "No evidence of disease (NED)",
+    "Minor response",
+    "Major response",
+    "Complete response",
 ]
 
 DOSAGE_UNITS = ["mg/m2", "IU/m2", "ug/m2", "g/m2", "mg/kg"]
