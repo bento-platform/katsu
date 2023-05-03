@@ -577,6 +577,19 @@ TREATMENT_RESPONSE = [
     "Complete response",
 ]
 
+TREATMENT_STATUS = [
+    "Treatment completed as prescribed",
+    "Treatment incomplete due to technical or organizational problems",
+    "Treatment incomplete because patient died",
+    "Patient choice (stopped or interrupted treatment)",
+    "Physician decision (stopped or interrupted treatment)",
+    "Treatment stopped due to lack of efficacy (disease progression)",
+    "Treatment stopped due to acute toxicity",
+    "Other",
+    "Not applicable",
+    "Unknown",
+]
+
 DOSAGE_UNITS = ["mg/m2", "IU/m2", "ug/m2", "g/m2", "mg/kg"]
 
 RADIATION_THERAPY_MODALITY = [

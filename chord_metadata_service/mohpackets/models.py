@@ -199,6 +199,7 @@ class Treatment(models.Model):
         max_length=255, null=True, blank=True
     )
     response_to_treatment = models.CharField(max_length=255, null=True, blank=True)
+    status_of_treatment = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         ordering = ["submitter_treatment_id"]

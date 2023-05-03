@@ -255,6 +255,9 @@ class TreatmentSerializer(serializers.ModelSerializer):
     response_to_treatment = CustomChoiceField(
         choices=val.TREATMENT_RESPONSE, allow_blank=True, allow_null=True
     )
+    status_of_treatment = CustomChoiceField(
+        choices=val.TREATMENT_STATUS, allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model = Treatment
