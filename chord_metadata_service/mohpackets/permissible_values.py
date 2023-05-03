@@ -607,6 +607,7 @@ DOSAGE_UNITS = [
 
 RADIATION_THERAPY_MODALITY = [
     "Megavoltage radiation therapy using photons (procedure)",
+    "Radiopharmaceutical",
     "Teleradiotherapy using electrons (procedure)",
     "Teleradiotherapy protons (procedure)",
     "Teleradiotherapy neutrons (procedure)",
