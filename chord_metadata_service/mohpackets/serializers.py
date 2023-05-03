@@ -310,6 +310,9 @@ class ImmunotherapySerializer(serializers.ModelSerializer):
     immunotherapy_type = CustomChoiceField(
         choices=val.IMMUNOTHERAPY_TYPE, allow_blank=True, allow_null=True
     )
+    drug_reference_database = CustomChoiceField(
+        choices=val.DRUG_REFERENCE_DB, allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model = Immunotherapy
