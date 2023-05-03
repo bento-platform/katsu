@@ -101,7 +101,7 @@ class ProjectJsonSchemaTest(TransactionTestCase):
             "properties": {
                 "prop_a": {"type": "string"}
             },
-            "required": ["prop_a"] 
+            "required": ["prop_a"]
         }
         self.required_pheno_schema = ProjectJsonSchema.objects.create(
             project=self.p,
@@ -115,7 +115,7 @@ class ProjectJsonSchemaTest(TransactionTestCase):
         self.assertEqual(proj_json_schema.project_id, self.p.identifier)
         self.assertEqual(proj_json_schema.json_schema, self.json_schema)
         self.assertEqual(proj_json_schema.schema_type, SchemaType.PHENOPACKET)
-    
+
     def test_schema_type_constraint(self):
         # ProjectJsonSchema must be unique for every project_id, schema_type pair
         # Should fail
@@ -127,7 +127,7 @@ class ProjectJsonSchemaTest(TransactionTestCase):
         )
         with self.assertRaises(IntegrityError):
             invalid_pjs.save()
-        
+
         # Should succeed
         valid_pjs = ProjectJsonSchema.objects.create(
             project=self.p,

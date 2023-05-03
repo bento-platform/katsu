@@ -14,7 +14,6 @@ class Individual(BaseExtraProperties, IndexableMixin):
     @property
     def schema_type(self) -> SchemaType:
         return SchemaType.INDIVIDUAL
-    
 
     def get_project_id(self) -> str:
         if len(phenopackets := self.phenopackets.all()) < 1:

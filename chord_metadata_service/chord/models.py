@@ -214,7 +214,8 @@ class Table(models.Model):
 class ProjectJsonSchema(models.Model):
     id = models.CharField(primary_key=True, max_length=200, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")
-    required = models.BooleanField(default=False, help_text="Determines if the extra_properties field is required or not.")
+    required = models.BooleanField(default=False,
+                                   help_text="Determines if the extra_properties field is required or not.")
     json_schema = models.JSONField()
     schema_type = models.CharField(max_length=200, choices=SchemaType.choices)
 

@@ -84,6 +84,7 @@ DEFAULT_PROJECT_JSON_SCHEMA = {
     }
 }
 
+
 def valid_dataset_1(project_id):
     return {
         "title": "Dataset 1",
@@ -111,8 +112,10 @@ def valid_table_1(dataset_id, model_compatible=False):
     )
 
 
-def valid_project_json_schema(project_id: str, schema_type=SchemaType.PHENOPACKET, required:bool=False, 
-                              json_schema:dict=DEFAULT_PROJECT_JSON_SCHEMA):
+def valid_project_json_schema(project_id: str,
+                              schema_type=SchemaType.PHENOPACKET,
+                              required: bool = False,
+                              json_schema: dict = DEFAULT_PROJECT_JSON_SCHEMA):
     return {
         "project": project_id,
         "required": required,

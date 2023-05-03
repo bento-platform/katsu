@@ -13,7 +13,13 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 from .models import Project, Dataset, ProjectJsonSchema, TableOwnership, Table
 from .permissions import OverrideOrSuperUserOnly
-from .serializers import ProjectJsonSchemaSerializer, ProjectSerializer, DatasetSerializer, TableOwnershipSerializer, TableSerializer
+from .serializers import (
+    ProjectJsonSchemaSerializer,
+    ProjectSerializer,
+    DatasetSerializer,
+    TableOwnershipSerializer,
+    TableSerializer
+    )
 from .filters import AuthorizedDatasetFilter
 
 logger = logging.getLogger(__name__)

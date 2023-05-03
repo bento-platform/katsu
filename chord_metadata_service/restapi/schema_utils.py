@@ -16,6 +16,7 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
+
 def merge_schema_dictionaries(dict1: dict, dict2: dict):
     """
     Merges two dictionaries with the ~same structure (in this case, keys that
@@ -166,12 +167,12 @@ def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, object
         if schema_id and schema_id in extension_schemas:
             ext_schema = extension_schemas[schema_id]
             logger.debug(f"Applying ProjectJsonSchema to extra_properties of {ext_schema.schema_type}.")
-            
+
             # Append or create 'required' field according to ProjectJsonSchema in use
             required = patched_schema.get("required", [])
             if ext_schema.required:
                 required = required + ["extra_properties"]
-            
+
             patched_schema = {
                 **patched_schema,
                 "properties": {
@@ -180,7 +181,7 @@ def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, object
                 },
                 "required": required
             }
-        
+
         return {
             **patched_schema,
             "properties": {
@@ -194,5 +195,5 @@ def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, object
             **patched_schema,
             "items": patch_project_schemas(patched_schema["items"], extension_schemas)
         } if "items" in patched_schema else patched_schema
-    
+
     return patched_schema

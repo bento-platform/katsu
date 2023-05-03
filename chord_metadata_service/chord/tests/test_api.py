@@ -120,25 +120,24 @@ class CreateProjectJsonSchema(APITestCase):
         # Invalid project_id
         self.project_json_schema_invalid_payload = valid_project_json_schema(project_id="an-id-that-does-not-exist")
 
-    
     def test_create_project_json_schema(self):
-        r = self.client.post('/api/project_json_schemas', 
-                             data=json.dumps(self.project_json_schema_valid_payload), 
+        r = self.client.post('/api/project_json_schemas',
+                             data=json.dumps(self.project_json_schema_valid_payload),
                              content_type="application/json")
-        r_invalid = self.client.post('/api/project_json_schemas', 
-                                     data=json.dumps(self.project_json_schema_invalid_payload), 
+        r_invalid = self.client.post('/api/project_json_schemas',
+                                     data=json.dumps(self.project_json_schema_invalid_payload),
                                      content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         self.assertEqual(r_invalid.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(ProjectJsonSchema.objects.count(), 1)
 
     def test_create_constraint(self):
-        r = self.client.post('/api/project_json_schemas', 
-                             data=json.dumps(self.project_json_schema_valid_payload), 
+        r = self.client.post('/api/project_json_schemas',
+                             data=json.dumps(self.project_json_schema_valid_payload),
                              content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         with self.assertRaises(IntegrityError):
-            r_duplicate = self.client.post('/api/project_json_schemas', 
-                                           data=json.dumps(self.project_json_schema_valid_payload), 
+            r_duplicate = self.client.post('/api/project_json_schemas',
+                                           data=json.dumps(self.project_json_schema_valid_payload),
                                            content_type="application/json")
             self.assertEqual(r_duplicate, status.HTTP_500_INTERNAL_SERVER_ERROR)

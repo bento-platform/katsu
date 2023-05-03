@@ -47,13 +47,13 @@ class BaseExtraProperties(models.Model):
     def get_json_schema(self) -> tuple[str, QuerySet]:
         """
         Returns a tuple (project_id, QuerySet[ProjectJsonSchema]) containing schemas to validate
-        Template method design pattern, uses concrete defs of schema_type 
+        Template method design pattern, uses concrete defs of schema_type
         and get_project_id.
         """
         project_id = self.get_project_id()
         if not project_id:
             return None, None
-        
+
         # Use apps.get_model to avoid circular import issues.
         model = apps.get_model("chord", "ProjectJsonSchema")
         json_schema = None
@@ -63,10 +63,10 @@ class BaseExtraProperties(models.Model):
                 Q(schema_type=self.schema_type)
             )
             json_schema = project_json_schema.json_schema
-        except ObjectDoesNotExist as err:
+        except ObjectDoesNotExist:
             logger.debug(f"No ProjectJsonSchema found for project ID {project_id} and schema type {self.schema_type}")
         return project_id, json_schema
-    
+
     def validate_json_schema(self) -> list[str]:
         project_id, json_schema = self.get_json_schema()
         if not project_id or not json_schema:
