@@ -546,6 +546,7 @@ TREATMENT_RESPONSE_METHOD = [
     "Response Assessment in Neuro-Oncology (RANO)",
     "AML Response Criteria",
     "Physician Assessed Response Criteria",
+    "Blazer score",
 ]
 
 TREATMENT_RESPONSE = [
