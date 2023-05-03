@@ -312,7 +312,7 @@ class Immunotherapy(models.Model):
     drug_reference_database = models.CharField(max_length=64, null=True, blank=True)
     immunotherapy_type = models.CharField(max_length=255, null=True, blank=True)
     drug_name = models.CharField(max_length=255, null=True, blank=True)
-    drug_rxnormcui = models.CharField(max_length=64, null=True, blank=True)
+    drug_reference_identifier = models.CharField(max_length=64, null=True, blank=True)
 
     class Meta:
         ordering = ["id"]
