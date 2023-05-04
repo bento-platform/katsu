@@ -101,6 +101,14 @@ class DonorSerializer(serializers.ModelSerializer):
     sex_at_birth = CustomChoiceField(
         choices=val.SEX_AT_BIRTH, allow_blank=True, allow_null=True
     )
+    lost_to_followup_reason = CustomChoiceField(
+        choices=val.LOST_TO_FOLLOWUP_REASON,
+        allow_blank=True,
+        allow_null=True,
+    )
+    date_alive_after_lost_to_followup = serializers.RegexField(
+        regex=regex["DATE"], max_length=32, allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model = Donor
@@ -157,6 +165,12 @@ class SpecimenSerializer(serializers.ModelSerializer):
     )
     percent_tumour_cells_measurement_method = CustomChoiceField(
         choices=val.CELLS_MEASURE_METHOD, allow_blank=True, allow_null=True
+    )
+    specimen_processing = CustomChoiceField(
+        choices=val.SPECIMEN_PROCESSING, allow_blank=True, allow_null=True
+    )
+    specimen_laterality = CustomChoiceField(
+        choices=val.SPECIMEN_LATERALITY, allow_blank=True, allow_null=True
     )
 
     class Meta:
@@ -219,6 +233,9 @@ class PrimaryDiagnosisSerializer(serializers.ModelSerializer):
     )
     clinical_stage_group = CustomChoiceField(
         choices=val.STAGE_GROUP, allow_blank=True, allow_null=True
+    )
+    laterality = CustomChoiceField(
+        choices=val.MALIGNANCY_LATERALITY, allow_blank=True, allow_null=True
     )
 
     class Meta:
@@ -370,12 +387,6 @@ class SurgerySerializer(serializers.ModelSerializer):
 
 
 class FollowUpSerializer(serializers.ModelSerializer):
-    date_of_followup = serializers.RegexField(
-        regex=regex["DATE"], max_length=32, allow_blank=True, allow_null=True
-    )
-    lost_to_followup_reason = CustomChoiceField(
-        choices=val.LOST_FOLLOW_UP_REASON, allow_blank=True, allow_null=True
-    )
     disease_status_at_followup = CustomChoiceField(
         choices=val.DISEASE_STATUS_FOLLOWUP, allow_blank=True, allow_null=True
     )
