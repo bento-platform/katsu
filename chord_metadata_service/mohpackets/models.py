@@ -52,7 +52,7 @@ class Donor(models.Model):
     sex_at_birth = models.CharField(max_length=32, null=True, blank=True)
     is_deceased = models.BooleanField(null=True)
     lost_to_followup_after_clinical_event_identifier = models.CharField(
-        max_lenfth=255, null=True, blank=True
+        max_length=255, null=True, blank=True
     )
     lost_to_followup_reason = models.CharField(max_length=255, null=True, blank=True)
     date_alive_after_lost_to_followup = models.CharField(
@@ -386,8 +386,6 @@ class FollowUp(models.Model):
         Treatment, on_delete=models.SET_NULL, blank=True, null=True
     )
     date_of_followup = models.CharField(max_length=32, null=True, blank=True)
-    lost_to_followup = models.BooleanField(null=True)
-    lost_to_followup_reason = models.CharField(max_length=255, null=True, blank=True)
     disease_status_at_followup = models.CharField(max_length=255, null=True, blank=True)
     relapse_type = models.CharField(max_length=128, null=True, blank=True)
     date_of_relapse = models.CharField(max_length=32, null=True, blank=True)
