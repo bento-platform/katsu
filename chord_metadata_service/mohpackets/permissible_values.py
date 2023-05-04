@@ -1033,6 +1033,49 @@ MALIGNANCY_LATERALITY = [
     "Unknown",
 ]
 
+ER_PR_STATUS = [
+    "Cannot be determined",
+    "Negative",
+    "Not applicable",
+    "Positive",
+    "Unknown",
+]
+
+HER2_STATUS = [
+    "Cannot be determined",
+    "Equivocal",
+    "Positive",
+    "Negative",
+    "Not applicable",
+    "Unknown",
+]
+
+HPV_STATUS = [
+    "Cannot be determined",
+    "Negative",
+    "Not applicable",
+    "Positive",
+    "Unknown",
+]
+
+HPV_STRAIN = [
+    "HPV16",
+    "HPV18",
+    "HPV31",
+    "HPV33",
+    "HPV35",
+    "HPV39",
+    "HPV45",
+    "HPV51",
+    "HPV52",
+    "HPV56",
+    "HPV58",
+    "HPV59",
+    "HPV66",
+    "HPV68",
+    "HPV73",
+]
+
 REGEX_PATTERNS = {
     # ID format
     # Examples: 90234, BLD_donor_89, AML-90

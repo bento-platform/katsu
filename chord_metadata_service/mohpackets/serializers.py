@@ -412,6 +412,28 @@ class FollowUpSerializer(serializers.ModelSerializer):
 
 
 class BiomarkerSerializer(serializers.ModelSerializer):
+    er_status = CustomChoiceField(
+        choices=val.ER_PR_STATUS, allow_blank=True, allow_null=True
+    )
+    pr_status = CustomChoiceField(
+        choices=val.ER_PR_STATUS, allow_blank=True, allow_null=True
+    )
+    her2_ihc_status = CustomChoiceField(
+        choices=val.HER2_STATUS, allow_blank=True, allow_null=True
+    )
+    her2_ish_status = CustomChoiceField(
+        choices=val.HER2_STATUS, allow_blank=True, allow_null=True
+    )
+    hpv_ihc_status = CustomChoiceField(
+        choices=val.HPV_STATUS, allow_blank=True, allow_null=True
+    )
+    hpv_pcr_status = CustomChoiceField(
+        choices=val.HPV_STATUS, allow_blank=True, allow_null=True
+    )
+    hpv_strain = CustomChoiceField(
+        choices=val.HPV_STRAIN, allow_blank=True, allow_null=True
+    )
+
     class Meta:
         model = Biomarker
         fields = "__all__"
