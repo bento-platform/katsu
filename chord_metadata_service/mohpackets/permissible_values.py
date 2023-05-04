@@ -986,15 +986,6 @@ PERINEURAL_INVASION = [
     "Unknown",
 ]
 
-LOST_FOLLOW_UP_REASON = [
-    "Completed study",
-    "Discharged to palliative care",
-    "Lost contact",
-    "Not applicable",
-    "Unknown",
-    "Withdrew from study",
-]
-
 DISEASE_STATUS_FOLLOWUP = [
     "Complete remission",
     "Distant progression",
