@@ -399,8 +399,8 @@ class FollowUp(models.Model):
     anatomic_site_progression_or_recurrence = models.CharField(
         max_length=255, null=True, blank=True
     )
-    recurrence_tumour_staging_system = models.CharField(
-        max_length=255, null=True, blank=True
+    recurrence_tumour_staging_system = ArrayField(
+        models.CharField(max_length=255, null=True, blank=True), null=True, blank=True
     )
     recurrence_t_category = models.CharField(max_length=32, null=True, blank=True)
     recurrence_n_category = models.CharField(max_length=32, null=True, blank=True)
@@ -446,7 +446,9 @@ class Biomarker(models.Model):
     her2_ish_status = models.CharField(max_length=64, null=True, blank=True)
     hpv_ihc_status = models.CharField(max_length=64, null=True, blank=True)
     hpv_pcr_status = models.CharField(max_length=64, null=True, blank=True)
-    hpv_strain = models.CharField(max_length=32, null=True, blank=True)
+    hpv_strain = ArrayField(
+        models.CharField(max_length=32, null=True, blank=True), null=True, blank=True
+    )
 
     class Meta:
         ordering = ["id"]
@@ -481,3 +483,18 @@ class Comorbidity(models.Model):
 
     def __str__(self):
         return f"{self.id}"
+
+
+class Exposure(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    program_id = models.ForeignKey(
+        Program, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_donor_id = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    tobacco_smoking_status = models.CharField(max_length=255, null=True, blank=True)
+    tobacco_type = ArrayField(
+        models.CharField(max_length=128, null=True, blank=True), null=True, blank=True
+    )
+    pack_years_smoked = models.PositiveSmallIntegerField(null=True, blank=True)

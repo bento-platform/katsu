@@ -1076,6 +1076,29 @@ HPV_STRAIN = [
     "HPV73",
 ]
 
+SMOKING_STATUS = [
+    "Current reformed smoker for <= 15 years",
+    "Current reformed smoker for > 15 years",
+    "Current reformed smoker, duration not specified",
+    "Current smoker",
+    "Lifelong non-smoker (<100 cigarettes smoked in lifetime)",
+    "Not applicable",
+    "Smoking history not documented",
+]
+
+TOBACCO_TYPE = [
+    "Chewing Tobacco",
+    "Cigar",
+    "Cigarettes",
+    "Electronic cigarettes",
+    "Not applicable",
+    "Pipe",
+    "Roll-ups",
+    "Snuff",
+    "Unknown",
+    "Waterpipe",
+]
+
 REGEX_PATTERNS = {
     # ID format
     # Examples: 90234, BLD_donor_89, AML-90

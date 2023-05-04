@@ -10,6 +10,7 @@ from .models import (
     Chemotherapy,
     Comorbidity,
     Donor,
+    Exposure,
     FollowUp,
     HormoneTherapy,
     Immunotherapy,
@@ -390,9 +391,14 @@ class FollowUpSerializer(serializers.ModelSerializer):
     anatomic_site_progression_or_recurrence = serializers.RegexField(
         max_length=32, regex=regex["TOPOGRAPHY"], allow_blank=True, allow_null=True
     )
-    recurrence_tumour_staging_system = CustomChoiceField(
-        choices=val.TUMOUR_STAGING_SYSTEM, allow_blank=True, allow_null=True
+    recurrence_tumour_staging_system = serializers.ListField(
+        allow_null=True,
+        allow_empty=True,
+        child=CustomChoiceField(
+            choices=val.TUMOUR_STAGING_SYSTEM, allow_blank=True, allow_null=True
+        ),
     )
+
     recurrence_t_category = CustomChoiceField(
         choices=val.T_CATEGORY, allow_blank=True, allow_null=True
     )
@@ -430,8 +436,12 @@ class BiomarkerSerializer(serializers.ModelSerializer):
     hpv_pcr_status = CustomChoiceField(
         choices=val.HPV_STATUS, allow_blank=True, allow_null=True
     )
-    hpv_strain = CustomChoiceField(
-        choices=val.HPV_STRAIN, allow_blank=True, allow_null=True
+    hpv_strain = serializers.ListField(
+        allow_null=True,
+        allow_empty=True,
+        child=CustomChoiceField(
+            choices=val.HPV_STRAIN, allow_blank=True, allow_null=True
+        ),
     )
 
     class Meta:
@@ -458,6 +468,23 @@ class ComorbiditySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comorbidity
+        fields = "__all__"
+
+
+class ExposureSerializer(serializers.ModelSerializer):
+    tobacco_smoking_status = CustomChoiceField(
+        choices=val.SMOKING_STATUS, allow_blank=True, allow_null=True
+    )
+    tobacco_type = serializers.ListField(
+        allow_null=True,
+        allow_empty=True,
+        child=CustomChoiceField(
+            choices=val.TOBACCO_TYPE, allow_blank=True, allow_null=True
+        ),
+    )
+
+    class Meta:
+        model = Exposure
         fields = "__all__"
 
 
