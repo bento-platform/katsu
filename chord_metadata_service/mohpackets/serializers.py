@@ -97,6 +97,10 @@ class DonorSerializer(serializers.ModelSerializer):
             choices=val.PRIMARY_SITE, allow_blank=True, allow_null=True
         ),
     )
+    gender = CustomChoiceField(choices=val.GENDER, allow_blank=True, allow_null=True)
+    sex_at_birth = CustomChoiceField(
+        choices=val.SEX_AT_BIRTH, allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model = Donor
@@ -165,10 +169,6 @@ class SampleRegistrationSerializer(serializers.ModelSerializer):
         regex=regex["ID"],
         max_length=64,
         validators=[UniqueValidator(queryset=SampleRegistration.objects.all())],
-    )
-    gender = CustomChoiceField(choices=val.GENDER, allow_blank=True, allow_null=True)
-    sex_at_birth = CustomChoiceField(
-        choices=val.SEX_AT_BIRTH, allow_blank=True, allow_null=True
     )
     specimen_tissue_source = CustomChoiceField(
         choices=val.SPECIMEN_TISSUE_SOURCE, allow_blank=True, allow_null=True

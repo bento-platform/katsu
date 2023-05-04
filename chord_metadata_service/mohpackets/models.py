@@ -161,8 +161,6 @@ class SampleRegistration(models.Model):
     submitter_specimen_id = models.ForeignKey(
         Specimen, on_delete=models.CASCADE, null=False, blank=False
     )
-    gender = models.CharField(max_length=32, null=True, blank=True)
-    sex_at_birth = models.CharField(max_length=32, null=True, blank=True)
     specimen_tissue_source = models.CharField(max_length=255, null=True, blank=True)
     tumour_normal_designation = models.CharField(max_length=32, null=True, blank=True)
     specimen_type = models.CharField(max_length=255, null=True, blank=True)
