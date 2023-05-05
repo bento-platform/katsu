@@ -216,12 +216,16 @@ class SurgeryFilter(filters.FilterSet):
 
 
 class FollowUpFilter(filters.FilterSet):
+    recurrence_tumour_staging_system = filters.CharFilter(lookup_expr="icontains")
+
     class Meta:
         model = FollowUp
         fields = "__all__"
 
 
 class BiomarkerFilter(filters.FilterSet):
+    hpv_strain = filters.CharFilter(lookup_expr="icontains")
+
     class Meta:
         model = Biomarker
         fields = "__all__"
