@@ -53,7 +53,6 @@ class DonorFilter(filters.FilterSet):
     donors = filters.CharFilter(method="filter_donors")
     primary_diagnosis = filters.CharFilter(method="filter_primary_diagnosis")
     speciman = filters.CharFilter(method="filter_specimen")
-    sample_registration = filters.CharFilter(method="filter_sample_registration")
     treatment = filters.CharFilter(method="filter_treatment")
     chemotherapy = filters.CharFilter(method="filter_chemotherapy")
     hormone_therapy = filters.CharFilter(method="filter_hormone_therapy")
@@ -81,9 +80,6 @@ class DonorFilter(filters.FilterSet):
 
     def filter_specimen(self, queryset, name, value):
         return queryset.filter(specimen__pk__iexact=value)
-
-    def filter_sample_registration(self, queryset, name, value):
-        return queryset.filter(sampleregistration__pk__iexact=value)
 
     def filter_treatment(self, queryset, name, value):
         return queryset.filter(treatment__pk__iexact=value)
