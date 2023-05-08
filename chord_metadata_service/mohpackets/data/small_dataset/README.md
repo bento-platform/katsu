@@ -192,3 +192,16 @@ graph LR;
   Comorbidity_11_12 --> Donor_5_6 --> Program_1;  
   Comorbidity_13_14 --> Donor_7_8 --> Program_2;
 ```
+
+---
+
+```mermaid
+---
+title: 8 Exposures
+---
+graph LR;  
+  Exposure_1_3 --> Donor_1 --> Program_1;  
+  Exposure_4_5 --> Donor_2 --> Program_1;
+  Exposure_6 --> Donor_3 --> Program_1;    
+  Exposure_7_8 --> Donor_7_8 --> Program_2;
+```
