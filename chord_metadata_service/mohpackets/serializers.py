@@ -235,7 +235,7 @@ class PrimaryDiagnosisSerializer(serializers.ModelSerializer):
         choices=val.STAGE_GROUP, allow_blank=True, allow_null=True
     )
     laterality = CustomChoiceField(
-        choices=val.MALIGNANCY_LATERALITY, allow_blank=True, allow_null=True
+        choices=val.PRIMARY_DIAGNOSIS_LATERALITY, allow_blank=True, allow_null=True
     )
 
     class Meta:
@@ -433,10 +433,10 @@ class FollowUpSerializer(serializers.ModelSerializer):
 
 class BiomarkerSerializer(serializers.ModelSerializer):
     er_status = CustomChoiceField(
-        choices=val.ER_PR_STATUS, allow_blank=True, allow_null=True
+        choices=val.ER_PR_HPV_STATUS, allow_blank=True, allow_null=True
     )
     pr_status = CustomChoiceField(
-        choices=val.ER_PR_STATUS, allow_blank=True, allow_null=True
+        choices=val.ER_PR_HPV_STATUS, allow_blank=True, allow_null=True
     )
     her2_ihc_status = CustomChoiceField(
         choices=val.HER2_STATUS, allow_blank=True, allow_null=True
@@ -445,10 +445,10 @@ class BiomarkerSerializer(serializers.ModelSerializer):
         choices=val.HER2_STATUS, allow_blank=True, allow_null=True
     )
     hpv_ihc_status = CustomChoiceField(
-        choices=val.HPV_STATUS, allow_blank=True, allow_null=True
+        choices=val.ER_PR_HPV_STATUS, allow_blank=True, allow_null=True
     )
     hpv_pcr_status = CustomChoiceField(
-        choices=val.HPV_STATUS, allow_blank=True, allow_null=True
+        choices=val.ER_PR_HPV_STATUS, allow_blank=True, allow_null=True
     )
     hpv_strain = serializers.ListField(
         allow_null=True,
