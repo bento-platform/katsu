@@ -61,8 +61,6 @@ class NestedSampleRegistrationSerializer(SampleRegistrationSerializer):
         model = SampleRegistration
         fields = [
             "submitter_sample_id",
-            "gender",
-            "sex_at_birth",
             "specimen_tissue_source",
             "tumour_normal_designation",
             "specimen_type",
@@ -113,7 +111,6 @@ class NestedBiomarkerSerializer(BiomarkerSerializer):
 
 
 class NestedFollowUpSerializer(FollowUpSerializer):
-
     biomarkers = serializers.SerializerMethodField()
 
     @extend_schema_field(ListSerializer(child=NestedBiomarkerSerializer()))
@@ -125,8 +122,6 @@ class NestedFollowUpSerializer(FollowUpSerializer):
         model = FollowUp
         fields = [
             "date_of_followup",
-            "lost_to_followup",
-            "lost_to_followup_reason",
             "disease_status_at_followup",
             "relapse_type",
             "date_of_relapse",
@@ -320,6 +315,8 @@ class DonorWithClinicalDataSerializer(DonorSerializer):
             "cause_of_death",
             "date_of_birth",
             "date_of_death",
+            "gender",
+            "sex_at_birth",
             "primary_site",
             "primary_diagnoses",
             "comorbidities",
