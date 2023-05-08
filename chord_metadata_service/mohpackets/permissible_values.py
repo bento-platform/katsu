@@ -302,7 +302,6 @@ STAGE_GROUP = [
     "Stage L2",
     "Stage M",
     "Stage Ms",
-    "Stage 1",
     "Stage 2A",
     "Stage 2B",
     "Stage 3",
@@ -1025,7 +1024,7 @@ MALIGNANCY_LATERALITY = [
     "Unknown",
 ]
 
-ER_PR_STATUS = [
+ER_PR_HPV_STATUS = [
     "Cannot be determined",
     "Negative",
     "Not applicable",
@@ -1039,14 +1038,6 @@ HER2_STATUS = [
     "Positive",
     "Negative",
     "Not applicable",
-    "Unknown",
-]
-
-HPV_STATUS = [
-    "Cannot be determined",
-    "Negative",
-    "Not applicable",
-    "Positive",
     "Unknown",
 ]
 
