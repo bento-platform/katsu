@@ -220,5 +220,7 @@ SPECTACULAR_SETTINGS = {
         "ReferencePathologyEnum": "chord_metadata_service.mohpackets.permissible_values.CONFIRMED_DIAGNOSIS_TUMOUR",
         "MarginTypesEnum": "chord_metadata_service.mohpackets.permissible_values.MARGIN_TYPES",
         "DosageUnitsEnum": "chord_metadata_service.mohpackets.permissible_values.DOSAGE_UNITS",
+        "ErPrHpvStatusEnum": "chord_metadata_service.mohpackets.permissible_values.ER_PR_HPV_STATUS",
+        "Her2StatusEnum": "chord_metadata_service.mohpackets.permissible_values.HER2_STATUS",
     },
 }
