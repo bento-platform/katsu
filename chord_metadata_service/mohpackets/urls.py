@@ -32,12 +32,12 @@ from chord_metadata_service.mohpackets.api_discovery import (
     DiscoverySpecimenViewSet,
     DiscoverySurgeryViewSet,
     DiscoveryTreatmentViewSet,
-    diagnosis_age_count,
     cancer_type_count,
     cohort_count,
-    patient_per_cohort_count,
+    diagnosis_age_count,
     gender_count,
     individual_count,
+    patient_per_cohort_count,
     treatment_type_count,
 )
 from chord_metadata_service.mohpackets.api_ingest import (
@@ -118,13 +118,18 @@ urlpatterns = [
     path("ingest/", include(ingest_patterns)),
     path("delete/all", delete_all),
     path("version_check", version_check),
-    path("discovery/overview/", include([
-        path("cohort_count", cohort_count),
-        path("patients_per_cohort", patient_per_cohort_count),
-        path("individual_count", individual_count),
-        path("gender_count", gender_count),
-        path("cancer_type_count", cancer_type_count),
-        path("treatment_type_count", treatment_type_count),
-        path("diagnosis_age_count", diagnosis_age_count)
-    ])),
+    path(
+        "discovery/overview/",
+        include(
+            [
+                path("cohort_count", cohort_count),
+                path("patients_per_cohort", patient_per_cohort_count),
+                path("individual_count", individual_count),
+                path("gender_count", gender_count),
+                path("cancer_type_count", cancer_type_count),
+                path("treatment_type_count", treatment_type_count),
+                path("diagnosis_age_count", diagnosis_age_count),
+            ]
+        ),
+    ),
 ]
