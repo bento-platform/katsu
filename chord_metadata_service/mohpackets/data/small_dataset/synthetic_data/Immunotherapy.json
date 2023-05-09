@@ -5,39 +5,59 @@
         "submitter_treatment_id": "TREATMENT_14",
         "immunotherapy_type": "Cell-based",
         "drug_name": "Necitumumab",
-        "drug_rxnormcui": "8756456"
+        "drug_reference_identifier": "278936",
+        "drug_reference_database": "PubChem",
+        "immunotherapy_drug_dose_units": "IU/m2",
+        "prescribed_cumulative_drug_dose": 74,
+        "actual_cumulative_drug_dose": 55
     },
     {
         "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_3",
         "submitter_treatment_id": "TREATMENT_14",
-        "immunotherapy_type": "Immune checkpoint inhibitors",
-        "drug_name": "Gilteritinib",
-        "drug_rxnormcui": "4459876"
-    },
-    {
-        "program_id": "SYNTHETIC-1",
-        "submitter_donor_id": "DONOR_3",
-        "submitter_treatment_id": "TREATMENT_14",
-        "immunotherapy_type": "Other immunomodulatory substances",
-        "drug_name": "Copanlisib",
-        "drug_rxnormcui": "987654"
-    },
-    {
-        "program_id": "SYNTHETIC-1",
-        "submitter_donor_id": "DONOR_4",
-        "submitter_treatment_id": "TREATMENT_15",
         "immunotherapy_type": "Cell-based",
-        "drug_name": "Copanlisib",
-        "drug_rxnormcui": "4459876"
+        "drug_name": "Necitumumab",
+        "drug_reference_identifier": "8756456",
+        "drug_reference_database": "RxNorm",
+        "immunotherapy_drug_dose_units": "ug/m2",
+        "prescribed_cumulative_drug_dose": 199,
+        "actual_cumulative_drug_dose": 147
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_3",
+        "submitter_treatment_id": "TREATMENT_14",
+        "immunotherapy_type": "Monoclonal antibodies other than immune checkpoint inhibitors",
+        "drug_name": "Pembrolizumab",
+        "drug_reference_identifier": "8836851",
+        "drug_reference_database": "PubChem",
+        "immunotherapy_drug_dose_units": "IU/m2",
+        "prescribed_cumulative_drug_dose": 67,
+        "actual_cumulative_drug_dose": 136
     },
     {
         "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_4",
         "submitter_treatment_id": "TREATMENT_15",
         "immunotherapy_type": "Other immunomodulatory substances",
-        "drug_name": "Pexidartinib",
-        "drug_rxnormcui": "8836851"
+        "drug_name": "Necitumumab",
+        "drug_reference_identifier": "987654",
+        "drug_reference_database": "RxNorm",
+        "immunotherapy_drug_dose_units": "g/m2",
+        "prescribed_cumulative_drug_dose": 185,
+        "actual_cumulative_drug_dose": 126
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_4",
+        "submitter_treatment_id": "TREATMENT_15",
+        "immunotherapy_type": "Other immunomodulatory substances",
+        "drug_name": "Copanlisib",
+        "drug_reference_identifier": "8836851",
+        "drug_reference_database": "NCI Thesaurus",
+        "immunotherapy_drug_dose_units": "ug/m2",
+        "prescribed_cumulative_drug_dose": 141,
+        "actual_cumulative_drug_dose": 171
     },
     {
         "program_id": "SYNTHETIC-1",
@@ -45,14 +65,22 @@
         "submitter_treatment_id": "TREATMENT_16",
         "immunotherapy_type": "Immune checkpoint inhibitors",
         "drug_name": "Pexidartinib",
-        "drug_rxnormcui": "239766"
+        "drug_reference_identifier": "987654",
+        "drug_reference_database": "PubChem",
+        "immunotherapy_drug_dose_units": "cells/kg",
+        "prescribed_cumulative_drug_dose": 191,
+        "actual_cumulative_drug_dose": 72
     },
     {
         "program_id": "SYNTHETIC-1",
         "submitter_donor_id": "DONOR_5",
         "submitter_treatment_id": "TREATMENT_17",
-        "immunotherapy_type": "Monoclonal antibodies other than immune checkpoint inhibitors",
-        "drug_name": "Copanlisib",
-        "drug_rxnormcui": "4459876"
+        "immunotherapy_type": "Cell-based",
+        "drug_name": "Pembrolizumab",
+        "drug_reference_identifier": "278936",
+        "drug_reference_database": "NCI Thesaurus",
+        "immunotherapy_drug_dose_units": "mg/kg",
+        "prescribed_cumulative_drug_dose": 151,
+        "actual_cumulative_drug_dose": 164
     }
 ]
