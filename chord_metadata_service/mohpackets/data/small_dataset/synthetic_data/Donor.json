@@ -4,131 +4,182 @@
         "program_id": "SYNTHETIC-1",
         "is_deceased": true,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1977-03",
-        "date_of_death": "2014-03",
+        "date_of_birth": "1989-08",
+        "date_of_death": "2002-08",
         "primary_site": [
-            "Meninges",
-            "Nasal cavity and middle ear",
-            "Oropharynx",
-            "Breast",
-            "Liver and intrahepatic bile ducts"
-        ]
+            "Base of tongue",
+            "Retroperitoneum and peritoneum",
+            "Esophagus"
+        ],
+        "gender": "Woman",
+        "sex_at_birth": "Female",
+        "lost_to_followup_after_clinical_event_identifier": "",
+        "lost_to_followup_reason": "Discharged to palliative care",
+        "date_alive_after_lost_to_followup": "2022-08"
     },
     {
         "submitter_donor_id": "DONOR_2",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
+        "is_deceased": true,
         "cause_of_death": "Died of cancer",
-        "date_of_birth": "1999-03",
-        "date_of_death": null,
+        "date_of_birth": "1983-03",
+        "date_of_death": "2006-03",
         "primary_site": [
-            "Other and ill-defined sites within respiratory system and intrathoracic organs",
-            "Gum",
-            "Placenta"
-        ]
+            "Bladder",
+            "Small intestine",
+            "Other and unspecified female genital organs",
+            "Stomach",
+            "Vagina"
+        ],
+        "gender": "Woman",
+        "sex_at_birth": "Female",
+        "lost_to_followup_after_clinical_event_identifier": "",
+        "lost_to_followup_reason": "Unknown",
+        "date_alive_after_lost_to_followup": "2022-01"
     },
     {
         "submitter_donor_id": "DONOR_3",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": null,
-        "date_of_birth": "1981-11",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1993-03",
+        "date_of_death": "1996-03",
         "primary_site": [
-            "Colon"
-        ]
+            "Esophagus",
+            "Bones, joints and articular cartilage of other and unspecified sites"
+        ],
+        "gender": "Man",
+        "sex_at_birth": "Male",
+        "lost_to_followup_after_clinical_event_identifier": "",
+        "lost_to_followup_reason": "Completed study",
+        "date_alive_after_lost_to_followup": "2022-10"
     },
     {
         "submitter_donor_id": "DONOR_4",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1998-09",
-        "date_of_death": "2017-09",
+        "is_deceased": false,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1967-11",
+        "date_of_death": null,
         "primary_site": [
-            "Eye and adnexa",
-            "Other and unspecified parts of tongue",
-            "Other and ill-defined sites within respiratory system and intrathoracic organs",
-            "Gum"
-        ]
+            "Hematopoietic and reticuloendothelial systems",
+            "Base of tongue",
+            "Thymus",
+            "Oropharynx"
+        ],
+        "gender": "Non-binary",
+        "sex_at_birth": "Other",
+        "lost_to_followup_after_clinical_event_identifier": "",
+        "lost_to_followup_reason": "Completed study",
+        "date_alive_after_lost_to_followup": "2022-07"
     },
     {
         "submitter_donor_id": "DONOR_5",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1964-11",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1963-01",
+        "date_of_death": "1964-01",
         "primary_site": [
-            "Esophagus",
-            "Thymus",
-            "Bones, joints and articular cartilage of limbs",
-            "Lip",
-            "Corpus uteri"
-        ]
+            "Corpus uteri",
+            "Stomach",
+            "Pancreas",
+            "Testis",
+            "Bladder"
+        ],
+        "gender": "Woman",
+        "sex_at_birth": "Female",
+        "lost_to_followup_after_clinical_event_identifier": "",
+        "lost_to_followup_reason": "Unknown",
+        "date_alive_after_lost_to_followup": "2022-05"
     },
     {
         "submitter_donor_id": "DONOR_6",
         "program_id": "SYNTHETIC-1",
         "is_deceased": true,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1989-09",
-        "date_of_death": "2009-09",
+        "date_of_birth": "2008-09",
+        "date_of_death": "2023-09",
         "primary_site": [
-            "Kidney",
-            "Accessory sinuses"
-        ]
+            "Meninges",
+            "Bladder",
+            "Rectosigmoid junction",
+            "Lymph nodes"
+        ],
+        "gender": "Woman",
+        "sex_at_birth": "Other",
+        "lost_to_followup_after_clinical_event_identifier": "",
+        "lost_to_followup_reason": "Completed study",
+        "date_alive_after_lost_to_followup": "2022-04"
     },
     {
         "submitter_donor_id": "DONOR_7",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
+        "is_deceased": false,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1971-09",
-        "date_of_death": "1999-09",
+        "date_of_birth": "1963-09",
+        "date_of_death": null,
         "primary_site": [
-            "Adrenal gland"
-        ]
+            "Other and ill-defined sites in lip, oral cavity and pharynx",
+            "Placenta"
+        ],
+        "gender": "Woman",
+        "sex_at_birth": "Unknown",
+        "lost_to_followup_after_clinical_event_identifier": "",
+        "lost_to_followup_reason": "Completed study",
+        "date_alive_after_lost_to_followup": "2022-04"
     },
     {
         "submitter_donor_id": "DONOR_8",
         "program_id": "SYNTHETIC-2",
         "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1971-09",
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1972-04",
         "date_of_death": null,
         "primary_site": [
-            "Other and unspecified parts of biliary tract",
-            "Rectosigmoid junction",
-            "Other and ill-defined digestive organs"
-        ]
+            "Corpus uteri",
+            "Small intestine"
+        ],
+        "gender": "Non-binary",
+        "sex_at_birth": "Female",
+        "lost_to_followup_after_clinical_event_identifier": "",
+        "lost_to_followup_reason": "Unknown",
+        "date_alive_after_lost_to_followup": "2022-01"
     },
     {
         "submitter_donor_id": "DONOR_9",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
-        "cause_of_death": null,
-        "date_of_birth": "1977-05",
-        "date_of_death": "2006-05",
+        "is_deceased": false,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "2001-07",
+        "date_of_death": null,
         "primary_site": [
-            "Bronchus and lung",
-            "Adrenal gland",
-            "Renal pelvis"
-        ]
+            "Other and unspecified female genital organs",
+            "Oropharynx",
+            "Lip",
+            "Esophagus"
+        ],
+        "gender": "Man",
+        "sex_at_birth": "Other",
+        "lost_to_followup_after_clinical_event_identifier": "",
+        "lost_to_followup_reason": "Completed study",
+        "date_alive_after_lost_to_followup": "2022-07"
     },
     {
         "submitter_donor_id": "DONOR_10",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": false,
+        "is_deceased": true,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1964-03",
-        "date_of_death": null,
+        "date_of_birth": "2007-10",
+        "date_of_death": "2018-10",
         "primary_site": [
-            "Rectosigmoid junction",
-            "Oropharynx",
-            "Larynx",
-            "Thymus",
-            "Thyroid gland"
-        ]
+            "Other and unspecified major salivary glands",
+            "Pyriform sinus"
+        ],
+        "gender": "Woman",
+        "sex_at_birth": "Other",
+        "lost_to_followup_after_clinical_event_identifier": "",
+        "lost_to_followup_reason": "Lost contact",
+        "date_alive_after_lost_to_followup": "2022-09"
     }
 ]
