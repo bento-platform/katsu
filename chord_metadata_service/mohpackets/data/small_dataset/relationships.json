@@ -1217,20 +1217,20 @@
       ]
     },
     {
-        "range": [12, 12],
-        "targets": [
-          {
-            "range": [3, 3],
-            "field_name": "submitter_donor_id",
-            "field_value": "DONOR_"
-          },
-          {
-            "range": [1, 1],
-            "field_name": "program_id",
-            "field_value": "SYNTHETIC_"
-          }
-        ]
-      }
+      "range": [12, 12],
+      "targets": [
+        {
+          "range": [3, 3],
+          "field_name": "submitter_donor_id",
+          "field_value": "DONOR_"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id",
+          "field_value": "SYNTHETIC_"
+        }
+      ]
+    }
   ],
   "comorbidities": [
     {
@@ -1300,6 +1300,60 @@
     },
     {
       "range": [13, 14],
+      "targets": [
+        {
+          "range": [7, 8],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "program_id"
+        }
+      ]
+    }
+  ],
+  "exposures": [
+    {
+      "range": [1, 3],
+      "targets": [
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [4, 5],
+      "targets": [
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [6, 6],
+      "targets": [
+        {
+          "range": [3, 3],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [7, 8],
       "targets": [
         {
           "range": [7, 8],
