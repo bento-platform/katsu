@@ -5,11 +5,26 @@
             "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_5",
-            "drug_name": "exemestane",
-            "drug_rxnormcui": "345678",
-            "hormone_drug_dosage_units": "mg/m2",
-            "cumulative_drug_dosage_prescribed": "200",
-            "cumulative_drug_dosage_actual": "200"
+            "drug_name": "anastrozole",
+            "drug_reference_identifier": "345678",
+            "hormone_drug_dose_units": "mg/kg",
+            "prescribed_cumulative_drug_dose": 122,
+            "actual_cumulative_drug_dose": 180,
+            "drug_reference_database": "NCI Thesaurus"
+        }
+    },
+    {
+        "model": "mohpackets.hormonetherapy",
+        "fields": {
+            "program_id": "SYNTHETIC-1",
+            "submitter_donor_id": "DONOR_1",
+            "submitter_treatment_id": "TREATMENT_5",
+            "drug_name": "goserelin",
+            "drug_reference_identifier": "223986",
+            "hormone_drug_dose_units": "IU/m2",
+            "prescribed_cumulative_drug_dose": 76,
+            "actual_cumulative_drug_dose": 195,
+            "drug_reference_database": "NCI Thesaurus"
         }
     },
     {
@@ -19,23 +34,11 @@
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_5",
             "drug_name": "triptorelin",
-            "drug_rxnormcui": "258494",
-            "hormone_drug_dosage_units": "mg/m2",
-            "cumulative_drug_dosage_prescribed": "200",
-            "cumulative_drug_dosage_actual": "200"
-        }
-    },
-    {
-        "model": "mohpackets.hormonetherapy",
-        "fields": {
-            "program_id": "SYNTHETIC-1",
-            "submitter_donor_id": "DONOR_1",
-            "submitter_treatment_id": "TREATMENT_5",
-            "drug_name": "exemestane",
-            "drug_rxnormcui": "557845",
-            "hormone_drug_dosage_units": "mg/m2",
-            "cumulative_drug_dosage_prescribed": "200",
-            "cumulative_drug_dosage_actual": "200"
+            "drug_reference_identifier": "84857",
+            "hormone_drug_dose_units": "mg/m2",
+            "prescribed_cumulative_drug_dose": 138,
+            "actual_cumulative_drug_dose": 88,
+            "drug_reference_database": "NCI Thesaurus"
         }
     },
     {
@@ -45,10 +48,11 @@
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_6",
             "drug_name": "exemestane",
-            "drug_rxnormcui": "29875",
-            "hormone_drug_dosage_units": "mg/m2",
-            "cumulative_drug_dosage_prescribed": "200",
-            "cumulative_drug_dosage_actual": "200"
+            "drug_reference_identifier": "258494",
+            "hormone_drug_dose_units": "IU/m2",
+            "prescribed_cumulative_drug_dose": 195,
+            "actual_cumulative_drug_dose": 54,
+            "drug_reference_database": "PubChem"
         }
     },
     {
@@ -57,11 +61,12 @@
             "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_6",
-            "drug_name": "exemestane",
-            "drug_rxnormcui": "84857",
-            "hormone_drug_dosage_units": "mg/m2",
-            "cumulative_drug_dosage_prescribed": "200",
-            "cumulative_drug_dosage_actual": "200"
+            "drug_name": "goserelin",
+            "drug_reference_identifier": "345678",
+            "hormone_drug_dose_units": "IU/kg",
+            "prescribed_cumulative_drug_dose": 87,
+            "actual_cumulative_drug_dose": 122,
+            "drug_reference_database": "RxNorm"
         }
     },
     {
@@ -70,11 +75,12 @@
             "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_7",
-            "drug_name": "degarelix",
-            "drug_rxnormcui": "29875",
-            "hormone_drug_dosage_units": "mg/m2",
-            "cumulative_drug_dosage_prescribed": "200",
-            "cumulative_drug_dosage_actual": "200"
+            "drug_name": "leuprolide",
+            "drug_reference_identifier": "345678",
+            "hormone_drug_dose_units": "ug/m2",
+            "prescribed_cumulative_drug_dose": 129,
+            "actual_cumulative_drug_dose": 186,
+            "drug_reference_database": "RxNorm"
         }
     },
     {
@@ -83,11 +89,12 @@
             "program_id": "SYNTHETIC-1",
             "submitter_donor_id": "DONOR_1",
             "submitter_treatment_id": "TREATMENT_8",
-            "drug_name": "goserelin",
-            "drug_rxnormcui": "223986",
-            "hormone_drug_dosage_units": "mg/m2",
-            "cumulative_drug_dosage_prescribed": "200",
-            "cumulative_drug_dosage_actual": "200"
+            "drug_name": "anastrozole",
+            "drug_reference_identifier": "258494",
+            "hormone_drug_dose_units": "ug/m2",
+            "prescribed_cumulative_drug_dose": 107,
+            "actual_cumulative_drug_dose": 85,
+            "drug_reference_database": "PubChem"
         }
     }
 ]
