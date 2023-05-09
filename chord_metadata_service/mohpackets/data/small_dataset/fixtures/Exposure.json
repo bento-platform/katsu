@@ -1,0 +1,104 @@
+[
+    {
+        "model": "mohpackets.exposure",
+        "fields": {
+            "program_id": "SYNTHETIC-1",
+            "submitter_donor_id": "DONOR_1",
+            "tobacco_smoking_status": "Current reformed smoker, duration not specified",
+            "tobacco_type": [
+                "Not applicable",
+                "Chewing Tobacco"
+            ],
+            "pack_years_smoked": 127
+        }
+    },
+    {
+        "model": "mohpackets.exposure",
+        "fields": {
+            "program_id": "SYNTHETIC-1",
+            "submitter_donor_id": "DONOR_1",
+            "tobacco_smoking_status": "Not applicable",
+            "tobacco_type": [
+                "Snuff",
+                "Pipe"
+            ],
+            "pack_years_smoked": 190
+        }
+    },
+    {
+        "model": "mohpackets.exposure",
+        "fields": {
+            "program_id": "SYNTHETIC-1",
+            "submitter_donor_id": "DONOR_1",
+            "tobacco_smoking_status": "Current reformed smoker for > 15 years",
+            "tobacco_type": [
+                "Snuff"
+            ],
+            "pack_years_smoked": 204
+        }
+    },
+    {
+        "model": "mohpackets.exposure",
+        "fields": {
+            "program_id": "SYNTHETIC-1",
+            "submitter_donor_id": "DONOR_2",
+            "tobacco_smoking_status": "Current reformed smoker, duration not specified",
+            "tobacco_type": [
+                "Electronic cigarettes"
+            ],
+            "pack_years_smoked": 13
+        }
+    },
+    {
+        "model": "mohpackets.exposure",
+        "fields": {
+            "program_id": "SYNTHETIC-1",
+            "submitter_donor_id": "DONOR_2",
+            "tobacco_smoking_status": "Not applicable",
+            "tobacco_type": [
+                "Cigar",
+                "Electronic cigarettes",
+                "Pipe"
+            ],
+            "pack_years_smoked": 154
+        }
+    },
+    {
+        "model": "mohpackets.exposure",
+        "fields": {
+            "program_id": "SYNTHETIC-1",
+            "submitter_donor_id": "DONOR_3",
+            "tobacco_smoking_status": "Current reformed smoker for > 15 years",
+            "tobacco_type": [
+                "Chewing Tobacco",
+                "Cigar"
+            ],
+            "pack_years_smoked": 251
+        }
+    },
+    {
+        "model": "mohpackets.exposure",
+        "fields": {
+            "program_id": "SYNTHETIC-2",
+            "submitter_donor_id": "DONOR_7",
+            "tobacco_smoking_status": "Current reformed smoker for > 15 years",
+            "tobacco_type": [
+                "Snuff"
+            ],
+            "pack_years_smoked": 270
+        }
+    },
+    {
+        "model": "mohpackets.exposure",
+        "fields": {
+            "program_id": "SYNTHETIC-2",
+            "submitter_donor_id": "DONOR_8",
+            "tobacco_smoking_status": "Smoking history not documented",
+            "tobacco_type": [
+                "Electronic cigarettes",
+                "Waterpipe"
+            ],
+            "pack_years_smoked": 39
+        }
+    }
+]
