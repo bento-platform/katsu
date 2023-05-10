@@ -1,8 +1,8 @@
-[{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Current reformed smoker, duration not specified","tobacco_type":["Not applicable","Chewing Tobacco"],"pack_years_smoked":127},
-{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Not applicable","tobacco_type":["Snuff","Pipe"],"pack_years_smoked":190},
-{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Current reformed smoker for > 15 years","tobacco_type":["Snuff"],"pack_years_smoked":204},
-{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Current reformed smoker, duration not specified","tobacco_type":["Electronic cigarettes"],"pack_years_smoked":13},
-{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Not applicable","tobacco_type":["Cigar","Electronic cigarettes","Pipe"],"pack_years_smoked":154},
-{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Current reformed smoker for > 15 years","tobacco_type":["Chewing Tobacco","Cigar"],"pack_years_smoked":251},
-{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Current reformed smoker for > 15 years","tobacco_type":["Snuff"],"pack_years_smoked":270},
-{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Smoking history not documented","tobacco_type":["Electronic cigarettes","Waterpipe"],"pack_years_smoked":39}]
+[{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Current smoker","tobacco_type":["Unknown","Electronic cigarettes","Not applicable"],"pack_years_smoked":280},
+{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Not applicable","tobacco_type":["Chewing Tobacco","Pipe","Not applicable"],"pack_years_smoked":138},
+{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Not applicable","tobacco_type":["Cigar","Waterpipe","Electronic cigarettes"],"pack_years_smoked":141},
+{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Current reformed smoker for > 15 years","tobacco_type":["Cigarettes","Electronic cigarettes"],"pack_years_smoked":90},
+{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Current smoker","tobacco_type":["Cigarettes","Snuff"],"pack_years_smoked":266},
+{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Current reformed smoker for > 15 years","tobacco_type":["Waterpipe","Unknown"],"pack_years_smoked":29},
+{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Current reformed smoker, duration not specified","tobacco_type":["Unknown","Electronic cigarettes","Not applicable"],"pack_years_smoked":104},
+{"program_id":null,"submitter_donor_id":null,"tobacco_smoking_status":"Current reformed smoker for > 15 years","tobacco_type":["Waterpipe","Unknown"],"pack_years_smoked":48}]
