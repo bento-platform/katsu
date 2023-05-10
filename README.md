@@ -62,7 +62,7 @@ pip install -r requirements-candig-dev.txt
 
 This will install all the packages listed in the requirements.txt file.
 
-### Step 4: Set up PostgreSQL database
+### Step 4: Set up PostgreSQL
 
 Replace "dbname", "username", and "password" with the values in [local.py](config/settings/local.py):
 
@@ -73,7 +73,7 @@ CREATE USER username WITH PASSWORD 'password';
 GRANT ALL PRIVILEGES ON DATABASE dbname TO username;
 ```
 
-### Step 5: Set up database tables
+### Step 5: Set up database
 
 With the database configured, run the following command to create the necessary database tables:
 
