@@ -9,6 +9,7 @@ from chord_metadata_service.mohpackets.models import (
     Chemotherapy,
     Comorbidity,
     Donor,
+    Exposure,
     FollowUp,
     HormoneTherapy,
     Immunotherapy,
@@ -230,4 +231,12 @@ class BiomarkerFilter(filters.FilterSet):
 class ComorbidityFilter(filters.FilterSet):
     class Meta:
         model = Comorbidity
+        fields = "__all__"
+
+
+class ExposureFilter(filters.FilterSet):
+    tobacco_type = filters.CharFilter(lookup_expr="icontains")
+
+    class Meta:
+        model = Exposure
         fields = "__all__"
