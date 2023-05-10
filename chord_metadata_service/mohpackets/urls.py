@@ -7,6 +7,7 @@ from chord_metadata_service.mohpackets.api_authorized import (
     AuthorizedComorbidityViewSet,
     AuthorizedDonorViewSet,
     AuthorizedDonorWithClinicalDataViewSet,
+    AuthorizedExposureViewSet,
     AuthorizedFollowUpViewSet,
     AuthorizedHormoneTherapyViewSet,
     AuthorizedImmunotherapyViewSet,
@@ -23,6 +24,7 @@ from chord_metadata_service.mohpackets.api_discovery import (
     DiscoveryChemotherapyViewSet,
     DiscoveryComorbidityViewSet,
     DiscoveryDonorViewSet,
+    DiscoveryExposureViewSet,
     DiscoveryFollowUpViewSet,
     DiscoveryHormoneTherapyViewSet,
     DiscoveryImmunotherapyViewSet,
@@ -46,6 +48,7 @@ from chord_metadata_service.mohpackets.api_ingest import (
     ingest_chemotherapies,
     ingest_comorbidities,
     ingest_donors,
+    ingest_exposures,
     ingest_followups,
     ingest_hormonetherapies,
     ingest_immunotherapies,
@@ -75,6 +78,7 @@ router.register(r"surgeries", AuthorizedSurgeryViewSet)
 router.register(r"follow_ups", AuthorizedFollowUpViewSet)
 router.register(r"biomarkers", AuthorizedBiomarkerViewSet)
 router.register(r"comorbidities", AuthorizedComorbidityViewSet)
+router.register(r"exposures", AuthorizedExposureViewSet)
 router.register(r"donor_with_clinical_data", AuthorizedDonorWithClinicalDataViewSet)
 
 # ================== DISCOVERY API ================== #
@@ -92,6 +96,7 @@ discovery_router.register(r"surgeries", DiscoverySurgeryViewSet)
 discovery_router.register(r"follow_ups", DiscoveryFollowUpViewSet)
 discovery_router.register(r"biomarkers", DiscoveryBiomarkerViewSet)
 discovery_router.register(r"comorbidities", DiscoveryComorbidityViewSet)
+discovery_router.register(r"exposures", DiscoveryExposureViewSet)
 
 
 # ================== INGEST API ================== #
@@ -110,6 +115,7 @@ ingest_patterns = [
     path("follow_ups", ingest_followups),
     path("biomarkers", ingest_biomarkers),
     path("comorbidities", ingest_comorbidities),
+    path("exposures", ingest_exposures),
 ]
 
 urlpatterns = [
