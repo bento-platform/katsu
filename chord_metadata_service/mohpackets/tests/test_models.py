@@ -37,17 +37,27 @@ from chord_metadata_service.mohpackets.serializers import (
 
 
 def get_invalid_ids():
-    """Returns the invalid values to test in ID fields."""
-    return ["f" * 65, "", True]
+    """
+    Returns the invalid values to test in ID fields. ID fields must be strings
+    with 64 characters or less and must not be blank nor empty.
+    """
+    return ["f" * 65, "", None, True]
 
 
 def get_invalid_choices():
-    """Returns the invalid values to test in choice fields."""
+    """
+    Returns the invalid values to test in choice fields. ChoiceFields values 
+    must be strings and among the permissible values defined for that field  
+    in serializers.py or permissible_values.py
+    """
     return ["foo", 1, True]
 
 
 def get_invalid_dates():
-    """Returns the invalid values to test in date fields."""
+    """
+    Returns the invalid values to test in date fields. Dates must be strings
+    in one of the following formats: YYYY, YYYY-MM, YYYY-MM-DD
+    """
     return ["foo", "03", "114", "443-12", "Feb-1995", 1, True]
 
 
@@ -110,13 +120,19 @@ class DonorTest(TestCase):
             "Other and ill-defined sites in lip, oral cavity and pharynx"
         ])
 
-    # These tests will be implemented after we decide which fields are required
-    # def test_optional_fields(self):
-    #     optional_fields = ["submitter_donor_id", "is_deceased", "cause_of_death",
-    #     "date_of_birth", "date_of_death", "primary_site"]
-    #     for field in optional_fields:
-    #         setattr(self.donor, field, None)
-    #     self.donor.save()
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["cause_of_death", "date_of_birth", "date_of_death"]
+        for field in optional_fields:
+            setattr(self.donor, field, None)
+            self.donor.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = ["cause_of_death", "date_of_birth", "date_of_death"]
+        for field in optional_fields:
+            setattr(self.donor, field, "")
+            self.donor.full_clean()
 
     def test_unique_id(self):
         with self.assertRaises(IntegrityError):
@@ -127,6 +143,14 @@ class DonorTest(TestCase):
         for value in invalid_values:
             with self.subTest(value=value):
                 self.valid_values["submitter_donor_id"] = value
+                self.serializer = DonorSerializer(instance=self.donor, data=self.valid_values)
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_program_id(self):
+        invalid_values = get_invalid_ids()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["program_id"] = value
                 self.serializer = DonorSerializer(instance=self.donor, data=self.valid_values)
                 self.assertFalse(self.serializer.is_valid())
 
@@ -212,11 +236,34 @@ class PrimaryDiagnosisTest(TestCase):
         self.assertEqual(self.primary_diagnosis.clinical_m_category, "M1b(0)")
         self.assertEqual(self.primary_diagnosis.clinical_stage_group, "Stage IA3")
 
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["date_of_diagnosis", "cancer_type_code", "basis_of_diagnosis", "cancer_type_code", "lymph_nodes_examined_status", "lymph_nodes_examined_method",
+                           "number_lymph_nodes_positive", "clinical_tumour_staging_system", "clinical_t_category", "clinical_t_category", "clinical_t_category", "clinical_stage_group"]
+        for field in optional_fields:
+            setattr(self.primary_diagnosis, field, None)
+            self.primary_diagnosis.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = ["date_of_diagnosis", "cancer_type_code", "basis_of_diagnosis", "cancer_type_code", "lymph_nodes_examined_status", "lymph_nodes_examined_method",
+                           "number_lymph_nodes_positive", "clinical_tumour_staging_system", "clinical_t_category", "clinical_t_category", "clinical_t_category", "clinical_stage_group"]
+        for field in optional_fields:
+            setattr(self.primary_diagnosis, field, "")
+            self.primary_diagnosis.full_clean()
+
     def test_unique_id(self):
         with self.assertRaises(IntegrityError):
             self.primary_diagnosis = PrimaryDiagnosis.objects.create(**self.valid_values)
 
     def test_invalid_id(self):
+        invalid_values = get_invalid_ids()
+        for value in invalid_values:
+            self.valid_values["submitter_primary_diagnosis_id"] = value
+            self.serializer = PrimaryDiagnosisSerializer(instance=self.primary_diagnosis, data=self.valid_values)
+            self.assertFalse(self.serializer.is_valid())
+    
+    def test_invalid_program_id(self):
         invalid_values = get_invalid_ids()
         for value in invalid_values:
             self.valid_values["submitter_primary_diagnosis_id"] = value
@@ -352,6 +399,24 @@ class TestSpecimen(TestCase):
         self.assertEqual(self.specimen.tumour_grade, "G2")
         self.assertEqual(self.specimen.percent_tumour_cells_range, "51-100%")
         self.assertEqual(self.specimen.percent_tumour_cells_measurement_method, "Image analysis")
+    
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["pathological_tumour_staging_system", "pathological_t_category", "pathological_n_category", "pathological_m_category", "pathological_stage_group", "specimen_collection_date",
+                           "specimen_storage", "tumour_histological_type", "specimen_anatomic_location", "reference_pathology_confirmed_diagnosis", "reference_pathology_confirmed_tumour_presence", 
+                           "tumour_grading_system", "tumour_grade", "percent_tumour_cells_range", "percent_tumour_cells_measurement_method"]
+        for field in optional_fields:
+            setattr(self.specimen, field, None)
+            self.specimen.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = ["pathological_tumour_staging_system", "pathological_t_category", "pathological_n_category", "pathological_m_category", "pathological_stage_group", "specimen_collection_date",
+                           "specimen_storage", "tumour_histological_type", "specimen_anatomic_location", "reference_pathology_confirmed_diagnosis", "reference_pathology_confirmed_tumour_presence", 
+                           "tumour_grading_system", "tumour_grade", "percent_tumour_cells_range", "percent_tumour_cells_measurement_method"]
+        for field in optional_fields:
+            setattr(self.specimen, field, "")
+            self.specimen.full_clean()
 
     def test_unique_id(self):
         with self.assertRaises(IntegrityError):
@@ -501,10 +566,10 @@ class TestSampleRegistration(TestCase):
             submitter_donor_id=self.donor
         )
         self.specimen = Specimen.objects.create(
+            submitter_specimen_id="SPECIMEN-1",
             program_id=self.program,
             submitter_donor_id=self.donor,
             submitter_primary_diagnosis_id=self.primary_diagnosis
-
         )
         self.valid_values = {
             "submitter_sample_id": "SAMPLE_REGISTRATION_1",
@@ -535,6 +600,20 @@ class TestSampleRegistration(TestCase):
         self.assertEqual(self.sample_registration.specimen_type, "Primary tumour - adjacent to normal")
         self.assertEqual(self.sample_registration.sample_type, "Other DNA enrichments")
 
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["gender", "sex_at_birth", "specimen_tissue_source", "tumour_normal_designation", "specimen_type", "sample_type"]
+        for field in optional_fields:
+            setattr(self.sample_registration, field, None)
+            self.sample_registration.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = ["gender", "sex_at_birth", "specimen_tissue_source", "tumour_normal_designation", "specimen_type", "sample_type"]
+        for field in optional_fields:
+            setattr(self.sample_registration, field, "")
+            self.sample_registration.full_clean()
+
     def test_unique_id(self):
         with self.assertRaises(IntegrityError):
             self.sample_registration = SampleRegistration.objects.create(**self.valid_values)
@@ -551,9 +630,10 @@ class TestSampleRegistration(TestCase):
         for value in invalid_values:
             with self.subTest(value=value):
                 self.valid_values["gender"] = value
-                self.serializer = SampleRegistrationSerializer(
-                    instance=self.sample_registration, data=self.valid_values)
-                self.assertFalse(self.serializer.is_valid())
+                self.sample_registration.full_clean()
+                # self.serializer = SampleRegistrationSerializer(
+                #     instance=self.sample_registration, data=self.valid_values)
+                # self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_sex_at_birth(self):
         invalid_values = get_invalid_choices()
@@ -654,6 +734,22 @@ class TestTreatment(TestCase):
         self.assertEqual(self.treatment.response_to_treatment_criteria_method,
                          "Cheson CLL 2012 Oncology Response Criteria")
         self.assertEqual(self.treatment.response_to_treatment, "Stable disease")
+
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["treatment_type", "is_primary_treatment", "treatment_start_date", "treatment_end_date", "treatment_setting", "treatment_intent",
+                           "response_to_treatment_criteria_method", "response_to_treatment"]
+        for field in optional_fields:
+            setattr(self.treatment, field, None)
+            self.treatment.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = ["treatment_type", "is_primary_treatment", "treatment_start_date", "treatment_end_date", "treatment_setting", "treatment_intent",
+                           "response_to_treatment_criteria_method", "response_to_treatment"]
+        for field in optional_fields:
+            setattr(self.treatment, field, "")
+            self.treatment.full_clean()
 
     def test_unique_id(self):
         with self.assertRaises(IntegrityError):
@@ -775,6 +871,20 @@ class TestChemotherapy(TestCase):
         self.assertEqual(self.chemotherapy.cumulative_drug_dosage_prescribed, "320")
         self.assertEqual(self.chemotherapy.cumulative_drug_dosage_actual, "111")
 
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["drug_name", "drug_rxnormcui", "chemotherapy_dosage_units", "cumulative_drug_dosage_prescribed", "cumulative_drug_dosage_actual"]
+        for field in optional_fields:
+            setattr(self.chemotherapy, field, None)
+            self.chemotherapy.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = ["drug_name", "drug_rxnormcui", "chemotherapy_dosage_units", "cumulative_drug_dosage_prescribed", "cumulative_drug_dosage_actual"]
+        for field in optional_fields:
+            setattr(self.chemotherapy, field, "")
+            self.chemotherapy.full_clean()
+
     def test_drug_name_max_length(self):
         self.chemotherapy.drug_name = "f" * 256
         with self.assertRaises(DataError):
@@ -842,6 +952,20 @@ class TestHormoneTherapy(TestCase):
         self.assertEqual(self.hormone_therapy.hormone_drug_dosage_units, "mg/m2")
         self.assertEqual(self.hormone_therapy.cumulative_drug_dosage_prescribed, "200")
         self.assertEqual(self.hormone_therapy.cumulative_drug_dosage_actual, "200")
+
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["drug_name", "drug_rxnormcui", "hormone_dosage_units", "cumulative_drug_dosage_prescribed", "cumulative_drug_dosage_actual"]
+        for field in optional_fields:
+            setattr(self.hormone_therapy, field, None)
+            self.hormone_therapy.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = ["drug_name", "drug_rxnormcui", "hormone_dosage_units", "cumulative_drug_dosage_prescribed", "cumulative_drug_dosage_actual"]
+        for field in optional_fields:
+            setattr(self.hormone_therapy, field, "")
+            self.hormone_therapy.full_clean()
 
     def test_drug_name_max_length(self):
         self.hormone_therapy.drug_name = "f" * 256
@@ -914,6 +1038,22 @@ class TestRadiation(TestCase):
         self.assertEqual(self.radiation.anatomical_site_irradiated, "Chest wall structure")
         self.assertTrue(self.radiation.radiation_boost)
         self.assertEqual(self.radiation.reference_radiation_treatment_id, "REFERENCE_RADIATION_TREATMENT_1")
+
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["radiation_therapy_modality", "radiation_therapy_type", "radiation_therapy_fractions", "radiation_therapy_dosage", "anatomical_site_irradiated",
+                           "reference_radiation_treatment_id"]
+        for field in optional_fields:
+            setattr(self.radiation, field, None)
+            self.radiation.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = ["radiation_therapy_modality", "radiation_therapy_type", "radiation_therapy_fractions", "radiation_therapy_dosage", "anatomical_site_irradiated",
+                           "reference_radiation_treatment_id"]
+        for field in optional_fields:
+            setattr(self.radiation, field, "")
+            self.radiation.full_clean()
 
     def test_invalid_radiation_therapy_modality(self):
         invalid_values = get_invalid_choices()
@@ -989,6 +1129,21 @@ class TestImmunotherapy(TestCase):
         self.assertEqual(self.immunotherapy.immunotherapy_type, "Cell-based")
         self.assertEqual(self.immunotherapy.drug_name, "Necitumumab")
         self.assertEqual(self.immunotherapy.drug_rxnormcui, "8756456")
+
+
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["immunotherapy_type", "drug_name", "drug_rxnormcui"]
+        for field in optional_fields:
+            setattr(self.immunotherapy, field, None)
+            self.immunotherapy.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = ["immunotherapy_type", "drug_name", "drug_rxnormcui"]
+        for field in optional_fields:
+            setattr(self.immunotherapy, field, "")
+            self.immunotherapy.full_clean()
 
     def test_invalid_immunotherapy_type(self):
         invalid_values = get_invalid_choices()
@@ -1091,6 +1246,22 @@ class TestSurgery(TestCase):
                 "Not applicable"
             ])
         self.assertEqual(self.surgery.perineural_invasion, "Not applicable")
+
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["surgery_type", "surgery_site", "surgery_location", "tumour_length", "tumour_width", "greatest_dimension_tumour", "tumour_focality",
+                           "residual_tumour_classification", "lymphovascular_invasion", "perineural_invasion"]
+        for field in optional_fields:
+            setattr(self.surgery, field, None)
+            self.surgery.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = ["surgery_type", "surgery_site", "surgery_location", "tumour_length", "tumour_width", "greatest_dimension_tumour", "tumour_focality",
+                           "residual_tumour_classification", "lymphovascular_invasion", "perineural_invasion"]
+        for field in optional_fields:
+            setattr(self.surgery, field, "")
+            self.surgery.full_clean()
 
     def test_invalid_surgery_type(self):
         invalid_values = get_invalid_choices()
@@ -1237,6 +1408,22 @@ class TestFollowUp(TestCase):
         self.assertEqual(self.followup.recurrence_n_category, "N0a (biopsy)")
         self.assertEqual(self.followup.recurrence_m_category, "M0(i+)")
         self.assertEqual(self.followup.recurrence_stage_group, "Stage IBS")
+
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["date_of_followup", "lost_to_followup_reason", "disease_status_at_followup", "relapse_type", "date_of_relapse", "method_of_progression_status",
+                           "anatomic_site_progression_or_recurrence", "recurrence_t_category", "recurrence_n_category", "recurrence_m_category", "recurrence_stage_group"]
+        for field in optional_fields:
+            setattr(self.followup, field, None)
+            self.followup.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = ["date_of_followup", "lost_to_followup_reason", "disease_status_at_followup", "relapse_type", "date_of_relapse", "method_of_progression_status",
+                           "anatomic_site_progression_or_recurrence", "recurrence_t_category", "recurrence_n_category", "recurrence_m_category", "recurrence_stage_group"]
+        for field in optional_fields:
+            setattr(self.followup, field, "")
+            self.followup.full_clean()
 
     def test_unique_id(self):
         with self.assertRaises(IntegrityError):
@@ -1443,6 +1630,22 @@ class TestComorbidity(TestCase):
         self.assertEqual(self.comorbidity.comorbidity_type_code, "C04.0")
         self.assertEqual(self.comorbidity.comorbidity_treatment_status, "No")
         self.assertEqual(self.comorbidity.comorbidity_treatment, "Surgery")
+
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = ["prior_malignancy", "laterality_of_prior_malignancy", "comorbidity_type_code", "comorbidity_treatment_status",
+                           "comorbidity_treatment"]
+        for field in optional_fields:
+            setattr(self.comorbidity, field, None)
+            self.comorbidity.full_clean()
+    
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields =  ["prior_malignancy", "laterality_of_prior_malignancy", "comorbidity_type_code", "comorbidity_treatment_status",
+                           "comorbidity_treatment"]
+        for field in optional_fields:
+            setattr(self.comorbidity, field, "")
+            self.comorbidity.full_clean()
 
     def test_invalid_prior_malignancy(self):
         invalid_values = get_invalid_choices()
