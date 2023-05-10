@@ -15,6 +15,7 @@ from chord_metadata_service.mohpackets.api_base import (
     BaseChemotherapyViewSet,
     BaseComorbidityViewSet,
     BaseDonorViewSet,
+    BaseExposureViewSet,
     BaseFollowUpViewSet,
     BaseHormoneTherapyViewSet,
     BaseImmunotherapyViewSet,
@@ -145,6 +146,10 @@ class DiscoveryBiomarkerViewSet(DiscoveryMixin, BaseBiomarkerViewSet):
 
 
 class DiscoveryComorbidityViewSet(DiscoveryMixin, BaseComorbidityViewSet):
+    pass
+
+
+class DiscoveryExposureViewSet(DiscoveryMixin, BaseExposureViewSet):
     pass
 
 
