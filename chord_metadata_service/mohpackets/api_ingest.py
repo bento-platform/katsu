@@ -17,6 +17,7 @@ from chord_metadata_service.mohpackets.serializers import (
     ChemotherapySerializer,
     ComorbiditySerializer,
     DonorSerializer,
+    ExposureSerializer,
     FollowUpSerializer,
     HormoneTherapySerializer,
     ImmunotherapySerializer,
@@ -439,6 +440,31 @@ def ingest_comorbidities(request):
     return Response(
         status=status.HTTP_201_CREATED,
         data={f"{len(objs)} comorbidities were created."},
+    )
+
+
+# EXPOSURE
+# ---------------
+@extend_schema(
+    request=IngestRequestSerializer,
+    responses={201: OpenApiTypes.STR},
+)
+@api_view(["POST"])
+@permission_classes([CanDIGAdminOrReadOnly])
+def ingest_exposures(request):
+    serializer = ExposureSerializer
+    data = request.data
+    try:
+        objs = create_bulk_objects(serializer, data)
+    except Exception as e:
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST,
+            data={"error during exposures": str(e)},
+        )
+
+    return Response(
+        status=status.HTTP_201_CREATED,
+        data={f"{len(objs)} exposures were created."},
     )
 
 
