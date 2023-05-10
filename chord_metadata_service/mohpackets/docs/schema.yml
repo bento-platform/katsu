@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: This is the RESTful API for the MoH Service.
 paths:
-  /moh/v1/authorized/biomarkers/:
+  /moh/v2/authorized/biomarkers/:
     get:
       operationId: authorized_biomarkers_list
       description: |-
@@ -65,6 +65,44 @@ paths:
         name: cea
         schema:
           type: integer
+      - in: query
+        name: er_status
+        schema:
+          type: string
+      - in: query
+        name: er_percent_positive
+        schema:
+          type: number
+          format: float
+      - in: query
+        name: pr_status
+        schema:
+          type: string
+      - in: query
+        name: pr_percent_positive
+        schema:
+          type: number
+          format: float
+      - in: query
+        name: her2_ihc_status
+        schema:
+          type: string
+      - in: query
+        name: her2_ish_status
+        schema:
+          type: string
+      - in: query
+        name: hpv_ihc_status
+        schema:
+          type: string
+      - in: query
+        name: hpv_pcr_status
+        schema:
+          type: string
+      - in: query
+        name: hpv_strain
+        schema:
+          type: string
       - name: page
         required: false
         in: query
@@ -88,7 +126,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedBiomarkerList'
           description: ''
-  /moh/v1/authorized/chemotherapies/:
+  /moh/v2/authorized/chemotherapies/:
     get:
       operationId: authorized_chemotherapies_list
       description: |-
@@ -122,23 +160,27 @@ paths:
         schema:
           type: string
       - in: query
+        name: drug_reference_database
+        schema:
+          type: string
+      - in: query
         name: drug_name
         schema:
           type: string
       - in: query
-        name: drug_rxnormcui
+        name: drug_reference_identifier
         schema:
           type: string
       - in: query
-        name: chemotherapy_dosage_units
+        name: chemotherapy_drug_dose_units
         schema:
           type: string
       - in: query
-        name: cumulative_drug_dosage_prescribed
+        name: prescribed_cumulative_drug_dose
         schema:
           type: integer
       - in: query
-        name: cumulative_drug_dosage_actual
+        name: actual_cumulative_drug_dose
         schema:
           type: integer
       - name: page
@@ -164,7 +206,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedChemotherapyList'
           description: ''
-  /moh/v1/authorized/comorbidities/:
+  /moh/v2/authorized/comorbidities/:
     get:
       operationId: authorized_comorbidities_list
       description: |-
@@ -240,7 +282,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedComorbidityList'
           description: ''
-  /moh/v1/authorized/donor_with_clinical_data/:
+  /moh/v2/authorized/donor_with_clinical_data/:
     get:
       operationId: authorized_donor_with_clinical_data_list
       description: |-
@@ -260,9 +302,29 @@ paths:
         schema:
           type: string
       - in: query
+        name: gender
+        schema:
+          type: string
+      - in: query
+        name: sex_at_birth
+        schema:
+          type: string
+      - in: query
         name: is_deceased
         schema:
           type: boolean
+      - in: query
+        name: lost_to_followup_after_clinical_event_identifier
+        schema:
+          type: string
+      - in: query
+        name: lost_to_followup_reason
+        schema:
+          type: string
+      - in: query
+        name: date_alive_after_lost_to_followup
+        schema:
+          type: string
       - in: query
         name: cause_of_death
         schema:
@@ -301,10 +363,6 @@ paths:
           type: string
       - in: query
         name: speciman
-        schema:
-          type: string
-      - in: query
-        name: sample_registration
         schema:
           type: string
       - in: query
@@ -366,7 +424,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedDonorWithClinicalDataList'
           description: ''
-  /moh/v1/authorized/donors/:
+  /moh/v2/authorized/donors/:
     get:
       operationId: authorized_donors_list
       description: |-
@@ -391,9 +449,29 @@ paths:
         schema:
           type: string
       - in: query
+        name: gender
+        schema:
+          type: string
+      - in: query
+        name: sex_at_birth
+        schema:
+          type: string
+      - in: query
         name: is_deceased
         schema:
           type: boolean
+      - in: query
+        name: lost_to_followup_after_clinical_event_identifier
+        schema:
+          type: string
+      - in: query
+        name: lost_to_followup_reason
+        schema:
+          type: string
+      - in: query
+        name: date_alive_after_lost_to_followup
+        schema:
+          type: string
       - in: query
         name: cause_of_death
         schema:
@@ -432,10 +510,6 @@ paths:
           type: string
       - in: query
         name: speciman
-        schema:
-          type: string
-      - in: query
-        name: sample_registration
         schema:
           type: string
       - in: query
@@ -497,7 +571,72 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedDonorList'
           description: ''
-  /moh/v1/authorized/follow_ups/:
+  /moh/v2/authorized/exposures/:
+    get:
+      operationId: authorized_exposures_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+      parameters:
+      - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: tobacco_smoking_status
+        schema:
+          type: string
+      - in: query
+        name: tobacco_type
+        schema:
+          type: string
+      - in: query
+        name: pack_years_smoked
+        schema:
+          type: number
+          format: float
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedExposureList'
+          description: ''
+  /moh/v2/authorized/follow_ups/:
     get:
       operationId: authorized_follow_ups_list
       description: |-
@@ -535,14 +674,6 @@ paths:
           type: string
       - in: query
         name: date_of_followup
-        schema:
-          type: string
-      - in: query
-        name: lost_to_followup
-        schema:
-          type: boolean
-      - in: query
-        name: lost_to_followup_reason
         schema:
           type: string
       - in: query
@@ -608,7 +739,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedFollowUpList'
           description: ''
-  /moh/v1/authorized/hormone_therapies/:
+  /moh/v2/authorized/hormone_therapies/:
     get:
       operationId: authorized_hormone_therapies_list
       description: |-
@@ -642,23 +773,27 @@ paths:
         schema:
           type: string
       - in: query
+        name: drug_reference_database
+        schema:
+          type: string
+      - in: query
         name: drug_name
         schema:
           type: string
       - in: query
-        name: drug_rxnormcui
+        name: drug_reference_identifier
         schema:
           type: string
       - in: query
-        name: hormone_drug_dosage_units
+        name: hormone_drug_dose_units
         schema:
           type: string
       - in: query
-        name: cumulative_drug_dosage_prescribed
+        name: prescribed_cumulative_drug_dose
         schema:
           type: integer
       - in: query
-        name: cumulative_drug_dosage_actual
+        name: actual_cumulative_drug_dose
         schema:
           type: integer
       - name: page
@@ -684,7 +819,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedHormoneTherapyList'
           description: ''
-  /moh/v1/authorized/immunotherapies/:
+  /moh/v2/authorized/immunotherapies/:
     get:
       operationId: authorized_immunotherapies_list
       description: |-
@@ -718,6 +853,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: drug_reference_database
+        schema:
+          type: string
+      - in: query
         name: immunotherapy_type
         schema:
           type: string
@@ -726,9 +865,21 @@ paths:
         schema:
           type: string
       - in: query
-        name: drug_rxnormcui
+        name: drug_reference_identifier
         schema:
           type: string
+      - in: query
+        name: immunotherapy_drug_dose_units
+        schema:
+          type: string
+      - in: query
+        name: prescribed_cumulative_drug_dose
+        schema:
+          type: integer
+      - in: query
+        name: actual_cumulative_drug_dose
+        schema:
+          type: integer
       - name: page
         required: false
         in: query
@@ -752,7 +903,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedImmunotherapyList'
           description: ''
-  /moh/v1/authorized/primary_diagnoses/:
+  /moh/v2/authorized/primary_diagnoses/:
     get:
       operationId: authorized_primary_diagnoses_list
       description: |-
@@ -790,6 +941,10 @@ paths:
           type: string
       - in: query
         name: basis_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: laterality
         schema:
           type: string
       - in: query
@@ -847,7 +1002,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedPrimaryDiagnosisList'
           description: ''
-  /moh/v1/authorized/programs/:
+  /moh/v2/authorized/programs/:
     get:
       operationId: authorized_programs_list
       description: |-
@@ -900,7 +1055,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedProgramList'
           description: ''
-  /moh/v1/authorized/radiations/:
+  /moh/v2/authorized/radiations/:
     get:
       operationId: authorized_radiations_list
       description: |-
@@ -984,7 +1139,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRadiationList'
           description: ''
-  /moh/v1/authorized/sample_registrations/:
+  /moh/v2/authorized/sample_registrations/:
     get:
       operationId: authorized_sample_registrations_list
       description: |-
@@ -1014,14 +1169,6 @@ paths:
           type: string
       - in: query
         name: submitter_specimen_id
-        schema:
-          type: string
-      - in: query
-        name: gender
-        schema:
-          type: string
-      - in: query
-        name: sex_at_birth
         schema:
           type: string
       - in: query
@@ -1063,7 +1210,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedSampleRegistrationList'
           description: ''
-  /moh/v1/authorized/specimens/:
+  /moh/v2/authorized/specimens/:
     get:
       operationId: authorized_specimens_list
       description: |-
@@ -1124,11 +1271,19 @@ paths:
         schema:
           type: string
       - in: query
+        name: specimen_processing
+        schema:
+          type: string
+      - in: query
         name: tumour_histological_type
         schema:
           type: string
       - in: query
         name: specimen_anatomic_location
+        schema:
+          type: string
+      - in: query
+        name: specimen_laterality
         schema:
           type: string
       - in: query
@@ -1178,7 +1333,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedSpecimenList'
           description: ''
-  /moh/v1/authorized/surgeries/:
+  /moh/v2/authorized/surgeries/:
     get:
       operationId: authorized_surgeries_list
       description: |-
@@ -1290,7 +1445,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedSurgeryList'
           description: ''
-  /moh/v1/authorized/treatments/:
+  /moh/v2/authorized/treatments/:
     get:
       operationId: authorized_treatments_list
       description: |-
@@ -1331,6 +1486,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: line_of_treatment
+        schema:
+          type: integer
+      - in: query
         name: treatment_start_date
         schema:
           type: string
@@ -1362,6 +1521,10 @@ paths:
         name: response_to_treatment
         schema:
           type: string
+      - in: query
+        name: status_of_treatment
+        schema:
+          type: string
       - name: page
         required: false
         in: query
@@ -1385,7 +1548,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTreatmentList'
           description: ''
-  /moh/v1/discovery/biomarkers/:
+  /moh/v2/discovery/biomarkers/:
     get:
       operationId: discovery_biomarkers_list
       description: |-
@@ -1443,6 +1606,44 @@ paths:
         name: cea
         schema:
           type: integer
+      - in: query
+        name: er_status
+        schema:
+          type: string
+      - in: query
+        name: er_percent_positive
+        schema:
+          type: number
+          format: float
+      - in: query
+        name: pr_status
+        schema:
+          type: string
+      - in: query
+        name: pr_percent_positive
+        schema:
+          type: number
+          format: float
+      - in: query
+        name: her2_ihc_status
+        schema:
+          type: string
+      - in: query
+        name: her2_ish_status
+        schema:
+          type: string
+      - in: query
+        name: hpv_ihc_status
+        schema:
+          type: string
+      - in: query
+        name: hpv_pcr_status
+        schema:
+          type: string
+      - in: query
+        name: hpv_strain
+        schema:
+          type: string
       tags:
       - discovery
       responses:
@@ -1452,7 +1653,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/chemotherapies/:
+  /moh/v2/discovery/chemotherapies/:
     get:
       operationId: discovery_chemotherapies_list
       description: |-
@@ -1483,23 +1684,27 @@ paths:
         schema:
           type: string
       - in: query
+        name: drug_reference_database
+        schema:
+          type: string
+      - in: query
         name: drug_name
         schema:
           type: string
       - in: query
-        name: drug_rxnormcui
+        name: drug_reference_identifier
         schema:
           type: string
       - in: query
-        name: chemotherapy_dosage_units
+        name: chemotherapy_drug_dose_units
         schema:
           type: string
       - in: query
-        name: cumulative_drug_dosage_prescribed
+        name: prescribed_cumulative_drug_dose
         schema:
           type: integer
       - in: query
-        name: cumulative_drug_dosage_actual
+        name: actual_cumulative_drug_dose
         schema:
           type: integer
       tags:
@@ -1511,7 +1716,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/comorbidities/:
+  /moh/v2/discovery/comorbidities/:
     get:
       operationId: discovery_comorbidities_list
       description: |-
@@ -1570,7 +1775,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/donors/:
+  /moh/v2/discovery/donors/:
     get:
       operationId: discovery_donors_list
       description: |-
@@ -1592,9 +1797,29 @@ paths:
         schema:
           type: string
       - in: query
+        name: gender
+        schema:
+          type: string
+      - in: query
+        name: sex_at_birth
+        schema:
+          type: string
+      - in: query
         name: is_deceased
         schema:
           type: boolean
+      - in: query
+        name: lost_to_followup_after_clinical_event_identifier
+        schema:
+          type: string
+      - in: query
+        name: lost_to_followup_reason
+        schema:
+          type: string
+      - in: query
+        name: date_alive_after_lost_to_followup
+        schema:
+          type: string
       - in: query
         name: cause_of_death
         schema:
@@ -1633,10 +1858,6 @@ paths:
           type: string
       - in: query
         name: speciman
-        schema:
-          type: string
-      - in: query
-        name: sample_registration
         schema:
           type: string
       - in: query
@@ -1684,7 +1905,55 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/follow_ups/:
+  /moh/v2/discovery/exposures/:
+    get:
+      operationId: discovery_exposures_list
+      description: |-
+        This mixin should be used for viewsets that need to expose
+        discovery information about the donor they represent.
+
+        Methods
+        -------
+        list(request, *args, **kwargs)
+            Returns a response that contains the number of unique donors in the
+            queryset.
+      parameters:
+      - in: query
+        name: id
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: tobacco_smoking_status
+        schema:
+          type: string
+      - in: query
+        name: tobacco_type
+        schema:
+          type: string
+      - in: query
+        name: pack_years_smoked
+        schema:
+          type: number
+          format: float
+      tags:
+      - discovery
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+          description: ''
+  /moh/v2/discovery/follow_ups/:
     get:
       operationId: discovery_follow_ups_list
       description: |-
@@ -1719,14 +1988,6 @@ paths:
           type: string
       - in: query
         name: date_of_followup
-        schema:
-          type: string
-      - in: query
-        name: lost_to_followup
-        schema:
-          type: boolean
-      - in: query
-        name: lost_to_followup_reason
         schema:
           type: string
       - in: query
@@ -1778,7 +2039,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/hormone_therapies/:
+  /moh/v2/discovery/hormone_therapies/:
     get:
       operationId: discovery_hormone_therapies_list
       description: |-
@@ -1809,23 +2070,27 @@ paths:
         schema:
           type: string
       - in: query
+        name: drug_reference_database
+        schema:
+          type: string
+      - in: query
         name: drug_name
         schema:
           type: string
       - in: query
-        name: drug_rxnormcui
+        name: drug_reference_identifier
         schema:
           type: string
       - in: query
-        name: hormone_drug_dosage_units
+        name: hormone_drug_dose_units
         schema:
           type: string
       - in: query
-        name: cumulative_drug_dosage_prescribed
+        name: prescribed_cumulative_drug_dose
         schema:
           type: integer
       - in: query
-        name: cumulative_drug_dosage_actual
+        name: actual_cumulative_drug_dose
         schema:
           type: integer
       tags:
@@ -1837,7 +2102,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/immunotherapies/:
+  /moh/v2/discovery/immunotherapies/:
     get:
       operationId: discovery_immunotherapies_list
       description: |-
@@ -1868,6 +2133,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: drug_reference_database
+        schema:
+          type: string
+      - in: query
         name: immunotherapy_type
         schema:
           type: string
@@ -1876,9 +2145,21 @@ paths:
         schema:
           type: string
       - in: query
-        name: drug_rxnormcui
+        name: drug_reference_identifier
         schema:
           type: string
+      - in: query
+        name: immunotherapy_drug_dose_units
+        schema:
+          type: string
+      - in: query
+        name: prescribed_cumulative_drug_dose
+        schema:
+          type: integer
+      - in: query
+        name: actual_cumulative_drug_dose
+        schema:
+          type: integer
       tags:
       - discovery
       responses:
@@ -1888,7 +2169,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/overview/cancer_type_count:
+  /moh/v2/discovery/overview/cancer_type_count:
     get:
       operationId: discovery_overview_cancer_type_count_retrieve
       description: MoH cancer types count
@@ -1903,7 +2184,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_cancer_type_count_response'
           description: ''
-  /moh/v1/discovery/overview/cohort_count:
+  /moh/v2/discovery/overview/cohort_count:
     get:
       operationId: discovery_overview_cohort_count_retrieve
       description: MoH cohorts count
@@ -1918,7 +2199,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_cohort_count_response'
           description: ''
-  /moh/v1/discovery/overview/diagnosis_age_count:
+  /moh/v2/discovery/overview/diagnosis_age_count:
     get:
       operationId: discovery_overview_diagnosis_age_count_retrieve
       description: MoH Diagnosis age count
@@ -1933,7 +2214,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_diagnosis_age_count_response'
           description: ''
-  /moh/v1/discovery/overview/gender_count:
+  /moh/v2/discovery/overview/gender_count:
     get:
       operationId: discovery_overview_gender_count_retrieve
       description: MoH gender count
@@ -1948,7 +2229,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_gender_count_response'
           description: ''
-  /moh/v1/discovery/overview/individual_count:
+  /moh/v2/discovery/overview/individual_count:
     get:
       operationId: discovery_overview_individual_count_retrieve
       description: MoH individuals count
@@ -1963,7 +2244,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_individual_count_response'
           description: ''
-  /moh/v1/discovery/overview/patients_per_cohort:
+  /moh/v2/discovery/overview/patients_per_cohort:
     get:
       operationId: discovery_overview_patients_per_cohort_retrieve
       description: MoH patients per cohort count
@@ -1978,7 +2259,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_patient_per_cohort_response'
           description: ''
-  /moh/v1/discovery/overview/treatment_type_count:
+  /moh/v2/discovery/overview/treatment_type_count:
     get:
       operationId: discovery_overview_treatment_type_count_retrieve
       description: MoH Treatments type count
@@ -1993,7 +2274,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_treatment_type_count_response'
           description: ''
-  /moh/v1/discovery/primary_diagnoses/:
+  /moh/v2/discovery/primary_diagnoses/:
     get:
       operationId: discovery_primary_diagnoses_list
       description: |-
@@ -2028,6 +2309,10 @@ paths:
           type: string
       - in: query
         name: basis_of_diagnosis
+        schema:
+          type: string
+      - in: query
+        name: laterality
         schema:
           type: string
       - in: query
@@ -2071,7 +2356,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/radiations/:
+  /moh/v2/discovery/radiations/:
     get:
       operationId: discovery_radiations_list
       description: |-
@@ -2138,7 +2423,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/sample_registrations/:
+  /moh/v2/discovery/sample_registrations/:
     get:
       operationId: discovery_sample_registrations_list
       description: |-
@@ -2168,14 +2453,6 @@ paths:
         schema:
           type: string
       - in: query
-        name: gender
-        schema:
-          type: string
-      - in: query
-        name: sex_at_birth
-        schema:
-          type: string
-      - in: query
         name: specimen_tissue_source
         schema:
           type: string
@@ -2200,7 +2477,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/specimens/:
+  /moh/v2/discovery/specimens/:
     get:
       operationId: discovery_specimens_list
       description: |-
@@ -2258,11 +2535,19 @@ paths:
         schema:
           type: string
       - in: query
+        name: specimen_processing
+        schema:
+          type: string
+      - in: query
         name: tumour_histological_type
         schema:
           type: string
       - in: query
         name: specimen_anatomic_location
+        schema:
+          type: string
+      - in: query
+        name: specimen_laterality
         schema:
           type: string
       - in: query
@@ -2298,7 +2583,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/surgeries/:
+  /moh/v2/discovery/surgeries/:
     get:
       operationId: discovery_surgeries_list
       description: |-
@@ -2393,7 +2678,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v1/discovery/treatments/:
+  /moh/v2/discovery/treatments/:
     get:
       operationId: discovery_treatments_list
       description: |-
@@ -2431,6 +2716,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: line_of_treatment
+        schema:
+          type: integer
+      - in: query
         name: treatment_start_date
         schema:
           type: string
@@ -2462,6 +2751,10 @@ paths:
         name: response_to_treatment
         schema:
           type: string
+      - in: query
+        name: status_of_treatment
+        schema:
+          type: string
       tags:
       - discovery
       responses:
@@ -2475,140 +2768,528 @@ components:
   schemas:
     AnatomicalSiteIrradiatedEnum:
       enum:
-      - Cervical lymph node group
-      - Entire lymph node of thorax
-      - Axillary lymph node group
-      - Supraclavicular lymph node group
-      - Internal mammary lymph node group
-      - Abdominal lymph node group
-      - Pelvic lymph node group
-      - Structure of lymph node
-      - Entire eye
-      - Pituitary structure
-      - Brain structure
-      - Brain part
-      - Spinal cord structure
-      - Nasopharyngeal structure
-      - Oral cavity structure
-      - Oropharyngeal structure
-      - Laryngeal structure
-      - Hypopharyngeal structure
-      - Nasal sinus structure
-      - Salivary gland structure
-      - Thyroid structure
-      - Entire head and neck
-      - Entire lung
-      - Mesothelium structure
-      - Entire thorax
-      - Entire breast
-      - Breast part
-      - Chest wall structure
-      - Entire esophagus
-      - Stomach structure
-      - Small intestinal structure
-      - Colon structure
-      - Rectum structure
-      - Anal structure
-      - Liver structure
-      - Biliary tract structure
-      - Gallbladder structure
-      - Pancreatic structure
-      - Abdominal structure
-      - Entire urinary bladder
-      - Bladder part
-      - Kidney structure
-      - Ureteric structure
-      - Entire prostate
-      - Prostate part
-      - Urethral structure
-      - Penile structure
-      - Testis structure
-      - Scrotal structure
-      - Ovarian structure
-      - Fallopian tube structure
-      - Uterine structure
-      - Cervix uteri structure
-      - Vaginal structure
-      - Vulval structure
-      - Bone structure of cranium
-      - Entire vertebral column
-      - Shoulder region structure
-      - Bone structure of rib
-      - Hip region structure
-      - Entire bony pelvis
-      - Pelvic structure
-      - Bone structure of extremity
-      - Skin structure
-      - Soft tissues
-      - Entire body as a whole
+      - Left Abdomen
+      - Whole Abdomen
+      - Right Abdomen
+      - Lower Abdomen
+      - Left Lower Abdomen
+      - Right Lower Abdomen
+      - Upper Abdomen
+      - Left Upper Abdomen
+      - Right Upper Abdomen
+      - Left Adrenal
+      - Right Adrenal
+      - Bilateral Ankle
+      - Left Ankle
+      - Right Ankle
+      - Bilateral Antrum (Bull's Eye)
+      - Left Antrum
+      - Right Antrum
+      - Anus
+      - Lower Left Arm
+      - Lower Right Arm
+      - Bilateral Arms
+      - Left Arm
+      - Right Arm
+      - Upper Left Arm
+      - Upper Right Arm
+      - Left Axilla
+      - Right Axilla
+      - Skin or Soft Tissue of Back
+      - Bile Duct
+      - Bladder
+      - Lower Body
+      - Middle Body
+      - Upper Body
+      - Whole Body
+      - Boost - Area Previously Treated
+      - Brain
+      - Left Breast Boost
+      - Right Breast Boost
+      - Bilateral Breast
+      - Left Breast
+      - Right Breast
+      - Bilateral Breasts with Nodes
+      - Left Breast with Nodes
+      - Right Breast with Nodes
+      - Bilateral Buttocks
+      - Left Buttock
+      - Right Buttock
+      - Inner Canthus
+      - Outer Canthus
+      - Cervix
+      - Bilateral Chest Lung & Area Involve
+      - Left Chest
+      - Right Chest
+      - Chin
+      - Left Cheek
+      - Right Cheek
+      - Bilateral Chest Wall (W/o Breast)
+      - Left Chest Wall
+      - Right Chest Wall
+      - Bilateral Clavicle
+      - Left Clavicle
+      - Right Clavicle
+      - Coccyx
+      - Colon
+      - Whole C.N.S. (Medulla Techinque)
+      - Csf Spine (Medull Tech 2 Diff Machi
+      - Left Chestwall Boost
+      - Right Chestwall Boost
+      - Bilateral Chestwall with Nodes
+      - Left Chestwall with Nodes
+      - Right Chestwall with Nodes
+      - Left Ear
+      - Right Ear
+      - Epigastrium
+      - Lower Esophagus
+      - Middle Esophagus
+      - Upper Esophagus
+      - Entire Esophagus
+      - Ethmoid Sinus
+      - Bilateral Eyes
+      - Left Eye
+      - Right Eye
+      - Bilateral Face
+      - Left Face
+      - Right Face
+      - Left Fallopian Tubes
+      - Right Fallopian Tubes
+      - Bilateral Femur
+      - Left Femur
+      - Right Femur
+      - Left Fibula
+      - Right Fibula
+      - Finger (Including Thumbs)
+      - Floor of Mouth (Boosts)
+      - Bilateral Feet
+      - Left Foot
+      - Right Foot
+      - Forehead
+      - Posterior Fossa
+      - Gall Bladder
+      - Gingiva
+      - Bilateral Hand
+      - Left Hand
+      - Right Hand
+      - Head
+      - Bilateral Heel
+      - Left Heel
+      - Right Heel
+      - Left Hemimantle
+      - Right Hemimantle
+      - Heart
+      - Bilateral Hip
+      - Left Hip
+      - Right Hip
+      - Left Humerus
+      - Right Humerus
+      - Hypopharynx
+      - Bilateral Internal Mammary Chain
+      - Bilateral Inguinal Nodes
+      - Left Inguinal Nodes
+      - Right Inguinal Nodes
+      - Inverted 'Y' (Dog-Leg,Hockey-Stick)
+      - Left Kidney
+      - Right Kidney
+      - Bilateral Knee
+      - Left Knee
+      - Right Knee
+      - Bilateral Lacrimal Gland
+      - Left Lacrimal Gland
+      - Right Lacrimal Gland
+      - Larygopharynx
+      - Larynx
+      - Bilateral Leg
+      - Left Leg
+      - Right Leg
+      - Lower Bilateral Leg
+      - Lower Left Leg
+      - Lower Right Leg
+      - Upper Bilateral Leg
+      - Upper Left Leg
+      - Upper Right Leg
+      - Both Eyelid(s)
+      - Left Eyelid
+      - Right Eyelid
+      - Both Lip(s)
+      - Lower Lip
+      - Upper Lip
+      - Liver
+      - Bilateral Lung
+      - Left Lung
+      - Right Lung
+      - Bilateral Mandible
+      - Left Mandible
+      - Right Mandible
+      - Mantle
+      - Bilateral Maxilla
+      - Left Maxilla
+      - Right Maxilla
+      - Mediastinum
+      - Multiple Skin
+      - Nasal Fossa
+      - Nasopharynx
+      - Bilateral Neck Includes Nodes
+      - Left Neck Includes Nodes
+      - Right Neck Includes Nodes
+      - Neck - Skin
+      - Nose
+      - Oral Cavity / Buccal Mucosa
+      - Bilateral Orbit
+      - Left Orbit
+      - Right Orbit
+      - Oropharynx
+      - Bilateral Ovary
+      - Left Ovary
+      - Right Ovary
+      - Hard Palate
+      - Soft Palate
+      - Palate Unspecified
+      - Pancreas
+      - Para-Aortic Nodes
+      - Left Parotid
+      - Right Parotid
+      - Bilateral Pelvis
+      - Left Pelvis
+      - Right Pelvis
+      - Penis
+      - Perineum
+      - Pituitary
+      - Left Pleura (As in Mesothelioma)
+      - Right Pleura
+      - Prostate
+      - Pubis
+      - Pyriform Fossa (Sinuses)
+      - Left Radius
+      - Right Radius
+      - Rectum (Includes Sigmoid)
+      - Left Ribs
+      - Right Ribs
+      - Sacrum
+      - Left Salivary Gland
+      - Right Salivary Gland
+      - Bilateral Scapula
+      - Left Scapula
+      - Right Scapula
+      - Bilateral Supraclavicular Nodes
+      - Left Supraclavicular Nodes
+      - Right Supraclavicular Nodes
+      - Bilateral Scalp
+      - Left Scalp
+      - Right Scalp
+      - Scrotum
+      - Bilateral Shoulder
+      - Left Shoulder
+      - Right Shoulder
+      - Whole Body - Skin
+      - Skull
+      - Cervical & Thoracic Spine
+      - Sphenoid Sinus
+      - Cervical Spine
+      - Lumbar Spine
+      - Thoracic Spine
+      - Whole Spine
+      - Spleen
+      - Lumbo-Sacral Spine
+      - Thoracic & Lumbar Spine
+      - Sternum
+      - Stomach
+      - Submandibular Glands
+      - Left Temple
+      - Right Temple
+      - Bilateral Testis
+      - Left Testis
+      - Right Testis
+      - Thyroid
+      - Left Tibia
+      - Right Tibia
+      - Left Toes
+      - Right Toes
+      - Tongue
+      - Tonsil
+      - Trachea
+      - Left Ulna
+      - Right Ulna
+      - Left Ureter
+      - Right Ureter
+      - Urethra
+      - Uterus
+      - Uvula
+      - Vagina
+      - Vulva
+      - Abdomen
+      - Body
+      - Chest
+      - Lower Limb
+      - Neck
+      - Other
+      - Pelvis
+      - Skin
+      - Spine
+      - Upper Limb
       type: string
       description: |-
-        * `Cervical lymph node group` - Cervical lymph node group
-        * `Entire lymph node of thorax` - Entire lymph node of thorax
-        * `Axillary lymph node group` - Axillary lymph node group
-        * `Supraclavicular lymph node group` - Supraclavicular lymph node group
-        * `Internal mammary lymph node group` - Internal mammary lymph node group
-        * `Abdominal lymph node group` - Abdominal lymph node group
-        * `Pelvic lymph node group` - Pelvic lymph node group
-        * `Structure of lymph node` - Structure of lymph node
-        * `Entire eye` - Entire eye
-        * `Pituitary structure` - Pituitary structure
-        * `Brain structure` - Brain structure
-        * `Brain part` - Brain part
-        * `Spinal cord structure` - Spinal cord structure
-        * `Nasopharyngeal structure` - Nasopharyngeal structure
-        * `Oral cavity structure` - Oral cavity structure
-        * `Oropharyngeal structure` - Oropharyngeal structure
-        * `Laryngeal structure` - Laryngeal structure
-        * `Hypopharyngeal structure` - Hypopharyngeal structure
-        * `Nasal sinus structure` - Nasal sinus structure
-        * `Salivary gland structure` - Salivary gland structure
-        * `Thyroid structure` - Thyroid structure
-        * `Entire head and neck` - Entire head and neck
-        * `Entire lung` - Entire lung
-        * `Mesothelium structure` - Mesothelium structure
-        * `Entire thorax` - Entire thorax
-        * `Entire breast` - Entire breast
-        * `Breast part` - Breast part
-        * `Chest wall structure` - Chest wall structure
-        * `Entire esophagus` - Entire esophagus
-        * `Stomach structure` - Stomach structure
-        * `Small intestinal structure` - Small intestinal structure
-        * `Colon structure` - Colon structure
-        * `Rectum structure` - Rectum structure
-        * `Anal structure` - Anal structure
-        * `Liver structure` - Liver structure
-        * `Biliary tract structure` - Biliary tract structure
-        * `Gallbladder structure` - Gallbladder structure
-        * `Pancreatic structure` - Pancreatic structure
-        * `Abdominal structure` - Abdominal structure
-        * `Entire urinary bladder` - Entire urinary bladder
-        * `Bladder part` - Bladder part
-        * `Kidney structure` - Kidney structure
-        * `Ureteric structure` - Ureteric structure
-        * `Entire prostate` - Entire prostate
-        * `Prostate part` - Prostate part
-        * `Urethral structure` - Urethral structure
-        * `Penile structure` - Penile structure
-        * `Testis structure` - Testis structure
-        * `Scrotal structure` - Scrotal structure
-        * `Ovarian structure` - Ovarian structure
-        * `Fallopian tube structure` - Fallopian tube structure
-        * `Uterine structure` - Uterine structure
-        * `Cervix uteri structure` - Cervix uteri structure
-        * `Vaginal structure` - Vaginal structure
-        * `Vulval structure` - Vulval structure
-        * `Bone structure of cranium` - Bone structure of cranium
-        * `Entire vertebral column` - Entire vertebral column
-        * `Shoulder region structure` - Shoulder region structure
-        * `Bone structure of rib` - Bone structure of rib
-        * `Hip region structure` - Hip region structure
-        * `Entire bony pelvis` - Entire bony pelvis
-        * `Pelvic structure` - Pelvic structure
-        * `Bone structure of extremity` - Bone structure of extremity
-        * `Skin structure` - Skin structure
-        * `Soft tissues` - Soft tissues
-        * `Entire body as a whole` - Entire body as a whole
+        * `Left Abdomen` - Left Abdomen
+        * `Whole Abdomen` - Whole Abdomen
+        * `Right Abdomen` - Right Abdomen
+        * `Lower Abdomen` - Lower Abdomen
+        * `Left Lower Abdomen` - Left Lower Abdomen
+        * `Right Lower Abdomen` - Right Lower Abdomen
+        * `Upper Abdomen` - Upper Abdomen
+        * `Left Upper Abdomen` - Left Upper Abdomen
+        * `Right Upper Abdomen` - Right Upper Abdomen
+        * `Left Adrenal` - Left Adrenal
+        * `Right Adrenal` - Right Adrenal
+        * `Bilateral Ankle` - Bilateral Ankle
+        * `Left Ankle` - Left Ankle
+        * `Right Ankle` - Right Ankle
+        * `Bilateral Antrum (Bull's Eye)` - Bilateral Antrum (Bull's Eye)
+        * `Left Antrum` - Left Antrum
+        * `Right Antrum` - Right Antrum
+        * `Anus` - Anus
+        * `Lower Left Arm` - Lower Left Arm
+        * `Lower Right Arm` - Lower Right Arm
+        * `Bilateral Arms` - Bilateral Arms
+        * `Left Arm` - Left Arm
+        * `Right Arm` - Right Arm
+        * `Upper Left Arm` - Upper Left Arm
+        * `Upper Right Arm` - Upper Right Arm
+        * `Left Axilla` - Left Axilla
+        * `Right Axilla` - Right Axilla
+        * `Skin or Soft Tissue of Back` - Skin or Soft Tissue of Back
+        * `Bile Duct` - Bile Duct
+        * `Bladder` - Bladder
+        * `Lower Body` - Lower Body
+        * `Middle Body` - Middle Body
+        * `Upper Body` - Upper Body
+        * `Whole Body` - Whole Body
+        * `Boost - Area Previously Treated` - Boost - Area Previously Treated
+        * `Brain` - Brain
+        * `Left Breast Boost` - Left Breast Boost
+        * `Right Breast Boost` - Right Breast Boost
+        * `Bilateral Breast` - Bilateral Breast
+        * `Left Breast` - Left Breast
+        * `Right Breast` - Right Breast
+        * `Bilateral Breasts with Nodes` - Bilateral Breasts with Nodes
+        * `Left Breast with Nodes` - Left Breast with Nodes
+        * `Right Breast with Nodes` - Right Breast with Nodes
+        * `Bilateral Buttocks` - Bilateral Buttocks
+        * `Left Buttock` - Left Buttock
+        * `Right Buttock` - Right Buttock
+        * `Inner Canthus` - Inner Canthus
+        * `Outer Canthus` - Outer Canthus
+        * `Cervix` - Cervix
+        * `Bilateral Chest Lung & Area Involve` - Bilateral Chest Lung & Area Involve
+        * `Left Chest` - Left Chest
+        * `Right Chest` - Right Chest
+        * `Chin` - Chin
+        * `Left Cheek` - Left Cheek
+        * `Right Cheek` - Right Cheek
+        * `Bilateral Chest Wall (W/o Breast)` - Bilateral Chest Wall (W/o Breast)
+        * `Left Chest Wall` - Left Chest Wall
+        * `Right Chest Wall` - Right Chest Wall
+        * `Bilateral Clavicle` - Bilateral Clavicle
+        * `Left Clavicle` - Left Clavicle
+        * `Right Clavicle` - Right Clavicle
+        * `Coccyx` - Coccyx
+        * `Colon` - Colon
+        * `Whole C.N.S. (Medulla Techinque)` - Whole C.N.S. (Medulla Techinque)
+        * `Csf Spine (Medull Tech 2 Diff Machi` - Csf Spine (Medull Tech 2 Diff Machi
+        * `Left Chestwall Boost` - Left Chestwall Boost
+        * `Right Chestwall Boost` - Right Chestwall Boost
+        * `Bilateral Chestwall with Nodes` - Bilateral Chestwall with Nodes
+        * `Left Chestwall with Nodes` - Left Chestwall with Nodes
+        * `Right Chestwall with Nodes` - Right Chestwall with Nodes
+        * `Left Ear` - Left Ear
+        * `Right Ear` - Right Ear
+        * `Epigastrium` - Epigastrium
+        * `Lower Esophagus` - Lower Esophagus
+        * `Middle Esophagus` - Middle Esophagus
+        * `Upper Esophagus` - Upper Esophagus
+        * `Entire Esophagus` - Entire Esophagus
+        * `Ethmoid Sinus` - Ethmoid Sinus
+        * `Bilateral Eyes` - Bilateral Eyes
+        * `Left Eye` - Left Eye
+        * `Right Eye` - Right Eye
+        * `Bilateral Face` - Bilateral Face
+        * `Left Face` - Left Face
+        * `Right Face` - Right Face
+        * `Left Fallopian Tubes` - Left Fallopian Tubes
+        * `Right Fallopian Tubes` - Right Fallopian Tubes
+        * `Bilateral Femur` - Bilateral Femur
+        * `Left Femur` - Left Femur
+        * `Right Femur` - Right Femur
+        * `Left Fibula` - Left Fibula
+        * `Right Fibula` - Right Fibula
+        * `Finger (Including Thumbs)` - Finger (Including Thumbs)
+        * `Floor of Mouth (Boosts)` - Floor of Mouth (Boosts)
+        * `Bilateral Feet` - Bilateral Feet
+        * `Left Foot` - Left Foot
+        * `Right Foot` - Right Foot
+        * `Forehead` - Forehead
+        * `Posterior Fossa` - Posterior Fossa
+        * `Gall Bladder` - Gall Bladder
+        * `Gingiva` - Gingiva
+        * `Bilateral Hand` - Bilateral Hand
+        * `Left Hand` - Left Hand
+        * `Right Hand` - Right Hand
+        * `Head` - Head
+        * `Bilateral Heel` - Bilateral Heel
+        * `Left Heel` - Left Heel
+        * `Right Heel` - Right Heel
+        * `Left Hemimantle` - Left Hemimantle
+        * `Right Hemimantle` - Right Hemimantle
+        * `Heart` - Heart
+        * `Bilateral Hip` - Bilateral Hip
+        * `Left Hip` - Left Hip
+        * `Right Hip` - Right Hip
+        * `Left Humerus` - Left Humerus
+        * `Right Humerus` - Right Humerus
+        * `Hypopharynx` - Hypopharynx
+        * `Bilateral Internal Mammary Chain` - Bilateral Internal Mammary Chain
+        * `Bilateral Inguinal Nodes` - Bilateral Inguinal Nodes
+        * `Left Inguinal Nodes` - Left Inguinal Nodes
+        * `Right Inguinal Nodes` - Right Inguinal Nodes
+        * `Inverted 'Y' (Dog-Leg,Hockey-Stick)` - Inverted 'Y' (Dog-Leg,Hockey-Stick)
+        * `Left Kidney` - Left Kidney
+        * `Right Kidney` - Right Kidney
+        * `Bilateral Knee` - Bilateral Knee
+        * `Left Knee` - Left Knee
+        * `Right Knee` - Right Knee
+        * `Bilateral Lacrimal Gland` - Bilateral Lacrimal Gland
+        * `Left Lacrimal Gland` - Left Lacrimal Gland
+        * `Right Lacrimal Gland` - Right Lacrimal Gland
+        * `Larygopharynx` - Larygopharynx
+        * `Larynx` - Larynx
+        * `Bilateral Leg` - Bilateral Leg
+        * `Left Leg` - Left Leg
+        * `Right Leg` - Right Leg
+        * `Lower Bilateral Leg` - Lower Bilateral Leg
+        * `Lower Left Leg` - Lower Left Leg
+        * `Lower Right Leg` - Lower Right Leg
+        * `Upper Bilateral Leg` - Upper Bilateral Leg
+        * `Upper Left Leg` - Upper Left Leg
+        * `Upper Right Leg` - Upper Right Leg
+        * `Both Eyelid(s)` - Both Eyelid(s)
+        * `Left Eyelid` - Left Eyelid
+        * `Right Eyelid` - Right Eyelid
+        * `Both Lip(s)` - Both Lip(s)
+        * `Lower Lip` - Lower Lip
+        * `Upper Lip` - Upper Lip
+        * `Liver` - Liver
+        * `Bilateral Lung` - Bilateral Lung
+        * `Left Lung` - Left Lung
+        * `Right Lung` - Right Lung
+        * `Bilateral Mandible` - Bilateral Mandible
+        * `Left Mandible` - Left Mandible
+        * `Right Mandible` - Right Mandible
+        * `Mantle` - Mantle
+        * `Bilateral Maxilla` - Bilateral Maxilla
+        * `Left Maxilla` - Left Maxilla
+        * `Right Maxilla` - Right Maxilla
+        * `Mediastinum` - Mediastinum
+        * `Multiple Skin` - Multiple Skin
+        * `Nasal Fossa` - Nasal Fossa
+        * `Nasopharynx` - Nasopharynx
+        * `Bilateral Neck Includes Nodes` - Bilateral Neck Includes Nodes
+        * `Left Neck Includes Nodes` - Left Neck Includes Nodes
+        * `Right Neck Includes Nodes` - Right Neck Includes Nodes
+        * `Neck - Skin` - Neck - Skin
+        * `Nose` - Nose
+        * `Oral Cavity / Buccal Mucosa` - Oral Cavity / Buccal Mucosa
+        * `Bilateral Orbit` - Bilateral Orbit
+        * `Left Orbit` - Left Orbit
+        * `Right Orbit` - Right Orbit
+        * `Oropharynx` - Oropharynx
+        * `Bilateral Ovary` - Bilateral Ovary
+        * `Left Ovary` - Left Ovary
+        * `Right Ovary` - Right Ovary
+        * `Hard Palate` - Hard Palate
+        * `Soft Palate` - Soft Palate
+        * `Palate Unspecified` - Palate Unspecified
+        * `Pancreas` - Pancreas
+        * `Para-Aortic Nodes` - Para-Aortic Nodes
+        * `Left Parotid` - Left Parotid
+        * `Right Parotid` - Right Parotid
+        * `Bilateral Pelvis` - Bilateral Pelvis
+        * `Left Pelvis` - Left Pelvis
+        * `Right Pelvis` - Right Pelvis
+        * `Penis` - Penis
+        * `Perineum` - Perineum
+        * `Pituitary` - Pituitary
+        * `Left Pleura (As in Mesothelioma)` - Left Pleura (As in Mesothelioma)
+        * `Right Pleura` - Right Pleura
+        * `Prostate` - Prostate
+        * `Pubis` - Pubis
+        * `Pyriform Fossa (Sinuses)` - Pyriform Fossa (Sinuses)
+        * `Left Radius` - Left Radius
+        * `Right Radius` - Right Radius
+        * `Rectum (Includes Sigmoid)` - Rectum (Includes Sigmoid)
+        * `Left Ribs` - Left Ribs
+        * `Right Ribs` - Right Ribs
+        * `Sacrum` - Sacrum
+        * `Left Salivary Gland` - Left Salivary Gland
+        * `Right Salivary Gland` - Right Salivary Gland
+        * `Bilateral Scapula` - Bilateral Scapula
+        * `Left Scapula` - Left Scapula
+        * `Right Scapula` - Right Scapula
+        * `Bilateral Supraclavicular Nodes` - Bilateral Supraclavicular Nodes
+        * `Left Supraclavicular Nodes` - Left Supraclavicular Nodes
+        * `Right Supraclavicular Nodes` - Right Supraclavicular Nodes
+        * `Bilateral Scalp` - Bilateral Scalp
+        * `Left Scalp` - Left Scalp
+        * `Right Scalp` - Right Scalp
+        * `Scrotum` - Scrotum
+        * `Bilateral Shoulder` - Bilateral Shoulder
+        * `Left Shoulder` - Left Shoulder
+        * `Right Shoulder` - Right Shoulder
+        * `Whole Body - Skin` - Whole Body - Skin
+        * `Skull` - Skull
+        * `Cervical & Thoracic Spine` - Cervical & Thoracic Spine
+        * `Sphenoid Sinus` - Sphenoid Sinus
+        * `Cervical Spine` - Cervical Spine
+        * `Lumbar Spine` - Lumbar Spine
+        * `Thoracic Spine` - Thoracic Spine
+        * `Whole Spine` - Whole Spine
+        * `Spleen` - Spleen
+        * `Lumbo-Sacral Spine` - Lumbo-Sacral Spine
+        * `Thoracic & Lumbar Spine` - Thoracic & Lumbar Spine
+        * `Sternum` - Sternum
+        * `Stomach` - Stomach
+        * `Submandibular Glands` - Submandibular Glands
+        * `Left Temple` - Left Temple
+        * `Right Temple` - Right Temple
+        * `Bilateral Testis` - Bilateral Testis
+        * `Left Testis` - Left Testis
+        * `Right Testis` - Right Testis
+        * `Thyroid` - Thyroid
+        * `Left Tibia` - Left Tibia
+        * `Right Tibia` - Right Tibia
+        * `Left Toes` - Left Toes
+        * `Right Toes` - Right Toes
+        * `Tongue` - Tongue
+        * `Tonsil` - Tonsil
+        * `Trachea` - Trachea
+        * `Left Ulna` - Left Ulna
+        * `Right Ulna` - Right Ulna
+        * `Left Ureter` - Left Ureter
+        * `Right Ureter` - Right Ureter
+        * `Urethra` - Urethra
+        * `Uterus` - Uterus
+        * `Uvula` - Uvula
+        * `Vagina` - Vagina
+        * `Vulva` - Vulva
+        * `Abdomen` - Abdomen
+        * `Body` - Body
+        * `Chest` - Chest
+        * `Lower Limb` - Lower Limb
+        * `Neck` - Neck
+        * `Other` - Other
+        * `Pelvis` - Pelvis
+        * `Skin` - Skin
+        * `Spine` - Spine
+        * `Upper Limb` - Upper Limb
     BasisOfDiagnosisEnum:
       enum:
       - Clinical investigation
@@ -2635,6 +3316,61 @@ components:
         id:
           type: string
           format: uuid
+        er_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        pr_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        her2_ihc_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/Her2StatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        her2_ish_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/Her2StatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        hpv_ihc_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        hpv_pcr_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        hpv_strain:
+          type: array
+          items:
+            nullable: true
+            oneOf:
+            - $ref: '#/components/schemas/HpvStrainEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+            - $ref: '#/components/schemas/NullEnum'
+          nullable: true
+        er_percent_positive:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        pr_percent_positive:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
         test_interval:
           type: integer
           maximum: 32767
@@ -2672,6 +3408,13 @@ components:
           type: string
           nullable: true
       required:
+      - er_status
+      - her2_ihc_status
+      - her2_ish_status
+      - hpv_ihc_status
+      - hpv_pcr_status
+      - hpv_strain
+      - pr_status
       - program_id
       - submitter_donor_id
     BlankEnum:
@@ -2693,26 +3436,32 @@ components:
         id:
           type: string
           format: uuid
-        chemotherapy_dosage_units:
+        chemotherapy_drug_dose_units:
           nullable: true
           oneOf:
           - $ref: '#/components/schemas/DosageUnitsEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        drug_reference_database:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/DrugReferenceDatabaseEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
         drug_name:
           type: string
           nullable: true
           maxLength: 255
-        drug_rxnormcui:
+        drug_reference_identifier:
           type: string
           nullable: true
           maxLength: 64
-        cumulative_drug_dosage_prescribed:
+        prescribed_cumulative_drug_dose:
           type: integer
           maximum: 32767
           minimum: 0
           nullable: true
-        cumulative_drug_dosage_actual:
+        actual_cumulative_drug_dose:
           type: integer
           maximum: 32767
           minimum: 0
@@ -2724,7 +3473,8 @@ components:
         submitter_treatment_id:
           type: string
       required:
-      - chemotherapy_dosage_units
+      - chemotherapy_drug_dose_units
+      - drug_reference_database
       - program_id
       - submitter_donor_id
       - submitter_treatment_id
@@ -2795,7 +3545,7 @@ components:
       - Loco-regional progression
       - No evidence of disease
       - Partial remission
-      - Progression NOS
+      - Progression not otherwise specified
       - Relapse or recurrence
       - Stable
       type: string
@@ -2805,7 +3555,7 @@ components:
         * `Loco-regional progression` - Loco-regional progression
         * `No evidence of disease` - No evidence of disease
         * `Partial remission` - Partial remission
-        * `Progression NOS` - Progression NOS
+        * `Progression not otherwise specified` - Progression not otherwise specified
         * `Relapse or recurrence` - Relapse or recurrence
         * `Stable` - Stable
     Donor:
@@ -2840,17 +3590,48 @@ components:
             - $ref: '#/components/schemas/BlankEnum'
             - $ref: '#/components/schemas/NullEnum'
           nullable: true
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        sex_at_birth:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SexAtBirthEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        lost_to_followup_reason:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/LostToFollowupReasonEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        date_alive_after_lost_to_followup:
+          type: string
+          nullable: true
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         is_deceased:
           type: boolean
           nullable: true
+        lost_to_followup_after_clinical_event_identifier:
+          type: string
+          nullable: true
+          maxLength: 255
         program_id:
           type: string
       required:
       - cause_of_death
+      - date_alive_after_lost_to_followup
       - date_of_birth
       - date_of_death
+      - gender
+      - lost_to_followup_reason
       - primary_site
       - program_id
+      - sex_at_birth
       - submitter_donor_id
     DonorWithClinicalData:
       type: object
@@ -2880,6 +3661,18 @@ components:
           nullable: true
           maxLength: 32
           pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        sex_at_birth:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SexAtBirthEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         primary_site:
           type: array
           items:
@@ -2908,40 +3701,93 @@ components:
       - cause_of_death
       - date_of_birth
       - date_of_death
+      - gender
       - primary_site
       - program_id
+      - sex_at_birth
       - submitter_donor_id
     DosageUnitsEnum:
       enum:
       - mg/m2
       - IU/m2
+      - IU/kg
       - ug/m2
       - g/m2
       - mg/kg
+      - cells/kg
       type: string
       description: |-
         * `mg/m2` - mg/m2
         * `IU/m2` - IU/m2
+        * `IU/kg` - IU/kg
         * `ug/m2` - ug/m2
         * `g/m2` - g/m2
         * `mg/kg` - mg/kg
+        * `cells/kg` - cells/kg
+    DrugReferenceDatabaseEnum:
+      enum:
+      - RxNorm
+      - PubChem
+      - NCI Thesaurus
+      type: string
+      description: |-
+        * `RxNorm` - RxNorm
+        * `PubChem` - PubChem
+        * `NCI Thesaurus` - NCI Thesaurus
+    ErPrHpvStatusEnum:
+      enum:
+      - Cannot be determined
+      - Negative
+      - Not applicable
+      - Positive
+      - Unknown
+      type: string
+      description: |-
+        * `Cannot be determined` - Cannot be determined
+        * `Negative` - Negative
+        * `Not applicable` - Not applicable
+        * `Positive` - Positive
+        * `Unknown` - Unknown
+    Exposure:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tobacco_smoking_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/TobaccoSmokingStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        tobacco_type:
+          type: array
+          items:
+            nullable: true
+            oneOf:
+            - $ref: '#/components/schemas/TobaccoTypeEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+            - $ref: '#/components/schemas/NullEnum'
+          nullable: true
+        pack_years_smoked:
+          type: number
+          format: double
+          nullable: true
+        program_id:
+          type: string
+        submitter_donor_id:
+          type: string
+      required:
+      - program_id
+      - submitter_donor_id
+      - tobacco_smoking_status
+      - tobacco_type
     FollowUp:
       type: object
       properties:
         submitter_follow_up_id:
           type: string
           maxLength: 64
-        date_of_followup:
-          type: string
-          nullable: true
-          maxLength: 32
-          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        lost_to_followup_reason:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/LostToFollowupReasonEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         disease_status_at_followup:
           nullable: true
           oneOf:
@@ -2971,11 +3817,14 @@ components:
           maxLength: 32
           pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         recurrence_tumour_staging_system:
+          type: array
+          items:
+            nullable: true
+            oneOf:
+            - $ref: '#/components/schemas/StagingSystemEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+            - $ref: '#/components/schemas/NullEnum'
           nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/StagingSystemEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         recurrence_t_category:
           nullable: true
           oneOf:
@@ -3000,9 +3849,10 @@ components:
           - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        lost_to_followup:
-          type: boolean
+        date_of_followup:
+          type: string
           nullable: true
+          maxLength: 32
         program_id:
           type: string
         submitter_donor_id:
@@ -3015,10 +3865,8 @@ components:
           nullable: true
       required:
       - anatomic_site_progression_or_recurrence
-      - date_of_followup
       - date_of_relapse
       - disease_status_at_followup
-      - lost_to_followup_reason
       - method_of_progression_status
       - program_id
       - recurrence_m_category
@@ -3039,32 +3887,54 @@ components:
         * `Man` - Man
         * `Woman` - Woman
         * `Non-binary` - Non-binary
+    Her2StatusEnum:
+      enum:
+      - Cannot be determined
+      - Equivocal
+      - Positive
+      - Negative
+      - Not applicable
+      - Unknown
+      type: string
+      description: |-
+        * `Cannot be determined` - Cannot be determined
+        * `Equivocal` - Equivocal
+        * `Positive` - Positive
+        * `Negative` - Negative
+        * `Not applicable` - Not applicable
+        * `Unknown` - Unknown
     HormoneTherapy:
       type: object
       properties:
         id:
           type: string
           format: uuid
-        hormone_drug_dosage_units:
+        hormone_drug_dose_units:
           nullable: true
           oneOf:
           - $ref: '#/components/schemas/DosageUnitsEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        drug_reference_database:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/DrugReferenceDatabaseEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
         drug_name:
           type: string
           nullable: true
           maxLength: 255
-        drug_rxnormcui:
+        drug_reference_identifier:
           type: string
           nullable: true
           maxLength: 64
-        cumulative_drug_dosage_prescribed:
+        prescribed_cumulative_drug_dose:
           type: integer
           maximum: 32767
           minimum: 0
           nullable: true
-        cumulative_drug_dosage_actual:
+        actual_cumulative_drug_dose:
           type: integer
           maximum: 32767
           minimum: 0
@@ -3076,10 +3946,45 @@ components:
         submitter_treatment_id:
           type: string
       required:
-      - hormone_drug_dosage_units
+      - drug_reference_database
+      - hormone_drug_dose_units
       - program_id
       - submitter_donor_id
       - submitter_treatment_id
+    HpvStrainEnum:
+      enum:
+      - HPV16
+      - HPV18
+      - HPV31
+      - HPV33
+      - HPV35
+      - HPV39
+      - HPV45
+      - HPV51
+      - HPV52
+      - HPV56
+      - HPV58
+      - HPV59
+      - HPV66
+      - HPV68
+      - HPV73
+      type: string
+      description: |-
+        * `HPV16` - HPV16
+        * `HPV18` - HPV18
+        * `HPV31` - HPV31
+        * `HPV33` - HPV33
+        * `HPV35` - HPV35
+        * `HPV39` - HPV39
+        * `HPV45` - HPV45
+        * `HPV51` - HPV51
+        * `HPV52` - HPV52
+        * `HPV56` - HPV56
+        * `HPV58` - HPV58
+        * `HPV59` - HPV59
+        * `HPV66` - HPV66
+        * `HPV68` - HPV68
+        * `HPV73` - HPV73
     Immunotherapy:
       type: object
       properties:
@@ -3092,14 +3997,36 @@ components:
           - $ref: '#/components/schemas/ImmunotherapyTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        drug_reference_database:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/DrugReferenceDatabaseEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        immunotherapy_drug_dose_units:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/DosageUnitsEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         drug_name:
           type: string
           nullable: true
           maxLength: 255
-        drug_rxnormcui:
+        drug_reference_identifier:
           type: string
           nullable: true
           maxLength: 64
+        prescribed_cumulative_drug_dose:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        actual_cumulative_drug_dose:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
         program_id:
           type: string
         submitter_donor_id:
@@ -3107,6 +4034,8 @@ components:
         submitter_treatment_id:
           type: string
       required:
+      - drug_reference_database
+      - immunotherapy_drug_dose_units
       - immunotherapy_type
       - program_id
       - submitter_donor_id
@@ -3123,6 +4052,24 @@ components:
         * `Immune checkpoint inhibitors` - Immune checkpoint inhibitors
         * `Monoclonal antibodies other than immune checkpoint inhibitors` - Monoclonal antibodies other than immune checkpoint inhibitors
         * `Other immunomodulatory substances` - Other immunomodulatory substances
+    LateralityEnum:
+      enum:
+      - Bilateral
+      - Left
+      - Midline
+      - Not a paired site
+      - Right
+      - Unilateral, side not specified
+      - Unknown
+      type: string
+      description: |-
+        * `Bilateral` - Bilateral
+        * `Left` - Left
+        * `Midline` - Midline
+        * `Not a paired site` - Not a paired site
+        * `Right` - Right
+        * `Unilateral, side not specified` - Unilateral, side not specified
+        * `Unknown` - Unknown
     LateralityOfPriorMalignancyEnum:
       enum:
       - Bilateral
@@ -3357,32 +4304,39 @@ components:
         id:
           type: string
           format: uuid
-        chemotherapy_dosage_units:
+        chemotherapy_drug_dose_units:
           nullable: true
           oneOf:
           - $ref: '#/components/schemas/DosageUnitsEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        drug_reference_database:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/DrugReferenceDatabaseEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
         drug_name:
           type: string
           nullable: true
           maxLength: 255
-        drug_rxnormcui:
+        drug_reference_identifier:
           type: string
           nullable: true
           maxLength: 64
-        cumulative_drug_dosage_prescribed:
+        prescribed_cumulative_drug_dose:
           type: integer
           maximum: 32767
           minimum: 0
           nullable: true
-        cumulative_drug_dosage_actual:
+        actual_cumulative_drug_dose:
           type: integer
           maximum: 32767
           minimum: 0
           nullable: true
       required:
-      - chemotherapy_dosage_units
+      - chemotherapy_drug_dose_units
+      - drug_reference_database
     NestedComorbidity:
       type: object
       properties:
@@ -3431,16 +4385,6 @@ components:
           type: string
           nullable: true
           maxLength: 32
-          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
-        lost_to_followup:
-          type: boolean
-          nullable: true
-        lost_to_followup_reason:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/LostToFollowupReasonEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         disease_status_at_followup:
           nullable: true
           oneOf:
@@ -3470,11 +4414,14 @@ components:
           maxLength: 32
           pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         recurrence_tumour_staging_system:
+          type: array
+          items:
+            nullable: true
+            oneOf:
+            - $ref: '#/components/schemas/StagingSystemEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+            - $ref: '#/components/schemas/NullEnum'
           nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/StagingSystemEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         recurrence_t_category:
           nullable: true
           oneOf:
@@ -3506,10 +4453,8 @@ components:
           readOnly: true
       required:
       - anatomic_site_progression_or_recurrence
-      - date_of_followup
       - date_of_relapse
       - disease_status_at_followup
-      - lost_to_followup_reason
       - method_of_progression_status
       - recurrence_m_category
       - recurrence_n_category
@@ -3523,32 +4468,39 @@ components:
         id:
           type: string
           format: uuid
-        hormone_drug_dosage_units:
+        hormone_drug_dose_units:
           nullable: true
           oneOf:
           - $ref: '#/components/schemas/DosageUnitsEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        drug_reference_database:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/DrugReferenceDatabaseEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
         drug_name:
           type: string
           nullable: true
           maxLength: 255
-        drug_rxnormcui:
+        drug_reference_identifier:
           type: string
           nullable: true
           maxLength: 64
-        cumulative_drug_dosage_prescribed:
+        prescribed_cumulative_drug_dose:
           type: integer
           maximum: 32767
           minimum: 0
           nullable: true
-        cumulative_drug_dosage_actual:
+        actual_cumulative_drug_dose:
           type: integer
           maximum: 32767
           minimum: 0
           nullable: true
       required:
-      - hormone_drug_dosage_units
+      - drug_reference_database
+      - hormone_drug_dose_units
     NestedImmunotherapy:
       type: object
       properties:
@@ -3561,15 +4513,39 @@ components:
           - $ref: '#/components/schemas/ImmunotherapyTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        drug_reference_database:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/DrugReferenceDatabaseEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        immunotherapy_drug_dose_units:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/DosageUnitsEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         drug_name:
           type: string
           nullable: true
           maxLength: 255
-        drug_rxnormcui:
+        drug_reference_identifier:
           type: string
           nullable: true
           maxLength: 64
+        prescribed_cumulative_drug_dose:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        actual_cumulative_drug_dose:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
       required:
+      - drug_reference_database
+      - immunotherapy_drug_dose_units
       - immunotherapy_type
     NestedPrimaryDiagnosis:
       type: object
@@ -3718,18 +4694,6 @@ components:
           type: string
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
-        gender:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/GenderEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        sex_at_birth:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/SexAtBirthEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         specimen_tissue_source:
           nullable: true
           oneOf:
@@ -3755,9 +4719,7 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
       required:
-      - gender
       - sample_type
-      - sex_at_birth
       - specimen_tissue_source
       - specimen_type
       - submitter_sample_id
@@ -4176,6 +5138,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DonorWithClinicalData'
+    PaginatedExposureList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Exposure'
     PaginatedFollowUpList:
       type: object
       properties:
@@ -4472,6 +5454,12 @@ components:
           - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        laterality:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/LateralityEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         cancer_type_code:
           type: string
           nullable: true
@@ -4493,6 +5481,7 @@ components:
       - clinical_t_category
       - clinical_tumour_staging_system
       - date_of_diagnosis
+      - laterality
       - lymph_nodes_examined_method
       - lymph_nodes_examined_status
       - program_id
@@ -4565,11 +5554,11 @@ components:
       - Thyroid gland
       - Tonsil
       - Trachea
-      - Unknown primary site
       - Ureter
       - Uterus, NOS
       - Vagina
       - Vulva
+      - Unknown primary site
       type: string
       description: |-
         * `Accessory sinuses` - Accessory sinuses
@@ -4637,11 +5626,11 @@ components:
         * `Thyroid gland` - Thyroid gland
         * `Tonsil` - Tonsil
         * `Trachea` - Trachea
-        * `Unknown primary site` - Unknown primary site
         * `Ureter` - Ureter
         * `Uterus, NOS` - Uterus, NOS
         * `Vagina` - Vagina
         * `Vulva` - Vulva
+        * `Unknown primary site` - Unknown primary site
     Program:
       type: object
       properties:
@@ -4714,6 +5703,7 @@ components:
     RadiationTherapyModalityEnum:
       enum:
       - Megavoltage radiation therapy using photons (procedure)
+      - Radiopharmaceutical
       - Teleradiotherapy using electrons (procedure)
       - Teleradiotherapy protons (procedure)
       - Teleradiotherapy neutrons (procedure)
@@ -4722,6 +5712,7 @@ components:
       type: string
       description: |-
         * `Megavoltage radiation therapy using photons (procedure)` - Megavoltage radiation therapy using photons (procedure)
+        * `Radiopharmaceutical` - Radiopharmaceutical
         * `Teleradiotherapy using electrons (procedure)` - Teleradiotherapy using electrons (procedure)
         * `Teleradiotherapy protons (procedure)` - Teleradiotherapy protons (procedure)
         * `Teleradiotherapy neutrons (procedure)` - Teleradiotherapy neutrons (procedure)
@@ -4785,6 +5776,7 @@ components:
       - Response Assessment in Neuro-Oncology (RANO)
       - AML Response Criteria
       - Physician Assessed Response Criteria
+      - Blazer score
       type: string
       description: |-
         * `RECIST 1.1` - RECIST 1.1
@@ -4793,6 +5785,7 @@ components:
         * `Response Assessment in Neuro-Oncology (RANO)` - Response Assessment in Neuro-Oncology (RANO)
         * `AML Response Criteria` - AML Response Criteria
         * `Physician Assessed Response Criteria` - Physician Assessed Response Criteria
+        * `Blazer score` - Blazer score
     ResponseToTreatmentEnum:
       enum:
       - Complete response
@@ -4817,6 +5810,7 @@ components:
       - Physician assessed partial response
       - Physician assessed stable disease
       - No evidence of disease (NED)
+      - Major response
       type: string
       description: |-
         * `Complete response` - Complete response
@@ -4841,6 +5835,7 @@ components:
         * `Physician assessed partial response` - Physician assessed partial response
         * `Physician assessed stable disease` - Physician assessed stable disease
         * `No evidence of disease (NED)` - No evidence of disease (NED)
+        * `Major response` - Major response
     SampleRegistration:
       type: object
       properties:
@@ -4848,18 +5843,6 @@ components:
           type: string
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
-        gender:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/GenderEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        sex_at_birth:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/SexAtBirthEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         specimen_tissue_source:
           nullable: true
           oneOf:
@@ -4891,10 +5874,8 @@ components:
         submitter_specimen_id:
           type: string
       required:
-      - gender
       - program_id
       - sample_type
-      - sex_at_birth
       - specimen_tissue_source
       - specimen_type
       - submitter_donor_id
@@ -5029,6 +6010,18 @@ components:
           - $ref: '#/components/schemas/PercentTumourCellsMeasurementMethodEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        specimen_processing:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SpecimenProcessingEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        specimen_laterality:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SpecimenLateralityEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         program_id:
           type: string
         submitter_donor_id:
@@ -5048,6 +6041,8 @@ components:
       - reference_pathology_confirmed_tumour_presence
       - specimen_anatomic_location
       - specimen_collection_date
+      - specimen_laterality
+      - specimen_processing
       - specimen_storage
       - submitter_donor_id
       - submitter_primary_diagnosis_id
@@ -5055,6 +6050,42 @@ components:
       - tumour_grade
       - tumour_grading_system
       - tumour_histological_type
+    SpecimenLateralityEnum:
+      enum:
+      - Left
+      - Not applicable
+      - Right
+      - Unknown
+      type: string
+      description: |-
+        * `Left` - Left
+        * `Not applicable` - Not applicable
+        * `Right` - Right
+        * `Unknown` - Unknown
+    SpecimenProcessingEnum:
+      enum:
+      - Cryopreservation in liquid nitrogen (dead tissue)
+      - Cryopreservation in dry ice (dead tissue)
+      - Cryopreservation of live cells in liquid nitrogen
+      - Cryopreservation - other
+      - Formalin fixed & paraffin embedded
+      - Formalin fixed - buffered
+      - Formalin fixed - unbuffered
+      - Fresh
+      - Other
+      - Unknown
+      type: string
+      description: |-
+        * `Cryopreservation in liquid nitrogen (dead tissue)` - Cryopreservation in liquid nitrogen (dead tissue)
+        * `Cryopreservation in dry ice (dead tissue)` - Cryopreservation in dry ice (dead tissue)
+        * `Cryopreservation of live cells in liquid nitrogen` - Cryopreservation of live cells in liquid nitrogen
+        * `Cryopreservation - other` - Cryopreservation - other
+        * `Formalin fixed & paraffin embedded` - Formalin fixed & paraffin embedded
+        * `Formalin fixed - buffered` - Formalin fixed - buffered
+        * `Formalin fixed - unbuffered` - Formalin fixed - unbuffered
+        * `Fresh` - Fresh
+        * `Other` - Other
+        * `Unknown` - Unknown
     SpecimenStorageEnum:
       enum:
       - Cut slide
@@ -5079,75 +6110,81 @@ components:
         * `Unknown` - Unknown
     SpecimenTissueSourceEnum:
       enum:
+      - Abdominal fluid
       - Amniotic fluid
-      - Bile Fluid
-      - Whole blood
-      - Blood arterial
+      - Arterial blood
+      - Bile
+      - Blood derived - bone marrow
+      - Blood derived - peripheral blood
+      - Bone marrow fluid
+      - Bone marrow derived mononuclear cells
+      - Buccal cell
+      - Buffy coat
+      - Cerebrospinal fluid
+      - Cervical mucus
+      - Convalescent plasma
       - Cord blood
-      - Blood venous
-      - Bone
-      - Serum, Convalescent
-      - Cerebral spinal fluid
-      - Cervical Mucus
       - Duodenal fluid
-      - Blood, Fetal
-      - Fluid, Abdomen
-      - Genital vaginal
-      - Fluid, Hydrocele
-      - Fluid, Joint
-      - Fluid, Kidney
-      - Fluid, Lumbar Sac
-      - Marrow
+      - Female genital fluid
+      - Fetal blood
+      - Hydrocele fluid
+      - Male genital fluid
       - Pancreatic fluid
-      - Fluid, Pericardial
-      - Placenta
-      - Pleural fluid (thoracentesis fluid)
+      - Pericardial effusion
+      - Pleural fluid
+      - Renal cyst fluid
       - Saliva
-      - Skin
       - Seminal fluid
-      - Fluid, synovial (Joint fluid)
+      - Serum
+      - Solid tissue
       - Sputum
-      - Tissue
-      - Vitreous Fluid
+      - Synovial fluid
+      - Urine
+      - Venous blood
+      - Vitreous fluid
+      - Whole blood
       - Wound
       type: string
       description: |-
+        * `Abdominal fluid` - Abdominal fluid
         * `Amniotic fluid` - Amniotic fluid
-        * `Bile Fluid` - Bile Fluid
-        * `Whole blood` - Whole blood
-        * `Blood arterial` - Blood arterial
+        * `Arterial blood` - Arterial blood
+        * `Bile` - Bile
+        * `Blood derived - bone marrow` - Blood derived - bone marrow
+        * `Blood derived - peripheral blood` - Blood derived - peripheral blood
+        * `Bone marrow fluid` - Bone marrow fluid
+        * `Bone marrow derived mononuclear cells` - Bone marrow derived mononuclear cells
+        * `Buccal cell` - Buccal cell
+        * `Buffy coat` - Buffy coat
+        * `Cerebrospinal fluid` - Cerebrospinal fluid
+        * `Cervical mucus` - Cervical mucus
+        * `Convalescent plasma` - Convalescent plasma
         * `Cord blood` - Cord blood
-        * `Blood venous` - Blood venous
-        * `Bone` - Bone
-        * `Serum, Convalescent` - Serum, Convalescent
-        * `Cerebral spinal fluid` - Cerebral spinal fluid
-        * `Cervical Mucus` - Cervical Mucus
         * `Duodenal fluid` - Duodenal fluid
-        * `Blood, Fetal` - Blood, Fetal
-        * `Fluid, Abdomen` - Fluid, Abdomen
-        * `Genital vaginal` - Genital vaginal
-        * `Fluid, Hydrocele` - Fluid, Hydrocele
-        * `Fluid, Joint` - Fluid, Joint
-        * `Fluid, Kidney` - Fluid, Kidney
-        * `Fluid, Lumbar Sac` - Fluid, Lumbar Sac
-        * `Marrow` - Marrow
+        * `Female genital fluid` - Female genital fluid
+        * `Fetal blood` - Fetal blood
+        * `Hydrocele fluid` - Hydrocele fluid
+        * `Male genital fluid` - Male genital fluid
         * `Pancreatic fluid` - Pancreatic fluid
-        * `Fluid, Pericardial` - Fluid, Pericardial
-        * `Placenta` - Placenta
-        * `Pleural fluid (thoracentesis fluid)` - Pleural fluid (thoracentesis fluid)
+        * `Pericardial effusion` - Pericardial effusion
+        * `Pleural fluid` - Pleural fluid
+        * `Renal cyst fluid` - Renal cyst fluid
         * `Saliva` - Saliva
-        * `Skin` - Skin
         * `Seminal fluid` - Seminal fluid
-        * `Fluid, synovial (Joint fluid)` - Fluid, synovial (Joint fluid)
+        * `Serum` - Serum
+        * `Solid tissue` - Solid tissue
         * `Sputum` - Sputum
-        * `Tissue` - Tissue
-        * `Vitreous Fluid` - Vitreous Fluid
+        * `Synovial fluid` - Synovial fluid
+        * `Urine` - Urine
+        * `Venous blood` - Venous blood
+        * `Vitreous fluid` - Vitreous fluid
+        * `Whole blood` - Whole blood
         * `Wound` - Wound
     SpecimenTypeEnum:
       enum:
       - Cell line - derived from normal
-      - Cell line - derived from metastatic tumour
       - Cell line - derived from primary tumour
+      - Cell line - derived from metastatic tumour
       - Cell line - derived from xenograft tumour
       - Metastatic tumour - additional metastatic
       - Metastatic tumour - metastasis local to lymph node
@@ -5159,14 +6196,15 @@ components:
       - Primary tumour - adjacent to normal
       - Primary tumour
       - Recurrent tumour
+      - Tumour - unknown if derived from primary or metastatic tumour
       - Xenograft - derived from primary tumour
       - Xenograft - derived from metastatic tumour
       - Xenograft - derived from tumour cell line
       type: string
       description: |-
         * `Cell line - derived from normal` - Cell line - derived from normal
-        * `Cell line - derived from metastatic tumour` - Cell line - derived from metastatic tumour
         * `Cell line - derived from primary tumour` - Cell line - derived from primary tumour
+        * `Cell line - derived from metastatic tumour` - Cell line - derived from metastatic tumour
         * `Cell line - derived from xenograft tumour` - Cell line - derived from xenograft tumour
         * `Metastatic tumour - additional metastatic` - Metastatic tumour - additional metastatic
         * `Metastatic tumour - metastasis local to lymph node` - Metastatic tumour - metastasis local to lymph node
@@ -5178,12 +6216,12 @@ components:
         * `Primary tumour - adjacent to normal` - Primary tumour - adjacent to normal
         * `Primary tumour` - Primary tumour
         * `Recurrent tumour` - Recurrent tumour
+        * `Tumour - unknown if derived from primary or metastatic tumour` - Tumour - unknown if derived from primary or metastatic tumour
         * `Xenograft - derived from primary tumour` - Xenograft - derived from primary tumour
         * `Xenograft - derived from metastatic tumour` - Xenograft - derived from metastatic tumour
         * `Xenograft - derived from tumour cell line` - Xenograft - derived from tumour cell line
     StageGroupEnum:
       enum:
-      - Occult Carcinoma
       - Stage 0
       - Stage 0a
       - Stage 0is
@@ -5269,9 +6307,18 @@ components:
       - Localized
       - Regionalized
       - Distant
+      - Stage L1
+      - Stage L2
+      - Stage M
+      - Stage Ms
+      - Stage 2A
+      - Stage 2B
+      - Stage 3
+      - Stage 4
+      - Stage 4S
+      - Occult Carcinoma
       type: string
       description: |-
-        * `Occult Carcinoma` - Occult Carcinoma
         * `Stage 0` - Stage 0
         * `Stage 0a` - Stage 0a
         * `Stage 0is` - Stage 0is
@@ -5357,6 +6404,16 @@ components:
         * `Localized` - Localized
         * `Regionalized` - Regionalized
         * `Distant` - Distant
+        * `Stage L1` - Stage L1
+        * `Stage L2` - Stage L2
+        * `Stage M` - Stage M
+        * `Stage Ms` - Stage Ms
+        * `Stage 2A` - Stage 2A
+        * `Stage 2B` - Stage 2B
+        * `Stage 3` - Stage 3
+        * `Stage 4` - Stage 4
+        * `Stage 4S` - Stage 4S
+        * `Occult Carcinoma` - Occult Carcinoma
     StagingSystemEnum:
       enum:
       - AJCC 8th edition
@@ -5366,6 +6423,8 @@ components:
       - Binet staging system
       - Durie-Salmon staging system
       - FIGO staging system
+      - International Neuroblastoma Risk Group Staging System
+      - International Neuroblastoma Staging System
       - Lugano staging system
       - Rai staging system
       - Revised International staging system (RISS)
@@ -5380,11 +6439,37 @@ components:
         * `Binet staging system` - Binet staging system
         * `Durie-Salmon staging system` - Durie-Salmon staging system
         * `FIGO staging system` - FIGO staging system
+        * `International Neuroblastoma Risk Group Staging System` - International Neuroblastoma Risk Group Staging System
+        * `International Neuroblastoma Staging System` - International Neuroblastoma Staging System
         * `Lugano staging system` - Lugano staging system
         * `Rai staging system` - Rai staging system
         * `Revised International staging system (RISS)` - Revised International staging system (RISS)
         * `SEER staging system` - SEER staging system
         * `St Jude staging system` - St Jude staging system
+    StatusOfTreatmentEnum:
+      enum:
+      - Treatment completed as prescribed
+      - Treatment incomplete due to technical or organizational problems
+      - Treatment incomplete because patient died
+      - Patient choice (stopped or interrupted treatment)
+      - Physician decision (stopped or interrupted treatment)
+      - Treatment stopped due to lack of efficacy (disease progression)
+      - Treatment stopped due to acute toxicity
+      - Other
+      - Not applicable
+      - Unknown
+      type: string
+      description: |-
+        * `Treatment completed as prescribed` - Treatment completed as prescribed
+        * `Treatment incomplete due to technical or organizational problems` - Treatment incomplete due to technical or organizational problems
+        * `Treatment incomplete because patient died` - Treatment incomplete because patient died
+        * `Patient choice (stopped or interrupted treatment)` - Patient choice (stopped or interrupted treatment)
+        * `Physician decision (stopped or interrupted treatment)` - Physician decision (stopped or interrupted treatment)
+        * `Treatment stopped due to lack of efficacy (disease progression)` - Treatment stopped due to lack of efficacy (disease progression)
+        * `Treatment stopped due to acute toxicity` - Treatment stopped due to acute toxicity
+        * `Other` - Other
+        * `Not applicable` - Not applicable
+        * `Unknown` - Unknown
     Surgery:
       type: object
       properties:
@@ -5509,28 +6594,32 @@ components:
         * `Primary` - Primary
     SurgeryTypeEnum:
       enum:
+      - Ablation
       - Axillary Clearance
       - Axillary lymph nodes sampling
+      - Bilateral complete salpingo-oophorectomy
       - Biopsy
       - Bypass Gastrojejunostomy
       - Cholecystectomy
       - Cholecystojejunostomy
-      - Completion gastrectomy
+      - Completion Gastrectomy
       - Debridement of pancreatic and peripancreatic necrosis
-      - Debulking
       - Distal subtotal pancreatectomy
       - Drainage of abscess
       - Duodenal preserving pancreatic head resection
       - Endoscopic biopsy
-      - Endoscopic brushings of GIT
+      - Endoscopic brushings of gastrointestinal tract
       - Enucleation
       - Esophageal bypass surgery/jejunostomy only
       - Exploratory laparotomy
       - Fine needle aspiration biopsy
       - Gastric Antrectomy
-      - Hepaticojejunostomy
+      - Glossectomy
+      - Hepatojejunostomy
+      - Hysterectomy
+      - Incision of thorax
       - Ivor Lewis subtotal esophagectomy
-      - Laparotomy (Open and Shut)
+      - Laparotomy
       - Left thoracoabdominal incision
       - Lobectomy
       - Mammoplasty
@@ -5538,50 +6627,58 @@ components:
       - McKeown esophagectomy
       - Merendino procedure
       - Minimally invasive esophagectomy
-      - Pancreaticoduodenectomy
+      - Omentectomy
+      - Ovariectomy
+      - Pancreaticoduodenectomy (Whipple procedure)
       - Pancreaticojejunostomy, side-to-side anastomosis
+      - Partial pancreatectomy
       - Pneumonectomy
+      - Prostatectomy
       - Proximal subtotal gastrectomy
       - Pylorus-sparing Whipple operation
       - Radical pancreaticoduodenectomy
+      - Radical prostatectomy
       - Reexcision
       - Segmentectomy
       - Sentinal Lymph Node Biopsy
       - Spleen preserving distal pancreatectomy
       - Splenectomy
-      - Subtotal pancreatectomy
-      - Thoracotomy (Open & Shut)
       - Total gastrectomy
       - Total gastrectomy with extended lymphadenectomy
       - Total pancreatectomy
       - Transhiatal esophagectomy
       - Triple bypass of pancreas
+      - Tumor Debulking
       - Wedge/localised gastric resection
       - Wide Local Excision
       type: string
       description: |-
+        * `Ablation` - Ablation
         * `Axillary Clearance` - Axillary Clearance
         * `Axillary lymph nodes sampling` - Axillary lymph nodes sampling
+        * `Bilateral complete salpingo-oophorectomy` - Bilateral complete salpingo-oophorectomy
         * `Biopsy` - Biopsy
         * `Bypass Gastrojejunostomy` - Bypass Gastrojejunostomy
         * `Cholecystectomy` - Cholecystectomy
         * `Cholecystojejunostomy` - Cholecystojejunostomy
-        * `Completion gastrectomy` - Completion gastrectomy
+        * `Completion Gastrectomy` - Completion Gastrectomy
         * `Debridement of pancreatic and peripancreatic necrosis` - Debridement of pancreatic and peripancreatic necrosis
-        * `Debulking` - Debulking
         * `Distal subtotal pancreatectomy` - Distal subtotal pancreatectomy
         * `Drainage of abscess` - Drainage of abscess
         * `Duodenal preserving pancreatic head resection` - Duodenal preserving pancreatic head resection
         * `Endoscopic biopsy` - Endoscopic biopsy
-        * `Endoscopic brushings of GIT` - Endoscopic brushings of GIT
+        * `Endoscopic brushings of gastrointestinal tract` - Endoscopic brushings of gastrointestinal tract
         * `Enucleation` - Enucleation
         * `Esophageal bypass surgery/jejunostomy only` - Esophageal bypass surgery/jejunostomy only
         * `Exploratory laparotomy` - Exploratory laparotomy
         * `Fine needle aspiration biopsy` - Fine needle aspiration biopsy
         * `Gastric Antrectomy` - Gastric Antrectomy
-        * `Hepaticojejunostomy` - Hepaticojejunostomy
+        * `Glossectomy` - Glossectomy
+        * `Hepatojejunostomy` - Hepatojejunostomy
+        * `Hysterectomy` - Hysterectomy
+        * `Incision of thorax` - Incision of thorax
         * `Ivor Lewis subtotal esophagectomy` - Ivor Lewis subtotal esophagectomy
-        * `Laparotomy (Open and Shut)` - Laparotomy (Open and Shut)
+        * `Laparotomy` - Laparotomy
         * `Left thoracoabdominal incision` - Left thoracoabdominal incision
         * `Lobectomy` - Lobectomy
         * `Mammoplasty` - Mammoplasty
@@ -5589,24 +6686,28 @@ components:
         * `McKeown esophagectomy` - McKeown esophagectomy
         * `Merendino procedure` - Merendino procedure
         * `Minimally invasive esophagectomy` - Minimally invasive esophagectomy
-        * `Pancreaticoduodenectomy` - Pancreaticoduodenectomy
+        * `Omentectomy` - Omentectomy
+        * `Ovariectomy` - Ovariectomy
+        * `Pancreaticoduodenectomy (Whipple procedure)` - Pancreaticoduodenectomy (Whipple procedure)
         * `Pancreaticojejunostomy, side-to-side anastomosis` - Pancreaticojejunostomy, side-to-side anastomosis
+        * `Partial pancreatectomy` - Partial pancreatectomy
         * `Pneumonectomy` - Pneumonectomy
+        * `Prostatectomy` - Prostatectomy
         * `Proximal subtotal gastrectomy` - Proximal subtotal gastrectomy
         * `Pylorus-sparing Whipple operation` - Pylorus-sparing Whipple operation
         * `Radical pancreaticoduodenectomy` - Radical pancreaticoduodenectomy
+        * `Radical prostatectomy` - Radical prostatectomy
         * `Reexcision` - Reexcision
         * `Segmentectomy` - Segmentectomy
         * `Sentinal Lymph Node Biopsy` - Sentinal Lymph Node Biopsy
         * `Spleen preserving distal pancreatectomy` - Spleen preserving distal pancreatectomy
         * `Splenectomy` - Splenectomy
-        * `Subtotal pancreatectomy` - Subtotal pancreatectomy
-        * `Thoracotomy (Open & Shut)` - Thoracotomy (Open & Shut)
         * `Total gastrectomy` - Total gastrectomy
         * `Total gastrectomy with extended lymphadenectomy` - Total gastrectomy with extended lymphadenectomy
         * `Total pancreatectomy` - Total pancreatectomy
         * `Transhiatal esophagectomy` - Transhiatal esophagectomy
         * `Triple bypass of pancreas` - Triple bypass of pancreas
+        * `Tumor Debulking` - Tumor Debulking
         * `Wedge/localised gastric resection` - Wedge/localised gastric resection
         * `Wide Local Excision` - Wide Local Excision
     TCategoryEnum:
@@ -5717,6 +6818,48 @@ components:
         * `Tis pu` - Tis pu
         * `Tis pd` - Tis pd
         * `TX` - TX
+    TobaccoSmokingStatusEnum:
+      enum:
+      - Current reformed smoker for <= 15 years
+      - Current reformed smoker for > 15 years
+      - Current reformed smoker, duration not specified
+      - Current smoker
+      - Lifelong non-smoker (<100 cigarettes smoked in lifetime)
+      - Not applicable
+      - Smoking history not documented
+      type: string
+      description: |-
+        * `Current reformed smoker for <= 15 years` - Current reformed smoker for <= 15 years
+        * `Current reformed smoker for > 15 years` - Current reformed smoker for > 15 years
+        * `Current reformed smoker, duration not specified` - Current reformed smoker, duration not specified
+        * `Current smoker` - Current smoker
+        * `Lifelong non-smoker (<100 cigarettes smoked in lifetime)` - Lifelong non-smoker (<100 cigarettes smoked in lifetime)
+        * `Not applicable` - Not applicable
+        * `Smoking history not documented` - Smoking history not documented
+    TobaccoTypeEnum:
+      enum:
+      - Chewing Tobacco
+      - Cigar
+      - Cigarettes
+      - Electronic cigarettes
+      - Not applicable
+      - Pipe
+      - Roll-ups
+      - Snuff
+      - Unknown
+      - Waterpipe
+      type: string
+      description: |-
+        * `Chewing Tobacco` - Chewing Tobacco
+        * `Cigar` - Cigar
+        * `Cigarettes` - Cigarettes
+        * `Electronic cigarettes` - Electronic cigarettes
+        * `Not applicable` - Not applicable
+        * `Pipe` - Pipe
+        * `Roll-ups` - Roll-ups
+        * `Snuff` - Snuff
+        * `Unknown` - Unknown
+        * `Waterpipe` - Waterpipe
     Treatment:
       type: object
       properties:
@@ -5773,6 +6916,17 @@ components:
           - $ref: '#/components/schemas/ResponseToTreatmentEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        status_of_treatment:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/StatusOfTreatmentEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        line_of_treatment:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
         days_per_cycle:
           type: integer
           maximum: 32767
@@ -5794,6 +6948,7 @@ components:
       - program_id
       - response_to_treatment
       - response_to_treatment_criteria_method
+      - status_of_treatment
       - submitter_donor_id
       - submitter_primary_diagnosis_id
       - submitter_treatment_id
@@ -5806,28 +6961,52 @@ components:
       enum:
       - Curative
       - Palliative
+      - Supportive
+      - Diagnostic
+      - Preventive
+      - Guidance
+      - Screening
+      - Forensic
       type: string
       description: |-
         * `Curative` - Curative
         * `Palliative` - Palliative
+        * `Supportive` - Supportive
+        * `Diagnostic` - Diagnostic
+        * `Preventive` - Preventive
+        * `Guidance` - Guidance
+        * `Screening` - Screening
+        * `Forensic` - Forensic
     TreatmentSettingEnum:
       enum:
       - Adjuvant
       - Advanced/Metastatic
       - Neoadjuvant
-      - Not applicable
+      - Conditioning
+      - Induction
+      - Locally advanced
+      - Maintenance
+      - Mobilization
+      - Preventative
+      - Radiosensitization
+      - Salvage
       type: string
       description: |-
         * `Adjuvant` - Adjuvant
         * `Advanced/Metastatic` - Advanced/Metastatic
         * `Neoadjuvant` - Neoadjuvant
-        * `Not applicable` - Not applicable
+        * `Conditioning` - Conditioning
+        * `Induction` - Induction
+        * `Locally advanced` - Locally advanced
+        * `Maintenance` - Maintenance
+        * `Mobilization` - Mobilization
+        * `Preventative` - Preventative
+        * `Radiosensitization` - Radiosensitization
+        * `Salvage` - Salvage
     TreatmentTypeEnum:
       enum:
-      - Ablation
       - Bone marrow transplant
       - Chemotherapy
-      - Endoscopic therapy
       - Hormonal therapy
       - Immunotherapy
       - No treatment
@@ -5838,10 +7017,8 @@ components:
       - Surgery
       type: string
       description: |-
-        * `Ablation` - Ablation
         * `Bone marrow transplant` - Bone marrow transplant
         * `Chemotherapy` - Chemotherapy
-        * `Endoscopic therapy` - Endoscopic therapy
         * `Hormonal therapy` - Hormonal therapy
         * `Immunotherapy` - Immunotherapy
         * `No treatment` - No treatment
@@ -5875,6 +7052,10 @@ components:
       - G4
       - Low
       - High
+      - Grade 1
+      - Grade 2
+      - Grade 3
+      - Grade 4
       - Grade I
       - Grade II
       - Grade III
@@ -5895,6 +7076,10 @@ components:
         * `G4` - G4
         * `Low` - Low
         * `High` - High
+        * `Grade 1` - Grade 1
+        * `Grade 2` - Grade 2
+        * `Grade 3` - Grade 3
+        * `Grade 4` - Grade 4
         * `Grade I` - Grade I
         * `Grade II` - Grade II
         * `Grade III` - Grade III
@@ -5911,7 +7096,9 @@ components:
       - Gleason grade group system
       - Grading system for GISTs
       - Grading system for GNETs
+      - IASLC grading system
       - ISUP grading system
+      - Nottingham grading system
       - Nuclear grading system for DCIS
       - Scarff-Bloom-Richardson grading system
       - Three-tier grading system
@@ -5924,7 +7111,9 @@ components:
         * `Gleason grade group system` - Gleason grade group system
         * `Grading system for GISTs` - Grading system for GISTs
         * `Grading system for GNETs` - Grading system for GNETs
+        * `IASLC grading system` - IASLC grading system
         * `ISUP grading system` - ISUP grading system
+        * `Nottingham grading system` - Nottingham grading system
         * `Nuclear grading system for DCIS` - Nuclear grading system for DCIS
         * `Scarff-Bloom-Richardson grading system` - Scarff-Bloom-Richardson grading system
         * `Three-tier grading system` - Three-tier grading system
