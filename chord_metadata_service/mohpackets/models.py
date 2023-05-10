@@ -435,13 +435,9 @@ class Biomarker(models.Model):
     ca125 = models.PositiveSmallIntegerField(null=True, blank=True)
     cea = models.PositiveSmallIntegerField(null=True, blank=True)
     er_status = models.CharField(max_length=64, null=True, blank=True)
-    er_percent_positive = models.DecimalField(
-        null=True, blank=True, max_digits=5, decimal_places=2
-    )
+    er_percent_positive = models.FloatField(null=True, blank=True)
     pr_status = models.CharField(max_length=64, null=True, blank=True)
-    pr_percent_positive = models.DecimalField(
-        null=True, blank=True, max_digits=5, decimal_places=2
-    )
+    pr_percent_positive = models.FloatField(null=True, blank=True)
     her2_ihc_status = models.CharField(max_length=64, null=True, blank=True)
     her2_ish_status = models.CharField(max_length=64, null=True, blank=True)
     hpv_ihc_status = models.CharField(max_length=64, null=True, blank=True)
@@ -497,6 +493,4 @@ class Exposure(models.Model):
     tobacco_type = ArrayField(
         models.CharField(max_length=128, null=True, blank=True), null=True, blank=True
     )
-    pack_years_smoked = models.DecimalField(
-        null=True, blank=True, max_digits=5, decimal_places=2
-    )
+    pack_years_smoked = models.FloatField(null=True, blank=True)
