@@ -4,121 +4,114 @@
         "submitter_donor_id": "DONOR_6",
         "submitter_specimen_id": "SPECIMEN_18",
         "submitter_treatment_id": "TREATMENT_18",
-        "surgery_type": "Cholecystectomy",
-        "surgery_site": "C01",
-        "surgery_location": "Local recurrence",
-        "tumour_length": "6",
-        "tumour_width": "5",
-        "greatest_dimension_tumour": "4",
-        "tumour_focality": "Multifocal",
-        "residual_tumour_classification": "R1",
+        "surgery_type": "Axillary lymph nodes sampling",
+        "surgery_site": "C14",
+        "surgery_location": "Primary",
+        "tumour_length": "9",
+        "tumour_width": "7",
+        "greatest_dimension_tumour": "5",
+        "tumour_focality": "Unifocal",
+        "residual_tumour_classification": "R2",
         "margin_types_involved": [
-            "Common bile duct margin",
-            "Not applicable"
+            "Distal margin",
+            "Circumferential resection margin"
         ],
-        "margin_types_not_involved": [
-            "Common bile duct margin",
+        "margin_types_not_involved": [],
+        "lymphovascular_invasion": "Absent",
+        "margin_types_not_assessed": [
             "Unknown"
         ],
-        "lymphovascular_invasion": "Not applicable",
-        "margin_types_not_assessed": [
-            "Proximal margin",
-            "Common bile duct margin"
-        ],
-        "perineural_invasion": "Unknown"
+        "perineural_invasion": "Absent"
     },
     {
         "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_7",
         "submitter_specimen_id": null,
         "submitter_treatment_id": "TREATMENT_19",
-        "surgery_type": "Bilateral complete salpingo-oophorectomy",
-        "surgery_site": "C03",
-        "surgery_location": "Primary",
-        "tumour_length": "9",
-        "tumour_width": "4",
+        "surgery_type": "Axillary Clearance",
+        "surgery_site": "C14",
+        "surgery_location": "Local recurrence",
+        "tumour_length": "5",
+        "tumour_width": "5",
         "greatest_dimension_tumour": "6",
-        "tumour_focality": "Not applicable",
-        "residual_tumour_classification": "R1",
-        "margin_types_involved": [
-            "Unknown",
-            "Proximal margin"
-        ],
-        "margin_types_not_involved": [
-            "Distal margin"
-        ],
+        "tumour_focality": "Unknown",
+        "residual_tumour_classification": "Unknown",
+        "margin_types_involved": [],
+        "margin_types_not_involved": [],
         "lymphovascular_invasion": "Venous (large vessel) invasion only",
         "margin_types_not_assessed": [
-            "Common bile duct margin"
+            "Circumferential resection margin",
+            "Proximal margin"
         ],
-        "perineural_invasion": "Present"
+        "perineural_invasion": "Unknown"
     },
     {
         "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_8",
         "submitter_specimen_id": null,
         "submitter_treatment_id": "TREATMENT_20",
-        "surgery_type": "Triple bypass of pancreas",
-        "surgery_site": "C19",
-        "surgery_location": "Metastatic",
-        "tumour_length": "6",
-        "tumour_width": "3",
-        "greatest_dimension_tumour": "4",
-        "tumour_focality": "Multifocal",
+        "surgery_type": "Tumor Debulking",
+        "surgery_site": "C06",
+        "surgery_location": "Primary",
+        "tumour_length": "3",
+        "tumour_width": "6",
+        "greatest_dimension_tumour": "5",
+        "tumour_focality": "Not applicable",
         "residual_tumour_classification": "RX",
-        "margin_types_involved": [],
+        "margin_types_involved": [
+            "Unknown",
+            "Distal margin"
+        ],
         "margin_types_not_involved": [],
         "lymphovascular_invasion": "Venous (large vessel) invasion only",
-        "margin_types_not_assessed": [
-            "Distal margin",
-            "Not applicable"
-        ],
-        "perineural_invasion": "Absent"
+        "margin_types_not_assessed": [],
+        "perineural_invasion": "Present"
     },
     {
         "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_9",
         "submitter_specimen_id": null,
         "submitter_treatment_id": "TREATMENT_21",
-        "surgery_type": "Incision of thorax",
-        "surgery_site": "C17",
-        "surgery_location": "Primary",
-        "tumour_length": "3",
+        "surgery_type": "Pancreaticojejunostomy, side-to-side anastomosis",
+        "surgery_site": "C12",
+        "surgery_location": "Metastatic",
+        "tumour_length": "6",
         "tumour_width": "6",
         "greatest_dimension_tumour": "6",
-        "tumour_focality": "Not applicable",
-        "residual_tumour_classification": "RX",
+        "tumour_focality": "Unknown",
+        "residual_tumour_classification": "R0",
         "margin_types_involved": [],
         "margin_types_not_involved": [
-            "Distal margin"
+            "Unknown"
         ],
-        "lymphovascular_invasion": "Not applicable",
+        "lymphovascular_invasion": "Venous (large vessel) invasion only",
         "margin_types_not_assessed": [],
-        "perineural_invasion": "Absent"
+        "perineural_invasion": "Present"
     },
     {
         "program_id": "SYNTHETIC-2",
         "submitter_donor_id": "DONOR_10",
         "submitter_specimen_id": null,
         "submitter_treatment_id": "TREATMENT_22",
-        "surgery_type": "Drainage of abscess",
-        "surgery_site": "C12",
+        "surgery_type": "Pneumonectomy",
+        "surgery_site": "C14",
         "surgery_location": "Primary",
         "tumour_length": "3",
-        "tumour_width": "4",
+        "tumour_width": "5",
         "greatest_dimension_tumour": "5",
-        "tumour_focality": "Not applicable",
-        "residual_tumour_classification": "Not applicable",
+        "tumour_focality": "Unifocal",
+        "residual_tumour_classification": "R2",
         "margin_types_involved": [
-            "Proximal margin"
-        ],
-        "margin_types_not_involved": [
-            "Proximal margin"
-        ],
-        "lymphovascular_invasion": "Absent",
-        "margin_types_not_assessed": [
             "Unknown"
         ],
-        "perineural_invasion": "Present"
+        "margin_types_not_involved": [
+            "Circumferential resection margin"
+        ],
+        "lymphovascular_invasion": "Unknown",
+        "margin_types_not_assessed": [
+            "Distal margin",
+            "Proximal margin"
+        ],
+        "perineural_invasion": "Unknown"
     }
 ]
