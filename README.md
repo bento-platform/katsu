@@ -64,7 +64,7 @@ This will install all the packages listed in the requirements.txt file.
 
 ### Step 4: Set up the PostgreSQL database
 
-Replace "dbname", "username", and "password" with the value in [local.py](config/settings/local.py):
+Replace "dbname", "username", and "password" with the values in [local.py](config/settings/local.py):
 
 ```sql
 sudo -u postgres psql
