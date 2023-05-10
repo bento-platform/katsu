@@ -11,6 +11,7 @@ from chord_metadata_service.mohpackets.api_base import (
     BaseChemotherapyViewSet,
     BaseComorbidityViewSet,
     BaseDonorViewSet,
+    BaseExposureViewSet,
     BaseFollowUpViewSet,
     BaseHormoneTherapyViewSet,
     BaseImmunotherapyViewSet,
@@ -144,11 +145,16 @@ class AuthorizedComorbidityViewSet(AuthorizedMixin, BaseComorbidityViewSet):
     pass
 
 
+class AuthorizedExposureViewSet(AuthorizedMixin, BaseExposureViewSet):
+    pass
+
+
 ###############################################
 #                                             #
 #           CUSTOM API ENDPOINTS              #
 #                                             #
 ###############################################
+
 
 # TODO: redo this overview endpoint
 @extend_schema(
