@@ -75,12 +75,12 @@ get_queryset()
       "hpv_strain": [
         "HPV16"
       ],
-      "er_percent_positive": "string",
-      "pr_percent_positive": "string",
       "test_interval": 32767,
       "psa_level": 32767,
       "ca125": 32767,
       "cea": 32767,
+      "er_percent_positive": 0,
+      "pr_percent_positive": 0,
       "program_id": "string",
       "submitter_donor_id": "string",
       "submitter_specimen_id": "string",
@@ -2642,12 +2642,12 @@ list(request, *args, **kwargs)
   "hpv_strain": [
     "HPV16"
   ],
-  "er_percent_positive": "string",
-  "pr_percent_positive": "string",
   "test_interval": 32767,
   "psa_level": 32767,
   "ca125": 32767,
   "cea": 32767,
+  "er_percent_positive": 0,
+  "pr_percent_positive": 0,
   "program_id": "string",
   "submitter_donor_id": "string",
   "submitter_specimen_id": "string",
@@ -2831,12 +2831,12 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|er_percent_positive|string(decimal)¦null|false|none|none|
-|pr_percent_positive|string(decimal)¦null|false|none|none|
 |test_interval|integer¦null|false|none|none|
 |psa_level|integer¦null|false|none|none|
 |ca125|integer¦null|false|none|none|
 |cea|integer¦null|false|none|none|
+|er_percent_positive|number(double)¦null|false|none|none|
+|pr_percent_positive|number(double)¦null|false|none|none|
 |program_id|string|true|none|none|
 |submitter_donor_id|string|true|none|none|
 |submitter_specimen_id|string¦null|false|none|none|
@@ -6923,12 +6923,12 @@ null
       "hpv_strain": [
         "HPV16"
       ],
-      "er_percent_positive": "string",
-      "pr_percent_positive": "string",
       "test_interval": 32767,
       "psa_level": 32767,
       "ca125": 32767,
       "cea": 32767,
+      "er_percent_positive": 0,
+      "pr_percent_positive": 0,
       "program_id": "string",
       "submitter_donor_id": "string",
       "submitter_specimen_id": "string",

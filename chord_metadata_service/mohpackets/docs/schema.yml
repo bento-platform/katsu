@@ -3361,16 +3361,6 @@ components:
             - $ref: '#/components/schemas/BlankEnum'
             - $ref: '#/components/schemas/NullEnum'
           nullable: true
-        er_percent_positive:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-          nullable: true
-        pr_percent_positive:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-          nullable: true
         test_interval:
           type: integer
           maximum: 32767
@@ -3390,6 +3380,14 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
+          nullable: true
+        er_percent_positive:
+          type: number
+          format: double
+          nullable: true
+        pr_percent_positive:
+          type: number
+          format: double
           nullable: true
         program_id:
           type: string

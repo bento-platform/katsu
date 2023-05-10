@@ -457,12 +457,6 @@ class BiomarkerSerializer(serializers.ModelSerializer):
             choices=val.HPV_STRAIN, allow_blank=True, allow_null=True
         ),
     )
-    er_percent_positive = serializers.DecimalField(
-        allow_null=True, decimal_places=2, max_digits=5, required=False
-    )
-    pr_percent_positive = serializers.DecimalField(
-        allow_null=True, decimal_places=2, max_digits=5, required=False
-    )
 
     class Meta:
         model = Biomarker
