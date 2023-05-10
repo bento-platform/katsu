@@ -65,7 +65,7 @@ class AuthorizedMixin:
     pagination_class = StandardResultsSetPagination
     settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
     auth_methods = []
-    # Check for production or development environment
+    # Use jwt token auth in prod/dev environment
     if "dev" in settings_module or "prod" in settings_module:
         auth_methods.append(TokenAuthentication)
     else:
