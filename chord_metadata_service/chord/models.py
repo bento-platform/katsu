@@ -3,7 +3,8 @@ import uuid
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.resources.models import Resource
 from ..restapi.models import SchemaType
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
@@ -142,7 +143,7 @@ class Dataset(models.Model):
                                 help_text="Tags associated with the dataset, which will help in its discovery.")
     version = models.CharField(max_length=200, blank=True, default=version_default,
                                help_text="A release point for the dataset when applicable.")
-    dats_file = models.TextField(blank=True, help_text="Content of a valid DATS file, in JSON format, that specifies"
+    dats_file = models.JSONField(blank=True, help_text="Content of a valid DATS file, in JSON format, that specifies"
                                  " the dataset provenance.")
     extra_properties = models.JSONField(blank=True, null=True,
                                         help_text="Extra properties that do not fit in the previous "
@@ -218,6 +219,37 @@ class ProjectJsonSchema(models.Model):
                                    help_text="Determines if the extra_properties field is required or not.")
     json_schema = models.JSONField()
     schema_type = models.CharField(max_length=200, choices=SchemaType.choices)
+
+    def clean(self):
+        """
+        Creation of ProjectJsonSchema is prohibited if the target project already 
+        contains data matching the schema_type
+        """
+        
+        super().clean()
+
+        target_count = 0
+        if self.schema_type == SchemaType.PHENOPACKET:
+            target_count = Phenopacket.objects.filter(
+                table__ownership_record__dataset__project_id=self.project_id
+            ).count()
+        elif self.schema_type == SchemaType.INDIVIDUAL:
+            target_count = Individual.objects.filter(
+                phenopackets__table__ownership_record__dataset__project_id=self.project_id
+            ).count()
+        elif self.schema_type == SchemaType.BIOSAMPLE:
+            target_count = Biosample.objects.filter(
+                individual__phenopackets__table__ownership_record__dataset__project_id=self.project_id
+            ).count()
+        
+        if target_count > 0:
+            raise ValidationError(f"Project {self.project_id} already contains schemas for {self.schema_type}")
+
+    def save(self, *args, **kwargs):
+        # Override in order to call self.clean to validate data
+        self.clean()
+        return super().save(*args, **kwargs)
+
 
     class Meta:
         constraints = [
