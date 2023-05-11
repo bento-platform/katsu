@@ -7,6 +7,7 @@ from chord_metadata_service.mohpackets.models import (
     Chemotherapy,
     Comorbidity,
     Donor,
+    Exposure,
     FollowUp,
     HormoneTherapy,
     Immunotherapy,
@@ -22,6 +23,7 @@ from chord_metadata_service.mohpackets.serializers import (
     ChemotherapySerializer,
     ComorbiditySerializer,
     DonorSerializer,
+    ExposureSerializer,
     FollowUpSerializer,
     HormoneTherapySerializer,
     ImmunotherapySerializer,
@@ -41,6 +43,16 @@ from chord_metadata_service.mohpackets.serializers import (
 
     BioMarkers have unique relationships that require nesting at multiple levels.
 """
+
+
+class NestedExposureSerializer(ExposureSerializer):
+    class Meta:
+        model = Exposure
+        fields = [
+            "tobacco_smoking_status",
+            "tobacco_type",
+            "pack_years_smoked",
+        ]
 
 
 class NestedComorbiditySerializer(ComorbiditySerializer):
@@ -107,6 +119,15 @@ class NestedBiomarkerSerializer(BiomarkerSerializer):
             "psa_level",
             "ca125",
             "cea",
+            "er_status",
+            "er_percent_positive",
+            "her2_ish_status",
+            "her2_ihc_status",
+            "pr_status",
+            "pr_percent_positive",
+            "hpv_ihc_status",
+            "hpv_pcr_status",
+            "hpv_strain",
         ]
 
 
@@ -198,6 +219,8 @@ class NestedTreatmentSerializer(TreatmentSerializer):
             "days_per_cycle",
             "number_of_cycles",
             "response_to_treatment_criteria_method",
+            "line_of_treatment",
+            "status_of_treatment",
             "chemotherapies",
             "hormone_therapies",
             "immunotherapies",
@@ -240,6 +263,8 @@ class NestedSpecimenSerializer(SpecimenSerializer):
             "tumour_grade",
             "percent_tumour_cells_range",
             "percent_tumour_cells_measurement_method",
+            "specimen_processing",
+            "specimen_laterality",
             "sample_registrations",
             "biomarkers",
         ]
@@ -280,6 +305,7 @@ class NestedPrimaryDiagnosisSerializer(PrimaryDiagnosisSerializer):
             "clinical_n_category",
             "clinical_m_category",
             "clinical_stage_group",
+            "laterality",
             "specimens",
             "treatments",
             "biomarkers",
@@ -289,6 +315,7 @@ class NestedPrimaryDiagnosisSerializer(PrimaryDiagnosisSerializer):
 class DonorWithClinicalDataSerializer(DonorSerializer):
     primary_diagnoses = serializers.SerializerMethodField()
     comorbidities = serializers.SerializerMethodField()
+    exposures = serializers.SerializerMethodField()
     biomarkers = serializers.SerializerMethodField()
 
     @extend_schema_field(ListSerializer(child=NestedPrimaryDiagnosisSerializer()))
@@ -301,6 +328,11 @@ class DonorWithClinicalDataSerializer(DonorSerializer):
         comorbidities = obj.comorbidity_set.all()
         return NestedComorbiditySerializer(comorbidities, many=True).data
 
+    @extend_schema_field(ListSerializer(child=NestedExposureSerializer()))
+    def get_exposures(self, obj):
+        exposures = obj.exposure_set.all()
+        return NestedExposureSerializer(exposures, many=True).data
+
     @extend_schema_field(ListSerializer(child=NestedBiomarkerSerializer()))
     def get_biomarkers(self, obj):
         biomarkers = obj.biomarker_set.all()
@@ -311,6 +343,9 @@ class DonorWithClinicalDataSerializer(DonorSerializer):
         fields = [
             "submitter_donor_id",
             "program_id",
+            "lost_to_followup_after_clinical_event_identifier",
+            "lost_to_followup_reason",
+            "date_alive_after_lost_to_followup",
             "is_deceased",
             "cause_of_death",
             "date_of_birth",
@@ -320,5 +355,6 @@ class DonorWithClinicalDataSerializer(DonorSerializer):
             "primary_site",
             "primary_diagnoses",
             "comorbidities",
+            "exposures",
             "biomarkers",
         ]
