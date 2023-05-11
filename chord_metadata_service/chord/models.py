@@ -222,10 +222,10 @@ class ProjectJsonSchema(models.Model):
 
     def clean(self):
         """
-        Creation of ProjectJsonSchema is prohibited if the target project already 
+        Creation of ProjectJsonSchema is prohibited if the target project already
         contains data matching the schema_type
         """
-        
+
         super().clean()
 
         target_count = 0
@@ -241,7 +241,7 @@ class ProjectJsonSchema(models.Model):
             target_count = Biosample.objects.filter(
                 individual__phenopackets__table__ownership_record__dataset__project_id=self.project_id
             ).count()
-        
+
         if target_count > 0:
             raise ValidationError(f"Project {self.project_id} already contains schemas for {self.schema_type}")
 
@@ -249,7 +249,6 @@ class ProjectJsonSchema(models.Model):
         # Override in order to call self.clean to validate data
         self.clean()
         return super().save(*args, **kwargs)
-
 
     class Meta:
         constraints = [
