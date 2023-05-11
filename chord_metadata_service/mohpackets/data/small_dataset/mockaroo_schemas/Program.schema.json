@@ -1,0 +1,22 @@
+{
+  "id": 450481,
+  "num_rows": 2,
+  "file_format": "json",
+  "name": "Program",
+  "array": true,
+  "columns": [
+    {
+      "name": "__count",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": null
+    },
+    {
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "SYNTHETIC-{__count}",
+      "formula": null
+    }
+  ]
+}
