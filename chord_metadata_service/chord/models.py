@@ -243,7 +243,7 @@ class ProjectJsonSchema(models.Model):
             ).count()
 
         if target_count > 0:
-            raise ValidationError(f"Project {self.project_id} already contains schemas for {self.schema_type}")
+            raise ValidationError(f"Project {self.project_id} already contains data for {self.schema_type}")
 
     def save(self, *args, **kwargs):
         # Override in order to call self.clean to validate data
