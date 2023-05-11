@@ -1,4 +1,4 @@
-import logging
+from chord_metadata_service.logger import logger
 from bento_lib.search import queries as q
 from .description_utils import describe_schema
 from typing import List, Optional, Dict
@@ -13,8 +13,6 @@ __all__ = [
     "customize_schema",
     "schema_list",
 ]
-
-logger = logging.getLogger(__name__)
 
 
 def merge_schema_dictionaries(dict1: dict, dict2: dict):

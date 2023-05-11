@@ -19,7 +19,7 @@ from .serializers import (
     DatasetSerializer,
     TableOwnershipSerializer,
     TableSerializer
-    )
+)
 from .filters import AuthorizedDatasetFilter
 
 logger = logging.getLogger(__name__)
