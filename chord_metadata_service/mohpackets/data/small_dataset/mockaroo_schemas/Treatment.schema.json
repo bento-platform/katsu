@@ -1,0 +1,128 @@
+{
+  "id": 469111,
+  "num_rows": 22,
+  "file_format": "json",
+  "name": "Treatment",
+  "array": true,
+  "columns": [
+    {
+      "name": "submitter_treatment_id",
+      "null_percentage": 0,
+      "type": "Row Number",
+      "formula": "\"TREATMENT_\" + this.to_s"
+    },
+    {
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_donor_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_primary_diagnosis_id",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": ""
+    },
+    {
+      "name": "treatment_type",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Bone marrow transplant\",\n    \"Chemotherapy\",\n    \"Hormonal therapy\",\n    \"Immunotherapy\",\n    \"No treatment\",\n    \"Other targeting molecular therapy\",\n    \"Photodynamic therapy\",\n    \"Radiation therapy\",\n    \"Stem cell transplant\",\n    \"Surgery\",\n].sample(random(1,3))"
+    },
+    {
+      "name": "is_primary_treatment",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Yes\",\n\"No\",\n\"Unknown\"][random(0,2)]"
+    },
+    {
+      "name": "treatment_start_date",
+      "null_percentage": 0,
+      "type": "Datetime",
+      "min": "01/02/2021",
+      "max": "01/01/2022",
+      "format": "%Y-%m",
+      "formula": null
+    },
+    {
+      "name": "treatment_end_date",
+      "null_percentage": 0,
+      "type": "Datetime",
+      "min": "01/02/2022",
+      "max": "11/17/2022",
+      "format": "%Y-%m",
+      "formula": null
+    },
+    {
+      "name": "treatment_setting",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": " [\"Adjuvant\",\n    \"Advanced/Metastatic\",\n    \"Neoadjuvant\",\n    \"Conditioning\",\n    \"Induction\",\n    \"Locally advanced\",\n    \"Maintenance\",\n    \"Mobilization\",\n    \"Preventative\",\n    \"Radiosensitization\",\n    \"Salvage\",][random(0,10)]"
+    },
+    {
+      "name": "treatment_intent",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Curative\",\n    \"Palliative\",\n    \"Supportive\",\n    \"Diagnostic\",\n    \"Preventive\",\n    \"Guidance\",\n    \"Screening\",\n    \"Forensic\",][random(0,7)]"
+    },
+    {
+      "name": "days_per_cycle",
+      "null_percentage": 0,
+      "type": "Number",
+      "min": 1,
+      "max": 7,
+      "decimals": 0,
+      "formula": null
+    },
+    {
+      "name": "number_of_cycles",
+      "null_percentage": 0,
+      "type": "Number",
+      "min": 3,
+      "max": 5,
+      "decimals": 0,
+      "formula": null
+    },
+    {
+      "name": "response_to_treatment_criteria_method",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\n    \"RECIST 1.1\",\n    \"iRECIST\",\n    \"Cheson CLL 2012 Oncology Response Criteria\",\n    \"Response Assessment in Neuro-Oncology (RANO)\",\n    \"AML Response Criteria\",\n    \"Physician Assessed Response Criteria\",\n    \"Blazer score\",\n][random(0,6)]"
+    },
+    {
+      "name": "response_to_treatment",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Complete response\",\n    \"Partial response\",\n    \"Progressive disease\",\n    \"Stable disease\",\n    \"Immune complete response (iCR)\",\n    \"Immune partial response (iPR)\",\n    \"Immune uncomfirmed progressive disease (iUPD)\",\n    \"Immune confirmed progressive disease (iCPD)\",\n    \"Immune stable disease (iSD)\",\n    \"Complete remission\",\n    \"Partial remission\",\n    \"Minor response\",\n    \"Complete remission without measurable residual disease (CR MRD-)\",\n    \"Complete remission with incomplete hematologic recovery (CRi)\",\n    \"Morphologic leukemia-free state\",\n    \"Primary refractory disease\",\n    \"Hematologic relapse (after CR MRD-, CR, CRi)\",\n    \"Molecular relapse (after CR MRD-)\",\n    \"Physician assessed complete response\",\n    \"Physician assessed partial response\",\n    \"Physician assessed stable disease\",\n    \"No evidence of disease (NED)\",\n    \"Minor response\",\n    \"Major response\",\n    \"Complete response\",][random(0,24)]"
+    },
+    {
+      "name": "line_of_treatment",
+      "null_percentage": 0,
+      "type": "Number",
+      "min": 1,
+      "max": 5,
+      "decimals": null,
+      "formula": null
+    },
+    {
+      "name": "status_of_treatment",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": "",
+      "formula": "[ \"Treatment completed as prescribed\",\n    \"Treatment incomplete due to technical or organizational problems\",\n    \"Treatment incomplete because patient died\",\n    \"Patient choice (stopped or interrupted treatment)\",\n    \"Physician decision (stopped or interrupted treatment)\",\n    \"Treatment stopped due to lack of efficacy (disease progression)\",\n    \"Treatment stopped due to acute toxicity\",\n    \"Other\",\n    \"Not applicable\",\n    \"Unknown\",][random(0,9)]"
+    }
+  ]
+}
