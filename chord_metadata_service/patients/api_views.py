@@ -140,12 +140,13 @@ class IndividualBatchViewSet(BatchViewSet):
 )
 class PublicListIndividuals(APIView):
     """
-    View to return only count of all individuals after filtering.
+    View to return count of all individuals after filtering.
+    Optional parameter "response_format=beacon" adds a list of matching ids to the response,
+    and beacon handles censorship in this case
     """
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset, qp):
         # Check query parameters validity
-        qp = self.request.query_params
         if len(qp) > settings.CONFIG_PUBLIC["rules"]["max_query_parameters"]:
             raise ValidationError(f"Wrong number of fields: {len(qp)}")
 
@@ -183,9 +184,13 @@ class PublicListIndividuals(APIView):
         if not settings.CONFIG_PUBLIC:
             return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
 
+        # get mutable copy of query params, remove response param before filtering
+        qp = request.GET.copy()
+        [response_format] = qp.pop('response_format', [None])
+
         base_qs = Individual.objects.all()
         try:
-            filtered_qs = self.filter_queryset(base_qs)
+            filtered_qs = self.filter_queryset(base_qs, qp)
         except ValidationError as e:
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
@@ -193,7 +198,7 @@ class PublicListIndividuals(APIView):
 
         qct = filtered_qs.count()
 
-        if qct <= (threshold := settings.CONFIG_PUBLIC["rules"]["count_threshold"]):
+        if response_format != "beacon" and qct <= (threshold := settings.CONFIG_PUBLIC["rules"]["count_threshold"]):
             logger.info(
                 f"Public individuals endpoint recieved query params {request.query_params} which resulted in "
                 f"sub-threshold count: {qct} <= {threshold}")
@@ -202,7 +207,7 @@ class PublicListIndividuals(APIView):
         tissues_count, sampled_tissues = biosample_tissue_stats(filtered_qs)
         experiments_count, experiment_types = experiment_type_stats(filtered_qs)
 
-        return Response({
+        r = {
             "count": qct,
             "biosamples": {
                 "count": tissues_count,
@@ -212,4 +217,9 @@ class PublicListIndividuals(APIView):
                 "count": experiments_count,
                 "experiment_type": experiment_types
             }
-        })
+        }
+
+        if response_format == "beacon":
+            r["matches"] = filtered_qs.values_list("id", flat=True)
+
+        return Response(r)
