@@ -1,7 +1,7 @@
 from django.apps import apps
 from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.patients.models import Individual
@@ -314,8 +314,11 @@ class Phenopacket(BaseExtraProperties, IndexableMixin):
 
     def get_project_id(self) -> str:
         model = apps.get_model("chord.Project")
-        project = model.objects.get(datasets__table_ownership=self.table_id)
-        return project.identifier
+        try:
+            project = model.objects.get(datasets__table_ownership=self.table_id)
+            return project.identifier
+        except ObjectDoesNotExist:
+            return None
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.PHENOPACKET, "id"))
     # if Individual instance is deleted Phenopacket instance is deleted too

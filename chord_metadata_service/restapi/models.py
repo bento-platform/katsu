@@ -53,7 +53,7 @@ class BaseExtraProperties(models.Model):
         """
         project_id = self.get_project_id()
         if not project_id:
-            return None, None
+            return None
 
         # Use apps.get_model to avoid circular import issues.
         model = apps.get_model("chord", "ProjectJsonSchema")
@@ -66,10 +66,11 @@ class BaseExtraProperties(models.Model):
             json_schema = project_json_schema.json_schema
         except ObjectDoesNotExist:
             logger.debug(f"No ProjectJsonSchema found for project ID {project_id} and schema type {self.schema_type}")
-        return project_id, json_schema
+        return json_schema
 
     def validate_json_schema(self) -> List[str]:
-        project_id, json_schema = self.get_json_schema()
+        json_schema = self.get_json_schema()
+        project_id = self.get_project_id()
         if not project_id or not json_schema:
             # Skip if no JSON schema exists for this project/schema_type combination
             return []
