@@ -5,6 +5,7 @@ from chord_metadata_service.phenopackets.models import Biosample, Phenopacket, P
 from chord_metadata_service.phenopackets.tests import constants as pheno_consts
 from chord_metadata_service.restapi.models import SchemaType
 
+
 class TestBaseExtraProperties(ProjectTestCase):
 
     def setUp(self) -> None:
@@ -55,5 +56,3 @@ class TestBaseExtraProperties(ProjectTestCase):
 
         self.assertIsNone(self.no_proj_phenopacket.get_json_schema())
         self.assertIsNone(self.no_proj_phenopacket.get_project_id())
-
-

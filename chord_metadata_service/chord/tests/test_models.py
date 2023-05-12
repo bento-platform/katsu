@@ -1,7 +1,6 @@
 from django.db.utils import IntegrityError
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase
 from django.core.exceptions import ValidationError
-from django.db import transaction
 from uuid import uuid4
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 
@@ -179,4 +178,3 @@ class ProjectJsonSchemaTest(ProjectTestCase):
         with self.assertRaises(ValidationError):
             # A biosample exists already for this project
             invalid_pjs_biosample.save()
-

@@ -1,5 +1,5 @@
 from uuid import uuid4
-from django.test import TransactionTestCase, TestCase
+from django.test import TestCase
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 
 from chord_metadata_service.chord.models import Dataset, Project, Table, TableOwnership

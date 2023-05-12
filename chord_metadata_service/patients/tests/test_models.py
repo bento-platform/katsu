@@ -1,6 +1,4 @@
-from django.test import TestCase
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
-from chord_metadata_service.patients.tests.es_mocks import es  # noqa: F401
 from chord_metadata_service.phenopackets.tests import constants as c
 from chord_metadata_service.phenopackets import models as m
 from chord_metadata_service.restapi.models import SchemaType
