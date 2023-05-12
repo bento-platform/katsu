@@ -1,6 +1,5 @@
 from django.apps import apps
 from django.db import models
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.restapi.models import IndexableMixin, SchemaType, BaseExtraProperties
@@ -21,11 +20,8 @@ class Individual(BaseExtraProperties, IndexableMixin):
             # Need to wait for phenopacket to exist
             return None
         model = apps.get_model("chord.Project")
-        try:
-            project = model.objects.get(datasets__table_ownership=self.phenopackets.first().table_id)
-            return project.identifier
-        except ObjectDoesNotExist:
-            return None
+        project = model.objects.get(datasets__table_ownership=self.phenopackets.first().table_id)
+        return project.identifier
 
     SEX = Sex.as_django_values()
     KARYOTYPIC_SEX = KaryotypicSex.as_django_values()

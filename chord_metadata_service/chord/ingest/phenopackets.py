@@ -310,10 +310,14 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id) -> Union[list[pm.Phe
             json_data = json.load(jf)
 
     project_id = Project.objects.get(datasets__table_ownership=table_id)
-    project_schemas = ProjectJsonSchema.objects.filter(project_id=project_id)
+    project_schemas = ProjectJsonSchema.objects.filter(project_id=project_id).values(
+        "json_schema",
+        "required",
+        "schema_type",
+    )
 
     # Map with key:schema_type and value:json_schema
-    extension_schemas = {proj_schema.schema_type.lower(): proj_schema for proj_schema in project_schemas}
+    extension_schemas = {proj_schema["schema_type"].lower(): proj_schema for proj_schema in project_schemas}
     json_schema = patch_project_schemas(PHENOPACKET_SCHEMA, extension_schemas)
 
     # First, validate all phenopackets

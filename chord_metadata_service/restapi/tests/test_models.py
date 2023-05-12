@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.chord.models import ProjectJsonSchema
 from chord_metadata_service.patients.models import Individual
@@ -56,3 +57,11 @@ class TestBaseExtraProperties(ProjectTestCase):
 
         self.assertIsNone(self.no_proj_phenopacket.get_json_schema())
         self.assertIsNone(self.no_proj_phenopacket.get_project_id())
+
+    def test_validate_json_schema(self):
+        invalid_individual = Individual(**{
+            **pheno_consts.VALID_INDIVIDUAL_1,
+            "extra_properties": "invalid extra_properties of type 'string', expects 'object'"
+        })
+        with self.assertRaises(ValidationError):
+            invalid_individual.save()

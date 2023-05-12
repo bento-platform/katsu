@@ -25,6 +25,10 @@ class BiosampleTest(ProjectTestCase):
         self.procedure = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
         self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual, self.procedure))
         self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(None, self.procedure))
+        self.biosample_3 = m.Biosample.objects.create(**{
+            **c.valid_biosample_2(None, self.procedure),
+            "id": 'biosample_id:3'
+        })
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
 
         self.phenopacket = m.Phenopacket.objects.create(
@@ -33,6 +37,7 @@ class BiosampleTest(ProjectTestCase):
             meta_data=self.meta_data,
             table=self.table,
         )
+        # biosample_3 is not added to the phenopacket
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
     def test_biosample(self):
@@ -43,6 +48,9 @@ class BiosampleTest(ProjectTestCase):
         self.assertEqual(biosample_one.id, 'biosample_id:1')
         self.assertEqual(biosample_one.schema_type, SchemaType.BIOSAMPLE)
         self.assertEqual(biosample_one.get_project_id(), self.project.identifier)
+
+        # does not belong to a phenopacket => has no project
+        self.assertIsNone(self.biosample_3.get_project_id())
 
     def test_string_representations(self):
         # Test __str__
