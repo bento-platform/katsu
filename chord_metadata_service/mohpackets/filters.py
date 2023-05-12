@@ -63,6 +63,7 @@ class DonorFilter(filters.FilterSet):
     follow_up = filters.CharFilter(method="filter_follow_up")
     biomarker = filters.CharFilter(method="filter_biomarker")
     comorbidity = filters.CharFilter(method="filter_comorbidity")
+    exposure = filters.CharFilter(method="filter_exposure")
 
     def filter_donors(self, queryset, name, value):
         """
@@ -108,6 +109,9 @@ class DonorFilter(filters.FilterSet):
 
     def filter_comorbidity(self, queryset, name, value):
         return queryset.filter(comorbidity__pk__iexact=value)
+
+    def filter_exposure(self, queryset, name, value):
+        return queryset.filter(exposure__pk__iexact=value)
 
     def filter_age(self, queryset, name, value):
         """
