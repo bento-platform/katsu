@@ -157,7 +157,7 @@ T_CATEGORY = [
     "Tis(LAMN)",
     "Tis(LCIS)",
     "Tis(Paget)",
-    "Tis(Paget’s)",
+    "Tis(Paget's)",
     "Tis pu",
     "Tis pd",
     "TX",
