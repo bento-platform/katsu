@@ -256,6 +256,7 @@ available in a single database query, improving the performance of the viewset.
 |follow_up|query|string|false|none|
 |biomarker|query|string|false|none|
 |comorbidity|query|string|false|none|
+|exposure|query|string|false|none|
 |page|query|integer|false|A page number within the paginated result set.|
 |page_size|query|integer|false|Number of results to return per page.|
 
@@ -272,6 +273,9 @@ available in a single database query, improving the performance of the viewset.
     {
       "submitter_donor_id": "string",
       "program_id": "string",
+      "lost_to_followup_after_clinical_event_identifier": "string",
+      "lost_to_followup_reason": "Completed study",
+      "date_alive_after_lost_to_followup": "string",
       "is_deceased": true,
       "cause_of_death": "Died of cancer",
       "date_of_birth": "string",
@@ -295,6 +299,7 @@ available in a single database query, improving the performance of the viewset.
           "clinical_n_category": "N0",
           "clinical_m_category": "M0",
           "clinical_stage_group": "Stage 0",
+          "laterality": "Bilateral",
           "specimens": [
             {
               "pathological_tumour_staging_system": "AJCC 8th edition",
@@ -312,6 +317,8 @@ available in a single database query, improving the performance of the viewset.
               "tumour_grade": "Low grade",
               "percent_tumour_cells_range": "0-19%",
               "percent_tumour_cells_measurement_method": "Genomics",
+              "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
+              "specimen_laterality": "Left",
               "sample_registrations": [
                 {
                   "submitter_sample_id": "string",
@@ -327,7 +334,18 @@ available in a single database query, improving the performance of the viewset.
                   "test_interval": 32767,
                   "psa_level": 32767,
                   "ca125": 32767,
-                  "cea": 32767
+                  "cea": 32767,
+                  "er_status": "Cannot be determined",
+                  "er_percent_positive": 0,
+                  "her2_ish_status": "Cannot be determined",
+                  "her2_ihc_status": "Cannot be determined",
+                  "pr_status": "Cannot be determined",
+                  "pr_percent_positive": 0,
+                  "hpv_ihc_status": "Cannot be determined",
+                  "hpv_pcr_status": "Cannot be determined",
+                  "hpv_strain": [
+                    "HPV16"
+                  ]
                 }
               ]
             }
@@ -343,6 +361,8 @@ available in a single database query, improving the performance of the viewset.
               "days_per_cycle": 32767,
               "number_of_cycles": 32767,
               "response_to_treatment_criteria_method": "RECIST 1.1",
+              "line_of_treatment": -2147483648,
+              "status_of_treatment": "Treatment completed as prescribed",
               "chemotherapies": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -436,7 +456,18 @@ available in a single database query, improving the performance of the viewset.
                   "test_interval": 32767,
                   "psa_level": 32767,
                   "ca125": 32767,
-                  "cea": 32767
+                  "cea": 32767,
+                  "er_status": "Cannot be determined",
+                  "er_percent_positive": 0,
+                  "her2_ish_status": "Cannot be determined",
+                  "her2_ihc_status": "Cannot be determined",
+                  "pr_status": "Cannot be determined",
+                  "pr_percent_positive": 0,
+                  "hpv_ihc_status": "Cannot be determined",
+                  "hpv_pcr_status": "Cannot be determined",
+                  "hpv_strain": [
+                    "HPV16"
+                  ]
                 }
               ]
             }
@@ -447,7 +478,18 @@ available in a single database query, improving the performance of the viewset.
               "test_interval": 32767,
               "psa_level": 32767,
               "ca125": 32767,
-              "cea": 32767
+              "cea": 32767,
+              "er_status": "Cannot be determined",
+              "er_percent_positive": 0,
+              "her2_ish_status": "Cannot be determined",
+              "her2_ihc_status": "Cannot be determined",
+              "pr_status": "Cannot be determined",
+              "pr_percent_positive": 0,
+              "hpv_ihc_status": "Cannot be determined",
+              "hpv_pcr_status": "Cannot be determined",
+              "hpv_strain": [
+                "HPV16"
+              ]
             }
           ]
         }
@@ -462,13 +504,33 @@ available in a single database query, improving the performance of the viewset.
           "comorbidity_treatment": "string"
         }
       ],
+      "exposures": [
+        {
+          "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
+          "tobacco_type": [
+            "Chewing Tobacco"
+          ],
+          "pack_years_smoked": 0
+        }
+      ],
       "biomarkers": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "test_interval": 32767,
           "psa_level": 32767,
           "ca125": 32767,
-          "cea": 32767
+          "cea": 32767,
+          "er_status": "Cannot be determined",
+          "er_percent_positive": 0,
+          "her2_ish_status": "Cannot be determined",
+          "her2_ihc_status": "Cannot be determined",
+          "pr_status": "Cannot be determined",
+          "pr_percent_positive": 0,
+          "hpv_ihc_status": "Cannot be determined",
+          "hpv_pcr_status": "Cannot be determined",
+          "hpv_strain": [
+            "HPV16"
+          ]
         }
       ]
     }
@@ -525,6 +587,7 @@ get_queryset()
 |follow_up|query|string|false|none|
 |biomarker|query|string|false|none|
 |comorbidity|query|string|false|none|
+|exposure|query|string|false|none|
 |page|query|integer|false|A page number within the paginated result set.|
 |page_size|query|integer|false|Number of results to return per page.|
 
@@ -1468,6 +1531,7 @@ list(request, *args, **kwargs)
 |follow_up|query|string|false|none|
 |biomarker|query|string|false|none|
 |comorbidity|query|string|false|none|
+|exposure|query|string|false|none|
 
 > Example responses
 
@@ -3312,6 +3376,9 @@ continued
 {
   "submitter_donor_id": "string",
   "program_id": "string",
+  "lost_to_followup_after_clinical_event_identifier": "string",
+  "lost_to_followup_reason": "Completed study",
+  "date_alive_after_lost_to_followup": "string",
   "is_deceased": true,
   "cause_of_death": "Died of cancer",
   "date_of_birth": "string",
@@ -3335,6 +3402,7 @@ continued
       "clinical_n_category": "N0",
       "clinical_m_category": "M0",
       "clinical_stage_group": "Stage 0",
+      "laterality": "Bilateral",
       "specimens": [
         {
           "pathological_tumour_staging_system": "AJCC 8th edition",
@@ -3352,6 +3420,8 @@ continued
           "tumour_grade": "Low grade",
           "percent_tumour_cells_range": "0-19%",
           "percent_tumour_cells_measurement_method": "Genomics",
+          "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
+          "specimen_laterality": "Left",
           "sample_registrations": [
             {
               "submitter_sample_id": "string",
@@ -3367,7 +3437,18 @@ continued
               "test_interval": 32767,
               "psa_level": 32767,
               "ca125": 32767,
-              "cea": 32767
+              "cea": 32767,
+              "er_status": "Cannot be determined",
+              "er_percent_positive": 0,
+              "her2_ish_status": "Cannot be determined",
+              "her2_ihc_status": "Cannot be determined",
+              "pr_status": "Cannot be determined",
+              "pr_percent_positive": 0,
+              "hpv_ihc_status": "Cannot be determined",
+              "hpv_pcr_status": "Cannot be determined",
+              "hpv_strain": [
+                "HPV16"
+              ]
             }
           ]
         }
@@ -3383,6 +3464,8 @@ continued
           "days_per_cycle": 32767,
           "number_of_cycles": 32767,
           "response_to_treatment_criteria_method": "RECIST 1.1",
+          "line_of_treatment": -2147483648,
+          "status_of_treatment": "Treatment completed as prescribed",
           "chemotherapies": [
             {
               "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -3471,7 +3554,18 @@ continued
                   "test_interval": 32767,
                   "psa_level": 32767,
                   "ca125": 32767,
-                  "cea": 32767
+                  "cea": 32767,
+                  "er_status": "Cannot be determined",
+                  "er_percent_positive": 0,
+                  "her2_ish_status": "Cannot be determined",
+                  "her2_ihc_status": "Cannot be determined",
+                  "pr_status": "Cannot be determined",
+                  "pr_percent_positive": 0,
+                  "hpv_ihc_status": "Cannot be determined",
+                  "hpv_pcr_status": "Cannot be determined",
+                  "hpv_strain": [
+                    "HPV16"
+                  ]
                 }
               ]
             }
@@ -3482,7 +3576,18 @@ continued
               "test_interval": 32767,
               "psa_level": 32767,
               "ca125": 32767,
-              "cea": 32767
+              "cea": 32767,
+              "er_status": "Cannot be determined",
+              "er_percent_positive": 0,
+              "her2_ish_status": "Cannot be determined",
+              "her2_ihc_status": "Cannot be determined",
+              "pr_status": "Cannot be determined",
+              "pr_percent_positive": 0,
+              "hpv_ihc_status": "Cannot be determined",
+              "hpv_pcr_status": "Cannot be determined",
+              "hpv_strain": [
+                "HPV16"
+              ]
             }
           ]
         }
@@ -3493,7 +3598,18 @@ continued
           "test_interval": 32767,
           "psa_level": 32767,
           "ca125": 32767,
-          "cea": 32767
+          "cea": 32767,
+          "er_status": "Cannot be determined",
+          "er_percent_positive": 0,
+          "her2_ish_status": "Cannot be determined",
+          "her2_ihc_status": "Cannot be determined",
+          "pr_status": "Cannot be determined",
+          "pr_percent_positive": 0,
+          "hpv_ihc_status": "Cannot be determined",
+          "hpv_pcr_status": "Cannot be determined",
+          "hpv_strain": [
+            "HPV16"
+          ]
         }
       ]
     }
@@ -3508,13 +3624,33 @@ continued
       "comorbidity_treatment": "string"
     }
   ],
+  "exposures": [
+    {
+      "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
+      "tobacco_type": [
+        "Chewing Tobacco"
+      ],
+      "pack_years_smoked": 0
+    }
+  ],
   "biomarkers": [
     {
       "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "test_interval": 32767,
       "psa_level": 32767,
       "ca125": 32767,
-      "cea": 32767
+      "cea": 32767,
+      "er_status": "Cannot be determined",
+      "er_percent_positive": 0,
+      "her2_ish_status": "Cannot be determined",
+      "her2_ihc_status": "Cannot be determined",
+      "pr_status": "Cannot be determined",
+      "pr_percent_positive": 0,
+      "hpv_ihc_status": "Cannot be determined",
+      "hpv_pcr_status": "Cannot be determined",
+      "hpv_strain": [
+        "HPV16"
+      ]
     }
   ]
 }
@@ -3527,6 +3663,32 @@ continued
 |---|---|---|---|---|
 |submitter_donor_id|string|true|none|none|
 |program_id|string|true|none|none|
+|lost_to_followup_after_clinical_event_identifier|string¦null|false|none|none|
+|lost_to_followup_reason|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[LostToFollowupReasonEnum](#schemalosttofollowupreasonenum)|false|none|* `Completed study` - Completed study<br>* `Discharged to palliative care` - Discharged to palliative care<br>* `Lost contact` - Lost contact<br>* `Not applicable` - Not applicable<br>* `Unknown` - Unknown<br>* `Withdrew from study` - Withdrew from study|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|date_alive_after_lost_to_followup|string¦null|true|none|none|
 |is_deceased|boolean¦null|false|none|none|
 |cause_of_death|any|true|none|none|
 
@@ -3628,6 +3790,7 @@ continued
 |---|---|---|---|---|
 |primary_diagnoses|[[NestedPrimaryDiagnosis](#schemanestedprimarydiagnosis)]|false|read-only|none|
 |comorbidities|[[NestedComorbidity](#schemanestedcomorbidity)]|false|read-only|none|
+|exposures|[[NestedExposure](#schemanestedexposure)]|false|read-only|none|
 |biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
 
 <h2 id="tocS_DosageUnitsEnum">DosageUnitsEnum</h2>
@@ -3950,7 +4113,7 @@ oneOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget’s)` - Tis(Paget’s)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
+|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget's)` - Tis(Paget's)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
 
 xor
 
@@ -4824,7 +4987,18 @@ continued
   "test_interval": 32767,
   "psa_level": 32767,
   "ca125": 32767,
-  "cea": 32767
+  "cea": 32767,
+  "er_status": "Cannot be determined",
+  "er_percent_positive": 0,
+  "her2_ish_status": "Cannot be determined",
+  "her2_ihc_status": "Cannot be determined",
+  "pr_status": "Cannot be determined",
+  "pr_percent_positive": 0,
+  "hpv_ihc_status": "Cannot be determined",
+  "hpv_pcr_status": "Cannot be determined",
+  "hpv_strain": [
+    "HPV16"
+  ]
 }
 
 ```
@@ -4838,6 +5012,171 @@ continued
 |psa_level|integer¦null|false|none|none|
 |ca125|integer¦null|false|none|none|
 |cea|integer¦null|false|none|none|
+|er_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ErPrHpvStatusEnum](#schemaerprhpvstatusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `Negative` - Negative<br>* `Not applicable` - Not applicable<br>* `Positive` - Positive<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|er_percent_positive|number(double)¦null|false|none|none|
+|her2_ish_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[Her2StatusEnum](#schemaher2statusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `Equivocal` - Equivocal<br>* `Positive` - Positive<br>* `Negative` - Negative<br>* `Not applicable` - Not applicable<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|her2_ihc_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[Her2StatusEnum](#schemaher2statusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `Equivocal` - Equivocal<br>* `Positive` - Positive<br>* `Negative` - Negative<br>* `Not applicable` - Not applicable<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|pr_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ErPrHpvStatusEnum](#schemaerprhpvstatusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `Negative` - Negative<br>* `Not applicable` - Not applicable<br>* `Positive` - Positive<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|pr_percent_positive|number(double)¦null|false|none|none|
+|hpv_ihc_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ErPrHpvStatusEnum](#schemaerprhpvstatusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `Negative` - Negative<br>* `Not applicable` - Not applicable<br>* `Positive` - Positive<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|hpv_pcr_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ErPrHpvStatusEnum](#schemaerprhpvstatusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `Negative` - Negative<br>* `Not applicable` - Not applicable<br>* `Positive` - Positive<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|hpv_strain|[oneOf]¦null|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[HpvStrainEnum](#schemahpvstrainenum)|false|none|* `HPV16` - HPV16<br>* `HPV18` - HPV18<br>* `HPV31` - HPV31<br>* `HPV33` - HPV33<br>* `HPV35` - HPV35<br>* `HPV39` - HPV39<br>* `HPV45` - HPV45<br>* `HPV51` - HPV51<br>* `HPV52` - HPV52<br>* `HPV56` - HPV56<br>* `HPV58` - HPV58<br>* `HPV59` - HPV59<br>* `HPV66` - HPV66<br>* `HPV68` - HPV68<br>* `HPV73` - HPV73|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 <h2 id="tocS_NestedChemotherapy">NestedChemotherapy</h2>
 
@@ -5016,6 +5355,78 @@ continued
 |---|---|---|---|---|
 |comorbidity_treatment|string¦null|true|none|none|
 
+<h2 id="tocS_NestedExposure">NestedExposure</h2>
+
+<a id="schemanestedexposure"></a>
+<a id="schema_NestedExposure"></a>
+<a id="tocSnestedexposure"></a>
+<a id="tocsnestedexposure"></a>
+
+```json
+{
+  "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
+  "tobacco_type": [
+    "Chewing Tobacco"
+  ],
+  "pack_years_smoked": 0
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|tobacco_smoking_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TobaccoSmokingStatusEnum](#schematobaccosmokingstatusenum)|false|none|* `Current reformed smoker for <= 15 years` - Current reformed smoker for <= 15 years<br>* `Current reformed smoker for > 15 years` - Current reformed smoker for > 15 years<br>* `Current reformed smoker, duration not specified` - Current reformed smoker, duration not specified<br>* `Current smoker` - Current smoker<br>* `Lifelong non-smoker (<100 cigarettes smoked in lifetime)` - Lifelong non-smoker (<100 cigarettes smoked in lifetime)<br>* `Not applicable` - Not applicable<br>* `Smoking history not documented` - Smoking history not documented|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|tobacco_type|[oneOf]¦null|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TobaccoTypeEnum](#schematobaccotypeenum)|false|none|* `Chewing Tobacco` - Chewing Tobacco<br>* `Cigar` - Cigar<br>* `Cigarettes` - Cigarettes<br>* `Electronic cigarettes` - Electronic cigarettes<br>* `Not applicable` - Not applicable<br>* `Pipe` - Pipe<br>* `Roll-ups` - Roll-ups<br>* `Snuff` - Snuff<br>* `Unknown` - Unknown<br>* `Waterpipe` - Waterpipe|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|pack_years_smoked|number(double)¦null|false|none|none|
+
 <h2 id="tocS_NestedFollowUp">NestedFollowUp</h2>
 
 <a id="schemanestedfollowup"></a>
@@ -5044,7 +5455,18 @@ continued
       "test_interval": 32767,
       "psa_level": 32767,
       "ca125": 32767,
-      "cea": 32767
+      "cea": 32767,
+      "er_status": "Cannot be determined",
+      "er_percent_positive": 0,
+      "her2_ish_status": "Cannot be determined",
+      "her2_ihc_status": "Cannot be determined",
+      "pr_status": "Cannot be determined",
+      "pr_percent_positive": 0,
+      "hpv_ihc_status": "Cannot be determined",
+      "hpv_pcr_status": "Cannot be determined",
+      "hpv_strain": [
+        "HPV16"
+      ]
     }
   ]
 }
@@ -5160,7 +5582,7 @@ oneOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget’s)` - Tis(Paget’s)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
+|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget's)` - Tis(Paget's)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
 
 xor
 
@@ -5454,6 +5876,7 @@ continued
   "clinical_n_category": "N0",
   "clinical_m_category": "M0",
   "clinical_stage_group": "Stage 0",
+  "laterality": "Bilateral",
   "specimens": [
     {
       "pathological_tumour_staging_system": "AJCC 8th edition",
@@ -5471,6 +5894,8 @@ continued
       "tumour_grade": "Low grade",
       "percent_tumour_cells_range": "0-19%",
       "percent_tumour_cells_measurement_method": "Genomics",
+      "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
+      "specimen_laterality": "Left",
       "sample_registrations": [
         {
           "submitter_sample_id": "string",
@@ -5486,7 +5911,18 @@ continued
           "test_interval": 32767,
           "psa_level": 32767,
           "ca125": 32767,
-          "cea": 32767
+          "cea": 32767,
+          "er_status": "Cannot be determined",
+          "er_percent_positive": 0,
+          "her2_ish_status": "Cannot be determined",
+          "her2_ihc_status": "Cannot be determined",
+          "pr_status": "Cannot be determined",
+          "pr_percent_positive": 0,
+          "hpv_ihc_status": "Cannot be determined",
+          "hpv_pcr_status": "Cannot be determined",
+          "hpv_strain": [
+            "HPV16"
+          ]
         }
       ]
     }
@@ -5502,6 +5938,8 @@ continued
       "days_per_cycle": 32767,
       "number_of_cycles": 32767,
       "response_to_treatment_criteria_method": "RECIST 1.1",
+      "line_of_treatment": -2147483648,
+      "status_of_treatment": "Treatment completed as prescribed",
       "chemotherapies": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -5590,7 +6028,18 @@ continued
               "test_interval": 32767,
               "psa_level": 32767,
               "ca125": 32767,
-              "cea": 32767
+              "cea": 32767,
+              "er_status": "Cannot be determined",
+              "er_percent_positive": 0,
+              "her2_ish_status": "Cannot be determined",
+              "her2_ihc_status": "Cannot be determined",
+              "pr_status": "Cannot be determined",
+              "pr_percent_positive": 0,
+              "hpv_ihc_status": "Cannot be determined",
+              "hpv_pcr_status": "Cannot be determined",
+              "hpv_strain": [
+                "HPV16"
+              ]
             }
           ]
         }
@@ -5601,7 +6050,18 @@ continued
           "test_interval": 32767,
           "psa_level": 32767,
           "ca125": 32767,
-          "cea": 32767
+          "cea": 32767,
+          "er_status": "Cannot be determined",
+          "er_percent_positive": 0,
+          "her2_ish_status": "Cannot be determined",
+          "her2_ihc_status": "Cannot be determined",
+          "pr_status": "Cannot be determined",
+          "pr_percent_positive": 0,
+          "hpv_ihc_status": "Cannot be determined",
+          "hpv_pcr_status": "Cannot be determined",
+          "hpv_strain": [
+            "HPV16"
+          ]
         }
       ]
     }
@@ -5612,7 +6072,18 @@ continued
       "test_interval": 32767,
       "psa_level": 32767,
       "ca125": 32767,
-      "cea": 32767
+      "cea": 32767,
+      "er_status": "Cannot be determined",
+      "er_percent_positive": 0,
+      "her2_ish_status": "Cannot be determined",
+      "her2_ihc_status": "Cannot be determined",
+      "pr_status": "Cannot be determined",
+      "pr_percent_positive": 0,
+      "hpv_ihc_status": "Cannot be determined",
+      "hpv_pcr_status": "Cannot be determined",
+      "hpv_strain": [
+        "HPV16"
+      ]
     }
   ]
 }
@@ -5729,7 +6200,7 @@ oneOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget’s)` - Tis(Paget’s)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
+|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget's)` - Tis(Paget's)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
 
 xor
 
@@ -5802,6 +6273,30 @@ oneOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[StageGroupEnum](#schemastagegroupenum)|false|none|* `Stage 0` - Stage 0<br>* `Stage 0a` - Stage 0a<br>* `Stage 0is` - Stage 0is<br>* `Stage 1` - Stage 1<br>* `Stage 1A` - Stage 1A<br>* `Stage 1B` - Stage 1B<br>* `Stage A` - Stage A<br>* `Stage B` - Stage B<br>* `Stage C` - Stage C<br>* `Stage I` - Stage I<br>* `Stage IA` - Stage IA<br>* `Stage IA1` - Stage IA1<br>* `Stage IA2` - Stage IA2<br>* `Stage IA3` - Stage IA3<br>* `Stage IAB` - Stage IAB<br>* `Stage IAE` - Stage IAE<br>* `Stage IAES` - Stage IAES<br>* `Stage IAS` - Stage IAS<br>* `Stage IB` - Stage IB<br>* `Stage IB1` - Stage IB1<br>* `Stage IB2` - Stage IB2<br>* `Stage IBE` - Stage IBE<br>* `Stage IBES` - Stage IBES<br>* `Stage IBS` - Stage IBS<br>* `Stage IC` - Stage IC<br>* `Stage IE` - Stage IE<br>* `Stage IEA` - Stage IEA<br>* `Stage IEB` - Stage IEB<br>* `Stage IES` - Stage IES<br>* `Stage II` - Stage II<br>* `Stage II bulky` - Stage II bulky<br>* `Stage IIA` - Stage IIA<br>* `Stage IIA1` - Stage IIA1<br>* `Stage IIA2` - Stage IIA2<br>* `Stage IIAE` - Stage IIAE<br>* `Stage IIAES` - Stage IIAES<br>* `Stage IIAS` - Stage IIAS<br>* `Stage IIB` - Stage IIB<br>* `Stage IIBE` - Stage IIBE<br>* `Stage IIBES` - Stage IIBES<br>* `Stage IIBS` - Stage IIBS<br>* `Stage IIC` - Stage IIC<br>* `Stage IIE` - Stage IIE<br>* `Stage IIEA` - Stage IIEA<br>* `Stage IIEB` - Stage IIEB<br>* `Stage IIES` - Stage IIES<br>* `Stage III` - Stage III<br>* `Stage IIIA` - Stage IIIA<br>* `Stage IIIA1` - Stage IIIA1<br>* `Stage IIIA2` - Stage IIIA2<br>* `Stage IIIAE` - Stage IIIAE<br>* `Stage IIIAES` - Stage IIIAES<br>* `Stage IIIAS` - Stage IIIAS<br>* `Stage IIIB` - Stage IIIB<br>* `Stage IIIBE` - Stage IIIBE<br>* `Stage IIIBES` - Stage IIIBES<br>* `Stage IIIBS` - Stage IIIBS<br>* `Stage IIIC` - Stage IIIC<br>* `Stage IIIC1` - Stage IIIC1<br>* `Stage IIIC2` - Stage IIIC2<br>* `Stage IIID` - Stage IIID<br>* `Stage IIIE` - Stage IIIE<br>* `Stage IIIES` - Stage IIIES<br>* `Stage IIIS` - Stage IIIS<br>* `Stage IIS` - Stage IIS<br>* `Stage IS` - Stage IS<br>* `Stage IV` - Stage IV<br>* `Stage IVA` - Stage IVA<br>* `Stage IVA1` - Stage IVA1<br>* `Stage IVA2` - Stage IVA2<br>* `Stage IVAE` - Stage IVAE<br>* `Stage IVAES` - Stage IVAES<br>* `Stage IVAS` - Stage IVAS<br>* `Stage IVB` - Stage IVB<br>* `Stage IVBE` - Stage IVBE<br>* `Stage IVBES` - Stage IVBES<br>* `Stage IVBS` - Stage IVBS<br>* `Stage IVC` - Stage IVC<br>* `Stage IVE` - Stage IVE<br>* `Stage IVES` - Stage IVES<br>* `Stage IVS` - Stage IVS<br>* `In situ` - In situ<br>* `Localized` - Localized<br>* `Regionalized` - Regionalized<br>* `Distant` - Distant<br>* `Stage L1` - Stage L1<br>* `Stage L2` - Stage L2<br>* `Stage M` - Stage M<br>* `Stage Ms` - Stage Ms<br>* `Stage 2A` - Stage 2A<br>* `Stage 2B` - Stage 2B<br>* `Stage 3` - Stage 3<br>* `Stage 4` - Stage 4<br>* `Stage 4S` - Stage 4S<br>* `Occult Carcinoma` - Occult Carcinoma|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|laterality|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[LateralityEnum](#schemalateralityenum)|false|none|* `Bilateral` - Bilateral<br>* `Left` - Left<br>* `Midline` - Midline<br>* `Not a paired site` - Not a paired site<br>* `Right` - Right<br>* `Unilateral, side not specified` - Unilateral, side not specified<br>* `Unknown` - Unknown|
 
 xor
 
@@ -6065,6 +6560,8 @@ xor
   "tumour_grade": "Low grade",
   "percent_tumour_cells_range": "0-19%",
   "percent_tumour_cells_measurement_method": "Genomics",
+  "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
+  "specimen_laterality": "Left",
   "sample_registrations": [
     {
       "submitter_sample_id": "string",
@@ -6080,7 +6577,18 @@ xor
       "test_interval": 32767,
       "psa_level": 32767,
       "ca125": 32767,
-      "cea": 32767
+      "cea": 32767,
+      "er_status": "Cannot be determined",
+      "er_percent_positive": 0,
+      "her2_ish_status": "Cannot be determined",
+      "her2_ihc_status": "Cannot be determined",
+      "pr_status": "Cannot be determined",
+      "pr_percent_positive": 0,
+      "hpv_ihc_status": "Cannot be determined",
+      "hpv_pcr_status": "Cannot be determined",
+      "hpv_strain": [
+        "HPV16"
+      ]
     }
   ]
 }
@@ -6121,7 +6629,7 @@ oneOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget’s)` - Tis(Paget’s)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
+|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget's)` - Tis(Paget's)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
 
 xor
 
@@ -6365,6 +6873,54 @@ oneOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[PercentTumourCellsMeasurementMethodEnum](#schemapercenttumourcellsmeasurementmethodenum)|false|none|* `Genomics` - Genomics<br>* `Image analysis` - Image analysis<br>* `Pathology estimate by percent nuclei` - Pathology estimate by percent nuclei<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|specimen_processing|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SpecimenProcessingEnum](#schemaspecimenprocessingenum)|false|none|* `Cryopreservation in liquid nitrogen (dead tissue)` - Cryopreservation in liquid nitrogen (dead tissue)<br>* `Cryopreservation in dry ice (dead tissue)` - Cryopreservation in dry ice (dead tissue)<br>* `Cryopreservation of live cells in liquid nitrogen` - Cryopreservation of live cells in liquid nitrogen<br>* `Cryopreservation - other` - Cryopreservation - other<br>* `Formalin fixed & paraffin embedded` - Formalin fixed & paraffin embedded<br>* `Formalin fixed - buffered` - Formalin fixed - buffered<br>* `Formalin fixed - unbuffered` - Formalin fixed - unbuffered<br>* `Fresh` - Fresh<br>* `Other` - Other<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|specimen_laterality|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SpecimenLateralityEnum](#schemaspecimenlateralityenum)|false|none|* `Left` - Left<br>* `Not applicable` - Not applicable<br>* `Right` - Right<br>* `Unknown` - Unknown|
 
 xor
 
@@ -6664,6 +7220,8 @@ continued
   "days_per_cycle": 32767,
   "number_of_cycles": 32767,
   "response_to_treatment_criteria_method": "RECIST 1.1",
+  "line_of_treatment": -2147483648,
+  "status_of_treatment": "Treatment completed as prescribed",
   "chemotherapies": [
     {
       "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -6752,7 +7310,18 @@ continued
           "test_interval": 32767,
           "psa_level": 32767,
           "ca125": 32767,
-          "cea": 32767
+          "cea": 32767,
+          "er_status": "Cannot be determined",
+          "er_percent_positive": 0,
+          "her2_ish_status": "Cannot be determined",
+          "her2_ihc_status": "Cannot be determined",
+          "pr_status": "Cannot be determined",
+          "pr_percent_positive": 0,
+          "hpv_ihc_status": "Cannot be determined",
+          "hpv_pcr_status": "Cannot be determined",
+          "hpv_strain": [
+            "HPV16"
+          ]
         }
       ]
     }
@@ -6763,7 +7332,18 @@ continued
       "test_interval": 32767,
       "psa_level": 32767,
       "ca125": 32767,
-      "cea": 32767
+      "cea": 32767,
+      "er_status": "Cannot be determined",
+      "er_percent_positive": 0,
+      "her2_ish_status": "Cannot be determined",
+      "her2_ihc_status": "Cannot be determined",
+      "pr_status": "Cannot be determined",
+      "pr_percent_positive": 0,
+      "hpv_ihc_status": "Cannot be determined",
+      "hpv_pcr_status": "Cannot be determined",
+      "hpv_strain": [
+        "HPV16"
+      ]
     }
   ]
 }
@@ -6858,6 +7438,31 @@ oneOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|false|none|* `RECIST 1.1` - RECIST 1.1<br>* `iRECIST` - iRECIST<br>* `Cheson CLL 2012 Oncology Response Criteria` - Cheson CLL 2012 Oncology Response Criteria<br>* `Response Assessment in Neuro-Oncology (RANO)` - Response Assessment in Neuro-Oncology (RANO)<br>* `AML Response Criteria` - AML Response Criteria<br>* `Physician Assessed Response Criteria` - Physician Assessed Response Criteria<br>* `Blazer score` - Blazer score|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|line_of_treatment|integer¦null|false|none|none|
+|status_of_treatment|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[StatusOfTreatmentEnum](#schemastatusoftreatmentenum)|false|none|* `Treatment completed as prescribed` - Treatment completed as prescribed<br>* `Treatment incomplete due to technical or organizational problems` - Treatment incomplete due to technical or organizational problems<br>* `Treatment incomplete because patient died` - Treatment incomplete because patient died<br>* `Patient choice (stopped or interrupted treatment)` - Patient choice (stopped or interrupted treatment)<br>* `Physician decision (stopped or interrupted treatment)` - Physician decision (stopped or interrupted treatment)<br>* `Treatment stopped due to lack of efficacy (disease progression)` - Treatment stopped due to lack of efficacy (disease progression)<br>* `Treatment stopped due to acute toxicity` - Treatment stopped due to acute toxicity<br>* `Other` - Other<br>* `Not applicable` - Not applicable<br>* `Unknown` - Unknown|
 
 xor
 
@@ -7086,6 +7691,9 @@ null
     {
       "submitter_donor_id": "string",
       "program_id": "string",
+      "lost_to_followup_after_clinical_event_identifier": "string",
+      "lost_to_followup_reason": "Completed study",
+      "date_alive_after_lost_to_followup": "string",
       "is_deceased": true,
       "cause_of_death": "Died of cancer",
       "date_of_birth": "string",
@@ -7109,6 +7717,7 @@ null
           "clinical_n_category": "N0",
           "clinical_m_category": "M0",
           "clinical_stage_group": "Stage 0",
+          "laterality": "Bilateral",
           "specimens": [
             {
               "pathological_tumour_staging_system": "AJCC 8th edition",
@@ -7126,6 +7735,8 @@ null
               "tumour_grade": "Low grade",
               "percent_tumour_cells_range": "0-19%",
               "percent_tumour_cells_measurement_method": "Genomics",
+              "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
+              "specimen_laterality": "Left",
               "sample_registrations": [
                 {
                   "submitter_sample_id": "string",
@@ -7141,7 +7752,18 @@ null
                   "test_interval": 32767,
                   "psa_level": 32767,
                   "ca125": 32767,
-                  "cea": 32767
+                  "cea": 32767,
+                  "er_status": "Cannot be determined",
+                  "er_percent_positive": 0,
+                  "her2_ish_status": "Cannot be determined",
+                  "her2_ihc_status": "Cannot be determined",
+                  "pr_status": "Cannot be determined",
+                  "pr_percent_positive": 0,
+                  "hpv_ihc_status": "Cannot be determined",
+                  "hpv_pcr_status": "Cannot be determined",
+                  "hpv_strain": [
+                    "HPV16"
+                  ]
                 }
               ]
             }
@@ -7157,6 +7779,8 @@ null
               "days_per_cycle": 32767,
               "number_of_cycles": 32767,
               "response_to_treatment_criteria_method": "RECIST 1.1",
+              "line_of_treatment": -2147483648,
+              "status_of_treatment": "Treatment completed as prescribed",
               "chemotherapies": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -7250,7 +7874,18 @@ null
                   "test_interval": 32767,
                   "psa_level": 32767,
                   "ca125": 32767,
-                  "cea": 32767
+                  "cea": 32767,
+                  "er_status": "Cannot be determined",
+                  "er_percent_positive": 0,
+                  "her2_ish_status": "Cannot be determined",
+                  "her2_ihc_status": "Cannot be determined",
+                  "pr_status": "Cannot be determined",
+                  "pr_percent_positive": 0,
+                  "hpv_ihc_status": "Cannot be determined",
+                  "hpv_pcr_status": "Cannot be determined",
+                  "hpv_strain": [
+                    "HPV16"
+                  ]
                 }
               ]
             }
@@ -7261,7 +7896,18 @@ null
               "test_interval": 32767,
               "psa_level": 32767,
               "ca125": 32767,
-              "cea": 32767
+              "cea": 32767,
+              "er_status": "Cannot be determined",
+              "er_percent_positive": 0,
+              "her2_ish_status": "Cannot be determined",
+              "her2_ihc_status": "Cannot be determined",
+              "pr_status": "Cannot be determined",
+              "pr_percent_positive": 0,
+              "hpv_ihc_status": "Cannot be determined",
+              "hpv_pcr_status": "Cannot be determined",
+              "hpv_strain": [
+                "HPV16"
+              ]
             }
           ]
         }
@@ -7276,13 +7922,33 @@ null
           "comorbidity_treatment": "string"
         }
       ],
+      "exposures": [
+        {
+          "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
+          "tobacco_type": [
+            "Chewing Tobacco"
+          ],
+          "pack_years_smoked": 0
+        }
+      ],
       "biomarkers": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "test_interval": 32767,
           "psa_level": 32767,
           "ca125": 32767,
-          "cea": 32767
+          "cea": 32767,
+          "er_status": "Cannot be determined",
+          "er_percent_positive": 0,
+          "her2_ish_status": "Cannot be determined",
+          "her2_ihc_status": "Cannot be determined",
+          "pr_status": "Cannot be determined",
+          "pr_percent_positive": 0,
+          "hpv_ihc_status": "Cannot be determined",
+          "hpv_pcr_status": "Cannot be determined",
+          "hpv_strain": [
+            "HPV16"
+          ]
         }
       ]
     }
@@ -7998,7 +8664,7 @@ oneOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget’s)` - Tis(Paget’s)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
+|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget's)` - Tis(Paget's)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
 
 xor
 
@@ -8959,7 +9625,7 @@ oneOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget’s)` - Tis(Paget’s)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
+|» *anonymous*|[TCategoryEnum](#schematcategoryenum)|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget's)` - Tis(Paget's)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
 
 xor
 
@@ -10347,7 +11013,7 @@ continued
 * `Tis(LAMN)` - Tis(LAMN)
 * `Tis(LCIS)` - Tis(LCIS)
 * `Tis(Paget)` - Tis(Paget)
-* `Tis(Paget’s)` - Tis(Paget’s)
+* `Tis(Paget's)` - Tis(Paget's)
 * `Tis pu` - Tis pu
 * `Tis pd` - Tis pd
 * `TX` - TX
@@ -10356,7 +11022,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|*anonymous*|string|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget’s)` - Tis(Paget’s)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
+|*anonymous*|string|false|none|* `T0` - T0<br>* `T1` - T1<br>* `T1a` - T1a<br>* `T1a1` - T1a1<br>* `T1a2` - T1a2<br>* `T1a(s)` - T1a(s)<br>* `T1a(m)` - T1a(m)<br>* `T1b` - T1b<br>* `T1b1` - T1b1<br>* `T1b2` - T1b2<br>* `T1b(s)` - T1b(s)<br>* `T1b(m)` - T1b(m)<br>* `T1c` - T1c<br>* `T1d` - T1d<br>* `T1mi` - T1mi<br>* `T2` - T2<br>* `T2(s)` - T2(s)<br>* `T2(m)` - T2(m)<br>* `T2a` - T2a<br>* `T2a1` - T2a1<br>* `T2a2` - T2a2<br>* `T2b` - T2b<br>* `T2c` - T2c<br>* `T2d` - T2d<br>* `T3` - T3<br>* `T3(s)` - T3(s)<br>* `T3(m)` - T3(m)<br>* `T3a` - T3a<br>* `T3b` - T3b<br>* `T3c` - T3c<br>* `T3d` - T3d<br>* `T3e` - T3e<br>* `T4` - T4<br>* `T4a` - T4a<br>* `T4a(s)` - T4a(s)<br>* `T4a(m)` - T4a(m)<br>* `T4b` - T4b<br>* `T4b(s)` - T4b(s)<br>* `T4b(m)` - T4b(m)<br>* `T4c` - T4c<br>* `T4d` - T4d<br>* `T4e` - T4e<br>* `Ta` - Ta<br>* `Tis` - Tis<br>* `Tis(DCIS)` - Tis(DCIS)<br>* `Tis(LAMN)` - Tis(LAMN)<br>* `Tis(LCIS)` - Tis(LCIS)<br>* `Tis(Paget)` - Tis(Paget)<br>* `Tis(Paget's)` - Tis(Paget's)<br>* `Tis pu` - Tis pu<br>* `Tis pd` - Tis pd<br>* `TX` - TX|
 
 #### Enumerated Values
 
@@ -10410,7 +11076,7 @@ continued
 |*anonymous*|Tis(LAMN)|
 |*anonymous*|Tis(LCIS)|
 |*anonymous*|Tis(Paget)|
-|*anonymous*|Tis(Paget’s)|
+|*anonymous*|Tis(Paget's)|
 |*anonymous*|Tis pu|
 |*anonymous*|Tis pd|
 |*anonymous*|TX|
