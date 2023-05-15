@@ -88,6 +88,8 @@ async def make_data_type_response_object(
 @api_view(["GET"])
 @permission_classes([AllowAny])
 async def data_type_list(request: HttpRequest):
+    # TODO: Permissions: only return counts when we are authenticated/have access to counts or full data.
+    
     project = request.GET.get("project", "").strip() or None
     dataset = request.GET.get("dataset", "").strip() or None
 
@@ -105,6 +107,8 @@ async def data_type_list(request: HttpRequest):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 async def data_type_detail(request: HttpRequest, data_type: str):
+    # TODO: Permissions: only return counts when we are authenticated/have access to counts or full data.
+
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
 
