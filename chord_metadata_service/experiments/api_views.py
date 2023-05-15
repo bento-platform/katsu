@@ -98,7 +98,7 @@ class ExperimentBatchViewSet(BatchViewSet):
         return queryset
 
     def create(self, request, *args, **kwargs):
-        ids_list = request.data.get('ids', [])
+        ids_list = request.data.get('id', [])
         request.data["id"] = ids_list
         queryset = self.get_queryset()
 
