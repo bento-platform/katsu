@@ -24,10 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     # Add in environment variables for the entire "build" job
     env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: admin_local
+      POSTGRES_PASSWORD: password_local
       POSTGRES_HOST: localhost # default host value for the database
-      POSTGRES_DB: djtesting
+      POSTGRES_DB: katsu_local
       POSTGRES_PORT: 5432
       DJANGO_SECRET_KEY: test-key
     services:
