@@ -1,4 +1,3 @@
-import logging
 from abc import abstractmethod
 from django.apps import apps
 from django.db import models
@@ -6,8 +5,7 @@ from django.db.models import Q, QuerySet
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from jsonschema import Draft7Validator
 from typing import Tuple, List
-
-logger = logging.getLogger(__name__)
+from chord_metadata_service import logger
 
 
 class IndexableMixin:

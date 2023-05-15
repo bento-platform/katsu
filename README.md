@@ -165,16 +165,6 @@ CANDIG_OPA_SITE_ADMIN_KEY=
 INSIDE_CANDIG=
 ```
 
-## Extending extra properties
-WIP!!!
-
-Katsu's datamodel can be extended in order to support additional properties based on provided json-schema definitions.
-The file `extra-properties-schemas.json` can be modified to specify the expected types/shape of the `extra_properties` 
-field of a data model class.
-
-The file must be a valid json, each key needs to be the snake_case name of the class to extend (e.g. `phenotypic_features` for 
-PhenotypicFeature), the content of each key must represent a valid json-schema.
-
 ## Authentication
 
 Default authentication can be set globally in `settings.py`
