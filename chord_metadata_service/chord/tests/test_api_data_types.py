@@ -28,6 +28,16 @@ class DataTypeTest(APITestCase):
         self.assertIn(DATA_TYPE_READSET, ids)
         self.assertIn(DATA_TYPE_EXPERIMENT_RESULT, ids)
 
+    def test_data_type_list_non_uuid_project(self):
+        # Non-UUID project
+        r = self.client.get(reverse("data-type-list"), {"project": "a"})
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_data_type_list_non_uuid_dataset(self):
+        # Non-UUID dataset
+        r = self.client.get(reverse("data-type-list"), {"dataset": "a"})
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_data_type_detail(self):
         self.maxDiff = None
         r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}))
@@ -40,6 +50,16 @@ class DataTypeTest(APITestCase):
             "queryable": True,
             "count": 0,
         })
+
+    def test_data_type_detail_non_uuid_project(self):
+        # Non-UUID project
+        r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"project": "a"})
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_data_type_detail_non_uuid_dataset(self):
+        # Non-UUID dataset
+        r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"dataset": "a"})
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_data_type_detail_404(self):
         r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_NOT_REAL}))

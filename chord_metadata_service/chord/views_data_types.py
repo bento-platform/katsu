@@ -4,6 +4,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from adrf.decorators import api_view
+from rest_framework import status
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -98,7 +99,7 @@ async def data_type_list(request: HttpRequest):
         try:
             dt_response.append(await make_data_type_response_object(dt_id, dt_d, project, dataset))
         except ValueError as e:
-            return Response(errors.bad_request_error(str(e)), status=400)
+            return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
     dt_response.sort(key=lambda d: d["id"])
     return Response(dt_response)
@@ -110,7 +111,7 @@ async def data_type_detail(request: HttpRequest, data_type: str):
     # TODO: Permissions: only return counts when we are authenticated/have access to counts or full data.
 
     if data_type not in dt.DATA_TYPES:
-        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
+        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
 
     project = request.GET.get("project", "").strip() or None
     dataset = request.GET.get("dataset", "").strip() or None
@@ -118,14 +119,14 @@ async def data_type_detail(request: HttpRequest, data_type: str):
     try:
         return Response(await make_data_type_response_object(data_type, dt.DATA_TYPES[data_type], project, dataset))
     except ValueError as e:
-        return Response(errors.bad_request_error(str(e)), status=400)
+        return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 async def data_type_schema(_request: HttpRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
-        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
+        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
 
     return Response(dt.DATA_TYPES[data_type]["schema"])
 
@@ -134,6 +135,6 @@ async def data_type_schema(_request: HttpRequest, data_type: str):
 @permission_classes([AllowAny])
 async def data_type_metadata_schema(_request: HttpRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
-        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
+        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
 
     return Response(dt.DATA_TYPES[data_type]["metadata_schema"])
