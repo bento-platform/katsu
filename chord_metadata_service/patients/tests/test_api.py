@@ -650,3 +650,12 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+
+    # test beacon formatted response
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_public_filtering_beacon_response(self):
+        response = self.client.get('/api/public?sex=MALE&response_format=beacon')
+        male_count = Individual.objects.filter(sex="MALE").count()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(len(response_obj["matches"]), male_count)
