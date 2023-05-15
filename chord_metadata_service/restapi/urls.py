@@ -96,7 +96,8 @@ urlpatterns = [
     path('biosample_sampled_tissue_autocomplete', BiosampleSampledTissueAutocomplete.as_view(),
          name='biosample-sampled-tissue-autocomplete',),
 
-    # public endpoints (no confidential information leak)
+    # endpoints for bento public
+    # used by beacon or public backend, not meant for open access use
     path('public', individual_views.PublicListIndividuals.as_view(),
          name='public',),
     path('public_search_fields', public_search_fields, name='public-search-fields',),
