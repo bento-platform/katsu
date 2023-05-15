@@ -41,7 +41,7 @@
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\"T0\",\n\"T1\",\n\"T1a\",\n\"T1a1\",\n\"T1a2\",\n\"T1a(s)\",\n\"T1a(m)\",\n\"T1b\",\n\"T1b1\",\n\"T1b2\",\n\"T1b(s)\",\n\"T1b(m)\",\n\"T1c\",\n\"T1d\",\n\"T1mi\",\n\"T2\",\n\"T2(s)\",\n\"T2(m)\",\n\"T2a\",\n\"T2a1\",\n\"T2a2\",\n\"T2b\",\n\"T2c\",\n\"T2d\",\n\"T3\",\n\"T3(s)\",\n\"T3(m)\",\n\"T3a\",\n\"T3b\",\n\"T3c\",\n\"T3d\",\n\"T3e\",\n\"T4\",\n\"T4a\",\n\"T4a(s)\",\n\"T4a(m)\",\n\"T4b\",\n\"T4b(s)\",\n\"T4b(s)\",\n\"T4c\",\n\"T4d\",\n\"T4e\",\n\"Ta\",\n\"Tis\",\n\"Tis(DCIS)\",\n\"Tis(LAMN)\",\n\"Tis(LCIS)\",\n\"Tis(Paget)\",\n\"Tis(Paget’s)\",\n\"Tis pd\",\n\"Tis pu\",\n\"TX\"][random(0,51)]"
+      "formula": "[\"T0\",\n\"T1\",\n\"T1a\",\n\"T1a1\",\n\"T1a2\",\n\"T1a(s)\",\n\"T1a(m)\",\n\"T1b\",\n\"T1b1\",\n\"T1b2\",\n\"T1b(s)\",\n\"T1b(m)\",\n\"T1c\",\n\"T1d\",\n\"T1mi\",\n\"T2\",\n\"T2(s)\",\n\"T2(m)\",\n\"T2a\",\n\"T2a1\",\n\"T2a2\",\n\"T2b\",\n\"T2c\",\n\"T2d\",\n\"T3\",\n\"T3(s)\",\n\"T3(m)\",\n\"T3a\",\n\"T3b\",\n\"T3c\",\n\"T3d\",\n\"T3e\",\n\"T4\",\n\"T4a\",\n\"T4a(s)\",\n\"T4a(m)\",\n\"T4b\",\n\"T4b(s)\",\n\"T4b(s)\",\n\"T4c\",\n\"T4d\",\n\"T4e\",\n\"Ta\",\n\"Tis\",\n\"Tis(DCIS)\",\n\"Tis(LAMN)\",\n\"Tis(LCIS)\",\n\"Tis(Paget)\",\n\"Tis(Paget's)\",\n\"Tis pd\",\n\"Tis pu\",\n\"TX\"][random(0,51)]"
     },
     {
       "name": "pathological_n_category",
