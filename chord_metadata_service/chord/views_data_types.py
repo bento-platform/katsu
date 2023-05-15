@@ -59,17 +59,15 @@ async def get_count_for_data_type(
     return await q.acount()
 
 
-def make_data_type_response_object(
+async def make_data_type_response_object(
     data_type_id: str,
     data_type_details: dict,
     project: Optional[str],
     dataset: Optional[str],
 ) -> dict:
     return {
+        **data_type_details,
         "id": data_type_id,
-        "label": data_type_details["label"],
-        "schema": data_type_details["schema"],
-        "queryable": data_type_details["queryable"],
         "count": await get_count_for_data_type(data_type_id, project, dataset),
     }
 
@@ -80,10 +78,12 @@ async def data_type_list(request: HttpRequest):
     project = request.GET.get("project", "").strip() or None
     dataset = request.GET.get("dataset", "").strip() or None
 
-    return Response(sorted(
-        (make_data_type_response_object(dt_id, dt_d, project, dataset) for dt_id, dt_d in dt.DATA_TYPES.items()),
-        key=lambda d: d["id"],
-    ))
+    dt_response = []
+    for dt_id, dt_d in dt.DATA_TYPES.items():
+        dt_response.append(await make_data_type_response_object(dt_id, dt_d, project, dataset))
+
+    dt_response.sort(key=lambda d: d["id"])
+    return Response(dt_response)
 
 
 @api_view(["GET"])
@@ -95,7 +95,7 @@ async def data_type_detail(request: HttpRequest, data_type: str):
     project = request.GET.get("project", "").strip() or None
     dataset = request.GET.get("dataset", "").strip() or None
 
-    return make_data_type_response_object(data_type, dt.DATA_TYPES[data_type], project, dataset)
+    return Response(await make_data_type_response_object(data_type, dt.DATA_TYPES[data_type], project, dataset))
 
 
 @api_view(["GET"])
