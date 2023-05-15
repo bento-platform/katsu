@@ -206,7 +206,7 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
         return self._get_filtered_queryset(ids_list=individual_ids)
 
     def create(self, request, *args, **kwargs):
-        ids_list = request.data.get('ids', [])
+        ids_list = request.data.get('id', [])
         queryset = self._get_filtered_queryset(ids_list=ids_list)
 
         serializer = s.BiosampleSerializer(queryset, many=True)
