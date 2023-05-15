@@ -59,35 +59,43 @@ async def get_count_for_data_type(
     return await q.acount()
 
 
+def make_data_type_response_object(
+    data_type_id: str,
+    data_type_details: dict,
+    project: Optional[str],
+    dataset: Optional[str],
+) -> dict:
+    return {
+        "id": data_type_id,
+        "label": data_type_details["label"],
+        "schema": data_type_details["schema"],
+        "queryable": data_type_details["queryable"],
+        "count": await get_count_for_data_type(data_type_id, project, dataset),
+    }
+
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 async def data_type_list(request: HttpRequest):
-    dt_response = []
+    project = request.GET.get("project", "").strip() or None
+    dataset = request.GET.get("dataset", "").strip() or None
 
-    for data_type, data_type_details in dt.DATA_TYPES.items():
-        dt_response.append({
-            "id": data_type,
-            "label": data_type_details["label"],
-            "schema": data_type_details["schema"],
-            "queryable": data_type_details["queryable"],
-            "count": await get_count_for_data_type(
-                data_type,
-                request.GET.get("project", "").strip() or None,
-                request.GET.get("dataset", "").strip() or None,
-            ),
-        })
-
-    dt_response.sort(key=lambda d: d["id"])
-    return Response(dt_response)
+    return Response(sorted(
+        (make_data_type_response_object(dt_id, dt_d, project, dataset) for dt_id, dt_d in dt.DATA_TYPES.items()),
+        key=lambda d: d["id"],
+    ))
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-async def data_type_detail(_request: HttpRequest, data_type: str):
+async def data_type_detail(request: HttpRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
 
-    return Response({"id": data_type, **dt.DATA_TYPES[data_type]})
+    project = request.GET.get("project", "").strip() or None
+    dataset = request.GET.get("dataset", "").strip() or None
+
+    return make_data_type_response_object(data_type, dt.DATA_TYPES[data_type], project, dataset)
 
 
 @api_view(["GET"])
