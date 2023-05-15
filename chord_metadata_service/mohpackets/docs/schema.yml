@@ -401,6 +401,10 @@ paths:
         name: comorbidity
         schema:
           type: string
+      - in: query
+        name: exposure
+        schema:
+          type: string
       - name: page
         required: false
         in: query
@@ -546,6 +550,10 @@ paths:
           type: string
       - in: query
         name: comorbidity
+        schema:
+          type: string
+      - in: query
+        name: exposure
         schema:
           type: string
       - name: page
@@ -1894,6 +1902,10 @@ paths:
           type: string
       - in: query
         name: comorbidity
+        schema:
+          type: string
+      - in: query
+        name: exposure
         schema:
           type: string
       tags:
@@ -3640,6 +3652,21 @@ components:
           pattern: ^[A-Za-z0-9\-\._]{1,64}
         program_id:
           type: string
+        lost_to_followup_after_clinical_event_identifier:
+          type: string
+          nullable: true
+          maxLength: 255
+        lost_to_followup_reason:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/LostToFollowupReasonEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        date_alive_after_lost_to_followup:
+          type: string
+          nullable: true
+          maxLength: 32
+          pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
         is_deceased:
           type: boolean
           nullable: true
@@ -3690,6 +3717,11 @@ components:
           items:
             $ref: '#/components/schemas/NestedComorbidity'
           readOnly: true
+        exposures:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedExposure'
+          readOnly: true
         biomarkers:
           type: array
           items:
@@ -3697,9 +3729,11 @@ components:
           readOnly: true
       required:
       - cause_of_death
+      - date_alive_after_lost_to_followup
       - date_of_birth
       - date_of_death
       - gender
+      - lost_to_followup_reason
       - primary_site
       - program_id
       - sex_at_birth
@@ -4296,6 +4330,67 @@ components:
           maximum: 32767
           minimum: 0
           nullable: true
+        er_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        er_percent_positive:
+          type: number
+          format: double
+          nullable: true
+        her2_ish_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/Her2StatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        her2_ihc_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/Her2StatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        pr_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        pr_percent_positive:
+          type: number
+          format: double
+          nullable: true
+        hpv_ihc_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        hpv_pcr_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        hpv_strain:
+          type: array
+          items:
+            nullable: true
+            oneOf:
+            - $ref: '#/components/schemas/HpvStrainEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+            - $ref: '#/components/schemas/NullEnum'
+          nullable: true
+      required:
+      - er_status
+      - her2_ihc_status
+      - her2_ish_status
+      - hpv_ihc_status
+      - hpv_pcr_status
+      - hpv_strain
+      - pr_status
     NestedChemotherapy:
       type: object
       properties:
@@ -4376,6 +4471,31 @@ components:
       - comorbidity_type_code
       - laterality_of_prior_malignancy
       - prior_malignancy
+    NestedExposure:
+      type: object
+      properties:
+        tobacco_smoking_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/TobaccoSmokingStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        tobacco_type:
+          type: array
+          items:
+            nullable: true
+            oneOf:
+            - $ref: '#/components/schemas/TobaccoTypeEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+            - $ref: '#/components/schemas/NullEnum'
+          nullable: true
+        pack_years_smoked:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - tobacco_smoking_status
+      - tobacco_type
     NestedFollowUp:
       type: object
       properties:
@@ -4614,6 +4734,12 @@ components:
           - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        laterality:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/LateralityEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         specimens:
           type: array
           items:
@@ -4637,6 +4763,7 @@ components:
       - clinical_t_category
       - clinical_tumour_staging_system
       - date_of_diagnosis
+      - laterality
       - lymph_nodes_examined_method
       - lymph_nodes_examined_status
       - submitter_primary_diagnosis_id
@@ -4812,6 +4939,18 @@ components:
           - $ref: '#/components/schemas/PercentTumourCellsMeasurementMethodEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        specimen_processing:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SpecimenProcessingEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        specimen_laterality:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SpecimenLateralityEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         sample_registrations:
           type: array
           items:
@@ -4834,6 +4973,8 @@ components:
       - reference_pathology_confirmed_tumour_presence
       - specimen_anatomic_location
       - specimen_collection_date
+      - specimen_laterality
+      - specimen_processing
       - specimen_storage
       - tumour_grade
       - tumour_grading_system
@@ -4992,6 +5133,17 @@ components:
           - $ref: '#/components/schemas/ResponseToTreatmentCriteriaMethodEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        line_of_treatment:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        status_of_treatment:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/StatusOfTreatmentEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         chemotherapies:
           type: array
           items:
@@ -5028,6 +5180,7 @@ components:
       required:
       - is_primary_treatment
       - response_to_treatment_criteria_method
+      - status_of_treatment
       - submitter_treatment_id
       - treatment_end_date
       - treatment_intent
@@ -6758,7 +6911,7 @@ components:
       - Tis(LAMN)
       - Tis(LCIS)
       - Tis(Paget)
-      - Tis(Paget’s)
+      - Tis(Paget's)
       - Tis pu
       - Tis pd
       - TX
@@ -6812,7 +6965,7 @@ components:
         * `Tis(LAMN)` - Tis(LAMN)
         * `Tis(LCIS)` - Tis(LCIS)
         * `Tis(Paget)` - Tis(Paget)
-        * `Tis(Paget’s)` - Tis(Paget’s)
+        * `Tis(Paget's)` - Tis(Paget's)
         * `Tis pu` - Tis pu
         * `Tis pd` - Tis pd
         * `TX` - TX
