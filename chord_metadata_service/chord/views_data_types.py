@@ -89,7 +89,7 @@ async def make_data_type_response_object(
 @permission_classes([AllowAny])
 async def data_type_list(request: HttpRequest):
     # TODO: Permissions: only return counts when we are authenticated/have access to counts or full data.
-    
+
     project = request.GET.get("project", "").strip() or None
     dataset = request.GET.get("dataset", "").strip() or None
 
