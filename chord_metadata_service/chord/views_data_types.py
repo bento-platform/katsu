@@ -2,7 +2,8 @@ from bento_lib.responses import errors
 from django.http import HttpRequest
 from django.db.models import QuerySet
 
-from rest_framework.decorators import api_view, permission_classes
+from adrf.decorators import api_view
+from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -22,7 +23,7 @@ DATA_TYPES_TO_MODEL = {
 }
 
 
-def get_count_for_data_type(
+async def get_count_for_data_type(
     data_type: str,
     project: Optional[str] = None,
     dataset: Optional[str] = None,
@@ -55,12 +56,12 @@ def get_count_for_data_type(
     if q is None:
         raise ValueError(f"Unsupported data type for count function: {data_type}")
 
-    return q.count()
+    return await q.acount()
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def data_type_list(request: HttpRequest):
+async def data_type_list(request: HttpRequest):
     dt_response = []
 
     for data_type, data_type_details in dt.DATA_TYPES.items():
@@ -69,7 +70,7 @@ def data_type_list(request: HttpRequest):
             "label": data_type_details["label"],
             "schema": data_type_details["schema"],
             "queryable": data_type_details["queryable"],
-            "count": get_count_for_data_type(
+            "count": await get_count_for_data_type(
                 data_type,
                 request.GET.get("project", "").strip() or None,
                 request.GET.get("dataset", "").strip() or None,
@@ -82,7 +83,7 @@ def data_type_list(request: HttpRequest):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def data_type_detail(_request: HttpRequest, data_type: str):
+async def data_type_detail(_request: HttpRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
 
@@ -91,7 +92,7 @@ def data_type_detail(_request: HttpRequest, data_type: str):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def data_type_schema(_request: HttpRequest, data_type: str):
+async def data_type_schema(_request: HttpRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
 
@@ -100,7 +101,7 @@ def data_type_schema(_request: HttpRequest, data_type: str):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def data_type_metadata_schema(_request: HttpRequest, data_type: str):
+async def data_type_metadata_schema(_request: HttpRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
 

@@ -143,6 +143,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'rest_framework',
+    'adrf',
     'drf_spectacular',
 ]
 
