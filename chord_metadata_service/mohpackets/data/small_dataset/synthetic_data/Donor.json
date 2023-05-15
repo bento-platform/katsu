@@ -3,83 +3,80 @@
         "submitter_donor_id": "DONOR_1",
         "program_id": "SYNTHETIC-1",
         "is_deceased": true,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1975-08",
-        "date_of_death": "2009-08",
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1977-03",
+        "date_of_death": "2014-03",
         "primary_site": [
-            "Adrenal gland",
-            "Other and ill-defined sites in lip, oral cavity and pharynx",
-            "Other and unspecified urinary organs",
-            "Other and unspecified female genital organs",
-            "Bladder"
+            "Meninges",
+            "Nasal cavity and middle ear",
+            "Oropharynx",
+            "Breast",
+            "Liver and intrahepatic bile ducts"
         ]
     },
     {
         "submitter_donor_id": "DONOR_2",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
+        "is_deceased": false,
         "cause_of_death": "Died of cancer",
-        "date_of_birth": "2002-11",
-        "date_of_death": "2004-11",
+        "date_of_birth": "1999-03",
+        "date_of_death": null,
         "primary_site": [
-            "Gallbladder",
-            "Nasal cavity and middle ear",
-            "Trachea",
-            "Rectosigmoid junction",
-            "Bones, joints and articular cartilage of other and unspecified sites"
+            "Other and ill-defined sites within respiratory system and intrathoracic organs",
+            "Gum",
+            "Placenta"
         ]
     },
     {
         "submitter_donor_id": "DONOR_3",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": true,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1989-08",
-        "date_of_death": "2021-08",
+        "is_deceased": false,
+        "cause_of_death": null,
+        "date_of_birth": "1981-11",
+        "date_of_death": null,
         "primary_site": [
-            "Spinal cord, cranial nerves, and other parts of central nervous system",
-            "Parotid gland",
-            "Bones, joints and articular cartilage of other and unspecified sites",
-            "Other and ill-defined sites in lip, oral cavity and pharynx"
+            "Colon"
         ]
     },
     {
         "submitter_donor_id": "DONOR_4",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1991-09",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Unknown",
+        "date_of_birth": "1998-09",
+        "date_of_death": "2017-09",
         "primary_site": [
-            "Other and ill-defined sites in lip, oral cavity and pharynx",
-            "Bones, joints and articular cartilage of other and unspecified sites"
+            "Eye and adnexa",
+            "Other and unspecified parts of tongue",
+            "Other and ill-defined sites within respiratory system and intrathoracic organs",
+            "Gum"
         ]
     },
     {
         "submitter_donor_id": "DONOR_5",
         "program_id": "SYNTHETIC-1",
         "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1991-12",
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1964-11",
         "date_of_death": null,
         "primary_site": [
-            "Renal pelvis",
-            "Brain",
-            "Trachea"
+            "Esophagus",
+            "Thymus",
+            "Bones, joints and articular cartilage of limbs",
+            "Lip",
+            "Corpus uteri"
         ]
     },
     {
         "submitter_donor_id": "DONOR_6",
         "program_id": "SYNTHETIC-1",
-        "is_deceased": false,
-        "cause_of_death": "Died of cancer",
-        "date_of_birth": "1972-01",
-        "date_of_death": null,
+        "is_deceased": true,
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1989-09",
+        "date_of_death": "2009-09",
         "primary_site": [
-            "Other and unspecified major salivary glands",
             "Kidney",
-            "Breast",
-            "Retroperitoneum and peritoneum"
+            "Accessory sinuses"
         ]
     },
     {
@@ -87,50 +84,51 @@
         "program_id": "SYNTHETIC-2",
         "is_deceased": true,
         "cause_of_death": "Died of other reasons",
-        "date_of_birth": "1991-09",
-        "date_of_death": "2017-09",
+        "date_of_birth": "1971-09",
+        "date_of_death": "1999-09",
         "primary_site": [
-            "Skin"
+            "Adrenal gland"
         ]
     },
     {
         "submitter_donor_id": "DONOR_8",
         "program_id": "SYNTHETIC-2",
-        "is_deceased": true,
+        "is_deceased": false,
         "cause_of_death": "Died of cancer",
-        "date_of_birth": "1979-05",
-        "date_of_death": "2007-05",
+        "date_of_birth": "1971-09",
+        "date_of_death": null,
         "primary_site": [
-            "Oropharynx",
-            "Ovary",
-            "Stomach",
-            "Larynx"
+            "Other and unspecified parts of biliary tract",
+            "Rectosigmoid junction",
+            "Other and ill-defined digestive organs"
         ]
     },
     {
         "submitter_donor_id": "DONOR_9",
         "program_id": "SYNTHETIC-2",
         "is_deceased": true,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "2002-08",
-        "date_of_death": "2016-08",
+        "cause_of_death": null,
+        "date_of_birth": "1977-05",
+        "date_of_death": "2006-05",
         "primary_site": [
-            "Uterus,",
-            "Brain",
-            "Nasopharynx",
-            "Other and unspecified male genital organs"
+            "Bronchus and lung",
+            "Adrenal gland",
+            "Renal pelvis"
         ]
     },
     {
         "submitter_donor_id": "DONOR_10",
         "program_id": "SYNTHETIC-2",
         "is_deceased": false,
-        "cause_of_death": "Unknown",
-        "date_of_birth": "1964-08",
+        "cause_of_death": "Died of other reasons",
+        "date_of_birth": "1964-03",
         "date_of_death": null,
         "primary_site": [
-            "Small intestine",
-            "Other and unspecified major salivary glands"
+            "Rectosigmoid junction",
+            "Oropharynx",
+            "Larynx",
+            "Thymus",
+            "Thyroid gland"
         ]
     }
 ]

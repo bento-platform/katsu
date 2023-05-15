@@ -8,6 +8,7 @@
 
 - [Installation Guide](#installation-guide) <!-- omit in toc -->
 - [Tests](#tests)
+- [Data Model](#mohccn-clinical-data-model)
 - [Authentication and Authorization](#authentication-and-authorization)
 - [REST API](#rest-api)
 
@@ -120,6 +121,12 @@ Test and create `coverage` HTML report:
 tox -c tox-candig.ini
 coverage html
 ```
+
+## MOHCCN Clinical Data Model
+
+[Clinical Data Model](https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/mohccn-clinical-data-model_v1_endorsed6oct-2022.pdf?Status=Master&sfvrsn=7f6bd159_7)
+
+[ER Diagram](https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/mohccn_data_standard_er_diagram_endorsed6oct22.pdf?Status=Master&sfvrsn=dd57a75e_5)
 
 ## Authentication and Authorization
 

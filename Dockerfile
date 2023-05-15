@@ -9,31 +9,9 @@ USER root
 
 RUN apk update
 
-RUN apk add --no-cache \
-	autoconf \
-	automake \
-	bash \
-	build-base \
-	bzip2-dev \
-	cargo \
-	curl \
-	curl-dev \
-	gcc \
-	git \
-	libcurl \
-	libffi-dev \
-	libressl-dev \
-	linux-headers \
-	make \
-	musl-dev \
-	perl \
-	postgresql-dev \
-	postgresql-libs \
-	xz-dev \
-	yaml-dev \
-	zlib-dev
+# Install the required packages for building Python packages with native extensions and PostgreSQL support
+RUN apk add --no-cache bash build-base git postgresql-client postgresql-dev 
 
-RUN apk add --no-cache postgresql-client
 RUN mkdir /app
 WORKDIR /app
 ADD ./requirements-candig-base.txt /app

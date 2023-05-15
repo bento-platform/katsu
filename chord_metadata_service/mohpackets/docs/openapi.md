@@ -2182,7 +2182,30 @@ list(request, *args, **kwargs)
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|chemotherapy_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|* `mg/m2` - mg/m2<br>* `IU/m2` - IU/m2<br>* `ug/m2` - ug/m2<br>* `g/m2` - g/m2<br>* `mg/kg` - mg/kg|
+|chemotherapy_dosage_units|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[DosageUnitsEnum](#schemadosageunitsenum)|false|none|* `mg/m2` - mg/m2<br>* `IU/m2` - IU/m2<br>* `ug/m2` - ug/m2<br>* `g/m2` - g/m2<br>* `mg/kg` - mg/kg|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |drug_name|string¦null|false|none|none|
 |drug_rxnormcui|string¦null|false|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
@@ -2218,7 +2241,30 @@ list(request, *args, **kwargs)
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|prior_malignancy|[uBooleanEnum](#schemaubooleanenum)|true|none|* `Yes` - Yes<br>* `No` - No<br>* `Unknown` - Unknown|
+|prior_malignancy|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[uBooleanEnum](#schemaubooleanenum)|false|none|* `Yes` - Yes<br>* `No` - No<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |laterality_of_prior_malignancy|any|true|none|none|
 
 oneOf
@@ -2233,11 +2279,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|comorbidity_type_code|string|true|none|none|
+|comorbidity_type_code|string¦null|true|none|none|
 |comorbidity_treatment_status|any|true|none|none|
 
 oneOf
@@ -2252,11 +2304,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|comorbidity_treatment|string|true|none|none|
+|comorbidity_treatment|string¦null|true|none|none|
 |age_at_comorbidity_diagnosis|integer¦null|false|none|none|
 |program_id|string|true|none|none|
 |submitter_donor_id|string|true|none|none|
@@ -2365,13 +2423,42 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date_of_birth|string|true|none|none|
-|date_of_death|string|true|none|none|
-|primary_site|[[PrimarySiteEnum](#schemaprimarysiteenum)]|true|none|[* `Accessory sinuses` - Accessory sinuses<br>* `Adrenal gland` - Adrenal gland<br>* `Anus and anal canal` - Anus and anal canal<br>* `Base of tongue` - Base of tongue<br>* `Bladder` - Bladder<br>* `Bones, joints and articular cartilage of limbs` - Bones, joints and articular cartilage of limbs<br>* `Bones, joints and articular cartilage of other and unspecified sites` - Bones, joints and articular cartilage of other and unspecified sites<br>* `Brain` - Brain<br>* `Breast` - Breast<br>* `Bronchus and lung` - Bronchus and lung<br>* `Cervix uteri` - Cervix uteri<br>* `Colon` - Colon<br>* `Connective, subcutaneous and other soft tissues` - Connective, subcutaneous and other soft tissues<br>* `Corpus uteri` - Corpus uteri<br>* `Esophagus` - Esophagus<br>* `Eye and adnexa` - Eye and adnexa<br>* `Floor of mouth` - Floor of mouth<br>* `Gallbladder` - Gallbladder<br>* `Gum` - Gum<br>* `Heart, mediastinum, and pleura` - Heart, mediastinum, and pleura<br>* `Hematopoietic and reticuloendothelial systems` - Hematopoietic and reticuloendothelial systems<br>* `Hypopharynx` - Hypopharynx<br>* `Kidney` - Kidney<br>* `Larynx` - Larynx<br>* `Lip` - Lip<br>* `Liver and intrahepatic bile ducts` - Liver and intrahepatic bile ducts<br>* `Lymph nodes` - Lymph nodes<br>* `Meninges` - Meninges<br>* `Nasal cavity and middle ear` - Nasal cavity and middle ear<br>* `Nasopharynx` - Nasopharynx<br>* `Oropharynx` - Oropharynx<br>* `Other and ill-defined digestive organs` - Other and ill-defined digestive organs<br>* `Other and ill-defined sites` - Other and ill-defined sites<br>* `Other and ill-defined sites in lip, oral cavity and pharynx` - Other and ill-defined sites in lip, oral cavity and pharynx<br>* `Other and ill-defined sites within respiratory system and intrathoracic organs` - Other and ill-defined sites within respiratory system and intrathoracic organs<br>* `Other and unspecified female genital organs` - Other and unspecified female genital organs<br>* `Other and unspecified major salivary glands` - Other and unspecified major salivary glands<br>* `Other and unspecified male genital organs` - Other and unspecified male genital organs<br>* `Other and unspecified parts of biliary tract` - Other and unspecified parts of biliary tract<br>* `Other and unspecified parts of mouth` - Other and unspecified parts of mouth<br>* `Other and unspecified parts of tongue` - Other and unspecified parts of tongue<br>* `Other and unspecified urinary organs` - Other and unspecified urinary organs<br>* `Other endocrine glands and related structures` - Other endocrine glands and related structures<br>* `Ovary` - Ovary<br>* `Palate` - Palate<br>* `Pancreas` - Pancreas<br>* `Parotid gland` - Parotid gland<br>* `Penis` - Penis<br>* `Peripheral nerves and autonomic nervous system` - Peripheral nerves and autonomic nervous system<br>* `Placenta` - Placenta<br>* `Prostate gland` - Prostate gland<br>* `Pyriform sinus` - Pyriform sinus<br>* `Rectosigmoid junction` - Rectosigmoid junction<br>* `Rectum` - Rectum<br>* `Renal pelvis` - Renal pelvis<br>* `Retroperitoneum and peritoneum` - Retroperitoneum and peritoneum<br>* `Skin` - Skin<br>* `Small intestine` - Small intestine<br>* `Spinal cord, cranial nerves, and other parts of central nervous system` - Spinal cord, cranial nerves, and other parts of central nervous system<br>* `Stomach` - Stomach<br>* `Testis` - Testis<br>* `Thymus` - Thymus<br>* `Thyroid gland` - Thyroid gland<br>* `Tonsil` - Tonsil<br>* `Trachea` - Trachea<br>* `Unknown primary site` - Unknown primary site<br>* `Ureter` - Ureter<br>* `Uterus, NOS` - Uterus, NOS<br>* `Vagina` - Vagina<br>* `Vulva` - Vulva]|
+|date_of_birth|string¦null|true|none|none|
+|date_of_death|string¦null|true|none|none|
+|primary_site|[oneOf]¦null|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[PrimarySiteEnum](#schemaprimarysiteenum)|false|none|* `Accessory sinuses` - Accessory sinuses<br>* `Adrenal gland` - Adrenal gland<br>* `Anus and anal canal` - Anus and anal canal<br>* `Base of tongue` - Base of tongue<br>* `Bladder` - Bladder<br>* `Bones, joints and articular cartilage of limbs` - Bones, joints and articular cartilage of limbs<br>* `Bones, joints and articular cartilage of other and unspecified sites` - Bones, joints and articular cartilage of other and unspecified sites<br>* `Brain` - Brain<br>* `Breast` - Breast<br>* `Bronchus and lung` - Bronchus and lung<br>* `Cervix uteri` - Cervix uteri<br>* `Colon` - Colon<br>* `Connective, subcutaneous and other soft tissues` - Connective, subcutaneous and other soft tissues<br>* `Corpus uteri` - Corpus uteri<br>* `Esophagus` - Esophagus<br>* `Eye and adnexa` - Eye and adnexa<br>* `Floor of mouth` - Floor of mouth<br>* `Gallbladder` - Gallbladder<br>* `Gum` - Gum<br>* `Heart, mediastinum, and pleura` - Heart, mediastinum, and pleura<br>* `Hematopoietic and reticuloendothelial systems` - Hematopoietic and reticuloendothelial systems<br>* `Hypopharynx` - Hypopharynx<br>* `Kidney` - Kidney<br>* `Larynx` - Larynx<br>* `Lip` - Lip<br>* `Liver and intrahepatic bile ducts` - Liver and intrahepatic bile ducts<br>* `Lymph nodes` - Lymph nodes<br>* `Meninges` - Meninges<br>* `Nasal cavity and middle ear` - Nasal cavity and middle ear<br>* `Nasopharynx` - Nasopharynx<br>* `Oropharynx` - Oropharynx<br>* `Other and ill-defined digestive organs` - Other and ill-defined digestive organs<br>* `Other and ill-defined sites` - Other and ill-defined sites<br>* `Other and ill-defined sites in lip, oral cavity and pharynx` - Other and ill-defined sites in lip, oral cavity and pharynx<br>* `Other and ill-defined sites within respiratory system and intrathoracic organs` - Other and ill-defined sites within respiratory system and intrathoracic organs<br>* `Other and unspecified female genital organs` - Other and unspecified female genital organs<br>* `Other and unspecified major salivary glands` - Other and unspecified major salivary glands<br>* `Other and unspecified male genital organs` - Other and unspecified male genital organs<br>* `Other and unspecified parts of biliary tract` - Other and unspecified parts of biliary tract<br>* `Other and unspecified parts of mouth` - Other and unspecified parts of mouth<br>* `Other and unspecified parts of tongue` - Other and unspecified parts of tongue<br>* `Other and unspecified urinary organs` - Other and unspecified urinary organs<br>* `Other endocrine glands and related structures` - Other endocrine glands and related structures<br>* `Ovary` - Ovary<br>* `Palate` - Palate<br>* `Pancreas` - Pancreas<br>* `Parotid gland` - Parotid gland<br>* `Penis` - Penis<br>* `Peripheral nerves and autonomic nervous system` - Peripheral nerves and autonomic nervous system<br>* `Placenta` - Placenta<br>* `Prostate gland` - Prostate gland<br>* `Pyriform sinus` - Pyriform sinus<br>* `Rectosigmoid junction` - Rectosigmoid junction<br>* `Rectum` - Rectum<br>* `Renal pelvis` - Renal pelvis<br>* `Retroperitoneum and peritoneum` - Retroperitoneum and peritoneum<br>* `Skin` - Skin<br>* `Small intestine` - Small intestine<br>* `Spinal cord, cranial nerves, and other parts of central nervous system` - Spinal cord, cranial nerves, and other parts of central nervous system<br>* `Stomach` - Stomach<br>* `Testis` - Testis<br>* `Thymus` - Thymus<br>* `Thyroid gland` - Thyroid gland<br>* `Tonsil` - Tonsil<br>* `Trachea` - Trachea<br>* `Unknown primary site` - Unknown primary site<br>* `Ureter` - Ureter<br>* `Uterus, NOS` - Uterus, NOS<br>* `Vagina` - Vagina<br>* `Vulva` - Vulva|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |is_deceased|boolean¦null|false|none|none|
 |program_id|string|true|none|none|
 
@@ -2610,13 +2697,42 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date_of_birth|string|true|none|none|
-|date_of_death|string|true|none|none|
-|primary_site|[[PrimarySiteEnum](#schemaprimarysiteenum)]|true|none|[* `Accessory sinuses` - Accessory sinuses<br>* `Adrenal gland` - Adrenal gland<br>* `Anus and anal canal` - Anus and anal canal<br>* `Base of tongue` - Base of tongue<br>* `Bladder` - Bladder<br>* `Bones, joints and articular cartilage of limbs` - Bones, joints and articular cartilage of limbs<br>* `Bones, joints and articular cartilage of other and unspecified sites` - Bones, joints and articular cartilage of other and unspecified sites<br>* `Brain` - Brain<br>* `Breast` - Breast<br>* `Bronchus and lung` - Bronchus and lung<br>* `Cervix uteri` - Cervix uteri<br>* `Colon` - Colon<br>* `Connective, subcutaneous and other soft tissues` - Connective, subcutaneous and other soft tissues<br>* `Corpus uteri` - Corpus uteri<br>* `Esophagus` - Esophagus<br>* `Eye and adnexa` - Eye and adnexa<br>* `Floor of mouth` - Floor of mouth<br>* `Gallbladder` - Gallbladder<br>* `Gum` - Gum<br>* `Heart, mediastinum, and pleura` - Heart, mediastinum, and pleura<br>* `Hematopoietic and reticuloendothelial systems` - Hematopoietic and reticuloendothelial systems<br>* `Hypopharynx` - Hypopharynx<br>* `Kidney` - Kidney<br>* `Larynx` - Larynx<br>* `Lip` - Lip<br>* `Liver and intrahepatic bile ducts` - Liver and intrahepatic bile ducts<br>* `Lymph nodes` - Lymph nodes<br>* `Meninges` - Meninges<br>* `Nasal cavity and middle ear` - Nasal cavity and middle ear<br>* `Nasopharynx` - Nasopharynx<br>* `Oropharynx` - Oropharynx<br>* `Other and ill-defined digestive organs` - Other and ill-defined digestive organs<br>* `Other and ill-defined sites` - Other and ill-defined sites<br>* `Other and ill-defined sites in lip, oral cavity and pharynx` - Other and ill-defined sites in lip, oral cavity and pharynx<br>* `Other and ill-defined sites within respiratory system and intrathoracic organs` - Other and ill-defined sites within respiratory system and intrathoracic organs<br>* `Other and unspecified female genital organs` - Other and unspecified female genital organs<br>* `Other and unspecified major salivary glands` - Other and unspecified major salivary glands<br>* `Other and unspecified male genital organs` - Other and unspecified male genital organs<br>* `Other and unspecified parts of biliary tract` - Other and unspecified parts of biliary tract<br>* `Other and unspecified parts of mouth` - Other and unspecified parts of mouth<br>* `Other and unspecified parts of tongue` - Other and unspecified parts of tongue<br>* `Other and unspecified urinary organs` - Other and unspecified urinary organs<br>* `Other endocrine glands and related structures` - Other endocrine glands and related structures<br>* `Ovary` - Ovary<br>* `Palate` - Palate<br>* `Pancreas` - Pancreas<br>* `Parotid gland` - Parotid gland<br>* `Penis` - Penis<br>* `Peripheral nerves and autonomic nervous system` - Peripheral nerves and autonomic nervous system<br>* `Placenta` - Placenta<br>* `Prostate gland` - Prostate gland<br>* `Pyriform sinus` - Pyriform sinus<br>* `Rectosigmoid junction` - Rectosigmoid junction<br>* `Rectum` - Rectum<br>* `Renal pelvis` - Renal pelvis<br>* `Retroperitoneum and peritoneum` - Retroperitoneum and peritoneum<br>* `Skin` - Skin<br>* `Small intestine` - Small intestine<br>* `Spinal cord, cranial nerves, and other parts of central nervous system` - Spinal cord, cranial nerves, and other parts of central nervous system<br>* `Stomach` - Stomach<br>* `Testis` - Testis<br>* `Thymus` - Thymus<br>* `Thyroid gland` - Thyroid gland<br>* `Tonsil` - Tonsil<br>* `Trachea` - Trachea<br>* `Unknown primary site` - Unknown primary site<br>* `Ureter` - Ureter<br>* `Uterus, NOS` - Uterus, NOS<br>* `Vagina` - Vagina<br>* `Vulva` - Vulva]|
+|date_of_birth|string¦null|true|none|none|
+|date_of_death|string¦null|true|none|none|
+|primary_site|[oneOf]¦null|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[PrimarySiteEnum](#schemaprimarysiteenum)|false|none|* `Accessory sinuses` - Accessory sinuses<br>* `Adrenal gland` - Adrenal gland<br>* `Anus and anal canal` - Anus and anal canal<br>* `Base of tongue` - Base of tongue<br>* `Bladder` - Bladder<br>* `Bones, joints and articular cartilage of limbs` - Bones, joints and articular cartilage of limbs<br>* `Bones, joints and articular cartilage of other and unspecified sites` - Bones, joints and articular cartilage of other and unspecified sites<br>* `Brain` - Brain<br>* `Breast` - Breast<br>* `Bronchus and lung` - Bronchus and lung<br>* `Cervix uteri` - Cervix uteri<br>* `Colon` - Colon<br>* `Connective, subcutaneous and other soft tissues` - Connective, subcutaneous and other soft tissues<br>* `Corpus uteri` - Corpus uteri<br>* `Esophagus` - Esophagus<br>* `Eye and adnexa` - Eye and adnexa<br>* `Floor of mouth` - Floor of mouth<br>* `Gallbladder` - Gallbladder<br>* `Gum` - Gum<br>* `Heart, mediastinum, and pleura` - Heart, mediastinum, and pleura<br>* `Hematopoietic and reticuloendothelial systems` - Hematopoietic and reticuloendothelial systems<br>* `Hypopharynx` - Hypopharynx<br>* `Kidney` - Kidney<br>* `Larynx` - Larynx<br>* `Lip` - Lip<br>* `Liver and intrahepatic bile ducts` - Liver and intrahepatic bile ducts<br>* `Lymph nodes` - Lymph nodes<br>* `Meninges` - Meninges<br>* `Nasal cavity and middle ear` - Nasal cavity and middle ear<br>* `Nasopharynx` - Nasopharynx<br>* `Oropharynx` - Oropharynx<br>* `Other and ill-defined digestive organs` - Other and ill-defined digestive organs<br>* `Other and ill-defined sites` - Other and ill-defined sites<br>* `Other and ill-defined sites in lip, oral cavity and pharynx` - Other and ill-defined sites in lip, oral cavity and pharynx<br>* `Other and ill-defined sites within respiratory system and intrathoracic organs` - Other and ill-defined sites within respiratory system and intrathoracic organs<br>* `Other and unspecified female genital organs` - Other and unspecified female genital organs<br>* `Other and unspecified major salivary glands` - Other and unspecified major salivary glands<br>* `Other and unspecified male genital organs` - Other and unspecified male genital organs<br>* `Other and unspecified parts of biliary tract` - Other and unspecified parts of biliary tract<br>* `Other and unspecified parts of mouth` - Other and unspecified parts of mouth<br>* `Other and unspecified parts of tongue` - Other and unspecified parts of tongue<br>* `Other and unspecified urinary organs` - Other and unspecified urinary organs<br>* `Other endocrine glands and related structures` - Other endocrine glands and related structures<br>* `Ovary` - Ovary<br>* `Palate` - Palate<br>* `Pancreas` - Pancreas<br>* `Parotid gland` - Parotid gland<br>* `Penis` - Penis<br>* `Peripheral nerves and autonomic nervous system` - Peripheral nerves and autonomic nervous system<br>* `Placenta` - Placenta<br>* `Prostate gland` - Prostate gland<br>* `Pyriform sinus` - Pyriform sinus<br>* `Rectosigmoid junction` - Rectosigmoid junction<br>* `Rectum` - Rectum<br>* `Renal pelvis` - Renal pelvis<br>* `Retroperitoneum and peritoneum` - Retroperitoneum and peritoneum<br>* `Skin` - Skin<br>* `Small intestine` - Small intestine<br>* `Spinal cord, cranial nerves, and other parts of central nervous system` - Spinal cord, cranial nerves, and other parts of central nervous system<br>* `Stomach` - Stomach<br>* `Testis` - Testis<br>* `Thymus` - Thymus<br>* `Thyroid gland` - Thyroid gland<br>* `Tonsil` - Tonsil<br>* `Trachea` - Trachea<br>* `Unknown primary site` - Unknown primary site<br>* `Ureter` - Ureter<br>* `Uterus, NOS` - Uterus, NOS<br>* `Vagina` - Vagina<br>* `Vulva` - Vulva|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |primary_diagnoses|[[NestedPrimaryDiagnosis](#schemanestedprimarydiagnosis)]|false|read-only|none|
 |comorbidities|[[NestedComorbidity](#schemanestedcomorbidity)]|false|read-only|none|
 |biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
@@ -2691,7 +2807,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_follow_up_id|string|true|none|none|
-|date_of_followup|string|true|none|none|
+|date_of_followup|string¦null|true|none|none|
 |lost_to_followup_reason|any|true|none|none|
 
 oneOf
@@ -2706,11 +2822,40 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|disease_status_at_followup|[DiseaseStatusAtFollowupEnum](#schemadiseasestatusatfollowupenum)|true|none|* `Complete remission` - Complete remission<br>* `Distant progression` - Distant progression<br>* `Loco-regional progression` - Loco-regional progression<br>* `No evidence of disease` - No evidence of disease<br>* `Partial remission` - Partial remission<br>* `Progression NOS` - Progression NOS<br>* `Relapse or recurrence` - Relapse or recurrence<br>* `Stable` - Stable|
+|disease_status_at_followup|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[DiseaseStatusAtFollowupEnum](#schemadiseasestatusatfollowupenum)|false|none|* `Complete remission` - Complete remission<br>* `Distant progression` - Distant progression<br>* `Loco-regional progression` - Loco-regional progression<br>* `No evidence of disease` - No evidence of disease<br>* `Partial remission` - Partial remission<br>* `Progression NOS` - Progression NOS<br>* `Relapse or recurrence` - Relapse or recurrence<br>* `Stable` - Stable|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |relapse_type|any|true|none|none|
 
 oneOf
@@ -2725,11 +2870,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date_of_relapse|string|true|none|none|
+|date_of_relapse|string¦null|true|none|none|
 |method_of_progression_status|any|true|none|none|
 
 oneOf
@@ -2744,11 +2895,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|anatomic_site_progression_or_recurrence|string|true|none|none|
+|anatomic_site_progression_or_recurrence|string¦null|true|none|none|
 |recurrence_tumour_staging_system|any|true|none|none|
 
 oneOf
@@ -2762,6 +2919,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -2781,6 +2944,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -2798,6 +2967,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -2817,6 +2992,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -2834,6 +3015,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -2902,7 +3089,30 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|hormone_drug_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|* `mg/m2` - mg/m2<br>* `IU/m2` - IU/m2<br>* `ug/m2` - ug/m2<br>* `g/m2` - g/m2<br>* `mg/kg` - mg/kg|
+|hormone_drug_dosage_units|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[DosageUnitsEnum](#schemadosageunitsenum)|false|none|* `mg/m2` - mg/m2<br>* `IU/m2` - IU/m2<br>* `ug/m2` - ug/m2<br>* `g/m2` - g/m2<br>* `mg/kg` - mg/kg|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |drug_name|string¦null|false|none|none|
 |drug_rxnormcui|string¦null|false|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
@@ -2936,7 +3146,30 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|immunotherapy_type|[ImmunotherapyTypeEnum](#schemaimmunotherapytypeenum)|true|none|* `Cell-based` - Cell-based<br>* `Immune checkpoint inhibitors` - Immune checkpoint inhibitors<br>* `Monoclonal antibodies other than immune checkpoint inhibitors` - Monoclonal antibodies other than immune checkpoint inhibitors<br>* `Other immunomodulatory substances` - Other immunomodulatory substances|
+|immunotherapy_type|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ImmunotherapyTypeEnum](#schemaimmunotherapytypeenum)|false|none|* `Cell-based` - Cell-based<br>* `Immune checkpoint inhibitors` - Immune checkpoint inhibitors<br>* `Monoclonal antibodies other than immune checkpoint inhibitors` - Monoclonal antibodies other than immune checkpoint inhibitors<br>* `Other immunomodulatory substances` - Other immunomodulatory substances|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |drug_name|string¦null|false|none|none|
 |drug_rxnormcui|string¦null|false|none|none|
 |program_id|string|true|none|none|
@@ -3409,7 +3642,30 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|chemotherapy_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|* `mg/m2` - mg/m2<br>* `IU/m2` - IU/m2<br>* `ug/m2` - ug/m2<br>* `g/m2` - g/m2<br>* `mg/kg` - mg/kg|
+|chemotherapy_dosage_units|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[DosageUnitsEnum](#schemadosageunitsenum)|false|none|* `mg/m2` - mg/m2<br>* `IU/m2` - IU/m2<br>* `ug/m2` - ug/m2<br>* `g/m2` - g/m2<br>* `mg/kg` - mg/kg|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |drug_name|string¦null|false|none|none|
 |drug_rxnormcui|string¦null|false|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
@@ -3438,7 +3694,30 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|prior_malignancy|[uBooleanEnum](#schemaubooleanenum)|true|none|* `Yes` - Yes<br>* `No` - No<br>* `Unknown` - Unknown|
+|prior_malignancy|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[uBooleanEnum](#schemaubooleanenum)|false|none|* `Yes` - Yes<br>* `No` - No<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |laterality_of_prior_malignancy|any|true|none|none|
 
 oneOf
@@ -3453,12 +3732,18 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |age_at_comorbidity_diagnosis|integer¦null|false|none|none|
-|comorbidity_type_code|string|true|none|none|
+|comorbidity_type_code|string¦null|true|none|none|
 |comorbidity_treatment_status|any|true|none|none|
 
 oneOf
@@ -3473,11 +3758,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|comorbidity_treatment|string|true|none|none|
+|comorbidity_treatment|string¦null|true|none|none|
 
 <h2 id="tocS_NestedFollowUp">NestedFollowUp</h2>
 
@@ -3518,7 +3809,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date_of_followup|string|true|none|none|
+|date_of_followup|string¦null|true|none|none|
 |lost_to_followup|boolean¦null|false|none|none|
 |lost_to_followup_reason|any|true|none|none|
 
@@ -3534,11 +3825,40 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|disease_status_at_followup|[DiseaseStatusAtFollowupEnum](#schemadiseasestatusatfollowupenum)|true|none|* `Complete remission` - Complete remission<br>* `Distant progression` - Distant progression<br>* `Loco-regional progression` - Loco-regional progression<br>* `No evidence of disease` - No evidence of disease<br>* `Partial remission` - Partial remission<br>* `Progression NOS` - Progression NOS<br>* `Relapse or recurrence` - Relapse or recurrence<br>* `Stable` - Stable|
+|disease_status_at_followup|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[DiseaseStatusAtFollowupEnum](#schemadiseasestatusatfollowupenum)|false|none|* `Complete remission` - Complete remission<br>* `Distant progression` - Distant progression<br>* `Loco-regional progression` - Loco-regional progression<br>* `No evidence of disease` - No evidence of disease<br>* `Partial remission` - Partial remission<br>* `Progression NOS` - Progression NOS<br>* `Relapse or recurrence` - Relapse or recurrence<br>* `Stable` - Stable|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |relapse_type|any|true|none|none|
 
 oneOf
@@ -3553,11 +3873,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date_of_relapse|string|true|none|none|
+|date_of_relapse|string¦null|true|none|none|
 |method_of_progression_status|any|true|none|none|
 
 oneOf
@@ -3572,11 +3898,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|anatomic_site_progression_or_recurrence|string|true|none|none|
+|anatomic_site_progression_or_recurrence|string¦null|true|none|none|
 |recurrence_tumour_staging_system|any|true|none|none|
 
 oneOf
@@ -3590,6 +3922,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -3609,6 +3947,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -3626,6 +3970,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -3645,6 +3995,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -3662,6 +4018,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -3693,7 +4055,30 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|hormone_drug_dosage_units|[DosageUnitsEnum](#schemadosageunitsenum)|true|none|* `mg/m2` - mg/m2<br>* `IU/m2` - IU/m2<br>* `ug/m2` - ug/m2<br>* `g/m2` - g/m2<br>* `mg/kg` - mg/kg|
+|hormone_drug_dosage_units|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[DosageUnitsEnum](#schemadosageunitsenum)|false|none|* `mg/m2` - mg/m2<br>* `IU/m2` - IU/m2<br>* `ug/m2` - ug/m2<br>* `g/m2` - g/m2<br>* `mg/kg` - mg/kg|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |drug_name|string¦null|false|none|none|
 |drug_rxnormcui|string¦null|false|none|none|
 |cumulative_drug_dosage_prescribed|integer¦null|false|none|none|
@@ -3721,7 +4106,30 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|immunotherapy_type|[ImmunotherapyTypeEnum](#schemaimmunotherapytypeenum)|true|none|* `Cell-based` - Cell-based<br>* `Immune checkpoint inhibitors` - Immune checkpoint inhibitors<br>* `Monoclonal antibodies other than immune checkpoint inhibitors` - Monoclonal antibodies other than immune checkpoint inhibitors<br>* `Other immunomodulatory substances` - Other immunomodulatory substances|
+|immunotherapy_type|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ImmunotherapyTypeEnum](#schemaimmunotherapytypeenum)|false|none|* `Cell-based` - Cell-based<br>* `Immune checkpoint inhibitors` - Immune checkpoint inhibitors<br>* `Monoclonal antibodies other than immune checkpoint inhibitors` - Monoclonal antibodies other than immune checkpoint inhibitors<br>* `Other immunomodulatory substances` - Other immunomodulatory substances|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |drug_name|string¦null|false|none|none|
 |drug_rxnormcui|string¦null|false|none|none|
 
@@ -3912,11 +4320,80 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_primary_diagnosis_id|string|true|none|none|
-|date_of_diagnosis|string|true|none|none|
+|date_of_diagnosis|string¦null|true|none|none|
 |cancer_type_code|string¦null|false|none|none|
-|basis_of_diagnosis|[BasisOfDiagnosisEnum](#schemabasisofdiagnosisenum)|true|none|* `Clinical investigation` - Clinical investigation<br>* `Clinical` - Clinical<br>* `Cytology` - Cytology<br>* `Death certificate only` - Death certificate only<br>* `Histology of a metastasis` - Histology of a metastasis<br>* `Histology of a primary tumour` - Histology of a primary tumour<br>* `Specific tumour markers` - Specific tumour markers<br>* `Unknown` - Unknown|
-|lymph_nodes_examined_status|[LymphNodesExaminedStatusEnum](#schemalymphnodesexaminedstatusenum)|true|none|* `Cannot be determined` - Cannot be determined<br>* `No` - No<br>* `No lymph nodes found in resected specimen` - No lymph nodes found in resected specimen<br>* `Not applicable` - Not applicable<br>* `Yes` - Yes|
-|lymph_nodes_examined_method|[LymphNodesExaminedMethodEnum](#schemalymphnodesexaminedmethodenum)|true|none|* `Imaging` - Imaging<br>* `Lymph node dissection/pathological exam` - Lymph node dissection/pathological exam<br>* `Physical palpation of patient` - Physical palpation of patient|
+|basis_of_diagnosis|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BasisOfDiagnosisEnum](#schemabasisofdiagnosisenum)|false|none|* `Clinical investigation` - Clinical investigation<br>* `Clinical` - Clinical<br>* `Cytology` - Cytology<br>* `Death certificate only` - Death certificate only<br>* `Histology of a metastasis` - Histology of a metastasis<br>* `Histology of a primary tumour` - Histology of a primary tumour<br>* `Specific tumour markers` - Specific tumour markers<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|lymph_nodes_examined_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[LymphNodesExaminedStatusEnum](#schemalymphnodesexaminedstatusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `No` - No<br>* `No lymph nodes found in resected specimen` - No lymph nodes found in resected specimen<br>* `Not applicable` - Not applicable<br>* `Yes` - Yes|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|lymph_nodes_examined_method|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[LymphNodesExaminedMethodEnum](#schemalymphnodesexaminedmethodenum)|false|none|* `Imaging` - Imaging<br>* `Lymph node dissection/pathological exam` - Lymph node dissection/pathological exam<br>* `Physical palpation of patient` - Physical palpation of patient|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |number_lymph_nodes_positive|integer¦null|false|none|none|
 |clinical_tumour_staging_system|any|true|none|none|
 
@@ -3931,6 +4408,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -3950,6 +4433,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -3967,6 +4456,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -3986,6 +4481,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -4003,6 +4504,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -4038,9 +4545,78 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|radiation_therapy_modality|[RadiationTherapyModalityEnum](#schemaradiationtherapymodalityenum)|true|none|* `Megavoltage radiation therapy using photons (procedure)` - Megavoltage radiation therapy using photons (procedure)<br>* `Teleradiotherapy using electrons (procedure)` - Teleradiotherapy using electrons (procedure)<br>* `Teleradiotherapy protons (procedure)` - Teleradiotherapy protons (procedure)<br>* `Teleradiotherapy neutrons (procedure)` - Teleradiotherapy neutrons (procedure)<br>* `Brachytherapy (procedure)` - Brachytherapy (procedure)<br>* `Other` - Other|
-|radiation_therapy_type|[RadiationTherapyTypeEnum](#schemaradiationtherapytypeenum)|true|none|* `External` - External<br>* `Internal` - Internal|
-|anatomical_site_irradiated|[AnatomicalSiteIrradiatedEnum](#schemaanatomicalsiteirradiatedenum)|true|none|* `Cervical lymph node group` - Cervical lymph node group<br>* `Entire lymph node of thorax` - Entire lymph node of thorax<br>* `Axillary lymph node group` - Axillary lymph node group<br>* `Supraclavicular lymph node group` - Supraclavicular lymph node group<br>* `Internal mammary lymph node group` - Internal mammary lymph node group<br>* `Abdominal lymph node group` - Abdominal lymph node group<br>* `Pelvic lymph node group` - Pelvic lymph node group<br>* `Structure of lymph node` - Structure of lymph node<br>* `Entire eye` - Entire eye<br>* `Pituitary structure` - Pituitary structure<br>* `Brain structure` - Brain structure<br>* `Brain part` - Brain part<br>* `Spinal cord structure` - Spinal cord structure<br>* `Nasopharyngeal structure` - Nasopharyngeal structure<br>* `Oral cavity structure` - Oral cavity structure<br>* `Oropharyngeal structure` - Oropharyngeal structure<br>* `Laryngeal structure` - Laryngeal structure<br>* `Hypopharyngeal structure` - Hypopharyngeal structure<br>* `Nasal sinus structure` - Nasal sinus structure<br>* `Salivary gland structure` - Salivary gland structure<br>* `Thyroid structure` - Thyroid structure<br>* `Entire head and neck` - Entire head and neck<br>* `Entire lung` - Entire lung<br>* `Mesothelium structure` - Mesothelium structure<br>* `Entire thorax` - Entire thorax<br>* `Entire breast` - Entire breast<br>* `Breast part` - Breast part<br>* `Chest wall structure` - Chest wall structure<br>* `Entire esophagus` - Entire esophagus<br>* `Stomach structure` - Stomach structure<br>* `Small intestinal structure` - Small intestinal structure<br>* `Colon structure` - Colon structure<br>* `Rectum structure` - Rectum structure<br>* `Anal structure` - Anal structure<br>* `Liver structure` - Liver structure<br>* `Biliary tract structure` - Biliary tract structure<br>* `Gallbladder structure` - Gallbladder structure<br>* `Pancreatic structure` - Pancreatic structure<br>* `Abdominal structure` - Abdominal structure<br>* `Entire urinary bladder` - Entire urinary bladder<br>* `Bladder part` - Bladder part<br>* `Kidney structure` - Kidney structure<br>* `Ureteric structure` - Ureteric structure<br>* `Entire prostate` - Entire prostate<br>* `Prostate part` - Prostate part<br>* `Urethral structure` - Urethral structure<br>* `Penile structure` - Penile structure<br>* `Testis structure` - Testis structure<br>* `Scrotal structure` - Scrotal structure<br>* `Ovarian structure` - Ovarian structure<br>* `Fallopian tube structure` - Fallopian tube structure<br>* `Uterine structure` - Uterine structure<br>* `Cervix uteri structure` - Cervix uteri structure<br>* `Vaginal structure` - Vaginal structure<br>* `Vulval structure` - Vulval structure<br>* `Bone structure of cranium` - Bone structure of cranium<br>* `Entire vertebral column` - Entire vertebral column<br>* `Shoulder region structure` - Shoulder region structure<br>* `Bone structure of rib` - Bone structure of rib<br>* `Hip region structure` - Hip region structure<br>* `Entire bony pelvis` - Entire bony pelvis<br>* `Pelvic structure` - Pelvic structure<br>* `Bone structure of extremity` - Bone structure of extremity<br>* `Skin structure` - Skin structure<br>* `Soft tissues` - Soft tissues<br>* `Entire body as a whole` - Entire body as a whole|
+|radiation_therapy_modality|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[RadiationTherapyModalityEnum](#schemaradiationtherapymodalityenum)|false|none|* `Megavoltage radiation therapy using photons (procedure)` - Megavoltage radiation therapy using photons (procedure)<br>* `Teleradiotherapy using electrons (procedure)` - Teleradiotherapy using electrons (procedure)<br>* `Teleradiotherapy protons (procedure)` - Teleradiotherapy protons (procedure)<br>* `Teleradiotherapy neutrons (procedure)` - Teleradiotherapy neutrons (procedure)<br>* `Brachytherapy (procedure)` - Brachytherapy (procedure)<br>* `Other` - Other|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|radiation_therapy_type|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[RadiationTherapyTypeEnum](#schemaradiationtherapytypeenum)|false|none|* `External` - External<br>* `Internal` - Internal|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|anatomical_site_irradiated|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[AnatomicalSiteIrradiatedEnum](#schemaanatomicalsiteirradiatedenum)|false|none|* `Cervical lymph node group` - Cervical lymph node group<br>* `Entire lymph node of thorax` - Entire lymph node of thorax<br>* `Axillary lymph node group` - Axillary lymph node group<br>* `Supraclavicular lymph node group` - Supraclavicular lymph node group<br>* `Internal mammary lymph node group` - Internal mammary lymph node group<br>* `Abdominal lymph node group` - Abdominal lymph node group<br>* `Pelvic lymph node group` - Pelvic lymph node group<br>* `Structure of lymph node` - Structure of lymph node<br>* `Entire eye` - Entire eye<br>* `Pituitary structure` - Pituitary structure<br>* `Brain structure` - Brain structure<br>* `Brain part` - Brain part<br>* `Spinal cord structure` - Spinal cord structure<br>* `Nasopharyngeal structure` - Nasopharyngeal structure<br>* `Oral cavity structure` - Oral cavity structure<br>* `Oropharyngeal structure` - Oropharyngeal structure<br>* `Laryngeal structure` - Laryngeal structure<br>* `Hypopharyngeal structure` - Hypopharyngeal structure<br>* `Nasal sinus structure` - Nasal sinus structure<br>* `Salivary gland structure` - Salivary gland structure<br>* `Thyroid structure` - Thyroid structure<br>* `Entire head and neck` - Entire head and neck<br>* `Entire lung` - Entire lung<br>* `Mesothelium structure` - Mesothelium structure<br>* `Entire thorax` - Entire thorax<br>* `Entire breast` - Entire breast<br>* `Breast part` - Breast part<br>* `Chest wall structure` - Chest wall structure<br>* `Entire esophagus` - Entire esophagus<br>* `Stomach structure` - Stomach structure<br>* `Small intestinal structure` - Small intestinal structure<br>* `Colon structure` - Colon structure<br>* `Rectum structure` - Rectum structure<br>* `Anal structure` - Anal structure<br>* `Liver structure` - Liver structure<br>* `Biliary tract structure` - Biliary tract structure<br>* `Gallbladder structure` - Gallbladder structure<br>* `Pancreatic structure` - Pancreatic structure<br>* `Abdominal structure` - Abdominal structure<br>* `Entire urinary bladder` - Entire urinary bladder<br>* `Bladder part` - Bladder part<br>* `Kidney structure` - Kidney structure<br>* `Ureteric structure` - Ureteric structure<br>* `Entire prostate` - Entire prostate<br>* `Prostate part` - Prostate part<br>* `Urethral structure` - Urethral structure<br>* `Penile structure` - Penile structure<br>* `Testis structure` - Testis structure<br>* `Scrotal structure` - Scrotal structure<br>* `Ovarian structure` - Ovarian structure<br>* `Fallopian tube structure` - Fallopian tube structure<br>* `Uterine structure` - Uterine structure<br>* `Cervix uteri structure` - Cervix uteri structure<br>* `Vaginal structure` - Vaginal structure<br>* `Vulval structure` - Vulval structure<br>* `Bone structure of cranium` - Bone structure of cranium<br>* `Entire vertebral column` - Entire vertebral column<br>* `Shoulder region structure` - Shoulder region structure<br>* `Bone structure of rib` - Bone structure of rib<br>* `Hip region structure` - Hip region structure<br>* `Entire bony pelvis` - Entire bony pelvis<br>* `Pelvic structure` - Pelvic structure<br>* `Bone structure of extremity` - Bone structure of extremity<br>* `Skin structure` - Skin structure<br>* `Soft tissues` - Soft tissues<br>* `Entire body as a whole` - Entire body as a whole|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |radiation_therapy_fractions|integer¦null|false|none|none|
 |radiation_therapy_dosage|integer¦null|false|none|none|
 |radiation_boost|boolean¦null|false|none|none|
@@ -4071,12 +4647,145 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_sample_id|string|true|none|none|
-|gender|[GenderEnum](#schemagenderenum)|true|none|* `Man` - Man<br>* `Woman` - Woman<br>* `Non-binary` - Non-binary|
-|sex_at_birth|[SexAtBirthEnum](#schemasexatbirthenum)|true|none|* `Male` - Male<br>* `Female` - Female<br>* `Other` - Other<br>* `Unknown` - Unknown|
-|specimen_tissue_source|[SpecimenTissueSourceEnum](#schemaspecimentissuesourceenum)|true|none|* `Amniotic fluid` - Amniotic fluid<br>* `Bile Fluid` - Bile Fluid<br>* `Whole blood` - Whole blood<br>* `Blood arterial` - Blood arterial<br>* `Cord blood` - Cord blood<br>* `Blood venous` - Blood venous<br>* `Bone` - Bone<br>* `Serum, Convalescent` - Serum, Convalescent<br>* `Cerebral spinal fluid` - Cerebral spinal fluid<br>* `Cervical Mucus` - Cervical Mucus<br>* `Duodenal fluid` - Duodenal fluid<br>* `Blood, Fetal` - Blood, Fetal<br>* `Fluid, Abdomen` - Fluid, Abdomen<br>* `Genital vaginal` - Genital vaginal<br>* `Fluid, Hydrocele` - Fluid, Hydrocele<br>* `Fluid, Joint` - Fluid, Joint<br>* `Fluid, Kidney` - Fluid, Kidney<br>* `Fluid, Lumbar Sac` - Fluid, Lumbar Sac<br>* `Marrow` - Marrow<br>* `Pancreatic fluid` - Pancreatic fluid<br>* `Fluid, Pericardial` - Fluid, Pericardial<br>* `Placenta` - Placenta<br>* `Pleural fluid (thoracentesis fluid)` - Pleural fluid (thoracentesis fluid)<br>* `Saliva` - Saliva<br>* `Skin` - Skin<br>* `Seminal fluid` - Seminal fluid<br>* `Fluid, synovial (Joint fluid)` - Fluid, synovial (Joint fluid)<br>* `Sputum` - Sputum<br>* `Tissue` - Tissue<br>* `Vitreous Fluid` - Vitreous Fluid<br>* `Wound` - Wound|
-|tumour_normal_designation|[TumourNormalDesignationEnum](#schematumournormaldesignationenum)|true|none|* `Normal` - Normal<br>* `Tumour` - Tumour|
-|specimen_type|[SpecimenTypeEnum](#schemaspecimentypeenum)|true|none|* `Cell line - derived from normal` - Cell line - derived from normal<br>* `Cell line - derived from metastatic tumour` - Cell line - derived from metastatic tumour<br>* `Cell line - derived from primary tumour` - Cell line - derived from primary tumour<br>* `Cell line - derived from xenograft tumour` - Cell line - derived from xenograft tumour<br>* `Metastatic tumour - additional metastatic` - Metastatic tumour - additional metastatic<br>* `Metastatic tumour - metastasis local to lymph node` - Metastatic tumour - metastasis local to lymph node<br>* `Metastatic tumour - metastasis to distant location` - Metastatic tumour - metastasis to distant location<br>* `Metastatic tumour` - Metastatic tumour<br>* `Normal - tissue adjacent to primary tumour` - Normal - tissue adjacent to primary tumour<br>* `Normal` - Normal<br>* `Primary tumour - additional new primary` - Primary tumour - additional new primary<br>* `Primary tumour - adjacent to normal` - Primary tumour - adjacent to normal<br>* `Primary tumour` - Primary tumour<br>* `Recurrent tumour` - Recurrent tumour<br>* `Xenograft - derived from primary tumour` - Xenograft - derived from primary tumour<br>* `Xenograft - derived from metastatic tumour` - Xenograft - derived from metastatic tumour<br>* `Xenograft - derived from tumour cell line` - Xenograft - derived from tumour cell line|
-|sample_type|[SampleTypeEnum](#schemasampletypeenum)|true|none|* `Amplified DNA` - Amplified DNA<br>* `ctDNA` - ctDNA<br>* `Other DNA enrichments` - Other DNA enrichments<br>* `Other RNA fractions` - Other RNA fractions<br>* `polyA+ RNA` - polyA+ RNA<br>* `Protein` - Protein<br>* `rRNA-depleted RNA` - rRNA-depleted RNA<br>* `Total DNA` - Total DNA<br>* `Total RNA` - Total RNA|
+|gender|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[GenderEnum](#schemagenderenum)|false|none|* `Man` - Man<br>* `Woman` - Woman<br>* `Non-binary` - Non-binary|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|sex_at_birth|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SexAtBirthEnum](#schemasexatbirthenum)|false|none|* `Male` - Male<br>* `Female` - Female<br>* `Other` - Other<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|specimen_tissue_source|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SpecimenTissueSourceEnum](#schemaspecimentissuesourceenum)|false|none|* `Amniotic fluid` - Amniotic fluid<br>* `Bile Fluid` - Bile Fluid<br>* `Whole blood` - Whole blood<br>* `Blood arterial` - Blood arterial<br>* `Cord blood` - Cord blood<br>* `Blood venous` - Blood venous<br>* `Bone` - Bone<br>* `Serum, Convalescent` - Serum, Convalescent<br>* `Cerebral spinal fluid` - Cerebral spinal fluid<br>* `Cervical Mucus` - Cervical Mucus<br>* `Duodenal fluid` - Duodenal fluid<br>* `Blood, Fetal` - Blood, Fetal<br>* `Fluid, Abdomen` - Fluid, Abdomen<br>* `Genital vaginal` - Genital vaginal<br>* `Fluid, Hydrocele` - Fluid, Hydrocele<br>* `Fluid, Joint` - Fluid, Joint<br>* `Fluid, Kidney` - Fluid, Kidney<br>* `Fluid, Lumbar Sac` - Fluid, Lumbar Sac<br>* `Marrow` - Marrow<br>* `Pancreatic fluid` - Pancreatic fluid<br>* `Fluid, Pericardial` - Fluid, Pericardial<br>* `Placenta` - Placenta<br>* `Pleural fluid (thoracentesis fluid)` - Pleural fluid (thoracentesis fluid)<br>* `Saliva` - Saliva<br>* `Skin` - Skin<br>* `Seminal fluid` - Seminal fluid<br>* `Fluid, synovial (Joint fluid)` - Fluid, synovial (Joint fluid)<br>* `Sputum` - Sputum<br>* `Tissue` - Tissue<br>* `Vitreous Fluid` - Vitreous Fluid<br>* `Wound` - Wound|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|tumour_normal_designation|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TumourNormalDesignationEnum](#schematumournormaldesignationenum)|false|none|* `Normal` - Normal<br>* `Tumour` - Tumour|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|specimen_type|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SpecimenTypeEnum](#schemaspecimentypeenum)|false|none|* `Cell line - derived from normal` - Cell line - derived from normal<br>* `Cell line - derived from metastatic tumour` - Cell line - derived from metastatic tumour<br>* `Cell line - derived from primary tumour` - Cell line - derived from primary tumour<br>* `Cell line - derived from xenograft tumour` - Cell line - derived from xenograft tumour<br>* `Metastatic tumour - additional metastatic` - Metastatic tumour - additional metastatic<br>* `Metastatic tumour - metastasis local to lymph node` - Metastatic tumour - metastasis local to lymph node<br>* `Metastatic tumour - metastasis to distant location` - Metastatic tumour - metastasis to distant location<br>* `Metastatic tumour` - Metastatic tumour<br>* `Normal - tissue adjacent to primary tumour` - Normal - tissue adjacent to primary tumour<br>* `Normal` - Normal<br>* `Primary tumour - additional new primary` - Primary tumour - additional new primary<br>* `Primary tumour - adjacent to normal` - Primary tumour - adjacent to normal<br>* `Primary tumour` - Primary tumour<br>* `Recurrent tumour` - Recurrent tumour<br>* `Xenograft - derived from primary tumour` - Xenograft - derived from primary tumour<br>* `Xenograft - derived from metastatic tumour` - Xenograft - derived from metastatic tumour<br>* `Xenograft - derived from tumour cell line` - Xenograft - derived from tumour cell line|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|sample_type|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SampleTypeEnum](#schemasampletypeenum)|false|none|* `Amplified DNA` - Amplified DNA<br>* `ctDNA` - ctDNA<br>* `Other DNA enrichments` - Other DNA enrichments<br>* `Other RNA fractions` - Other RNA fractions<br>* `polyA+ RNA` - polyA+ RNA<br>* `Protein` - Protein<br>* `rRNA-depleted RNA` - rRNA-depleted RNA<br>* `Total DNA` - Total DNA<br>* `Total RNA` - Total RNA|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 <h2 id="tocS_NestedSpecimen">NestedSpecimen</h2>
 
@@ -4144,6 +4853,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -4161,6 +4876,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -4180,6 +4901,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -4197,6 +4924,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -4216,14 +4949,43 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimen_collection_date|string|true|none|none|
-|specimen_storage|[SpecimenStorageEnum](#schemaspecimenstorageenum)|true|none|* `Cut slide` - Cut slide<br>* `Frozen in -70 freezer` - Frozen in -70 freezer<br>* `Frozen in liquid nitrogen` - Frozen in liquid nitrogen<br>* `Frozen in vapour phase` - Frozen in vapour phase<br>* `Not Applicable` - Not Applicable<br>* `Other` - Other<br>* `Paraffin block` - Paraffin block<br>* `RNA later frozen` - RNA later frozen<br>* `Unknown` - Unknown|
-|tumour_histological_type|string|true|none|none|
-|specimen_anatomic_location|string|true|none|none|
+|specimen_collection_date|string¦null|true|none|none|
+|specimen_storage|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SpecimenStorageEnum](#schemaspecimenstorageenum)|false|none|* `Cut slide` - Cut slide<br>* `Frozen in -70 freezer` - Frozen in -70 freezer<br>* `Frozen in liquid nitrogen` - Frozen in liquid nitrogen<br>* `Frozen in vapour phase` - Frozen in vapour phase<br>* `Not Applicable` - Not Applicable<br>* `Other` - Other<br>* `Paraffin block` - Paraffin block<br>* `RNA later frozen` - RNA later frozen<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|tumour_histological_type|string¦null|true|none|none|
+|specimen_anatomic_location|string¦null|true|none|none|
 |reference_pathology_confirmed_diagnosis|any|true|none|none|
 
 oneOf
@@ -4237,6 +4999,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -4256,6 +5024,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -4273,6 +5047,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -4292,6 +5072,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -4310,6 +5096,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -4327,6 +5119,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -4374,8 +5172,31 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|surgery_type|[SurgeryTypeEnum](#schemasurgerytypeenum)|true|none|* `Axillary Clearance` - Axillary Clearance<br>* `Axillary lymph nodes sampling` - Axillary lymph nodes sampling<br>* `Biopsy` - Biopsy<br>* `Bypass Gastrojejunostomy` - Bypass Gastrojejunostomy<br>* `Cholecystectomy` - Cholecystectomy<br>* `Cholecystojejunostomy` - Cholecystojejunostomy<br>* `Completion gastrectomy` - Completion gastrectomy<br>* `Debridement of pancreatic and peripancreatic necrosis` - Debridement of pancreatic and peripancreatic necrosis<br>* `Debulking` - Debulking<br>* `Distal subtotal pancreatectomy` - Distal subtotal pancreatectomy<br>* `Drainage of abscess` - Drainage of abscess<br>* `Duodenal preserving pancreatic head resection` - Duodenal preserving pancreatic head resection<br>* `Endoscopic biopsy` - Endoscopic biopsy<br>* `Endoscopic brushings of GIT` - Endoscopic brushings of GIT<br>* `Enucleation` - Enucleation<br>* `Esophageal bypass surgery/jejunostomy only` - Esophageal bypass surgery/jejunostomy only<br>* `Exploratory laparotomy` - Exploratory laparotomy<br>* `Fine needle aspiration biopsy` - Fine needle aspiration biopsy<br>* `Gastric Antrectomy` - Gastric Antrectomy<br>* `Hepaticojejunostomy` - Hepaticojejunostomy<br>* `Ivor Lewis subtotal esophagectomy` - Ivor Lewis subtotal esophagectomy<br>* `Laparotomy (Open and Shut)` - Laparotomy (Open and Shut)<br>* `Left thoracoabdominal incision` - Left thoracoabdominal incision<br>* `Lobectomy` - Lobectomy<br>* `Mammoplasty` - Mammoplasty<br>* `Mastectomy` - Mastectomy<br>* `McKeown esophagectomy` - McKeown esophagectomy<br>* `Merendino procedure` - Merendino procedure<br>* `Minimally invasive esophagectomy` - Minimally invasive esophagectomy<br>* `Pancreaticoduodenectomy` - Pancreaticoduodenectomy<br>* `Pancreaticojejunostomy, side-to-side anastomosis` - Pancreaticojejunostomy, side-to-side anastomosis<br>* `Pneumonectomy` - Pneumonectomy<br>* `Proximal subtotal gastrectomy` - Proximal subtotal gastrectomy<br>* `Pylorus-sparing Whipple operation` - Pylorus-sparing Whipple operation<br>* `Radical pancreaticoduodenectomy` - Radical pancreaticoduodenectomy<br>* `Reexcision` - Reexcision<br>* `Segmentectomy` - Segmentectomy<br>* `Sentinal Lymph Node Biopsy` - Sentinal Lymph Node Biopsy<br>* `Spleen preserving distal pancreatectomy` - Spleen preserving distal pancreatectomy<br>* `Splenectomy` - Splenectomy<br>* `Subtotal pancreatectomy` - Subtotal pancreatectomy<br>* `Thoracotomy (Open & Shut)` - Thoracotomy (Open & Shut)<br>* `Total gastrectomy` - Total gastrectomy<br>* `Total gastrectomy with extended lymphadenectomy` - Total gastrectomy with extended lymphadenectomy<br>* `Total pancreatectomy` - Total pancreatectomy<br>* `Transhiatal esophagectomy` - Transhiatal esophagectomy<br>* `Triple bypass of pancreas` - Triple bypass of pancreas<br>* `Wedge/localised gastric resection` - Wedge/localised gastric resection<br>* `Wide Local Excision` - Wide Local Excision|
-|surgery_site|string|true|none|none|
+|surgery_type|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SurgeryTypeEnum](#schemasurgerytypeenum)|false|none|* `Axillary Clearance` - Axillary Clearance<br>* `Axillary lymph nodes sampling` - Axillary lymph nodes sampling<br>* `Biopsy` - Biopsy<br>* `Bypass Gastrojejunostomy` - Bypass Gastrojejunostomy<br>* `Cholecystectomy` - Cholecystectomy<br>* `Cholecystojejunostomy` - Cholecystojejunostomy<br>* `Completion gastrectomy` - Completion gastrectomy<br>* `Debridement of pancreatic and peripancreatic necrosis` - Debridement of pancreatic and peripancreatic necrosis<br>* `Debulking` - Debulking<br>* `Distal subtotal pancreatectomy` - Distal subtotal pancreatectomy<br>* `Drainage of abscess` - Drainage of abscess<br>* `Duodenal preserving pancreatic head resection` - Duodenal preserving pancreatic head resection<br>* `Endoscopic biopsy` - Endoscopic biopsy<br>* `Endoscopic brushings of GIT` - Endoscopic brushings of GIT<br>* `Enucleation` - Enucleation<br>* `Esophageal bypass surgery/jejunostomy only` - Esophageal bypass surgery/jejunostomy only<br>* `Exploratory laparotomy` - Exploratory laparotomy<br>* `Fine needle aspiration biopsy` - Fine needle aspiration biopsy<br>* `Gastric Antrectomy` - Gastric Antrectomy<br>* `Hepaticojejunostomy` - Hepaticojejunostomy<br>* `Ivor Lewis subtotal esophagectomy` - Ivor Lewis subtotal esophagectomy<br>* `Laparotomy (Open and Shut)` - Laparotomy (Open and Shut)<br>* `Left thoracoabdominal incision` - Left thoracoabdominal incision<br>* `Lobectomy` - Lobectomy<br>* `Mammoplasty` - Mammoplasty<br>* `Mastectomy` - Mastectomy<br>* `McKeown esophagectomy` - McKeown esophagectomy<br>* `Merendino procedure` - Merendino procedure<br>* `Minimally invasive esophagectomy` - Minimally invasive esophagectomy<br>* `Pancreaticoduodenectomy` - Pancreaticoduodenectomy<br>* `Pancreaticojejunostomy, side-to-side anastomosis` - Pancreaticojejunostomy, side-to-side anastomosis<br>* `Pneumonectomy` - Pneumonectomy<br>* `Proximal subtotal gastrectomy` - Proximal subtotal gastrectomy<br>* `Pylorus-sparing Whipple operation` - Pylorus-sparing Whipple operation<br>* `Radical pancreaticoduodenectomy` - Radical pancreaticoduodenectomy<br>* `Reexcision` - Reexcision<br>* `Segmentectomy` - Segmentectomy<br>* `Sentinal Lymph Node Biopsy` - Sentinal Lymph Node Biopsy<br>* `Spleen preserving distal pancreatectomy` - Spleen preserving distal pancreatectomy<br>* `Splenectomy` - Splenectomy<br>* `Subtotal pancreatectomy` - Subtotal pancreatectomy<br>* `Thoracotomy (Open & Shut)` - Thoracotomy (Open & Shut)<br>* `Total gastrectomy` - Total gastrectomy<br>* `Total gastrectomy with extended lymphadenectomy` - Total gastrectomy with extended lymphadenectomy<br>* `Total pancreatectomy` - Total pancreatectomy<br>* `Transhiatal esophagectomy` - Transhiatal esophagectomy<br>* `Triple bypass of pancreas` - Triple bypass of pancreas<br>* `Wedge/localised gastric resection` - Wedge/localised gastric resection<br>* `Wide Local Excision` - Wide Local Excision|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|surgery_site|string¦null|true|none|none|
 |surgery_location|any|true|none|none|
 
 oneOf
@@ -4389,6 +5210,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -4408,6 +5235,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -4426,11 +5259,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_involved|[oneOf]|true|none|none|
+|margin_types_involved|[oneOf]¦null|true|none|none|
 
 oneOf
 
@@ -4444,11 +5283,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_involved|[oneOf]|true|none|none|
+|margin_types_not_involved|[oneOf]¦null|true|none|none|
 
 oneOf
 
@@ -4462,11 +5307,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_assessed|[oneOf]|true|none|none|
+|margin_types_not_assessed|[oneOf]¦null|true|none|none|
 
 oneOf
 
@@ -4479,6 +5330,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -4498,6 +5355,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -4515,6 +5378,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -4648,14 +5517,106 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_treatment_id|string|true|none|none|
-|is_primary_treatment|[uBooleanEnum](#schemaubooleanenum)|true|none|* `Yes` - Yes<br>* `No` - No<br>* `Unknown` - Unknown|
-|treatment_start_date|string|true|none|none|
-|treatment_end_date|string|true|none|none|
-|treatment_setting|[TreatmentSettingEnum](#schematreatmentsettingenum)|true|none|* `Adjuvant` - Adjuvant<br>* `Advanced/Metastatic` - Advanced/Metastatic<br>* `Neoadjuvant` - Neoadjuvant<br>* `Not applicable` - Not applicable|
-|treatment_intent|[TreatmentIntentEnum](#schematreatmentintentenum)|true|none|* `Curative` - Curative<br>* `Palliative` - Palliative|
+|is_primary_treatment|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[uBooleanEnum](#schemaubooleanenum)|false|none|* `Yes` - Yes<br>* `No` - No<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|treatment_start_date|string¦null|true|none|none|
+|treatment_end_date|string¦null|true|none|none|
+|treatment_setting|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TreatmentSettingEnum](#schematreatmentsettingenum)|false|none|* `Adjuvant` - Adjuvant<br>* `Advanced/Metastatic` - Advanced/Metastatic<br>* `Neoadjuvant` - Neoadjuvant<br>* `Not applicable` - Not applicable|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|treatment_intent|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TreatmentIntentEnum](#schematreatmentintentenum)|false|none|* `Curative` - Curative<br>* `Palliative` - Palliative|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |days_per_cycle|integer¦null|false|none|none|
 |number_of_cycles|integer¦null|false|none|none|
-|response_to_treatment_criteria_method|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|true|none|* `RECIST 1.1` - RECIST 1.1<br>* `iRECIST` - iRECIST<br>* `Cheson CLL 2012 Oncology Response Criteria` - Cheson CLL 2012 Oncology Response Criteria<br>* `Response Assessment in Neuro-Oncology (RANO)` - Response Assessment in Neuro-Oncology (RANO)<br>* `AML Response Criteria` - AML Response Criteria<br>* `Physician Assessed Response Criteria` - Physician Assessed Response Criteria|
+|response_to_treatment_criteria_method|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|false|none|* `RECIST 1.1` - RECIST 1.1<br>* `iRECIST` - iRECIST<br>* `Cheson CLL 2012 Oncology Response Criteria` - Cheson CLL 2012 Oncology Response Criteria<br>* `Response Assessment in Neuro-Oncology (RANO)` - Response Assessment in Neuro-Oncology (RANO)<br>* `AML Response Criteria` - AML Response Criteria<br>* `Physician Assessed Response Criteria` - Physician Assessed Response Criteria|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |chemotherapies|[[NestedChemotherapy](#schemanestedchemotherapy)]|false|read-only|none|
 |hormone_therapies|[[NestedHormoneTherapy](#schemanestedhormonetherapy)]|false|read-only|none|
 |immunotherapies|[[NestedImmunotherapy](#schemanestedimmunotherapy)]|false|read-only|none|
@@ -4663,6 +5624,22 @@ continued
 |surgery|[NestedSurgery](#schemanestedsurgery)|false|read-only|none|
 |followups|[[NestedFollowUp](#schemanestedfollowup)]|false|read-only|none|
 |biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
+
+<h2 id="tocS_NullEnum">NullEnum</h2>
+
+<a id="schemanullenum"></a>
+<a id="schema_NullEnum"></a>
+<a id="tocSnullenum"></a>
+<a id="tocsnullenum"></a>
+
+```json
+null
+
+```
+
+### Properties
+
+*None*
 
 <h2 id="tocS_PaginatedBiomarkerList">PaginatedBiomarkerList</h2>
 
@@ -5591,10 +6568,79 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_primary_diagnosis_id|string|true|none|none|
-|date_of_diagnosis|string|true|none|none|
-|basis_of_diagnosis|[BasisOfDiagnosisEnum](#schemabasisofdiagnosisenum)|true|none|* `Clinical investigation` - Clinical investigation<br>* `Clinical` - Clinical<br>* `Cytology` - Cytology<br>* `Death certificate only` - Death certificate only<br>* `Histology of a metastasis` - Histology of a metastasis<br>* `Histology of a primary tumour` - Histology of a primary tumour<br>* `Specific tumour markers` - Specific tumour markers<br>* `Unknown` - Unknown|
-|lymph_nodes_examined_status|[LymphNodesExaminedStatusEnum](#schemalymphnodesexaminedstatusenum)|true|none|* `Cannot be determined` - Cannot be determined<br>* `No` - No<br>* `No lymph nodes found in resected specimen` - No lymph nodes found in resected specimen<br>* `Not applicable` - Not applicable<br>* `Yes` - Yes|
-|lymph_nodes_examined_method|[LymphNodesExaminedMethodEnum](#schemalymphnodesexaminedmethodenum)|true|none|* `Imaging` - Imaging<br>* `Lymph node dissection/pathological exam` - Lymph node dissection/pathological exam<br>* `Physical palpation of patient` - Physical palpation of patient|
+|date_of_diagnosis|string¦null|true|none|none|
+|basis_of_diagnosis|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BasisOfDiagnosisEnum](#schemabasisofdiagnosisenum)|false|none|* `Clinical investigation` - Clinical investigation<br>* `Clinical` - Clinical<br>* `Cytology` - Cytology<br>* `Death certificate only` - Death certificate only<br>* `Histology of a metastasis` - Histology of a metastasis<br>* `Histology of a primary tumour` - Histology of a primary tumour<br>* `Specific tumour markers` - Specific tumour markers<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|lymph_nodes_examined_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[LymphNodesExaminedStatusEnum](#schemalymphnodesexaminedstatusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `No` - No<br>* `No lymph nodes found in resected specimen` - No lymph nodes found in resected specimen<br>* `Not applicable` - Not applicable<br>* `Yes` - Yes|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|lymph_nodes_examined_method|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[LymphNodesExaminedMethodEnum](#schemalymphnodesexaminedmethodenum)|false|none|* `Imaging` - Imaging<br>* `Lymph node dissection/pathological exam` - Lymph node dissection/pathological exam<br>* `Physical palpation of patient` - Physical palpation of patient|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |clinical_tumour_staging_system|any|true|none|none|
 
 oneOf
@@ -5608,6 +6654,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -5627,6 +6679,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -5644,6 +6702,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -5663,6 +6727,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -5680,6 +6750,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -5907,9 +6983,78 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|radiation_therapy_modality|[RadiationTherapyModalityEnum](#schemaradiationtherapymodalityenum)|true|none|* `Megavoltage radiation therapy using photons (procedure)` - Megavoltage radiation therapy using photons (procedure)<br>* `Teleradiotherapy using electrons (procedure)` - Teleradiotherapy using electrons (procedure)<br>* `Teleradiotherapy protons (procedure)` - Teleradiotherapy protons (procedure)<br>* `Teleradiotherapy neutrons (procedure)` - Teleradiotherapy neutrons (procedure)<br>* `Brachytherapy (procedure)` - Brachytherapy (procedure)<br>* `Other` - Other|
-|radiation_therapy_type|[RadiationTherapyTypeEnum](#schemaradiationtherapytypeenum)|true|none|* `External` - External<br>* `Internal` - Internal|
-|anatomical_site_irradiated|[AnatomicalSiteIrradiatedEnum](#schemaanatomicalsiteirradiatedenum)|true|none|* `Cervical lymph node group` - Cervical lymph node group<br>* `Entire lymph node of thorax` - Entire lymph node of thorax<br>* `Axillary lymph node group` - Axillary lymph node group<br>* `Supraclavicular lymph node group` - Supraclavicular lymph node group<br>* `Internal mammary lymph node group` - Internal mammary lymph node group<br>* `Abdominal lymph node group` - Abdominal lymph node group<br>* `Pelvic lymph node group` - Pelvic lymph node group<br>* `Structure of lymph node` - Structure of lymph node<br>* `Entire eye` - Entire eye<br>* `Pituitary structure` - Pituitary structure<br>* `Brain structure` - Brain structure<br>* `Brain part` - Brain part<br>* `Spinal cord structure` - Spinal cord structure<br>* `Nasopharyngeal structure` - Nasopharyngeal structure<br>* `Oral cavity structure` - Oral cavity structure<br>* `Oropharyngeal structure` - Oropharyngeal structure<br>* `Laryngeal structure` - Laryngeal structure<br>* `Hypopharyngeal structure` - Hypopharyngeal structure<br>* `Nasal sinus structure` - Nasal sinus structure<br>* `Salivary gland structure` - Salivary gland structure<br>* `Thyroid structure` - Thyroid structure<br>* `Entire head and neck` - Entire head and neck<br>* `Entire lung` - Entire lung<br>* `Mesothelium structure` - Mesothelium structure<br>* `Entire thorax` - Entire thorax<br>* `Entire breast` - Entire breast<br>* `Breast part` - Breast part<br>* `Chest wall structure` - Chest wall structure<br>* `Entire esophagus` - Entire esophagus<br>* `Stomach structure` - Stomach structure<br>* `Small intestinal structure` - Small intestinal structure<br>* `Colon structure` - Colon structure<br>* `Rectum structure` - Rectum structure<br>* `Anal structure` - Anal structure<br>* `Liver structure` - Liver structure<br>* `Biliary tract structure` - Biliary tract structure<br>* `Gallbladder structure` - Gallbladder structure<br>* `Pancreatic structure` - Pancreatic structure<br>* `Abdominal structure` - Abdominal structure<br>* `Entire urinary bladder` - Entire urinary bladder<br>* `Bladder part` - Bladder part<br>* `Kidney structure` - Kidney structure<br>* `Ureteric structure` - Ureteric structure<br>* `Entire prostate` - Entire prostate<br>* `Prostate part` - Prostate part<br>* `Urethral structure` - Urethral structure<br>* `Penile structure` - Penile structure<br>* `Testis structure` - Testis structure<br>* `Scrotal structure` - Scrotal structure<br>* `Ovarian structure` - Ovarian structure<br>* `Fallopian tube structure` - Fallopian tube structure<br>* `Uterine structure` - Uterine structure<br>* `Cervix uteri structure` - Cervix uteri structure<br>* `Vaginal structure` - Vaginal structure<br>* `Vulval structure` - Vulval structure<br>* `Bone structure of cranium` - Bone structure of cranium<br>* `Entire vertebral column` - Entire vertebral column<br>* `Shoulder region structure` - Shoulder region structure<br>* `Bone structure of rib` - Bone structure of rib<br>* `Hip region structure` - Hip region structure<br>* `Entire bony pelvis` - Entire bony pelvis<br>* `Pelvic structure` - Pelvic structure<br>* `Bone structure of extremity` - Bone structure of extremity<br>* `Skin structure` - Skin structure<br>* `Soft tissues` - Soft tissues<br>* `Entire body as a whole` - Entire body as a whole|
+|radiation_therapy_modality|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[RadiationTherapyModalityEnum](#schemaradiationtherapymodalityenum)|false|none|* `Megavoltage radiation therapy using photons (procedure)` - Megavoltage radiation therapy using photons (procedure)<br>* `Teleradiotherapy using electrons (procedure)` - Teleradiotherapy using electrons (procedure)<br>* `Teleradiotherapy protons (procedure)` - Teleradiotherapy protons (procedure)<br>* `Teleradiotherapy neutrons (procedure)` - Teleradiotherapy neutrons (procedure)<br>* `Brachytherapy (procedure)` - Brachytherapy (procedure)<br>* `Other` - Other|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|radiation_therapy_type|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[RadiationTherapyTypeEnum](#schemaradiationtherapytypeenum)|false|none|* `External` - External<br>* `Internal` - Internal|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|anatomical_site_irradiated|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[AnatomicalSiteIrradiatedEnum](#schemaanatomicalsiteirradiatedenum)|false|none|* `Cervical lymph node group` - Cervical lymph node group<br>* `Entire lymph node of thorax` - Entire lymph node of thorax<br>* `Axillary lymph node group` - Axillary lymph node group<br>* `Supraclavicular lymph node group` - Supraclavicular lymph node group<br>* `Internal mammary lymph node group` - Internal mammary lymph node group<br>* `Abdominal lymph node group` - Abdominal lymph node group<br>* `Pelvic lymph node group` - Pelvic lymph node group<br>* `Structure of lymph node` - Structure of lymph node<br>* `Entire eye` - Entire eye<br>* `Pituitary structure` - Pituitary structure<br>* `Brain structure` - Brain structure<br>* `Brain part` - Brain part<br>* `Spinal cord structure` - Spinal cord structure<br>* `Nasopharyngeal structure` - Nasopharyngeal structure<br>* `Oral cavity structure` - Oral cavity structure<br>* `Oropharyngeal structure` - Oropharyngeal structure<br>* `Laryngeal structure` - Laryngeal structure<br>* `Hypopharyngeal structure` - Hypopharyngeal structure<br>* `Nasal sinus structure` - Nasal sinus structure<br>* `Salivary gland structure` - Salivary gland structure<br>* `Thyroid structure` - Thyroid structure<br>* `Entire head and neck` - Entire head and neck<br>* `Entire lung` - Entire lung<br>* `Mesothelium structure` - Mesothelium structure<br>* `Entire thorax` - Entire thorax<br>* `Entire breast` - Entire breast<br>* `Breast part` - Breast part<br>* `Chest wall structure` - Chest wall structure<br>* `Entire esophagus` - Entire esophagus<br>* `Stomach structure` - Stomach structure<br>* `Small intestinal structure` - Small intestinal structure<br>* `Colon structure` - Colon structure<br>* `Rectum structure` - Rectum structure<br>* `Anal structure` - Anal structure<br>* `Liver structure` - Liver structure<br>* `Biliary tract structure` - Biliary tract structure<br>* `Gallbladder structure` - Gallbladder structure<br>* `Pancreatic structure` - Pancreatic structure<br>* `Abdominal structure` - Abdominal structure<br>* `Entire urinary bladder` - Entire urinary bladder<br>* `Bladder part` - Bladder part<br>* `Kidney structure` - Kidney structure<br>* `Ureteric structure` - Ureteric structure<br>* `Entire prostate` - Entire prostate<br>* `Prostate part` - Prostate part<br>* `Urethral structure` - Urethral structure<br>* `Penile structure` - Penile structure<br>* `Testis structure` - Testis structure<br>* `Scrotal structure` - Scrotal structure<br>* `Ovarian structure` - Ovarian structure<br>* `Fallopian tube structure` - Fallopian tube structure<br>* `Uterine structure` - Uterine structure<br>* `Cervix uteri structure` - Cervix uteri structure<br>* `Vaginal structure` - Vaginal structure<br>* `Vulval structure` - Vulval structure<br>* `Bone structure of cranium` - Bone structure of cranium<br>* `Entire vertebral column` - Entire vertebral column<br>* `Shoulder region structure` - Shoulder region structure<br>* `Bone structure of rib` - Bone structure of rib<br>* `Hip region structure` - Hip region structure<br>* `Entire bony pelvis` - Entire bony pelvis<br>* `Pelvic structure` - Pelvic structure<br>* `Bone structure of extremity` - Bone structure of extremity<br>* `Skin structure` - Skin structure<br>* `Soft tissues` - Soft tissues<br>* `Entire body as a whole` - Entire body as a whole|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |radiation_therapy_fractions|integer¦null|false|none|none|
 |radiation_therapy_dosage|integer¦null|false|none|none|
 |radiation_boost|boolean¦null|false|none|none|
@@ -6216,12 +7361,150 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_sample_id|string|true|none|none|
-|gender|[GenderEnum](#schemagenderenum)|true|none|* `Man` - Man<br>* `Woman` - Woman<br>* `Non-binary` - Non-binary|
-|sex_at_birth|[SexAtBirthEnum](#schemasexatbirthenum)|true|none|* `Male` - Male<br>* `Female` - Female<br>* `Other` - Other<br>* `Unknown` - Unknown|
-|specimen_tissue_source|[SpecimenTissueSourceEnum](#schemaspecimentissuesourceenum)|true|none|* `Amniotic fluid` - Amniotic fluid<br>* `Bile Fluid` - Bile Fluid<br>* `Whole blood` - Whole blood<br>* `Blood arterial` - Blood arterial<br>* `Cord blood` - Cord blood<br>* `Blood venous` - Blood venous<br>* `Bone` - Bone<br>* `Serum, Convalescent` - Serum, Convalescent<br>* `Cerebral spinal fluid` - Cerebral spinal fluid<br>* `Cervical Mucus` - Cervical Mucus<br>* `Duodenal fluid` - Duodenal fluid<br>* `Blood, Fetal` - Blood, Fetal<br>* `Fluid, Abdomen` - Fluid, Abdomen<br>* `Genital vaginal` - Genital vaginal<br>* `Fluid, Hydrocele` - Fluid, Hydrocele<br>* `Fluid, Joint` - Fluid, Joint<br>* `Fluid, Kidney` - Fluid, Kidney<br>* `Fluid, Lumbar Sac` - Fluid, Lumbar Sac<br>* `Marrow` - Marrow<br>* `Pancreatic fluid` - Pancreatic fluid<br>* `Fluid, Pericardial` - Fluid, Pericardial<br>* `Placenta` - Placenta<br>* `Pleural fluid (thoracentesis fluid)` - Pleural fluid (thoracentesis fluid)<br>* `Saliva` - Saliva<br>* `Skin` - Skin<br>* `Seminal fluid` - Seminal fluid<br>* `Fluid, synovial (Joint fluid)` - Fluid, synovial (Joint fluid)<br>* `Sputum` - Sputum<br>* `Tissue` - Tissue<br>* `Vitreous Fluid` - Vitreous Fluid<br>* `Wound` - Wound|
-|tumour_normal_designation|[TumourNormalDesignationEnum](#schematumournormaldesignationenum)|true|none|* `Normal` - Normal<br>* `Tumour` - Tumour|
-|specimen_type|[SpecimenTypeEnum](#schemaspecimentypeenum)|true|none|* `Cell line - derived from normal` - Cell line - derived from normal<br>* `Cell line - derived from metastatic tumour` - Cell line - derived from metastatic tumour<br>* `Cell line - derived from primary tumour` - Cell line - derived from primary tumour<br>* `Cell line - derived from xenograft tumour` - Cell line - derived from xenograft tumour<br>* `Metastatic tumour - additional metastatic` - Metastatic tumour - additional metastatic<br>* `Metastatic tumour - metastasis local to lymph node` - Metastatic tumour - metastasis local to lymph node<br>* `Metastatic tumour - metastasis to distant location` - Metastatic tumour - metastasis to distant location<br>* `Metastatic tumour` - Metastatic tumour<br>* `Normal - tissue adjacent to primary tumour` - Normal - tissue adjacent to primary tumour<br>* `Normal` - Normal<br>* `Primary tumour - additional new primary` - Primary tumour - additional new primary<br>* `Primary tumour - adjacent to normal` - Primary tumour - adjacent to normal<br>* `Primary tumour` - Primary tumour<br>* `Recurrent tumour` - Recurrent tumour<br>* `Xenograft - derived from primary tumour` - Xenograft - derived from primary tumour<br>* `Xenograft - derived from metastatic tumour` - Xenograft - derived from metastatic tumour<br>* `Xenograft - derived from tumour cell line` - Xenograft - derived from tumour cell line|
-|sample_type|[SampleTypeEnum](#schemasampletypeenum)|true|none|* `Amplified DNA` - Amplified DNA<br>* `ctDNA` - ctDNA<br>* `Other DNA enrichments` - Other DNA enrichments<br>* `Other RNA fractions` - Other RNA fractions<br>* `polyA+ RNA` - polyA+ RNA<br>* `Protein` - Protein<br>* `rRNA-depleted RNA` - rRNA-depleted RNA<br>* `Total DNA` - Total DNA<br>* `Total RNA` - Total RNA|
+|gender|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[GenderEnum](#schemagenderenum)|false|none|* `Man` - Man<br>* `Woman` - Woman<br>* `Non-binary` - Non-binary|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|sex_at_birth|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SexAtBirthEnum](#schemasexatbirthenum)|false|none|* `Male` - Male<br>* `Female` - Female<br>* `Other` - Other<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|specimen_tissue_source|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SpecimenTissueSourceEnum](#schemaspecimentissuesourceenum)|false|none|* `Amniotic fluid` - Amniotic fluid<br>* `Bile Fluid` - Bile Fluid<br>* `Whole blood` - Whole blood<br>* `Blood arterial` - Blood arterial<br>* `Cord blood` - Cord blood<br>* `Blood venous` - Blood venous<br>* `Bone` - Bone<br>* `Serum, Convalescent` - Serum, Convalescent<br>* `Cerebral spinal fluid` - Cerebral spinal fluid<br>* `Cervical Mucus` - Cervical Mucus<br>* `Duodenal fluid` - Duodenal fluid<br>* `Blood, Fetal` - Blood, Fetal<br>* `Fluid, Abdomen` - Fluid, Abdomen<br>* `Genital vaginal` - Genital vaginal<br>* `Fluid, Hydrocele` - Fluid, Hydrocele<br>* `Fluid, Joint` - Fluid, Joint<br>* `Fluid, Kidney` - Fluid, Kidney<br>* `Fluid, Lumbar Sac` - Fluid, Lumbar Sac<br>* `Marrow` - Marrow<br>* `Pancreatic fluid` - Pancreatic fluid<br>* `Fluid, Pericardial` - Fluid, Pericardial<br>* `Placenta` - Placenta<br>* `Pleural fluid (thoracentesis fluid)` - Pleural fluid (thoracentesis fluid)<br>* `Saliva` - Saliva<br>* `Skin` - Skin<br>* `Seminal fluid` - Seminal fluid<br>* `Fluid, synovial (Joint fluid)` - Fluid, synovial (Joint fluid)<br>* `Sputum` - Sputum<br>* `Tissue` - Tissue<br>* `Vitreous Fluid` - Vitreous Fluid<br>* `Wound` - Wound|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|tumour_normal_designation|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TumourNormalDesignationEnum](#schematumournormaldesignationenum)|false|none|* `Normal` - Normal<br>* `Tumour` - Tumour|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|specimen_type|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SpecimenTypeEnum](#schemaspecimentypeenum)|false|none|* `Cell line - derived from normal` - Cell line - derived from normal<br>* `Cell line - derived from metastatic tumour` - Cell line - derived from metastatic tumour<br>* `Cell line - derived from primary tumour` - Cell line - derived from primary tumour<br>* `Cell line - derived from xenograft tumour` - Cell line - derived from xenograft tumour<br>* `Metastatic tumour - additional metastatic` - Metastatic tumour - additional metastatic<br>* `Metastatic tumour - metastasis local to lymph node` - Metastatic tumour - metastasis local to lymph node<br>* `Metastatic tumour - metastasis to distant location` - Metastatic tumour - metastasis to distant location<br>* `Metastatic tumour` - Metastatic tumour<br>* `Normal - tissue adjacent to primary tumour` - Normal - tissue adjacent to primary tumour<br>* `Normal` - Normal<br>* `Primary tumour - additional new primary` - Primary tumour - additional new primary<br>* `Primary tumour - adjacent to normal` - Primary tumour - adjacent to normal<br>* `Primary tumour` - Primary tumour<br>* `Recurrent tumour` - Recurrent tumour<br>* `Xenograft - derived from primary tumour` - Xenograft - derived from primary tumour<br>* `Xenograft - derived from metastatic tumour` - Xenograft - derived from metastatic tumour<br>* `Xenograft - derived from tumour cell line` - Xenograft - derived from tumour cell line|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|sample_type|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SampleTypeEnum](#schemasampletypeenum)|false|none|* `Amplified DNA` - Amplified DNA<br>* `ctDNA` - ctDNA<br>* `Other DNA enrichments` - Other DNA enrichments<br>* `Other RNA fractions` - Other RNA fractions<br>* `polyA+ RNA` - polyA+ RNA<br>* `Protein` - Protein<br>* `rRNA-depleted RNA` - rRNA-depleted RNA<br>* `Total DNA` - Total DNA<br>* `Total RNA` - Total RNA|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |program_id|string|true|none|none|
 |submitter_donor_id|string|true|none|none|
 |submitter_specimen_id|string|true|none|none|
@@ -6351,6 +7634,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -6368,6 +7657,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -6387,6 +7682,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -6404,6 +7705,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -6423,14 +7730,43 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimen_collection_date|string|true|none|none|
-|specimen_storage|[SpecimenStorageEnum](#schemaspecimenstorageenum)|true|none|* `Cut slide` - Cut slide<br>* `Frozen in -70 freezer` - Frozen in -70 freezer<br>* `Frozen in liquid nitrogen` - Frozen in liquid nitrogen<br>* `Frozen in vapour phase` - Frozen in vapour phase<br>* `Not Applicable` - Not Applicable<br>* `Other` - Other<br>* `Paraffin block` - Paraffin block<br>* `RNA later frozen` - RNA later frozen<br>* `Unknown` - Unknown|
-|tumour_histological_type|string|true|none|none|
-|specimen_anatomic_location|string|true|none|none|
+|specimen_collection_date|string¦null|true|none|none|
+|specimen_storage|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SpecimenStorageEnum](#schemaspecimenstorageenum)|false|none|* `Cut slide` - Cut slide<br>* `Frozen in -70 freezer` - Frozen in -70 freezer<br>* `Frozen in liquid nitrogen` - Frozen in liquid nitrogen<br>* `Frozen in vapour phase` - Frozen in vapour phase<br>* `Not Applicable` - Not Applicable<br>* `Other` - Other<br>* `Paraffin block` - Paraffin block<br>* `RNA later frozen` - RNA later frozen<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|tumour_histological_type|string¦null|true|none|none|
+|specimen_anatomic_location|string¦null|true|none|none|
 |reference_pathology_confirmed_diagnosis|any|true|none|none|
 
 oneOf
@@ -6444,6 +7780,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -6463,6 +7805,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -6480,6 +7828,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -6499,6 +7853,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -6517,6 +7877,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -6534,6 +7900,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -7015,8 +8387,31 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|surgery_type|[SurgeryTypeEnum](#schemasurgerytypeenum)|true|none|* `Axillary Clearance` - Axillary Clearance<br>* `Axillary lymph nodes sampling` - Axillary lymph nodes sampling<br>* `Biopsy` - Biopsy<br>* `Bypass Gastrojejunostomy` - Bypass Gastrojejunostomy<br>* `Cholecystectomy` - Cholecystectomy<br>* `Cholecystojejunostomy` - Cholecystojejunostomy<br>* `Completion gastrectomy` - Completion gastrectomy<br>* `Debridement of pancreatic and peripancreatic necrosis` - Debridement of pancreatic and peripancreatic necrosis<br>* `Debulking` - Debulking<br>* `Distal subtotal pancreatectomy` - Distal subtotal pancreatectomy<br>* `Drainage of abscess` - Drainage of abscess<br>* `Duodenal preserving pancreatic head resection` - Duodenal preserving pancreatic head resection<br>* `Endoscopic biopsy` - Endoscopic biopsy<br>* `Endoscopic brushings of GIT` - Endoscopic brushings of GIT<br>* `Enucleation` - Enucleation<br>* `Esophageal bypass surgery/jejunostomy only` - Esophageal bypass surgery/jejunostomy only<br>* `Exploratory laparotomy` - Exploratory laparotomy<br>* `Fine needle aspiration biopsy` - Fine needle aspiration biopsy<br>* `Gastric Antrectomy` - Gastric Antrectomy<br>* `Hepaticojejunostomy` - Hepaticojejunostomy<br>* `Ivor Lewis subtotal esophagectomy` - Ivor Lewis subtotal esophagectomy<br>* `Laparotomy (Open and Shut)` - Laparotomy (Open and Shut)<br>* `Left thoracoabdominal incision` - Left thoracoabdominal incision<br>* `Lobectomy` - Lobectomy<br>* `Mammoplasty` - Mammoplasty<br>* `Mastectomy` - Mastectomy<br>* `McKeown esophagectomy` - McKeown esophagectomy<br>* `Merendino procedure` - Merendino procedure<br>* `Minimally invasive esophagectomy` - Minimally invasive esophagectomy<br>* `Pancreaticoduodenectomy` - Pancreaticoduodenectomy<br>* `Pancreaticojejunostomy, side-to-side anastomosis` - Pancreaticojejunostomy, side-to-side anastomosis<br>* `Pneumonectomy` - Pneumonectomy<br>* `Proximal subtotal gastrectomy` - Proximal subtotal gastrectomy<br>* `Pylorus-sparing Whipple operation` - Pylorus-sparing Whipple operation<br>* `Radical pancreaticoduodenectomy` - Radical pancreaticoduodenectomy<br>* `Reexcision` - Reexcision<br>* `Segmentectomy` - Segmentectomy<br>* `Sentinal Lymph Node Biopsy` - Sentinal Lymph Node Biopsy<br>* `Spleen preserving distal pancreatectomy` - Spleen preserving distal pancreatectomy<br>* `Splenectomy` - Splenectomy<br>* `Subtotal pancreatectomy` - Subtotal pancreatectomy<br>* `Thoracotomy (Open & Shut)` - Thoracotomy (Open & Shut)<br>* `Total gastrectomy` - Total gastrectomy<br>* `Total gastrectomy with extended lymphadenectomy` - Total gastrectomy with extended lymphadenectomy<br>* `Total pancreatectomy` - Total pancreatectomy<br>* `Transhiatal esophagectomy` - Transhiatal esophagectomy<br>* `Triple bypass of pancreas` - Triple bypass of pancreas<br>* `Wedge/localised gastric resection` - Wedge/localised gastric resection<br>* `Wide Local Excision` - Wide Local Excision|
-|surgery_site|string|true|none|none|
+|surgery_type|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SurgeryTypeEnum](#schemasurgerytypeenum)|false|none|* `Axillary Clearance` - Axillary Clearance<br>* `Axillary lymph nodes sampling` - Axillary lymph nodes sampling<br>* `Biopsy` - Biopsy<br>* `Bypass Gastrojejunostomy` - Bypass Gastrojejunostomy<br>* `Cholecystectomy` - Cholecystectomy<br>* `Cholecystojejunostomy` - Cholecystojejunostomy<br>* `Completion gastrectomy` - Completion gastrectomy<br>* `Debridement of pancreatic and peripancreatic necrosis` - Debridement of pancreatic and peripancreatic necrosis<br>* `Debulking` - Debulking<br>* `Distal subtotal pancreatectomy` - Distal subtotal pancreatectomy<br>* `Drainage of abscess` - Drainage of abscess<br>* `Duodenal preserving pancreatic head resection` - Duodenal preserving pancreatic head resection<br>* `Endoscopic biopsy` - Endoscopic biopsy<br>* `Endoscopic brushings of GIT` - Endoscopic brushings of GIT<br>* `Enucleation` - Enucleation<br>* `Esophageal bypass surgery/jejunostomy only` - Esophageal bypass surgery/jejunostomy only<br>* `Exploratory laparotomy` - Exploratory laparotomy<br>* `Fine needle aspiration biopsy` - Fine needle aspiration biopsy<br>* `Gastric Antrectomy` - Gastric Antrectomy<br>* `Hepaticojejunostomy` - Hepaticojejunostomy<br>* `Ivor Lewis subtotal esophagectomy` - Ivor Lewis subtotal esophagectomy<br>* `Laparotomy (Open and Shut)` - Laparotomy (Open and Shut)<br>* `Left thoracoabdominal incision` - Left thoracoabdominal incision<br>* `Lobectomy` - Lobectomy<br>* `Mammoplasty` - Mammoplasty<br>* `Mastectomy` - Mastectomy<br>* `McKeown esophagectomy` - McKeown esophagectomy<br>* `Merendino procedure` - Merendino procedure<br>* `Minimally invasive esophagectomy` - Minimally invasive esophagectomy<br>* `Pancreaticoduodenectomy` - Pancreaticoduodenectomy<br>* `Pancreaticojejunostomy, side-to-side anastomosis` - Pancreaticojejunostomy, side-to-side anastomosis<br>* `Pneumonectomy` - Pneumonectomy<br>* `Proximal subtotal gastrectomy` - Proximal subtotal gastrectomy<br>* `Pylorus-sparing Whipple operation` - Pylorus-sparing Whipple operation<br>* `Radical pancreaticoduodenectomy` - Radical pancreaticoduodenectomy<br>* `Reexcision` - Reexcision<br>* `Segmentectomy` - Segmentectomy<br>* `Sentinal Lymph Node Biopsy` - Sentinal Lymph Node Biopsy<br>* `Spleen preserving distal pancreatectomy` - Spleen preserving distal pancreatectomy<br>* `Splenectomy` - Splenectomy<br>* `Subtotal pancreatectomy` - Subtotal pancreatectomy<br>* `Thoracotomy (Open & Shut)` - Thoracotomy (Open & Shut)<br>* `Total gastrectomy` - Total gastrectomy<br>* `Total gastrectomy with extended lymphadenectomy` - Total gastrectomy with extended lymphadenectomy<br>* `Total pancreatectomy` - Total pancreatectomy<br>* `Transhiatal esophagectomy` - Transhiatal esophagectomy<br>* `Triple bypass of pancreas` - Triple bypass of pancreas<br>* `Wedge/localised gastric resection` - Wedge/localised gastric resection<br>* `Wide Local Excision` - Wide Local Excision|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|surgery_site|string¦null|true|none|none|
 |surgery_location|any|true|none|none|
 
 oneOf
@@ -7030,6 +8425,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -7049,6 +8450,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -7067,11 +8474,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_involved|[oneOf]|true|none|none|
+|margin_types_involved|[oneOf]¦null|true|none|none|
 
 oneOf
 
@@ -7085,11 +8498,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_involved|[oneOf]|true|none|none|
+|margin_types_not_involved|[oneOf]¦null|true|none|none|
 
 oneOf
 
@@ -7103,11 +8522,17 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_assessed|[oneOf]|true|none|none|
+|margin_types_not_assessed|[oneOf]¦null|true|none|none|
 
 oneOf
 
@@ -7120,6 +8545,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -7139,6 +8570,12 @@ xor
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
 
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
 continued
 
 |Name|Type|Required|Restrictions|Description|
@@ -7156,6 +8593,12 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
 
 continued
 
@@ -7483,14 +8926,152 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_treatment_id|string|true|none|none|
-|treatment_type|[[TreatmentTypeEnum](#schematreatmenttypeenum)]|true|none|[* `Ablation` - Ablation<br>* `Bone marrow transplant` - Bone marrow transplant<br>* `Chemotherapy` - Chemotherapy<br>* `Endoscopic therapy` - Endoscopic therapy<br>* `Hormonal therapy` - Hormonal therapy<br>* `Immunotherapy` - Immunotherapy<br>* `No treatment` - No treatment<br>* `Other targeting molecular therapy` - Other targeting molecular therapy<br>* `Photodynamic therapy` - Photodynamic therapy<br>* `Radiation therapy` - Radiation therapy<br>* `Stem cell transplant` - Stem cell transplant<br>* `Surgery` - Surgery]|
-|is_primary_treatment|[uBooleanEnum](#schemaubooleanenum)|true|none|* `Yes` - Yes<br>* `No` - No<br>* `Unknown` - Unknown|
-|treatment_start_date|string|true|none|none|
-|treatment_end_date|string|true|none|none|
-|treatment_setting|[TreatmentSettingEnum](#schematreatmentsettingenum)|true|none|* `Adjuvant` - Adjuvant<br>* `Advanced/Metastatic` - Advanced/Metastatic<br>* `Neoadjuvant` - Neoadjuvant<br>* `Not applicable` - Not applicable|
-|treatment_intent|[TreatmentIntentEnum](#schematreatmentintentenum)|true|none|* `Curative` - Curative<br>* `Palliative` - Palliative|
-|response_to_treatment_criteria_method|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|true|none|* `RECIST 1.1` - RECIST 1.1<br>* `iRECIST` - iRECIST<br>* `Cheson CLL 2012 Oncology Response Criteria` - Cheson CLL 2012 Oncology Response Criteria<br>* `Response Assessment in Neuro-Oncology (RANO)` - Response Assessment in Neuro-Oncology (RANO)<br>* `AML Response Criteria` - AML Response Criteria<br>* `Physician Assessed Response Criteria` - Physician Assessed Response Criteria|
-|response_to_treatment|[ResponseToTreatmentEnum](#schemaresponsetotreatmentenum)|true|none|* `Complete response` - Complete response<br>* `Partial response` - Partial response<br>* `Progressive disease` - Progressive disease<br>* `Stable disease` - Stable disease<br>* `Immune complete response (iCR)` - Immune complete response (iCR)<br>* `Immune partial response (iPR)` - Immune partial response (iPR)<br>* `Immune uncomfirmed progressive disease (iUPD)` - Immune uncomfirmed progressive disease (iUPD)<br>* `Immune confirmed progressive disease (iCPD)` - Immune confirmed progressive disease (iCPD)<br>* `Immune stable disease (iSD)` - Immune stable disease (iSD)<br>* `Complete remission` - Complete remission<br>* `Partial remission` - Partial remission<br>* `Minor response` - Minor response<br>* `Complete remission without measurable residual disease (CR MRD-)` - Complete remission without measurable residual disease (CR MRD-)<br>* `Complete remission with incomplete hematologic recovery (CRi)` - Complete remission with incomplete hematologic recovery (CRi)<br>* `Morphologic leukemia-free state` - Morphologic leukemia-free state<br>* `Primary refractory disease` - Primary refractory disease<br>* `Hematologic relapse (after CR MRD-, CR, CRi)` - Hematologic relapse (after CR MRD-, CR, CRi)<br>* `Molecular relapse (after CR MRD-)` - Molecular relapse (after CR MRD-)<br>* `Physician assessed complete response` - Physician assessed complete response<br>* `Physician assessed partial response` - Physician assessed partial response<br>* `Physician assessed stable disease` - Physician assessed stable disease<br>* `No evidence of disease (NED)` - No evidence of disease (NED)|
+|treatment_type|[oneOf]¦null|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TreatmentTypeEnum](#schematreatmenttypeenum)|false|none|* `Ablation` - Ablation<br>* `Bone marrow transplant` - Bone marrow transplant<br>* `Chemotherapy` - Chemotherapy<br>* `Endoscopic therapy` - Endoscopic therapy<br>* `Hormonal therapy` - Hormonal therapy<br>* `Immunotherapy` - Immunotherapy<br>* `No treatment` - No treatment<br>* `Other targeting molecular therapy` - Other targeting molecular therapy<br>* `Photodynamic therapy` - Photodynamic therapy<br>* `Radiation therapy` - Radiation therapy<br>* `Stem cell transplant` - Stem cell transplant<br>* `Surgery` - Surgery|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|is_primary_treatment|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[uBooleanEnum](#schemaubooleanenum)|false|none|* `Yes` - Yes<br>* `No` - No<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|treatment_start_date|string¦null|true|none|none|
+|treatment_end_date|string¦null|true|none|none|
+|treatment_setting|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TreatmentSettingEnum](#schematreatmentsettingenum)|false|none|* `Adjuvant` - Adjuvant<br>* `Advanced/Metastatic` - Advanced/Metastatic<br>* `Neoadjuvant` - Neoadjuvant<br>* `Not applicable` - Not applicable|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|treatment_intent|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TreatmentIntentEnum](#schematreatmentintentenum)|false|none|* `Curative` - Curative<br>* `Palliative` - Palliative|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|response_to_treatment_criteria_method|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|false|none|* `RECIST 1.1` - RECIST 1.1<br>* `iRECIST` - iRECIST<br>* `Cheson CLL 2012 Oncology Response Criteria` - Cheson CLL 2012 Oncology Response Criteria<br>* `Response Assessment in Neuro-Oncology (RANO)` - Response Assessment in Neuro-Oncology (RANO)<br>* `AML Response Criteria` - AML Response Criteria<br>* `Physician Assessed Response Criteria` - Physician Assessed Response Criteria|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|response_to_treatment|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ResponseToTreatmentEnum](#schemaresponsetotreatmentenum)|false|none|* `Complete response` - Complete response<br>* `Partial response` - Partial response<br>* `Progressive disease` - Progressive disease<br>* `Stable disease` - Stable disease<br>* `Immune complete response (iCR)` - Immune complete response (iCR)<br>* `Immune partial response (iPR)` - Immune partial response (iPR)<br>* `Immune uncomfirmed progressive disease (iUPD)` - Immune uncomfirmed progressive disease (iUPD)<br>* `Immune confirmed progressive disease (iCPD)` - Immune confirmed progressive disease (iCPD)<br>* `Immune stable disease (iSD)` - Immune stable disease (iSD)<br>* `Complete remission` - Complete remission<br>* `Partial remission` - Partial remission<br>* `Minor response` - Minor response<br>* `Complete remission without measurable residual disease (CR MRD-)` - Complete remission without measurable residual disease (CR MRD-)<br>* `Complete remission with incomplete hematologic recovery (CRi)` - Complete remission with incomplete hematologic recovery (CRi)<br>* `Morphologic leukemia-free state` - Morphologic leukemia-free state<br>* `Primary refractory disease` - Primary refractory disease<br>* `Hematologic relapse (after CR MRD-, CR, CRi)` - Hematologic relapse (after CR MRD-, CR, CRi)<br>* `Molecular relapse (after CR MRD-)` - Molecular relapse (after CR MRD-)<br>* `Physician assessed complete response` - Physician assessed complete response<br>* `Physician assessed partial response` - Physician assessed partial response<br>* `Physician assessed stable disease` - Physician assessed stable disease<br>* `No evidence of disease (NED)` - No evidence of disease (NED)|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |days_per_cycle|integer¦null|false|none|none|
 |number_of_cycles|integer¦null|false|none|none|
 |program_id|string|true|none|none|

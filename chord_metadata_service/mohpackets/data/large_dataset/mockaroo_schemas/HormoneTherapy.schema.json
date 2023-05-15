@@ -1,0 +1,62 @@
+{
+  "id": 469104,
+  "num_rows": 800,
+  "file_format": "json",
+  "name": "HormoneTherapy",
+  "array": true,
+  "columns": [
+    {
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_donor_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_treatment_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "drug_name",
+      "null_percentage": 15,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"anastrozole\",\n\"exemestane\", \n\"letrozole\",\n\"goserelin\", \n\"leuprolide\", \n\"triptorelin\",\n\"degarelix\"][random(0,6)]"
+    },
+    {
+      "name": "drug_rxnormcui",
+      "null_percentage": 16,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"84857\",\n\"258494\",\n\"46475\",\n\"557845\",\n\"223986\",\n\"345678\",\n\"29875\"][random(0,6)]\n  "
+    },
+    {
+      "name": "hormone_drug_dosage_units",
+      "null_percentage": 17,
+      "type": "Template",
+      "value": "mg/m2",
+      "formula": ""
+    },
+    {
+      "name": "cumulative_drug_dosage_prescribed",
+      "null_percentage": 18,
+      "type": "Template",
+      "value": "200",
+      "formula": ""
+    },
+    {
+      "name": "cumulative_drug_dosage_actual",
+      "null_percentage": 19,
+      "type": "Template",
+      "value": "200",
+      "formula": ""
+    }
+  ]
+}
