@@ -308,8 +308,8 @@ def mcodepacket_query_results(query, params, options=None):
     return queryset
 
 
-def get_biosamples_experiments(phenopacket_ids):
-    biosamples = Biosample.objects.filter(phenopacket__subject_id__in=phenopacket_ids)\
+def get_biosamples_experiments(subject_ids):
+    biosamples = Biosample.objects.filter(phenopacket__subject_id__in=subject_ids)\
         .values(
             subject_id=F("phenopacket__subject_id"),
             biosample_id=F("id"),
@@ -459,7 +459,7 @@ def search(request, internal_data=False):
         } for table_id, table_objects in itertools.groupby(
             queryset if queryset is not None else [],
             key=lambda o: str(o.table_id)  # object here
-            )
+        )
     }, start))
 
 
