@@ -1,4 +1,4 @@
-# Katsu Metadata ServiceX
+# Katsu Metadata Service
 
 ![Test Status](https://github.com/bento-platform/katsu/workflows/Test/badge.svg)
 ![Lint Status](https://github.com/bento-platform/katsu/workflows/Lint/badge.svg)
