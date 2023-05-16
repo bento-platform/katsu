@@ -221,7 +221,7 @@ class ExperimentCSVRenderer(JSONRenderer):
                 'created': experiment.get('created'),
                 'updated': experiment.get('updated'),
                 'biosample': experiment.get('biosample'),
-                'individual_id': experiment['biosample_individual']['id'],
+                'individual_id': experiment.get('biosample_individual', {}).get('id', 'NA'),
             }
             experiments.append(exp_obj)
 
