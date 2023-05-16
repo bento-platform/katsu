@@ -282,4 +282,3 @@ class BeaconListIndividuals(APIView):
                 "experiment_type": experiment_types
             }
         })
-

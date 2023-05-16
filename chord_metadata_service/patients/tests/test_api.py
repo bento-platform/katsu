@@ -657,7 +657,7 @@ class BeaconSearchTest(APITestCase):
     random_range = 20
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  
+        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]
         for individual in individuals:
             Individual.objects.create(**individual)
 
