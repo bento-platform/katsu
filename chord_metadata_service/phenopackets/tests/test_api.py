@@ -1,5 +1,9 @@
 import uuid
 import os
+import csv
+import io
+
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from . import constants as c
@@ -86,23 +90,36 @@ class CreateBiosampleTest(APITestCase):
         self.assertEqual(serializer.is_valid(), True)
 
 
-class BiosampleBatchViewSetTest(APITestCase):
+class BatchBiosamplesCSVTest(APITestCase):
     def setUp(self):
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.procedure = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
         self.valid_payload = c.valid_biosample_1(self.individual, self.procedure)
         self.biosample = m.Biosample.objects.create(**self.valid_payload)
-        self.url = '/api/batch/biosamples'
+        self.view = 'batch/biosamples-list'
 
     def test_get_all_biosamples(self):
-        response = self.client.get(self.url)
+        response = self.client.get(reverse(self.view))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1),
 
     def test_post_biosamples_with_ids(self):
-        response = self.client.post(self.url, {'id': [str(self.biosample.id)]}, format='json')
+        data = {
+            'id': [str(self.biosample.id)],
+            'format': 'csv'
+        }
+        response = get_response(self.view, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+        content = response.content.decode('utf-8')
+        csv_reader = csv.reader(io.StringIO(content))
+        body = list(csv_reader)
+        headers = body.pop(0)
+        for column in ['id', 'description', 'sampled tissue',
+                       'individual age at collection',
+                       'histological diagnosis', 'extra properties',
+                       'created', 'updated', 'individual']:
+            self.assertIn(column, [column_name.lower() for column_name in headers])
 
 
 class CreatePhenotypicFeatureTest(APITestCase):
