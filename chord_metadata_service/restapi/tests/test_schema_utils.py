@@ -58,6 +58,7 @@ class TestSchemaMerge(TestCase):
 class TestPatchSchema(SimpleTestCase):
 
     def test_ignored(self):
+        # patch_project_schemas simply returns the base_schema if it has no "type" property
         base_schema = {"$schema": "https://json-schema.org/draft/2020-12/schema"}
         ext_schemas = {
             "phenopacket": {
