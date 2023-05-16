@@ -135,7 +135,7 @@ class GetExperimentsAppApisTest(APITestCase):
         response_data = response.json()
         self.assertEqual(response_data["count"], 0)
         self.assertEqual(len(response_data["results"]), 0)
-        
+
     def test_post_experiment_batch_no_data(self):
         response = self.client.post('/api/batch/experiments', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
