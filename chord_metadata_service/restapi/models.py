@@ -5,7 +5,7 @@ from django.db.models import Q, QuerySet
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from jsonschema import Draft7Validator
 from typing import Tuple, List
-from chord_metadata_service import logger
+from chord_metadata_service.logger import logger
 
 
 class IndexableMixin:
