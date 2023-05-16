@@ -58,12 +58,12 @@ async def get_count_for_data_type(
         q = ExperimentResult.objects.all()
         if dataset:
             try:
-                q = q.filter(experiment_set__table__ownership_record__dataset_id=dataset)
+                q = q.filter(experiment__table__ownership_record__dataset_id=dataset)
             except ValidationError:
                 raise ValueError("Dataset ID must be a UUID")
         elif project:
             try:
-                q = q.filter(experiment_set__table__ownership_record__dataset__project_id=project)
+                q = q.filter(experiment__table__ownership_record__dataset__project_id=project)
             except ValidationError:
                 raise ValueError("Project ID must be a UUID")
 
