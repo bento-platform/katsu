@@ -140,13 +140,12 @@ class IndividualBatchViewSet(BatchViewSet):
 )
 class PublicListIndividuals(APIView):
     """
-    View to return count of all individuals after filtering.
-    Optional parameter "response_format=beacon" adds a list of matching ids to the response,
-    and beacon handles censorship in this case
+    View to return only count of all individuals after filtering.
     """
 
-    def filter_queryset(self, queryset, qp):
+    def filter_queryset(self, queryset):
         # Check query parameters validity
+        qp = self.request.query_params
         if len(qp) > settings.CONFIG_PUBLIC["rules"]["max_query_parameters"]:
             raise ValidationError(f"Wrong number of fields: {len(qp)}")
 
@@ -184,13 +183,9 @@ class PublicListIndividuals(APIView):
         if not settings.CONFIG_PUBLIC:
             return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
 
-        # get mutable copy of query params, remove response param before filtering
-        qp = request.GET.copy()
-        [response_format] = qp.pop('response_format', [None])
-
         base_qs = Individual.objects.all()
         try:
-            filtered_qs = self.filter_queryset(base_qs, qp)
+            filtered_qs = self.filter_queryset(base_qs)
         except ValidationError as e:
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
@@ -198,7 +193,7 @@ class PublicListIndividuals(APIView):
 
         qct = filtered_qs.count()
 
-        if response_format != "beacon" and qct <= (threshold := settings.CONFIG_PUBLIC["rules"]["count_threshold"]):
+        if qct <= (threshold := settings.CONFIG_PUBLIC["rules"]["count_threshold"]):
             logger.info(
                 f"Public individuals endpoint recieved query params {request.query_params} which resulted in "
                 f"sub-threshold count: {qct} <= {threshold}")
@@ -207,7 +202,7 @@ class PublicListIndividuals(APIView):
         tissues_count, sampled_tissues = biosample_tissue_stats(filtered_qs)
         experiments_count, experiment_types = experiment_type_stats(filtered_qs)
 
-        r = {
+        return Response({
             "count": qct,
             "biosamples": {
                 "count": tissues_count,
@@ -217,9 +212,74 @@ class PublicListIndividuals(APIView):
                 "count": experiments_count,
                 "experiment_type": experiment_types
             }
+        })
+
+
+class BeaconListIndividuals(APIView):
+    """
+    View to return lists of individuals filtered using search terms from katsu's config.json.
+    Uncensored equivalent of PublicListIndividuals.
+    """
+    def filter_queryset(self, queryset):
+        # Check query parameters validity
+        qp = self.request.query_params
+        if len(qp) > settings.CONFIG_PUBLIC["rules"]["max_query_parameters"]:
+            raise ValidationError(f"Wrong number of fields: {len(qp)}")
+
+        search_conf = settings.CONFIG_PUBLIC["search"]
+        field_conf = settings.CONFIG_PUBLIC["fields"]
+        queryable_fields = {
+            f"{f}": field_conf[f] for section in search_conf for f in section["fields"]
         }
 
-        if response_format == "beacon":
-            r["matches"] = filtered_qs.values_list("id", flat=True)
+        for field, value in qp.items():
+            if field not in queryable_fields:
+                raise ValidationError(f"Unsupported field used in query: {field}")
 
-        return Response(r)
+            field_props = queryable_fields[field]
+            options = get_field_options(field_props)
+            if value not in options \
+                    and not (
+                        # case-insensitive search on categories
+                        field_props["datatype"] == "string"
+                        and value.lower() in [o.lower() for o in options]
+                    ) \
+                    and not (
+                        # no restriction when enum is not set for categories
+                        field_props["datatype"] == "string"
+                        and field_props["config"]["enum"] is None
+                    ):
+                raise ValidationError(f"Invalid value used in query: {value}")
+
+            # recursion
+            queryset = filter_queryset_field_value(queryset, field_props, value)
+
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        if not settings.CONFIG_PUBLIC:
+            return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
+
+        base_qs = Individual.objects.all()
+        try:
+            filtered_qs = self.filter_queryset(base_qs)
+        except ValidationError as e:
+            return Response(errors.bad_request_error(
+                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
+            ))
+
+        tissues_count, sampled_tissues = biosample_tissue_stats(filtered_qs)
+        experiments_count, experiment_types = experiment_type_stats(filtered_qs)
+
+        return Response({
+            "matches": filtered_qs.values_list("id", flat=True),
+            "biosamples": {
+                "count": tissues_count,
+                "sampled_tissue": sampled_tissues
+            },
+            "experiments": {
+                "count": experiments_count,
+                "experiment_type": experiment_types
+            }
+        })
+

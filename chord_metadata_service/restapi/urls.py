@@ -96,11 +96,13 @@ urlpatterns = [
     path('biosample_sampled_tissue_autocomplete', BiosampleSampledTissueAutocomplete.as_view(),
          name='biosample-sampled-tissue-autocomplete',),
 
-    # endpoints for bento public
-    # used by beacon or public backend, not meant for open access use
+    # public endpoints (no confidential information leak)
     path('public', individual_views.PublicListIndividuals.as_view(),
          name='public',),
     path('public_search_fields', public_search_fields, name='public-search-fields',),
     path('public_overview', public_overview, name='public-overview',),
     path('public_dataset', public_dataset, name='public-dataset'),
+
+    # uncensored endpoint for beacon search using fields from config.json
+    path('beacon_search', individual_views.BeaconListIndividuals.as_view(), name='beacon-search'),
 ]
