@@ -690,4 +690,3 @@ class BeaconSearchTest(APITestCase):
     def test_beacon_search_too_many_params(self):
         response = self.client.get('/api/beacon_search?sex=MALE&smoking=Non-smoker&death_dc=Deceased')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
