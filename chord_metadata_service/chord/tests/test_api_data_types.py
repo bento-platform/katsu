@@ -9,6 +9,7 @@ from ..data_types import (
     DATA_TYPE_READSET,
     DATA_TYPES
 )
+from ..views_data_types import get_count_for_data_type
 
 POST_GET = ("POST", "GET")
 
@@ -68,6 +69,14 @@ class DataTypeTest(APITestCase):
         r = self.client.get(reverse(
             "data-type-detail", kwargs={"data_type": DATA_TYPE_EXPERIMENT_RESULT}), {"dataset": "a"})
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_data_type_detail_bad_data_type_for_count(self):
+        r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_READSET}))
+        self.assertIsNone(r.json()["count"])
+
+    async def test_data_type_count_bad_data_type(self):
+        with self.assertRaises(ValueError):
+            await get_count_for_data_type(DATA_TYPE_NOT_REAL)
 
     def test_data_type_detail_404(self):
         r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_NOT_REAL}))
