@@ -672,7 +672,7 @@ class BeaconSearchTest(APITestCase):
 
     @override_settings(CONFIG_PUBLIC={})
     def test_beacon_search_response_no_config(self):
-        # test when config is not provided, returns BAD_REQUEST
+        # test when config is not provided, returns NOT FOUND
         response = self.client.get('/api/beacon_search?sex=MALE')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
