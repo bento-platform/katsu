@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views_search
+from . import views_data_types, views_search
 from .export import views as views_export
 from .ingest import views as views_ingest
 from .workflows import views as views_workflow
@@ -13,12 +13,13 @@ urlpatterns = [
     path('private/ingest', views_ingest.ingest, name="ingest"),
     path('private/export', views_export.export, name="export"),
 
-    path('data-types', views_search.data_type_list, name="data-type-list"),
-    path('data-types/<str:data_type>', views_search.data_type_detail, name="data-type-detail"),
-    path('data-types/<str:data_type>/schema', views_search.data_type_schema, name="data-type-schema"),
+    path('data-types', views_data_types.data_type_list, name="data-type-list"),
+    path('data-types/<str:data_type>', views_data_types.data_type_detail, name="data-type-detail"),
+    path('data-types/<str:data_type>/schema', views_data_types.data_type_schema, name="data-type-schema"),
     # TODO: Consistent snake or kebab
-    path('data-types/<str:data_type>/metadata_schema', views_search.data_type_metadata_schema,
+    path('data-types/<str:data_type>/metadata_schema', views_data_types.data_type_metadata_schema,
          name="data-type-metadata-schema"),
+
     path('tables', views_search.table_list, name="chord-table-list"),
     path('tables/<str:table_id>', views_search.table_detail, name="chord-table-detail"),
     path('tables/<str:table_id>/summary', views_search.chord_table_summary, name="table-summary"),
