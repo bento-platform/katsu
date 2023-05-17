@@ -258,15 +258,14 @@ class BeaconListIndividuals(APIView):
 
     def get(self, request, *args, **kwargs):
         if not settings.CONFIG_PUBLIC:
-            return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
+            return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=400)
 
         base_qs = Individual.objects.all()
         try:
             filtered_qs = self.filter_queryset(base_qs)
         except ValidationError as e:
             return Response(errors.bad_request_error(
-                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
-            ))
+                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items())), status=400)
 
         tissues_count, sampled_tissues = biosample_tissue_stats(filtered_qs)
         experiments_count, experiment_types = experiment_type_stats(filtered_qs)
