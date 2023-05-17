@@ -258,7 +258,7 @@ class BeaconListIndividuals(APIView):
 
     def get(self, request, *args, **kwargs):
         if not settings.CONFIG_PUBLIC:
-            return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=400)
+            return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=404)
 
         base_qs = Individual.objects.all()
         try:
