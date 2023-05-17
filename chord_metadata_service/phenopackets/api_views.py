@@ -191,13 +191,14 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
     content_negotiation_class = FormatInPostContentNegotiation
 
     def _get_filtered_queryset(self, ids_list=None):
-        queryset = m.Biosample.objects.all() \
-            .prefetch_related(*BIOSAMPLE_PREFETCH) \
-            .select_related(*BIOSAMPLE_SELECT_REL) \
-            .order_by("id")
+        queryset = m.Biosample.objects.all()
 
         if ids_list:
             queryset = queryset.filter(id__in=ids_list)
+
+        queryset = queryset.prefetch_related(*BIOSAMPLE_PREFETCH) \
+            .select_related(*BIOSAMPLE_SELECT_REL) \
+            .order_by("id")
 
         return queryset
 
