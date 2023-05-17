@@ -16,14 +16,6 @@ from chord_metadata_service.experiments.models import Experiment, ExperimentResu
 
 from . import data_types as dt
 
-OUTPUT_FORMAT_VALUES_LIST = "values_list"
-OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
-
-
-DATA_TYPES_TO_MODEL = {
-    dt.DATA_TYPE_PHENOPACKET: Phenopacket
-}
-
 
 async def get_count_for_data_type(
     data_type: str,
