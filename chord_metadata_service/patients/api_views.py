@@ -229,7 +229,7 @@ class BeaconListIndividuals(APIView):
         search_conf = settings.CONFIG_PUBLIC["search"]
         field_conf = settings.CONFIG_PUBLIC["fields"]
         queryable_fields = {
-            f"{f}": field_conf[f] for section in search_conf for f in section["fields"]
+            f: field_conf[f] for section in search_conf for f in section["fields"]
         }
 
         for field, value in qp.items():
