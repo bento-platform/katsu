@@ -102,4 +102,7 @@ urlpatterns = [
     path('public_search_fields', public_search_fields, name='public-search-fields',),
     path('public_overview', public_overview, name='public-overview',),
     path('public_dataset', public_dataset, name='public-dataset'),
+
+    # uncensored endpoint for beacon search using fields from config.json
+    path('beacon_search', individual_views.BeaconListIndividuals.as_view(), name='beacon-search'),
 ]
