@@ -1,3 +1,4 @@
+from typing import Optional
 from django.apps import apps
 from django.db import models
 from django.utils import timezone
@@ -294,7 +295,7 @@ class Biosample(BaseExtraProperties, IndexableMixin):
     def schema_type(self) -> SchemaType:
         return SchemaType.BIOSAMPLE
 
-    def get_project_id(self) -> str:
+    def get_project_id(self) -> Optional[str]:
         model = apps.get_model("phenopackets.Phenopacket")
         if len(phenopackets := model.objects.filter(biosamples__id=self.id)) < 1:
             return None
@@ -312,7 +313,7 @@ class Phenopacket(BaseExtraProperties, IndexableMixin):
     def schema_type(self) -> SchemaType:
         return SchemaType.PHENOPACKET
 
-    def get_project_id(self) -> str:
+    def get_project_id(self) -> Optional[str]:
         model = apps.get_model("chord.Project")
         try:
             project = model.objects.get(datasets__table_ownership=self.table_id)

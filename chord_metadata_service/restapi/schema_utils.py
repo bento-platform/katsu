@@ -150,7 +150,7 @@ def schema_list(schema):
     }
 
 
-def patch_project_schemas(base_schema: Dict, extension_schemas: Dict[str, object]) -> Dict:
+def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, object]) -> dict:
     if not isinstance(base_schema, dict) or "type" not in base_schema:
         return base_schema
 
@@ -169,7 +169,7 @@ def patch_project_schemas(base_schema: Dict, extension_schemas: Dict[str, object
             # Append or create 'required' field according to ProjectJsonSchema in use
             required = patched_schema.get("required", [])
             if ext_schema["required"]:
-                required = required + ["extra_properties"]
+                required.append("extra_properties")
 
             patched_schema = {
                 **patched_schema,

@@ -1,3 +1,4 @@
+from typing import Optional
 from django.apps import apps
 from django.db import models
 from django.db.models import JSONField
@@ -15,7 +16,7 @@ class Individual(BaseExtraProperties, IndexableMixin):
     def schema_type(self) -> SchemaType:
         return SchemaType.INDIVIDUAL
 
-    def get_project_id(self) -> str:
+    def get_project_id(self) -> Optional[str]:
         if not self.phenopackets.count():
             # Need to wait for phenopacket to exist
             return None

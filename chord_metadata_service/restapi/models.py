@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import Q, QuerySet
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from jsonschema import Draft7Validator
-from typing import Tuple, List
+from typing import Optional, List
 from chord_metadata_service.logger import logger
 
 
@@ -28,7 +28,7 @@ class BaseExtraProperties(models.Model):
 
     @property
     @abstractmethod
-    def schema_type(self) -> SchemaType:
+    def schema_type(self) -> SchemaType:  # pragma: no cover
         """
         Returns the SchemaType of the model.
         Template method design pattern, implementation left to inheritors.
@@ -36,14 +36,14 @@ class BaseExtraProperties(models.Model):
         pass
 
     @abstractmethod
-    def get_project_id(self) -> str:
+    def get_project_id(self) -> Optional[str]:  # pragma: no cover
         """
         Returns the Project.identifier of the project that owns this object.
         Template method design pattern, implementation left to inheritors.
         """
         pass
 
-    def get_json_schema(self) -> Tuple[str, QuerySet]:
+    def get_json_schema(self) -> Optional[QuerySet]:
         """
         Returns a tuple (project_id, QuerySet[ProjectJsonSchema]) containing schemas to validate
         Template method design pattern, uses concrete defs of schema_type
