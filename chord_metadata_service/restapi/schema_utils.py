@@ -122,7 +122,7 @@ def tag_ids_and_describe(schema: dict, descriptions: dict):
 
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
                      schema_id: str = None, title: str = None, description: str = None,
-                     additional_properties: bool = False, required=None) -> Dict:
+                     additional_properties: bool = False, required=None) -> dict:
     return {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "$id": schema_id,
