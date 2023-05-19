@@ -1,5 +1,7 @@
 import uuid
 
+from chord_metadata_service.restapi.models import SchemaType
+
 from ..data_types import DATA_TYPE_PHENOPACKET
 
 __all__ = [
@@ -73,6 +75,15 @@ INVALID_DATS_CREATORS = [
     }
 ]
 
+DEFAULT_PROJECT_JSON_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "string_prop": {"type": "string"},
+        "bool_prop": {"type": "boolean"},
+        "obj_prop": {"type": "object"}
+    }
+}
+
 
 def valid_dataset_1(project_id):
     return {
@@ -99,6 +110,18 @@ def valid_table_1(dataset_id, model_compatible=False):
             "data_type": DATA_TYPE_PHENOPACKET,
         }
     )
+
+
+def valid_project_json_schema(project_id: str,
+                              schema_type=SchemaType.PHENOPACKET,
+                              required: bool = False,
+                              json_schema: dict = DEFAULT_PROJECT_JSON_SCHEMA):
+    return {
+        "project": project_id,
+        "required": required,
+        "schema_type": schema_type,
+        "json_schema": json_schema
+    }
 
 
 def dats_dataset(project_id, creators):

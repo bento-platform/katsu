@@ -165,7 +165,6 @@ CANDIG_OPA_SITE_ADMIN_KEY=
 INSIDE_CANDIG=
 ```
 
-
 ## Authentication
 
 Default authentication can be set globally in `settings.py`
