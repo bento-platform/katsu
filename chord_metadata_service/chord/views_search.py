@@ -308,8 +308,8 @@ def mcodepacket_query_results(query, params, options=None):
     return queryset
 
 
-def get_biosamples_experiments(subject_ids):
-    biosamples = Biosample.objects.filter(phenopacket__subject_id__in=subject_ids)\
+def get_biosamples_with_experiment_details(subject_ids):
+    biosamples_exp_tissue_details = Biosample.objects.filter(phenopacket__subject_id__in=subject_ids)\
         .values(
             subject_id=F("phenopacket__subject_id"),
             biosample_id=F("id"),
@@ -319,7 +319,7 @@ def get_biosamples_experiments(subject_ids):
             tissue_id=F("sampled_tissue__id"),
             tissue_label=F("sampled_tissue__label")
         )
-    return biosamples
+    return biosamples_exp_tissue_details
 
 
 def phenopacket_query_results(query, params, options=None):
@@ -345,7 +345,7 @@ def phenopacket_query_results(query, params, options=None):
 
         # Get the biosamples with experiments data
         phenopacket_ids = [result['subject_id'] for result in results]
-        biosamples_data = get_biosamples_experiments(phenopacket_ids)
+        biosamples_data = get_biosamples_with_experiment_details(phenopacket_ids)
 
         # Group the biosamples data by subject_id
         biosamples_with_experiments = defaultdict(list)
