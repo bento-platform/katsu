@@ -50,7 +50,7 @@ class Donor(models.Model):
     )
     gender = models.CharField(max_length=32, null=True, blank=True)
     sex_at_birth = models.CharField(max_length=32, null=True, blank=True)
-    is_deceased = models.BooleanField(null=True)
+    is_deceased = models.BooleanField(blank=True, null=True)
     lost_to_followup_after_clinical_event_identifier = models.CharField(
         max_length=255, null=True, blank=True
     )
@@ -284,7 +284,7 @@ class Radiation(models.Model):
     )
     radiation_therapy_dosage = models.PositiveSmallIntegerField(null=True, blank=True)
     anatomical_site_irradiated = models.CharField(max_length=255, null=True, blank=True)
-    radiation_boost = models.BooleanField(null=True)
+    radiation_boost = models.BooleanField(blank=True, null=True)
     reference_radiation_treatment_id = models.CharField(
         max_length=64, null=True, blank=True
     )
