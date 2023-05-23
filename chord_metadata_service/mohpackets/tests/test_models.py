@@ -229,6 +229,46 @@ class DonorTest(TestCase):
                 )
                 self.assertFalse(self.serializer.is_valid())
 
+    def test_invalid_gender(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["gender"] = value
+                self.serializer = DonorSerializer(
+                    instance=self.donor, data=self.valid_values
+                )
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_sex_at_birth(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["sex_at_birth"] = value
+                self.serializer = DonorSerializer(
+                    instance=self.donor, data=self.valid_values
+                )
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_lost_to_followup_reason(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["lost_to_followup_reason"] = value
+                self.serializer = DonorSerializer(
+                    instance=self.donor, data=self.valid_values
+                )
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_date_alive_after_lost_to_followup(self):
+        invalid_values = get_invalid_dates()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["date_alive_after_lost_to_followup"] = value
+                self.serializer = DonorSerializer(
+                    instance=self.donor, data=self.valid_values
+                )
+                self.assertFalse(self.serializer.is_valid())
+
 
 class PrimaryDiagnosisTest(TestCase):
     def setUp(self):
