@@ -35,6 +35,23 @@ from chord_metadata_service.mohpackets.serializers import (
 )
 
 
+def get_optional_fields(excluded_fields, model_fields):
+    """
+    Get a list of optional field names based on the excluded fields and the given fields.
+
+    Args:
+        excluded_fields (list): List of field names to be excluded.
+        model_fields (list): List of field objects to check against the excluded fields.
+
+    Returns:
+        list: List of optional field names.
+    """
+    optional_fields = [
+        field.name for field in model_fields if field.name not in excluded_fields
+    ]
+    return optional_fields
+
+
 def get_invalid_ids():
     """
     Returns the invalid values to test in ID fields. ID fields must be strings
@@ -138,24 +155,20 @@ class DonorTest(TestCase):
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        excluded_fields = ["submitter_donor_id", "program_id"]
-        optional_fields = [
-            field.name
-            for field in self.donor._meta.fields
-            if field.name not in excluded_fields
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=["submitter_donor_id", "program_id"],
+            model_fields=self.donor._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.donor, field, None)
             self.donor.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        excluded_fields = ["submitter_donor_id", "program_id"]
-        optional_fields = [
-            field.name
-            for field in self.donor._meta.fields
-            if field.name not in excluded_fields
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=["submitter_donor_id", "program_id"],
+            model_fields=self.donor._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.donor, field, "")
             self.donor.full_clean()
@@ -329,32 +342,28 @@ class PrimaryDiagnosisTest(TestCase):
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        excluded_fields = [
-            "submitter_donor_id",
-            "program_id",
-            "submitter_primary_diagnosis_id",
-        ]
-        optional_fields = [
-            field.name
-            for field in self.donor._meta.fields
-            if field.name not in excluded_fields
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "submitter_donor_id",
+                "program_id",
+                "submitter_primary_diagnosis_id",
+            ],
+            model_fields=self.primary_diagnosis._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.primary_diagnosis, field, None)
             self.primary_diagnosis.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        excluded_fields = [
-            "submitter_donor_id",
-            "program_id",
-            "submitter_primary_diagnosis_id",
-        ]
-        optional_fields = [
-            field.name
-            for field in self.donor._meta.fields
-            if field.name not in excluded_fields
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "submitter_donor_id",
+                "program_id",
+                "submitter_primary_diagnosis_id",
+            ],
+            model_fields=self.primary_diagnosis._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.primary_diagnosis, field, "")
             self.primary_diagnosis.full_clean()
@@ -558,34 +567,30 @@ class SpecimenTest(TestCase):
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        excluded_fields = [
-            "submitter_donor_id",
-            "program_id",
-            "submitter_primary_diagnosis_id",
-            "submitter_specimen_id",
-        ]
-        optional_fields = [
-            field.name
-            for field in self.donor._meta.fields
-            if field.name not in excluded_fields
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "submitter_donor_id",
+                "program_id",
+                "submitter_primary_diagnosis_id",
+                "submitter_specimen_id",
+            ],
+            model_fields=self.specimen._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.specimen, field, None)
             self.specimen.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        excluded_fields = [
-            "submitter_donor_id",
-            "program_id",
-            "submitter_primary_diagnosis_id",
-            "submitter_specimen_id",
-        ]
-        optional_fields = [
-            field.name
-            for field in self.donor._meta.fields
-            if field.name not in excluded_fields
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "submitter_donor_id",
+                "program_id",
+                "submitter_primary_diagnosis_id",
+                "submitter_specimen_id",
+            ],
+            model_fields=self.specimen._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.specimen, field, "")
             self.specimen.full_clean()
@@ -829,28 +834,30 @@ class SampleRegistrationTest(TestCase):
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        optional_fields = [
-            "gender",
-            "sex_at_birth",
-            "specimen_tissue_source",
-            "tumour_normal_designation",
-            "specimen_type",
-            "sample_type",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "submitter_donor_id",
+                "program_id",
+                "submitter_specimen_id",
+                "submitter_sample_id",
+            ],
+            model_fields=self.sample_registration._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.sample_registration, field, None)
             self.sample_registration.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        optional_fields = [
-            "gender",
-            "sex_at_birth",
-            "specimen_tissue_source",
-            "tumour_normal_designation",
-            "specimen_type",
-            "sample_type",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "submitter_donor_id",
+                "program_id",
+                "submitter_specimen_id",
+                "submitter_sample_id",
+            ],
+            model_fields=self.sample_registration._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.sample_registration, field, "")
             self.sample_registration.full_clean()
@@ -928,7 +935,7 @@ class SampleRegistrationTest(TestCase):
                 self.assertFalse(self.serializer.is_valid())
 
 
-class TestTreatment(TestCase):
+class TreatmentTest(TestCase):
     def setUp(self):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.donor = Donor.objects.create(
@@ -956,6 +963,8 @@ class TestTreatment(TestCase):
             "number_of_cycles": 3,
             "response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
             "response_to_treatment": "Stable disease",
+            "line_of_treatment": 5,
+            "status_of_treatment": "Other",
         }
         self.treatment = Treatment.objects.create(**self.valid_values)
 
@@ -985,35 +994,35 @@ class TestTreatment(TestCase):
             "Cheson CLL 2012 Oncology Response Criteria",
         )
         self.assertEqual(self.treatment.response_to_treatment, "Stable disease")
+        self.assertEqual(self.treatment.line_of_treatment, 5)
+        self.assertEqual(self.treatment.status_of_treatment, "Other")
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        optional_fields = [
-            "treatment_type",
-            "is_primary_treatment",
-            "treatment_start_date",
-            "treatment_end_date",
-            "treatment_setting",
-            "treatment_intent",
-            "response_to_treatment_criteria_method",
-            "response_to_treatment",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+                "submitter_primary_diagnosis_id",
+            ],
+            model_fields=self.treatment._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.treatment, field, None)
             self.treatment.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        optional_fields = [
-            "treatment_type",
-            "is_primary_treatment",
-            "treatment_start_date",
-            "treatment_end_date",
-            "treatment_setting",
-            "treatment_intent",
-            "response_to_treatment_criteria_method",
-            "response_to_treatment",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+                "submitter_primary_diagnosis_id",
+            ],
+            model_fields=self.treatment._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.treatment, field, "")
             self.treatment.full_clean()
@@ -1106,6 +1115,16 @@ class TestTreatment(TestCase):
         for value in invalid_values:
             with self.subTest(value=value):
                 self.valid_values["response_to_treatment"] = value
+            self.serializer = TreatmentSerializer(
+                instance=self.treatment, data=self.valid_values
+            )
+            self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_status_of_treatment(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["status_of_treatment"] = value
             self.serializer = TreatmentSerializer(
                 instance=self.treatment, data=self.valid_values
             )
