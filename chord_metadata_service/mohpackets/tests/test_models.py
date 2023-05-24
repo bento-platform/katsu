@@ -1131,7 +1131,7 @@ class TreatmentTest(TestCase):
             self.assertFalse(self.serializer.is_valid())
 
 
-class TestChemotherapy(TestCase):
+class ChemotherapyTest(TestCase):
     def setUp(self):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.donor = Donor.objects.create(
@@ -1155,10 +1155,11 @@ class TestChemotherapy(TestCase):
             "submitter_donor_id": self.donor,
             "submitter_treatment_id": self.treatment,
             "drug_name": "FLUOROURACIL",
-            "drug_rxnormcui": "6534648",
-            "chemotherapy_dosage_units": "mg/m2",
-            "cumulative_drug_dosage_prescribed": "320",
-            "cumulative_drug_dosage_actual": "111",
+            "drug_reference_identifier": "87354",
+            "chemotherapy_drug_dose_units": "mg/m2",
+            "prescribed_cumulative_drug_dose": "320",
+            "actual_cumulative_drug_dose": "111",
+            "drug_reference_database": "PubChem",
         }
         self.chemotherapy = Chemotherapy.objects.create(**self.valid_values)
 
@@ -1170,33 +1171,38 @@ class TestChemotherapy(TestCase):
         self.assertEqual(self.chemotherapy.submitter_donor_id, self.donor)
         self.assertEqual(self.chemotherapy.submitter_treatment_id, self.treatment)
         self.assertEqual(self.chemotherapy.drug_name, "FLUOROURACIL")
-        self.assertEqual(self.chemotherapy.drug_rxnormcui, "6534648")
-        self.assertEqual(self.chemotherapy.chemotherapy_dosage_units, "mg/m2")
-        self.assertEqual(self.chemotherapy.cumulative_drug_dosage_prescribed, "320")
-        self.assertEqual(self.chemotherapy.cumulative_drug_dosage_actual, "111")
+        self.assertEqual(self.chemotherapy.drug_reference_identifier, "87354")
+        self.assertEqual(self.chemotherapy.chemotherapy_drug_dose_units, "mg/m2")
+        self.assertEqual(self.chemotherapy.prescribed_cumulative_drug_dose, "320")
+        self.assertEqual(self.chemotherapy.actual_cumulative_drug_dose, "111")
+        self.assertEqual(self.chemotherapy.drug_reference_database, "PubChem")
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        optional_fields = [
-            "drug_name",
-            "drug_rxnormcui",
-            "chemotherapy_dosage_units",
-            "cumulative_drug_dosage_prescribed",
-            "cumulative_drug_dosage_actual",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+            ],
+            model_fields=self.chemotherapy._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.chemotherapy, field, None)
             self.chemotherapy.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        optional_fields = [
-            "drug_name",
-            "drug_rxnormcui",
-            "chemotherapy_dosage_units",
-            "cumulative_drug_dosage_prescribed",
-            "cumulative_drug_dosage_actual",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+            ],
+            model_fields=self.chemotherapy._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.chemotherapy, field, "")
             self.chemotherapy.full_clean()
@@ -1206,25 +1212,30 @@ class TestChemotherapy(TestCase):
         with self.assertRaises(DataError):
             self.chemotherapy.save()
 
-    def test_drug_rxnormcui_max_length(self):
-        self.chemotherapy.drug_rxnormcui = "f" * 65
+    def test_drug_reference_identifier_max_length(self):
+        self.chemotherapy.drug_reference_identifier = "f" * 65
         with self.assertRaises(DataError):
             self.chemotherapy.save()
 
-    def test_invalid_chemotherapy_dosage_units(self):
+    def test_invalid_chemotherapy_drug_dose_units(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
             with self.subTest(value=value):
-                self.valid_values["chemotherapy_dosage_units"] = value
+                self.valid_values["chemotherapy_drug_dose_units"] = value
             self.serializer = ChemotherapySerializer(
                 instance=self.chemotherapy, data=self.valid_values
             )
             self.assertFalse(self.serializer.is_valid())
 
-    def test_chemotherapy_dosage_units_max_length(self):
-        self.chemotherapy.drug_rxnormcui = "f" * 65
-        with self.assertRaises(DataError):
-            self.chemotherapy.save()
+    def test_invalid_drug_reference_database(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["drug_reference_database"] = value
+            self.serializer = ChemotherapySerializer(
+                instance=self.chemotherapy, data=self.valid_values
+            )
+            self.assertFalse(self.serializer.is_valid())
 
 
 class TestHormoneTherapy(TestCase):
