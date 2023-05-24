@@ -293,6 +293,7 @@ class PrimaryDiagnosisTest(TestCase):
             "clinical_n_category": "N2mi",
             "clinical_m_category": "M1b(0)",
             "clinical_stage_group": "Stage IA3",
+            "laterality": "Right",
         }
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(**self.valid_values)
 
@@ -324,22 +325,15 @@ class PrimaryDiagnosisTest(TestCase):
         self.assertEqual(self.primary_diagnosis.clinical_n_category, "N2mi")
         self.assertEqual(self.primary_diagnosis.clinical_m_category, "M1b(0)")
         self.assertEqual(self.primary_diagnosis.clinical_stage_group, "Stage IA3")
+        self.assertEqual(self.primary_diagnosis.laterality, "Right")
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
+        excluded_fields = ["submitter_donor_id", "program_id"]
         optional_fields = [
-            "date_of_diagnosis",
-            "cancer_type_code",
-            "basis_of_diagnosis",
-            "cancer_type_code",
-            "lymph_nodes_examined_status",
-            "lymph_nodes_examined_method",
-            "number_lymph_nodes_positive",
-            "clinical_tumour_staging_system",
-            "clinical_t_category",
-            "clinical_t_category",
-            "clinical_t_category",
-            "clinical_stage_group",
+            field.name
+            for field in self.donor._meta.fields
+            if field.name not in excluded_fields
         ]
         for field in optional_fields:
             setattr(self.primary_diagnosis, field, None)
@@ -347,19 +341,11 @@ class PrimaryDiagnosisTest(TestCase):
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
+        excluded_fields = ["submitter_donor_id", "program_id"]
         optional_fields = [
-            "date_of_diagnosis",
-            "cancer_type_code",
-            "basis_of_diagnosis",
-            "cancer_type_code",
-            "lymph_nodes_examined_status",
-            "lymph_nodes_examined_method",
-            "number_lymph_nodes_positive",
-            "clinical_tumour_staging_system",
-            "clinical_t_category",
-            "clinical_t_category",
-            "clinical_t_category",
-            "clinical_stage_group",
+            field.name
+            for field in self.donor._meta.fields
+            if field.name not in excluded_fields
         ]
         for field in optional_fields:
             setattr(self.primary_diagnosis, field, "")
@@ -470,6 +456,16 @@ class PrimaryDiagnosisTest(TestCase):
         for value in invalid_values:
             with self.subTest(value=value):
                 self.valid_values["clinical_stage_group"] = value
+                self.serializer = PrimaryDiagnosisSerializer(
+                    instance=self.primary_diagnosis, data=self.valid_values
+                )
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_laterality(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["laterality"] = value
                 self.serializer = PrimaryDiagnosisSerializer(
                     instance=self.primary_diagnosis, data=self.valid_values
                 )
