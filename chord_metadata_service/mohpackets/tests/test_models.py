@@ -329,7 +329,11 @@ class PrimaryDiagnosisTest(TestCase):
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        excluded_fields = ["submitter_donor_id", "program_id"]
+        excluded_fields = [
+            "submitter_donor_id",
+            "program_id",
+            "submitter_primary_diagnosis_id",
+        ]
         optional_fields = [
             field.name
             for field in self.donor._meta.fields
@@ -341,7 +345,11 @@ class PrimaryDiagnosisTest(TestCase):
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        excluded_fields = ["submitter_donor_id", "program_id"]
+        excluded_fields = [
+            "submitter_donor_id",
+            "program_id",
+            "submitter_primary_diagnosis_id",
+        ]
         optional_fields = [
             field.name
             for field in self.donor._meta.fields
@@ -472,7 +480,7 @@ class PrimaryDiagnosisTest(TestCase):
                 self.assertFalse(self.serializer.is_valid())
 
 
-class TestSpecimen(TestCase):
+class SpecimenTest(TestCase):
     def setUp(self):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.donor = Donor.objects.create(
@@ -505,6 +513,8 @@ class TestSpecimen(TestCase):
             "tumour_grade": "G2",
             "percent_tumour_cells_range": "51-100%",
             "percent_tumour_cells_measurement_method": "Image analysis",
+            "specimen_processing": "Formalin fixed - unbuffered",
+            "specimen_laterality": "Left",
         }
         self.specimen = Specimen.objects.create(**self.valid_values)
 
@@ -541,25 +551,23 @@ class TestSpecimen(TestCase):
         self.assertEqual(
             self.specimen.percent_tumour_cells_measurement_method, "Image analysis"
         )
+        self.assertEqual(
+            self.specimen.specimen_processing, "Formalin fixed - unbuffered"
+        )
+        self.assertEqual(self.specimen.specimen_laterality, "Left")
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
+        excluded_fields = [
+            "submitter_donor_id",
+            "program_id",
+            "submitter_primary_diagnosis_id",
+            "submitter_specimen_id",
+        ]
         optional_fields = [
-            "pathological_tumour_staging_system",
-            "pathological_t_category",
-            "pathological_n_category",
-            "pathological_m_category",
-            "pathological_stage_group",
-            "specimen_collection_date",
-            "specimen_storage",
-            "tumour_histological_type",
-            "specimen_anatomic_location",
-            "reference_pathology_confirmed_diagnosis",
-            "reference_pathology_confirmed_tumour_presence",
-            "tumour_grading_system",
-            "tumour_grade",
-            "percent_tumour_cells_range",
-            "percent_tumour_cells_measurement_method",
+            field.name
+            for field in self.donor._meta.fields
+            if field.name not in excluded_fields
         ]
         for field in optional_fields:
             setattr(self.specimen, field, None)
@@ -567,22 +575,16 @@ class TestSpecimen(TestCase):
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
+        excluded_fields = [
+            "submitter_donor_id",
+            "program_id",
+            "submitter_primary_diagnosis_id",
+            "submitter_specimen_id",
+        ]
         optional_fields = [
-            "pathological_tumour_staging_system",
-            "pathological_t_category",
-            "pathological_n_category",
-            "pathological_m_category",
-            "pathological_stage_group",
-            "specimen_collection_date",
-            "specimen_storage",
-            "tumour_histological_type",
-            "specimen_anatomic_location",
-            "reference_pathology_confirmed_diagnosis",
-            "reference_pathology_confirmed_tumour_presence",
-            "tumour_grading_system",
-            "tumour_grade",
-            "percent_tumour_cells_range",
-            "percent_tumour_cells_measurement_method",
+            field.name
+            for field in self.donor._meta.fields
+            if field.name not in excluded_fields
         ]
         for field in optional_fields:
             setattr(self.specimen, field, "")
@@ -746,6 +748,26 @@ class TestSpecimen(TestCase):
         for value in invalid_values:
             with self.subTest(value=value):
                 self.valid_values["percent_tumour_cells_measurement_method"] = value
+                self.serializer = SpecimenSerializer(
+                    instance=self.specimen, data=self.valid_values
+                )
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_specimen_processing(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["specimen_processing"] = value
+                self.serializer = SpecimenSerializer(
+                    instance=self.specimen, data=self.valid_values
+                )
+                self.assertFalse(self.serializer.is_valid())
+
+    def test_invalid_specimen_laterality(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["specimen_laterality"] = value
                 self.serializer = SpecimenSerializer(
                     instance=self.specimen, data=self.valid_values
                 )
