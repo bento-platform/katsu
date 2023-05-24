@@ -774,7 +774,7 @@ class SpecimenTest(TestCase):
                 self.assertFalse(self.serializer.is_valid())
 
 
-class TestSampleRegistration(TestCase):
+class SampleRegistrationTest(TestCase):
     def setUp(self):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.donor = Donor.objects.create(
@@ -798,8 +798,6 @@ class TestSampleRegistration(TestCase):
             "program_id": self.program,
             "submitter_donor_id": self.donor,
             "submitter_specimen_id": self.specimen,
-            "gender": "Man",
-            "sex_at_birth": "Male",
             "specimen_tissue_source": "Blood venous",
             "tumour_normal_designation": "Normal",
             "specimen_type": "Primary tumour - adjacent to normal",
@@ -819,8 +817,6 @@ class TestSampleRegistration(TestCase):
         self.assertEqual(self.sample_registration.program_id, self.program)
         self.assertEqual(self.sample_registration.submitter_donor_id, self.donor)
         self.assertEqual(self.sample_registration.submitter_specimen_id, self.specimen)
-        self.assertEqual(self.sample_registration.gender, "Man")
-        self.assertEqual(self.sample_registration.sex_at_birth, "Male")
         self.assertEqual(
             self.sample_registration.specimen_tissue_source, "Blood venous"
         )
