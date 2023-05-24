@@ -345,12 +345,12 @@ def phenopacket_query_results(query, params, options=None):
 
         # Get the biosamples with experiments data
         phenopacket_ids = [result['subject_id'] for result in results]
-        biosamples_data = get_biosamples_with_experiment_details(phenopacket_ids)
+        biosamples_experiments_details = get_biosamples_with_experiment_details(phenopacket_ids)
 
-        # Group the biosamples data by subject_id
-        biosamples_with_experiments = defaultdict(list)
-        for b in biosamples_data:
-            biosamples_with_experiments[b["subject_id"]].append({
+        # Group the experiments with biosamples by subject_id
+        experiments_with_biosamples = defaultdict(list)
+        for b in biosamples_experiments_details:
+            experiments_with_biosamples[b["subject_id"]].append({
                 "biosample_id": b["biosample_id"],
                 "sampled_tissue": {
                     "id": b["tissue_id"],
@@ -363,9 +363,9 @@ def phenopacket_query_results(query, params, options=None):
                 }
             })
 
-        # Add the biosamples_with_experiments data to the results
+        # Add the experiments_with_biosamples data to the results
         for result in results:
-            result["biosamples_with_experiments"] = biosamples_with_experiments[result['subject_id']]
+            result["experiments_with_biosamples"] = experiments_with_biosamples[result['subject_id']]
 
         return results
     else:
