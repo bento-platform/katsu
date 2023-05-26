@@ -1400,28 +1400,30 @@ class RadiationTest(TestCase):
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        optional_fields = [
-            "radiation_therapy_modality",
-            "radiation_therapy_type",
-            "radiation_therapy_fractions",
-            "radiation_therapy_dosage",
-            "anatomical_site_irradiated",
-            "reference_radiation_treatment_id",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+            ],
+            model_fields=self.radiation._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.radiation, field, None)
             self.radiation.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        optional_fields = [
-            "radiation_therapy_modality",
-            "radiation_therapy_type",
-            "radiation_therapy_fractions",
-            "radiation_therapy_dosage",
-            "anatomical_site_irradiated",
-            "reference_radiation_treatment_id",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+            ],
+            model_fields=self.radiation._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.radiation, field, "")
             self.radiation.full_clean()
@@ -1515,14 +1517,30 @@ class ImmunotherapyTest(TestCase):
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        optional_fields = ["immunotherapy_type", "drug_name", "drug_rxnormcui"]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+            ],
+            model_fields=self.immunotherapy._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.immunotherapy, field, None)
             self.immunotherapy.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        optional_fields = ["immunotherapy_type", "drug_name", "drug_rxnormcui"]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+            ],
+            model_fields=self.immunotherapy._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.immunotherapy, field, "")
             self.immunotherapy.full_clean()
@@ -1622,35 +1640,30 @@ class SurgeryTest(TestCase):
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        optional_fields = [
-            "surgery_type",
-            "surgery_site",
-            "surgery_location",
-            "tumour_length",
-            "tumour_width",
-            "greatest_dimension_tumour",
-            "tumour_focality" "residual_tumour_classification",
-            "lymphovascular_invasion",
-            "perineural_invasion",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+            ],
+            model_fields=self.surgery._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.surgery, field, None)
             self.surgery.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        optional_fields = [
-            "surgery_type",
-            "surgery_site",
-            "surgery_location",
-            "tumour_length",
-            "tumour_width",
-            "greatest_dimension_tumour",
-            "tumour_focality",
-            "residual_tumour_classification",
-            "lymphovascular_invasion",
-            "perineural_invasion",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+            ],
+            model_fields=self.surgery._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.surgery, field, "")
             self.surgery.full_clean()
@@ -1831,38 +1844,32 @@ class FollowUpTest(TestCase):
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        optional_fields = [
-            "date_of_followup",
-            "lost_to_followup_reason",
-            "disease_status_at_followup",
-            "relapse_type",
-            "date_of_relapse",
-            "method_of_progression_status",
-            "anatomic_site_progression_or_recurrence",
-            "recurrence_t_category",
-            "recurrence_n_category",
-            "recurrence_m_category",
-            "recurrence_stage_group",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "submitter_follow_up_id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+                "submitter_primary_diagnosis_id",
+            ],
+            model_fields=self.followup._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.followup, field, None)
             self.followup.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        optional_fields = [
-            "date_of_followup",
-            "lost_to_followup_reason",
-            "disease_status_at_followup",
-            "relapse_type",
-            "date_of_relapse",
-            "method_of_progression_status",
-            "anatomic_site_progression_or_recurrence",
-            "recurrence_t_category",
-            "recurrence_n_category",
-            "recurrence_m_category",
-            "recurrence_stage_group",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "submitter_follow_up_id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+                "submitter_primary_diagnosis_id",
+            ],
+            model_fields=self.followup._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.followup, field, "")
             self.followup.full_clean()
@@ -1990,7 +1997,7 @@ class FollowUpTest(TestCase):
                 self.assertFalse(self.serializer.is_valid())
 
 
-class TestBiomarker(TestCase):
+class BiomarkerTest(TestCase):
     def setUp(self):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.donor = Donor.objects.create(
@@ -2030,6 +2037,15 @@ class TestBiomarker(TestCase):
             "psa_level": 230,
             "ca125": 29,
             "cea": 11,
+            "er_status": "Cannot be determined",
+            "er_percent_positive": 18.3,
+            "pr_status": "Unknown",
+            "pr_percent_positive": 65.2,
+            "her2_ihc_status": "Equivocal",
+            "her2_ish_status": "Negative",
+            "hpv_ihc_status": "Not applicable",
+            "hpv_pcr_status": "Negative",
+            "hpv_strain": ["HPV35"],
         }
         self.biomarker = Biomarker.objects.create(**self.valid_values)
 
@@ -2049,7 +2065,47 @@ class TestBiomarker(TestCase):
         self.assertEqual(self.biomarker.psa_level, 230)
         self.assertEqual(self.biomarker.ca125, 29)
         self.assertEqual(self.biomarker.cea, 11)
+        self.assertEqual(self.biomarker.er_status, "Cannot be determined")
+        self.assertEqual(self.biomarker.er_percent_positive, 18.3)
+        self.assertEqual(self.biomarker.pr_status, "Unknown")
+        self.assertEqual(self.biomarker.pr_percent_positive, 65.2)
+        self.assertEqual(self.biomarker.her2_ihc_status, "Equivocal")
+        self.assertEqual(self.biomarker.her2_ish_status, "Negative")
+        self.assertEqual(self.biomarker.hpv_ihc_status, "Not applicable")
+        self.assertEqual(self.biomarker.hpv_pcr_status, "Negative")
+        self.assertEqual(self.biomarker.hpv_strain, ["HPV35"])
 
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+            ],
+            model_fields=self.biomarker._meta.fields,
+        )
+        for field in optional_fields:
+            setattr(self.biomarker, field, None)
+            self.biomarker.full_clean()
+
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_specimen_id",
+                "submitter_primary_diagnosis_id",
+                "submitter_treatment_id",
+                "submitter_follow_up_id",
+            ],
+            model_fields=self.biomarker._meta.fields,
+        )
+        for field in optional_fields:
+            setattr(self.biomarker, field, "")
+            self.biomarker.full_clean()
 
 class TestComorbidity(TestCase):
     def setUp(self):
