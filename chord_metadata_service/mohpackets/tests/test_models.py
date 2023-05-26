@@ -7,6 +7,7 @@ from chord_metadata_service.mohpackets.models import (
     Chemotherapy,
     Comorbidity,
     Donor,
+    Exposure,
     FollowUp,
     HormoneTherapy,
     Immunotherapy,
@@ -22,6 +23,7 @@ from chord_metadata_service.mohpackets.serializers import (
     ChemotherapySerializer,
     ComorbiditySerializer,
     DonorSerializer,
+    ExposureSerializer,
     FollowUpSerializer,
     HormoneTherapySerializer,
     ImmunotherapySerializer,
@@ -1560,8 +1562,8 @@ class ImmunotherapyTest(TestCase):
         with self.assertRaises(DataError):
             self.immunotherapy.save()
 
-    def test_drug_rxnormcui_max_length(self):
-        self.immunotherapy.drug_rxnormcui = "f" * 65
+    def test_drug_reference_identifier_max_length(self):
+        self.immunotherapy.drug_reference_identifier = "f" * 65
         with self.assertRaises(DataError):
             self.immunotherapy.save()
 
@@ -1646,6 +1648,10 @@ class SurgeryTest(TestCase):
                 "submitter_donor_id",
                 "program_id",
                 "submitter_treatment_id",
+                "submitter_specimen_id",
+                "margin_types_involved",
+                "margin_types_not_involved",
+                "margin_types_not_assessed",
             ],
             model_fields=self.surgery._meta.fields,
         )
@@ -1661,6 +1667,10 @@ class SurgeryTest(TestCase):
                 "submitter_donor_id",
                 "program_id",
                 "submitter_treatment_id",
+                "submitter_specimen_id",
+                "margin_types_involved",
+                "margin_types_not_involved",
+                "margin_types_not_assessed",
             ],
             model_fields=self.surgery._meta.fields,
         )
@@ -2107,7 +2117,8 @@ class BiomarkerTest(TestCase):
             setattr(self.biomarker, field, "")
             self.biomarker.full_clean()
 
-class TestComorbidity(TestCase):
+
+class ComorbidityTest(TestCase):
     def setUp(self):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.donor = Donor.objects.create(
@@ -2144,26 +2155,28 @@ class TestComorbidity(TestCase):
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        optional_fields = [
-            "prior_malignancy",
-            "laterality_of_prior_malignancy",
-            "comorbidity_type_code",
-            "comorbidity_treatment_status",
-            "comorbidity_treatment",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+            ],
+            model_fields=self.comorbidity._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.comorbidity, field, None)
             self.comorbidity.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        optional_fields = [
-            "prior_malignancy",
-            "laterality_of_prior_malignancy",
-            "comorbidity_type_code",
-            "comorbidity_treatment_status",
-            "comorbidity_treatment",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+            ],
+            model_fields=self.comorbidity._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.comorbidity, field, "")
             self.comorbidity.full_clean()
@@ -2211,3 +2224,62 @@ class TestComorbidity(TestCase):
         self.comorbidity.comorbidity_treatment = "f" * 256
         with self.assertRaises(DataError):
             self.comorbidity.save()
+
+
+class ExposureTest(TestCase):
+    def setUp(self):
+        self.program = Program.objects.create(program_id="SYNTHETIC")
+        self.donor = Donor.objects.create(
+            submitter_donor_id="DONOR_1",
+            program_id=self.program,
+            primary_site=["Adrenal gland"],
+        )
+        self.valid_values = {
+            "program_id": self.program,
+            "submitter_donor_id": self.donor,
+            "tobacco_smoking_status": "Current smoker",
+            "tobacco_type": ["Unknown", "Electronic cigarettes", "Not applicable"],
+            "pack_years_smoked": 280,
+        }
+        self.exposure = Exposure.objects.create(**self.valid_values)
+
+    def test_exposure_creation(self):
+        self.assertIsInstance(self.exposure, Exposure)
+
+    def test_exposure_fields(self):
+        self.assertEqual(self.exposure.program_id, self.program)
+        self.assertEqual(self.exposure.submitter_donor_id, self.donor)
+        self.assertEqual(self.exposure.tobacco_smoking_status, "Current smoker")
+        self.assertEqual(
+            self.exposure.tobacco_type,
+            ["Unknown", "Electronic cigarettes", "Not applicable"],
+        )
+        self.assertEqual(self.exposure.pack_years_smoked, 280)
+
+    def test_null_optional_fields(self):
+        """Tests no exceptions are raised when saving null values in optional fields."""
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+            ],
+            model_fields=self.exposure._meta.fields,
+        )
+        for field in optional_fields:
+            setattr(self.exposure, field, None)
+            self.exposure.full_clean()
+
+    def test_blank_optional_fields(self):
+        """Tests no exceptions are raised when saving blank values in optional fields."""
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+            ],
+            model_fields=self.exposure._meta.fields,
+        )
+        for field in optional_fields:
+            setattr(self.exposure, field, "")
+            self.exposure.full_clean()
