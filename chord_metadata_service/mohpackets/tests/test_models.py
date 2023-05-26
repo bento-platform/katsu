@@ -23,7 +23,6 @@ from chord_metadata_service.mohpackets.serializers import (
     ChemotherapySerializer,
     ComorbiditySerializer,
     DonorSerializer,
-    ExposureSerializer,
     FollowUpSerializer,
     HormoneTherapySerializer,
     ImmunotherapySerializer,
