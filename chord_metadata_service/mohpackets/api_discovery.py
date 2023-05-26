@@ -1,7 +1,11 @@
 from collections import Counter, defaultdict
 from datetime import datetime as dt
 
-from drf_spectacular.utils import extend_schema, extend_schema_serializer, inline_serializer
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_serializer,
+    inline_serializer,
+)
 from rest_framework import serializers
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
@@ -11,6 +15,7 @@ from chord_metadata_service.mohpackets.api_base import (
     BaseChemotherapyViewSet,
     BaseComorbidityViewSet,
     BaseDonorViewSet,
+    BaseExposureViewSet,
     BaseFollowUpViewSet,
     BaseHormoneTherapyViewSet,
     BaseImmunotherapyViewSet,
@@ -141,6 +146,10 @@ class DiscoveryBiomarkerViewSet(DiscoveryMixin, BaseBiomarkerViewSet):
 
 
 class DiscoveryComorbidityViewSet(DiscoveryMixin, BaseComorbidityViewSet):
+    pass
+
+
+class DiscoveryExposureViewSet(DiscoveryMixin, BaseExposureViewSet):
     pass
 
 
@@ -293,23 +302,30 @@ def diagnosis_age_count(_request):
     Return the count for age of diagnosis in the database.
     """
     # Find the earliest diagnosis date per donor
-    diagnosis_dates = PrimaryDiagnosis.objects.values("submitter_donor_id", "date_of_diagnosis")
+    diagnosis_dates = PrimaryDiagnosis.objects.values(
+        "submitter_donor_id", "date_of_diagnosis"
+    )
     min_dates = {}
     for date in diagnosis_dates:
         donor = date["submitter_donor_id"]
-        cur_date = (dt.strptime(date["date_of_diagnosis"], "%Y-%m").date()
-                    if date["date_of_diagnosis"] != ""
-                    else "")
+        cur_date = (
+            dt.strptime(date["date_of_diagnosis"], "%Y-%m").date()
+            if date["date_of_diagnosis"] != ""
+            else ""
+        )
         if donor not in min_dates.keys():
             min_dates[donor] = cur_date
         else:
-            if ((min_dates[donor] != "" and cur_date < min_dates[donor]) or
-               (min_dates[donor] == "" and cur_date != "")):
+            if (min_dates[donor] != "" and cur_date < min_dates[donor]) or (
+                min_dates[donor] == "" and cur_date != ""
+            ):
                 min_dates[donor] = cur_date
 
     # Calculate donor's age of diagnosis
     birth_dates = Donor.objects.values("submitter_donor_id", "date_of_birth")
-    birth_dates = {date["submitter_donor_id"]: date["date_of_birth"] for date in birth_dates}
+    birth_dates = {
+        date["submitter_donor_id"]: date["date_of_birth"] for date in birth_dates
+    }
     ages = {}
     for donor, diagnosis_date in min_dates.items():
         if birth_dates[donor] != "" and diagnosis_date != "":

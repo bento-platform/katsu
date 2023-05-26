@@ -9,6 +9,7 @@ from chord_metadata_service.mohpackets.models import (
     Chemotherapy,
     Comorbidity,
     Donor,
+    Exposure,
     FollowUp,
     HormoneTherapy,
     Immunotherapy,
@@ -53,7 +54,6 @@ class DonorFilter(filters.FilterSet):
     donors = filters.CharFilter(method="filter_donors")
     primary_diagnosis = filters.CharFilter(method="filter_primary_diagnosis")
     speciman = filters.CharFilter(method="filter_specimen")
-    sample_registration = filters.CharFilter(method="filter_sample_registration")
     treatment = filters.CharFilter(method="filter_treatment")
     chemotherapy = filters.CharFilter(method="filter_chemotherapy")
     hormone_therapy = filters.CharFilter(method="filter_hormone_therapy")
@@ -63,6 +63,7 @@ class DonorFilter(filters.FilterSet):
     follow_up = filters.CharFilter(method="filter_follow_up")
     biomarker = filters.CharFilter(method="filter_biomarker")
     comorbidity = filters.CharFilter(method="filter_comorbidity")
+    exposure = filters.CharFilter(method="filter_exposure")
 
     def filter_donors(self, queryset, name, value):
         """
@@ -81,9 +82,6 @@ class DonorFilter(filters.FilterSet):
 
     def filter_specimen(self, queryset, name, value):
         return queryset.filter(specimen__pk__iexact=value)
-
-    def filter_sample_registration(self, queryset, name, value):
-        return queryset.filter(sampleregistration__pk__iexact=value)
 
     def filter_treatment(self, queryset, name, value):
         return queryset.filter(treatment__pk__iexact=value)
@@ -111,6 +109,9 @@ class DonorFilter(filters.FilterSet):
 
     def filter_comorbidity(self, queryset, name, value):
         return queryset.filter(comorbidity__pk__iexact=value)
+
+    def filter_exposure(self, queryset, name, value):
+        return queryset.filter(exposure__pk__iexact=value)
 
     def filter_age(self, queryset, name, value):
         """
@@ -216,12 +217,16 @@ class SurgeryFilter(filters.FilterSet):
 
 
 class FollowUpFilter(filters.FilterSet):
+    recurrence_tumour_staging_system = filters.CharFilter(lookup_expr="icontains")
+
     class Meta:
         model = FollowUp
         fields = "__all__"
 
 
 class BiomarkerFilter(filters.FilterSet):
+    hpv_strain = filters.CharFilter(lookup_expr="icontains")
+
     class Meta:
         model = Biomarker
         fields = "__all__"
@@ -230,4 +235,12 @@ class BiomarkerFilter(filters.FilterSet):
 class ComorbidityFilter(filters.FilterSet):
     class Meta:
         model = Comorbidity
+        fields = "__all__"
+
+
+class ExposureFilter(filters.FilterSet):
+    tobacco_type = filters.CharFilter(lookup_expr="icontains")
+
+    class Meta:
+        model = Exposure
         fields = "__all__"

@@ -5,6 +5,7 @@ from chord_metadata_service.mohpackets.filters import (
     ChemotherapyFilter,
     ComorbidityFilter,
     DonorFilter,
+    ExposureFilter,
     FollowUpFilter,
     HormoneTherapyFilter,
     ImmunotherapyFilter,
@@ -21,6 +22,7 @@ from chord_metadata_service.mohpackets.models import (
     Chemotherapy,
     Comorbidity,
     Donor,
+    Exposure,
     FollowUp,
     HormoneTherapy,
     Immunotherapy,
@@ -38,6 +40,7 @@ from chord_metadata_service.mohpackets.serializers import (
     ChemotherapySerializer,
     ComorbiditySerializer,
     DonorSerializer,
+    ExposureSerializer,
     FollowUpSerializer,
     HormoneTherapySerializer,
     ImmunotherapySerializer,
@@ -177,3 +180,11 @@ class BaseComorbidityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [CanDIGAdminOrReadOnly]
     throttle_classes = [MoHRateThrottle]
     queryset = Comorbidity.objects.all()
+
+
+class BaseExposureViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = ExposureSerializer
+    filterset_class = ExposureFilter
+    permission_classes = [CanDIGAdminOrReadOnly]
+    throttle_classes = [MoHRateThrottle]
+    queryset = Exposure.objects.all()

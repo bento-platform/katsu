@@ -76,6 +76,73 @@
       "max": 14,
       "decimals": 0,
       "formula": null
+    },
+    {
+      "name": "er_status",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": null,
+      "formula": "[\n    \"Cannot be determined\",\n    \"Negative\",\n    \"Not applicable\",\n    \"Positive\",\n    \"Unknown\",\n][random(0,4)]"
+    },
+    {
+      "name": "er_percent_positive",
+      "null_percentage": 0,
+      "type": "Number",
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "formula": null
+    },
+    {
+      "name": "pr_status",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": null,
+      "formula": "[\n    \"Cannot be determined\",\n    \"Negative\",\n    \"Not applicable\",\n    \"Positive\",\n    \"Unknown\",\n][random(0,4)]"
+    },
+    {
+      "name": "pr_percent_positive",
+      "null_percentage": 0,
+      "type": "Number",
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "formula": null
+    },
+    {
+      "name": "her2_ihc_status",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": null,
+      "formula": "[\n    \"Cannot be determined\",\n    \"Equivocal\",\n    \"Positive\",\n    \"Negative\",\n    \"Not applicable\",\n    \"Unknown\",\n][random(0,5)]"
+    },
+    {
+      "name": "her2_ish_status",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": null,
+      "formula": "[\n    \"Cannot be determined\",\n    \"Equivocal\",\n    \"Positive\",\n    \"Negative\",\n    \"Not applicable\",\n    \"Unknown\",\n][random(0,5)]"
+    },
+    {
+      "name": "hpv_ihc_status",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": null,
+      "formula": "[\n    \"Cannot be determined\",\n    \"Negative\",\n    \"Not applicable\",\n    \"Positive\",\n    \"Unknown\",\n][random(0,4)]"
+    },
+    {
+      "name": "hpv_pcr_status",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": null,
+      "formula": "[\n    \"Cannot be determined\",\n    \"Negative\",\n    \"Not applicable\",\n    \"Positive\",\n    \"Unknown\",\n][random(0,4)]"
+    },
+    {
+      "name": "hpv_strain",
+      "null_percentage": 0,
+      "type": "Template",
+      "value": null,
+      "formula": "[\n    \"HPV16\",\n    \"HPV18\",\n    \"HPV31\",\n    \"HPV33\",\n    \"HPV35\",\n    \"HPV39\",\n    \"HPV45\",\n    \"HPV51\",\n    \"HPV52\",\n    \"HPV56\",\n    \"HPV58\",\n    \"HPV59\",\n    \"HPV66\",\n    \"HPV68\",\n    \"HPV73\",\n].sample(random(1,2))"
     }
   ]
 }

@@ -27,6 +27,7 @@ python manage.py loaddata $fixtures_path/Surgery.json
 python manage.py loaddata $fixtures_path/FollowUp.json
 python manage.py loaddata $fixtures_path/Biomarker.json
 python manage.py loaddata $fixtures_path/Comorbidity.json
+python manage.py loaddata $fixtures_path/Exposure.json
 ```
 
 ## Clean up data

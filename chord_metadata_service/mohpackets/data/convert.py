@@ -73,6 +73,7 @@ def set_foreign_keys(path):
         "follow_ups": "FollowUp.json",
         "biomarkers": "Biomarker.json",
         "comorbidities": "Comorbidity.json",
+        "exposures": "Exposure.json",
     }
 
     with open(relationships_file, "r") as f:

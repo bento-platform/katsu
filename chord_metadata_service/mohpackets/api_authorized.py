@@ -11,6 +11,7 @@ from chord_metadata_service.mohpackets.api_base import (
     BaseChemotherapyViewSet,
     BaseComorbidityViewSet,
     BaseDonorViewSet,
+    BaseExposureViewSet,
     BaseFollowUpViewSet,
     BaseHormoneTherapyViewSet,
     BaseImmunotherapyViewSet,
@@ -64,7 +65,7 @@ class AuthorizedMixin:
     pagination_class = StandardResultsSetPagination
     settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
     auth_methods = []
-    # Check for production or development environment
+    # Use jwt token auth in prod/dev environment
     if "dev" in settings_module or "prod" in settings_module:
         auth_methods.append(TokenAuthentication)
     else:
@@ -144,11 +145,16 @@ class AuthorizedComorbidityViewSet(AuthorizedMixin, BaseComorbidityViewSet):
     pass
 
 
+class AuthorizedExposureViewSet(AuthorizedMixin, BaseExposureViewSet):
+    pass
+
+
 ###############################################
 #                                             #
 #           CUSTOM API ENDPOINTS              #
 #                                             #
 ###############################################
+
 
 # TODO: redo this overview endpoint
 @extend_schema(

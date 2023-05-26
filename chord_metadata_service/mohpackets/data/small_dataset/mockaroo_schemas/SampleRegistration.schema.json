@@ -30,25 +30,11 @@
       "formula": ""
     },
     {
-      "name": "gender",
-      "null_percentage": 0,
-      "type": "Template",
-      "value": "",
-      "formula": "[\n\"Man\",\n\"Woman\",\n\"Non-binary\"][random(0,2)]"
-    },
-    {
-      "name": "sex_at_birth",
-      "null_percentage": 0,
-      "type": "Template",
-      "value": "",
-      "formula": "[\n\"Male\",\n\"Female\",\n\"Other\",\n\"Unknown\"][random(0,3)]\n\n\n\n\n\n\n\n"
-    },
-    {
       "name": "specimen_tissue_source",
       "null_percentage": 0,
       "type": "Template",
       "value": "",
-      "formula": "[\"Amniotic fluid\",\"Bile Fluid\",\"Whole blood\",\"Blood arterial\",\"Cord blood\",\"Blood venous\",\"Bone\",\"Serum, Convalescent\",\"Cerebral spinal fluid\",\"Cervical Mucus\",\"Duodenal fluid\",\"Blood, Fetal\",\"Fluid, Abdomen\",\"Genital vaginal\",\"Fluid, Hydrocele\",\"Fluid, Joint\",\"Fluid, Kidney\",\"Fluid, Lumbar Sac\",\"Marrow\",\"Pancreatic fluid\",\"Fluid, Pericardial\",\"Placenta\",\"Pleural fluid (thoracentesis fluid)\",\"Saliva\",\"Skin\",\"Seminal fluid\",\"Fluid, synovial (Joint fluid)\",\"Sputum\",\"Tissue\",\"Vitreous Fluid\",\"Wound\",][random(0,30)]"
+      "formula": "[\n    \"Abdominal fluid\",\n    \"Amniotic fluid\",\n    \"Arterial blood\",\n    \"Bile\",\n    \"Blood derived - bone marrow\",\n    \"Blood derived - peripheral blood\",\n    \"Bone marrow fluid\",\n    \"Bone marrow derived mononuclear cells\",\n    \"Buccal cell\",\n    \"Buffy coat\",\n    \"Cerebrospinal fluid\",\n    \"Cervical mucus\",\n    \"Convalescent plasma\",\n    \"Cord blood\",\n    \"Duodenal fluid\",\n    \"Female genital fluid\",\n    \"Fetal blood\",\n    \"Hydrocele fluid\",\n    \"Male genital fluid\",\n    \"Pancreatic fluid\",\n    \"Pericardial effusion\",\n    \"Pleural fluid\",\n    \"Renal cyst fluid\",\n    \"Saliva\",\n    \"Seminal fluid\",\n    \"Serum\",\n    \"Solid tissue\",\n    \"Sputum\",\n    \"Synovial fluid\",\n    \"Urine\",\n    \"Venous blood\",\n    \"Vitreous fluid\",\n    \"Whole blood\",\n    \"Wound\",\n][random(0,31)]"
     },
     {
       "name": "tumour_normal_designation",

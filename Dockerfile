@@ -10,7 +10,7 @@ USER root
 RUN apk update
 
 # Install the required packages for building Python packages with native extensions and PostgreSQL support
-RUN apk add --no-cache bash build-base git postgresql-client postgresql-dev 
+RUN apk add --no-cache bash build-base git postgresql-client postgresql-dev libffi-dev
 
 RUN mkdir /app
 WORKDIR /app
