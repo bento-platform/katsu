@@ -1343,7 +1343,7 @@ class HormoneTherapyTest(TestCase):
             self.assertFalse(self.serializer.is_valid())
 
 
-class TestRadiation(TestCase):
+class RadiationTest(TestCase):
     def setUp(self):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.donor = Donor.objects.create(
@@ -1467,7 +1467,7 @@ class TestRadiation(TestCase):
             self.radiation.save()
 
 
-class TestImmunotherapy(TestCase):
+class ImmunotherapyTest(TestCase):
     def setUp(self):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.donor = Donor.objects.create(
@@ -1492,7 +1492,10 @@ class TestImmunotherapy(TestCase):
             "submitter_treatment_id": self.treatment,
             "immunotherapy_type": "Cell-based",
             "drug_name": "Necitumumab",
-            "drug_rxnormcui": "8756456",
+            "drug_reference_identifier": "8756456",
+            "immunotherapy_drug_dose_units": "mg/m2",
+            "prescribed_cumulative_drug_dose": "200",
+            "actual_cumulative_drug_dose": "200",
         }
         self.immunotherapy = Immunotherapy.objects.create(**self.valid_values)
 
@@ -1505,7 +1508,10 @@ class TestImmunotherapy(TestCase):
         self.assertEqual(self.immunotherapy.submitter_treatment_id, self.treatment)
         self.assertEqual(self.immunotherapy.immunotherapy_type, "Cell-based")
         self.assertEqual(self.immunotherapy.drug_name, "Necitumumab")
-        self.assertEqual(self.immunotherapy.drug_rxnormcui, "8756456")
+        self.assertEqual(self.immunotherapy.drug_reference_identifier, "8756456")
+        self.assertEqual(self.immunotherapy.immunotherapy_drug_dose_units, "mg/m2")
+        self.assertEqual(self.immunotherapy.prescribed_cumulative_drug_dose, "200")
+        self.assertEqual(self.immunotherapy.actual_cumulative_drug_dose, "200")
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
@@ -1542,7 +1548,7 @@ class TestImmunotherapy(TestCase):
             self.immunotherapy.save()
 
 
-class TestSurgery(TestCase):
+class SurgeryTest(TestCase):
     def setUp(self):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.donor = Donor.objects.create(
@@ -1749,7 +1755,7 @@ class TestSurgery(TestCase):
             self.assertFalse(self.serializer.is_valid())
 
 
-class TestFollowUp(TestCase):
+class FollowUpTest(TestCase):
     def setUp(self):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.donor = Donor.objects.create(
@@ -1775,14 +1781,16 @@ class TestFollowUp(TestCase):
             "submitter_primary_diagnosis_id": self.primary_diagnosis,
             "submitter_treatment_id": self.treatment,
             "date_of_followup": "2022-10",
-            "lost_to_followup": True,
-            "lost_to_followup_reason": "Completed study",
             "disease_status_at_followup": "Loco-regional progression",
             "relapse_type": "Progression (liquid tumours)",
             "date_of_relapse": "2022-07",
             "method_of_progression_status": "Assessment of symptom control (procedure)",
             "anatomic_site_progression_or_recurrence": "C18",
-            "recurrence_tumour_staging_system": "Revised International staging system (RISS)",
+            "recurrence_tumour_staging_system": [
+                "AJCC 6th edition",
+                "Lugano staging system",
+                "AJCC 7th edition",
+            ],
             "recurrence_t_category": "T2a",
             "recurrence_n_category": "N0a (biopsy)",
             "recurrence_m_category": "M0(i+)",
@@ -1802,8 +1810,6 @@ class TestFollowUp(TestCase):
         )
         self.assertEqual(self.followup.submitter_treatment_id, self.treatment)
         self.assertEqual(self.followup.date_of_followup, "2022-10")
-        self.assertEqual(self.followup.lost_to_followup, True)
-        self.assertEqual(self.followup.lost_to_followup_reason, "Completed study")
         self.assertEqual(
             self.followup.disease_status_at_followup, "Loco-regional progression"
         )
@@ -1816,7 +1822,7 @@ class TestFollowUp(TestCase):
         self.assertEqual(self.followup.anatomic_site_progression_or_recurrence, "C18")
         self.assertEqual(
             self.followup.recurrence_tumour_staging_system,
-            "Revised International staging system (RISS)",
+            ["AJCC 6th edition", "Lugano staging system", "AJCC 7th edition"],
         )
         self.assertEqual(self.followup.recurrence_t_category, "T2a")
         self.assertEqual(self.followup.recurrence_n_category, "N0a (biopsy)")
@@ -1883,21 +1889,6 @@ class TestFollowUp(TestCase):
                     instance=self.donor, data=self.valid_values
                 )
                 self.assertFalse(self.serializer.is_valid())
-
-    def test_invalid_lost_to_followup(self):
-        self.followup.lost_to_followup = "foo"
-        with self.assertRaises(ValidationError):
-            self.followup.save()
-
-    def test_invalid_lost_to_followup_reason(self):
-        invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["lost_to_followup_reason"] = value
-            self.serializer = FollowUpSerializer(
-                instance=self.followup, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_disease_status_at_followup(self):
         invalid_values = get_invalid_choices()
