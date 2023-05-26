@@ -1238,7 +1238,7 @@ class ChemotherapyTest(TestCase):
             self.assertFalse(self.serializer.is_valid())
 
 
-class TestHormoneTherapy(TestCase):
+class HormoneTherapyTest(TestCase):
     def setUp(self):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.donor = Donor.objects.create(
@@ -1262,10 +1262,10 @@ class TestHormoneTherapy(TestCase):
             "submitter_donor_id": self.donor,
             "submitter_treatment_id": self.treatment,
             "drug_name": "exemestane",
-            "drug_rxnormcui": "345678",
-            "hormone_drug_dosage_units": "mg/m2",
-            "cumulative_drug_dosage_prescribed": "200",
-            "cumulative_drug_dosage_actual": "200",
+            "drug_reference_identifier": "345678",
+            "hormone_drug_dose_units": "mg/m2",
+            "prescribed_cumulative_drug_dose": "200",
+            "actual_cumulative_drug_dose": "200",
         }
         self.hormone_therapy = HormoneTherapy.objects.create(**self.valid_values)
 
@@ -1277,33 +1277,37 @@ class TestHormoneTherapy(TestCase):
         self.assertEqual(self.hormone_therapy.submitter_donor_id, self.donor)
         self.assertEqual(self.hormone_therapy.submitter_treatment_id, self.treatment)
         self.assertEqual(self.hormone_therapy.drug_name, "exemestane")
-        self.assertEqual(self.hormone_therapy.drug_rxnormcui, "345678")
-        self.assertEqual(self.hormone_therapy.hormone_drug_dosage_units, "mg/m2")
-        self.assertEqual(self.hormone_therapy.cumulative_drug_dosage_prescribed, "200")
-        self.assertEqual(self.hormone_therapy.cumulative_drug_dosage_actual, "200")
+        self.assertEqual(self.hormone_therapy.drug_reference_identifier, "345678")
+        self.assertEqual(self.hormone_therapy.hormone_drug_dose_units, "mg/m2")
+        self.assertEqual(self.hormone_therapy.prescribed_cumulative_drug_dose, "200")
+        self.assertEqual(self.hormone_therapy.actual_cumulative_drug_dose, "200")
 
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
-        optional_fields = [
-            "drug_name",
-            "drug_rxnormcui",
-            "hormone_dosage_units",
-            "cumulative_drug_dosage_prescribed",
-            "cumulative_drug_dosage_actual",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+            ],
+            model_fields=self.hormone_therapy._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.hormone_therapy, field, None)
             self.hormone_therapy.full_clean()
 
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
-        optional_fields = [
-            "drug_name",
-            "drug_rxnormcui",
-            "hormone_dosage_units",
-            "cumulative_drug_dosage_prescribed",
-            "cumulative_drug_dosage_actual",
-        ]
+        optional_fields = get_optional_fields(
+            excluded_fields=[
+                "id",
+                "submitter_donor_id",
+                "program_id",
+                "submitter_treatment_id",
+            ],
+            model_fields=self.hormone_therapy._meta.fields,
+        )
         for field in optional_fields:
             setattr(self.hormone_therapy, field, "")
             self.hormone_therapy.full_clean()
@@ -1313,25 +1317,30 @@ class TestHormoneTherapy(TestCase):
         with self.assertRaises(DataError):
             self.hormone_therapy.save()
 
-    def test_drug_rxnormcui_max_length(self):
-        self.hormone_therapy.drug_rxnormcui = "f" * 65
+    def test_drug_reference_identifier_max_length(self):
+        self.hormone_therapy.drug_reference_identifier = "f" * 65
         with self.assertRaises(DataError):
             self.hormone_therapy.save()
 
-    def test_invalid_hormone_therapy_dosage_units(self):
+    def test_invalid_hormone_drug_dose_units(self):
         invalid_values = get_invalid_choices()
         for value in invalid_values:
             with self.subTest(value=value):
-                self.valid_values["hormone_drug_dosage_units"] = value
+                self.valid_values["hormone_drug_dose_units"] = value
             self.serializer = HormoneTherapySerializer(
                 instance=self.hormone_therapy, data=self.valid_values
             )
             self.assertFalse(self.serializer.is_valid())
 
-    def chemotherapy_dosage_units(self):
-        self.hormone_therapy.drug_rxnormcui = "f" * 65
-        with self.assertRaises(ValidationError):
-            self.hormone_therapy.save()
+    def test_invalid_drug_reference_database(self):
+        invalid_values = get_invalid_choices()
+        for value in invalid_values:
+            with self.subTest(value=value):
+                self.valid_values["drug_reference_database"] = value
+            self.serializer = ChemotherapySerializer(
+                instance=self.hormone_therapy, data=self.valid_values
+            )
+            self.assertFalse(self.serializer.is_valid())
 
 
 class TestRadiation(TestCase):
