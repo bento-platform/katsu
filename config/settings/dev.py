@@ -8,7 +8,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "docker.localhost",
-    "candig.docker.localhost",
+    "candig.docker.internal",
     os.environ.get("HOST_CONTAINER_NAME"),
 ]
 
