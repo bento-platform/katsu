@@ -40,3 +40,12 @@ class CanDIGAdminOrReadOnly(BasePermission):
                     logger.exception(f"An error occurred in OPA is_site_admin: {e}")
                     raise Exception("Error checking roles from OPA.")
             return True
+
+class CustodianOnly(BasePermission):
+    '''
+    Similar to CanDIGAdminOrReadOnly, but checks if the user is a Data Custodian. If the user is a site
+    admin, they are automatically approved.
+    '''
+    def has_permission(self, request, view):
+        if CanDIGAdminOrReadOnly().has_permission(request, view): return True
+        return True # TODO: Use authx functions for data custodian when available
