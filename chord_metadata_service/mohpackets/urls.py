@@ -44,21 +44,21 @@ from chord_metadata_service.mohpackets.api_discovery import (
 )
 from chord_metadata_service.mohpackets.api_ingest import (
     delete_all,
-    ingest_biomarkers,
-    ingest_chemotherapies,
-    ingest_comorbidities,
-    ingest_donors,
-    ingest_exposures,
-    ingest_followups,
-    ingest_hormonetherapies,
-    ingest_immunotherapies,
-    ingest_primary_diagnosises,
-    ingest_programs,
-    ingest_radiations,
-    ingest_sample_registrations,
-    ingest_specimens,
-    ingest_surgeries,
-    ingest_treatments,
+    IngestProgramViewSet,
+    IngestDonorViewSet,
+    IngestSpecimenViewSet,
+    IngestSampleRegistrationViewSet,
+    IngestPrimaryDiagnosisViewSet,
+    IngestTreatmentViewSet,
+    IngestChemotherapyViewSet,
+    IngestHormoneTherapyViewSet,
+    IngestRadiationViewSet,
+    IngestImmunotherapyViewSet,
+    IngestSurgeryViewSet,
+    IngestFollowUpViewSet,
+    IngestBiomarkerViewSet,
+    IngestComorbidityViewSet,
+    IngestExposureViewSet,
     version_check,
 )
 
@@ -100,28 +100,28 @@ discovery_router.register(r"exposures", DiscoveryExposureViewSet)
 
 
 # ================== INGEST API ================== #
-ingest_patterns = [
-    path("programs", ingest_programs),
-    path("donors", ingest_donors),
-    path("specimens", ingest_specimens),
-    path("sample_registrations", ingest_sample_registrations),
-    path("primary_diagnoses", ingest_primary_diagnosises),
-    path("treatments", ingest_treatments),
-    path("chemotherapies", ingest_chemotherapies),
-    path("hormone_therapies", ingest_hormonetherapies),
-    path("radiations", ingest_radiations),
-    path("immunotherapies", ingest_immunotherapies),
-    path("surgeries", ingest_surgeries),
-    path("follow_ups", ingest_followups),
-    path("biomarkers", ingest_biomarkers),
-    path("comorbidities", ingest_comorbidities),
-    path("exposures", ingest_exposures),
-]
+ingest_router = routers.SimpleRouter()
+ingest_router.register(r"programs", IngestProgramViewSet, basename="ingest_programs")
+ingest_router.register(r"donors", IngestDonorViewSet, basename="ingest_donors")
+ingest_router.register(r"specimens", IngestSpecimenViewSet,  basename="ingest_specimens")
+ingest_router.register(r"sample_registrations", IngestSampleRegistrationViewSet,  basename="ingest_registrations")
+ingest_router.register(r"primary_diagnoses", IngestPrimaryDiagnosisViewSet,  basename="ingest_diagnoses")
+ingest_router.register(r"treatments", IngestTreatmentViewSet, basename="ingest_treatments")
+ingest_router.register(r"chemotherapies", IngestChemotherapyViewSet, basename="ingest_chemotherapies")
+ingest_router.register(r"hormone_therapies", IngestHormoneTherapyViewSet, basename="ingest_hormone_therapies")
+ingest_router.register(r"radiations", IngestRadiationViewSet, basename="ingest_radiations")
+ingest_router.register(r"immunotherapies", IngestImmunotherapyViewSet, basename="ingest_immunotherapies")
+ingest_router.register(r"surgeries", IngestSurgeryViewSet, basename="ingest_surgeries")
+ingest_router.register(r"follow_ups", IngestFollowUpViewSet, basename="ingest_followups")
+ingest_router.register(r"biomarkers", IngestBiomarkerViewSet, basename="ingest_biomarkers")
+ingest_router.register(r"comorbidities", IngestComorbidityViewSet, basename="ingest_comorbidities")
+ingest_router.register(r"exposures", IngestExposureViewSet, basename="ingest_exposures")
 
 urlpatterns = [
     path("authorized/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
-    path("ingest/", include(ingest_patterns)),
+    #path("ingest/", include(ingest_patterns)),
+    path("ingest/", include(ingest_router.urls)),
     path("delete/all", delete_all),
     path("version_check", version_check),
     path(

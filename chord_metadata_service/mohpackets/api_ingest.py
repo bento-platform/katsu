@@ -7,7 +7,7 @@ from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
@@ -30,6 +30,7 @@ from chord_metadata_service.mohpackets.serializers import (
     SurgerySerializer,
     TreatmentSerializer,
 )
+from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 
 """
     This module contains the API endpoints for ingesting bulk data into the database.
@@ -48,6 +49,42 @@ from chord_metadata_service.mohpackets.serializers import (
 ##########################################
 
 logger = logging.getLogger(__name__)
+
+class IngestMixin:
+    """
+        This mixin should be used for viewsets that are used for ingesting dataa.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        ingest_data()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
+        """
+    serializer = None
+    ingest_name = "Unknown"
+    def create(self, request):
+        serializer = self.serializer
+        name = self.ingest_name
+        data = request.data
+        try:
+            if not data:
+                raise ValueError("Ingest request body is empty.")
+            objs = create_bulk_objects(serializer, data)
+        except Exception as e:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error during ingest_%s" % name: str(e)},
+            )
+
+        return Response(
+            status=status.HTTP_201_CREATED,
+            data={f"{len(objs)} %s were created." % name},
+        )
+
 
 def create_bulk_objects(serializer_class, data: dict):
     """Create a list of objects in bulk using a list of JSON strings.
@@ -91,9 +128,9 @@ def backup_db():
 #                                        #
 ##########################################
 
-
 # PROGRAM
 # ---------------
+'''
 @extend_schema(
     request=IngestRequestSerializer,
     responses={201: OpenApiTypes.STR},
@@ -116,357 +153,128 @@ def ingest_programs(request):
         status=status.HTTP_201_CREATED,
         data={f"{len(objs)} programs were created."},
     )
-
+'''
+class IngestProgramViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Programs"
+    serializer = ProgramSerializer
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 # DONOR
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_donors(request):
+class IngestDonorViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Donors"
     serializer = DonorSerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_donors": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} donors were created."},
-    )
-
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 # PRIMARY DIAGNOSIS
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_primary_diagnosises(request):
+class IngestPrimaryDiagnosisViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Primary Diagnoses"
     serializer = PrimaryDiagnosisSerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_primary_diagnosises": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} primary diagnosises were created."},
-    )
-
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 # SPECIMEN
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_specimens(request):
+class IngestSpecimenViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Specimen"
     serializer = SpecimenSerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_specimens": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} specimens were created."},
-    )
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 
 # SAMPLE REGISTRATION
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_sample_registrations(request):
+class IngestSampleRegistrationViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Sample Registrations"
     serializer = SampleRegistrationSerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_sample_registrations": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} sample registrations were created."},
-    )
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 
 # TREATMENT
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_treatments(request):
-    serializer = TreatmentSerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_treatments": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} treatments were created."},
-    )
-
+class IngestTreatmentViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Treatments"
+    serializer = SampleRegistrationSerializer
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 # CHEMOTHERAPY
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_chemotherapies(request):
+class IngestChemotherapyViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Chemotherapies"
     serializer = ChemotherapySerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_chemotherapies": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} chemotherapies were created."},
-    )
-
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 # RADIATION
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_radiations(request):
+class IngestRadiationViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Radiations"
     serializer = RadiationSerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_radiations": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} radiations were created."},
-    )
-
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 # SURGERY
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_surgeries(request):
+class IngestSurgeryViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Surgeries"
     serializer = SurgerySerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_surgeries": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} surgeries were created."},
-    )
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 
 # HORMONE THERAPY
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_hormonetherapies(request):
+class IngestHormoneTherapyViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Hormone Therapies"
     serializer = HormoneTherapySerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_hormonetherapies": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} hormonetherapies were created."},
-    )
-
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 # IMMUNOTHERAPY
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_immunotherapies(request):
+class IngestImmunotherapyViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Immunotherapies"
     serializer = ImmunotherapySerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_immunotherapies": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} immunotherapies were created."},
-    )
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 
 # FOLLOW UP
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_followups(request):
+class IngestFollowUpViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Followups"
     serializer = FollowUpSerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_followups": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} followups were created."},
-    )
-
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 # BIOMARKER
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_biomarkers(request):
+class IngestBiomarkerViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Biomarkers"
     serializer = BiomarkerSerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_biomarkers": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} biomarkers were created."},
-    )
-
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 # COMORBIDITY
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_comorbidities(request):
+class IngestComorbidityViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Comorbidities"
     serializer = ComorbiditySerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_comorbidities": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} comorbidities were created."},
-    )
-
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 # EXPOSURE
 # ---------------
-@extend_schema(
-    request=IngestRequestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-@api_view(["POST"])
-@permission_classes([CustodianOnly])
-def ingest_exposures(request):
+class IngestExposureViewSet(IngestMixin, viewsets.GenericViewSet):
+    ingest_name = "Exposures"
     serializer = ExposureSerializer
-    data = request.data
-    try:
-        objs = create_bulk_objects(serializer, data)
-    except Exception as e:
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={"error during exposures": str(e)},
-        )
-
-    return Response(
-        status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} exposures were created."},
-    )
-
+    permission_classes = [CustodianOnly]
+    throttle_classes = [MoHRateThrottle]
 
 @extend_schema(
     responses={204: OpenApiTypes.STR},
