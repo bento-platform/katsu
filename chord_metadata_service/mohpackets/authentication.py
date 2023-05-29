@@ -18,10 +18,11 @@ class TokenAuthentication(BaseAuthentication):
         else:
             opa_secret = settings.CANDIG_OPA_SECRET
             try:
-                authorized_datasets = get_opa_datasets(request, admin_secret=opa_secret)
+                authorized_datasets_read = get_opa_datasets(request, admin_secret=opa_secret)
                 # add dataset to request
-                logger.debug(f"User is authorized to access {authorized_datasets}")
-                request.authorized_datasets = authorized_datasets
+                logger.debug(f"User is authorized to access {authorized_datasets_read} for reading")
+                request.authorized_datasets_read = authorized_datasets_read
+                request.authorized_datasets_write = ["SYNTHETIC_1"] # TODO: Use corresponding OPA function when ready
 
             except Exception as e:
                 logger.exception(

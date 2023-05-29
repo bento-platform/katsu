@@ -1,6 +1,7 @@
 import os
 
 from django.db.models import Prefetch
+from django.conf import settings
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework.decorators import api_view, throttle_classes
@@ -33,12 +34,16 @@ from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
+from authx.auth import is_site_admin
+
+import logging
 
 """
     This module inheriting from the base views and adding the authorized mixin,
     which returns the objects related to the datasets that the user is authorized to see.
 """
 
+logger = logging.getLogger(__name__)
 
 ##########################################
 #                                        #
@@ -73,7 +78,10 @@ class AuthorizedMixin:
     authentication_classes = auth_methods
 
     def get_queryset(self):
-        authorized_datasets = self.request.authorized_datasets
+        if is_site_admin(self.request, admin_secret=settings.CANDIG_OPA_SECRET):
+            filtered_queryset = super().get_queryset()
+            return filtered_queryset
+        authorized_datasets = self.request.authorized_datasets_read
         filtered_queryset = (
             super().get_queryset().filter(program_id__in=authorized_datasets)
         )
