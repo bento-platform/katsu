@@ -309,6 +309,11 @@ def mcodepacket_query_results(query, params, options=None):
 
 
 def get_biosamples_with_experiment_details(subject_ids):
+    """
+    The function returns a queryset where each entry represents a biosample obtained from a subject, along with
+    details of any associated experiment. If a biosample does not have an associated experiment, the experiment
+    details are returned as None.
+    """
     biosamples_exp_tissue_details = Biosample.objects.filter(phenopacket__subject_id__in=subject_ids)\
         .values(
             subject_id=F("phenopacket__subject_id"),
