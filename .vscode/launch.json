@@ -2,6 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Django Test",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "test",
+                "${relativeFileDirname}"
+            ],
+            "django": true,
+            "justMyCode": true
+        },
+        {
             "name": "Python: Run Django",
             "type": "python",
             "request": "launch",

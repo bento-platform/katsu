@@ -650,3 +650,43 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+
+
+class BeaconSearchTest(APITestCase):
+
+    random_range = 20
+
+    def setUp(self):
+        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]
+        for individual in individuals:
+            Individual.objects.create(**individual)
+
+    # test beacon formatted response
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_beacon_search_response(self):
+        response = self.client.get('/api/beacon_search?sex=MALE')
+        male_count = Individual.objects.filter(sex="MALE").count()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(len(response_obj["matches"]), male_count)
+
+    @override_settings(CONFIG_PUBLIC={})
+    def test_beacon_search_response_no_config(self):
+        # test when config is not provided, returns NOT FOUND
+        response = self.client.get('/api/beacon_search?sex=MALE')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_beacon_search_response_invalid_search_key(self):
+        response = self.client.get('/api/beacon_search?birdwatcher=yes')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_beacon_search_response_invalid_search_value(self):
+        response = self.client.get('/api/beacon_search?smoking=on_Sundays')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_beacon_search_too_many_params(self):
+        response = self.client.get('/api/beacon_search?sex=MALE&smoking=Non-smoker&death_dc=Deceased')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

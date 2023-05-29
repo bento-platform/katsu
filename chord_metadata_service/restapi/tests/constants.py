@@ -220,6 +220,58 @@ VALID_INDIVIDUALS = [
     VALID_INDIVIDUAL_8,
 ]
 
+VALID_PHENOPACKET_SCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "katsu:phenopackets",
+    "type": "object",
+    "properties": {
+        "phenopacket": {
+            "$id": "katsu:phenopackets:phenopacket",
+            "type": "object",
+            "properties": {
+                "biosamples": {
+                    "type": "array",
+                    "items": {
+                        "$id": "katsu:phenopackets:biosample",
+                        "type": "object",
+                        "properties": {
+                            "original_biosample_extra_prop": {"type": "string"}
+                        }
+                    }
+                },
+                "extra_properties": {
+                    "type": "object",
+                    "properties": {
+                        "original_pheno_extra_prop": {"type": "string"}
+                    }
+                }
+            }
+        }
+    }
+}
+
+VALID_EXTRA_PROPERTIES_EXTENSIONS = {
+    "phenopacket": {
+        "schema_type": "PHENOPACKET",
+        "required": True,
+        "json_schema": {
+            "type": "object",
+            "properties": {
+                "new_pheno_prop": {"type": "string"}
+            },
+        }
+    },
+    "biosample": {
+        "schema_type": "BIOSAMPLE",
+        "required": False,
+        "json_schema": {
+            "type": "object",
+            "properties": {
+                "new_biosample_prop": {"type": "string"}
+            }
+        }
+    }
+}
 
 extra_properties_with_list = {
         "smoking": "Former smoker",

@@ -1,7 +1,19 @@
+from django.db.utils import IntegrityError
 from django.test import TestCase
+from django.core.exceptions import ValidationError
 from uuid import uuid4
+from chord_metadata_service.chord.tests.helpers import ProjectTestCase
+
+from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, Procedure
+from chord_metadata_service.phenopackets.tests.constants import (
+    valid_biosample_1,
+    VALID_PROCEDURE_1,
+    VALID_INDIVIDUAL_1
+)
+from chord_metadata_service.restapi.models import SchemaType
 from ..data_types import DATA_TYPE_PHENOPACKET
-from ..models import Project, Dataset, TableOwnership, Table
+from ..models import Project, Dataset, ProjectJsonSchema, TableOwnership, Table
 from .constants import VALID_DATA_USE_1
 
 
@@ -88,3 +100,81 @@ class TableTest(TestCase):
         self.assertEqual(t.dataset, self.d)
 
         self.assertEqual(str(t), f"{t.name} (ID: {TABLE_ID}, Type: {DATA_TYPE_PHENOPACKET})")
+
+
+class ProjectJsonSchemaTest(ProjectTestCase):
+    def setUp(self) -> None:
+        self.json_schema = {
+            "type": "object",
+            "properties": {
+                "prop_a": {"type": "string"}
+            },
+            "required": ["prop_a"]
+        }
+        self.required_pheno_schema = ProjectJsonSchema.objects.create(
+            project=self.project,
+            required=True,
+            json_schema=self.json_schema,
+            schema_type=SchemaType.PHENOPACKET
+        )
+
+    def test_project_json_schema(self):
+        proj_json_schema = ProjectJsonSchema.objects.get(id=self.required_pheno_schema.id)
+        self.assertEqual(proj_json_schema.project_id, self.project.identifier)
+        self.assertEqual(proj_json_schema.json_schema, self.json_schema)
+        self.assertEqual(proj_json_schema.schema_type, SchemaType.PHENOPACKET)
+
+    def test_schema_type_constraint(self):
+        # ProjectJsonSchema must be unique for every project_id, schema_type pair
+        # Should fail
+        invalid_pjs = ProjectJsonSchema(
+            project=self.project,
+            required=False,
+            json_schema={"type": "string"},
+            schema_type=SchemaType.PHENOPACKET
+        )
+        with self.assertRaises(IntegrityError):
+            # Should fail;
+            invalid_pjs.save()
+
+    def test_existing_data_validation(self):
+        # Add a Phenopacket with an Individual and a Biosample to the project
+        individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
+        procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
+        biosample = Biosample.objects.create(**valid_biosample_1(individual, procedure))
+        meta_data = MetaData.objects.create(
+            created_by="test",
+            submitted_by="test"
+        )
+        phenopacket = Phenopacket.objects.create(
+            id="phenopacket_id:1",
+            subject=individual,
+            table=self.table,
+            extra_properties={
+                "prop_a": "extra property text"
+            },
+            meta_data=meta_data,
+        )
+        phenopacket.biosamples.set([biosample])
+
+        # Tentative new ProjectJsonSchema for Individual
+        invalid_pjs_individual = ProjectJsonSchema(
+            project=self.project,
+            required=False,
+            json_schema={"type": "string"},
+            schema_type=SchemaType.INDIVIDUAL
+        )
+        # Tentative new ProjectJsonSchema for Biosample
+        invalid_pjs_biosample = ProjectJsonSchema(
+            project=self.project,
+            required=False,
+            json_schema={"type": "string"},
+            schema_type=SchemaType.BIOSAMPLE
+        )
+
+        with self.assertRaises(ValidationError):
+            # An individual exists already for this project
+            invalid_pjs_individual.save()
+        with self.assertRaises(ValidationError):
+            # A biosample exists already for this project
+            invalid_pjs_biosample.save()

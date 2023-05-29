@@ -1,12 +1,14 @@
+from typing import Optional
+from django.apps import apps
 from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.description_utils import rec_help
-from chord_metadata_service.restapi.models import IndexableMixin
+from chord_metadata_service.restapi.models import IndexableMixin, BaseExtraProperties, SchemaType
 from chord_metadata_service.restapi.schema_utils import schema_list
 from chord_metadata_service.restapi.validators import (
     JsonSchemaValidator,
@@ -237,7 +239,7 @@ class Disease(models.Model, IndexableMixin):
         return str(self.id)
 
 
-class Biosample(models.Model, IndexableMixin):
+class Biosample(BaseExtraProperties, IndexableMixin):
     """
     Class to describe a unit of biological material
 
@@ -289,13 +291,35 @@ class Biosample(models.Model, IndexableMixin):
             }
         }
 
+    @property
+    def schema_type(self) -> SchemaType:
+        return SchemaType.BIOSAMPLE
 
-class Phenopacket(models.Model, IndexableMixin):
+    def get_project_id(self) -> Optional[str]:
+        model = apps.get_model("phenopackets.Phenopacket")
+        if len(phenopackets := model.objects.filter(biosamples__id=self.id)) < 1:
+            return None
+        return phenopackets.first().get_project_id()
+
+
+class Phenopacket(BaseExtraProperties, IndexableMixin):
     """
     Class to aggregate Individual's experiments data
 
     FHIR: Composition
     """
+
+    @property
+    def schema_type(self) -> SchemaType:
+        return SchemaType.PHENOPACKET
+
+    def get_project_id(self) -> Optional[str]:
+        model = apps.get_model("chord.Project")
+        try:
+            project = model.objects.get(datasets__table_ownership=self.table_id)
+            return project.identifier
+        except ObjectDoesNotExist:
+            return None
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.PHENOPACKET, "id"))
     # if Individual instance is deleted Phenopacket instance is deleted too
