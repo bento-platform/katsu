@@ -41,7 +41,7 @@ class CanDIGAdminOrReadOnly(BasePermission):
                     raise Exception("Error checking roles from OPA.")
             return True
 
-class CustodianOnly(BasePermission):
+class CustodianOrAdminOnly(BasePermission):
     '''
     Similar to CanDIGAdminOrReadOnly, but checks if the user is a Data Custodian. If the user is a site
     admin, they are automatically approved.
