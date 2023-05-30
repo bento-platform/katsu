@@ -153,7 +153,8 @@ def search_overview(request):
     queryset = patients_models.Individual.objects.all().filter(id__in=individual_id)
 
     individuals_count = len(individual_id)
-    biosamples_count = queryset.values("phenopackets__biosamples__id").count()
+    biosamples_count = queryset.values("phenopackets__biosamples__id").exclude(
+        phenopackets__biosamples__id__isnull=True).count()
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema

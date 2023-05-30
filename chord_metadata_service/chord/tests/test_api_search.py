@@ -483,7 +483,7 @@ class SearchTest(APITestCase):
 
     def test_private_table_search_bento_search_results(self):
         # Valid query to search for biosample id in list
-        # Output as Bento search (a list of 4 values)
+        # Output as Bento search (a list of 5 values)
 
         d = {
             "query": TEST_SEARCH_QUERY_10,
@@ -495,11 +495,21 @@ class SearchTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(len(c["results"]), 1)  # 1 matching phenopacket
-            self.assertEqual(len(c["results"][0]), 4)    # 4 columns by result
+            self.assertEqual(len(c["results"][0]), 5)    # 5 columns by result
             self.assertEqual(
-                {"subject_id", "alternate_ids", "biosamples", "num_experiments"},
+                {"subject_id", "alternate_ids", "biosamples", "experiments_with_biosamples", "num_experiments"},
                 set(c["results"][0].keys()))
             self.assertIsInstance(c["results"][0]["alternate_ids"], list)
+            self.assertIsInstance(c["results"][0]["experiments_with_biosamples"], list)
+            for biosample in c["results"][0]["experiments_with_biosamples"]:
+                self.assertIn("biosample_id", biosample)
+                self.assertIn("sampled_tissue", biosample)
+                self.assertIn("id", biosample["sampled_tissue"])
+                self.assertIn("label", biosample["sampled_tissue"])
+                self.assertIn("experiment", biosample)
+                self.assertIn("experiment_id", biosample["experiment"])
+                self.assertIn("experiment_type", biosample["experiment"])
+                self.assertIn("study_type", biosample["experiment"])
 
     def test_private_search_bento_search_results(self):
         # Valid query to search for biosample id in list

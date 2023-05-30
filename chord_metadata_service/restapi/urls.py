@@ -37,10 +37,14 @@ router.register(r'project_json_schemas', chord_views.ProjectJsonSchemaViewSet)
 # Experiments app urls
 router.register(r'experiments', experiment_views.ExperimentViewSet)
 router.register(r'experimentresults', experiment_views.ExperimentResultViewSet)
+router.register(r'batch/experiments', experiment_views.ExperimentBatchViewSet, basename="batch/experiments")
 
 # Patients app urls
 router.register(r'individuals', individual_views.IndividualViewSet, basename="individuals")
 batch_router.register(r'batch/individuals', individual_views.IndividualBatchViewSet, basename="batch/individuals")
+
+# Biosamples app urls
+router.register(r'batch/biosamples', phenopacket_views.BiosampleBatchViewSet, basename="batch/biosamples")
 
 # Phenopackets app urls
 router.register(r'phenotypicfeatures', phenopacket_views.PhenotypicFeatureViewSet, basename="phenotypicfeatures")

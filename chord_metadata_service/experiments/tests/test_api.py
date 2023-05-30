@@ -2,6 +2,11 @@ import os
 from jsonschema.validators import Draft7Validator
 from uuid import uuid4
 
+from django.test import TestCase
+from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer
+import csv
+import io
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
@@ -135,3 +140,80 @@ class GetExperimentsAppApisTest(APITestCase):
         response_data = response.json()
         self.assertEqual(response_data["count"], 0)
         self.assertEqual(len(response_data["results"]), 0)
+
+    def test_post_experiment_batch_no_data(self):
+        response = self.client.post('/api/batch/experiments', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 2)
+
+    def test_post_experiment_batch_with_ids(self):
+        response = self.client.post('/api/batch/experiments', {'id': ['experiment:1']}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data), 1)
+        self.assertEqual(response_data[0]['id'], 'experiment:1')
+
+
+class TestExperimentCSVRenderer(TestCase):
+    """
+    Test the CSV renderer for the experiment API
+    """
+    def setUp(self):
+        self.renderer = ExperimentCSVRenderer()
+        self.data = [{
+            'id': 'id1',
+            'study_type': 'study_type1',
+            'experiment_type': 'experiment_type1',
+            'molecule': 'molecule1',
+            'library_strategy': 'library_strategy1',
+            'library_source': 'library_source1',
+            'library_selection': 'library_selection1',
+            'library_layout': 'library_layout1',
+            'created': 'created1',
+            'updated': 'updated1',
+            'biosample': 'biosample1',
+            'biosample_individual': {'id': 'individual_id1'},
+        }]
+
+    def test_csv_headers(self):
+        response = self.renderer.render(self.data)
+        csv_content = response.content.decode()
+        csv_file = io.StringIO(csv_content)
+        reader = csv.DictReader(csv_file)
+        expected_headers = ['Id', 'Study type', 'Experiment type', 'Molecule', 'Library strategy',
+                            'Library source', 'Library selection', 'Library layout',
+                            'Created', 'Updated', 'Biosample', 'Individual id']
+        self.assertListEqual(list(reader.fieldnames), expected_headers)
+
+    def test_csv_render_with_missing_fields(self):
+        data_with_missing_fields = [{
+            'id': 'id3',
+            'study_type': 'study_type3',
+            'experiment_type': 'experiment_type3',
+            'molecule': 'molecule3',
+            'library_strategy': 'library_strategy3',
+            'library_source': 'library_source3',
+            # 'library_selection' intentionally missing
+            'library_layout': 'library_layout3',
+            'created': 'created3',
+            'updated': 'updated3',
+            'biosample': 'biosample3',
+            'biosample_individual': {'id': 'individual_id3'},
+        }]
+        response = self.renderer.render(data_with_missing_fields)
+        csv_content = response.content.decode()
+        csv_file = io.StringIO(csv_content)
+        reader = csv.DictReader(csv_file)
+        row = next(reader)
+        self.assertIsNone(row.get('library_selection'))
+
+    def test_csv_render_with_empty_data(self):
+        data_empty = [{}]
+        response = self.renderer.render(data_empty)
+        csv_content = response.content.decode()
+        csv_file = io.StringIO(csv_content)
+        reader = csv.DictReader(csv_file)
+        row = next(reader)
+        for row in reader:
+            for key in row:
+                self.assertEqual(row[key], '')

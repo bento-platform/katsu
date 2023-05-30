@@ -37,12 +37,15 @@ from chord_metadata_service.metadata.settings import CHORD_SERVICE_ARTIFACT, CHO
 from chord_metadata_service.patients.models import Individual
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
-from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset, TableOwnership, Table
 from .permissions import ReadOnly, OverrideOrSuperUserOnly
+
+from collections import defaultdict
+
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
@@ -269,6 +272,25 @@ def mcodepacket_query_results(query, params, options=None):
     return queryset
 
 
+def get_biosamples_with_experiment_details(subject_ids):
+    """
+    The function returns a queryset where each entry represents a biosample obtained from a subject, along with
+    details of any associated experiment. If a biosample does not have an associated experiment, the experiment
+    details are returned as None.
+    """
+    biosamples_exp_tissue_details = Biosample.objects.filter(phenopacket__subject_id__in=subject_ids)\
+        .values(
+            subject_id=F("phenopacket__subject_id"),
+            biosample_id=F("id"),
+            experiment_id=F("experiment__id"),
+            experiment_type=F("experiment__experiment_type"),
+            study_type=F("experiment__study_type"),
+            tissue_id=F("sampled_tissue__id"),
+            tissue_label=F("sampled_tissue__label")
+        )
+    return biosamples_exp_tissue_details
+
+
 def phenopacket_query_results(query, params, options=None):
     queryset = Phenopacket.objects \
         .filter(id__in=data_type_results(query, params, "id"))
@@ -282,29 +304,42 @@ def phenopacket_query_results(query, params, options=None):
         if "add_field" in options:
             fields.append(options["add_field"])
 
-        # Results displayed as 4/5 columns:
-        # "individuals ID", "table ID" (optional), [Alternate ids list], number of experiments, [Biosamples list...]
-        return queryset.values(
-                *fields,
-                alternate_ids=Coalesce(F("subject__alternate_ids"), [])
-            ).annotate(
-                # Weird bug with Django 4.1 here: num_experiments must come before the use of ArrayAgg or biosamples
-                # is considered as an ArrayField...
-                num_experiments=Count("biosamples__experiment"),
-                # Postgre specific: aggregates multiple values in a list
-                biosamples=Coalesce(
-                    ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
-                    []
-                )
-            )
+        results = queryset.values(
+            *fields,
+            alternate_ids=Coalesce(F("subject__alternate_ids"), []),
+        ).annotate(
+            num_experiments=Count("biosamples__experiment"),
+            biosamples=Coalesce(ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)), []),
+        )
 
-    # To expand further on this query : the select_related call
-    # will join on these tables we'd call anyway, thus 2 less request
-    # to the DB. prefetch_related works on M2M relationships and makes
-    # sure that, for instance, when querying diseases, we won't make multiple call
-    # for the same set of data
-    return queryset.select_related(*PHENOPACKET_SELECT_REL) \
-        .prefetch_related(*PHENOPACKET_PREFETCH)
+        # Get the biosamples with experiments data
+        phenopacket_ids = [result['subject_id'] for result in results]
+        biosamples_experiments_details = get_biosamples_with_experiment_details(phenopacket_ids)
+
+        # Group the experiments with biosamples by subject_id
+        experiments_with_biosamples = defaultdict(list)
+        for b in biosamples_experiments_details:
+            experiments_with_biosamples[b["subject_id"]].append({
+                "biosample_id": b["biosample_id"],
+                "sampled_tissue": {
+                    "id": b["tissue_id"],
+                    "label": b["tissue_label"]
+                },
+                "experiment": {
+                    "experiment_id": b["experiment_id"],
+                    "experiment_type": b["experiment_type"],
+                    "study_type": b["study_type"]
+                }
+            })
+
+        # Add the experiments_with_biosamples data to the results
+        for result in results:
+            result["experiments_with_biosamples"] = experiments_with_biosamples[result['subject_id']]
+
+        return results
+    else:
+        return queryset.select_related(*PHENOPACKET_SELECT_REL) \
+            .prefetch_related(*PHENOPACKET_PREFETCH)
 
 
 QUERY_RESULTS_FN: Dict[str, Callable] = {
@@ -391,8 +426,8 @@ def search(request, internal_data=False):
             "data_type": data_type,
             "matches": list(serializer_class(p).data for p in table_objects)
         } for table_id, table_objects in itertools.groupby(
-            queryset,
-            key=lambda o: str(o.table_id)           # object here
+            queryset if queryset is not None else [],
+            key=lambda o: str(o.table_id)  # object here
         )
     }, start))
 
@@ -621,7 +656,6 @@ def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[
         params=search_params["params"] + (table_id,),
         options=search_params
     )
-
     if not internal:
         return queryset.exists(), None    # True if at least one match
 
