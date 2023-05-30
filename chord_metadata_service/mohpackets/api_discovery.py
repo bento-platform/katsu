@@ -1,6 +1,5 @@
 from collections import Counter, defaultdict
 from datetime import datetime as dt
-from itertools import chain
 
 from drf_spectacular.utils import (
     extend_schema,
@@ -31,7 +30,6 @@ from chord_metadata_service.mohpackets.models import (
     Donor,
     PrimaryDiagnosis,
     Program,
-    SampleRegistration,
     Treatment,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
@@ -261,12 +259,12 @@ def cancer_type_count(_request):
     Return the count for every cancer type in the database.
     """
     cancer_types = list(Donor.objects.values_list("primary_site", flat=True))
-    
+
     # Handle missing values as empty arrays
     for i in range(len(cancer_types)):
         if cancer_types[i] is None:
             cancer_types[i] = [None]
-    
+
     return Response(count_terms(cancer_types))
 
 
@@ -323,17 +321,17 @@ def diagnosis_age_count(_request):
         donor = date["submitter_donor_id"]
         cur_date = (
             dt.strptime(date["date_of_diagnosis"], "%Y-%m").date()
-            if date["date_of_diagnosis"] != None
+            if date["date_of_diagnosis"] is not None
             else None
         )
         if donor not in min_dates.keys():
             min_dates[donor] = cur_date
         else:
-            if (min_dates[donor] != None and cur_date < min_dates[donor]) or (
-                min_dates[donor] == None and cur_date != None
+            if (min_dates[donor] is not None and cur_date < min_dates[donor]) or (
+                min_dates[donor] is None and cur_date is not None
             ):
                 min_dates[donor] = cur_date
-                
+
     # Calculate donor's age of diagnosis
     birth_dates = Donor.objects.values("submitter_donor_id", "date_of_birth")
     birth_dates = {
@@ -341,7 +339,7 @@ def diagnosis_age_count(_request):
     }
     ages = {}
     for donor, diagnosis_date in min_dates.items():
-        if birth_dates[donor] != None and diagnosis_date != None:
+        if birth_dates[donor] is not None and diagnosis_date is not None:
             birth_date = dt.strptime(birth_dates[donor], "%Y-%m").date()
             ages[donor] = (diagnosis_date - birth_date).days // 365.25
         else:
@@ -349,7 +347,7 @@ def diagnosis_age_count(_request):
 
     age_counts = defaultdict(int)
     for age in ages.values():
-        if age == None:
+        if age is None:
             age_counts["null"] += 1
         elif age <= 19:
             age_counts["0-19"] += 1
