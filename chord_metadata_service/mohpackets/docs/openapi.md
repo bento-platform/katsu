@@ -13,7 +13,7 @@ This is the RESTful API for the MoH Service.
 
 <a id="opIdauthorized_biomarkers_list"></a>
 
-`GET /moh/v2/authorized/biomarkers/`
+`GET /v2/authorized/biomarkers/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -96,7 +96,7 @@ get_queryset()
 
 <a id="opIdauthorized_chemotherapies_list"></a>
 
-`GET /moh/v2/authorized/chemotherapies/`
+`GET /v2/authorized/chemotherapies/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -157,7 +157,7 @@ get_queryset()
 
 <a id="opIdauthorized_comorbidities_list"></a>
 
-`GET /moh/v2/authorized/comorbidities/`
+`GET /v2/authorized/comorbidities/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -216,7 +216,7 @@ get_queryset()
 
 <a id="opIdauthorized_donor_with_clinical_data_list"></a>
 
-`GET /moh/v2/authorized/donor_with_clinical_data/`
+`GET /v2/authorized/donor_with_clinical_data/`
 
 This viewset provides access to Donor model and its related clinical data.
 It uses the DonorWithClinicalDataSerializer for serialization.
@@ -542,7 +542,7 @@ available in a single database query, improving the performance of the viewset.
 
 <a id="opIdauthorized_donors_list"></a>
 
-`GET /moh/v2/authorized/donors/`
+`GET /v2/authorized/donors/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -625,7 +625,7 @@ get_queryset()
 
 <a id="opIdauthorized_exposures_list"></a>
 
-`GET /moh/v2/authorized/exposures/`
+`GET /v2/authorized/exposures/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -680,7 +680,7 @@ get_queryset()
 
 <a id="opIdauthorized_follow_ups_list"></a>
 
-`GET /moh/v2/authorized/follow_ups/`
+`GET /v2/authorized/follow_ups/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -755,7 +755,7 @@ get_queryset()
 
 <a id="opIdauthorized_hormone_therapies_list"></a>
 
-`GET /moh/v2/authorized/hormone_therapies/`
+`GET /v2/authorized/hormone_therapies/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -816,7 +816,7 @@ get_queryset()
 
 <a id="opIdauthorized_immunotherapies_list"></a>
 
-`GET /moh/v2/authorized/immunotherapies/`
+`GET /v2/authorized/immunotherapies/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -879,7 +879,7 @@ get_queryset()
 
 <a id="opIdauthorized_primary_diagnoses_list"></a>
 
-`GET /moh/v2/authorized/primary_diagnoses/`
+`GET /v2/authorized/primary_diagnoses/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -950,7 +950,7 @@ get_queryset()
 
 <a id="opIdauthorized_programs_list"></a>
 
-`GET /moh/v2/authorized/programs/`
+`GET /v2/authorized/programs/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -997,7 +997,7 @@ get_queryset()
 
 <a id="opIdauthorized_radiations_list"></a>
 
-`GET /moh/v2/authorized/radiations/`
+`GET /v2/authorized/radiations/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -1060,7 +1060,7 @@ get_queryset()
 
 <a id="opIdauthorized_sample_registrations_list"></a>
 
-`GET /moh/v2/authorized/sample_registrations/`
+`GET /v2/authorized/sample_registrations/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -1117,7 +1117,7 @@ get_queryset()
 
 <a id="opIdauthorized_specimens_list"></a>
 
-`GET /moh/v2/authorized/specimens/`
+`GET /v2/authorized/specimens/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -1200,7 +1200,7 @@ get_queryset()
 
 <a id="opIdauthorized_surgeries_list"></a>
 
-`GET /moh/v2/authorized/surgeries/`
+`GET /v2/authorized/surgeries/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -1283,7 +1283,7 @@ get_queryset()
 
 <a id="opIdauthorized_treatments_list"></a>
 
-`GET /moh/v2/authorized/treatments/`
+`GET /v2/authorized/treatments/`
 
 This mixin should be used for viewsets that need to restrict access.
 
@@ -1360,7 +1360,7 @@ get_queryset()
 
 <a id="opIddiscovery_biomarkers_list"></a>
 
-`GET /moh/v2/discovery/biomarkers/`
+`GET /v2/discovery/biomarkers/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -1410,7 +1410,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_chemotherapies_list"></a>
 
-`GET /moh/v2/discovery/chemotherapies/`
+`GET /v2/discovery/chemotherapies/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -1450,7 +1450,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_comorbidities_list"></a>
 
-`GET /moh/v2/discovery/comorbidities/`
+`GET /v2/discovery/comorbidities/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -1489,7 +1489,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_donors_list"></a>
 
-`GET /moh/v2/discovery/donors/`
+`GET /v2/discovery/donors/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -1547,7 +1547,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_exposures_list"></a>
 
-`GET /moh/v2/discovery/exposures/`
+`GET /v2/discovery/exposures/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -1583,7 +1583,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_follow_ups_list"></a>
 
-`GET /moh/v2/discovery/follow_ups/`
+`GET /v2/discovery/follow_ups/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -1629,7 +1629,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_hormone_therapies_list"></a>
 
-`GET /moh/v2/discovery/hormone_therapies/`
+`GET /v2/discovery/hormone_therapies/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -1669,7 +1669,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_immunotherapies_list"></a>
 
-`GET /moh/v2/discovery/immunotherapies/`
+`GET /v2/discovery/immunotherapies/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -1710,7 +1710,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_overview_cancer_type_count_retrieve"></a>
 
-`GET /moh/v2/discovery/overview/cancer_type_count`
+`GET /v2/discovery/overview/cancer_type_count`
 
 MoH cancer types count
 
@@ -1728,7 +1728,7 @@ MoH cancer types count
 
 <a id="opIddiscovery_overview_cohort_count_retrieve"></a>
 
-`GET /moh/v2/discovery/overview/cohort_count`
+`GET /v2/discovery/overview/cohort_count`
 
 MoH cohorts count
 
@@ -1746,7 +1746,7 @@ MoH cohorts count
 
 <a id="opIddiscovery_overview_diagnosis_age_count_retrieve"></a>
 
-`GET /moh/v2/discovery/overview/diagnosis_age_count`
+`GET /v2/discovery/overview/diagnosis_age_count`
 
 MoH Diagnosis age count
 
@@ -1764,7 +1764,7 @@ MoH Diagnosis age count
 
 <a id="opIddiscovery_overview_gender_count_retrieve"></a>
 
-`GET /moh/v2/discovery/overview/gender_count`
+`GET /v2/discovery/overview/gender_count`
 
 MoH gender count
 
@@ -1782,7 +1782,7 @@ MoH gender count
 
 <a id="opIddiscovery_overview_individual_count_retrieve"></a>
 
-`GET /moh/v2/discovery/overview/individual_count`
+`GET /v2/discovery/overview/individual_count`
 
 MoH individuals count
 
@@ -1800,7 +1800,7 @@ MoH individuals count
 
 <a id="opIddiscovery_overview_patients_per_cohort_retrieve"></a>
 
-`GET /moh/v2/discovery/overview/patients_per_cohort`
+`GET /v2/discovery/overview/patients_per_cohort`
 
 MoH patients per cohort count
 
@@ -1818,7 +1818,7 @@ MoH patients per cohort count
 
 <a id="opIddiscovery_overview_treatment_type_count_retrieve"></a>
 
-`GET /moh/v2/discovery/overview/treatment_type_count`
+`GET /v2/discovery/overview/treatment_type_count`
 
 MoH Treatments type count
 
@@ -1836,7 +1836,7 @@ MoH Treatments type count
 
 <a id="opIddiscovery_primary_diagnoses_list"></a>
 
-`GET /moh/v2/discovery/primary_diagnoses/`
+`GET /v2/discovery/primary_diagnoses/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -1881,7 +1881,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_radiations_list"></a>
 
-`GET /moh/v2/discovery/radiations/`
+`GET /v2/discovery/radiations/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -1922,7 +1922,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_sample_registrations_list"></a>
 
-`GET /moh/v2/discovery/sample_registrations/`
+`GET /v2/discovery/sample_registrations/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -1960,7 +1960,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_specimens_list"></a>
 
-`GET /moh/v2/discovery/specimens/`
+`GET /v2/discovery/specimens/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -2011,7 +2011,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_surgeries_list"></a>
 
-`GET /moh/v2/discovery/surgeries/`
+`GET /v2/discovery/surgeries/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
@@ -2059,7 +2059,7 @@ list(request, *args, **kwargs)
 
 <a id="opIddiscovery_treatments_list"></a>
 
-`GET /moh/v2/discovery/treatments/`
+`GET /v2/discovery/treatments/`
 
 This mixin should be used for viewsets that need to expose
 discovery information about the donor they represent.
