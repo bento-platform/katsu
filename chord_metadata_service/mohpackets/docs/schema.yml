@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: This is the RESTful API for the MoH Service.
 paths:
-  /moh/v2/authorized/biomarkers/:
+  /v2/authorized/biomarkers/:
     get:
       operationId: authorized_biomarkers_list
       description: |-
@@ -126,7 +126,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedBiomarkerList'
           description: ''
-  /moh/v2/authorized/chemotherapies/:
+  /v2/authorized/chemotherapies/:
     get:
       operationId: authorized_chemotherapies_list
       description: |-
@@ -206,7 +206,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedChemotherapyList'
           description: ''
-  /moh/v2/authorized/comorbidities/:
+  /v2/authorized/comorbidities/:
     get:
       operationId: authorized_comorbidities_list
       description: |-
@@ -282,7 +282,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedComorbidityList'
           description: ''
-  /moh/v2/authorized/donor_with_clinical_data/:
+  /v2/authorized/donor_with_clinical_data/:
     get:
       operationId: authorized_donor_with_clinical_data_list
       description: |-
@@ -428,7 +428,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedDonorWithClinicalDataList'
           description: ''
-  /moh/v2/authorized/donors/:
+  /v2/authorized/donors/:
     get:
       operationId: authorized_donors_list
       description: |-
@@ -579,7 +579,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedDonorList'
           description: ''
-  /moh/v2/authorized/exposures/:
+  /v2/authorized/exposures/:
     get:
       operationId: authorized_exposures_list
       description: |-
@@ -644,7 +644,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedExposureList'
           description: ''
-  /moh/v2/authorized/follow_ups/:
+  /v2/authorized/follow_ups/:
     get:
       operationId: authorized_follow_ups_list
       description: |-
@@ -747,7 +747,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedFollowUpList'
           description: ''
-  /moh/v2/authorized/hormone_therapies/:
+  /v2/authorized/hormone_therapies/:
     get:
       operationId: authorized_hormone_therapies_list
       description: |-
@@ -827,7 +827,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedHormoneTherapyList'
           description: ''
-  /moh/v2/authorized/immunotherapies/:
+  /v2/authorized/immunotherapies/:
     get:
       operationId: authorized_immunotherapies_list
       description: |-
@@ -911,7 +911,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedImmunotherapyList'
           description: ''
-  /moh/v2/authorized/primary_diagnoses/:
+  /v2/authorized/primary_diagnoses/:
     get:
       operationId: authorized_primary_diagnoses_list
       description: |-
@@ -1010,7 +1010,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedPrimaryDiagnosisList'
           description: ''
-  /moh/v2/authorized/programs/:
+  /v2/authorized/programs/:
     get:
       operationId: authorized_programs_list
       description: |-
@@ -1063,7 +1063,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedProgramList'
           description: ''
-  /moh/v2/authorized/radiations/:
+  /v2/authorized/radiations/:
     get:
       operationId: authorized_radiations_list
       description: |-
@@ -1147,7 +1147,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRadiationList'
           description: ''
-  /moh/v2/authorized/sample_registrations/:
+  /v2/authorized/sample_registrations/:
     get:
       operationId: authorized_sample_registrations_list
       description: |-
@@ -1218,7 +1218,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedSampleRegistrationList'
           description: ''
-  /moh/v2/authorized/specimens/:
+  /v2/authorized/specimens/:
     get:
       operationId: authorized_specimens_list
       description: |-
@@ -1341,7 +1341,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedSpecimenList'
           description: ''
-  /moh/v2/authorized/surgeries/:
+  /v2/authorized/surgeries/:
     get:
       operationId: authorized_surgeries_list
       description: |-
@@ -1453,7 +1453,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedSurgeryList'
           description: ''
-  /moh/v2/authorized/treatments/:
+  /v2/authorized/treatments/:
     get:
       operationId: authorized_treatments_list
       description: |-
@@ -1556,7 +1556,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTreatmentList'
           description: ''
-  /moh/v2/discovery/biomarkers/:
+  /v2/discovery/biomarkers/:
     get:
       operationId: discovery_biomarkers_list
       description: |-
@@ -1661,7 +1661,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/chemotherapies/:
+  /v2/discovery/chemotherapies/:
     get:
       operationId: discovery_chemotherapies_list
       description: |-
@@ -1724,7 +1724,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/comorbidities/:
+  /v2/discovery/comorbidities/:
     get:
       operationId: discovery_comorbidities_list
       description: |-
@@ -1783,7 +1783,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/donors/:
+  /v2/discovery/donors/:
     get:
       operationId: discovery_donors_list
       description: |-
@@ -1917,7 +1917,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/exposures/:
+  /v2/discovery/exposures/:
     get:
       operationId: discovery_exposures_list
       description: |-
@@ -1965,7 +1965,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/follow_ups/:
+  /v2/discovery/follow_ups/:
     get:
       operationId: discovery_follow_ups_list
       description: |-
@@ -2051,7 +2051,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/hormone_therapies/:
+  /v2/discovery/hormone_therapies/:
     get:
       operationId: discovery_hormone_therapies_list
       description: |-
@@ -2114,7 +2114,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/immunotherapies/:
+  /v2/discovery/immunotherapies/:
     get:
       operationId: discovery_immunotherapies_list
       description: |-
@@ -2181,7 +2181,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/overview/cancer_type_count:
+  /v2/discovery/overview/cancer_type_count:
     get:
       operationId: discovery_overview_cancer_type_count_retrieve
       description: MoH cancer types count
@@ -2196,7 +2196,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_cancer_type_count_response'
           description: ''
-  /moh/v2/discovery/overview/cohort_count:
+  /v2/discovery/overview/cohort_count:
     get:
       operationId: discovery_overview_cohort_count_retrieve
       description: MoH cohorts count
@@ -2211,7 +2211,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_cohort_count_response'
           description: ''
-  /moh/v2/discovery/overview/diagnosis_age_count:
+  /v2/discovery/overview/diagnosis_age_count:
     get:
       operationId: discovery_overview_diagnosis_age_count_retrieve
       description: MoH Diagnosis age count
@@ -2226,7 +2226,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_diagnosis_age_count_response'
           description: ''
-  /moh/v2/discovery/overview/gender_count:
+  /v2/discovery/overview/gender_count:
     get:
       operationId: discovery_overview_gender_count_retrieve
       description: MoH gender count
@@ -2241,7 +2241,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_gender_count_response'
           description: ''
-  /moh/v2/discovery/overview/individual_count:
+  /v2/discovery/overview/individual_count:
     get:
       operationId: discovery_overview_individual_count_retrieve
       description: MoH individuals count
@@ -2256,7 +2256,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_individual_count_response'
           description: ''
-  /moh/v2/discovery/overview/patients_per_cohort:
+  /v2/discovery/overview/patients_per_cohort:
     get:
       operationId: discovery_overview_patients_per_cohort_retrieve
       description: MoH patients per cohort count
@@ -2271,7 +2271,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_patient_per_cohort_response'
           description: ''
-  /moh/v2/discovery/overview/treatment_type_count:
+  /v2/discovery/overview/treatment_type_count:
     get:
       operationId: discovery_overview_treatment_type_count_retrieve
       description: MoH Treatments type count
@@ -2286,7 +2286,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/moh_overview_treatment_type_count_response'
           description: ''
-  /moh/v2/discovery/primary_diagnoses/:
+  /v2/discovery/primary_diagnoses/:
     get:
       operationId: discovery_primary_diagnoses_list
       description: |-
@@ -2368,7 +2368,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/radiations/:
+  /v2/discovery/radiations/:
     get:
       operationId: discovery_radiations_list
       description: |-
@@ -2435,7 +2435,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/sample_registrations/:
+  /v2/discovery/sample_registrations/:
     get:
       operationId: discovery_sample_registrations_list
       description: |-
@@ -2489,7 +2489,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/specimens/:
+  /v2/discovery/specimens/:
     get:
       operationId: discovery_specimens_list
       description: |-
@@ -2595,7 +2595,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/surgeries/:
+  /v2/discovery/surgeries/:
     get:
       operationId: discovery_surgeries_list
       description: |-
@@ -2690,7 +2690,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Discovery'
           description: ''
-  /moh/v2/discovery/treatments/:
+  /v2/discovery/treatments/:
     get:
       operationId: discovery_treatments_list
       description: |-
