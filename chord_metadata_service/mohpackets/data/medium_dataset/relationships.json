@@ -665,5 +665,33 @@
         }
       ]
     }
+  ],
+  "exposures": [
+    {
+      "range": [1, 160],
+      "targets": [
+        {
+          "range": [1, 40],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [161, 220],
+      "targets": [
+        {
+          "range": [71, 90],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [3, 3],
+          "field_name": "program_id"
+        }
+      ]
+    }
   ]
 }
