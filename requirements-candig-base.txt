@@ -1,4 +1,4 @@
-git+https://github.com/CanDIG/candigv2-authx.git#egg=candigv2-authx
+candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@new-auth-model
 Django==4.2
 psycopg==3.1.8
 djangorestframework==3.14.0

@@ -34,7 +34,6 @@ from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
-from authx.auth import is_site_admin
 
 import logging
 
@@ -78,9 +77,6 @@ class AuthorizedMixin:
     authentication_classes = auth_methods
 
     def get_queryset(self):
-        if is_site_admin(self.request, admin_secret=settings.CANDIG_OPA_SECRET):
-            filtered_queryset = super().get_queryset()
-            return filtered_queryset
         authorized_datasets = self.request.authorized_datasets_read
         filtered_queryset = (
             super().get_queryset().filter(program_id__in=authorized_datasets)

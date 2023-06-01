@@ -11,7 +11,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly, CustodianOrAdminOnly
+from chord_metadata_service.mohpackets.permissions import CanDIGPermissions
 from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
     ChemotherapySerializer,
@@ -135,7 +135,7 @@ def backup_db():
     responses={201: OpenApiTypes.STR},
 )
 @api_view(["POST"])
-@permission_classes([CustodianOrAdminOnly])
+@permission_classes([CanDIGPermissions])
 
 def ingest_programs(request):
     serializer = ProgramSerializer
@@ -156,7 +156,7 @@ def ingest_programs(request):
 class IngestProgramViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Programs"
     serializer = ProgramSerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 # DONOR
@@ -164,7 +164,7 @@ class IngestProgramViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestDonorViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Donors"
     serializer = DonorSerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 # PRIMARY DIAGNOSIS
@@ -172,7 +172,7 @@ class IngestDonorViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestPrimaryDiagnosisViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Primary Diagnoses"
     serializer = PrimaryDiagnosisSerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 # SPECIMEN
@@ -180,7 +180,7 @@ class IngestPrimaryDiagnosisViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestSpecimenViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Specimen"
     serializer = SpecimenSerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 
@@ -189,7 +189,7 @@ class IngestSpecimenViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestSampleRegistrationViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Sample Registrations"
     serializer = SampleRegistrationSerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 
@@ -198,7 +198,7 @@ class IngestSampleRegistrationViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestTreatmentViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Treatments"
     serializer = TreatmentSerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 # CHEMOTHERAPY
@@ -206,7 +206,7 @@ class IngestTreatmentViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestChemotherapyViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Chemotherapies"
     serializer = ChemotherapySerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 # RADIATION
@@ -214,7 +214,7 @@ class IngestChemotherapyViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestRadiationViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Radiations"
     serializer = RadiationSerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 # SURGERY
@@ -222,7 +222,7 @@ class IngestRadiationViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestSurgeryViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Surgeries"
     serializer = SurgerySerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 
@@ -231,7 +231,7 @@ class IngestSurgeryViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestHormoneTherapyViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Hormone Therapies"
     serializer = HormoneTherapySerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 # IMMUNOTHERAPY
@@ -239,7 +239,7 @@ class IngestHormoneTherapyViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestImmunotherapyViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Immunotherapies"
     serializer = ImmunotherapySerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 
@@ -248,7 +248,7 @@ class IngestImmunotherapyViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestFollowUpViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Followups"
     serializer = FollowUpSerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 # BIOMARKER
@@ -256,7 +256,7 @@ class IngestFollowUpViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestBiomarkerViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Biomarkers"
     serializer = BiomarkerSerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 # COMORBIDITY
@@ -264,7 +264,7 @@ class IngestBiomarkerViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestComorbidityViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Comorbidities"
     serializer = ComorbiditySerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 # EXPOSURE
@@ -272,14 +272,14 @@ class IngestComorbidityViewSet(IngestMixin, viewsets.GenericViewSet):
 class IngestExposureViewSet(IngestMixin, viewsets.GenericViewSet):
     ingest_name = "Exposures"
     serializer = ExposureSerializer
-    permission_classes = [CustodianOrAdminOnly]
+    permission_classes = [CanDIGPermissions]
     throttle_classes = [MoHRateThrottle]
 
 @extend_schema(
     responses={204: OpenApiTypes.STR},
 )
 @api_view(["DELETE"])
-@permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGPermissions])
 def delete_all(request):
     """
     Clean all the tables in the database
@@ -297,6 +297,6 @@ def delete_all(request):
     responses={200: OpenApiTypes.STR},
 )
 @api_view(["GET"])
-@permission_classes([CanDIGAdminOrReadOnly])
+@permission_classes([CanDIGPermissions])
 def version_check(_request):
     return JsonResponse({"version": "2.0.0"}, status=status.HTTP_200_OK)

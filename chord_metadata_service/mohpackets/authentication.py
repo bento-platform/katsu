@@ -1,6 +1,6 @@
 import logging
 
-from authx.auth import get_opa_datasets
+from authx.auth import get_readable_datasets
 from django.conf import settings
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from drf_spectacular.plumbing import build_bearer_security_scheme_object
@@ -18,12 +18,10 @@ class TokenAuthentication(BaseAuthentication):
         else:
             opa_secret = settings.CANDIG_OPA_SECRET
             try:
-                authorized_datasets_read = get_opa_datasets(request, admin_secret=opa_secret)
+                authorized_datasets_read = get_readable_datasets(request, admin_secret=opa_secret)
                 # add dataset to request
                 logger.debug(f"User is authorized to access {authorized_datasets_read} for reading")
                 request.authorized_datasets_read = authorized_datasets_read
-                request.authorized_datasets_write = ["SYNTHETIC_1"] # TODO: Use corresponding OPA function when ready
-
             except Exception as e:
                 logger.exception(
                     f"An error occurred in OPA get_authorized_datasets: {e}"

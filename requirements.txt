@@ -1,4 +1,4 @@
-candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@main
+candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@new-auth-model
 bento-lib==3.2.0
 Django==4.1.1
 django-autocomplete-light==3.9.4
