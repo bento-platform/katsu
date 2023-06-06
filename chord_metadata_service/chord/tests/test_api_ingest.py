@@ -9,9 +9,9 @@ from .constants import VALID_PROJECT_1, valid_dataset_1, valid_table_1
 from ..workflows.metadata import METADATA_WORKFLOWS
 
 
-def generate_phenopackets_ingest(table_id):
+def generate_phenopackets_ingest(dataset_id):
     return {
-        "table_id": table_id,
+        "dataset_id": dataset_id,
         "workflow_id": "phenopackets_json",
         "workflow_metadata": METADATA_WORKFLOWS["ingestion"]["phenopackets_json"],
         "workflow_outputs": {
@@ -57,12 +57,6 @@ class IngestTest(APITestCase):
                              content_type="application/json")
         self.dataset = r.json()
 
-        table_ownership, table_record = valid_table_1(self.dataset["identifier"])
-        self.client.post(reverse("tableownership-list"), data=json.dumps(table_ownership),
-                         content_type="application/json")
-        r = self.client.post(reverse("table-list"), data=json.dumps(table_record), content_type="application/json")
-        self.table = r.json()
-
     def test_phenopackets_ingest(self):
         # No ingestion body
         r = self.client.post(reverse("ingest"), content_type="application/json")
@@ -76,10 +70,10 @@ class IngestTest(APITestCase):
             generate_phenopackets_ingest(str(uuid4())),
 
             # Non-existent workflow ID
-            {**generate_phenopackets_ingest(self.table["identifier"]), "workflow_id": "phenopackets_json_invalid"},
+            {**generate_phenopackets_ingest(self.dataset["identifier"]), "workflow_id": "phenopackets_json_invalid"},
 
             # json_document not in output
-            {**generate_phenopackets_ingest(self.table["identifier"]), "workflow_outputs": {}},
+            {**generate_phenopackets_ingest(self.dataset["identifier"]), "workflow_outputs": {}},
         )
 
         for data in bad_ingest_bodies:

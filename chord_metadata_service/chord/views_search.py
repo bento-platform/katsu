@@ -51,97 +51,8 @@ OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-def chord_table_representation(table: Table) -> dict:
-    return {
-        "id": table.identifier,
-        "name": table.name,
-        "metadata": {
-            "dataset_id": table.ownership_record.dataset_id,
-            "created": table.created.isoformat(),
-            "updated": table.updated.isoformat()
-        },
-        "data_type": table.data_type,
-        "schema": DATA_TYPES[table.data_type]["schema"],
-    }
-
-
-@api_view(["GET", "POST"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def table_list(request):
-    if request.method == "POST":
-        request_data = json.loads(request.body)  # TODO: Handle JSON errors here
-
-        name = request_data.get("name", "").strip()
-        data_type = request_data.get("data_type", "")
-        dataset = request_data.get("dataset")
-
-        if name == "":
-            return Response(errors.bad_request_error("Missing or blank name field"), status=400)
-
-        if data_type not in DATA_TYPES:
-            return Response(errors.bad_request_error(f"Invalid data type for table: {data_type}"), status=400)
-
-        table_id = str(uuid.uuid4())
-
-        table_ownership = TableOwnership.objects.create(
-            table_id=table_id,
-            service_id=CHORD_SERVICE_ID,
-            service_artifact=CHORD_SERVICE_ARTIFACT,
-            dataset=Dataset.objects.get(identifier=dataset),
-        )
-
-        table = Table.objects.create(
-            ownership_record=table_ownership,
-            name=name,
-            data_type=data_type,
-        )
-
-        return Response(chord_table_representation(table))
-
-    # GET
-
-    data_types = request.query_params.getlist("data-type")
-
-    if len(data_types) == 0 or next((dt for dt in data_types if dt not in DATA_TYPES), None) is not None:
-        return Response(errors.bad_request_error(f"Missing or invalid data type(s) (Specified: {data_types})"),
-                        status=400)
-
-    return Response([chord_table_representation(t) for t in Table.objects.filter(data_type__in=data_types)])
-
-
-# TODO: Remove pragma: no cover when POST implemented
-@api_view(["GET", "DELETE"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def table_detail(request, table_id):  # pragma: no cover
-    # TODO: Implement GET, POST
-    # TODO: Permissions: Check if user has control / more direct access over this table and/or dataset?
-    #  Or just always use owner...
-    try:
-        table = Table.objects.get(ownership_record_id=table_id)
-        table_ownership = TableOwnership.objects.get(table_id=table_id)
-    except Table.DoesNotExist:
-        return Response(errors.not_found_error(f"Table with ID {table_id} not found"), status=404)
-    except TableOwnership.DoesNotExist:
-        return Response(
-            errors.not_found_error(f"Table ownership record for table with ID {table_id} not found"), status=404)
-
-    if request.method == "DELETE":
-        # First, delete the table record itself - use the cascade from the ownership record
-        table_ownership.delete()  # also deletes table
-
-        # Then, run cleanup
-        logger.info(f"Running cleanup after deleting table {table_id} via /tables Bento data service endpoint")
-        n_removed = run_all_cleanup()
-        logger.info(f"Cleanup: removed {n_removed} objects in total")
-
-        return Response(status=204)
-
-    # GET
-    return Response(chord_table_representation(table))
-
-
-def experiment_table_summary(table):
-    experiments = Experiment.objects.filter(table=table)  # TODO
+def experiment_dataset_summary(dataset):
+    experiments = Experiment.objects.filter(dataset=dataset)
 
     return Response({
         "count": experiments.count(),
@@ -149,8 +60,8 @@ def experiment_table_summary(table):
     })
 
 
-def mcodepacket_table_summary(table):
-    mcodepackets = MCodePacket.objects.filter(table=table)  # TODO
+def mcodepacket_dataset_summary(dataset):
+    mcodepackets = MCodePacket.objects.filter(dataset=dataset)  # TODO
 
     return Response({
         "count": mcodepackets.count(),
@@ -158,8 +69,8 @@ def mcodepacket_table_summary(table):
     })
 
 
-def phenopacket_table_summary(table):
-    phenopacket_qs = Phenopacket.objects.filter(table=table)  # TODO
+def phenopacket_dataset_summary(dataset):
+    phenopacket_qs = Phenopacket.objects.filter(dataset=dataset)  # TODO
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema
@@ -188,22 +99,10 @@ def phenopacket_table_summary(table):
 
 
 SUMMARY_HANDLERS: Dict[str, Callable[[Any], Response]] = {
-    DATA_TYPE_EXPERIMENT: experiment_table_summary,
-    DATA_TYPE_MCODEPACKET: mcodepacket_table_summary,
-    DATA_TYPE_PHENOPACKET: phenopacket_table_summary,
+    DATA_TYPE_EXPERIMENT: experiment_dataset_summary,
+    DATA_TYPE_MCODEPACKET: mcodepacket_dataset_summary,
+    DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary,
 }
-
-
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
-@api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly])
-def chord_table_summary(_request, table_id):
-    try:
-        table = Table.objects.get(ownership_record_id=table_id)
-        return SUMMARY_HANDLERS[table.data_type](table)
-    except Table.DoesNotExist:
-        return Response(errors.not_found_error(f"Table with ID {table_id} not found"), status=404)
 
 
 # TODO: CHORD-standardized logging
@@ -704,59 +603,3 @@ def chord_table_search_response(request, table_id, internal=False):
         return Response(build_search_response(data, start))
 
     return Response(data)
-
-
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
-@api_view(["GET", "POST"])
-@permission_classes([AllowAny])
-def chord_public_table_search(request, table_id):
-    """
-    Returns a Boolean value to indicate that a match with the query exists in
-    the given table.
-    See `chord_private_table_search for a detail of the request parameters
-
-    - Returns
-      {
-        time: query duration,
-        results: boolean
-      }
-    """
-    # Search data types in specific tables without leaking internal data
-    return chord_table_search_response(request, table_id, internal=False)
-
-
-# Mounted on /private/, so will get protected anyway; this allows for access from federation service
-# TODO: Ugly and misleading permissions
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
-@api_view(["GET", "POST"])
-@permission_classes([AllowAny])
-def chord_private_table_search(request, table_id):
-    """
-    Free-form search using Bento specific syntax in a given table.
-    request parameters (either via GET or POST) must contain:
-    - query: a Bento specific object representing a query e.g.:
-        ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
-        Note: for GET method, it must be encoded as a JSON string.
-    - optional parameters:
-        - output: predefined output types in {"values_list", "bento_search_result"}
-          If not set, the objects in the results
-          set will be serialized using the default serializer for this data-type
-          (for example: phenopackets serializer)
-        - field: when `output="values_list"`, defines which field should be in
-           used to get the list of values.
-
-    - Returns:
-        {
-            time: query duration,
-            results: [] see infra.
-        }
-        Serialized objects of the result set. If the table `data-type` is `experiment`
-        the Experiments serializer will be used.
-        The optional `output` parameter can be used to define a more restrictive
-        response.
-    """
-    # Search data types in specific tables
-    # Private search endpoints are protected by URL namespace, not by Django permissions.
-    return chord_table_search_response(request, table_id, internal=True)

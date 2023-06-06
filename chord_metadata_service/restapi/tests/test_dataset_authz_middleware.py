@@ -53,9 +53,9 @@ class GetPhenopacketsWithOpaTest(APITestCase):
         self.t2 = Table.objects.create(ownership_record=to2, name="Table 2", data_type=DATA_TYPE_PHENOPACKET)
 
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_1, self.t.identifier)
+            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_1, self.d.identifier)
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_2, self.t2.identifier)
+            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_2, self.d2.identifier)
 
     def test_get_phenopackets(self):
         """

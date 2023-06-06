@@ -77,10 +77,6 @@ class Dataset(models.Model):
             ),
         })
 
-    @property
-    def n_of_tables(self):
-        return TableOwnership.objects.filter(dataset=self).count()
-
     # --------------------------- DATS model fields ---------------------------
 
     alternate_identifiers = models.JSONField(blank=True, default=list,

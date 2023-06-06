@@ -48,25 +48,14 @@ class ExportCBioTest(TestCase):
                                         project=p)
         self.study_id = str(self.d.identifier)
 
-        # TODO: Real service ID
-        # table for phenopackets
-        to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
-                                           dataset=self.d)
-        self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
-
-        # table for experiments metadata
-        to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
-                                               service_artifact="experiments", dataset=self.d)
-        self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
-
-        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
         # ingest list of experiments
         self.exp = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.t_exp.identifier
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.d.identifier
         )
         # append derived MAF files to experiment results
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT, self.t_exp.identifier
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT, self.d.identifier
         )
         self.exp_res = ExperimentResult.objects.all()
 

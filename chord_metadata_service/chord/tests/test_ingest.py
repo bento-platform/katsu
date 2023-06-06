@@ -128,7 +128,7 @@ class IngestTest(TestCase):
     #     self.assertEqual(p3.pk, p1.pk)
 
     def test_ingesting_phenopackets_json(self):
-        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
         self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
 
         self.assertEqual(p.subject.id, EXAMPLE_INGEST_PHENOPACKET["subject"]["id"])
@@ -162,8 +162,8 @@ class IngestTest(TestCase):
         # TODO: More
 
     def test_reingesting_updating_phenopackets_json(self):
-        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
-        p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS_UPDATE, self.t.identifier)
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
+        p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS_UPDATE, self.d.identifier)
 
         self.assertNotEqual(p.id, p2.id)
         self.assertEqual(p.subject.id, p2.subject.id)
@@ -202,12 +202,12 @@ class IngestTest(TestCase):
 
     def test_ingesting_experiments_json(self):
         # ingest phenopackets data in order to match to biosample ids
-        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
         self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
 
         # ingest list of experiments
         experiments = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.t_exp.identifier
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.d.identifier
         )
 
         # experiments
@@ -249,9 +249,9 @@ class IngestTest(TestCase):
 
     def test_ingesting_experiment_results_json(self):
         # ingest list of experiments
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.t_exp.identifier
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.d.identifier
         )
         # ingest list of experiment results
         experiment_results = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
@@ -280,7 +280,7 @@ class IngestISOAgeToNumberTest(TestCase):
 
     def test_ingesting_phenopackets_json(self):
         ingested_phenopackets = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_MULTIPLE_OUTPUTS, self.t.identifier
+            EXAMPLE_INGEST_MULTIPLE_OUTPUTS, self.d.identifier
         )
         self.assertIsInstance(ingested_phenopackets, list)
         # test for a single individual ind:NA20509001

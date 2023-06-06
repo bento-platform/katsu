@@ -4,7 +4,7 @@ import json
 import uuid
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
-from chord_metadata_service.chord.models import Table, TableOwnership
+from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERIMENT_RESULT_SCHEMA
 from chord_metadata_service.phenopackets import models as pm
@@ -69,7 +69,7 @@ def validate_experiment(experiment_data, idx: Optional[int] = None) -> None:
 
 def ingest_experiment(
     experiment_data: dict,
-    table_id: str,
+    dataset_id: str,
     validate: bool = True,
     idx: Optional[int] = None,
 ) -> em.Experiment:
@@ -132,7 +132,7 @@ def ingest_experiment(
         biosample=biosample,
         instrument=instrument_db,
         extra_properties=extra_properties,
-        table=Table.objects.get(ownership_record_id=table_id, data_type=DATA_TYPE_EXPERIMENT)
+        dataset=Dataset.objects.get(identifier=dataset_id)
     )
 
     # create m2m relationships
@@ -141,13 +141,13 @@ def ingest_experiment(
     return new_experiment
 
 
-def ingest_experiments_workflow(workflow_outputs, table_id: str) -> list[em.Experiment]:
+def ingest_experiments_workflow(workflow_outputs, dataset_id: str) -> list[em.Experiment]:
     with workflow_file_output_to_path(get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
         logger.info(f"Attempting ingestion of experiments from path: {json_doc_path}")
         with open(json_doc_path, "r") as jf:
             json_data: dict = json.load(jf)
 
-    dataset = TableOwnership.objects.get(table_id=table_id).dataset
+    dataset = Dataset.objects.get(identifier=dataset_id)
 
     for rs in json_data.get("resources", []):
         dataset.additional_resources.add(ingest_resource(rs))
@@ -159,7 +159,7 @@ def ingest_experiments_workflow(workflow_outputs, table_id: str) -> list[em.Expe
         validate_experiment(exp, idx)
 
     # Then, if everything passes, ingest the experiments. Don't re-do the validation in this case.
-    return [ingest_experiment(exp, table_id, validate=False) for exp in exps]
+    return [ingest_experiment(exp, dataset_id, validate=False) for exp in exps]
 
 
 def ingest_derived_experiment_results(json_data: list[dict]) -> list[em.ExperimentResult]:

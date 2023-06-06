@@ -338,6 +338,8 @@ class Phenopacket(BaseExtraProperties, IndexableMixin):
     # TODO OneToOneField
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
     table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+    dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOPACKET, "extra_properties"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

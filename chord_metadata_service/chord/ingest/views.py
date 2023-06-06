@@ -45,6 +45,7 @@ def ingest(request):
     if not BENTO_INGEST_SCHEMA_VALIDATOR.is_valid(request.data):
         return Response(errors.bad_request_error("Invalid ingest request body"), status=400)  # TODO: Validation errors
 
+    # TODO: replace with dataset logic
     table_id = request.data["table_id"]
 
     if table_id not in TABLE_ID_OVERRIDES:

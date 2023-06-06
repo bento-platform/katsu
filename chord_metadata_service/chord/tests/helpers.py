@@ -21,6 +21,8 @@ class ProjectTestCase(TestCase):
             data_use=VALID_DATA_USE_1,
             project=cls.project
         )
+
+        # TODO: remove
         cls.table_ownership = TableOwnership.objects.create(
             table_id=str(uuid4()),
             service_id=str(uuid4()),

@@ -23,6 +23,7 @@ LINKED_FIELD_SETS_SCHEMA_VALIDATOR = Draft7Validator(LINKED_FIELD_SETS_SCHEMA)
 #############################################################
 
 
+# TODO: remove
 class TableOwnershipSerializer(GenericSerializer):
     class Meta:
         model = TableOwnership

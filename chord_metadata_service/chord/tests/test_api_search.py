@@ -41,71 +41,16 @@ from .constants import (
 from ..models import Project, Dataset, TableOwnership, Table
 from ..data_types import (
     DATA_TYPE_EXPERIMENT,
-    DATA_TYPE_PHENOPACKET,
-    DATA_TYPES
+    DATA_TYPE_PHENOPACKET
 )
 
 POST_GET = ("POST", "GET")
-
-
-class TableTest(APITestCase):
-    @staticmethod
-    def table_rep(table, created, updated):
-        return {
-            "id": table["identifier"],
-            "name": table["name"],
-            "metadata": {
-                "dataset_id": table["dataset"]["identifier"],
-                "created": created,
-                "updated": updated
-            },
-            "data_type": table["data_type"],
-            "schema": DATA_TYPES[table["data_type"]]["schema"],
-        }
-
-    def setUp(self) -> None:
-        # Add example data
-
-        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
-        self.project = r.json()
-
-        r = self.client.post('/api/datasets', data=json.dumps(valid_dataset_1(self.project["identifier"])),
-                             content_type="application/json")
-        self.dataset = r.json()
-
-        to, tr = valid_table_1(self.dataset["identifier"])
-        self.client.post(reverse("tableownership-list"), data=json.dumps(to), content_type="application/json")
-        r = self.client.post(reverse("table-list"), data=json.dumps(tr), content_type="application/json")
-        self.table = r.json()
-
-    def test_chord_table_list(self):
-        # No data type specified
-        r = self.client.get(reverse("chord-table-list"))
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
-        r = self.client.get(reverse("chord-table-list"), {"data-type": DATA_TYPE_PHENOPACKET})
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        c = r.json()
-        self.assertEqual(len(c), 1)
-        self.assertEqual(c[0], self.table_rep(self.table, c[0]["metadata"]["created"], c[0]["metadata"]["updated"]))
-
-    def test_table_summary(self):
-        r = self.client.get(reverse("table-summary", kwargs={"table_id": str(uuid.uuid4())}))
-        self.assertEqual(r.status_code, 404)
-
-        r = self.client.get(reverse("table-summary", kwargs={"table_id": self.table["identifier"]}))
-        s = r.json()
-        self.assertEqual(s["count"], 0)  # No phenopackets
-        self.assertIn("data_type_specific", s)
 
 
 class SearchTest(APITestCase):
     def setUp(self) -> None:
         self.project = Project.objects.create(**VALID_PROJECT_1)
         self.dataset = Dataset.objects.create(**valid_dataset_1(self.project))
-        to, tr = valid_table_1(self.dataset.identifier, model_compatible=True)
-        TableOwnership.objects.create(**to)
-        self.table = Table.objects.create(**tr)
 
         # Set up a dummy phenopacket
 
@@ -123,7 +68,7 @@ class SearchTest(APITestCase):
             id="phenopacket_id:1",
             subject=self.individual,
             meta_data=self.meta_data,
-            table=self.table
+            dataset=self.dataset
         )
 
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
@@ -132,16 +77,11 @@ class SearchTest(APITestCase):
             **valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
 
-        # table for experiments metadata
-        to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
-                                               service_artifact="experiments", dataset=self.dataset)
-        self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
-
         # add Experiments metadata and link to self.biosample_1
         self.instrument = Instrument.objects.create(**valid_instrument())
         self.experiment_result = ExperimentResult.objects.create(**valid_experiment_result())
         self.experiment = Experiment.objects.create(**valid_experiment(
-            biosample=self.biosample_1, instrument=self.instrument, table=self.t_exp))
+            biosample=self.biosample_1, instrument=self.instrument, dataset=self.dataset))
         self.experiment.experiment_results.set([self.experiment_result])
 
     def _search_call(self, endpoint, args=None, data=None, method="GET"):
@@ -234,122 +174,13 @@ class SearchTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
 
-            self.assertIn(str(self.table.identifier), c["results"])
+            self.assertIn(str(self.dataset.identifier), c["results"])
             self.assertEqual(c["results"][str(self.table.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
             self.assertEqual(self.phenopacket.id, c["results"][str(self.table.identifier)]["matches"][0]["id"])
 
         # TODO: Check schema?
 
-    def test_private_table_search_1(self):
-        # No body
-
-        for method in POST_GET:
-            r = self._search_call("public-table-search", args=[str(self.table.identifier)], method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_private_table_search_2(self):
-        # No query
-        for method in POST_GET:
-            r = self._search_call("public-table-search", args=[str(self.table.identifier)], data={}, method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data={}, method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_private_table_search_3(self):
-        # Bad syntax for query
-        d = {"query": ["hello", "world"]}
-        for method in POST_GET:
-            r = self._search_call("public-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_private_table_search_4(self):
-        # Valid query with one result
-
-        d = {"query": TEST_SEARCH_QUERY_1}
-
-        for method in POST_GET:
-            r = self._search_call("public-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(c, True)
-
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)
-            self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
-
-    def test_private_table_search_5(self):
-        # Valid query: literal "true"
-
-        d = {"query": True}
-
-        for method in POST_GET:
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)
-            self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
-
-    def test_private_table_search_6(self):
-        # Valid query to search for phenotypic feature type
-
-        d = {"query": TEST_SEARCH_QUERY_3}
-
-        for method in POST_GET:
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)
-            self.assertEqual(len(c["results"][0]["phenotypic_features"]), 1)
-            self.assertEqual(c["results"][0]["phenotypic_features"][0]["type"]["label"], "Proptosis")
-
-    def test_private_table_search_7(self):
-        # Valid query to search for biosample sampled tissue term (this is exact match now only)
-
-        d = {"query": TEST_SEARCH_QUERY_4}
-
-        for method in POST_GET:
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)
-            self.assertEqual(len(c["results"][0]["biosamples"]), 2)
-            self.assertIn("bladder", c["results"][0]["biosamples"][0]["sampled_tissue"]["label"])
-
-    def test_private_table_search_8(self):
-        # Valid query to search for phenotypic feature type, case-insensitive
-
-        d = {"query": TEST_SEARCH_QUERY_5}
-
-        for method in POST_GET:
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)
-            self.assertEqual(len(c["results"][0]["phenotypic_features"]), 1)
-
-    def test_private_table_search_9(self):
-        # Valid query to search for biosample sample tissue label, case-insensitive
-
-        d = {
-            "query": TEST_SEARCH_QUERY_6
-        }
-
-        for method in POST_GET:
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)
-            self.assertEqual(len(c["results"][0]["biosamples"]), 2)
-
+    
     def test_private_search_10_experiment(self):
         # Valid search with result
 
@@ -362,7 +193,7 @@ class SearchTest(APITestCase):
             r = self._search_call("private-search", data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
-            self.assertIn(str(self.t_exp.identifier), c["results"])
+            self.assertIn(str(self.dataset.identifier), c["results"])
             self.assertEqual(c["results"][str(self.t_exp.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
             self.assertEqual(self.experiment.id, c["results"][str(self.t_exp.identifier)]["matches"][0]["id"])
             self.assertEqual(len(c["results"][str(self.t_exp.identifier)]["matches"]), 1)
@@ -395,122 +226,12 @@ class SearchTest(APITestCase):
             r = self._search_call("private-search", data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
-            self.assertIn(str(self.t_exp.identifier), c["results"])
+            self.assertIn(str(self.dataset.identifier), c["results"])
             self.assertEqual(c["results"][str(self.t_exp.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
             self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["experiment_type"],
                              "DNA Methylation")
 
-    # TODO table search fr experiments
-
-    def test_private_table_search_12(self):
-        # Valid query to search for subject id
-
-        d = {
-            "query": TEST_SEARCH_QUERY_9
-        }
-
-        for method in POST_GET:
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)
-            self.assertIn("patient:1", [phenopacket["subject"]["id"] for phenopacket in c["results"]])
-
-    def test_private_table_search_13(self):
-        # Valid query to search for biosample id in list
-
-        d = {
-            "query": TEST_SEARCH_QUERY_10
-        }
-
-        for method in POST_GET:
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)  # 1 phenopacket that contains 2 matching biosamples
-            self.assertIn("biosample_id:1", [b["id"]
-                                             for phenopacket in c["results"]
-                                             for b in phenopacket["biosamples"]
-                                             ])
-
-    def test_private_table_search_values_list(self):
-        # Valid query to search for biosample id in list
-        # Output as a list of values from a single field
-
-        d = {
-            "query": TEST_SEARCH_QUERY_10,
-            "output": "values_list",
-            "field": '["biosamples", "[item]", "id"]'
-        }
-
-        for method in POST_GET:
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 2)  # 2 biosamples id for the matching phenopacket
-            self.assertTrue(all([isinstance(item, str) for item in c["results"]]))
-
-    def test_private_table_experiment_search_values_list(self):
-        # Valid query to search for experiment
-        # Output as a list of values from a single field
-
-        d = {
-            "query": TEST_SEARCH_QUERY_7,
-            "output": "values_list",
-            "field": '["biosample"]'
-        }
-
-        for method in POST_GET:
-            r = self._search_call("private-table-search", args=[str(self.t_exp.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)  # 1 biosamples id in the database
-            self.assertEqual(c["results"][0], str(self.biosample_1.id))
-
-    def test_private_table_search_values_list_invalid_field_syntax(self):
-        # Valid query to search for biosample id in list
-        # Output as a list of values from a single field badly defined
-
-        d = {
-            "query": TEST_SEARCH_QUERY_10,
-            "output": "values_list",
-            "field": '["biosamples", "[item]"'
-        }
-
-        for method in POST_GET:
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_private_table_search_bento_search_results(self):
-        # Valid query to search for biosample id in list
-        # Output as Bento search (a list of 5 values)
-
-        d = {
-            "query": TEST_SEARCH_QUERY_10,
-            "output": "bento_search_result",
-        }
-
-        for method in POST_GET:
-            r = self._search_call("private-table-search", args=[str(self.table.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)  # 1 matching phenopacket
-            self.assertEqual(len(c["results"][0]), 5)    # 5 columns by result
-            self.assertEqual(
-                {"subject_id", "alternate_ids", "biosamples", "experiments_with_biosamples", "num_experiments"},
-                set(c["results"][0].keys()))
-            self.assertIsInstance(c["results"][0]["alternate_ids"], list)
-            self.assertIsInstance(c["results"][0]["experiments_with_biosamples"], list)
-            for biosample in c["results"][0]["experiments_with_biosamples"]:
-                self.assertIn("biosample_id", biosample)
-                self.assertIn("sampled_tissue", biosample)
-                self.assertIn("id", biosample["sampled_tissue"])
-                self.assertIn("label", biosample["sampled_tissue"])
-                self.assertIn("experiment", biosample)
-                self.assertIn("experiment_id", biosample["experiment"])
-                self.assertIn("experiment_type", biosample["experiment"])
-                self.assertIn("study_type", biosample["experiment"])
-
+    
     def test_private_search_bento_search_results(self):
         # Valid query to search for biosample id in list
         # Output as a bento search is valid
@@ -578,6 +299,6 @@ class SearchTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
 
-            self.assertIn(str(self.table.identifier), c["results"])
-            self.assertEqual(c["results"][str(self.table.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
+            self.assertIn(str(self.dataset.identifier), c["results"])
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
             self.assertEqual(self.phenopacket.id, c["results"][str(self.table.identifier)]["matches"][0]["id"])

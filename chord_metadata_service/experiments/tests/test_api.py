@@ -1,6 +1,5 @@
 import os
 from jsonschema.validators import Draft7Validator
-from uuid import uuid4
 
 from django.test import TestCase
 from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer
@@ -9,9 +8,8 @@ import io
 
 from rest_framework import status
 from rest_framework.test import APITestCase
-from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON, WORKFLOW_EXPERIMENTS_JSON
 
@@ -39,16 +37,10 @@ class GetExperimentsAppApisTest(APITestCase):
                                          project=p)
         self.d2 = Dataset.objects.create(title="dataset_2", description="Some dataset 2", data_use=VALID_DATA_USE_1,
                                          project=p)
-        to1 = TableOwnership.objects.create(table_id=uuid4(), service_id=uuid4(), service_artifact="metadata",
-                                            dataset=self.d1)
-        to2 = TableOwnership.objects.create(table_id=uuid4(), service_id=uuid4(), service_artifact="metadata",
-                                            dataset=self.d1)
-        self.t1 = Table.objects.create(ownership_record=to1, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
-        self.t2 = Table.objects.create(ownership_record=to2, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON, self.t1.identifier)
+            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON, self.d1.identifier)
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON, self.t2.identifier)
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON, self.d1.identifier)
 
     def test_get_experiments(self):
         response = self.client.get('/api/experiments')

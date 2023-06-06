@@ -57,6 +57,8 @@ class Experiment(models.Model, IndexableMixin):
     # SAMPLE
     biosample = models.ForeignKey(Biosample, on_delete=models.CASCADE, help_text=rec_help(d.EXPERIMENT, "biosample"))
     table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+    dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+    
     # EXPERIMENT RESULT
     #  - Many-to-many because experiment results can contain analyses involving multiple experiments,
     #    e.g., a pairwise analysis

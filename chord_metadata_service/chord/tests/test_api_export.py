@@ -54,7 +54,7 @@ class ExportTest(APITestCase):
                                                service_artifact="experiments", dataset=self.d)
         self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
 
-        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
 
     def test_export_cbio(self):
         # Test with no export body
