@@ -181,16 +181,6 @@ graph LR;
 title: 18000 Biomarkers
 ---
 graph LR;  
-  Biomarker_1_400 --> FollowUp_1_400 --> Treatment_1_400 --> PrimaryDiagnosis_1_200 --> Donor_1_100 --> Program_1;
-  Biomarker_401_800 --> Treatment_401_800--> PrimaryDiagnosis_201_400 --> Donor_101_200 --> Program_2;  
-  Biomarker_801_1200 --> PrimaryDiagnosis_401_600 --> Donor_201_300 --> Program_3;  
-  Biomarker_1201_1600 --> Donor_301_400 --> Program_4;  
-  Biomarker_1601_2000 --> FollowUp_1601_2000 --> Treatment_1601_2000 --> Donor_401_500 --> Program_5;  
-  Biomarker_2001_2400 --> Treatment_2001_2400 --> Donor_501_600 --> Program_6;  
-  Biomarker_2401_2800 --> Specimen_1201_1400 --> PrimaryDiagnosis_1201_1400 --> Donor_601_700 --> Program_7;  
-  Biomarker_2801_3200 --> Specimen_1401_1600  --> Donor_701_800 --> Program_8;  
-  Biomarker_3201_3600 --> FollowUp_3201_3600--> Treatment_3201_3600 --> Specimen_1601_1800 --> PrimaryDiagnosis_1601_1800 --> Donor_801_900 --> Program_9;
-
   Biomarker_1_2000 --> Donor_1_500 --> Program_1;
   Biomarker_2001_4000 --> PrimaryDiagnosis_1001_2000 --> Donor_501_1000 --> Program_2;
   Biomarker_4001_6000 --> Specimen_2001_3000 --> PrimaryDiagnosis_2001_3000 --> Donor_1001_1500 --> Program_3;
