@@ -302,6 +302,7 @@ available in a single database query, improving the performance of the viewset.
           "laterality": "Bilateral",
           "specimens": [
             {
+              "submitter_specimen_id": "string",
               "pathological_tumour_staging_system": "AJCC 8th edition",
               "pathological_t_category": "T0",
               "pathological_n_category": "N0",
@@ -3405,6 +3406,7 @@ continued
       "laterality": "Bilateral",
       "specimens": [
         {
+          "submitter_specimen_id": "string",
           "pathological_tumour_staging_system": "AJCC 8th edition",
           "pathological_t_category": "T0",
           "pathological_n_category": "N0",
@@ -5879,6 +5881,7 @@ continued
   "laterality": "Bilateral",
   "specimens": [
     {
+      "submitter_specimen_id": "string",
       "pathological_tumour_staging_system": "AJCC 8th edition",
       "pathological_t_category": "T0",
       "pathological_n_category": "N0",
@@ -6545,6 +6548,7 @@ xor
 
 ```json
 {
+  "submitter_specimen_id": "string",
   "pathological_tumour_staging_system": "AJCC 8th edition",
   "pathological_t_category": "T0",
   "pathological_n_category": "N0",
@@ -6599,6 +6603,7 @@ xor
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|submitter_specimen_id|string|true|none|none|
 |pathological_tumour_staging_system|any|true|none|none|
 
 oneOf
@@ -7720,6 +7725,7 @@ null
           "laterality": "Bilateral",
           "specimens": [
             {
+              "submitter_specimen_id": "string",
               "pathological_tumour_staging_system": "AJCC 8th edition",
               "pathological_t_category": "T0",
               "pathological_n_category": "N0",

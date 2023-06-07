@@ -248,6 +248,7 @@ class NestedSpecimenSerializer(SpecimenSerializer):
     class Meta:
         model = Specimen
         fields = [
+            "submitter_specimen_id",
             "pathological_tumour_staging_system",
             "pathological_t_category",
             "pathological_n_category",

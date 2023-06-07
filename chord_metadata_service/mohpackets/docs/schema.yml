@@ -4852,6 +4852,10 @@ components:
     NestedSpecimen:
       type: object
       properties:
+        submitter_specimen_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
         pathological_tumour_staging_system:
           nullable: true
           oneOf:
@@ -4976,6 +4980,7 @@ components:
       - specimen_laterality
       - specimen_processing
       - specimen_storage
+      - submitter_specimen_id
       - tumour_grade
       - tumour_grading_system
       - tumour_histological_type
