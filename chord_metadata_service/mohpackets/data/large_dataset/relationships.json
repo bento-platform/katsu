@@ -302,14 +302,18 @@
   ],
   "specimens": [
     {
-      "range": [1, 200],
+      "range": [1, 1000],
       "targets": [
         {
-          "range": [1, 200],
+          "range": [1, 1000],
+          "field_name": "submitter_specimen_id"
+        },
+        {
+          "range": [1, 1000],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [1, 100],
+          "range": [1, 500],
           "field_name": "submitter_donor_id"
         },
         {
@@ -319,14 +323,18 @@
       ]
     },
     {
-      "range": [201, 400],
+      "range": [1001, 2000],
       "targets": [
         {
-          "range": [201, 400],
+          "range": [1001, 2000],
+          "field_name": "submitter_specimen_id"
+        },
+        {
+          "range": [1001, 2000],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [101, 200],
+          "range": [501, 1000],
           "field_name": "submitter_donor_id"
         },
         {
@@ -336,14 +344,18 @@
       ]
     },
     {
-      "range": [401, 600],
+      "range": [2001, 3000],
       "targets": [
         {
-          "range": [401, 600],
+          "range": [2001, 3000],
+          "field_name": "submitter_specimen_id"
+        },
+        {
+          "range": [2001, 3000],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [201, 300],
+          "range": [1001, 1500],
           "field_name": "submitter_donor_id"
         },
         {
@@ -353,14 +365,18 @@
       ]
     },
     {
-      "range": [601, 800],
+      "range": [3001, 4000],
       "targets": [
         {
-          "range": [601, 800],
+          "range": [3001, 4000],
+          "field_name": "submitter_specimen_id"
+        },
+        {
+          "range": [3001, 4000],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [301, 400],
+          "range": [1501, 2000],
           "field_name": "submitter_donor_id"
         },
         {
@@ -370,14 +386,18 @@
       ]
     },
     {
-      "range": [801, 1000],
+      "range": [4001, 5000],
       "targets": [
         {
-          "range": [801, 1000],
+          "range": [4001, 5000],
+          "field_name": "submitter_specimen_id"
+        },
+        {
+          "range": [4001, 5000],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [401, 500],
+          "range": [2001, 2500],
           "field_name": "submitter_donor_id"
         },
         {
@@ -387,14 +407,18 @@
       ]
     },
     {
-      "range": [1001, 1200],
+      "range": [5001, 6000],
       "targets": [
         {
-          "range": [1001, 1200],
+          "range": [5001, 6000],
+          "field_name": "submitter_specimen_id"
+        },
+        {
+          "range": [5001, 6000],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [501, 600],
+          "range": [2501, 3000],
           "field_name": "submitter_donor_id"
         },
         {
@@ -404,14 +428,18 @@
       ]
     },
     {
-      "range": [1201, 1400],
+      "range": [6001, 7000],
       "targets": [
         {
-          "range": [1201, 1400],
+          "range": [6001, 7000],
+          "field_name": "submitter_specimen_id"
+        },
+        {
+          "range": [6001, 7000],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [601, 700],
+          "range": [3001, 3500],
           "field_name": "submitter_donor_id"
         },
         {
@@ -421,14 +449,18 @@
       ]
     },
     {
-      "range": [1401, 1600],
+      "range": [7001, 8000],
       "targets": [
         {
-          "range": [1401, 1600],
+          "range": [7001, 8000],
+          "field_name": "submitter_specimen_id"
+        },
+        {
+          "range": [7001, 8000],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [701, 800],
+          "range": [3501, 4000],
           "field_name": "submitter_donor_id"
         },
         {
@@ -438,14 +470,18 @@
       ]
     },
     {
-      "range": [1601, 1800],
+      "range": [8001, 9000],
       "targets": [
         {
-          "range": [1601, 1800],
+          "range": [8001, 9000],
+          "field_name": "submitter_specimen_id"
+        },
+        {
+          "range": [8001, 9000],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [801, 900],
+          "range": [4001, 4500],
           "field_name": "submitter_donor_id"
         },
         {
@@ -455,14 +491,18 @@
       ]
     },
     {
-      "range": [1801, 2000],
+      "range": [9001, 10000],
       "targets": [
         {
-          "range": [1801, 2000],
+          "range": [9001, 10000],
+          "field_name": "submitter_specimen_id"
+        },
+        {
+          "range": [9001, 10000],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [901, 1000],
+          "range": [4501, 5000],
           "field_name": "submitter_donor_id"
         },
         {
