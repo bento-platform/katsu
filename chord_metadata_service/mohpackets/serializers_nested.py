@@ -221,6 +221,8 @@ class NestedTreatmentSerializer(TreatmentSerializer):
             "response_to_treatment_criteria_method",
             "line_of_treatment",
             "status_of_treatment",
+            "treatment_type",
+            "response_to_treatment_criteria_method",
             "chemotherapies",
             "hormone_therapies",
             "immunotherapies",

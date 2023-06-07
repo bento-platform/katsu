@@ -5149,6 +5149,15 @@ components:
           - $ref: '#/components/schemas/StatusOfTreatmentEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        treatment_type:
+          type: array
+          items:
+            nullable: true
+            oneOf:
+            - $ref: '#/components/schemas/TreatmentTypeEnum'
+            - $ref: '#/components/schemas/BlankEnum'
+            - $ref: '#/components/schemas/NullEnum'
+          nullable: true
         chemotherapies:
           type: array
           items:
@@ -5191,6 +5200,7 @@ components:
       - treatment_intent
       - treatment_setting
       - treatment_start_date
+      - treatment_type
     NullEnum:
       enum:
       - null

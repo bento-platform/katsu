@@ -364,6 +364,9 @@ available in a single database query, improving the performance of the viewset.
               "response_to_treatment_criteria_method": "RECIST 1.1",
               "line_of_treatment": -2147483648,
               "status_of_treatment": "Treatment completed as prescribed",
+              "treatment_type": [
+                "Bone marrow transplant"
+              ],
               "chemotherapies": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -3468,6 +3471,9 @@ continued
           "response_to_treatment_criteria_method": "RECIST 1.1",
           "line_of_treatment": -2147483648,
           "status_of_treatment": "Treatment completed as prescribed",
+          "treatment_type": [
+            "Bone marrow transplant"
+          ],
           "chemotherapies": [
             {
               "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -5943,6 +5949,9 @@ continued
       "response_to_treatment_criteria_method": "RECIST 1.1",
       "line_of_treatment": -2147483648,
       "status_of_treatment": "Treatment completed as prescribed",
+      "treatment_type": [
+        "Bone marrow transplant"
+      ],
       "chemotherapies": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -7227,6 +7236,9 @@ continued
   "response_to_treatment_criteria_method": "RECIST 1.1",
   "line_of_treatment": -2147483648,
   "status_of_treatment": "Treatment completed as prescribed",
+  "treatment_type": [
+    "Bone marrow transplant"
+  ],
   "chemotherapies": [
     {
       "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -7468,6 +7480,30 @@ oneOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[StatusOfTreatmentEnum](#schemastatusoftreatmentenum)|false|none|* `Treatment completed as prescribed` - Treatment completed as prescribed<br>* `Treatment incomplete due to technical or organizational problems` - Treatment incomplete due to technical or organizational problems<br>* `Treatment incomplete because patient died` - Treatment incomplete because patient died<br>* `Patient choice (stopped or interrupted treatment)` - Patient choice (stopped or interrupted treatment)<br>* `Physician decision (stopped or interrupted treatment)` - Physician decision (stopped or interrupted treatment)<br>* `Treatment stopped due to lack of efficacy (disease progression)` - Treatment stopped due to lack of efficacy (disease progression)<br>* `Treatment stopped due to acute toxicity` - Treatment stopped due to acute toxicity<br>* `Other` - Other<br>* `Not applicable` - Not applicable<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|treatment_type|[oneOf]¦null|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[TreatmentTypeEnum](#schematreatmenttypeenum)|false|none|* `Bone marrow transplant` - Bone marrow transplant<br>* `Chemotherapy` - Chemotherapy<br>* `Hormonal therapy` - Hormonal therapy<br>* `Immunotherapy` - Immunotherapy<br>* `No treatment` - No treatment<br>* `Other targeting molecular therapy` - Other targeting molecular therapy<br>* `Photodynamic therapy` - Photodynamic therapy<br>* `Radiation therapy` - Radiation therapy<br>* `Stem cell transplant` - Stem cell transplant<br>* `Surgery` - Surgery|
 
 xor
 
@@ -7787,6 +7823,9 @@ null
               "response_to_treatment_criteria_method": "RECIST 1.1",
               "line_of_treatment": -2147483648,
               "status_of_treatment": "Treatment completed as prescribed",
+              "treatment_type": [
+                "Bone marrow transplant"
+              ],
               "chemotherapies": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
