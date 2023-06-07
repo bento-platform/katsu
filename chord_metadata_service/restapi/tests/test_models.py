@@ -40,6 +40,7 @@ class TestBaseExtraProperties(ProjectTestCase):
             subject=self.individual,
             table=self.table,
             meta_data=meta_data,
+            dataset=self.dataset
         )
         self.phenopacket.biosamples.set([self.biosample])
 

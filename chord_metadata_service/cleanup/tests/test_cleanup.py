@@ -185,7 +185,6 @@ class CleanUpExperimentsTestCase(APITestCase):
         r = self.client.delete(f'/api/experiments/{self.experiment.id}')
         assert r.status_code == 204
 
-        self.dataset.delete()
         with self.assertRaises(Experiment.DoesNotExist):
             self.experiment.refresh_from_db()
         

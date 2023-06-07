@@ -229,7 +229,7 @@ class IngestTest(TestCase):
         # try ingesting the file with an invalid biosample ID
         with self.assertRaises(Biosample.DoesNotExist):
             WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-                EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_BAD_BIOSAMPLE, self.t_exp.identifier
+                EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_BAD_BIOSAMPLE, self.d.identifier
             )
 
     def test_ingesting_invalid_experiment_json(self):

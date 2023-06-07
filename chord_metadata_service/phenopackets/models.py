@@ -309,6 +309,11 @@ class Phenopacket(BaseExtraProperties, IndexableMixin):
     FHIR: Composition
     """
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["id", "dataset_id"], name="unique_pheno_dataset")
+        ]
+
     @property
     def schema_type(self) -> SchemaType:
         return SchemaType.PHENOPACKET
