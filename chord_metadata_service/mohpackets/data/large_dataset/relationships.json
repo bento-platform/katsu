@@ -1304,10 +1304,6 @@
         "field_name": "submitter_treatment_id"
       },
       {
-        "range": [7001, 8000],
-        "field_name": "submitter_primary_diagnosis_id"
-      },
-      {
         "range": [3501, 4000],
         "field_name": "submitter_donor_id"
       },
@@ -1323,10 +1319,6 @@
       {
         "range": [16001, 18000],
         "field_name": "submitter_follow_up_id"
-      },
-      {
-        "range": [16001, 18000],
-        "field_name": "submitter_treatment_id"
       },
       {
         "range": [8001, 9000],
@@ -1348,14 +1340,6 @@
       {
         "range": [18001, 20000],
         "field_name": "submitter_follow_up_id"
-      },
-      {
-        "range": [18001, 20000],
-        "field_name": "submitter_treatment_id"
-      },
-      {
-        "range": [9001, 10000],
-        "field_name": "submitter_primary_diagnosis_id"
       },
       {
         "range": [4501, 5000],
