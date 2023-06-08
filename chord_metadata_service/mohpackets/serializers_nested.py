@@ -198,10 +198,10 @@ class NestedTreatmentSerializer(TreatmentSerializer):
             "treatment_intent",
             "days_per_cycle",
             "number_of_cycles",
-            "response_to_treatment_criteria_method",
             "line_of_treatment",
             "status_of_treatment",
             "treatment_type",
+            "response_to_treatment_criteria_method",
             "response_to_treatment",
             "chemotherapies",  # nested child
             "hormone_therapies",  # nested child
