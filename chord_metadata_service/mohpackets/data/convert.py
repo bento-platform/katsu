@@ -149,6 +149,7 @@ def replace_values(input_data, transformation_rules):
         "submitter_donor_id": "DONOR_",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_",
         "submitter_specimen_id": "SPECIMEN_",
+        "submitter_sample_id": "SAMPLE_REGISTRATION_",
         "submitter_treatment_id": "TREATMENT_",
         "submitter_follow_up_id": "FOLLOW_UP_",
     }
