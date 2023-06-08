@@ -48,35 +48,22 @@ from chord_metadata_service.mohpackets.serializers import (
 class NestedExposureSerializer(ExposureSerializer):
     class Meta:
         model = Exposure
-        fields = [
-            "tobacco_smoking_status",
-            "tobacco_type",
-            "pack_years_smoked",
-        ]
+        exclude = ["program_id", "submitter_donor_id"]
 
 
 class NestedComorbiditySerializer(ComorbiditySerializer):
     class Meta:
         model = Comorbidity
-        fields = [
-            "prior_malignancy",
-            "laterality_of_prior_malignancy",
-            "age_at_comorbidity_diagnosis",
-            "comorbidity_type_code",
-            "comorbidity_treatment_status",
-            "comorbidity_treatment",
-        ]
+        exclude = ["program_id", "submitter_donor_id"]
 
 
 class NestedSampleRegistrationSerializer(SampleRegistrationSerializer):
     class Meta:
         model = SampleRegistration
-        fields = [
-            "submitter_sample_id",
-            "specimen_tissue_source",
-            "tumour_normal_designation",
-            "specimen_type",
-            "sample_type",
+        exclude = [
+            "program_id",
+            "submitter_donor_id",
+            "submitter_specimen_id",
         ]
 
 
@@ -113,21 +100,13 @@ class NestedSurgerySerializer(SurgerySerializer):
 class NestedBiomarkerSerializer(BiomarkerSerializer):
     class Meta:
         model = Biomarker
-        fields = [
-            "id",
-            "test_interval",
-            "psa_level",
-            "ca125",
-            "cea",
-            "er_status",
-            "er_percent_positive",
-            "her2_ish_status",
-            "her2_ihc_status",
-            "pr_status",
-            "pr_percent_positive",
-            "hpv_ihc_status",
-            "hpv_pcr_status",
-            "hpv_strain",
+        exclude = [
+            "program_id",
+            "submitter_donor_id",
+            "submitter_specimen_id",
+            "submitter_primary_diagnosis_id",
+            "submitter_treatment_id",
+            "submitter_follow_up_id",
         ]
 
 
@@ -142,6 +121,7 @@ class NestedFollowUpSerializer(FollowUpSerializer):
     class Meta:
         model = FollowUp
         fields = [
+            "submitter_follow_up_id",
             "date_of_followup",
             "disease_status_at_followup",
             "relapse_type",
@@ -153,7 +133,7 @@ class NestedFollowUpSerializer(FollowUpSerializer):
             "recurrence_n_category",
             "recurrence_m_category",
             "recurrence_stage_group",
-            "biomarkers",
+            "biomarkers",  # nested child
         ]
 
 
@@ -222,14 +202,14 @@ class NestedTreatmentSerializer(TreatmentSerializer):
             "line_of_treatment",
             "status_of_treatment",
             "treatment_type",
-            "response_to_treatment_criteria_method",
-            "chemotherapies",
-            "hormone_therapies",
-            "immunotherapies",
-            "radiation",
-            "surgery",
-            "followups",
-            "biomarkers",
+            "response_to_treatment",
+            "chemotherapies",  # nested child
+            "hormone_therapies",  # nested child
+            "immunotherapies",  # nested child
+            "radiation",  # nested child
+            "surgery",  # nested child
+            "followups",  # nested child
+            "biomarkers",  # nested child
         ]
 
 
@@ -268,8 +248,8 @@ class NestedSpecimenSerializer(SpecimenSerializer):
             "percent_tumour_cells_measurement_method",
             "specimen_processing",
             "specimen_laterality",
-            "sample_registrations",
-            "biomarkers",
+            "sample_registrations",  # nested child
+            "biomarkers",  # nested child
         ]
 
 
@@ -315,10 +295,10 @@ class NestedPrimaryDiagnosisSerializer(PrimaryDiagnosisSerializer):
             "clinical_m_category",
             "clinical_stage_group",
             "laterality",
-            "specimens",
-            "treatments",
-            "biomarkers",
-            "followups",
+            "specimens",  # nested child
+            "treatments",  # nested child
+            "biomarkers",  # nested child
+            "followups",  # nested child
         ]
 
 
@@ -369,9 +349,9 @@ class DonorWithClinicalDataSerializer(DonorSerializer):
             "gender",
             "sex_at_birth",
             "primary_site",
-            "primary_diagnoses",
-            "comorbidities",
-            "exposures",
-            "biomarkers",
-            "followups",
+            "primary_diagnoses",  # nested child
+            "comorbidities",  # nested child
+            "exposures",  # nested child
+            "biomarkers",  # nested child
+            "followups",  # nested child
         ]
