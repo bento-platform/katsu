@@ -277,6 +277,7 @@ class NestedPrimaryDiagnosisSerializer(PrimaryDiagnosisSerializer):
     specimens = serializers.SerializerMethodField()
     treatments = serializers.SerializerMethodField()
     biomarkers = serializers.SerializerMethodField()
+    followups = serializers.SerializerMethodField()
 
     @extend_schema_field(ListSerializer(child=NestedSpecimenSerializer()))
     def get_specimens(self, obj):
@@ -292,6 +293,11 @@ class NestedPrimaryDiagnosisSerializer(PrimaryDiagnosisSerializer):
     def get_biomarkers(self, obj):
         biomarkers = obj.biomarker_set.all()
         return NestedBiomarkerSerializer(biomarkers, many=True).data
+
+    @extend_schema_field(ListSerializer(child=NestedFollowUpSerializer()))
+    def get_followups(self, obj):
+        followups = obj.followup_set.all()
+        return NestedFollowUpSerializer(followups, many=True).data
 
     class Meta:
         model = PrimaryDiagnosis
@@ -312,6 +318,7 @@ class NestedPrimaryDiagnosisSerializer(PrimaryDiagnosisSerializer):
             "specimens",
             "treatments",
             "biomarkers",
+            "followups",
         ]
 
 
@@ -320,6 +327,7 @@ class DonorWithClinicalDataSerializer(DonorSerializer):
     comorbidities = serializers.SerializerMethodField()
     exposures = serializers.SerializerMethodField()
     biomarkers = serializers.SerializerMethodField()
+    followups = serializers.SerializerMethodField()
 
     @extend_schema_field(ListSerializer(child=NestedPrimaryDiagnosisSerializer()))
     def get_primary_diagnoses(self, obj):
@@ -341,6 +349,11 @@ class DonorWithClinicalDataSerializer(DonorSerializer):
         biomarkers = obj.biomarker_set.all()
         return NestedBiomarkerSerializer(biomarkers, many=True).data
 
+    @extend_schema_field(ListSerializer(child=NestedFollowUpSerializer()))
+    def get_followups(self, obj):
+        followups = obj.followup_set.all()
+        return NestedFollowUpSerializer(followups, many=True).data
+
     class Meta:
         model = Donor
         fields = [
@@ -360,4 +373,5 @@ class DonorWithClinicalDataSerializer(DonorSerializer):
             "comorbidities",
             "exposures",
             "biomarkers",
+            "followups",
         ]
