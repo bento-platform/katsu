@@ -3727,6 +3727,11 @@ components:
           items:
             $ref: '#/components/schemas/NestedBiomarker'
           readOnly: true
+        followups:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedFollowUp'
+          readOnly: true
       required:
       - cause_of_death
       - date_alive_after_lost_to_followup
@@ -4310,46 +4315,10 @@ components:
         id:
           type: string
           format: uuid
-        test_interval:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        psa_level:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        ca125:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
-        cea:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
         er_status:
           nullable: true
           oneOf:
           - $ref: '#/components/schemas/ErPrHpvStatusEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        er_percent_positive:
-          type: number
-          format: double
-          nullable: true
-        her2_ish_status:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/Her2StatusEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        her2_ihc_status:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/Her2StatusEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
         pr_status:
@@ -4358,10 +4327,18 @@ components:
           - $ref: '#/components/schemas/ErPrHpvStatusEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        pr_percent_positive:
-          type: number
-          format: double
+        her2_ihc_status:
           nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/Her2StatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        her2_ish_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/Her2StatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         hpv_ihc_status:
           nullable: true
           oneOf:
@@ -4382,6 +4359,34 @@ components:
             - $ref: '#/components/schemas/HpvStrainEnum'
             - $ref: '#/components/schemas/BlankEnum'
             - $ref: '#/components/schemas/NullEnum'
+          nullable: true
+        test_interval:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        psa_level:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        ca125:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        cea:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        er_percent_positive:
+          type: number
+          format: double
+          nullable: true
+        pr_percent_positive:
+          type: number
+          format: double
           nullable: true
       required:
       - er_status
@@ -4433,6 +4438,9 @@ components:
     NestedComorbidity:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
         prior_malignancy:
           nullable: true
           oneOf:
@@ -4445,11 +4453,6 @@ components:
           - $ref: '#/components/schemas/LateralityOfPriorMalignancyEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        age_at_comorbidity_diagnosis:
-          type: integer
-          maximum: 32767
-          minimum: 0
-          nullable: true
         comorbidity_type_code:
           type: string
           nullable: true
@@ -4465,6 +4468,11 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        age_at_comorbidity_diagnosis:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
       required:
       - comorbidity_treatment
       - comorbidity_treatment_status
@@ -4474,6 +4482,9 @@ components:
     NestedExposure:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
         tobacco_smoking_status:
           nullable: true
           oneOf:
@@ -4499,6 +4510,9 @@ components:
     NestedFollowUp:
       type: object
       properties:
+        submitter_follow_up_id:
+          type: string
+          maxLength: 64
         date_of_followup:
           type: string
           nullable: true
@@ -4580,6 +4594,7 @@ components:
       - recurrence_t_category
       - recurrence_tumour_staging_system
       - relapse_type
+      - submitter_follow_up_id
     NestedHormoneTherapy:
       type: object
       properties:
@@ -4754,6 +4769,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NestedBiomarker'
+          readOnly: true
+        followups:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedFollowUp'
           readOnly: true
       required:
       - basis_of_diagnosis
@@ -5152,16 +5172,16 @@ components:
             - $ref: '#/components/schemas/BlankEnum'
             - $ref: '#/components/schemas/NullEnum'
           nullable: true
-        response_to_treatment:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/ResponseToTreatmentEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         response_to_treatment_criteria_method:
           nullable: true
           oneOf:
           - $ref: '#/components/schemas/ResponseToTreatmentCriteriaMethodEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        response_to_treatment:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ResponseToTreatmentEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
         chemotherapies:

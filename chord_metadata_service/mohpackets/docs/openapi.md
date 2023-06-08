@@ -332,21 +332,21 @@ available in a single database query, improving the performance of the viewset.
               "biomarkers": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
                   "er_status": "Cannot be determined",
-                  "er_percent_positive": 0,
-                  "her2_ish_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
-                  "pr_percent_positive": 0,
+                  "her2_ihc_status": "Cannot be determined",
+                  "her2_ish_status": "Cannot be determined",
                   "hpv_ihc_status": "Cannot be determined",
                   "hpv_pcr_status": "Cannot be determined",
                   "hpv_strain": [
                     "HPV16"
-                  ]
+                  ],
+                  "test_interval": 32767,
+                  "psa_level": 32767,
+                  "ca125": 32767,
+                  "cea": 32767,
+                  "er_percent_positive": 0,
+                  "pr_percent_positive": 0
                 }
               ]
             }
@@ -366,8 +366,8 @@ available in a single database query, improving the performance of the viewset.
               "treatment_type": [
                 "Bone marrow transplant"
               ],
-              "response_to_treatment": "Complete response",
               "response_to_treatment_criteria_method": "RECIST 1.1",
+              "response_to_treatment": "Complete response",
               "chemotherapies": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -437,6 +437,7 @@ available in a single database query, improving the performance of the viewset.
               },
               "followups": [
                 {
+                  "submitter_follow_up_id": "string",
                   "date_of_followup": "string",
                   "disease_status_at_followup": "Complete remission",
                   "relapse_type": "Distant recurrence/metastasis",
@@ -458,21 +459,21 @@ available in a single database query, improving the performance of the viewset.
               "biomarkers": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
                   "er_status": "Cannot be determined",
-                  "er_percent_positive": 0,
-                  "her2_ish_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
-                  "pr_percent_positive": 0,
+                  "her2_ihc_status": "Cannot be determined",
+                  "her2_ish_status": "Cannot be determined",
                   "hpv_ihc_status": "Cannot be determined",
                   "hpv_pcr_status": "Cannot be determined",
                   "hpv_strain": [
                     "HPV16"
-                  ]
+                  ],
+                  "test_interval": 32767,
+                  "psa_level": 32767,
+                  "ca125": 32767,
+                  "cea": 32767,
+                  "er_percent_positive": 0,
+                  "pr_percent_positive": 0
                 }
               ]
             }
@@ -480,20 +481,58 @@ available in a single database query, improving the performance of the viewset.
           "biomarkers": [
             {
               "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
               "er_status": "Cannot be determined",
-              "er_percent_positive": 0,
-              "her2_ish_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
-              "pr_percent_positive": 0,
+              "her2_ihc_status": "Cannot be determined",
+              "her2_ish_status": "Cannot be determined",
               "hpv_ihc_status": "Cannot be determined",
               "hpv_pcr_status": "Cannot be determined",
               "hpv_strain": [
                 "HPV16"
+              ],
+              "test_interval": 32767,
+              "psa_level": 32767,
+              "ca125": 32767,
+              "cea": 32767,
+              "er_percent_positive": 0,
+              "pr_percent_positive": 0
+            }
+          ],
+          "followups": [
+            {
+              "submitter_follow_up_id": "string",
+              "date_of_followup": "string",
+              "disease_status_at_followup": "Complete remission",
+              "relapse_type": "Distant recurrence/metastasis",
+              "date_of_relapse": "string",
+              "method_of_progression_status": "Imaging (procedure)",
+              "anatomic_site_progression_or_recurrence": "string",
+              "recurrence_tumour_staging_system": [
+                "AJCC 8th edition"
+              ],
+              "recurrence_t_category": "T0",
+              "recurrence_n_category": "N0",
+              "recurrence_m_category": "M0",
+              "recurrence_stage_group": "Stage 0",
+              "biomarkers": [
+                {
+                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+                  "er_status": "Cannot be determined",
+                  "pr_status": "Cannot be determined",
+                  "her2_ihc_status": "Cannot be determined",
+                  "her2_ish_status": "Cannot be determined",
+                  "hpv_ihc_status": "Cannot be determined",
+                  "hpv_pcr_status": "Cannot be determined",
+                  "hpv_strain": [
+                    "HPV16"
+                  ],
+                  "test_interval": 32767,
+                  "psa_level": 32767,
+                  "ca125": 32767,
+                  "cea": 32767,
+                  "er_percent_positive": 0,
+                  "pr_percent_positive": 0
+                }
               ]
             }
           ]
@@ -501,16 +540,18 @@ available in a single database query, improving the performance of the viewset.
       ],
       "comorbidities": [
         {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "prior_malignancy": "Yes",
           "laterality_of_prior_malignancy": "Bilateral",
-          "age_at_comorbidity_diagnosis": 32767,
           "comorbidity_type_code": "string",
           "comorbidity_treatment_status": "Yes",
-          "comorbidity_treatment": "string"
+          "comorbidity_treatment": "string",
+          "age_at_comorbidity_diagnosis": 32767
         }
       ],
       "exposures": [
         {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
           "tobacco_type": [
             "Chewing Tobacco"
@@ -521,20 +562,58 @@ available in a single database query, improving the performance of the viewset.
       "biomarkers": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
           "er_status": "Cannot be determined",
-          "er_percent_positive": 0,
-          "her2_ish_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
-          "pr_percent_positive": 0,
+          "her2_ihc_status": "Cannot be determined",
+          "her2_ish_status": "Cannot be determined",
           "hpv_ihc_status": "Cannot be determined",
           "hpv_pcr_status": "Cannot be determined",
           "hpv_strain": [
             "HPV16"
+          ],
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767,
+          "er_percent_positive": 0,
+          "pr_percent_positive": 0
+        }
+      ],
+      "followups": [
+        {
+          "submitter_follow_up_id": "string",
+          "date_of_followup": "string",
+          "disease_status_at_followup": "Complete remission",
+          "relapse_type": "Distant recurrence/metastasis",
+          "date_of_relapse": "string",
+          "method_of_progression_status": "Imaging (procedure)",
+          "anatomic_site_progression_or_recurrence": "string",
+          "recurrence_tumour_staging_system": [
+            "AJCC 8th edition"
+          ],
+          "recurrence_t_category": "T0",
+          "recurrence_n_category": "N0",
+          "recurrence_m_category": "M0",
+          "recurrence_stage_group": "Stage 0",
+          "biomarkers": [
+            {
+              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+              "er_status": "Cannot be determined",
+              "pr_status": "Cannot be determined",
+              "her2_ihc_status": "Cannot be determined",
+              "her2_ish_status": "Cannot be determined",
+              "hpv_ihc_status": "Cannot be determined",
+              "hpv_pcr_status": "Cannot be determined",
+              "hpv_strain": [
+                "HPV16"
+              ],
+              "test_interval": 32767,
+              "psa_level": 32767,
+              "ca125": 32767,
+              "cea": 32767,
+              "er_percent_positive": 0,
+              "pr_percent_positive": 0
+            }
           ]
         }
       ]
@@ -3440,21 +3519,21 @@ continued
           "biomarkers": [
             {
               "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
               "er_status": "Cannot be determined",
-              "er_percent_positive": 0,
-              "her2_ish_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
-              "pr_percent_positive": 0,
+              "her2_ihc_status": "Cannot be determined",
+              "her2_ish_status": "Cannot be determined",
               "hpv_ihc_status": "Cannot be determined",
               "hpv_pcr_status": "Cannot be determined",
               "hpv_strain": [
                 "HPV16"
-              ]
+              ],
+              "test_interval": 32767,
+              "psa_level": 32767,
+              "ca125": 32767,
+              "cea": 32767,
+              "er_percent_positive": 0,
+              "pr_percent_positive": 0
             }
           ]
         }
@@ -3474,8 +3553,8 @@ continued
           "treatment_type": [
             "Bone marrow transplant"
           ],
-          "response_to_treatment": "Complete response",
           "response_to_treatment_criteria_method": "RECIST 1.1",
+          "response_to_treatment": "Complete response",
           "chemotherapies": [
             {
               "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -3545,6 +3624,7 @@ continued
           },
           "followups": [
             {
+              "submitter_follow_up_id": "string",
               "date_of_followup": "string",
               "disease_status_at_followup": "Complete remission",
               "relapse_type": "Distant recurrence/metastasis",
@@ -3561,21 +3641,21 @@ continued
               "biomarkers": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
                   "er_status": "Cannot be determined",
-                  "er_percent_positive": 0,
-                  "her2_ish_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
-                  "pr_percent_positive": 0,
+                  "her2_ihc_status": "Cannot be determined",
+                  "her2_ish_status": "Cannot be determined",
                   "hpv_ihc_status": "Cannot be determined",
                   "hpv_pcr_status": "Cannot be determined",
                   "hpv_strain": [
                     "HPV16"
-                  ]
+                  ],
+                  "test_interval": 32767,
+                  "psa_level": 32767,
+                  "ca125": 32767,
+                  "cea": 32767,
+                  "er_percent_positive": 0,
+                  "pr_percent_positive": 0
                 }
               ]
             }
@@ -3583,21 +3663,21 @@ continued
           "biomarkers": [
             {
               "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
               "er_status": "Cannot be determined",
-              "er_percent_positive": 0,
-              "her2_ish_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
-              "pr_percent_positive": 0,
+              "her2_ihc_status": "Cannot be determined",
+              "her2_ish_status": "Cannot be determined",
               "hpv_ihc_status": "Cannot be determined",
               "hpv_pcr_status": "Cannot be determined",
               "hpv_strain": [
                 "HPV16"
-              ]
+              ],
+              "test_interval": 32767,
+              "psa_level": 32767,
+              "ca125": 32767,
+              "cea": 32767,
+              "er_percent_positive": 0,
+              "pr_percent_positive": 0
             }
           ]
         }
@@ -3605,20 +3685,58 @@ continued
       "biomarkers": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
           "er_status": "Cannot be determined",
-          "er_percent_positive": 0,
-          "her2_ish_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
-          "pr_percent_positive": 0,
+          "her2_ihc_status": "Cannot be determined",
+          "her2_ish_status": "Cannot be determined",
           "hpv_ihc_status": "Cannot be determined",
           "hpv_pcr_status": "Cannot be determined",
           "hpv_strain": [
             "HPV16"
+          ],
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767,
+          "er_percent_positive": 0,
+          "pr_percent_positive": 0
+        }
+      ],
+      "followups": [
+        {
+          "submitter_follow_up_id": "string",
+          "date_of_followup": "string",
+          "disease_status_at_followup": "Complete remission",
+          "relapse_type": "Distant recurrence/metastasis",
+          "date_of_relapse": "string",
+          "method_of_progression_status": "Imaging (procedure)",
+          "anatomic_site_progression_or_recurrence": "string",
+          "recurrence_tumour_staging_system": [
+            "AJCC 8th edition"
+          ],
+          "recurrence_t_category": "T0",
+          "recurrence_n_category": "N0",
+          "recurrence_m_category": "M0",
+          "recurrence_stage_group": "Stage 0",
+          "biomarkers": [
+            {
+              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+              "er_status": "Cannot be determined",
+              "pr_status": "Cannot be determined",
+              "her2_ihc_status": "Cannot be determined",
+              "her2_ish_status": "Cannot be determined",
+              "hpv_ihc_status": "Cannot be determined",
+              "hpv_pcr_status": "Cannot be determined",
+              "hpv_strain": [
+                "HPV16"
+              ],
+              "test_interval": 32767,
+              "psa_level": 32767,
+              "ca125": 32767,
+              "cea": 32767,
+              "er_percent_positive": 0,
+              "pr_percent_positive": 0
+            }
           ]
         }
       ]
@@ -3626,16 +3744,18 @@ continued
   ],
   "comorbidities": [
     {
+      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "prior_malignancy": "Yes",
       "laterality_of_prior_malignancy": "Bilateral",
-      "age_at_comorbidity_diagnosis": 32767,
       "comorbidity_type_code": "string",
       "comorbidity_treatment_status": "Yes",
-      "comorbidity_treatment": "string"
+      "comorbidity_treatment": "string",
+      "age_at_comorbidity_diagnosis": 32767
     }
   ],
   "exposures": [
     {
+      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
       "tobacco_type": [
         "Chewing Tobacco"
@@ -3646,20 +3766,58 @@ continued
   "biomarkers": [
     {
       "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
       "er_status": "Cannot be determined",
-      "er_percent_positive": 0,
-      "her2_ish_status": "Cannot be determined",
-      "her2_ihc_status": "Cannot be determined",
       "pr_status": "Cannot be determined",
-      "pr_percent_positive": 0,
+      "her2_ihc_status": "Cannot be determined",
+      "her2_ish_status": "Cannot be determined",
       "hpv_ihc_status": "Cannot be determined",
       "hpv_pcr_status": "Cannot be determined",
       "hpv_strain": [
         "HPV16"
+      ],
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767,
+      "er_percent_positive": 0,
+      "pr_percent_positive": 0
+    }
+  ],
+  "followups": [
+    {
+      "submitter_follow_up_id": "string",
+      "date_of_followup": "string",
+      "disease_status_at_followup": "Complete remission",
+      "relapse_type": "Distant recurrence/metastasis",
+      "date_of_relapse": "string",
+      "method_of_progression_status": "Imaging (procedure)",
+      "anatomic_site_progression_or_recurrence": "string",
+      "recurrence_tumour_staging_system": [
+        "AJCC 8th edition"
+      ],
+      "recurrence_t_category": "T0",
+      "recurrence_n_category": "N0",
+      "recurrence_m_category": "M0",
+      "recurrence_stage_group": "Stage 0",
+      "biomarkers": [
+        {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+          "er_status": "Cannot be determined",
+          "pr_status": "Cannot be determined",
+          "her2_ihc_status": "Cannot be determined",
+          "her2_ish_status": "Cannot be determined",
+          "hpv_ihc_status": "Cannot be determined",
+          "hpv_pcr_status": "Cannot be determined",
+          "hpv_strain": [
+            "HPV16"
+          ],
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767,
+          "er_percent_positive": 0,
+          "pr_percent_positive": 0
+        }
       ]
     }
   ]
@@ -3802,6 +3960,7 @@ continued
 |comorbidities|[[NestedComorbidity](#schemanestedcomorbidity)]|false|read-only|none|
 |exposures|[[NestedExposure](#schemanestedexposure)]|false|read-only|none|
 |biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
+|followups|[[NestedFollowUp](#schemanestedfollowup)]|false|read-only|none|
 
 <h2 id="tocS_DosageUnitsEnum">DosageUnitsEnum</h2>
 
@@ -4994,21 +5153,21 @@ continued
 ```json
 {
   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-  "test_interval": 32767,
-  "psa_level": 32767,
-  "ca125": 32767,
-  "cea": 32767,
   "er_status": "Cannot be determined",
-  "er_percent_positive": 0,
-  "her2_ish_status": "Cannot be determined",
-  "her2_ihc_status": "Cannot be determined",
   "pr_status": "Cannot be determined",
-  "pr_percent_positive": 0,
+  "her2_ihc_status": "Cannot be determined",
+  "her2_ish_status": "Cannot be determined",
   "hpv_ihc_status": "Cannot be determined",
   "hpv_pcr_status": "Cannot be determined",
   "hpv_strain": [
     "HPV16"
-  ]
+  ],
+  "test_interval": 32767,
+  "psa_level": 32767,
+  "ca125": 32767,
+  "cea": 32767,
+  "er_percent_positive": 0,
+  "pr_percent_positive": 0
 }
 
 ```
@@ -5018,10 +5177,6 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|test_interval|integer¦null|false|none|none|
-|psa_level|integer¦null|false|none|none|
-|ca125|integer¦null|false|none|none|
-|cea|integer¦null|false|none|none|
 |er_status|any|true|none|none|
 
 oneOf
@@ -5029,55 +5184,6 @@ oneOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[ErPrHpvStatusEnum](#schemaerprhpvstatusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `Negative` - Negative<br>* `Not applicable` - Not applicable<br>* `Positive` - Positive<br>* `Unknown` - Unknown|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|er_percent_positive|number(double)¦null|false|none|none|
-|her2_ish_status|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[Her2StatusEnum](#schemaher2statusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `Equivocal` - Equivocal<br>* `Positive` - Positive<br>* `Negative` - Negative<br>* `Not applicable` - Not applicable<br>* `Unknown` - Unknown|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|her2_ihc_status|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[Her2StatusEnum](#schemaher2statusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `Equivocal` - Equivocal<br>* `Positive` - Positive<br>* `Negative` - Negative<br>* `Not applicable` - Not applicable<br>* `Unknown` - Unknown|
 
 xor
 
@@ -5119,7 +5225,54 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pr_percent_positive|number(double)¦null|false|none|none|
+|her2_ihc_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[Her2StatusEnum](#schemaher2statusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `Equivocal` - Equivocal<br>* `Positive` - Positive<br>* `Negative` - Negative<br>* `Not applicable` - Not applicable<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|her2_ish_status|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[Her2StatusEnum](#schemaher2statusenum)|false|none|* `Cannot be determined` - Cannot be determined<br>* `Equivocal` - Equivocal<br>* `Positive` - Positive<br>* `Negative` - Negative<br>* `Not applicable` - Not applicable<br>* `Unknown` - Unknown|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |hpv_ihc_status|any|true|none|none|
 
 oneOf
@@ -5187,6 +5340,17 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|test_interval|integer¦null|false|none|none|
+|psa_level|integer¦null|false|none|none|
+|ca125|integer¦null|false|none|none|
+|cea|integer¦null|false|none|none|
+|er_percent_positive|number(double)¦null|false|none|none|
+|pr_percent_positive|number(double)¦null|false|none|none|
 
 <h2 id="tocS_NestedChemotherapy">NestedChemotherapy</h2>
 
@@ -5275,12 +5439,13 @@ continued
 
 ```json
 {
+  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
   "prior_malignancy": "Yes",
   "laterality_of_prior_malignancy": "Bilateral",
-  "age_at_comorbidity_diagnosis": 32767,
   "comorbidity_type_code": "string",
   "comorbidity_treatment_status": "Yes",
-  "comorbidity_treatment": "string"
+  "comorbidity_treatment": "string",
+  "age_at_comorbidity_diagnosis": 32767
 }
 
 ```
@@ -5289,6 +5454,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|id|string(uuid)|false|none|none|
 |prior_malignancy|any|true|none|none|
 
 oneOf
@@ -5337,7 +5503,6 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|age_at_comorbidity_diagnosis|integer¦null|false|none|none|
 |comorbidity_type_code|string¦null|true|none|none|
 |comorbidity_treatment_status|any|true|none|none|
 
@@ -5364,6 +5529,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |comorbidity_treatment|string¦null|true|none|none|
+|age_at_comorbidity_diagnosis|integer¦null|false|none|none|
 
 <h2 id="tocS_NestedExposure">NestedExposure</h2>
 
@@ -5374,6 +5540,7 @@ continued
 
 ```json
 {
+  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
   "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
   "tobacco_type": [
     "Chewing Tobacco"
@@ -5387,6 +5554,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|id|string(uuid)|false|none|none|
 |tobacco_smoking_status|any|true|none|none|
 
 oneOf
@@ -5446,6 +5614,7 @@ continued
 
 ```json
 {
+  "submitter_follow_up_id": "string",
   "date_of_followup": "string",
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
@@ -5462,21 +5631,21 @@ continued
   "biomarkers": [
     {
       "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
       "er_status": "Cannot be determined",
-      "er_percent_positive": 0,
-      "her2_ish_status": "Cannot be determined",
-      "her2_ihc_status": "Cannot be determined",
       "pr_status": "Cannot be determined",
-      "pr_percent_positive": 0,
+      "her2_ihc_status": "Cannot be determined",
+      "her2_ish_status": "Cannot be determined",
       "hpv_ihc_status": "Cannot be determined",
       "hpv_pcr_status": "Cannot be determined",
       "hpv_strain": [
         "HPV16"
-      ]
+      ],
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767,
+      "er_percent_positive": 0,
+      "pr_percent_positive": 0
     }
   ]
 }
@@ -5487,6 +5656,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|submitter_follow_up_id|string|true|none|none|
 |date_of_followup|string¦null|false|none|none|
 |disease_status_at_followup|any|true|none|none|
 
@@ -5919,21 +6089,21 @@ continued
       "biomarkers": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
           "er_status": "Cannot be determined",
-          "er_percent_positive": 0,
-          "her2_ish_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
-          "pr_percent_positive": 0,
+          "her2_ihc_status": "Cannot be determined",
+          "her2_ish_status": "Cannot be determined",
           "hpv_ihc_status": "Cannot be determined",
           "hpv_pcr_status": "Cannot be determined",
           "hpv_strain": [
             "HPV16"
-          ]
+          ],
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767,
+          "er_percent_positive": 0,
+          "pr_percent_positive": 0
         }
       ]
     }
@@ -5953,8 +6123,8 @@ continued
       "treatment_type": [
         "Bone marrow transplant"
       ],
-      "response_to_treatment": "Complete response",
       "response_to_treatment_criteria_method": "RECIST 1.1",
+      "response_to_treatment": "Complete response",
       "chemotherapies": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -6024,6 +6194,7 @@ continued
       },
       "followups": [
         {
+          "submitter_follow_up_id": "string",
           "date_of_followup": "string",
           "disease_status_at_followup": "Complete remission",
           "relapse_type": "Distant recurrence/metastasis",
@@ -6040,21 +6211,21 @@ continued
           "biomarkers": [
             {
               "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
               "er_status": "Cannot be determined",
-              "er_percent_positive": 0,
-              "her2_ish_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
-              "pr_percent_positive": 0,
+              "her2_ihc_status": "Cannot be determined",
+              "her2_ish_status": "Cannot be determined",
               "hpv_ihc_status": "Cannot be determined",
               "hpv_pcr_status": "Cannot be determined",
               "hpv_strain": [
                 "HPV16"
-              ]
+              ],
+              "test_interval": 32767,
+              "psa_level": 32767,
+              "ca125": 32767,
+              "cea": 32767,
+              "er_percent_positive": 0,
+              "pr_percent_positive": 0
             }
           ]
         }
@@ -6062,21 +6233,21 @@ continued
       "biomarkers": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
           "er_status": "Cannot be determined",
-          "er_percent_positive": 0,
-          "her2_ish_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
-          "pr_percent_positive": 0,
+          "her2_ihc_status": "Cannot be determined",
+          "her2_ish_status": "Cannot be determined",
           "hpv_ihc_status": "Cannot be determined",
           "hpv_pcr_status": "Cannot be determined",
           "hpv_strain": [
             "HPV16"
-          ]
+          ],
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767,
+          "er_percent_positive": 0,
+          "pr_percent_positive": 0
         }
       ]
     }
@@ -6084,20 +6255,58 @@ continued
   "biomarkers": [
     {
       "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
       "er_status": "Cannot be determined",
-      "er_percent_positive": 0,
-      "her2_ish_status": "Cannot be determined",
-      "her2_ihc_status": "Cannot be determined",
       "pr_status": "Cannot be determined",
-      "pr_percent_positive": 0,
+      "her2_ihc_status": "Cannot be determined",
+      "her2_ish_status": "Cannot be determined",
       "hpv_ihc_status": "Cannot be determined",
       "hpv_pcr_status": "Cannot be determined",
       "hpv_strain": [
         "HPV16"
+      ],
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767,
+      "er_percent_positive": 0,
+      "pr_percent_positive": 0
+    }
+  ],
+  "followups": [
+    {
+      "submitter_follow_up_id": "string",
+      "date_of_followup": "string",
+      "disease_status_at_followup": "Complete remission",
+      "relapse_type": "Distant recurrence/metastasis",
+      "date_of_relapse": "string",
+      "method_of_progression_status": "Imaging (procedure)",
+      "anatomic_site_progression_or_recurrence": "string",
+      "recurrence_tumour_staging_system": [
+        "AJCC 8th edition"
+      ],
+      "recurrence_t_category": "T0",
+      "recurrence_n_category": "N0",
+      "recurrence_m_category": "M0",
+      "recurrence_stage_group": "Stage 0",
+      "biomarkers": [
+        {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+          "er_status": "Cannot be determined",
+          "pr_status": "Cannot be determined",
+          "her2_ihc_status": "Cannot be determined",
+          "her2_ish_status": "Cannot be determined",
+          "hpv_ihc_status": "Cannot be determined",
+          "hpv_pcr_status": "Cannot be determined",
+          "hpv_strain": [
+            "HPV16"
+          ],
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767,
+          "er_percent_positive": 0,
+          "pr_percent_positive": 0
+        }
       ]
     }
   ]
@@ -6332,6 +6541,7 @@ continued
 |specimens|[[NestedSpecimen](#schemanestedspecimen)]|false|read-only|none|
 |treatments|[[NestedTreatment](#schemanestedtreatment)]|false|read-only|none|
 |biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
+|followups|[[NestedFollowUp](#schemanestedfollowup)]|false|read-only|none|
 
 <h2 id="tocS_NestedRadiation">NestedRadiation</h2>
 
@@ -6590,21 +6800,21 @@ xor
   "biomarkers": [
     {
       "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
       "er_status": "Cannot be determined",
-      "er_percent_positive": 0,
-      "her2_ish_status": "Cannot be determined",
-      "her2_ihc_status": "Cannot be determined",
       "pr_status": "Cannot be determined",
-      "pr_percent_positive": 0,
+      "her2_ihc_status": "Cannot be determined",
+      "her2_ish_status": "Cannot be determined",
       "hpv_ihc_status": "Cannot be determined",
       "hpv_pcr_status": "Cannot be determined",
       "hpv_strain": [
         "HPV16"
-      ]
+      ],
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767,
+      "er_percent_positive": 0,
+      "pr_percent_positive": 0
     }
   ]
 }
@@ -7241,8 +7451,8 @@ continued
   "treatment_type": [
     "Bone marrow transplant"
   ],
-  "response_to_treatment": "Complete response",
   "response_to_treatment_criteria_method": "RECIST 1.1",
+  "response_to_treatment": "Complete response",
   "chemotherapies": [
     {
       "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -7312,6 +7522,7 @@ continued
   },
   "followups": [
     {
+      "submitter_follow_up_id": "string",
       "date_of_followup": "string",
       "disease_status_at_followup": "Complete remission",
       "relapse_type": "Distant recurrence/metastasis",
@@ -7328,21 +7539,21 @@ continued
       "biomarkers": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
           "er_status": "Cannot be determined",
-          "er_percent_positive": 0,
-          "her2_ish_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
-          "pr_percent_positive": 0,
+          "her2_ihc_status": "Cannot be determined",
+          "her2_ish_status": "Cannot be determined",
           "hpv_ihc_status": "Cannot be determined",
           "hpv_pcr_status": "Cannot be determined",
           "hpv_strain": [
             "HPV16"
-          ]
+          ],
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767,
+          "er_percent_positive": 0,
+          "pr_percent_positive": 0
         }
       ]
     }
@@ -7350,21 +7561,21 @@ continued
   "biomarkers": [
     {
       "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
       "er_status": "Cannot be determined",
-      "er_percent_positive": 0,
-      "her2_ish_status": "Cannot be determined",
-      "her2_ihc_status": "Cannot be determined",
       "pr_status": "Cannot be determined",
-      "pr_percent_positive": 0,
+      "her2_ihc_status": "Cannot be determined",
+      "her2_ish_status": "Cannot be determined",
       "hpv_ihc_status": "Cannot be determined",
       "hpv_pcr_status": "Cannot be determined",
       "hpv_strain": [
         "HPV16"
-      ]
+      ],
+      "test_interval": 32767,
+      "psa_level": 32767,
+      "ca125": 32767,
+      "cea": 32767,
+      "er_percent_positive": 0,
+      "pr_percent_positive": 0
     }
   ]
 }
@@ -7501,13 +7712,13 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|response_to_treatment|any|true|none|none|
+|response_to_treatment_criteria_method|any|true|none|none|
 
 oneOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[ResponseToTreatmentEnum](#schemaresponsetotreatmentenum)|false|none|* `Complete response` - Complete response<br>* `Partial response` - Partial response<br>* `Progressive disease` - Progressive disease<br>* `Stable disease` - Stable disease<br>* `Immune complete response (iCR)` - Immune complete response (iCR)<br>* `Immune partial response (iPR)` - Immune partial response (iPR)<br>* `Immune uncomfirmed progressive disease (iUPD)` - Immune uncomfirmed progressive disease (iUPD)<br>* `Immune confirmed progressive disease (iCPD)` - Immune confirmed progressive disease (iCPD)<br>* `Immune stable disease (iSD)` - Immune stable disease (iSD)<br>* `Complete remission` - Complete remission<br>* `Partial remission` - Partial remission<br>* `Minor response` - Minor response<br>* `Complete remission without measurable residual disease (CR MRD-)` - Complete remission without measurable residual disease (CR MRD-)<br>* `Complete remission with incomplete hematologic recovery (CRi)` - Complete remission with incomplete hematologic recovery (CRi)<br>* `Morphologic leukemia-free state` - Morphologic leukemia-free state<br>* `Primary refractory disease` - Primary refractory disease<br>* `Hematologic relapse (after CR MRD-, CR, CRi)` - Hematologic relapse (after CR MRD-, CR, CRi)<br>* `Molecular relapse (after CR MRD-)` - Molecular relapse (after CR MRD-)<br>* `Physician assessed complete response` - Physician assessed complete response<br>* `Physician assessed partial response` - Physician assessed partial response<br>* `Physician assessed stable disease` - Physician assessed stable disease<br>* `No evidence of disease (NED)` - No evidence of disease (NED)<br>* `Major response` - Major response|
+|» *anonymous*|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|false|none|* `RECIST 1.1` - RECIST 1.1<br>* `iRECIST` - iRECIST<br>* `Cheson CLL 2012 Oncology Response Criteria` - Cheson CLL 2012 Oncology Response Criteria<br>* `Response Assessment in Neuro-Oncology (RANO)` - Response Assessment in Neuro-Oncology (RANO)<br>* `AML Response Criteria` - AML Response Criteria<br>* `Physician Assessed Response Criteria` - Physician Assessed Response Criteria<br>* `Blazer score` - Blazer score|
 
 xor
 
@@ -7525,13 +7736,13 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|response_to_treatment_criteria_method|any|true|none|none|
+|response_to_treatment|any|true|none|none|
 
 oneOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|false|none|* `RECIST 1.1` - RECIST 1.1<br>* `iRECIST` - iRECIST<br>* `Cheson CLL 2012 Oncology Response Criteria` - Cheson CLL 2012 Oncology Response Criteria<br>* `Response Assessment in Neuro-Oncology (RANO)` - Response Assessment in Neuro-Oncology (RANO)<br>* `AML Response Criteria` - AML Response Criteria<br>* `Physician Assessed Response Criteria` - Physician Assessed Response Criteria<br>* `Blazer score` - Blazer score|
+|» *anonymous*|[ResponseToTreatmentEnum](#schemaresponsetotreatmentenum)|false|none|* `Complete response` - Complete response<br>* `Partial response` - Partial response<br>* `Progressive disease` - Progressive disease<br>* `Stable disease` - Stable disease<br>* `Immune complete response (iCR)` - Immune complete response (iCR)<br>* `Immune partial response (iPR)` - Immune partial response (iPR)<br>* `Immune uncomfirmed progressive disease (iUPD)` - Immune uncomfirmed progressive disease (iUPD)<br>* `Immune confirmed progressive disease (iCPD)` - Immune confirmed progressive disease (iCPD)<br>* `Immune stable disease (iSD)` - Immune stable disease (iSD)<br>* `Complete remission` - Complete remission<br>* `Partial remission` - Partial remission<br>* `Minor response` - Minor response<br>* `Complete remission without measurable residual disease (CR MRD-)` - Complete remission without measurable residual disease (CR MRD-)<br>* `Complete remission with incomplete hematologic recovery (CRi)` - Complete remission with incomplete hematologic recovery (CRi)<br>* `Morphologic leukemia-free state` - Morphologic leukemia-free state<br>* `Primary refractory disease` - Primary refractory disease<br>* `Hematologic relapse (after CR MRD-, CR, CRi)` - Hematologic relapse (after CR MRD-, CR, CRi)<br>* `Molecular relapse (after CR MRD-)` - Molecular relapse (after CR MRD-)<br>* `Physician assessed complete response` - Physician assessed complete response<br>* `Physician assessed partial response` - Physician assessed partial response<br>* `Physician assessed stable disease` - Physician assessed stable disease<br>* `No evidence of disease (NED)` - No evidence of disease (NED)<br>* `Major response` - Major response|
 
 xor
 
@@ -7819,21 +8030,21 @@ null
               "biomarkers": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
                   "er_status": "Cannot be determined",
-                  "er_percent_positive": 0,
-                  "her2_ish_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
-                  "pr_percent_positive": 0,
+                  "her2_ihc_status": "Cannot be determined",
+                  "her2_ish_status": "Cannot be determined",
                   "hpv_ihc_status": "Cannot be determined",
                   "hpv_pcr_status": "Cannot be determined",
                   "hpv_strain": [
                     "HPV16"
-                  ]
+                  ],
+                  "test_interval": 32767,
+                  "psa_level": 32767,
+                  "ca125": 32767,
+                  "cea": 32767,
+                  "er_percent_positive": 0,
+                  "pr_percent_positive": 0
                 }
               ]
             }
@@ -7853,8 +8064,8 @@ null
               "treatment_type": [
                 "Bone marrow transplant"
               ],
-              "response_to_treatment": "Complete response",
               "response_to_treatment_criteria_method": "RECIST 1.1",
+              "response_to_treatment": "Complete response",
               "chemotherapies": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -7924,6 +8135,7 @@ null
               },
               "followups": [
                 {
+                  "submitter_follow_up_id": "string",
                   "date_of_followup": "string",
                   "disease_status_at_followup": "Complete remission",
                   "relapse_type": "Distant recurrence/metastasis",
@@ -7945,21 +8157,21 @@ null
               "biomarkers": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
                   "er_status": "Cannot be determined",
-                  "er_percent_positive": 0,
-                  "her2_ish_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
-                  "pr_percent_positive": 0,
+                  "her2_ihc_status": "Cannot be determined",
+                  "her2_ish_status": "Cannot be determined",
                   "hpv_ihc_status": "Cannot be determined",
                   "hpv_pcr_status": "Cannot be determined",
                   "hpv_strain": [
                     "HPV16"
-                  ]
+                  ],
+                  "test_interval": 32767,
+                  "psa_level": 32767,
+                  "ca125": 32767,
+                  "cea": 32767,
+                  "er_percent_positive": 0,
+                  "pr_percent_positive": 0
                 }
               ]
             }
@@ -7967,20 +8179,58 @@ null
           "biomarkers": [
             {
               "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
               "er_status": "Cannot be determined",
-              "er_percent_positive": 0,
-              "her2_ish_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
-              "pr_percent_positive": 0,
+              "her2_ihc_status": "Cannot be determined",
+              "her2_ish_status": "Cannot be determined",
               "hpv_ihc_status": "Cannot be determined",
               "hpv_pcr_status": "Cannot be determined",
               "hpv_strain": [
                 "HPV16"
+              ],
+              "test_interval": 32767,
+              "psa_level": 32767,
+              "ca125": 32767,
+              "cea": 32767,
+              "er_percent_positive": 0,
+              "pr_percent_positive": 0
+            }
+          ],
+          "followups": [
+            {
+              "submitter_follow_up_id": "string",
+              "date_of_followup": "string",
+              "disease_status_at_followup": "Complete remission",
+              "relapse_type": "Distant recurrence/metastasis",
+              "date_of_relapse": "string",
+              "method_of_progression_status": "Imaging (procedure)",
+              "anatomic_site_progression_or_recurrence": "string",
+              "recurrence_tumour_staging_system": [
+                "AJCC 8th edition"
+              ],
+              "recurrence_t_category": "T0",
+              "recurrence_n_category": "N0",
+              "recurrence_m_category": "M0",
+              "recurrence_stage_group": "Stage 0",
+              "biomarkers": [
+                {
+                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+                  "er_status": "Cannot be determined",
+                  "pr_status": "Cannot be determined",
+                  "her2_ihc_status": "Cannot be determined",
+                  "her2_ish_status": "Cannot be determined",
+                  "hpv_ihc_status": "Cannot be determined",
+                  "hpv_pcr_status": "Cannot be determined",
+                  "hpv_strain": [
+                    "HPV16"
+                  ],
+                  "test_interval": 32767,
+                  "psa_level": 32767,
+                  "ca125": 32767,
+                  "cea": 32767,
+                  "er_percent_positive": 0,
+                  "pr_percent_positive": 0
+                }
               ]
             }
           ]
@@ -7988,16 +8238,18 @@ null
       ],
       "comorbidities": [
         {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "prior_malignancy": "Yes",
           "laterality_of_prior_malignancy": "Bilateral",
-          "age_at_comorbidity_diagnosis": 32767,
           "comorbidity_type_code": "string",
           "comorbidity_treatment_status": "Yes",
-          "comorbidity_treatment": "string"
+          "comorbidity_treatment": "string",
+          "age_at_comorbidity_diagnosis": 32767
         }
       ],
       "exposures": [
         {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
           "tobacco_type": [
             "Chewing Tobacco"
@@ -8008,20 +8260,58 @@ null
       "biomarkers": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
           "er_status": "Cannot be determined",
-          "er_percent_positive": 0,
-          "her2_ish_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
-          "pr_percent_positive": 0,
+          "her2_ihc_status": "Cannot be determined",
+          "her2_ish_status": "Cannot be determined",
           "hpv_ihc_status": "Cannot be determined",
           "hpv_pcr_status": "Cannot be determined",
           "hpv_strain": [
             "HPV16"
+          ],
+          "test_interval": 32767,
+          "psa_level": 32767,
+          "ca125": 32767,
+          "cea": 32767,
+          "er_percent_positive": 0,
+          "pr_percent_positive": 0
+        }
+      ],
+      "followups": [
+        {
+          "submitter_follow_up_id": "string",
+          "date_of_followup": "string",
+          "disease_status_at_followup": "Complete remission",
+          "relapse_type": "Distant recurrence/metastasis",
+          "date_of_relapse": "string",
+          "method_of_progression_status": "Imaging (procedure)",
+          "anatomic_site_progression_or_recurrence": "string",
+          "recurrence_tumour_staging_system": [
+            "AJCC 8th edition"
+          ],
+          "recurrence_t_category": "T0",
+          "recurrence_n_category": "N0",
+          "recurrence_m_category": "M0",
+          "recurrence_stage_group": "Stage 0",
+          "biomarkers": [
+            {
+              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+              "er_status": "Cannot be determined",
+              "pr_status": "Cannot be determined",
+              "her2_ihc_status": "Cannot be determined",
+              "her2_ish_status": "Cannot be determined",
+              "hpv_ihc_status": "Cannot be determined",
+              "hpv_pcr_status": "Cannot be determined",
+              "hpv_strain": [
+                "HPV16"
+              ],
+              "test_interval": 32767,
+              "psa_level": 32767,
+              "ca125": 32767,
+              "cea": 32767,
+              "er_percent_positive": 0,
+              "pr_percent_positive": 0
+            }
           ]
         }
       ]
