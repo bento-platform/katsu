@@ -361,12 +361,13 @@ available in a single database query, improving the performance of the viewset.
               "treatment_intent": "Curative",
               "days_per_cycle": 32767,
               "number_of_cycles": 32767,
-              "response_to_treatment_criteria_method": "RECIST 1.1",
               "line_of_treatment": -2147483648,
               "status_of_treatment": "Treatment completed as prescribed",
               "treatment_type": [
                 "Bone marrow transplant"
               ],
+              "response_to_treatment": "Complete response",
+              "response_to_treatment_criteria_method": "RECIST 1.1",
               "chemotherapies": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -3468,12 +3469,13 @@ continued
           "treatment_intent": "Curative",
           "days_per_cycle": 32767,
           "number_of_cycles": 32767,
-          "response_to_treatment_criteria_method": "RECIST 1.1",
           "line_of_treatment": -2147483648,
           "status_of_treatment": "Treatment completed as prescribed",
           "treatment_type": [
             "Bone marrow transplant"
           ],
+          "response_to_treatment": "Complete response",
+          "response_to_treatment_criteria_method": "RECIST 1.1",
           "chemotherapies": [
             {
               "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -5946,12 +5948,13 @@ continued
       "treatment_intent": "Curative",
       "days_per_cycle": 32767,
       "number_of_cycles": 32767,
-      "response_to_treatment_criteria_method": "RECIST 1.1",
       "line_of_treatment": -2147483648,
       "status_of_treatment": "Treatment completed as prescribed",
       "treatment_type": [
         "Bone marrow transplant"
       ],
+      "response_to_treatment": "Complete response",
+      "response_to_treatment_criteria_method": "RECIST 1.1",
       "chemotherapies": [
         {
           "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -7233,12 +7236,13 @@ continued
   "treatment_intent": "Curative",
   "days_per_cycle": 32767,
   "number_of_cycles": 32767,
-  "response_to_treatment_criteria_method": "RECIST 1.1",
   "line_of_treatment": -2147483648,
   "status_of_treatment": "Treatment completed as prescribed",
   "treatment_type": [
     "Bone marrow transplant"
   ],
+  "response_to_treatment": "Complete response",
+  "response_to_treatment_criteria_method": "RECIST 1.1",
   "chemotherapies": [
     {
       "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
@@ -7448,30 +7452,6 @@ continued
 |---|---|---|---|---|
 |days_per_cycle|integer¦null|false|none|none|
 |number_of_cycles|integer¦null|false|none|none|
-|response_to_treatment_criteria_method|any|true|none|none|
-
-oneOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|false|none|* `RECIST 1.1` - RECIST 1.1<br>* `iRECIST` - iRECIST<br>* `Cheson CLL 2012 Oncology Response Criteria` - Cheson CLL 2012 Oncology Response Criteria<br>* `Response Assessment in Neuro-Oncology (RANO)` - Response Assessment in Neuro-Oncology (RANO)<br>* `AML Response Criteria` - AML Response Criteria<br>* `Physician Assessed Response Criteria` - Physician Assessed Response Criteria<br>* `Blazer score` - Blazer score|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
-
-xor
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
 |line_of_treatment|integer¦null|false|none|none|
 |status_of_treatment|any|true|none|none|
 
@@ -7504,6 +7484,54 @@ oneOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[TreatmentTypeEnum](#schematreatmenttypeenum)|false|none|* `Bone marrow transplant` - Bone marrow transplant<br>* `Chemotherapy` - Chemotherapy<br>* `Hormonal therapy` - Hormonal therapy<br>* `Immunotherapy` - Immunotherapy<br>* `No treatment` - No treatment<br>* `Other targeting molecular therapy` - Other targeting molecular therapy<br>* `Photodynamic therapy` - Photodynamic therapy<br>* `Radiation therapy` - Radiation therapy<br>* `Stem cell transplant` - Stem cell transplant<br>* `Surgery` - Surgery|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|response_to_treatment|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ResponseToTreatmentEnum](#schemaresponsetotreatmentenum)|false|none|* `Complete response` - Complete response<br>* `Partial response` - Partial response<br>* `Progressive disease` - Progressive disease<br>* `Stable disease` - Stable disease<br>* `Immune complete response (iCR)` - Immune complete response (iCR)<br>* `Immune partial response (iPR)` - Immune partial response (iPR)<br>* `Immune uncomfirmed progressive disease (iUPD)` - Immune uncomfirmed progressive disease (iUPD)<br>* `Immune confirmed progressive disease (iCPD)` - Immune confirmed progressive disease (iCPD)<br>* `Immune stable disease (iSD)` - Immune stable disease (iSD)<br>* `Complete remission` - Complete remission<br>* `Partial remission` - Partial remission<br>* `Minor response` - Minor response<br>* `Complete remission without measurable residual disease (CR MRD-)` - Complete remission without measurable residual disease (CR MRD-)<br>* `Complete remission with incomplete hematologic recovery (CRi)` - Complete remission with incomplete hematologic recovery (CRi)<br>* `Morphologic leukemia-free state` - Morphologic leukemia-free state<br>* `Primary refractory disease` - Primary refractory disease<br>* `Hematologic relapse (after CR MRD-, CR, CRi)` - Hematologic relapse (after CR MRD-, CR, CRi)<br>* `Molecular relapse (after CR MRD-)` - Molecular relapse (after CR MRD-)<br>* `Physician assessed complete response` - Physician assessed complete response<br>* `Physician assessed partial response` - Physician assessed partial response<br>* `Physician assessed stable disease` - Physician assessed stable disease<br>* `No evidence of disease (NED)` - No evidence of disease (NED)<br>* `Major response` - Major response|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[BlankEnum](#schemablankenum)|false|none|none|
+
+xor
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|response_to_treatment_criteria_method|any|true|none|none|
+
+oneOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[ResponseToTreatmentCriteriaMethodEnum](#schemaresponsetotreatmentcriteriamethodenum)|false|none|* `RECIST 1.1` - RECIST 1.1<br>* `iRECIST` - iRECIST<br>* `Cheson CLL 2012 Oncology Response Criteria` - Cheson CLL 2012 Oncology Response Criteria<br>* `Response Assessment in Neuro-Oncology (RANO)` - Response Assessment in Neuro-Oncology (RANO)<br>* `AML Response Criteria` - AML Response Criteria<br>* `Physician Assessed Response Criteria` - Physician Assessed Response Criteria<br>* `Blazer score` - Blazer score|
 
 xor
 
@@ -7820,12 +7848,13 @@ null
               "treatment_intent": "Curative",
               "days_per_cycle": 32767,
               "number_of_cycles": 32767,
-              "response_to_treatment_criteria_method": "RECIST 1.1",
               "line_of_treatment": -2147483648,
               "status_of_treatment": "Treatment completed as prescribed",
               "treatment_type": [
                 "Bone marrow transplant"
               ],
+              "response_to_treatment": "Complete response",
+              "response_to_treatment_criteria_method": "RECIST 1.1",
               "chemotherapies": [
                 {
                   "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",

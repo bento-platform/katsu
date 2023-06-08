@@ -5132,12 +5132,6 @@ components:
           maximum: 32767
           minimum: 0
           nullable: true
-        response_to_treatment_criteria_method:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/ResponseToTreatmentCriteriaMethodEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         line_of_treatment:
           type: integer
           maximum: 2147483647
@@ -5158,6 +5152,18 @@ components:
             - $ref: '#/components/schemas/BlankEnum'
             - $ref: '#/components/schemas/NullEnum'
           nullable: true
+        response_to_treatment:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ResponseToTreatmentEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        response_to_treatment_criteria_method:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ResponseToTreatmentCriteriaMethodEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         chemotherapies:
           type: array
           items:
@@ -5193,6 +5199,7 @@ components:
           readOnly: true
       required:
       - is_primary_treatment
+      - response_to_treatment
       - response_to_treatment_criteria_method
       - status_of_treatment
       - submitter_treatment_id
