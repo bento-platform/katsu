@@ -1,0 +1,79 @@
+[
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_treatment_id": "TREATMENT_5",
+        "drug_name": "leuprolide",
+        "drug_reference_identifier": "258494",
+        "hormone_drug_dose_units": "IU/kg",
+        "prescribed_cumulative_drug_dose": 160,
+        "actual_cumulative_drug_dose": 73,
+        "drug_reference_database": "RxNorm"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_treatment_id": "TREATMENT_5",
+        "drug_name": "degarelix",
+        "drug_reference_identifier": "46475",
+        "hormone_drug_dose_units": "ug/m2",
+        "prescribed_cumulative_drug_dose": 179,
+        "actual_cumulative_drug_dose": 97,
+        "drug_reference_database": "PubChem"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_treatment_id": "TREATMENT_5",
+        "drug_name": "degarelix",
+        "drug_reference_identifier": "258494",
+        "hormone_drug_dose_units": "mg/m2",
+        "prescribed_cumulative_drug_dose": 106,
+        "actual_cumulative_drug_dose": 114,
+        "drug_reference_database": "PubChem"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_treatment_id": "TREATMENT_6",
+        "drug_name": "leuprolide",
+        "drug_reference_identifier": "258494",
+        "hormone_drug_dose_units": "IU/m2",
+        "prescribed_cumulative_drug_dose": 71,
+        "actual_cumulative_drug_dose": 92,
+        "drug_reference_database": "PubChem"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_treatment_id": "TREATMENT_6",
+        "drug_name": "triptorelin",
+        "drug_reference_identifier": "258494",
+        "hormone_drug_dose_units": "g/m2",
+        "prescribed_cumulative_drug_dose": 76,
+        "actual_cumulative_drug_dose": 156,
+        "drug_reference_database": "NCI Thesaurus"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_treatment_id": "TREATMENT_7",
+        "drug_name": "goserelin",
+        "drug_reference_identifier": "557845",
+        "hormone_drug_dose_units": "g/m2",
+        "prescribed_cumulative_drug_dose": 187,
+        "actual_cumulative_drug_dose": 133,
+        "drug_reference_database": "PubChem"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_1",
+        "submitter_treatment_id": "TREATMENT_8",
+        "drug_name": "exemestane",
+        "drug_reference_identifier": "223986",
+        "hormone_drug_dose_units": "IU/m2",
+        "prescribed_cumulative_drug_dose": 124,
+        "actual_cumulative_drug_dose": 134,
+        "drug_reference_database": "RxNorm"
+    }
+]
