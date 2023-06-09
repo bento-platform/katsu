@@ -30,10 +30,10 @@ jobs:
       - name: Create package.json file
         run: |
           echo '{"name": "my-project", "version": "1.0.0"}' > package.json
-          
+
       - name: Install npm
         run: npm install
-      
+
       - name: Install widdershins
         run: npm install -g widdershins
 
@@ -43,7 +43,7 @@ jobs:
       - name: Convert schema to OpenAPI documentation
         run: |
           npx widdershins ./chord_metadata_service/mohpackets/docs/schema.yml -o ./chord_metadata_service/mohpackets/docs/openapi.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true
-      
+
       - name: Install octokit/rest
         run: npm install @octokit/rest
 
@@ -66,13 +66,22 @@ jobs:
               });
               return data.sha;
             }
-            
+
             const schemaSha = await getFileSha('schema.yml');
             const openApiSha = await getFileSha('openapi.md');
 
             // Read the content of updated files
-            const schemaYml = fs.readFileSync(`./${repoPath}schema.yml`, 'utf8');
+            let schemaYml = fs.readFileSync(`./${repoPath}schema.yml`, 'utf8');
             const openApiMd = fs.readFileSync(`./${repoPath}openapi.md`, 'utf8');
+
+            // Update description to include sha
+            let schemaLines = schemaYml.split('\n')
+            for (let i = 0; i < schemaLines.length; ++i) {
+              if /description: This is the RESTful API for the MoH Service./.exec(schemaLines[i]) {
+                schemaLines[i] += ' Based on commit "' + schemaSha + '".'
+              }
+            }
+            schemaYml = schemaLines.join('\n')
 
             // Commit and push changes
             await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
@@ -95,6 +104,6 @@ jobs:
               branch: `${{ github.head_ref }}`
             });
 
-          
+
 
 
