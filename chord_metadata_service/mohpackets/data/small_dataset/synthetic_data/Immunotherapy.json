@@ -1,0 +1,86 @@
+[
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_3",
+        "submitter_treatment_id": "TREATMENT_14",
+        "immunotherapy_type": "Cell-based",
+        "drug_name": "Pembrolizumab",
+        "drug_reference_identifier": "4459876",
+        "drug_reference_database": "RxNorm",
+        "immunotherapy_drug_dose_units": "IU/kg",
+        "prescribed_cumulative_drug_dose": 95,
+        "actual_cumulative_drug_dose": 160
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_3",
+        "submitter_treatment_id": "TREATMENT_14",
+        "immunotherapy_type": "Other immunomodulatory substances",
+        "drug_name": "Pexidartinib",
+        "drug_reference_identifier": "8836851",
+        "drug_reference_database": "PubChem",
+        "immunotherapy_drug_dose_units": "ug/m2",
+        "prescribed_cumulative_drug_dose": 197,
+        "actual_cumulative_drug_dose": 183
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_3",
+        "submitter_treatment_id": "TREATMENT_14",
+        "immunotherapy_type": "Monoclonal antibodies other than immune checkpoint inhibitors",
+        "drug_name": "Copanlisib",
+        "drug_reference_identifier": "278936",
+        "drug_reference_database": "RxNorm",
+        "immunotherapy_drug_dose_units": "cells/kg",
+        "prescribed_cumulative_drug_dose": 183,
+        "actual_cumulative_drug_dose": 100
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_4",
+        "submitter_treatment_id": "TREATMENT_15",
+        "immunotherapy_type": "Cell-based",
+        "drug_name": "Necitumumab",
+        "drug_reference_identifier": "278936",
+        "drug_reference_database": "NCI Thesaurus",
+        "immunotherapy_drug_dose_units": "IU/kg",
+        "prescribed_cumulative_drug_dose": 138,
+        "actual_cumulative_drug_dose": 167
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_4",
+        "submitter_treatment_id": "TREATMENT_15",
+        "immunotherapy_type": "Immune checkpoint inhibitors",
+        "drug_name": "Pexidartinib",
+        "drug_reference_identifier": "278936",
+        "drug_reference_database": "PubChem",
+        "immunotherapy_drug_dose_units": "g/m2",
+        "prescribed_cumulative_drug_dose": 184,
+        "actual_cumulative_drug_dose": 190
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_4",
+        "submitter_treatment_id": "TREATMENT_16",
+        "immunotherapy_type": "Monoclonal antibodies other than immune checkpoint inhibitors",
+        "drug_name": "Copanlisib",
+        "drug_reference_identifier": "239766",
+        "drug_reference_database": "RxNorm",
+        "immunotherapy_drug_dose_units": "IU/kg",
+        "prescribed_cumulative_drug_dose": 181,
+        "actual_cumulative_drug_dose": 111
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_5",
+        "submitter_treatment_id": "TREATMENT_17",
+        "immunotherapy_type": "Monoclonal antibodies other than immune checkpoint inhibitors",
+        "drug_name": "Gilteritinib",
+        "drug_reference_identifier": "8756456",
+        "drug_reference_database": "NCI Thesaurus",
+        "immunotherapy_drug_dose_units": "IU/m2",
+        "prescribed_cumulative_drug_dose": 87,
+        "actual_cumulative_drug_dose": 101
+    }
+]
