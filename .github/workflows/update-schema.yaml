@@ -67,14 +67,25 @@ jobs:
               return data.sha;
             }
 
+            // get last commit sha for repo
+            const getRepoSha = async () => {
+              const { data } = await octokit.rest.repos.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `${{ github.head_ref }}`
+              });
+              return data.sha;
+            }
+
             const schemaSha = await getFileSha('schema.yml');
             const openApiSha = await getFileSha('openapi.md');
+            const repoSha = await getRepoSha();
 
             // Read the content of updated files
             let schemaYml = fs.readFileSync(`./${repoPath}schema.yml`, 'utf8');
             const openApiMd = fs.readFileSync(`./${repoPath}openapi.md`, 'utf8');
 
-            // Update description to include sha
+            // Update description to include sha of
             let schemaLines = schemaYml.split('\n');
             for (let i = 0; i < schemaLines.length; ++i) {
               if ("description: This is the RESTful API for the MoH Service." === schemaLines[i].trim()) {
