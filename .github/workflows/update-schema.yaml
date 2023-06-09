@@ -89,7 +89,7 @@ jobs:
             let schemaLines = schemaYml.split('\n');
             for (let i = 0; i < schemaLines.length; ++i) {
               if ("description: This is the RESTful API for the MoH Service." === schemaLines[i].trim()) {
-                schemaLines[i] += ' Based on commit "' + schemaSha + '".';
+                schemaLines[i] += ' Based on commit "' + repoSha + '".';
               }
             }
             schemaYml = schemaLines.join('\n');
