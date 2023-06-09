@@ -27,7 +27,7 @@ from chord_metadata_service.mohpackets.authentication import (
     LocalAuthentication,
     TokenAuthentication,
 )
-from chord_metadata_service.mohpackets.models import Biomarker, Donor, Program
+from chord_metadata_service.mohpackets.models import Biomarker, Donor, FollowUp, Program
 from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
@@ -238,18 +238,35 @@ class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
         ),
     )
 
+    donor_followups_prefetch = Prefetch(
+        "followup_set",
+        queryset=FollowUp.objects.filter(
+            submitter_primary_diagnosis_id__isnull=True,
+            submitter_treatment_id__isnull=True,
+        ),
+    )
+
+    primary_diagnosis_followups_prefetch = Prefetch(
+        "primarydiagnosis_set__followup_set",
+        queryset=FollowUp.objects.filter(
+            submitter_primary_diagnosis_id__isnull=False,
+            submitter_treatment_id__isnull=True,
+        ),
+    )
+
     queryset = Donor.objects.prefetch_related(
         donor_biomarkers_prefetch,
         primary_diagnosis_biomarkers_prefetch,
         specimen_biomarkers_prefetch,
         treatment_biomarkers_prefetch,
         followup_biomarkers_prefetch,
+        donor_followups_prefetch,
+        primary_diagnosis_followups_prefetch,
         "comorbidity_set",
         "primarydiagnosis_set__treatment_set__chemotherapy_set",
         "primarydiagnosis_set__treatment_set__hormonetherapy_set",
         "primarydiagnosis_set__treatment_set__immunotherapy_set",
         "primarydiagnosis_set__treatment_set__radiation",
         "primarydiagnosis_set__treatment_set__surgery",
-        "primarydiagnosis_set__treatment_set__followup_set",
         "primarydiagnosis_set__specimen_set__sampleregistration_set",
     ).all()
