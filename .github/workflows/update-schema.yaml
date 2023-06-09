@@ -3,7 +3,10 @@ name: Docs
 on:
   pull_request:
     types: [review_requested, ready_for_review]
-
+  push:
+    branches:
+      - develop
+      - master
 jobs:
   generate-moh-schema:
     name: Update MoH schema
