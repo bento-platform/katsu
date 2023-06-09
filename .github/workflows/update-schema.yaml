@@ -78,8 +78,9 @@ jobs:
             // Update description to include sha
             let schemaLines = schemaYml.split('\n')
             for (let i = 0; i < schemaLines.length; ++i) {
-              if /description: This is the RESTful API for the MoH Service./.exec(schemaLines[i]) {
-                schemaLines[i] += ' Based on commit "' + schemaSha + '".'
+              let descMatch = /description: This is the RESTful API for the MoH Service./.exec(schemaLines[i]);
+              if (descMatch) {
+                schemaLines[i] += ' Based on commit "' + schemaSha + '".';
               }
             }
             schemaYml = schemaLines.join('\n')
