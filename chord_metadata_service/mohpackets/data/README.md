@@ -39,4 +39,4 @@ If you want to modify the mock data to your preferences, you can follow these st
 python chord_metadata_service/mohpackets/data/convert.py
 ```
 
-NOTE: Synthetic data simplifies data ingestion into the database for frontend testing. However, for other testing purposes like unittests or integration tests, it's recommended to create your own data to ensure accuracy and targeted testing.
+NOTE: Synthetic data simplifies data ingestion into the database for frontend testing. However, for other testing purposes it's recommended to create your own data to ensure accuracy and targeted testing.
