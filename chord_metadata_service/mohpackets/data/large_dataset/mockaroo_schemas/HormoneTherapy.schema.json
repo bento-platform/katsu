@@ -1,0 +1,73 @@
+{
+  "id": 469104,
+  "num_rows": 1000,
+  "file_format": "json",
+  "name": "HormoneTherapy",
+  "array": true,
+  "columns": [
+    {
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_donor_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_treatment_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "drug_name",
+      "null_percentage": 10,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"anastrozole\",\n\"exemestane\", \n\"letrozole\",\n\"goserelin\", \n\"leuprolide\", \n\"triptorelin\",\n\"degarelix\"][random(0,6)]"
+    },
+    {
+      "name": "drug_reference_identifier",
+      "null_percentage": 11,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"84857\",\n\"258494\",\n\"46475\",\n\"557845\",\n\"223986\",\n\"345678\",\n\"29875\"][random(0,6)]\n  "
+    },
+    {
+      "name": "hormone_drug_dose_units",
+      "null_percentage": 12,
+      "type": "Template",
+      "value": "",
+      "formula": "[\n    \"mg/m2\",\n    \"IU/m2\",\n    \"IU/kg\",\n    \"ug/m2\",\n    \"g/m2\",\n    \"mg/kg\",\n][random(0,5)]"
+    },
+    {
+      "name": "prescribed_cumulative_drug_dose",
+      "null_percentage": 13,
+      "type": "Number",
+      "min": 50,
+      "max": 200,
+      "decimals": null,
+      "formula": ""
+    },
+    {
+      "name": "actual_cumulative_drug_dose",
+      "null_percentage": 14,
+      "type": "Number",
+      "min": 50,
+      "max": 200,
+      "decimals": null,
+      "formula": ""
+    },
+    {
+      "name": "drug_reference_database",
+      "null_percentage": 15,
+      "type": "Template",
+      "value": "",
+      "formula": "[\n    \"RxNorm\",\n    \"PubChem\",\n    \"NCI Thesaurus\",\n][random(0,2)]"
+    }
+  ]
+}
