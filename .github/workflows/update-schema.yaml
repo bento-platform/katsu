@@ -3,7 +3,6 @@ name: Docs
 on:
   pull_request:
     types: [review_requested, ready_for_review]
-  workflow_dispatch:
 
 jobs:
   generate-moh-schema:
