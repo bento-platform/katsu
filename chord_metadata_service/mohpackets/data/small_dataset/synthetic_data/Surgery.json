@@ -1,0 +1,117 @@
+[
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_6",
+        "submitter_specimen_id": "SPECIMEN_18",
+        "submitter_treatment_id": "TREATMENT_18",
+        "surgery_type": "Axillary lymph nodes sampling",
+        "surgery_site": "C14",
+        "surgery_location": "Primary",
+        "tumour_length": "9",
+        "tumour_width": "7",
+        "greatest_dimension_tumour": "5",
+        "tumour_focality": "Unifocal",
+        "residual_tumour_classification": "R2",
+        "margin_types_involved": [
+            "Distal margin",
+            "Circumferential resection margin"
+        ],
+        "margin_types_not_involved": [],
+        "lymphovascular_invasion": "Absent",
+        "margin_types_not_assessed": [
+            "Unknown"
+        ],
+        "perineural_invasion": "Absent"
+    },
+    {
+        "program_id": "SYNTHETIC-2",
+        "submitter_donor_id": "DONOR_7",
+        "submitter_specimen_id": null,
+        "submitter_treatment_id": "TREATMENT_19",
+        "surgery_type": "Axillary Clearance",
+        "surgery_site": "C14",
+        "surgery_location": "Local recurrence",
+        "tumour_length": "5",
+        "tumour_width": "5",
+        "greatest_dimension_tumour": "6",
+        "tumour_focality": "Unknown",
+        "residual_tumour_classification": "Unknown",
+        "margin_types_involved": [],
+        "margin_types_not_involved": [],
+        "lymphovascular_invasion": "Venous (large vessel) invasion only",
+        "margin_types_not_assessed": [
+            "Circumferential resection margin",
+            "Proximal margin"
+        ],
+        "perineural_invasion": "Unknown"
+    },
+    {
+        "program_id": "SYNTHETIC-2",
+        "submitter_donor_id": "DONOR_8",
+        "submitter_specimen_id": null,
+        "submitter_treatment_id": "TREATMENT_20",
+        "surgery_type": "Tumor Debulking",
+        "surgery_site": "C06",
+        "surgery_location": "Primary",
+        "tumour_length": "3",
+        "tumour_width": "6",
+        "greatest_dimension_tumour": "5",
+        "tumour_focality": "Not applicable",
+        "residual_tumour_classification": "RX",
+        "margin_types_involved": [
+            "Unknown",
+            "Distal margin"
+        ],
+        "margin_types_not_involved": [],
+        "lymphovascular_invasion": "Venous (large vessel) invasion only",
+        "margin_types_not_assessed": [],
+        "perineural_invasion": "Present"
+    },
+    {
+        "program_id": "SYNTHETIC-2",
+        "submitter_donor_id": "DONOR_9",
+        "submitter_specimen_id": null,
+        "submitter_treatment_id": "TREATMENT_21",
+        "surgery_type": "Pancreaticojejunostomy, side-to-side anastomosis",
+        "surgery_site": "C12",
+        "surgery_location": "Metastatic",
+        "tumour_length": "6",
+        "tumour_width": "6",
+        "greatest_dimension_tumour": "6",
+        "tumour_focality": "Unknown",
+        "residual_tumour_classification": "R0",
+        "margin_types_involved": [],
+        "margin_types_not_involved": [
+            "Unknown"
+        ],
+        "lymphovascular_invasion": "Venous (large vessel) invasion only",
+        "margin_types_not_assessed": [],
+        "perineural_invasion": "Present"
+    },
+    {
+        "program_id": "SYNTHETIC-2",
+        "submitter_donor_id": "DONOR_10",
+        "submitter_specimen_id": null,
+        "submitter_treatment_id": "TREATMENT_22",
+        "surgery_type": "Pneumonectomy",
+        "surgery_site": "C14",
+        "surgery_location": "Primary",
+        "tumour_length": "3",
+        "tumour_width": "5",
+        "greatest_dimension_tumour": "5",
+        "tumour_focality": "Unifocal",
+        "residual_tumour_classification": "R2",
+        "margin_types_involved": [
+            "Unknown"
+        ],
+        "margin_types_not_involved": [
+            "Circumferential resection margin"
+        ],
+        "lymphovascular_invasion": "Unknown",
+        "margin_types_not_assessed": [
+            "Distal margin",
+            "Proximal margin"
+        ],
+        "perineural_invasion": "Unknown"
+    }
+]
