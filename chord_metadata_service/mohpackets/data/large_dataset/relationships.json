@@ -141,6 +141,10 @@
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
+          "range": [1, 500],
+          "field_name": "submitter_donor_id"
+        },
+        {
           "range": [1, 1],
           "field_name": "program_id"
         }
@@ -1374,7 +1378,7 @@
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [1001, 1000],
+          "range": [1001, 2000],
           "field_name": "submitter_specimen_id"
         },
         {
