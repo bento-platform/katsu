@@ -1,0 +1,80 @@
+{
+  "id": 469105,
+  "num_rows": 1000,
+  "file_format": "json",
+  "name": "Immunotherapy",
+  "array": true,
+  "columns": [
+    {
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_donor_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_treatment_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "immunotherapy_type",
+      "null_percentage": 10,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Cell-based\",\n\"Immune checkpoint inhibitors\",\n\"Monoclonal antibodies other than immune checkpoint inhibitors\",\n\"Other immunomodulatory substances\"][random(0,3)]"
+    },
+    {
+      "name": "drug_name",
+      "null_percentage": 11,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Pembrolizumab\",\n\"Belantamab\",\n\"Copanlisib\",\n\"Gilteritinib\",\n\"Necitumumab\",\n\"Pexidartinib\",\n\"Selumitinib\"][random(0,6)]\n"
+    },
+    {
+      "name": "drug_reference_identifier",
+      "null_percentage": 12,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"239766\",\n\"8836851\",\n\"4459876\",\n\"278936\",\n\"8756456\",\n\"987654\"][random(0,5)]"
+    },
+    {
+      "name": "drug_reference_database",
+      "null_percentage": 13,
+      "type": "Template",
+      "value": "",
+      "formula": " [\n    \"RxNorm\",\n    \"PubChem\",\n    \"NCI Thesaurus\",\n][random(0,2)]"
+    },
+    {
+      "name": "immunotherapy_drug_dose_units",
+      "null_percentage": 14,
+      "type": "Template",
+      "value": "",
+      "formula": "[\n    \"mg/m2\",\n    \"IU/m2\",\n    \"IU/kg\",\n    \"ug/m2\",\n    \"g/m2\",\n    \"mg/kg\",\n    \"cells/kg\",\n][random(0,6)]"
+    },
+    {
+      "name": "prescribed_cumulative_drug_dose",
+      "null_percentage": 15,
+      "type": "Number",
+      "min": 50,
+      "max": 200,
+      "decimals": null,
+      "formula": null
+    },
+    {
+      "name": "actual_cumulative_drug_dose",
+      "null_percentage": 16,
+      "type": "Number",
+      "min": 50,
+      "max": 200,
+      "decimals": null,
+      "formula": null
+    }
+  ]
+}
