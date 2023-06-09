@@ -1,0 +1,142 @@
+[
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_1",
+        "prior_malignancy": "Yes",
+        "laterality_of_prior_malignancy": "Right",
+        "age_at_comorbidity_diagnosis": 44,
+        "comorbidity_type_code": "C34.9",
+        "comorbidity_treatment_status": "Unknown",
+        "comorbidity_treatment": "Ablation"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_1",
+        "prior_malignancy": "No",
+        "laterality_of_prior_malignancy": "Unilateral, Side not specified",
+        "age_at_comorbidity_diagnosis": 40,
+        "comorbidity_type_code": "C02.1",
+        "comorbidity_treatment_status": "Yes",
+        "comorbidity_treatment": "Endoscopic therapy"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_1",
+        "prior_malignancy": "Yes",
+        "laterality_of_prior_malignancy": "Unilateral, Side not specified",
+        "age_at_comorbidity_diagnosis": 46,
+        "comorbidity_type_code": "C43.9",
+        "comorbidity_treatment_status": "Yes",
+        "comorbidity_treatment": "Hormonal therapy"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_2",
+        "prior_malignancy": "Yes",
+        "laterality_of_prior_malignancy": "Bilateral",
+        "age_at_comorbidity_diagnosis": 53,
+        "comorbidity_type_code": "C50.9",
+        "comorbidity_treatment_status": "No",
+        "comorbidity_treatment": "Surgery"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_2",
+        "prior_malignancy": "No",
+        "laterality_of_prior_malignancy": "Midline",
+        "age_at_comorbidity_diagnosis": 56,
+        "comorbidity_type_code": "C34.9",
+        "comorbidity_treatment_status": "Unknown",
+        "comorbidity_treatment": "Endoscopic therapy"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_2",
+        "prior_malignancy": "Unknown",
+        "laterality_of_prior_malignancy": "Left",
+        "age_at_comorbidity_diagnosis": 57,
+        "comorbidity_type_code": "C04.0",
+        "comorbidity_treatment_status": "Yes",
+        "comorbidity_treatment": "Other targeting molecular therapy"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_3",
+        "prior_malignancy": "Yes",
+        "laterality_of_prior_malignancy": "Bilateral",
+        "age_at_comorbidity_diagnosis": 41,
+        "comorbidity_type_code": "C67.6",
+        "comorbidity_treatment_status": "Unknown",
+        "comorbidity_treatment": "Ablation"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_3",
+        "prior_malignancy": "No",
+        "laterality_of_prior_malignancy": "Left",
+        "age_at_comorbidity_diagnosis": 46,
+        "comorbidity_type_code": "C43.9",
+        "comorbidity_treatment_status": "Unknown",
+        "comorbidity_treatment": "Endoscopic therapy"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_4",
+        "prior_malignancy": "No",
+        "laterality_of_prior_malignancy": "Unknown",
+        "age_at_comorbidity_diagnosis": 35,
+        "comorbidity_type_code": "C02.0",
+        "comorbidity_treatment_status": "No",
+        "comorbidity_treatment": "Photodynamic therapy"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_4",
+        "prior_malignancy": "No",
+        "laterality_of_prior_malignancy": "Unknown",
+        "age_at_comorbidity_diagnosis": 47,
+        "comorbidity_type_code": "C67.6",
+        "comorbidity_treatment_status": "Unknown",
+        "comorbidity_treatment": "Radiation therapy"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_5",
+        "prior_malignancy": "Unknown",
+        "laterality_of_prior_malignancy": "Midline",
+        "age_at_comorbidity_diagnosis": 40,
+        "comorbidity_type_code": "C03.9",
+        "comorbidity_treatment_status": "Yes",
+        "comorbidity_treatment": "Bone marrow transplant"
+    },
+    {
+        "program_id": "SYNTHETIC-1",
+        "submitter_donor_id": "DONOR_6",
+        "prior_malignancy": "No",
+        "laterality_of_prior_malignancy": "Left",
+        "age_at_comorbidity_diagnosis": 51,
+        "comorbidity_type_code": "C02.1",
+        "comorbidity_treatment_status": "Unknown",
+        "comorbidity_treatment": "Ablation"
+    },
+    {
+        "program_id": "SYNTHETIC-2",
+        "submitter_donor_id": "DONOR_7",
+        "prior_malignancy": "No",
+        "laterality_of_prior_malignancy": "Bilateral",
+        "age_at_comorbidity_diagnosis": 38,
+        "comorbidity_type_code": "C67.6",
+        "comorbidity_treatment_status": "Unknown",
+        "comorbidity_treatment": "Radiation therapy"
+    },
+    {
+        "program_id": "SYNTHETIC-2",
+        "submitter_donor_id": "DONOR_8",
+        "prior_malignancy": "Yes",
+        "laterality_of_prior_malignancy": "Unknown",
+        "age_at_comorbidity_diagnosis": 51,
+        "comorbidity_type_code": "C64.9",
+        "comorbidity_treatment_status": "Yes",
+        "comorbidity_treatment": "Surgery"
+    }
+]
