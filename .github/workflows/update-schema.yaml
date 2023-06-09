@@ -76,13 +76,14 @@ jobs:
             const openApiMd = fs.readFileSync(`./${repoPath}openapi.md`, 'utf8');
 
             // Update description to include sha
-            let schemaLines = schemaYml.split('\n')
+            let schemaLines = schemaYml.split('\n');
             for (let i = 0; i < schemaLines.length; ++i) {
               if ("description: This is the RESTful API for the MoH Service." === schemaLines[i].trim()) {
                 schemaLines[i] += ' Based on commit "' + schemaSha + '".';
               }
             }
-            schemaYml = schemaLines.join('\n')
+            schemaYml = schemaLines.join('\n');
+            fs.writeFileSync(`./${repoPath}schema.yml`, schemaYml, 'utf8');
 
             // Commit and push changes
             await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
