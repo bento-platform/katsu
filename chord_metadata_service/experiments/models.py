@@ -56,7 +56,6 @@ class Experiment(models.Model, IndexableMixin):
                           blank=True, default=list)
     # SAMPLE
     biosample = models.ForeignKey(Biosample, on_delete=models.CASCADE, help_text=rec_help(d.EXPERIMENT, "biosample"))
-    table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
     dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
     
     # EXPERIMENT RESULT

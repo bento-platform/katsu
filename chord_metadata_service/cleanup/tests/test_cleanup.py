@@ -181,8 +181,7 @@ class CleanUpExperimentsTestCase(APITestCase):
         self.assertEqual(ec.clean_experiment_results(), 0)
         self.assertEqual(ec.clean_instruments(), 0)
 
-        # r = self.client.delete(f'/api/datasets/{self.dataset.identifier}')
-        r = self.client.delete(f'/api/experiments/{self.experiment.id}')
+        r = self.client.delete(f'/api/datasets/{self.dataset.identifier}')
         assert r.status_code == 204
 
         with self.assertRaises(Experiment.DoesNotExist):

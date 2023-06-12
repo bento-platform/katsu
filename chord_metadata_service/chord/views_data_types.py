@@ -37,12 +37,12 @@ async def get_count_for_data_type(
         q = (Phenopacket if data_type == dt.DATA_TYPE_PHENOPACKET else Experiment).objects.all()
         if dataset:
             try:
-                q = q.filter(table__ownership_record__dataset_id=dataset)
+                q = q.filter(dataset_id=dataset)
             except ValidationError:
                 raise ValueError("Dataset ID must be a UUID")
         elif project:
             try:
-                q = q.filter(table__ownership_record__dataset__project_id=project)
+                q = q.filter(dataset__project_id=project)
             except ValidationError:
                 raise ValueError("Project ID must be a UUID")
 
@@ -50,12 +50,12 @@ async def get_count_for_data_type(
         q = ExperimentResult.objects.all()
         if dataset:
             try:
-                q = q.filter(experiment__table__ownership_record__dataset_id=dataset)
+                q = q.filter(experiment__dataset_id=dataset)
             except ValidationError:
                 raise ValueError("Dataset ID must be a UUID")
         elif project:
             try:
-                q = q.filter(experiment__table__ownership_record__dataset__project_id=project)
+                q = q.filter(experiment__dataset__project_id=project)
             except ValidationError:
                 raise ValueError("Project ID must be a UUID")
 

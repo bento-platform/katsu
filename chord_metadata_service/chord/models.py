@@ -227,15 +227,15 @@ class ProjectJsonSchema(models.Model):
         target_count = 0
         if self.schema_type == SchemaType.PHENOPACKET:
             target_count = Phenopacket.objects.filter(
-                table__ownership_record__dataset__project_id=self.project_id
+                dataset__project_id=self.project_id
             ).count()
         elif self.schema_type == SchemaType.INDIVIDUAL:
             target_count = Individual.objects.filter(
-                phenopackets__table__ownership_record__dataset__project_id=self.project_id
+                phenopackets__dataset__project_id=self.project_id
             ).count()
         elif self.schema_type == SchemaType.BIOSAMPLE:
             target_count = Biosample.objects.filter(
-                individual__phenopackets__table__ownership_record__dataset__project_id=self.project_id
+                individual__phenopackets__dataset__project_id=self.project_id
             ).count()
 
         if target_count > 0:

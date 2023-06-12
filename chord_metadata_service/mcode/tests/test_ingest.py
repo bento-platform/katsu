@@ -35,7 +35,7 @@ class IngestMcodeJsonTest(TestCase):
         self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_MCODEPACKET)
 
     def test_ingest_mcodepacket_json(self):
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MCODE_JSON](EXAMPLE_INGEST_OUTPUTS_MCODE_JSON, self.t.identifier)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MCODE_JSON](EXAMPLE_INGEST_OUTPUTS_MCODE_JSON, self.d.identifier)
         self.assertEqual(len(MCodePacket.objects.all()), 1)
         self.assertEqual(len(Individual.objects.all()), 1)
         individual = Individual.objects.get(id="ind:HG00096")

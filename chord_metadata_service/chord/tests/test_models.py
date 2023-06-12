@@ -149,7 +149,7 @@ class ProjectJsonSchemaTest(ProjectTestCase):
         phenopacket = Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=individual,
-            table=self.table,
+            dataset=self.dataset,
             extra_properties={
                 "prop_a": "extra property text"
             },
