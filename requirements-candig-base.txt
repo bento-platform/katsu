@@ -5,3 +5,4 @@ djangorestframework==3.14.0
 django-cors-headers==3.14.0
 django-filter==23.1
 drf-spectacular==0.26.1
+uwsgi==2.0.21
