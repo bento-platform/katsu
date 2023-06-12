@@ -272,7 +272,7 @@ def search(request, internal_data=False):
 
     if (search_params["output"] == OUTPUT_FORMAT_VALUES_LIST
        or search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT):
-        search_params["add_field"] = "table_id"
+        search_params["add_field"] = "dataset_id"
 
     start = datetime.now()
     data_type = search_params["data_type"]
@@ -280,53 +280,55 @@ def search(request, internal_data=False):
     query_params = search_params["params"]
 
     if not internal_data:
-        tables = Table.objects.filter(ownership_record_id__in=data_type_results(
+        datasets = Dataset.objects.filter(identifier__in=data_type_results(
             query=compiled_query,
             params=query_params,
-            key="table_id"
-        ))  # TODO: Maybe can avoid hitting DB here
-        return Response(build_search_response([{"id": t.identifier, "data_type": data_type} for t in tables], start))
+            key="dataset_id"
+        ))
+        return Response(build_search_response([{"id": d.identifier, "data_type": data_type} for d in datasets], start))
 
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
     query_function = QUERY_RESULTS_FN[data_type]
     queryset = query_function(compiled_query, query_params, search_params)
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
-        return Response(build_search_response({
-            table_id: {
+        result = {
+            dataset_id: {
                 "data_type": data_type,
-                "matches": [p["value"] for p in table_dicts]
-            } for table_id, table_dicts in itertools.groupby(
+                "matches": [p["value"] for p in dataset_dicts]
+            } for dataset_id, dataset_dicts in itertools.groupby(
                 queryset,
-                key=lambda d: str(d["table_id"])    # dict here
+                key=lambda d: str(d["dataset_id"])    # dict here
             )
-        }, start))
+        }
+        return Response(build_search_response(result, start))
 
     if search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
         # The queryset for the bento_search_result output is based on the
         # usage of Django ORM `values()` to restrict its content to specific fields.
         # This result in a slight change of the queryset iterable where
         # items are dictionaries instead of objects.
-        return Response(build_search_response({
-            table_id: {
+        result = {
+            dataset_id: {
                 "data_type": data_type,
                 "matches": [
-                    {key: value for key, value in p.items() if key != "table_id"}
-                    for p in table_dicts
+                    {key: value for key, value in p.items() if key != "dataset_id"}
+                    for p in dataset_dicts
                 ]
-            } for table_id, table_dicts in itertools.groupby(
+            } for dataset_id, dataset_dicts in itertools.groupby(
                 queryset,
-                key=lambda d: str(d["table_id"])    # dict here
+                key=lambda d: str(d["dataset_id"])    # dict here
             )
-        }, start))
+        }
+        return Response(build_search_response(result, start))
 
     return Response(build_search_response({
-        table_id: {
+        dataset_id: {
             "data_type": data_type,
-            "matches": list(serializer_class(p).data for p in table_objects)
-        } for table_id, table_objects in itertools.groupby(
+            "matches": list(serializer_class(p).data for p in dataset_objects)
+        } for dataset_id, dataset_objects in itertools.groupby(
             queryset if queryset is not None else [],
-            key=lambda o: str(o.table_id)  # object here
+            key=lambda o: str(o.dataset_id)  # object here
         )
     }, start))
 
@@ -451,15 +453,24 @@ def fhir_search(request, internal_data=False):
 
     if not internal_data:
         # TODO: Maybe can avoid hitting DB here
-        datasets = Table.objects.filter(ownership_record_id__in=frozenset(p.table_id for p in phenopackets))
+        # datasets = Table.objects.filter(ownership_record_id__in=frozenset(p.table_id for p in phenopackets))
+        datasets = Dataset.objects.filter(identifier__in=frozenset(p.dataset_id for p in phenopackets))
         return Response(build_search_response([{"id": d.identifier, "data_type": DATA_TYPE_PHENOPACKET}
                                                for d in datasets], start))
-    return Response(build_search_response({
-        table_id: {
+    
+    # ext_result = {
+    #     table_id: {
+    #         "data_type": DATA_TYPE_PHENOPACKET,
+    #         "matches": list(PhenopacketSerializer(p).data for p in table_phenopackets)
+    #     } for table_id, table_phenopackets in itertools.groupby(phenopackets, key=lambda p: str(p.table_id))
+    # }
+    ext_result = {
+        dataset_id: {
             "data_type": DATA_TYPE_PHENOPACKET,
-            "matches": list(PhenopacketSerializer(p).data for p in table_phenopackets)
-        } for table_id, table_phenopackets in itertools.groupby(phenopackets, key=lambda p: str(p.table_id))
-    }, start))
+            "matches": list(PhenopacketSerializer(p).data for p in dataset_phenopackets)
+        } for dataset_id, dataset_phenopackets in itertools.groupby(phenopackets, key=lambda p: str(p.dataset_id))
+    }
+    return Response(build_search_response(ext_result, start))
 
 
 @api_view(["GET", "POST"])

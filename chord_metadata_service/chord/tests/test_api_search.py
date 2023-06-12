@@ -149,7 +149,7 @@ class SearchTest(APITestCase):
 
             self.assertEqual(len(c["results"]), 1)
             self.assertDictEqual(c["results"][0], {
-                "id": str(self.table.identifier),
+                "id": str(self.dataset.identifier),
                 "data_type": DATA_TYPE_PHENOPACKET
             })
 
@@ -175,8 +175,8 @@ class SearchTest(APITestCase):
             c = r.json()
 
             self.assertIn(str(self.dataset.identifier), c["results"])
-            self.assertEqual(c["results"][str(self.table.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
-            self.assertEqual(self.phenopacket.id, c["results"][str(self.table.identifier)]["matches"][0]["id"])
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
+            self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.identifier)]["matches"][0]["id"])
 
         # TODO: Check schema?
 
@@ -194,24 +194,24 @@ class SearchTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertIn(str(self.dataset.identifier), c["results"])
-            self.assertEqual(c["results"][str(self.t_exp.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
-            self.assertEqual(self.experiment.id, c["results"][str(self.t_exp.identifier)]["matches"][0]["id"])
-            self.assertEqual(len(c["results"][str(self.t_exp.identifier)]["matches"]), 1)
-            self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["id"], "experiment:1")
-            self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["study_type"],
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
+            self.assertEqual(self.experiment.id, c["results"][str(self.dataset.identifier)]["matches"][0]["id"])
+            self.assertEqual(len(c["results"][str(self.dataset.identifier)]["matches"]), 1)
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["id"], "experiment:1")
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["study_type"],
                              "Whole genome Sequencing")
-            self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["molecule"], "total RNA")
-            self.assertEqual(len(c["results"][str(self.t_exp.identifier)]["matches"][0]["experiment_results"]), 1)
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["molecule"], "total RNA")
+            self.assertEqual(len(c["results"][str(self.dataset.identifier)]["matches"][0]["experiment_results"]), 1)
             self.assertEqual(
-                c["results"][str(self.t_exp.identifier)]["matches"][0]["experiment_results"][0]["file_format"], "VCF"
+                c["results"][str(self.dataset.identifier)]["matches"][0]["experiment_results"][0]["file_format"], "VCF"
             )
-            self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["instrument"]["identifier"],
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["identifier"],
                              "instrument:01")
-            self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["instrument"]["platform"],
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["platform"],
                              "Illumina")
-            self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["instrument"]["model"],
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["model"],
                              "Illumina HiSeq 4000")
-            self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["instrument"]["extra_properties"],
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["extra_properties"],
                              {"date": "2021-06-21"})
 
     def test_private_search_11_experiment(self):
@@ -227,8 +227,8 @@ class SearchTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertIn(str(self.dataset.identifier), c["results"])
-            self.assertEqual(c["results"][str(self.t_exp.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
-            self.assertEqual(c["results"][str(self.t_exp.identifier)]["matches"][0]["experiment_type"],
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["experiment_type"],
                              "DNA Methylation")
 
     
@@ -283,7 +283,7 @@ class SearchTest(APITestCase):
 
             self.assertEqual(len(c["results"]), 1)
             self.assertDictEqual(c["results"][0], {
-                "id": str(self.table.identifier),
+                "id": str(self.dataset.identifier),
                 "data_type": DATA_TYPE_PHENOPACKET
             })
 
@@ -301,4 +301,4 @@ class SearchTest(APITestCase):
 
             self.assertIn(str(self.dataset.identifier), c["results"])
             self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
-            self.assertEqual(self.phenopacket.id, c["results"][str(self.table.identifier)]["matches"][0]["id"])
+            self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.identifier)]["matches"][0]["id"])
