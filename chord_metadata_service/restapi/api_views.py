@@ -359,6 +359,9 @@ def public_overview(_request):
     if individuals_count < settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
         return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
 
+    # Get the rules config
+    rules_config = settings.CONFIG_PUBLIC["rules"]
+
     response = {
         "layout": settings.CONFIG_PUBLIC["overview"],
         "fields": {},
@@ -367,7 +370,8 @@ def public_overview(_request):
             "biosamples": biosamples_count,
             "experiments": experiments_count
         },
-        "max_query_parameters": settings.CONFIG_PUBLIC["rules"]["max_query_parameters"],
+        "max_query_parameters": rules_config["max_query_parameters"],
+        "count_threshold": rules_config["count_threshold"],
     }
 
     # Parse the public config to gather data for each field defined in the
