@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     # Local
     # -----
-    "chord_metadata_service.mohpackets.apps.MohpacketsConfig",
+    "chord_metadata_service.mohpackets",
 ]
 
 MIDDLEWARE = [
