@@ -1,7 +1,6 @@
 import itertools
 import json
 import logging
-import uuid
 
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response, postgres
@@ -20,7 +19,6 @@ from rest_framework.response import Response
 
 from typing import Any, Callable, Dict, Optional, Tuple, Union
 
-from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.utils import get_field_bins, queryset_stats_for_field
 
@@ -32,7 +30,6 @@ from chord_metadata_service.mcode.models import MCodePacket
 from chord_metadata_service.mcode.serializers import MCodePacketSerializer
 
 from chord_metadata_service.metadata.elastic import es
-from chord_metadata_service.metadata.settings import CHORD_SERVICE_ARTIFACT, CHORD_SERVICE_ID
 
 from chord_metadata_service.patients.models import Individual
 
@@ -455,7 +452,7 @@ def fhir_search(request, internal_data=False):
         datasets = Dataset.objects.filter(identifier__in=frozenset(p.dataset_id for p in phenopackets))
         return Response(build_search_response([{"id": d.identifier, "data_type": DATA_TYPE_PHENOPACKET}
                                                for d in datasets], start))
-    
+
     ext_result = {
         dataset_id: {
             "data_type": DATA_TYPE_PHENOPACKET,

@@ -57,14 +57,14 @@ class Experiment(models.Model, IndexableMixin):
     # SAMPLE
     biosample = models.ForeignKey(Biosample, on_delete=models.CASCADE, help_text=rec_help(d.EXPERIMENT, "biosample"))
     dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
-    
+
     # EXPERIMENT RESULT
     #  - Many-to-many because experiment results can contain analyses involving multiple experiments,
     #    e.g., a pairwise analysis
     experiment_results = models.ManyToManyField("experiments.ExperimentResult", blank=True,
                                                 help_text=rec_help(d.EXPERIMENT, "experiment_results"))
     # INSTRUMENT
-    instrument = models.ForeignKey("experiments.Instrument", on_delete=models.CASCADE, blank=True, null=True, 
+    instrument = models.ForeignKey("experiments.Instrument", on_delete=models.CASCADE, blank=True, null=True,
                                    help_text=rec_help(d.EXPERIMENT, "instrument"))
     # EXTRA
     extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],

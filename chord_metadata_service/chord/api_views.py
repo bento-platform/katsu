@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from django_filters.rest_framework import DjangoFilterBackend
+from chord_metadata_service.cleanup.run_all import run_all_cleanup
 
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
@@ -22,7 +23,7 @@ from .filters import AuthorizedDatasetFilter
 logger = logging.getLogger(__name__)
 
 
-__all__ = ["ProjectViewSet", "DatasetViewSet", "TableOwnershipViewSet", "TableViewSet"]
+__all__ = ["ProjectViewSet", "DatasetViewSet"]
 
 
 class ReadOnly(BasePermission):
@@ -68,6 +69,15 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     serializer_class = DatasetSerializer
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
     queryset = Dataset.objects.all().order_by("title")
+
+    def destroy(self, request, *args, **kwargs):
+        dataset = self.get_object()
+        dataset.delete()
+
+        logger.info(f"Running cleanup after deleting dataset {dataset.identifier} via DRF API")
+        n_removed = run_all_cleanup()
+        logger.info(f"Cleanup: removed {n_removed} objects in total")
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ProjectJsonSchemaViewSet(CHORDPublicModelViewSet):

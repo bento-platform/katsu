@@ -1,10 +1,8 @@
-import uuid
 import os
 
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from chord_metadata_service.chord.data_types import DATA_TYPE_MCODEPACKET
 from chord_metadata_service.chord.models import Project, Dataset
 # noinspection PyProtectedMember
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP

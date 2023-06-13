@@ -12,7 +12,6 @@ from chord_metadata_service.phenopackets.tests.constants import (
     VALID_INDIVIDUAL_1
 )
 from chord_metadata_service.restapi.models import SchemaType
-from ..data_types import DATA_TYPE_PHENOPACKET
 from ..models import Project, Dataset, ProjectJsonSchema
 from .constants import VALID_DATA_USE_1
 

@@ -69,7 +69,7 @@ def ingest(request):
     try:
         with transaction.atomic():
             # Wrap ingestion in a transaction, so if it fails we don't end up in a partial state in the database.
-            WORKFLOW_INGEST_FUNCTION_MAP[workflow_id](workflow_outputs, table_id)
+            WORKFLOW_INGEST_FUNCTION_MAP[workflow_id](workflow_outputs, dataset_id)
 
     except IngestError as e:
         return Response(errors.bad_request_error(f"Encountered ingest error: {e}"), status=400)

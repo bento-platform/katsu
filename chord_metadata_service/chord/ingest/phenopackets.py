@@ -5,7 +5,6 @@ import uuid
 
 from dateutil.parser import isoparse
 from decimal import Decimal
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Dataset
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA

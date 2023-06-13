@@ -1,8 +1,4 @@
-import uuid
-
 from rest_framework.test import APITestCase
-
-from django.urls import reverse
 
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.experiments import cleanup as ec
@@ -25,7 +21,6 @@ from chord_metadata_service.experiments.tests.constants import (
     valid_experiment_result,
     valid_experiment,
 )
-from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.tests.constants import (
     VALID_PROJECT_1,
     valid_dataset_1,
@@ -179,7 +174,7 @@ class CleanUpExperimentsTestCase(APITestCase):
 
         with self.assertRaises(Experiment.DoesNotExist):
             self.experiment.refresh_from_db()
-        
+
         with self.assertRaises(ExperimentResult.DoesNotExist):  # ExperimentResult successfully deleted
             self.experiment_result.refresh_from_db()
 

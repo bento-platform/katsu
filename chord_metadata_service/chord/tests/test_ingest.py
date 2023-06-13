@@ -1,10 +1,7 @@
-import uuid
-
 from django.test import TestCase
 from chord_metadata_service.chord.ingest.views import TABLE_ID_OVERRIDES
 from dateutil.parser import isoparse
 
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.ingest.exceptions import IngestError

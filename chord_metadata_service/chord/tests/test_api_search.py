@@ -1,5 +1,4 @@
 import json
-import uuid
 
 from unittest.mock import patch
 
@@ -27,13 +26,13 @@ from .constants import (
     valid_phenotypic_feature,
     TEST_SEARCH_QUERY_1,
     TEST_SEARCH_QUERY_2,
-    TEST_SEARCH_QUERY_3,
-    TEST_SEARCH_QUERY_4,
-    TEST_SEARCH_QUERY_5,
-    TEST_SEARCH_QUERY_6,
+    # TEST_SEARCH_QUERY_3, TODO: cover commented search queries in new tests
+    # TEST_SEARCH_QUERY_4,
+    # TEST_SEARCH_QUERY_5,
+    # TEST_SEARCH_QUERY_6,
     TEST_SEARCH_QUERY_7,
     TEST_SEARCH_QUERY_8,
-    TEST_SEARCH_QUERY_9,
+    # TEST_SEARCH_QUERY_9,
     TEST_SEARCH_QUERY_10,
     TEST_FHIR_SEARCH_QUERY,
 )
@@ -179,7 +178,6 @@ class SearchTest(APITestCase):
 
         # TODO: Check schema?
 
-    
     def test_private_search_10_experiment(self):
         # Valid search with result
 
@@ -230,7 +228,6 @@ class SearchTest(APITestCase):
             self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["experiment_type"],
                              "DNA Methylation")
 
-    
     def test_private_search_bento_search_results(self):
         # Valid query to search for biosample id in list
         # Output as a bento search is valid

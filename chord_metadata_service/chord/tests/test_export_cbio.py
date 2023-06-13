@@ -1,4 +1,3 @@
-import uuid
 import io
 from typing import Dict, TextIO
 from os import walk, path
@@ -16,7 +15,6 @@ from chord_metadata_service.chord.export.cbioportal import (
     SAMPLE_DATA_FILENAME,
     SAMPLE_DATATYPE,
 )
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.export.utils import ExportFileContext
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.experiments.models import ExperimentResult

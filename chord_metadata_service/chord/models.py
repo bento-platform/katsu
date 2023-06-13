@@ -3,7 +3,6 @@ import uuid
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.resources.models import Resource

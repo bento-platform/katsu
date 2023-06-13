@@ -1,8 +1,4 @@
-import uuid
-
 from chord_metadata_service.restapi.models import SchemaType
-
-from ..data_types import DATA_TYPE_PHENOPACKET
 
 __all__ = [
     "VALID_DATA_USE_1",
@@ -10,7 +6,6 @@ __all__ = [
     "VALID_DATS_CREATORS",
     "INVALID_DATS_CREATORS",
     "valid_dataset_1",
-    "valid_table_1",
     "valid_phenotypic_feature",
     "dats_dataset",
     "TEST_SEARCH_QUERY_1",
@@ -92,24 +87,6 @@ def valid_dataset_1(project_id):
         "data_use": VALID_DATA_USE_1,
         "project": project_id
     }
-
-
-def valid_table_1(dataset_id, model_compatible=False):
-    table_id = str(uuid.uuid4())
-    service_id = str(uuid.uuid4())  # TODO: Real service ID
-    return (
-        {
-            "table_id": table_id,
-            "service_id": service_id,
-            "service_artifact": "metadata",
-            ("dataset_id" if model_compatible else "dataset"): dataset_id,
-        },
-        {
-            ("ownership_record_id" if model_compatible else "ownership_record"): table_id,
-            "name": "Table 1",
-            "data_type": DATA_TYPE_PHENOPACKET,
-        }
-    )
 
 
 def valid_project_json_schema(project_id: str,

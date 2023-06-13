@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import uuid
 
-from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERIMENT_RESULT_SCHEMA
