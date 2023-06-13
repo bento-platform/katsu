@@ -5,11 +5,11 @@ from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
 from chord_metadata_service.restapi.utils import transform_keys
 
-from .models import Project, Dataset, ProjectJsonSchema, TableOwnership, Table
+from .models import Project, Dataset, ProjectJsonSchema
 from .schemas import LINKED_FIELD_SETS_SCHEMA
 
 
-__all__ = ["ProjectSerializer", "DatasetSerializer", "TableOwnershipSerializer", "TableSerializer"]
+__all__ = ["ProjectSerializer", "DatasetSerializer"]
 
 
 BENTO_DATA_USE_SCHEMA_VALIDATOR = Draft7Validator(BENTO_DATA_USE_SCHEMA)
@@ -23,13 +23,6 @@ LINKED_FIELD_SETS_SCHEMA_VALIDATOR = Draft7Validator(LINKED_FIELD_SETS_SCHEMA)
 #############################################################
 
 
-# TODO: remove
-class TableOwnershipSerializer(GenericSerializer):
-    class Meta:
-        model = TableOwnership
-        fields = '__all__'
-
-
 class DatasetSerializer(GenericSerializer):
     always_include = (
         "description",
@@ -37,8 +30,6 @@ class DatasetSerializer(GenericSerializer):
         "linked_field_sets",
         "table_ownership",
     )
-
-    table_ownership = TableOwnershipSerializer(read_only=True, many=True, exclude_when_nested=["dataset"])
 
     # noinspection PyMethodMayBeStatic
     def validate_title(self, value):
@@ -163,12 +154,3 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = '__all__'
-
-
-class TableSerializer(GenericSerializer):
-    identifier = serializers.CharField(read_only=True)
-    dataset = DatasetSerializer(read_only=True, exclude_when_nested=["table_ownership"])
-
-    class Meta:
-        model = Table
-        fields = "__all__"

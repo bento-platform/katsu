@@ -41,8 +41,7 @@ from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
-from .models import Dataset, TableOwnership, Table
-from .permissions import ReadOnly, OverrideOrSuperUserOnly
+from .models import Dataset
 
 from collections import defaultdict
 
@@ -453,17 +452,10 @@ def fhir_search(request, internal_data=False):
 
     if not internal_data:
         # TODO: Maybe can avoid hitting DB here
-        # datasets = Table.objects.filter(ownership_record_id__in=frozenset(p.table_id for p in phenopackets))
         datasets = Dataset.objects.filter(identifier__in=frozenset(p.dataset_id for p in phenopackets))
         return Response(build_search_response([{"id": d.identifier, "data_type": DATA_TYPE_PHENOPACKET}
                                                for d in datasets], start))
     
-    # ext_result = {
-    #     table_id: {
-    #         "data_type": DATA_TYPE_PHENOPACKET,
-    #         "matches": list(PhenopacketSerializer(p).data for p in table_phenopackets)
-    #     } for table_id, table_phenopackets in itertools.groupby(phenopackets, key=lambda p: str(p.table_id))
-    # }
     ext_result = {
         dataset_id: {
             "data_type": DATA_TYPE_PHENOPACKET,
@@ -579,38 +571,3 @@ def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[
     debug_log(f"Finished running query and serializing in {datetime.now() - start}")
 
     return serialized_data, None
-
-
-def chord_table_search_response(request, table_id, internal=False):
-    """
-    Executes a free-form query using the Bento specific syntax, restricted to
-    a given table and generates DRF Responses.
-    - Parameters:
-        - request: DRF Request object, see `chord_table_private_search` for
-            the expected values
-        - table_id: table_id to restrict the results to. Extracted from the
-            URL (hence, unverified)
-        - internal: if set to True, the response contains values from records.
-            if set to False, the response is a Boolean (no private data can
-            be leaked).
-    """
-    start = datetime.now()
-    debug_log(f"Started {'private' if internal else 'public'} table search")
-
-    table = Table.objects.get(ownership_record_id=table_id)
-    data_type = table.data_type
-
-    search_params, err = get_chord_search_parameters(request, data_type)
-    if err:
-        return Response(errors.bad_request_error(err), status=400)
-
-    debug_log(f"Finished compiling query in {datetime.now() - start}")
-    data, err = chord_table_search(search_params, table_id, start, internal)
-
-    if err:
-        return Response(errors.bad_request_error(err), status=400)
-
-    if internal:
-        return Response(build_search_response(data, start))
-
-    return Response(data)

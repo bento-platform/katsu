@@ -35,7 +35,7 @@ class BiosampleTest(ProjectTestCase):
             id="phenopacket_id:1",
             subject=self.individual,
             meta_data=self.meta_data,
-            table=self.table,
+            dataset=self.dataset,
         )
         # biosample_3 is not added to the phenopacket
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
@@ -309,7 +309,7 @@ class PhenopacketTest(ProjectTestCase):
             id="phenopacket_id:1",
             subject=self.individual,
             meta_data=self.meta_data,
-            table=self.table,
+            dataset=self.dataset,
         )
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)

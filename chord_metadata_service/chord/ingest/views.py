@@ -18,7 +18,7 @@ from bento_lib.workflows import workflow_exists
 
 from . import WORKFLOW_INGEST_FUNCTION_MAP
 from .exceptions import IngestError
-from ..models import Table
+from ..models import Dataset
 from ..workflows.metadata import METADATA_WORKFLOWS
 
 
@@ -46,13 +46,19 @@ def ingest(request):
         return Response(errors.bad_request_error("Invalid ingest request body"), status=400)  # TODO: Validation errors
 
     # TODO: replace with dataset logic
-    table_id = request.data["table_id"]
+    # table_id = request.data["table_id"]
+    dataset_id = request.data["dataset_id"]
 
-    if table_id not in TABLE_ID_OVERRIDES:
-        if not Table.objects.filter(ownership_record_id=table_id).exists():
-            return Response(errors.bad_request_error(f"Table with ID {table_id} does not exist"), status=400)
+    # if table_id not in TABLE_ID_OVERRIDES:
+    #     if not Table.objects.filter(ownership_record_id=table_id).exists():
+    #         return Response(errors.bad_request_error(f"Table with ID {table_id} does not exist"), status=400)
 
-        table_id = str(uuid.UUID(table_id))  # Normalize dataset ID to UUID's str format.
+    #     table_id = str(uuid.UUID(table_id))  # Normalize dataset ID to UUID's str format.
+
+    if dataset_id not in TABLE_ID_OVERRIDES:
+        if not Dataset.objects.filter(identifier=dataset_id).exists():
+            return Response(errors.bad_request_error(f"Dataset with ID {dataset_id} dows not exist"), status=400)
+        dataset_id = str(uuid.UUID(dataset_id))  # Normalize dataset ID to UUID's str format.
 
     workflow_id = request.data["workflow_id"].strip()
     workflow_outputs = request.data["workflow_outputs"]

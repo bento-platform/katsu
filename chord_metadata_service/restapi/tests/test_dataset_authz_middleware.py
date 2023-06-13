@@ -1,12 +1,10 @@
-import uuid
 import os
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.test import modify_settings
 
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
-from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
@@ -45,12 +43,6 @@ class GetPhenopacketsWithOpaTest(APITestCase):
                                         project=p)
         self.d2 = Dataset.objects.create(title="dataset_2", description="Some dataset", data_use=VALID_DATA_USE_1,
                                          project=p)
-        to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
-                                           dataset=self.d)
-        to2 = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
-                                            dataset=self.d2)
-        self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
-        self.t2 = Table.objects.create(ownership_record=to2, name="Table 2", data_type=DATA_TYPE_PHENOPACKET)
 
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
             EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_1, self.d.identifier)

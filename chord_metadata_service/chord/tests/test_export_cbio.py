@@ -18,7 +18,7 @@ from chord_metadata_service.chord.export.cbioportal import (
 )
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.export.utils import ExportFileContext
-from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import (

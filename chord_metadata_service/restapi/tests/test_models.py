@@ -38,7 +38,6 @@ class TestBaseExtraProperties(ProjectTestCase):
         self.phenopacket = Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=self.individual,
-            table=self.table,
             meta_data=meta_data,
             dataset=self.dataset
         )

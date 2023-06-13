@@ -5,7 +5,7 @@ from chord_metadata_service.chord.ingest.views import TABLE_ID_OVERRIDES
 from dateutil.parser import isoparse
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.ingest.exceptions import IngestError
 from chord_metadata_service.chord.ingest.experiments import (
@@ -52,16 +52,6 @@ class IngestTest(TestCase):
         p = Project.objects.create(title="Project 1", description="")
         self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
                                         project=p)
-        # TODO: Real service ID
-        # table for phenopackets
-        to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
-                                           dataset=self.d)
-        self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
-
-        # table for experiments metadata
-        to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
-                                               service_artifact="experiments", dataset=self.d)
-        self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
 
     def test_create_pf(self):
         p1 = get_or_create_phenotypic_feature({
@@ -273,10 +263,6 @@ class IngestISOAgeToNumberTest(TestCase):
         p = Project.objects.create(title="Project 1", description="")
         self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
                                         project=p)
-        # table for phenopackets
-        to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
-                                           dataset=self.d)
-        self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
 
     def test_ingesting_phenopackets_json(self):
         ingested_phenopackets = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](

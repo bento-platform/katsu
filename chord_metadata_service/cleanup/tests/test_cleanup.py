@@ -29,10 +29,9 @@ from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.tests.constants import (
     VALID_PROJECT_1,
     valid_dataset_1,
-    valid_table_1,
     valid_phenotypic_feature,
 )
-from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+from chord_metadata_service.chord.models import Project, Dataset
 
 
 class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
@@ -42,9 +41,6 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
 
         self.project = Project.objects.create(**VALID_PROJECT_1)
         self.dataset = Dataset.objects.create(**valid_dataset_1(self.project))
-        to, tr = valid_table_1(self.dataset.identifier, model_compatible=True)
-        TableOwnership.objects.create(**to)
-        self.table = Table.objects.create(**tr)
 
         # Set up a dummy phenopacket
 
@@ -65,7 +61,7 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
             id="phenopacket_id:1",
             subject=self.individual,
             meta_data=self.meta_data,
-            table=self.table
+            dataset=self.dataset
         )
 
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
@@ -94,9 +90,6 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         r = self.client.delete(delete_url)
         assert r.status_code == 204
 
-        with self.assertRaises(Table.DoesNotExist):  # Table successfully deleted
-            self.table.refresh_from_db()
-
         with self.assertRaises(PhenotypicFeature.DoesNotExist):  # PhenotypicFeature successfully deleted
             self.phenotypic_feature.refresh_from_db()
 
@@ -118,15 +111,15 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
     def test_no_cleanup(self):
         self.unlinked_phenotypic_feature.refresh_from_db()
 
-        # No cleanup except the unlinked phenotypic feature should occur without removing the table/phenopacket first
+        # No cleanup except the unlinked phenotypic feature should occur without removing the dataset/phenopacket first
         self.assertEqual(run_all_cleanup(), 1)
 
         with self.assertRaises(PhenotypicFeature.DoesNotExist):
             self.unlinked_phenotypic_feature.refresh_from_db()
 
     def test_cleanup_basic(self):
-        # Delete table to remove the parent phenopacket
-        self.table.ownership_record.delete()
+        # Delete dataset to remove the parent phenopacket
+        self.dataset.delete()
 
         # 1 metadata object +
         # 2 biosamples +

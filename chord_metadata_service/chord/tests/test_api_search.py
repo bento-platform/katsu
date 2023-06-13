@@ -24,7 +24,6 @@ from chord_metadata_service.chord.tests.es_mocks import SEARCH_SUCCESS
 from .constants import (
     VALID_PROJECT_1,
     valid_dataset_1,
-    valid_table_1,
     valid_phenotypic_feature,
     TEST_SEARCH_QUERY_1,
     TEST_SEARCH_QUERY_2,
@@ -38,7 +37,7 @@ from .constants import (
     TEST_SEARCH_QUERY_10,
     TEST_FHIR_SEARCH_QUERY,
 )
-from ..models import Project, Dataset, TableOwnership, Table
+from ..models import Project, Dataset
 from ..data_types import (
     DATA_TYPE_EXPERIMENT,
     DATA_TYPE_PHENOPACKET
