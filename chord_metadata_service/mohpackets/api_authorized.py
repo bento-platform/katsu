@@ -1,7 +1,7 @@
 import os
 
 from django.db.models import Prefetch
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
 from rest_framework import serializers
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
@@ -248,6 +248,11 @@ def moh_overview(_request):
     )
 
 
+@extend_schema_view(
+    list=extend_schema(
+        description="Retrieves a list of authorized Donor with clinical data."
+    )
+)
 class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
     """
     This viewset provides access to Donor model and its related clinical data.
