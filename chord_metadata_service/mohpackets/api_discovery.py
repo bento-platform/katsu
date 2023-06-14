@@ -97,58 +97,114 @@ def count_terms(terms):
 
 
 class DiscoveryDonorViewSet(DiscoveryMixin, BaseDonorViewSet):
+    """
+    Retrieves a number of discovery donors.
+    """
+
     pass
 
 
 class DiscoverySpecimenViewSet(DiscoveryMixin, BaseSpecimenViewSet):
+    """
+    Retrieves a number of discovery specimens.
+    """
+
     pass
 
 
 class DiscoverySampleRegistrationViewSet(DiscoveryMixin, BaseSampleRegistrationViewSet):
+    """
+    Retrieves a number of discovery samples.
+    """
+
     pass
 
 
 class DiscoveryPrimaryDiagnosisViewSet(DiscoveryMixin, BasePrimaryDiagnosisViewSet):
+    """
+    Retrieves a number of discovery primary diagnosises.
+    """
+
     pass
 
 
 class DiscoveryTreatmentViewSet(DiscoveryMixin, BaseTreatmentViewSet):
+    """
+    Retrieves a number of discovery treatments.
+    """
+
     pass
 
 
 class DiscoveryChemotherapyViewSet(DiscoveryMixin, BaseChemotherapyViewSet):
+    """
+    Retrieves a number of discovery chemotherapies.
+    """
+
     pass
 
 
 class DiscoveryHormoneTherapyViewSet(DiscoveryMixin, BaseHormoneTherapyViewSet):
+    """
+    Retrieves a number of discovery hormone therapies.
+    """
+
     pass
 
 
 class DiscoveryRadiationViewSet(DiscoveryMixin, BaseRadiationViewSet):
+    """
+    Retrieves a number of discovery radiations.
+    """
+
     pass
 
 
 class DiscoveryImmunotherapyViewSet(DiscoveryMixin, BaseImmunotherapyViewSet):
+    """
+    Retrieves a number of discovery immuno therapies.
+    """
+
     pass
 
 
 class DiscoverySurgeryViewSet(DiscoveryMixin, BaseSurgeryViewSet):
+    """
+    Retrieves a number of discovery surgeries.
+    """
+
     pass
 
 
 class DiscoveryFollowUpViewSet(DiscoveryMixin, BaseFollowUpViewSet):
+    """
+    Retrieves a number of discovery follow ups.
+    """
+
     pass
 
 
 class DiscoveryBiomarkerViewSet(DiscoveryMixin, BaseBiomarkerViewSet):
+    """
+    Retrieves a number of discovery biomarkers.
+    """
+
     pass
 
 
 class DiscoveryComorbidityViewSet(DiscoveryMixin, BaseComorbidityViewSet):
+    """
+    Retrieves a number of discovery comorbidities.
+    """
+
     pass
 
 
 class DiscoveryExposureViewSet(DiscoveryMixin, BaseExposureViewSet):
+    """
+    Retrieves a number of discovery exposures.
+    """
+
     pass
 
 
