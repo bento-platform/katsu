@@ -2,7 +2,7 @@ import os
 
 from django.db.models import Prefetch
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
+from rest_framework import mixins, serializers
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 
@@ -87,7 +87,9 @@ class AuthorizedMixin:
 ##############################################
 
 
-class AuthorizedProgramViewSet(AuthorizedMixin, BaseProgramViewSet):
+class AuthorizedProgramViewSet(
+    AuthorizedMixin, BaseProgramViewSet, mixins.DestroyModelMixin
+):
     pass
 
 
