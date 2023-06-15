@@ -7,18 +7,7 @@ paths:
   /v2/authorized/biomarkers/:
     get:
       operationId: authorized_biomarkers_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized biomarkers.
       parameters:
       - in: query
         name: id
@@ -129,18 +118,7 @@ paths:
   /v2/authorized/chemotherapies/:
     get:
       operationId: authorized_chemotherapies_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized chemotherapies.
       parameters:
       - in: query
         name: id
@@ -209,18 +187,7 @@ paths:
   /v2/authorized/comorbidities/:
     get:
       operationId: authorized_comorbidities_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized comorbidities.
       parameters:
       - in: query
         name: id
@@ -431,18 +398,7 @@ paths:
   /v2/authorized/donors/:
     get:
       operationId: authorized_donors_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized donors.
       parameters:
       - in: query
         name: submitter_donor_id
@@ -582,18 +538,7 @@ paths:
   /v2/authorized/exposures/:
     get:
       operationId: authorized_exposures_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized exposures.
       parameters:
       - in: query
         name: id
@@ -647,18 +592,7 @@ paths:
   /v2/authorized/follow_ups/:
     get:
       operationId: authorized_follow_ups_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized follow ups.
       parameters:
       - in: query
         name: submitter_follow_up_id
@@ -750,18 +684,7 @@ paths:
   /v2/authorized/hormone_therapies/:
     get:
       operationId: authorized_hormone_therapies_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized hormone therapies.
       parameters:
       - in: query
         name: id
@@ -830,18 +753,7 @@ paths:
   /v2/authorized/immunotherapies/:
     get:
       operationId: authorized_immunotherapies_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized immuno therapies.
       parameters:
       - in: query
         name: id
@@ -914,18 +826,7 @@ paths:
   /v2/authorized/primary_diagnoses/:
     get:
       operationId: authorized_primary_diagnoses_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized primary diagnosises.
       parameters:
       - in: query
         name: submitter_primary_diagnosis_id
@@ -1013,18 +914,7 @@ paths:
   /v2/authorized/programs/:
     get:
       operationId: authorized_programs_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized programs.
       parameters:
       - in: query
         name: program_id
@@ -1066,18 +956,7 @@ paths:
   /v2/authorized/radiations/:
     get:
       operationId: authorized_radiations_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized radiations.
       parameters:
       - in: query
         name: id
@@ -1150,18 +1029,7 @@ paths:
   /v2/authorized/sample_registrations/:
     get:
       operationId: authorized_sample_registrations_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized sample registrations.
       parameters:
       - in: query
         name: submitter_sample_id
@@ -1221,18 +1089,7 @@ paths:
   /v2/authorized/specimens/:
     get:
       operationId: authorized_specimens_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized specimens.
       parameters:
       - in: query
         name: submitter_specimen_id
@@ -1344,18 +1201,7 @@ paths:
   /v2/authorized/surgeries/:
     get:
       operationId: authorized_surgeries_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized surgeries.
       parameters:
       - in: query
         name: id
@@ -1456,18 +1302,7 @@ paths:
   /v2/authorized/treatments/:
     get:
       operationId: authorized_treatments_list
-      description: |-
-        This mixin should be used for viewsets that need to restrict access.
-
-        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-        If the env is "dev" or "prod", the `TokenAuthentication` class is
-        used. Otherwise, the `LocalAuthentication` class is used.
-
-        Methods
-        -------
-        get_queryset()
-            Returns a filtered queryset that includes only the objects that the user is
-            authorized to see based on their permissions.
+      description: Retrieves a list of authorized treatments.
       parameters:
       - in: query
         name: submitter_treatment_id
@@ -1559,15 +1394,7 @@ paths:
   /v2/discovery/biomarkers/:
     get:
       operationId: discovery_biomarkers_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery biomarkers.
       parameters:
       - in: query
         name: id
@@ -1664,15 +1491,7 @@ paths:
   /v2/discovery/chemotherapies/:
     get:
       operationId: discovery_chemotherapies_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery chemotherapies.
       parameters:
       - in: query
         name: id
@@ -1727,15 +1546,7 @@ paths:
   /v2/discovery/comorbidities/:
     get:
       operationId: discovery_comorbidities_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery comorbidities.
       parameters:
       - in: query
         name: id
@@ -1786,15 +1597,7 @@ paths:
   /v2/discovery/donors/:
     get:
       operationId: discovery_donors_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery donors.
       parameters:
       - in: query
         name: submitter_donor_id
@@ -1920,15 +1723,7 @@ paths:
   /v2/discovery/exposures/:
     get:
       operationId: discovery_exposures_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery exposures.
       parameters:
       - in: query
         name: id
@@ -1968,15 +1763,7 @@ paths:
   /v2/discovery/follow_ups/:
     get:
       operationId: discovery_follow_ups_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery follow ups.
       parameters:
       - in: query
         name: submitter_follow_up_id
@@ -2054,15 +1841,7 @@ paths:
   /v2/discovery/hormone_therapies/:
     get:
       operationId: discovery_hormone_therapies_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery hormone therapies.
       parameters:
       - in: query
         name: id
@@ -2117,15 +1896,7 @@ paths:
   /v2/discovery/immunotherapies/:
     get:
       operationId: discovery_immunotherapies_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery immuno therapies.
       parameters:
       - in: query
         name: id
@@ -2289,15 +2060,7 @@ paths:
   /v2/discovery/primary_diagnoses/:
     get:
       operationId: discovery_primary_diagnoses_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery primary diagnosises.
       parameters:
       - in: query
         name: submitter_primary_diagnosis_id
@@ -2371,15 +2134,7 @@ paths:
   /v2/discovery/radiations/:
     get:
       operationId: discovery_radiations_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery radiations.
       parameters:
       - in: query
         name: id
@@ -2438,15 +2193,7 @@ paths:
   /v2/discovery/sample_registrations/:
     get:
       operationId: discovery_sample_registrations_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery samples.
       parameters:
       - in: query
         name: submitter_sample_id
@@ -2492,15 +2239,7 @@ paths:
   /v2/discovery/specimens/:
     get:
       operationId: discovery_specimens_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery specimens.
       parameters:
       - in: query
         name: submitter_specimen_id
@@ -2598,15 +2337,7 @@ paths:
   /v2/discovery/surgeries/:
     get:
       operationId: discovery_surgeries_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery surgeries.
       parameters:
       - in: query
         name: id
@@ -2693,15 +2424,7 @@ paths:
   /v2/discovery/treatments/:
     get:
       operationId: discovery_treatments_list
-      description: |-
-        This mixin should be used for viewsets that need to expose
-        discovery information about the donor they represent.
-
-        Methods
-        -------
-        list(request, *args, **kwargs)
-            Returns a response that contains the number of unique donors in the
-            queryset.
+      description: Retrieves a number of discovery treatments.
       parameters:
       - in: query
         name: submitter_treatment_id
@@ -3418,13 +3141,6 @@ components:
           type: string
           nullable: true
       required:
-      - er_status
-      - her2_ihc_status
-      - her2_ish_status
-      - hpv_ihc_status
-      - hpv_pcr_status
-      - hpv_strain
-      - pr_status
       - program_id
       - submitter_donor_id
     BlankEnum:
@@ -3483,8 +3199,6 @@ components:
         submitter_treatment_id:
           type: string
       required:
-      - chemotherapy_drug_dose_units
-      - drug_reference_database
       - program_id
       - submitter_donor_id
       - submitter_treatment_id
@@ -3531,11 +3245,6 @@ components:
         submitter_donor_id:
           type: string
       required:
-      - comorbidity_treatment
-      - comorbidity_treatment_status
-      - comorbidity_type_code
-      - laterality_of_prior_malignancy
-      - prior_malignancy
       - program_id
       - submitter_donor_id
     Discovery:
@@ -3633,15 +3342,7 @@ components:
         program_id:
           type: string
       required:
-      - cause_of_death
-      - date_alive_after_lost_to_followup
-      - date_of_birth
-      - date_of_death
-      - gender
-      - lost_to_followup_reason
-      - primary_site
       - program_id
-      - sex_at_birth
       - submitter_donor_id
     DonorWithClinicalData:
       type: object
@@ -3733,15 +3434,7 @@ components:
             $ref: '#/components/schemas/NestedFollowUp'
           readOnly: true
       required:
-      - cause_of_death
-      - date_alive_after_lost_to_followup
-      - date_of_birth
-      - date_of_death
-      - gender
-      - lost_to_followup_reason
-      - primary_site
       - program_id
-      - sex_at_birth
       - submitter_donor_id
     DosageUnitsEnum:
       enum:
@@ -3817,8 +3510,6 @@ components:
       required:
       - program_id
       - submitter_donor_id
-      - tobacco_smoking_status
-      - tobacco_type
     FollowUp:
       type: object
       properties:
@@ -3901,17 +3592,7 @@ components:
           type: string
           nullable: true
       required:
-      - anatomic_site_progression_or_recurrence
-      - date_of_relapse
-      - disease_status_at_followup
-      - method_of_progression_status
       - program_id
-      - recurrence_m_category
-      - recurrence_n_category
-      - recurrence_stage_group
-      - recurrence_t_category
-      - recurrence_tumour_staging_system
-      - relapse_type
       - submitter_donor_id
       - submitter_follow_up_id
     GenderEnum:
@@ -3983,8 +3664,6 @@ components:
         submitter_treatment_id:
           type: string
       required:
-      - drug_reference_database
-      - hormone_drug_dose_units
       - program_id
       - submitter_donor_id
       - submitter_treatment_id
@@ -4071,9 +3750,6 @@ components:
         submitter_treatment_id:
           type: string
       required:
-      - drug_reference_database
-      - immunotherapy_drug_dose_units
-      - immunotherapy_type
       - program_id
       - submitter_donor_id
       - submitter_treatment_id
@@ -4388,14 +4064,6 @@ components:
           type: number
           format: double
           nullable: true
-      required:
-      - er_status
-      - her2_ihc_status
-      - her2_ish_status
-      - hpv_ihc_status
-      - hpv_pcr_status
-      - hpv_strain
-      - pr_status
     NestedChemotherapy:
       type: object
       properties:
@@ -4432,9 +4100,6 @@ components:
           maximum: 32767
           minimum: 0
           nullable: true
-      required:
-      - chemotherapy_drug_dose_units
-      - drug_reference_database
     NestedComorbidity:
       type: object
       properties:
@@ -4473,12 +4138,6 @@ components:
           maximum: 32767
           minimum: 0
           nullable: true
-      required:
-      - comorbidity_treatment
-      - comorbidity_treatment_status
-      - comorbidity_type_code
-      - laterality_of_prior_malignancy
-      - prior_malignancy
     NestedExposure:
       type: object
       properties:
@@ -4504,9 +4163,6 @@ components:
           type: number
           format: double
           nullable: true
-      required:
-      - tobacco_smoking_status
-      - tobacco_type
     NestedFollowUp:
       type: object
       properties:
@@ -4584,16 +4240,6 @@ components:
             $ref: '#/components/schemas/NestedBiomarker'
           readOnly: true
       required:
-      - anatomic_site_progression_or_recurrence
-      - date_of_relapse
-      - disease_status_at_followup
-      - method_of_progression_status
-      - recurrence_m_category
-      - recurrence_n_category
-      - recurrence_stage_group
-      - recurrence_t_category
-      - recurrence_tumour_staging_system
-      - relapse_type
       - submitter_follow_up_id
     NestedHormoneTherapy:
       type: object
@@ -4631,9 +4277,6 @@ components:
           maximum: 32767
           minimum: 0
           nullable: true
-      required:
-      - drug_reference_database
-      - hormone_drug_dose_units
     NestedImmunotherapy:
       type: object
       properties:
@@ -4676,10 +4319,6 @@ components:
           maximum: 32767
           minimum: 0
           nullable: true
-      required:
-      - drug_reference_database
-      - immunotherapy_drug_dose_units
-      - immunotherapy_type
     NestedPrimaryDiagnosis:
       type: object
       properties:
@@ -4776,16 +4415,6 @@ components:
             $ref: '#/components/schemas/NestedFollowUp'
           readOnly: true
       required:
-      - basis_of_diagnosis
-      - clinical_m_category
-      - clinical_n_category
-      - clinical_stage_group
-      - clinical_t_category
-      - clinical_tumour_staging_system
-      - date_of_diagnosis
-      - laterality
-      - lymph_nodes_examined_method
-      - lymph_nodes_examined_status
       - submitter_primary_diagnosis_id
     NestedRadiation:
       type: object
@@ -4828,10 +4457,6 @@ components:
           type: string
           nullable: true
           maxLength: 64
-      required:
-      - anatomical_site_irradiated
-      - radiation_therapy_modality
-      - radiation_therapy_type
     NestedSampleRegistration:
       type: object
       properties:
@@ -4864,11 +4489,7 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
       required:
-      - sample_type
-      - specimen_tissue_source
-      - specimen_type
       - submitter_sample_id
-      - tumour_normal_designation
     NestedSpecimen:
       type: object
       properties:
@@ -4986,24 +4607,7 @@ components:
             $ref: '#/components/schemas/NestedBiomarker'
           readOnly: true
       required:
-      - pathological_m_category
-      - pathological_n_category
-      - pathological_stage_group
-      - pathological_t_category
-      - pathological_tumour_staging_system
-      - percent_tumour_cells_measurement_method
-      - percent_tumour_cells_range
-      - reference_pathology_confirmed_diagnosis
-      - reference_pathology_confirmed_tumour_presence
-      - specimen_anatomic_location
-      - specimen_collection_date
-      - specimen_laterality
-      - specimen_processing
-      - specimen_storage
       - submitter_specimen_id
-      - tumour_grade
-      - tumour_grading_system
-      - tumour_histological_type
     NestedSurgery:
       type: object
       properties:
@@ -5096,17 +4700,6 @@ components:
         submitter_specimen_id:
           type: string
           nullable: true
-      required:
-      - lymphovascular_invasion
-      - margin_types_involved
-      - margin_types_not_assessed
-      - margin_types_not_involved
-      - perineural_invasion
-      - residual_tumour_classification
-      - surgery_location
-      - surgery_site
-      - surgery_type
-      - tumour_focality
     NestedTreatment:
       type: object
       properties:
@@ -5218,16 +4811,7 @@ components:
             $ref: '#/components/schemas/NestedBiomarker'
           readOnly: true
       required:
-      - is_primary_treatment
-      - response_to_treatment
-      - response_to_treatment_criteria_method
-      - status_of_treatment
       - submitter_treatment_id
-      - treatment_end_date
-      - treatment_intent
-      - treatment_setting
-      - treatment_start_date
-      - treatment_type
     NullEnum:
       enum:
       - null
@@ -5667,16 +5251,6 @@ components:
         submitter_donor_id:
           type: string
       required:
-      - basis_of_diagnosis
-      - clinical_m_category
-      - clinical_n_category
-      - clinical_stage_group
-      - clinical_t_category
-      - clinical_tumour_staging_system
-      - date_of_diagnosis
-      - laterality
-      - lymph_nodes_examined_method
-      - lymph_nodes_examined_status
       - program_id
       - submitter_donor_id
       - submitter_primary_diagnosis_id
@@ -5887,10 +5461,7 @@ components:
         submitter_treatment_id:
           type: string
       required:
-      - anatomical_site_irradiated
       - program_id
-      - radiation_therapy_modality
-      - radiation_therapy_type
       - submitter_donor_id
       - submitter_treatment_id
     RadiationTherapyModalityEnum:
@@ -6068,13 +5639,9 @@ components:
           type: string
       required:
       - program_id
-      - sample_type
-      - specimen_tissue_source
-      - specimen_type
       - submitter_donor_id
       - submitter_sample_id
       - submitter_specimen_id
-      - tumour_normal_designation
     SampleTypeEnum:
       enum:
       - Amplified DNA
@@ -6222,27 +5789,10 @@ components:
         submitter_primary_diagnosis_id:
           type: string
       required:
-      - pathological_m_category
-      - pathological_n_category
-      - pathological_stage_group
-      - pathological_t_category
-      - pathological_tumour_staging_system
-      - percent_tumour_cells_measurement_method
-      - percent_tumour_cells_range
       - program_id
-      - reference_pathology_confirmed_diagnosis
-      - reference_pathology_confirmed_tumour_presence
-      - specimen_anatomic_location
-      - specimen_collection_date
-      - specimen_laterality
-      - specimen_processing
-      - specimen_storage
       - submitter_donor_id
       - submitter_primary_diagnosis_id
       - submitter_specimen_id
-      - tumour_grade
-      - tumour_grading_system
-      - tumour_histological_type
     SpecimenLateralityEnum:
       enum:
       - Left
@@ -6762,19 +6312,9 @@ components:
         submitter_treatment_id:
           type: string
       required:
-      - lymphovascular_invasion
-      - margin_types_involved
-      - margin_types_not_assessed
-      - margin_types_not_involved
-      - perineural_invasion
       - program_id
-      - residual_tumour_classification
       - submitter_donor_id
       - submitter_treatment_id
-      - surgery_location
-      - surgery_site
-      - surgery_type
-      - tumour_focality
     SurgeryLocationEnum:
       enum:
       - Local recurrence
@@ -7137,19 +6677,10 @@ components:
         submitter_primary_diagnosis_id:
           type: string
       required:
-      - is_primary_treatment
       - program_id
-      - response_to_treatment
-      - response_to_treatment_criteria_method
-      - status_of_treatment
       - submitter_donor_id
       - submitter_primary_diagnosis_id
       - submitter_treatment_id
-      - treatment_end_date
-      - treatment_intent
-      - treatment_setting
-      - treatment_start_date
-      - treatment_type
     TreatmentIntentEnum:
       enum:
       - Curative
