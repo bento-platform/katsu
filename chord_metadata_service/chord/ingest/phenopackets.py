@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import uuid
+from humps import decamelize
 
 from dateutil.parser import isoparse
 from decimal import Decimal
@@ -308,6 +309,9 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id) -> Union[list[pm.Phe
         logger.info(f"Attempting ingestion of phenopackets from path: {json_doc_path}")
         with open(json_doc_path, "r") as jf:
             json_data = json.load(jf)
+
+    # Converts camelCase keys to snake_case
+    json_data = decamelize(json_data)
 
     project_id = Project.objects.get(datasets__table_ownership=table_id)
     project_schemas = ProjectJsonSchema.objects.filter(project_id=project_id).values(
