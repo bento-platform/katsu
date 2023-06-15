@@ -7,6 +7,8 @@ LABEL "candigv2"="chord_metadata_service"
 
 USER root
 
+RUN addgroup -S candig && adduser -S candig -G candig
+
 RUN apk update
 
 # Install the required packages for building Python packages with native extensions and PostgreSQL support

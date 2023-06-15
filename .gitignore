@@ -45,3 +45,6 @@ chord_metadata_service/mohpackets/data/backup_db/*
 chord_metadata_service/mohpackets/data/small_dataset/fixtures/*
 chord_metadata_service/mohpackets/data/medium_dataset/fixtures/*
 chord_metadata_service/mohpackets/data/large_dataset/fixtures/*
+
+# Staticfiles
+config/staticfiles/*
