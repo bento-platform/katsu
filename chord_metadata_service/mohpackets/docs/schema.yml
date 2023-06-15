@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: MoH Service API
   version: 1.0.0
-  description: This is the RESTful API for the MoH Service.
+  description: This is the RESTful API for the MoH Service. Based on commit "2d719c1baefedfcfbaee0c74c37f66899ab0b234".
 paths:
   /v2/authorized/biomarkers/:
     get:
@@ -252,13 +252,7 @@ paths:
   /v2/authorized/donor_with_clinical_data/:
     get:
       operationId: authorized_donor_with_clinical_data_list
-      description: |-
-        This viewset provides access to Donor model and its related clinical data.
-        It uses the DonorWithClinicalDataSerializer for serialization.
-
-        The viewset pre-fetches related objects using the `prefetch_related` method
-        to minimize database queries. This ensures that all the related objects are
-        available in a single database query, improving the performance of the viewset.
+      description: Retrieves a list of authorized Donor with clinical data.
       parameters:
       - in: query
         name: submitter_donor_id
