@@ -87,9 +87,7 @@ class AuthorizedMixin:
 ##############################################
 
 
-class AuthorizedProgramViewSet(
-    AuthorizedMixin, BaseProgramViewSet, mixins.DestroyModelMixin
-):
+class AuthorizedProgramViewSet(BaseProgramViewSet, mixins.DestroyModelMixin):
     pass
 
 
