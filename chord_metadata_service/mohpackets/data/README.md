@@ -13,21 +13,7 @@ Run the following commands (change the `fixtures_path` variable to the dataset y
 
 ```bash
 fixtures_path="chord_metadata_service/mohpackets/data/small_dataset/fixtures"
-python manage.py loaddata $fixtures_path/Program.json
-python manage.py loaddata $fixtures_path/Donor.json
-python manage.py loaddata $fixtures_path/PrimaryDiagnosis.json
-python manage.py loaddata $fixtures_path/Specimen.json
-python manage.py loaddata $fixtures_path/SampleRegistration.json
-python manage.py loaddata $fixtures_path/Treatment.json
-python manage.py loaddata $fixtures_path/Chemotherapy.json
-python manage.py loaddata $fixtures_path/HormoneTherapy.json
-python manage.py loaddata $fixtures_path/Radiation.json
-python manage.py loaddata $fixtures_path/Immunotherapy.json
-python manage.py loaddata $fixtures_path/Surgery.json
-python manage.py loaddata $fixtures_path/FollowUp.json
-python manage.py loaddata $fixtures_path/Biomarker.json
-python manage.py loaddata $fixtures_path/Comorbidity.json
-python manage.py loaddata $fixtures_path/Exposure.json
+python manage.py loaddata $fixtures_path/fixtures.json -v 3
 ```
 
 ## Clean up data
@@ -52,3 +38,5 @@ If you want to modify the mock data to your preferences, you can follow these st
 ```python
 python chord_metadata_service/mohpackets/data/convert.py
 ```
+
+NOTE: Synthetic data simplifies data ingestion into the database for frontend testing. However, for other testing purposes it's recommended to create your own data to ensure accuracy and targeted testing.

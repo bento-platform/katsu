@@ -1,6 +1,24 @@
 import json
 import os
 
+MODEL_NAME_MAPPING = {
+    "programs": "Program.json",
+    "donors": "Donor.json",
+    "primary_diagnoses": "PrimaryDiagnosis.json",
+    "specimens": "Specimen.json",
+    "sample_registrations": "SampleRegistration.json",
+    "treatments": "Treatment.json",
+    "chemotherapies": "Chemotherapy.json",
+    "hormone_therapies": "HormoneTherapy.json",
+    "radiations": "Radiation.json",
+    "immunotherapies": "Immunotherapy.json",
+    "surgeries": "Surgery.json",
+    "follow_ups": "FollowUp.json",
+    "biomarkers": "Biomarker.json",
+    "comorbidities": "Comorbidity.json",
+    "exposures": "Exposure.json",
+}
+
 
 def convert_to_fixtures(path):
     """
@@ -16,16 +34,15 @@ def convert_to_fixtures(path):
     # Create the fixtures folder if it doesn't already exist
     os.makedirs(fixtures_folder, exist_ok=True)
 
-    # Get all the JSON file names in the synthetic data folder
-    json_file_names = [
-        file for file in os.listdir(synthetic_data_folder) if file.endswith(".json")
-    ]
+    # Get all the JSON file names in ingest order
+    json_file_names = list(MODEL_NAME_MAPPING.values())
+
+    fixtures = []
 
     # Convert each JSON file to a Django fixture
     for json_file_name in json_file_names:
         print(f"Processing {json_file_name}...")
         model_name = json_file_name.split(".")[0].lower()
-        fixtures = []
 
         with open(os.path.join(synthetic_data_folder, json_file_name)) as json_file:
             raw_data = json.load(json_file)
@@ -34,8 +51,8 @@ def convert_to_fixtures(path):
                 fixture = {"model": "mohpackets." + model_name, "fields": data_item}
                 fixtures.append(fixture)
 
-        with open(os.path.join(fixtures_folder, json_file_name), "w") as fixtures_file:
-            json.dump(fixtures, fixtures_file, indent=4)
+    with open(os.path.join(fixtures_folder, "fixtures.json"), "w") as fixtures_file:
+        json.dump(fixtures, fixtures_file, indent=4)
 
     print(
         "\nSuccess! Converted files to fixtures completed and saved to folder fixtures.\n"
@@ -58,28 +75,10 @@ def set_foreign_keys(path):
     # Create the folder if it doesn't already exist
     os.makedirs(synthetic_data_folder, exist_ok=True)
 
-    file_names = {
-        "programs": "Program.json",
-        "donors": "Donor.json",
-        "primary_diagnoses": "PrimaryDiagnosis.json",
-        "specimens": "Specimen.json",
-        "sample_registrations": "SampleRegistration.json",
-        "treatments": "Treatment.json",
-        "chemotherapies": "Chemotherapy.json",
-        "hormone_therapies": "HormoneTherapy.json",
-        "radiations": "Radiation.json",
-        "immunotherapies": "Immunotherapy.json",
-        "surgeries": "Surgery.json",
-        "follow_ups": "FollowUp.json",
-        "biomarkers": "Biomarker.json",
-        "comorbidities": "Comorbidity.json",
-        "exposures": "Exposure.json",
-    }
-
     with open(relationships_file, "r") as f:
         relationships = json.load(f)
 
-    for model, filename in file_names.items():
+    for model, filename in MODEL_NAME_MAPPING.items():
         input_path = f"{no_relationships_data_folder}/{filename}"
         output_path = f"{synthetic_data_folder}/{filename}"
 
@@ -149,6 +148,7 @@ def replace_values(input_data, transformation_rules):
         "submitter_donor_id": "DONOR_",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_",
         "submitter_specimen_id": "SPECIMEN_",
+        "submitter_sample_id": "SAMPLE_REGISTRATION_",
         "submitter_treatment_id": "TREATMENT_",
         "submitter_follow_up_id": "FOLLOW_UP_",
     }
