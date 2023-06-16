@@ -88,7 +88,14 @@ class AuthorizedMixin:
 
 
 class AuthorizedProgramViewSet(BaseProgramViewSet, mixins.DestroyModelMixin):
-    pass
+    # For Program, we want authorization but still be able to access all datasets
+    pagination_class = StandardResultsSetPagination
+    settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
+    authentication_classes = [
+        TokenAuthentication
+        if "dev" in settings_module or "prod" in settings_module
+        else LocalAuthentication
+    ]
 
 
 class AuthorizedDonorViewSet(AuthorizedMixin, BaseDonorViewSet):
