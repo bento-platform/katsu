@@ -15,17 +15,7 @@ This is the RESTful API for the MoH Service.
 
 `GET /v2/authorized/biomarkers/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized biomarkers.
 
 <h3 id="authorized_biomarkers_list-parameters">Parameters</h3>
 
@@ -98,17 +88,7 @@ get_queryset()
 
 `GET /v2/authorized/chemotherapies/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized chemotherapies.
 
 <h3 id="authorized_chemotherapies_list-parameters">Parameters</h3>
 
@@ -159,17 +139,7 @@ get_queryset()
 
 `GET /v2/authorized/comorbidities/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized comorbidities.
 
 <h3 id="authorized_comorbidities_list-parameters">Parameters</h3>
 
@@ -218,12 +188,7 @@ get_queryset()
 
 `GET /v2/authorized/donor_with_clinical_data/`
 
-This viewset provides access to Donor model and its related clinical data.
-It uses the DonorWithClinicalDataSerializer for serialization.
-
-The viewset pre-fetches related objects using the `prefetch_related` method
-to minimize database queries. This ensures that all the related objects are
-available in a single database query, improving the performance of the viewset.
+Retrieves a list of authorized Donor with clinical data.
 
 <h3 id="authorized_donor_with_clinical_data_list-parameters">Parameters</h3>
 
@@ -628,17 +593,7 @@ available in a single database query, improving the performance of the viewset.
 
 `GET /v2/authorized/donors/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized donors.
 
 <h3 id="authorized_donors_list-parameters">Parameters</h3>
 
@@ -711,17 +666,7 @@ get_queryset()
 
 `GET /v2/authorized/exposures/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized exposures.
 
 <h3 id="authorized_exposures_list-parameters">Parameters</h3>
 
@@ -766,17 +711,7 @@ get_queryset()
 
 `GET /v2/authorized/follow_ups/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized follow ups.
 
 <h3 id="authorized_follow_ups_list-parameters">Parameters</h3>
 
@@ -841,17 +776,7 @@ get_queryset()
 
 `GET /v2/authorized/hormone_therapies/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized hormone therapies.
 
 <h3 id="authorized_hormone_therapies_list-parameters">Parameters</h3>
 
@@ -902,17 +827,7 @@ get_queryset()
 
 `GET /v2/authorized/immunotherapies/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized immuno therapies.
 
 <h3 id="authorized_immunotherapies_list-parameters">Parameters</h3>
 
@@ -965,17 +880,7 @@ get_queryset()
 
 `GET /v2/authorized/primary_diagnoses/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized primary diagnosises.
 
 <h3 id="authorized_primary_diagnoses_list-parameters">Parameters</h3>
 
@@ -1036,17 +941,7 @@ get_queryset()
 
 `GET /v2/authorized/programs/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized programs.
 
 <h3 id="authorized_programs_list-parameters">Parameters</h3>
 
@@ -1083,17 +978,7 @@ get_queryset()
 
 `GET /v2/authorized/radiations/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized radiations.
 
 <h3 id="authorized_radiations_list-parameters">Parameters</h3>
 
@@ -1146,17 +1031,7 @@ get_queryset()
 
 `GET /v2/authorized/sample_registrations/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized sample registrations.
 
 <h3 id="authorized_sample_registrations_list-parameters">Parameters</h3>
 
@@ -1203,17 +1078,7 @@ get_queryset()
 
 `GET /v2/authorized/specimens/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized specimens.
 
 <h3 id="authorized_specimens_list-parameters">Parameters</h3>
 
@@ -1286,17 +1151,7 @@ get_queryset()
 
 `GET /v2/authorized/surgeries/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized surgeries.
 
 <h3 id="authorized_surgeries_list-parameters">Parameters</h3>
 
@@ -1369,17 +1224,7 @@ get_queryset()
 
 `GET /v2/authorized/treatments/`
 
-This mixin should be used for viewsets that need to restrict access.
-
-The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
-If the env is "dev" or "prod", the `TokenAuthentication` class is
-used. Otherwise, the `LocalAuthentication` class is used.
-
-Methods
--------
-get_queryset()
-    Returns a filtered queryset that includes only the objects that the user is
-    authorized to see based on their permissions.
+Retrieves a list of authorized treatments.
 
 <h3 id="authorized_treatments_list-parameters">Parameters</h3>
 
@@ -1446,14 +1291,7 @@ get_queryset()
 
 `GET /v2/discovery/biomarkers/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery biomarkers.
 
 <h3 id="discovery_biomarkers_list-parameters">Parameters</h3>
 
@@ -1496,14 +1334,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/chemotherapies/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery chemotherapies.
 
 <h3 id="discovery_chemotherapies_list-parameters">Parameters</h3>
 
@@ -1536,14 +1367,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/comorbidities/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery comorbidities.
 
 <h3 id="discovery_comorbidities_list-parameters">Parameters</h3>
 
@@ -1575,14 +1399,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/donors/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery donors.
 
 <h3 id="discovery_donors_list-parameters">Parameters</h3>
 
@@ -1633,14 +1450,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/exposures/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery exposures.
 
 <h3 id="discovery_exposures_list-parameters">Parameters</h3>
 
@@ -1669,14 +1479,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/follow_ups/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery follow ups.
 
 <h3 id="discovery_follow_ups_list-parameters">Parameters</h3>
 
@@ -1715,14 +1518,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/hormone_therapies/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery hormone therapies.
 
 <h3 id="discovery_hormone_therapies_list-parameters">Parameters</h3>
 
@@ -1755,14 +1551,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/immunotherapies/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery immuno therapies.
 
 <h3 id="discovery_immunotherapies_list-parameters">Parameters</h3>
 
@@ -1922,14 +1711,7 @@ MoH Treatments type count
 
 `GET /v2/discovery/primary_diagnoses/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery primary diagnosises.
 
 <h3 id="discovery_primary_diagnoses_list-parameters">Parameters</h3>
 
@@ -1967,14 +1749,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/radiations/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery radiations.
 
 <h3 id="discovery_radiations_list-parameters">Parameters</h3>
 
@@ -2008,14 +1783,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/sample_registrations/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery samples.
 
 <h3 id="discovery_sample_registrations_list-parameters">Parameters</h3>
 
@@ -2046,14 +1814,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/specimens/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery specimens.
 
 <h3 id="discovery_specimens_list-parameters">Parameters</h3>
 
@@ -2097,14 +1858,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/surgeries/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery surgeries.
 
 <h3 id="discovery_surgeries_list-parameters">Parameters</h3>
 
@@ -2145,14 +1899,7 @@ list(request, *args, **kwargs)
 
 `GET /v2/discovery/treatments/`
 
-This mixin should be used for viewsets that need to expose
-discovery information about the donor they represent.
-
-Methods
--------
-list(request, *args, **kwargs)
-    Returns a response that contains the number of unique donors in the
-    queryset.
+Retrieves a number of discovery treatments.
 
 <h3 id="discovery_treatments_list-parameters">Parameters</h3>
 
@@ -2811,7 +2558,7 @@ list(request, *args, **kwargs)
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|er_status|any|true|none|none|
+|er_status|any|false|none|none|
 
 oneOf
 
@@ -2835,7 +2582,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pr_status|any|true|none|none|
+|pr_status|any|false|none|none|
 
 oneOf
 
@@ -2859,7 +2606,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|her2_ihc_status|any|true|none|none|
+|her2_ihc_status|any|false|none|none|
 
 oneOf
 
@@ -2883,7 +2630,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|her2_ish_status|any|true|none|none|
+|her2_ish_status|any|false|none|none|
 
 oneOf
 
@@ -2907,7 +2654,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|hpv_ihc_status|any|true|none|none|
+|hpv_ihc_status|any|false|none|none|
 
 oneOf
 
@@ -2931,7 +2678,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|hpv_pcr_status|any|true|none|none|
+|hpv_pcr_status|any|false|none|none|
 
 oneOf
 
@@ -2955,7 +2702,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|hpv_strain|[oneOf]¦null|true|none|none|
+|hpv_strain|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -3066,7 +2813,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|chemotherapy_drug_dose_units|any|true|none|none|
+|chemotherapy_drug_dose_units|any|false|none|none|
 
 oneOf
 
@@ -3090,7 +2837,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|drug_reference_database|any|true|none|none|
+|drug_reference_database|any|false|none|none|
 
 oneOf
 
@@ -3149,7 +2896,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|prior_malignancy|any|true|none|none|
+|prior_malignancy|any|false|none|none|
 
 oneOf
 
@@ -3173,7 +2920,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|laterality_of_prior_malignancy|any|true|none|none|
+|laterality_of_prior_malignancy|any|false|none|none|
 
 oneOf
 
@@ -3197,8 +2944,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|comorbidity_type_code|string¦null|true|none|none|
-|comorbidity_treatment_status|any|true|none|none|
+|comorbidity_type_code|string¦null|false|none|none|
+|comorbidity_treatment_status|any|false|none|none|
 
 oneOf
 
@@ -3222,7 +2969,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|comorbidity_treatment|string¦null|true|none|none|
+|comorbidity_treatment|string¦null|false|none|none|
 |age_at_comorbidity_diagnosis|integer¦null|false|none|none|
 |program_id|string|true|none|none|
 |submitter_donor_id|string|true|none|none|
@@ -3322,7 +3069,7 @@ It also override the list serializer to a single object
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_donor_id|string|true|none|none|
-|cause_of_death|any|true|none|none|
+|cause_of_death|any|false|none|none|
 
 oneOf
 
@@ -3346,9 +3093,9 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date_of_birth|string¦null|true|none|none|
-|date_of_death|string¦null|true|none|none|
-|primary_site|[oneOf]¦null|true|none|none|
+|date_of_birth|string¦null|false|none|none|
+|date_of_death|string¦null|false|none|none|
+|primary_site|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -3372,7 +3119,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|gender|any|true|none|none|
+|gender|any|false|none|none|
 
 oneOf
 
@@ -3396,7 +3143,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|sex_at_birth|any|true|none|none|
+|sex_at_birth|any|false|none|none|
 
 oneOf
 
@@ -3420,7 +3167,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|lost_to_followup_reason|any|true|none|none|
+|lost_to_followup_reason|any|false|none|none|
 
 oneOf
 
@@ -3444,7 +3191,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date_alive_after_lost_to_followup|string¦null|true|none|none|
+|date_alive_after_lost_to_followup|string¦null|false|none|none|
 |is_deceased|boolean¦null|false|none|none|
 |lost_to_followup_after_clinical_event_identifier|string¦null|false|none|none|
 |program_id|string|true|none|none|
@@ -3832,7 +3579,7 @@ continued
 |submitter_donor_id|string|true|none|none|
 |program_id|string|true|none|none|
 |lost_to_followup_after_clinical_event_identifier|string¦null|false|none|none|
-|lost_to_followup_reason|any|true|none|none|
+|lost_to_followup_reason|any|false|none|none|
 
 oneOf
 
@@ -3856,9 +3603,9 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date_alive_after_lost_to_followup|string¦null|true|none|none|
+|date_alive_after_lost_to_followup|string¦null|false|none|none|
 |is_deceased|boolean¦null|false|none|none|
-|cause_of_death|any|true|none|none|
+|cause_of_death|any|false|none|none|
 
 oneOf
 
@@ -3882,9 +3629,9 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date_of_birth|string¦null|true|none|none|
-|date_of_death|string¦null|true|none|none|
-|gender|any|true|none|none|
+|date_of_birth|string¦null|false|none|none|
+|date_of_death|string¦null|false|none|none|
+|gender|any|false|none|none|
 
 oneOf
 
@@ -3908,7 +3655,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|sex_at_birth|any|true|none|none|
+|sex_at_birth|any|false|none|none|
 
 oneOf
 
@@ -3932,7 +3679,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|primary_site|[oneOf]¦null|true|none|none|
+|primary_site|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -4090,7 +3837,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|tobacco_smoking_status|any|true|none|none|
+|tobacco_smoking_status|any|false|none|none|
 
 oneOf
 
@@ -4114,7 +3861,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tobacco_type|[oneOf]¦null|true|none|none|
+|tobacco_type|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -4178,7 +3925,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_follow_up_id|string|true|none|none|
-|disease_status_at_followup|any|true|none|none|
+|disease_status_at_followup|any|false|none|none|
 
 oneOf
 
@@ -4202,7 +3949,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|relapse_type|any|true|none|none|
+|relapse_type|any|false|none|none|
 
 oneOf
 
@@ -4226,8 +3973,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date_of_relapse|string¦null|true|none|none|
-|method_of_progression_status|any|true|none|none|
+|date_of_relapse|string¦null|false|none|none|
+|method_of_progression_status|any|false|none|none|
 
 oneOf
 
@@ -4251,8 +3998,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|anatomic_site_progression_or_recurrence|string¦null|true|none|none|
-|recurrence_tumour_staging_system|[oneOf]¦null|true|none|none|
+|anatomic_site_progression_or_recurrence|string¦null|false|none|none|
+|recurrence_tumour_staging_system|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -4276,7 +4023,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|recurrence_t_category|any|true|none|none|
+|recurrence_t_category|any|false|none|none|
 
 oneOf
 
@@ -4300,7 +4047,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|recurrence_n_category|any|true|none|none|
+|recurrence_n_category|any|false|none|none|
 
 oneOf
 
@@ -4324,7 +4071,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|recurrence_m_category|any|true|none|none|
+|recurrence_m_category|any|false|none|none|
 
 oneOf
 
@@ -4348,7 +4095,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|recurrence_stage_group|any|true|none|none|
+|recurrence_stage_group|any|false|none|none|
 
 oneOf
 
@@ -4472,7 +4219,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|hormone_drug_dose_units|any|true|none|none|
+|hormone_drug_dose_units|any|false|none|none|
 
 oneOf
 
@@ -4496,7 +4243,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|drug_reference_database|any|true|none|none|
+|drug_reference_database|any|false|none|none|
 
 oneOf
 
@@ -4611,7 +4358,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|immunotherapy_type|any|true|none|none|
+|immunotherapy_type|any|false|none|none|
 
 oneOf
 
@@ -4635,7 +4382,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|drug_reference_database|any|true|none|none|
+|drug_reference_database|any|false|none|none|
 
 oneOf
 
@@ -4659,7 +4406,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|immunotherapy_drug_dose_units|any|true|none|none|
+|immunotherapy_drug_dose_units|any|false|none|none|
 
 oneOf
 
@@ -5177,7 +4924,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|er_status|any|true|none|none|
+|er_status|any|false|none|none|
 
 oneOf
 
@@ -5201,7 +4948,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pr_status|any|true|none|none|
+|pr_status|any|false|none|none|
 
 oneOf
 
@@ -5225,7 +4972,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|her2_ihc_status|any|true|none|none|
+|her2_ihc_status|any|false|none|none|
 
 oneOf
 
@@ -5249,7 +4996,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|her2_ish_status|any|true|none|none|
+|her2_ish_status|any|false|none|none|
 
 oneOf
 
@@ -5273,7 +5020,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|hpv_ihc_status|any|true|none|none|
+|hpv_ihc_status|any|false|none|none|
 
 oneOf
 
@@ -5297,7 +5044,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|hpv_pcr_status|any|true|none|none|
+|hpv_pcr_status|any|false|none|none|
 
 oneOf
 
@@ -5321,7 +5068,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|hpv_strain|[oneOf]¦null|true|none|none|
+|hpv_strain|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -5377,7 +5124,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|chemotherapy_drug_dose_units|any|true|none|none|
+|chemotherapy_drug_dose_units|any|false|none|none|
 
 oneOf
 
@@ -5401,7 +5148,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|drug_reference_database|any|true|none|none|
+|drug_reference_database|any|false|none|none|
 
 oneOf
 
@@ -5455,7 +5202,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|prior_malignancy|any|true|none|none|
+|prior_malignancy|any|false|none|none|
 
 oneOf
 
@@ -5479,7 +5226,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|laterality_of_prior_malignancy|any|true|none|none|
+|laterality_of_prior_malignancy|any|false|none|none|
 
 oneOf
 
@@ -5503,8 +5250,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|comorbidity_type_code|string¦null|true|none|none|
-|comorbidity_treatment_status|any|true|none|none|
+|comorbidity_type_code|string¦null|false|none|none|
+|comorbidity_treatment_status|any|false|none|none|
 
 oneOf
 
@@ -5528,7 +5275,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|comorbidity_treatment|string¦null|true|none|none|
+|comorbidity_treatment|string¦null|false|none|none|
 |age_at_comorbidity_diagnosis|integer¦null|false|none|none|
 
 <h2 id="tocS_NestedExposure">NestedExposure</h2>
@@ -5555,7 +5302,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|tobacco_smoking_status|any|true|none|none|
+|tobacco_smoking_status|any|false|none|none|
 
 oneOf
 
@@ -5579,7 +5326,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tobacco_type|[oneOf]¦null|true|none|none|
+|tobacco_type|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -5658,7 +5405,7 @@ continued
 |---|---|---|---|---|
 |submitter_follow_up_id|string|true|none|none|
 |date_of_followup|string¦null|false|none|none|
-|disease_status_at_followup|any|true|none|none|
+|disease_status_at_followup|any|false|none|none|
 
 oneOf
 
@@ -5682,7 +5429,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|relapse_type|any|true|none|none|
+|relapse_type|any|false|none|none|
 
 oneOf
 
@@ -5706,8 +5453,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|date_of_relapse|string¦null|true|none|none|
-|method_of_progression_status|any|true|none|none|
+|date_of_relapse|string¦null|false|none|none|
+|method_of_progression_status|any|false|none|none|
 
 oneOf
 
@@ -5731,8 +5478,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|anatomic_site_progression_or_recurrence|string¦null|true|none|none|
-|recurrence_tumour_staging_system|[oneOf]¦null|true|none|none|
+|anatomic_site_progression_or_recurrence|string¦null|false|none|none|
+|recurrence_tumour_staging_system|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -5756,7 +5503,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|recurrence_t_category|any|true|none|none|
+|recurrence_t_category|any|false|none|none|
 
 oneOf
 
@@ -5780,7 +5527,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|recurrence_n_category|any|true|none|none|
+|recurrence_n_category|any|false|none|none|
 
 oneOf
 
@@ -5804,7 +5551,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|recurrence_m_category|any|true|none|none|
+|recurrence_m_category|any|false|none|none|
 
 oneOf
 
@@ -5828,7 +5575,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|recurrence_stage_group|any|true|none|none|
+|recurrence_stage_group|any|false|none|none|
 
 oneOf
 
@@ -5879,7 +5626,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|hormone_drug_dose_units|any|true|none|none|
+|hormone_drug_dose_units|any|false|none|none|
 
 oneOf
 
@@ -5903,7 +5650,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|drug_reference_database|any|true|none|none|
+|drug_reference_database|any|false|none|none|
 
 oneOf
 
@@ -5958,7 +5705,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|immunotherapy_type|any|true|none|none|
+|immunotherapy_type|any|false|none|none|
 
 oneOf
 
@@ -5982,7 +5729,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|drug_reference_database|any|true|none|none|
+|drug_reference_database|any|false|none|none|
 
 oneOf
 
@@ -6006,7 +5753,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|immunotherapy_drug_dose_units|any|true|none|none|
+|immunotherapy_drug_dose_units|any|false|none|none|
 
 oneOf
 
@@ -6319,9 +6066,9 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_primary_diagnosis_id|string|true|none|none|
-|date_of_diagnosis|string¦null|true|none|none|
+|date_of_diagnosis|string¦null|false|none|none|
 |cancer_type_code|string¦null|false|none|none|
-|basis_of_diagnosis|any|true|none|none|
+|basis_of_diagnosis|any|false|none|none|
 
 oneOf
 
@@ -6345,7 +6092,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|lymph_nodes_examined_status|any|true|none|none|
+|lymph_nodes_examined_status|any|false|none|none|
 
 oneOf
 
@@ -6369,7 +6116,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|lymph_nodes_examined_method|any|true|none|none|
+|lymph_nodes_examined_method|any|false|none|none|
 
 oneOf
 
@@ -6394,7 +6141,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |number_lymph_nodes_positive|integer¦null|false|none|none|
-|clinical_tumour_staging_system|any|true|none|none|
+|clinical_tumour_staging_system|any|false|none|none|
 
 oneOf
 
@@ -6418,7 +6165,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|clinical_t_category|any|true|none|none|
+|clinical_t_category|any|false|none|none|
 
 oneOf
 
@@ -6442,7 +6189,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|clinical_n_category|any|true|none|none|
+|clinical_n_category|any|false|none|none|
 
 oneOf
 
@@ -6466,7 +6213,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|clinical_m_category|any|true|none|none|
+|clinical_m_category|any|false|none|none|
 
 oneOf
 
@@ -6490,7 +6237,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|clinical_stage_group|any|true|none|none|
+|clinical_stage_group|any|false|none|none|
 
 oneOf
 
@@ -6514,7 +6261,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|laterality|any|true|none|none|
+|laterality|any|false|none|none|
 
 oneOf
 
@@ -6569,7 +6316,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|radiation_therapy_modality|any|true|none|none|
+|radiation_therapy_modality|any|false|none|none|
 
 oneOf
 
@@ -6593,7 +6340,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|radiation_therapy_type|any|true|none|none|
+|radiation_therapy_type|any|false|none|none|
 
 oneOf
 
@@ -6617,7 +6364,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|anatomical_site_irradiated|any|true|none|none|
+|anatomical_site_irradiated|any|false|none|none|
 
 oneOf
 
@@ -6669,7 +6416,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_sample_id|string|true|none|none|
-|specimen_tissue_source|any|true|none|none|
+|specimen_tissue_source|any|false|none|none|
 
 oneOf
 
@@ -6693,7 +6440,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tumour_normal_designation|any|true|none|none|
+|tumour_normal_designation|any|false|none|none|
 
 oneOf
 
@@ -6717,7 +6464,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimen_type|any|true|none|none|
+|specimen_type|any|false|none|none|
 
 oneOf
 
@@ -6741,7 +6488,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|sample_type|any|true|none|none|
+|sample_type|any|false|none|none|
 
 oneOf
 
@@ -6826,7 +6573,7 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_specimen_id|string|true|none|none|
-|pathological_tumour_staging_system|any|true|none|none|
+|pathological_tumour_staging_system|any|false|none|none|
 
 oneOf
 
@@ -6850,7 +6597,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pathological_t_category|any|true|none|none|
+|pathological_t_category|any|false|none|none|
 
 oneOf
 
@@ -6874,7 +6621,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pathological_n_category|any|true|none|none|
+|pathological_n_category|any|false|none|none|
 
 oneOf
 
@@ -6898,7 +6645,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pathological_m_category|any|true|none|none|
+|pathological_m_category|any|false|none|none|
 
 oneOf
 
@@ -6922,7 +6669,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pathological_stage_group|any|true|none|none|
+|pathological_stage_group|any|false|none|none|
 
 oneOf
 
@@ -6946,8 +6693,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimen_collection_date|string¦null|true|none|none|
-|specimen_storage|any|true|none|none|
+|specimen_collection_date|string¦null|false|none|none|
+|specimen_storage|any|false|none|none|
 
 oneOf
 
@@ -6971,9 +6718,9 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tumour_histological_type|string¦null|true|none|none|
-|specimen_anatomic_location|string¦null|true|none|none|
-|reference_pathology_confirmed_diagnosis|any|true|none|none|
+|tumour_histological_type|string¦null|false|none|none|
+|specimen_anatomic_location|string¦null|false|none|none|
+|reference_pathology_confirmed_diagnosis|any|false|none|none|
 
 oneOf
 
@@ -6997,7 +6744,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|reference_pathology_confirmed_tumour_presence|any|true|none|none|
+|reference_pathology_confirmed_tumour_presence|any|false|none|none|
 
 oneOf
 
@@ -7021,7 +6768,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tumour_grading_system|any|true|none|none|
+|tumour_grading_system|any|false|none|none|
 
 oneOf
 
@@ -7045,7 +6792,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tumour_grade|any|true|none|none|
+|tumour_grade|any|false|none|none|
 
 oneOf
 
@@ -7069,7 +6816,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|percent_tumour_cells_range|any|true|none|none|
+|percent_tumour_cells_range|any|false|none|none|
 
 oneOf
 
@@ -7093,7 +6840,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|percent_tumour_cells_measurement_method|any|true|none|none|
+|percent_tumour_cells_measurement_method|any|false|none|none|
 
 oneOf
 
@@ -7117,7 +6864,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimen_processing|any|true|none|none|
+|specimen_processing|any|false|none|none|
 
 oneOf
 
@@ -7141,7 +6888,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimen_laterality|any|true|none|none|
+|specimen_laterality|any|false|none|none|
 
 oneOf
 
@@ -7207,7 +6954,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|surgery_type|any|true|none|none|
+|surgery_type|any|false|none|none|
 
 oneOf
 
@@ -7231,8 +6978,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|surgery_site|string¦null|true|none|none|
-|surgery_location|any|true|none|none|
+|surgery_site|string¦null|false|none|none|
+|surgery_location|any|false|none|none|
 
 oneOf
 
@@ -7256,7 +7003,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tumour_focality|any|true|none|none|
+|tumour_focality|any|false|none|none|
 
 oneOf
 
@@ -7280,7 +7027,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|residual_tumour_classification|any|true|none|none|
+|residual_tumour_classification|any|false|none|none|
 
 oneOf
 
@@ -7304,7 +7051,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_involved|[oneOf]¦null|true|none|none|
+|margin_types_involved|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -7328,7 +7075,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_involved|[oneOf]¦null|true|none|none|
+|margin_types_not_involved|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -7352,7 +7099,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_assessed|[oneOf]¦null|true|none|none|
+|margin_types_not_assessed|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -7376,7 +7123,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|lymphovascular_invasion|any|true|none|none|
+|lymphovascular_invasion|any|false|none|none|
 
 oneOf
 
@@ -7400,7 +7147,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|perineural_invasion|any|true|none|none|
+|perineural_invasion|any|false|none|none|
 
 oneOf
 
@@ -7587,7 +7334,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_treatment_id|string|true|none|none|
-|is_primary_treatment|any|true|none|none|
+|is_primary_treatment|any|false|none|none|
 
 oneOf
 
@@ -7611,9 +7358,9 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|treatment_start_date|string¦null|true|none|none|
-|treatment_end_date|string¦null|true|none|none|
-|treatment_setting|any|true|none|none|
+|treatment_start_date|string¦null|false|none|none|
+|treatment_end_date|string¦null|false|none|none|
+|treatment_setting|any|false|none|none|
 
 oneOf
 
@@ -7637,7 +7384,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|treatment_intent|any|true|none|none|
+|treatment_intent|any|false|none|none|
 
 oneOf
 
@@ -7664,7 +7411,7 @@ continued
 |days_per_cycle|integer¦null|false|none|none|
 |number_of_cycles|integer¦null|false|none|none|
 |line_of_treatment|integer¦null|false|none|none|
-|status_of_treatment|any|true|none|none|
+|status_of_treatment|any|false|none|none|
 
 oneOf
 
@@ -7688,7 +7435,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|treatment_type|[oneOf]¦null|true|none|none|
+|treatment_type|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -7712,7 +7459,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|response_to_treatment_criteria_method|any|true|none|none|
+|response_to_treatment_criteria_method|any|false|none|none|
 
 oneOf
 
@@ -7736,7 +7483,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|response_to_treatment|any|true|none|none|
+|response_to_treatment|any|false|none|none|
 
 oneOf
 
@@ -8925,8 +8672,8 @@ null
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_primary_diagnosis_id|string|true|none|none|
-|date_of_diagnosis|string¦null|true|none|none|
-|basis_of_diagnosis|any|true|none|none|
+|date_of_diagnosis|string¦null|false|none|none|
+|basis_of_diagnosis|any|false|none|none|
 
 oneOf
 
@@ -8950,7 +8697,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|lymph_nodes_examined_status|any|true|none|none|
+|lymph_nodes_examined_status|any|false|none|none|
 
 oneOf
 
@@ -8974,7 +8721,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|lymph_nodes_examined_method|any|true|none|none|
+|lymph_nodes_examined_method|any|false|none|none|
 
 oneOf
 
@@ -8998,7 +8745,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|clinical_tumour_staging_system|any|true|none|none|
+|clinical_tumour_staging_system|any|false|none|none|
 
 oneOf
 
@@ -9022,7 +8769,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|clinical_t_category|any|true|none|none|
+|clinical_t_category|any|false|none|none|
 
 oneOf
 
@@ -9046,7 +8793,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|clinical_n_category|any|true|none|none|
+|clinical_n_category|any|false|none|none|
 
 oneOf
 
@@ -9070,7 +8817,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|clinical_m_category|any|true|none|none|
+|clinical_m_category|any|false|none|none|
 
 oneOf
 
@@ -9094,7 +8841,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|clinical_stage_group|any|true|none|none|
+|clinical_stage_group|any|false|none|none|
 
 oneOf
 
@@ -9118,7 +8865,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|laterality|any|true|none|none|
+|laterality|any|false|none|none|
 
 oneOf
 
@@ -9364,7 +9111,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|radiation_therapy_modality|any|true|none|none|
+|radiation_therapy_modality|any|false|none|none|
 
 oneOf
 
@@ -9388,7 +9135,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|radiation_therapy_type|any|true|none|none|
+|radiation_therapy_type|any|false|none|none|
 
 oneOf
 
@@ -9412,7 +9159,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|anatomical_site_irradiated|any|true|none|none|
+|anatomical_site_irradiated|any|false|none|none|
 
 oneOf
 
@@ -9746,7 +9493,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_sample_id|string|true|none|none|
-|specimen_tissue_source|any|true|none|none|
+|specimen_tissue_source|any|false|none|none|
 
 oneOf
 
@@ -9770,7 +9517,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tumour_normal_designation|any|true|none|none|
+|tumour_normal_designation|any|false|none|none|
 
 oneOf
 
@@ -9794,7 +9541,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimen_type|any|true|none|none|
+|specimen_type|any|false|none|none|
 
 oneOf
 
@@ -9818,7 +9565,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|sample_type|any|true|none|none|
+|sample_type|any|false|none|none|
 
 oneOf
 
@@ -9959,7 +9706,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_specimen_id|string|true|none|none|
-|pathological_tumour_staging_system|any|true|none|none|
+|pathological_tumour_staging_system|any|false|none|none|
 
 oneOf
 
@@ -9983,7 +9730,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pathological_t_category|any|true|none|none|
+|pathological_t_category|any|false|none|none|
 
 oneOf
 
@@ -10007,7 +9754,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pathological_n_category|any|true|none|none|
+|pathological_n_category|any|false|none|none|
 
 oneOf
 
@@ -10031,7 +9778,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pathological_m_category|any|true|none|none|
+|pathological_m_category|any|false|none|none|
 
 oneOf
 
@@ -10055,7 +9802,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|pathological_stage_group|any|true|none|none|
+|pathological_stage_group|any|false|none|none|
 
 oneOf
 
@@ -10079,8 +9826,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimen_collection_date|string¦null|true|none|none|
-|specimen_storage|any|true|none|none|
+|specimen_collection_date|string¦null|false|none|none|
+|specimen_storage|any|false|none|none|
 
 oneOf
 
@@ -10104,9 +9851,9 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tumour_histological_type|string¦null|true|none|none|
-|specimen_anatomic_location|string¦null|true|none|none|
-|reference_pathology_confirmed_diagnosis|any|true|none|none|
+|tumour_histological_type|string¦null|false|none|none|
+|specimen_anatomic_location|string¦null|false|none|none|
+|reference_pathology_confirmed_diagnosis|any|false|none|none|
 
 oneOf
 
@@ -10130,7 +9877,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|reference_pathology_confirmed_tumour_presence|any|true|none|none|
+|reference_pathology_confirmed_tumour_presence|any|false|none|none|
 
 oneOf
 
@@ -10154,7 +9901,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tumour_grading_system|any|true|none|none|
+|tumour_grading_system|any|false|none|none|
 
 oneOf
 
@@ -10178,7 +9925,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tumour_grade|any|true|none|none|
+|tumour_grade|any|false|none|none|
 
 oneOf
 
@@ -10202,7 +9949,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|percent_tumour_cells_range|any|true|none|none|
+|percent_tumour_cells_range|any|false|none|none|
 
 oneOf
 
@@ -10226,7 +9973,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|percent_tumour_cells_measurement_method|any|true|none|none|
+|percent_tumour_cells_measurement_method|any|false|none|none|
 
 oneOf
 
@@ -10250,7 +9997,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimen_processing|any|true|none|none|
+|specimen_processing|any|false|none|none|
 
 oneOf
 
@@ -10274,7 +10021,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimen_laterality|any|true|none|none|
+|specimen_laterality|any|false|none|none|
 
 oneOf
 
@@ -10924,7 +10671,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|string(uuid)|false|none|none|
-|surgery_type|any|true|none|none|
+|surgery_type|any|false|none|none|
 
 oneOf
 
@@ -10948,8 +10695,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|surgery_site|string¦null|true|none|none|
-|surgery_location|any|true|none|none|
+|surgery_site|string¦null|false|none|none|
+|surgery_location|any|false|none|none|
 
 oneOf
 
@@ -10973,7 +10720,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|tumour_focality|any|true|none|none|
+|tumour_focality|any|false|none|none|
 
 oneOf
 
@@ -10997,7 +10744,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|residual_tumour_classification|any|true|none|none|
+|residual_tumour_classification|any|false|none|none|
 
 oneOf
 
@@ -11021,7 +10768,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_involved|[oneOf]¦null|true|none|none|
+|margin_types_involved|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -11045,7 +10792,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_involved|[oneOf]¦null|true|none|none|
+|margin_types_not_involved|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -11069,7 +10816,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|margin_types_not_assessed|[oneOf]¦null|true|none|none|
+|margin_types_not_assessed|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -11093,7 +10840,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|lymphovascular_invasion|any|true|none|none|
+|lymphovascular_invasion|any|false|none|none|
 
 oneOf
 
@@ -11117,7 +10864,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|perineural_invasion|any|true|none|none|
+|perineural_invasion|any|false|none|none|
 
 oneOf
 
@@ -11563,7 +11310,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_treatment_id|string|true|none|none|
-|treatment_type|[oneOf]¦null|true|none|none|
+|treatment_type|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -11587,7 +11334,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|is_primary_treatment|any|true|none|none|
+|is_primary_treatment|any|false|none|none|
 
 oneOf
 
@@ -11611,9 +11358,9 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|treatment_start_date|string¦null|true|none|none|
-|treatment_end_date|string¦null|true|none|none|
-|treatment_setting|any|true|none|none|
+|treatment_start_date|string¦null|false|none|none|
+|treatment_end_date|string¦null|false|none|none|
+|treatment_setting|any|false|none|none|
 
 oneOf
 
@@ -11637,7 +11384,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|treatment_intent|any|true|none|none|
+|treatment_intent|any|false|none|none|
 
 oneOf
 
@@ -11661,7 +11408,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|response_to_treatment_criteria_method|any|true|none|none|
+|response_to_treatment_criteria_method|any|false|none|none|
 
 oneOf
 
@@ -11685,7 +11432,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|response_to_treatment|any|true|none|none|
+|response_to_treatment|any|false|none|none|
 
 oneOf
 
@@ -11709,7 +11456,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|status_of_treatment|any|true|none|none|
+|status_of_treatment|any|false|none|none|
 
 oneOf
 

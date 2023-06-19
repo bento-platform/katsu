@@ -99,60 +99,116 @@ class AuthorizedProgramViewSet(BaseProgramViewSet, mixins.DestroyModelMixin):
 
 
 class AuthorizedDonorViewSet(AuthorizedMixin, BaseDonorViewSet):
+    """
+    Retrieves a list of authorized donors.
+    """
+
     pass
 
 
 class AuthorizedSpecimenViewSet(AuthorizedMixin, BaseSpecimenViewSet):
+    """
+    Retrieves a list of authorized specimens.
+    """
+
     pass
 
 
 class AuthorizedSampleRegistrationViewSet(
     AuthorizedMixin, BaseSampleRegistrationViewSet
 ):
+    """
+    Retrieves a list of authorized sample registrations.
+    """
+
     pass
 
 
 class AuthorizedPrimaryDiagnosisViewSet(AuthorizedMixin, BasePrimaryDiagnosisViewSet):
+    """
+    Retrieves a list of authorized primary diagnosises.
+    """
+
     pass
 
 
 class AuthorizedTreatmentViewSet(AuthorizedMixin, BaseTreatmentViewSet):
+    """
+    Retrieves a list of authorized treatments.
+    """
+
     pass
 
 
 class AuthorizedChemotherapyViewSet(AuthorizedMixin, BaseChemotherapyViewSet):
+    """
+    Retrieves a list of authorized chemotherapies.
+    """
+
     pass
 
 
 class AuthorizedHormoneTherapyViewSet(AuthorizedMixin, BaseHormoneTherapyViewSet):
+    """
+    Retrieves a list of authorized hormone therapies.
+    """
+
     pass
 
 
 class AuthorizedRadiationViewSet(AuthorizedMixin, BaseRadiationViewSet):
+    """
+    Retrieves a list of authorized radiations.
+    """
+
     pass
 
 
 class AuthorizedImmunotherapyViewSet(AuthorizedMixin, BaseImmunotherapyViewSet):
+    """
+    Retrieves a list of authorized immuno therapies.
+    """
+
     pass
 
 
 class AuthorizedSurgeryViewSet(AuthorizedMixin, BaseSurgeryViewSet):
+    """
+    Retrieves a list of authorized surgeries.
+    """
+
     pass
 
 
 class AuthorizedFollowUpViewSet(AuthorizedMixin, BaseFollowUpViewSet):
+    """
+    Retrieves a list of authorized follow ups.
+    """
+
     pass
 
 
 class AuthorizedBiomarkerViewSet(AuthorizedMixin, BaseBiomarkerViewSet):
+    """
+    Retrieves a list of authorized biomarkers.
+    """
+
     pass
 
 
 class AuthorizedComorbidityViewSet(AuthorizedMixin, BaseComorbidityViewSet):
+    """
+    Retrieves a list of authorized comorbidities.
+    """
+
     pass
 
 
 class AuthorizedExposureViewSet(AuthorizedMixin, BaseExposureViewSet):
+    """
+    Retrieves a list of authorized exposures.
+    """
+
     pass
 
 
@@ -195,6 +251,11 @@ def moh_overview(_request):
     )
 
 
+@extend_schema_view(
+    list=extend_schema(
+        description="Retrieves a list of authorized Donor with clinical data."
+    )
+)
 class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
     """
     This viewset provides access to Donor model and its related clinical data.
