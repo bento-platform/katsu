@@ -140,6 +140,7 @@ def overview(_request):
 
     return Response(r)
 
+
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly])
 def extra_properties_schema_types(_request):
@@ -149,6 +150,7 @@ def extra_properties_schema_types(_request):
     """
     schema_types = dict(SchemaType.choices)
     return Response(schema_types)
+
 
 @api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly])
