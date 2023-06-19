@@ -18,7 +18,8 @@ from .api_views import (
      public_search_fields,
      public_overview,
      public_dataset,
-     search_overview
+     search_overview,
+     extra_properties_schema_types,
 )
 from chord_metadata_service.restapi.routers import BatchListRouter
 
@@ -88,6 +89,9 @@ urlpatterns = [
          name="experiment-schema"),
     path('mcode_schema', mcode_views.get_mcode_schema,
          name="mcode-schema"),
+
+    # extra properties schema types
+    path('extra_properties_schema_types', extra_properties_schema_types, name="extra-properties-schema-types"),
 
     # overviews (statistics)
     path('overview', overview, name="overview"),

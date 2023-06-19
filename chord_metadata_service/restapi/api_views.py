@@ -27,6 +27,7 @@ from chord_metadata_service.mcode import models as mcode_models
 from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
+from chord_metadata_service.restapi.models import SchemaType
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 
@@ -139,6 +140,15 @@ def overview(_request):
 
     return Response(r)
 
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly])
+def extra_properties_schema_types(_request):
+    """
+    get:
+    Extra properties schema types
+    """
+    schema_types = dict(SchemaType.choices)
+    return Response(schema_types)
 
 @api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly])
