@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: MoH Service API
   version: 1.0.0
-  description: This is the RESTful API for the MoH Service. Based on commit "aea2d6b78812c1a66dd3d766399fda48bfa13902".
+  description: This is the RESTful API for the MoH Service. Based on commit "e192b8f71dbefbb8bcfdf25b006e841c2f11f09e".
 paths:
   /v2/authorized/biomarkers/:
     get:
@@ -908,7 +908,6 @@ paths:
   /v2/authorized/programs/:
     get:
       operationId: authorized_programs_list
-      description: Retrieves a list of authorized programs.
       parameters:
       - in: query
         name: program_id
@@ -947,6 +946,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedProgramList'
           description: ''
+  /v2/authorized/programs/{program_id}/:
+    delete:
+      operationId: authorized_programs_destroy
+      parameters:
+      - in: path
+        name: program_id
+        schema:
+          type: string
+        description: A unique value identifying this program.
+        required: true
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '204':
+          description: No response body
   /v2/authorized/radiations/:
     get:
       operationId: authorized_radiations_list
