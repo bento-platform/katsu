@@ -941,8 +941,6 @@ Retrieves a list of authorized primary diagnosises.
 
 `GET /v2/authorized/programs/`
 
-Retrieves a list of authorized programs.
-
 <h3 id="authorized_programs_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
@@ -971,6 +969,18 @@ Retrieves a list of authorized programs.
   ]
 }
 ```
+
+## authorized_programs_destroy
+
+<a id="opIdauthorized_programs_destroy"></a>
+
+`DELETE /v2/authorized/programs/{program_id}/`
+
+<h3 id="authorized_programs_destroy-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|program_id|path|string|true|A unique value identifying this program.|
 
 ## authorized_radiations_list
 
