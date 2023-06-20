@@ -36,6 +36,19 @@ class ServiceInfoTest(APITestCase):
         # TODO: Test compliance with spec
 
 
+class ExtraPropertiesSchemaTypesTest(APITestCase):
+    def test_extra_properties_schema_types(self):
+        response = self.client.get('/api/extra_properties_schema_types')
+        response_obj = response.json()
+        expected_response = {
+            "PHENOPACKET": "Phenopacket",
+            "BIOSAMPLE": "Biosample",
+            "INDIVIDUAL": "Individual"
+        }
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_obj, expected_response)
+
+
 class OverviewTest(APITestCase):
 
     def setUp(self) -> None:
