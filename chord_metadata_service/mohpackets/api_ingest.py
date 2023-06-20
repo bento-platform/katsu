@@ -1,10 +1,7 @@
 import logging
-import os
-from datetime import datetime
 
-from django.core.management import CommandError, call_command
 from django.db import transaction
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -72,18 +69,6 @@ def create_bulk_objects(serializer_class, data: dict):
         objs = serializer.save()
 
     return objs
-
-
-def backup_db():
-    """Backup the database with current date and time."""
-    backup_db_folder = "chord_metadata_service/mohpackets/data/backup_db"
-    os.makedirs(backup_db_folder, exist_ok=True)
-    db_name = f"db_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"
-    try:
-        call_command("dumpdata", output=f"{backup_db_folder}/{db_name}")
-    except Exception as e:
-        logger.error(f"Error during backup_db: {e}")
-        raise CommandError("Error during backup_db") from e
 
 
 ##########################################
@@ -469,27 +454,9 @@ def ingest_exposures(request):
 
 
 @extend_schema(
-    responses={204: OpenApiTypes.STR},
-)
-@api_view(["DELETE"])
-@permission_classes([CanDIGAdminOrReadOnly])
-def delete_all(request):
-    """
-    Clean all the tables in the database
-    """
-    try:
-        backup_db()
-        call_command("flush", interactive=False, verbosity=0)
-    except Exception as e:
-        return HttpResponse(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-
-
-@extend_schema(
     responses={200: OpenApiTypes.STR},
 )
 @api_view(["GET"])
 @permission_classes([CanDIGAdminOrReadOnly])
 def version_check(_request):
-    return JsonResponse({"version": "2.0.0"}, status=status.HTTP_200_OK)
+    return JsonResponse({"version": "2.1.0"}, status=status.HTTP_200_OK)

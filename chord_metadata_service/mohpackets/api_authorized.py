@@ -2,7 +2,7 @@ import os
 
 from django.db.models import Prefetch
 from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
-from rest_framework import serializers
+from rest_framework import mixins, serializers
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 
@@ -87,12 +87,15 @@ class AuthorizedMixin:
 ##############################################
 
 
-class AuthorizedProgramViewSet(AuthorizedMixin, BaseProgramViewSet):
-    """
-    Retrieves a list of authorized programs.
-    """
-
-    pass
+class AuthorizedProgramViewSet(BaseProgramViewSet, mixins.DestroyModelMixin):
+    # For Program, we want to be able to access all datasets but still need authorization
+    pagination_class = StandardResultsSetPagination
+    settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
+    authentication_classes = [
+        TokenAuthentication
+        if "dev" in settings_module or "prod" in settings_module
+        else LocalAuthentication
+    ]
 
 
 class AuthorizedDonorViewSet(AuthorizedMixin, BaseDonorViewSet):

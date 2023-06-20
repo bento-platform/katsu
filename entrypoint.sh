@@ -11,5 +11,5 @@ done
 # Run migrations and start the server
 python manage.py makemigrations
 python manage.py migrate
-python manage.py collectstatic
+python manage.py collectstatic --noinput
 uwsgi --ini katsu_wsgi.ini
