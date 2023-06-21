@@ -19,7 +19,6 @@ from chord_metadata_service.mohpackets.api_authorized import (
     AuthorizedSurgeryViewSet,
     AuthorizedTreatmentViewSet,
     CustomViewSet,
-    custom_response,
 )
 from chord_metadata_service.mohpackets.api_discovery import (
     DiscoveryBiomarkerViewSet,
