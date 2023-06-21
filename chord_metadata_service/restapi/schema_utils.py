@@ -1,8 +1,10 @@
-from chord_metadata_service.logger import logger
 from bento_lib.search import queries as q
-from .description_utils import describe_schema
-from typing import List, Optional, Dict
+from chord_metadata_service.logger import logger
 from copy import deepcopy
+from typing import List, Optional, Dict
+
+from .description_utils import describe_schema
+from .types import ExtensionSchemaDict
 
 __all__ = [
     "merge_schema_dictionaries",
@@ -13,6 +15,7 @@ __all__ = [
     "tag_ids_and_describe",
     "customize_schema",
     "schema_list",
+    "patch_project_schemas",
 ]
 
 
@@ -151,7 +154,7 @@ def schema_list(schema):
     }
 
 
-def patch_project_schemas(base_schema: dict, extension_schemas: Dict[str, object]) -> dict:
+def patch_project_schemas(base_schema: dict, extension_schemas: Dict[str, ExtensionSchemaDict]) -> dict:
     if not isinstance(base_schema, dict) or "type" not in base_schema:
         return base_schema
 
