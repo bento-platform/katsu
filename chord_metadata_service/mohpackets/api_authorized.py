@@ -1,8 +1,17 @@
 import os
 
+from django.apps import apps
 from django.db.models import Prefetch
-from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
-from rest_framework import serializers
+from django.http import JsonResponse
+from drf_spectacular import openapi
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiTypes,
+    extend_schema,
+    extend_schema_view,
+    inline_serializer,
+)
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 
@@ -246,6 +255,75 @@ def moh_overview(_request):
             # where to get ethnicity and gender?
         }
     )
+
+
+class CustomResquestSerializer(serializers.Serializer):
+    model = serializers.CharField()
+    include_fields = serializers.CharField()
+
+
+@api_view(["POST"])
+@throttle_classes([MoHRateThrottle])
+@extend_schema(
+    request=CustomResquestSerializer,
+    responses={201: OpenApiTypes.STR},
+)
+def custom_response(request):
+    model_name = request.GET.get("model")
+    include_fields = request.GET.getlist("include_fields")
+
+    try:
+        model = apps.get_model(model_name)
+    except LookupError:
+        return Response(
+            {"error": f"Model '{model_name}' not found."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    queryset = model.objects.only(*include_fields)
+
+    # Perform any necessary operations on the queryset
+
+    serialized_data = list(queryset.values())
+
+    return Response(serialized_data)
+
+
+class CustomViewSet(viewsets.ViewSet):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="model",
+                description="Model name",
+                required=True,
+                type=str,
+                location=OpenApiParameter.QUERY,
+            ),
+            OpenApiParameter(
+                name="include_fields",
+                description="Comma-separated list of included fields",
+                required=True,
+                type=str,
+                location=OpenApiParameter.QUERY,
+            ),
+        ],
+        responses={201: OpenApiTypes.STR},
+    )
+    def list(self, request):
+        model_name = request.query_params.get("model")
+        include_fields = request.query_params.getlist("include_fields")
+
+        try:
+            model = apps.get_model("mohpackets", model_name)
+        except LookupError:
+            return Response(
+                {"error": f"Model '{model_name}' not found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        queryset = model.objects.values(*include_fields)
+
+        return Response(queryset)
 
 
 @extend_schema_view(
