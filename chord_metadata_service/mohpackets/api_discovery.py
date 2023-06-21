@@ -1,6 +1,7 @@
 from collections import Counter, defaultdict
 from datetime import date, datetime
 
+from django.db.models import Count
 from drf_spectacular.utils import (
     extend_schema,
     extend_schema_serializer,
@@ -73,10 +74,21 @@ class DiscoveryMixin:
     """
 
     @extend_schema(responses=DiscoverySerializer(many=False))
+    # def list(self, request, *args, **kwargs):
+    #     queryset = self.filter_queryset(self.get_queryset())
+    #     count = queryset.values_list("submitter_donor_id").distinct().count()
+    #     return Response({"discovery_donor": count})
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        count = queryset.values_list("submitter_donor_id").distinct().count()
-        return Response({"discovery_donor": count})
+        donor_counts = (
+            queryset.values("program_id")
+            .annotate(count=Count("submitter_donor_id"))
+            .order_by("program_id")
+        )
+        discovery_donor = {
+            f"{donor['program_id']}": donor["count"] for donor in donor_counts
+        }
+        return Response({"discovery_donor": discovery_donor})
 
 
 def count_terms(terms):
