@@ -36,7 +36,16 @@ from chord_metadata_service.mohpackets.authentication import (
     LocalAuthentication,
     TokenAuthentication,
 )
-from chord_metadata_service.mohpackets.models import Biomarker, Donor, FollowUp, Program
+from chord_metadata_service.mohpackets.models import (
+    Biomarker,
+    Chemotherapy,
+    Donor,
+    FollowUp,
+    HormoneTherapy,
+    Immunotherapy,
+    Program,
+    Treatment,
+)
 from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
@@ -292,6 +301,72 @@ class CustomViewSet(viewsets.ViewSet):
         queryset = model.objects.values(*include_fields)
 
         return Response(queryset)
+
+
+class QueryableNamesViewSet(viewsets.ViewSet):
+    @extend_schema(
+        responses={201: OpenApiTypes.STR},
+    )
+    def list(self, request):
+        # Types of treatment queryable by name
+        treatment_types_qs = Treatment.objects.values_list(
+            "treatment_type", flat=True
+        ).distinct()
+        # Flatten the list of treatment types and remove None values
+        treatment_types = {
+            t
+            for treatment_type in treatment_types_qs
+            for t in treatment_type
+            if t is not None
+        }
+
+        # Tumour primary sites queryable by name
+        tumour_primary_sites_qs = Donor.objects.values_list(
+            "primary_site", flat=True
+        ).distinct()
+        # Flatten the list of Tumour primary sites and remove None values
+        tumour_primary_sites = {
+            p
+            for primary_site in tumour_primary_sites_qs
+            for p in primary_site
+            if p is not None
+        }
+
+        # Drugs queryable for chemotherapy
+        chemotherapy_drug_names_qs = Chemotherapy.objects.values_list(
+            "drug_name", flat=True
+        ).distinct()
+        chemotherapy_drug_names = {
+            drug for drug in chemotherapy_drug_names_qs if drug is not None
+        }
+
+        # Drugs queryable for immunotherapy
+        immunotherapy_drug_names_qs = Immunotherapy.objects.values_list(
+            "drug_name", flat=True
+        ).distinct()
+        immunotherapy_drug_names = {
+            drug for drug in immunotherapy_drug_names_qs if drug is not None
+        }
+
+        # Drugs queryable for hormone therapy
+        hormone_therapy_drug_names_qs = HormoneTherapy.objects.values_list(
+            "drug_name", flat=True
+        ).distinct()
+        hormone_therapy_drug_names = {
+            drug for drug in hormone_therapy_drug_names_qs if drug is not None
+        }
+
+        # Create a dictionary of results
+        results = {
+            "treatment_types": treatment_types,
+            "tumour_primary_sites": tumour_primary_sites,
+            "chemotherapy_drug_names": chemotherapy_drug_names,
+            "immunotherapy_drug_names": immunotherapy_drug_names,
+            "hormone_therapy_drug_names": hormone_therapy_drug_names,
+        }
+
+        # Return the results as a JSON response
+        return Response(results)
 
 
 @extend_schema_view(
