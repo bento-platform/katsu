@@ -19,7 +19,7 @@ from chord_metadata_service.mohpackets.api_authorized import (
     AuthorizedSurgeryViewSet,
     AuthorizedTreatmentViewSet,
     CustomViewSet,
-    QueryableNameViewSet,
+    QueryableNamesViewSet,
 )
 from chord_metadata_service.mohpackets.api_discovery import (
     DiscoveryBiomarkerViewSet,
@@ -83,7 +83,7 @@ router.register(r"comorbidities", AuthorizedComorbidityViewSet)
 router.register(r"exposures", AuthorizedExposureViewSet)
 router.register(r"donor_with_clinical_data", AuthorizedDonorWithClinicalDataViewSet)
 router.register(r"custom_view", CustomViewSet, basename="custom_view")
-router.register(r"queryable_name", QueryableNameViewSet, basename="queryable_name")
+router.register(r"queryable_name", QueryableNamesViewSet, basename="queryable_name")
 
 # ================== DISCOVERY API ================== #
 discovery_router = routers.SimpleRouter()
