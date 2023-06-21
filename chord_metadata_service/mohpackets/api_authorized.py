@@ -257,38 +257,6 @@ def moh_overview(_request):
     )
 
 
-class CustomResquestSerializer(serializers.Serializer):
-    model = serializers.CharField()
-    include_fields = serializers.CharField()
-
-
-@api_view(["POST"])
-@throttle_classes([MoHRateThrottle])
-@extend_schema(
-    request=CustomResquestSerializer,
-    responses={201: OpenApiTypes.STR},
-)
-def custom_response(request):
-    model_name = request.GET.get("model")
-    include_fields = request.GET.getlist("include_fields")
-
-    try:
-        model = apps.get_model(model_name)
-    except LookupError:
-        return Response(
-            {"error": f"Model '{model_name}' not found."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    queryset = model.objects.only(*include_fields)
-
-    # Perform any necessary operations on the queryset
-
-    serialized_data = list(queryset.values())
-
-    return Response(serialized_data)
-
-
 class CustomViewSet(viewsets.ViewSet):
     @extend_schema(
         parameters=[
