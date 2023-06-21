@@ -304,10 +304,18 @@ class CustomViewSet(viewsets.ViewSet):
 
 
 class QueryableNamesViewSet(viewsets.ViewSet):
+    """
+    A viewset that provides a list of queryable names for various treatments and drugs.
+    """
+
     @extend_schema(
         responses={201: OpenApiTypes.STR},
     )
     def list(self, request):
+        """
+        Retrieve the list of available values for all fields (including for
+        datasets that the user is not authorized to view)
+        """
         # Types of treatment queryable by name
         treatment_types_qs = Treatment.objects.values_list(
             "treatment_type", flat=True
