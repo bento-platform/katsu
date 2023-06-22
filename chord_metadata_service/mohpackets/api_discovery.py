@@ -74,10 +74,6 @@ class DiscoveryMixin:
     """
 
     @extend_schema(responses=DiscoverySerializer(many=False))
-    # def list(self, request, *args, **kwargs):
-    #     queryset = self.filter_queryset(self.get_queryset())
-    #     count = queryset.values_list("submitter_donor_id").distinct().count()
-    #     return Response({"discovery_donor": count})
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         donor_counts = (
