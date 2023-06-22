@@ -8,10 +8,8 @@ from drf_spectacular.utils import (
     OpenApiTypes,
     extend_schema,
     extend_schema_view,
-    inline_serializer,
 )
-from rest_framework import mixins, serializers, status, viewsets
-from rest_framework.decorators import api_view, throttle_classes
+from rest_framework import mixins, status, viewsets
 from rest_framework.response import Response
 
 from chord_metadata_service.mohpackets.api_base import (
@@ -42,14 +40,12 @@ from chord_metadata_service.mohpackets.models import (
     FollowUp,
     HormoneTherapy,
     Immunotherapy,
-    Program,
     Treatment,
 )
 from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
 )
-from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 
 """
     This module inheriting from the base views and adding the authorized mixin,
