@@ -18,8 +18,7 @@ from chord_metadata_service.mohpackets.api_authorized import (
     AuthorizedSpecimenViewSet,
     AuthorizedSurgeryViewSet,
     AuthorizedTreatmentViewSet,
-    CustomViewSet,
-    QueryableNamesViewSet,
+    SidebarListViewSet,
 )
 from chord_metadata_service.mohpackets.api_discovery import (
     DiscoveryBiomarkerViewSet,
@@ -81,8 +80,7 @@ router.register(r"biomarkers", AuthorizedBiomarkerViewSet)
 router.register(r"comorbidities", AuthorizedComorbidityViewSet)
 router.register(r"exposures", AuthorizedExposureViewSet)
 router.register(r"donor_with_clinical_data", AuthorizedDonorWithClinicalDataViewSet)
-router.register(r"custom_view", CustomViewSet, basename="custom_view")
-router.register(r"queryable_name", QueryableNamesViewSet, basename="queryable_name")
+router.register(r"sidebar_list", SidebarListViewSet)
 
 # ================== DISCOVERY API ================== #
 discovery_router = routers.SimpleRouter()
@@ -123,7 +121,6 @@ ingest_patterns = [
 
 urlpatterns = [
     path("authorized/", include(router.urls)),
-    # path("authorized/custom_response", custom_response, name="custom_response"),
     path("discovery/", include(discovery_router.urls)),
     path("ingest/", include(ingest_patterns)),
     path("version_check", version_check),
