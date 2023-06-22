@@ -1,4 +1,3 @@
-import itertools
 import os
 
 from django.apps import apps
@@ -33,15 +32,7 @@ from chord_metadata_service.mohpackets.authentication import (
     LocalAuthentication,
     TokenAuthentication,
 )
-from chord_metadata_service.mohpackets.models import (
-    Biomarker,
-    Chemotherapy,
-    Donor,
-    FollowUp,
-    HormoneTherapy,
-    Immunotherapy,
-    Treatment,
-)
+from chord_metadata_service.mohpackets.models import Biomarker, Donor, FollowUp
 from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
@@ -232,7 +223,7 @@ class AuthorizedExposureViewSet(AuthorizedMixin, BaseExposureViewSet):
 ###############################################
 
 
-class OnDemandViewSet(viewsets.ViewSet):
+class OnDemandViewSet(AuthorizedMixin, viewsets.ViewSet):
     @extend_schema(
         parameters=[
             OpenApiParameter(
@@ -267,79 +258,6 @@ class OnDemandViewSet(viewsets.ViewSet):
         queryset = model.objects.values(*include_fields)
 
         return Response(queryset)
-
-
-class SidebarListViewSet(viewsets.ViewSet):
-    """
-    A viewset that provides a list of queryable names for various treatments and drugs.
-    """
-
-    @extend_schema(
-        responses={201: OpenApiTypes.STR},
-    )
-    def list(self, request):
-        """
-        Retrieve the list of available values for all fields (including for
-        datasets that the user is not authorized to view)
-        """
-        # Types of treatment queryable by name
-        treatment_types_qs = (
-            Treatment.objects.exclude(treatment_type__isnull=True)
-            .values_list("treatment_type", flat=True)
-            .order_by("treatment_type")
-            .distinct()
-        )
-
-        # Flatten the list of treatment types
-        treatment_types = set(itertools.chain.from_iterable(treatment_types_qs))
-
-        # Tumour primary sites queryable by name
-        tumour_primary_sites_qs = (
-            Donor.objects.exclude(primary_site__isnull=True)
-            .values_list("primary_site", flat=True)
-            .order_by("primary_site")
-            .distinct()
-        )
-
-        # Flatten the list of Tumour primary sites
-        tumour_primary_sites = set(
-            itertools.chain.from_iterable(tumour_primary_sites_qs)
-        )
-
-        # Drugs queryable for chemotherapy
-        chemotherapy_drug_names = (
-            Chemotherapy.objects.exclude(drug_name__isnull=True)
-            .values_list("drug_name", flat=True)
-            .order_by("drug_name")
-            .distinct()
-        )
-        # Drugs queryable for immunotherapy
-        immunotherapy_drug_names = (
-            Immunotherapy.objects.exclude(drug_name__isnull=True)
-            .values_list("drug_name", flat=True)
-            .order_by("drug_name")
-            .distinct()
-        )
-
-        # Drugs queryable for hormone therapy
-        hormone_therapy_drug_names = (
-            HormoneTherapy.objects.exclude(drug_name__isnull=True)
-            .values_list("drug_name", flat=True)
-            .order_by("drug_name")
-            .distinct()
-        )
-
-        # Create a dictionary of results
-        results = {
-            "treatment_types": treatment_types,
-            "tumour_primary_sites": tumour_primary_sites,
-            "chemotherapy_drug_names": chemotherapy_drug_names,
-            "immunotherapy_drug_names": immunotherapy_drug_names,
-            "hormone_therapy_drug_names": hormone_therapy_drug_names,
-        }
-
-        # Return the results as a JSON response
-        return Response(results)
 
 
 @extend_schema_view(
