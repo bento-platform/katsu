@@ -80,7 +80,7 @@ router.register(r"biomarkers", AuthorizedBiomarkerViewSet)
 router.register(r"comorbidities", AuthorizedComorbidityViewSet)
 router.register(r"exposures", AuthorizedExposureViewSet)
 router.register(r"donor_with_clinical_data", AuthorizedDonorWithClinicalDataViewSet)
-router.register(r"sidebar_list", SidebarListViewSet)
+router.register(r"sidebar_list", SidebarListViewSet, basename="sidebar_list")
 
 # ================== DISCOVERY API ================== #
 discovery_router = routers.SimpleRouter()
