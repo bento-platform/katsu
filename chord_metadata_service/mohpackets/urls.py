@@ -18,7 +18,6 @@ from chord_metadata_service.mohpackets.api_authorized import (
     AuthorizedSpecimenViewSet,
     AuthorizedSurgeryViewSet,
     AuthorizedTreatmentViewSet,
-    SidebarListViewSet,
 )
 from chord_metadata_service.mohpackets.api_discovery import (
     DiscoveryBiomarkerViewSet,
@@ -35,6 +34,7 @@ from chord_metadata_service.mohpackets.api_discovery import (
     DiscoverySpecimenViewSet,
     DiscoverySurgeryViewSet,
     DiscoveryTreatmentViewSet,
+    SidebarListViewSet,
     cancer_type_count,
     cohort_count,
     diagnosis_age_count,
@@ -80,7 +80,6 @@ router.register(r"biomarkers", AuthorizedBiomarkerViewSet)
 router.register(r"comorbidities", AuthorizedComorbidityViewSet)
 router.register(r"exposures", AuthorizedExposureViewSet)
 router.register(r"donor_with_clinical_data", AuthorizedDonorWithClinicalDataViewSet)
-router.register(r"sidebar_list", SidebarListViewSet, basename="sidebar_list")
 
 # ================== DISCOVERY API ================== #
 discovery_router = routers.SimpleRouter()
@@ -98,6 +97,7 @@ discovery_router.register(r"follow_ups", DiscoveryFollowUpViewSet)
 discovery_router.register(r"biomarkers", DiscoveryBiomarkerViewSet)
 discovery_router.register(r"comorbidities", DiscoveryComorbidityViewSet)
 discovery_router.register(r"exposures", DiscoveryExposureViewSet)
+discovery_router.register(r"sidebar_list", SidebarListViewSet, basename="sidebar_list")
 
 
 # ================== INGEST API ================== #
