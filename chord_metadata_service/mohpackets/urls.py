@@ -45,7 +45,6 @@ from chord_metadata_service.mohpackets.api_discovery import (
     treatment_type_count,
 )
 from chord_metadata_service.mohpackets.api_ingest import (
-    delete_all,
     ingest_biomarkers,
     ingest_chemotherapies,
     ingest_comorbidities,
@@ -127,7 +126,6 @@ urlpatterns = [
     # path("authorized/custom_response", custom_response, name="custom_response"),
     path("discovery/", include(discovery_router.urls)),
     path("ingest/", include(ingest_patterns)),
-    path("delete/all", delete_all),
     path("version_check", version_check),
     path(
         "discovery/overview/",
