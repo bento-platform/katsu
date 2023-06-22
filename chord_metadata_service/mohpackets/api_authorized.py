@@ -1,3 +1,4 @@
+import itertools
 import os
 
 from django.apps import apps
@@ -317,52 +318,51 @@ class QueryableNamesViewSet(viewsets.ViewSet):
         datasets that the user is not authorized to view)
         """
         # Types of treatment queryable by name
-        treatment_types_qs = Treatment.objects.values_list(
-            "treatment_type", flat=True
-        ).distinct()
-        # Flatten the list of treatment types and remove None values
-        treatment_types = {
-            t
-            for treatment_type in treatment_types_qs
-            for t in treatment_type
-            if t is not None
-        }
+        treatment_types_qs = (
+            Treatment.objects.exclude(treatment_type__isnull=True)
+            .values_list("treatment_type", flat=True)
+            .order_by("treatment_type")
+            .distinct()
+        )
+
+        # Flatten the list of treatment types
+        treatment_types = set(itertools.chain.from_iterable(treatment_types_qs))
 
         # Tumour primary sites queryable by name
-        tumour_primary_sites_qs = Donor.objects.values_list(
-            "primary_site", flat=True
-        ).distinct()
-        # Flatten the list of Tumour primary sites and remove None values
-        tumour_primary_sites = {
-            p
-            for primary_site in tumour_primary_sites_qs
-            for p in primary_site
-            if p is not None
-        }
+        tumour_primary_sites_qs = (
+            Donor.objects.exclude(primary_site__isnull=True)
+            .values_list("primary_site", flat=True)
+            .order_by("primary_site")
+            .distinct()
+        )
+
+        # Flatten the list of Tumour primary sites
+        tumour_primary_sites = set(
+            itertools.chain.from_iterable(tumour_primary_sites_qs)
+        )
 
         # Drugs queryable for chemotherapy
-        chemotherapy_drug_names_qs = Chemotherapy.objects.values_list(
-            "drug_name", flat=True
-        ).distinct()
-        chemotherapy_drug_names = {
-            drug for drug in chemotherapy_drug_names_qs if drug is not None
-        }
-
+        chemotherapy_drug_names = (
+            Chemotherapy.objects.exclude(drug_name__isnull=True)
+            .values_list("drug_name", flat=True)
+            .order_by("drug_name")
+            .distinct()
+        )
         # Drugs queryable for immunotherapy
-        immunotherapy_drug_names_qs = Immunotherapy.objects.values_list(
-            "drug_name", flat=True
-        ).distinct()
-        immunotherapy_drug_names = {
-            drug for drug in immunotherapy_drug_names_qs if drug is not None
-        }
+        immunotherapy_drug_names = (
+            Immunotherapy.objects.exclude(drug_name__isnull=True)
+            .values_list("drug_name", flat=True)
+            .order_by("drug_name")
+            .distinct()
+        )
 
         # Drugs queryable for hormone therapy
-        hormone_therapy_drug_names_qs = HormoneTherapy.objects.values_list(
-            "drug_name", flat=True
-        ).distinct()
-        hormone_therapy_drug_names = {
-            drug for drug in hormone_therapy_drug_names_qs if drug is not None
-        }
+        hormone_therapy_drug_names = (
+            HormoneTherapy.objects.exclude(drug_name__isnull=True)
+            .values_list("drug_name", flat=True)
+            .order_by("drug_name")
+            .distinct()
+        )
 
         # Create a dictionary of results
         results = {
