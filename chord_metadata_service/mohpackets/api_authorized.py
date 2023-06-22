@@ -236,39 +236,7 @@ class AuthorizedExposureViewSet(AuthorizedMixin, BaseExposureViewSet):
 ###############################################
 
 
-# TODO: redo this overview endpoint
-@extend_schema(
-    description="MoH Overview schema",
-    responses={
-        200: inline_serializer(
-            name="moh_overview_schema_response",
-            fields={
-                "cohort_count": serializers.IntegerField(),
-                "individual_count": serializers.IntegerField(),
-            },
-        )
-    },
-)
-@api_view(["GET"])
-@throttle_classes([MoHRateThrottle])
-def moh_overview(_request):
-    """
-    Return a summary of the statistics for the database:
-    - cohort_count: number of datasets
-    - individual_count: number of individuals
-    - ethnicity: the count of each ethenicity
-    - gender: the count of each gender
-    """
-    return Response(
-        {
-            "cohort_count": Program.objects.count(),
-            "individual_count": Donor.objects.count(),
-            # where to get ethnicity and gender?
-        }
-    )
-
-
-class CustomViewSet(viewsets.ViewSet):
+class OnDemandViewSet(viewsets.ViewSet):
     @extend_schema(
         parameters=[
             OpenApiParameter(
@@ -305,7 +273,7 @@ class CustomViewSet(viewsets.ViewSet):
         return Response(queryset)
 
 
-class QueryableNamesViewSet(viewsets.ViewSet):
+class SidebarListViewSet(viewsets.ViewSet):
     """
     A viewset that provides a list of queryable names for various treatments and drugs.
     """
