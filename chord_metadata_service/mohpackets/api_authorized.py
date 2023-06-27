@@ -306,6 +306,7 @@ class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
         "primarydiagnosis_set__specimen_set__biomarker_set",
         queryset=Biomarker.objects.filter(
             submitter_specimen_id__isnull=False,
+            submitter_treatment_id__isnull=True,
             submitter_follow_up_id__isnull=True,
         ),
     )
