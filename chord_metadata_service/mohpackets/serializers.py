@@ -520,11 +520,16 @@ class FollowUpSerializer(serializers.ModelSerializer):
         allow_null=True,
         required=False,
     )
-    method_of_progression_status = CustomChoiceField(
-        choices=val.PROGRESSION_STATUS_METHOD,
-        allow_blank=True,
+    method_of_progression_status = serializers.ListField(
         allow_null=True,
+        allow_empty=True,
         required=False,
+        child=CustomChoiceField(
+            choices=val.PROGRESSION_STATUS_METHOD,
+            allow_blank=True,
+            allow_null=True,
+            required=False,
+        ),
     )
     anatomic_site_progression_or_recurrence = serializers.RegexField(
         max_length=32,
@@ -533,16 +538,11 @@ class FollowUpSerializer(serializers.ModelSerializer):
         allow_null=True,
         required=False,
     )
-    recurrence_tumour_staging_system = serializers.ListField(
+    recurrence_tumour_staging_system = CustomChoiceField(
+        choices=val.TUMOUR_STAGING_SYSTEM,
+        allow_blank=True,
         allow_null=True,
-        allow_empty=True,
         required=False,
-        child=CustomChoiceField(
-            choices=val.TUMOUR_STAGING_SYSTEM,
-            allow_blank=True,
-            allow_null=True,
-            required=False,
-        ),
     )
 
     recurrence_t_category = CustomChoiceField(
