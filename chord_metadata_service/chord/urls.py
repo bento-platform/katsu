@@ -24,4 +24,11 @@ urlpatterns = [
     path('fhir-search', views_search.fhir_public_search, name="fhir-search"),
     path('private/fhir-search', views_search.fhir_private_search, name="fhir-private-search"),
     path('private/search', views_search.chord_private_search, name="private-search"),
+
+    path('datasets', views_search.datasets_list, name="chord-dataset-list"),
+    path('datasets/<str:dataset_id>', views_search.dataset_detail, name="chord-dataset-detail"),
+    path('datasets/<str:dataset_id>/summary', views_search.dataset_summary, name="chord-dataset-summary"),
+    path('datasets/<str:dataset_id>/search', views_search.dataset_search, name="chord-dataset-search"),
+
+    path('private/datasets/<str:dataset_id>/search', views_search.private_dataset_search, name="chord-private-dataset-search"),
 ]

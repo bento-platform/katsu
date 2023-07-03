@@ -11,13 +11,16 @@ from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
+from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework import status
 
 from typing import Any, Callable, Dict, Optional, Tuple, Union
+from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
 
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.utils import get_field_bins, queryset_stats_for_field
@@ -39,6 +42,7 @@ from chord_metadata_service.phenopackets.serializers import PhenopacketSerialize
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset
+from . import data_types as dt
 
 from collections import defaultdict
 
@@ -568,3 +572,48 @@ def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[
     debug_log(f"Finished running query and serializing in {datetime.now() - start}")
 
     return serialized_data, None
+
+def chord_dataset_representation(dataset: Dataset):
+    return {
+        "id": dataset.identifier,
+        "title": dataset.title,
+        "metadata": {
+            "project_id": dataset.project_id,
+            "created": dataset.created.isoformat(),
+            "updated": dataset.updated.isoformat(),
+        },
+    }
+
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+def datasets_list(request: HttpRequest):
+    datasets = Dataset.objects.all().order_by("title")
+    return Response([chord_dataset_representation(ds) for ds in datasets])
+
+
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+def dataset_detail(request: HttpRequest, dataset_id: str):
+    # search_params, err = get_chord_search_parameters(request)
+    return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+
+
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+def dataset_summary(request: HttpRequest, dataset_id: str):
+    # search_params, err = get_chord_search_parameters(request)
+    return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+
+
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+def dataset_search(request: HttpRequest, dataset_id: str):
+    # search_params, err = get_chord_search_parameters(request)
+    return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+
+
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+def private_dataset_search(request: HttpRequest, dataset_id: str):
+    # search_params, err = get_chord_search_parameters(request)
+    return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
