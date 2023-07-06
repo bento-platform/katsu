@@ -1,12 +1,14 @@
 from collections import Counter, defaultdict
 from datetime import date, datetime
 
+from django.db.models import Count
 from drf_spectacular.utils import (
+    OpenApiTypes,
     extend_schema,
     extend_schema_serializer,
     inline_serializer,
 )
-from rest_framework import serializers
+from rest_framework import serializers, viewsets
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 
@@ -27,10 +29,17 @@ from chord_metadata_service.mohpackets.api_base import (
     BaseTreatmentViewSet,
 )
 from chord_metadata_service.mohpackets.models import (
+    Chemotherapy,
     Donor,
+    HormoneTherapy,
+    Immunotherapy,
     PrimaryDiagnosis,
     Program,
     Treatment,
+)
+from chord_metadata_service.mohpackets.permissible_values import (
+    PRIMARY_SITE,
+    TREATMENT_TYPE,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 
@@ -75,8 +84,15 @@ class DiscoveryMixin:
     @extend_schema(responses=DiscoverySerializer(many=False))
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        count = queryset.values_list("submitter_donor_id").distinct().count()
-        return Response({"discovery_donor": count})
+        donor_counts = (
+            queryset.values("program_id")
+            .annotate(count=Count("submitter_donor_id"))
+            .order_by("program_id")
+        )
+        discovery_donor = {
+            f"{donor['program_id']}": donor["count"] for donor in donor_counts
+        }
+        return Response({"discovery_donor": discovery_donor})
 
 
 def count_terms(terms):
@@ -213,6 +229,55 @@ class DiscoveryExposureViewSet(DiscoveryMixin, BaseExposureViewSet):
 #        CUSTOM OVERVIEW API ENDPOINTS        #
 #                                             #
 ###############################################
+
+
+class SidebarListViewSet(viewsets.ViewSet):
+    """
+    A viewset that provides a list of queryable names for various treatments and drugs.
+    """
+
+    @extend_schema(
+        responses={201: OpenApiTypes.STR},
+    )
+    def list(self, request):
+        """
+        Retrieve the list of available values for all fields (including for
+        datasets that the user is not authorized to view)
+        """
+        # Drugs queryable for chemotherapy
+        chemotherapy_drug_names = (
+            Chemotherapy.objects.exclude(drug_name__isnull=True)
+            .values_list("drug_name", flat=True)
+            .order_by("drug_name")
+            .distinct()
+        )
+        # Drugs queryable for immunotherapy
+        immunotherapy_drug_names = (
+            Immunotherapy.objects.exclude(drug_name__isnull=True)
+            .values_list("drug_name", flat=True)
+            .order_by("drug_name")
+            .distinct()
+        )
+
+        # Drugs queryable for hormone therapy
+        hormone_therapy_drug_names = (
+            HormoneTherapy.objects.exclude(drug_name__isnull=True)
+            .values_list("drug_name", flat=True)
+            .order_by("drug_name")
+            .distinct()
+        )
+
+        # Create a dictionary of results
+        results = {
+            "treatment_types": TREATMENT_TYPE,
+            "tumour_primary_sites": PRIMARY_SITE,
+            "chemotherapy_drug_names": chemotherapy_drug_names,
+            "immunotherapy_drug_names": immunotherapy_drug_names,
+            "hormone_therapy_drug_names": hormone_therapy_drug_names,
+        }
+
+        # Return the results as a JSON response
+        return Response(results)
 
 
 @extend_schema(

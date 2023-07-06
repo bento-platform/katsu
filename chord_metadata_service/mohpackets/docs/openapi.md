@@ -941,6 +941,18 @@ Retrieves a list of authorized primary diagnosises.
 
 `GET /v2/authorized/programs/`
 
+This mixin should be used for viewsets that need to restrict access.
+
+The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+If the env is "dev" or "prod", the `TokenAuthentication` class is
+used. Otherwise, the `LocalAuthentication` class is used.
+
+Methods
+-------
+get_queryset()
+    Returns a filtered queryset that includes only the objects that the user is
+    authorized to see based on their permissions.
+
 <h3 id="authorized_programs_list-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
@@ -975,6 +987,8 @@ Retrieves a list of authorized primary diagnosises.
 <a id="opIdauthorized_programs_destroy"></a>
 
 `DELETE /v2/authorized/programs/{program_id}/`
+
+Delete a program, must be an admin that can access all programs
 
 <h3 id="authorized_programs_destroy-parameters">Parameters</h3>
 
@@ -1816,6 +1830,23 @@ Retrieves a number of discovery samples.
 {
   "discovery_donor": 0
 }
+```
+
+## discovery_sidebar_list_retrieve
+
+<a id="opIddiscovery_sidebar_list_retrieve"></a>
+
+`GET /v2/discovery/sidebar_list/`
+
+Retrieve the list of available values for all fields (including for
+datasets that the user is not authorized to view)
+
+> Example responses
+
+> 201 Response
+
+```json
+"string"
 ```
 
 ## discovery_specimens_list

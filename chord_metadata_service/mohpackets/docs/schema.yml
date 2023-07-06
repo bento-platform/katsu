@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: MoH Service API
   version: 1.0.0
-  description: This is the RESTful API for the MoH Service. Based on commit "d80c6bfcef21ba674f07b2372d6cbd30d55389eb".
+  description: This is the RESTful API for the MoH Service. Based on commit "5d186133f914b1e78c2d7177674d8fd85d6261f2".
 paths:
   /v2/authorized/biomarkers/:
     get:
@@ -908,6 +908,18 @@ paths:
   /v2/authorized/programs/:
     get:
       operationId: authorized_programs_list
+      description: |-
+        This mixin should be used for viewsets that need to restrict access.
+
+        The authentication classes are set based on the `DJANGO_SETTINGS_MODULE`.
+        If the env is "dev" or "prod", the `TokenAuthentication` class is
+        used. Otherwise, the `LocalAuthentication` class is used.
+
+        Methods
+        -------
+        get_queryset()
+            Returns a filtered queryset that includes only the objects that the user is
+            authorized to see based on their permissions.
       parameters:
       - in: query
         name: program_id
@@ -949,6 +961,7 @@ paths:
   /v2/authorized/programs/{program_id}/:
     delete:
       operationId: authorized_programs_destroy
+      description: Delete a program, must be an admin that can access all programs
       parameters:
       - in: path
         name: program_id
@@ -2245,6 +2258,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Discovery'
+          description: ''
+  /v2/discovery/sidebar_list/:
+    get:
+      operationId: discovery_sidebar_list_retrieve
+      description: |-
+        Retrieve the list of available values for all fields (including for
+        datasets that the user is not authorized to view)
+      tags:
+      - discovery
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: string
           description: ''
   /v2/discovery/specimens/:
     get:
