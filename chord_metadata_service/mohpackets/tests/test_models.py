@@ -1806,13 +1806,12 @@ class FollowUpTest(TestCase):
             "disease_status_at_followup": "Loco-regional progression",
             "relapse_type": "Progression (liquid tumours)",
             "date_of_relapse": "2022-07",
-            "method_of_progression_status": "Assessment of symptom control (procedure)",
-            "anatomic_site_progression_or_recurrence": "C18",
-            "recurrence_tumour_staging_system": [
-                "AJCC 6th edition",
-                "Lugano staging system",
-                "AJCC 7th edition",
+            "method_of_progression_status": [
+                "Imaging (procedure)",
+                "Laboratory data interpretation (procedure)",
             ],
+            "anatomic_site_progression_or_recurrence": "C18",
+            "recurrence_tumour_staging_system": "Lugano staging system",
             "recurrence_t_category": "T2a",
             "recurrence_n_category": "N0a (biopsy)",
             "recurrence_m_category": "M0(i+)",
@@ -1839,12 +1838,12 @@ class FollowUpTest(TestCase):
         self.assertEqual(self.followup.date_of_relapse, "2022-07")
         self.assertEqual(
             self.followup.method_of_progression_status,
-            "Assessment of symptom control (procedure)",
+            ["Imaging (procedure)", "Laboratory data interpretation (procedure)"],
         )
         self.assertEqual(self.followup.anatomic_site_progression_or_recurrence, "C18")
         self.assertEqual(
             self.followup.recurrence_tumour_staging_system,
-            ["AJCC 6th edition", "Lugano staging system", "AJCC 7th edition"],
+            "Lugano staging system",
         )
         self.assertEqual(self.followup.recurrence_t_category, "T2a")
         self.assertEqual(self.followup.recurrence_n_category, "N0a (biopsy)")
