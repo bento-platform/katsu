@@ -100,7 +100,7 @@ def count_terms(terms):
     Return a dictionary of counts for every term in a list, used in overview endpoints
     for fields with lists as entries.
     """
-    if isinstance(terms[0], list):  # Unnest list if nested
+    if len(terms) > 0 and isinstance(terms[0], list):  # Unnest list if nested
         terms = sum(terms, [])
     return Counter(terms)
 
