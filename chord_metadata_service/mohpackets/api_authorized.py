@@ -1,9 +1,14 @@
 import os
 
+from django.apps import apps
 from django.db.models import Prefetch
-from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
-from rest_framework import mixins, serializers
-from rest_framework.decorators import api_view, throttle_classes
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiTypes,
+    extend_schema,
+    extend_schema_view,
+)
+from rest_framework import mixins, status, viewsets
 from rest_framework.response import Response
 
 from chord_metadata_service.mohpackets.api_base import (
@@ -32,7 +37,6 @@ from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagin
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
 )
-from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 
 """
     This module inheriting from the base views and adding the authorized mixin,
@@ -87,15 +91,23 @@ class AuthorizedMixin:
 ##############################################
 
 
-class AuthorizedProgramViewSet(BaseProgramViewSet, mixins.DestroyModelMixin):
-    # For Program, we want to be able to access all datasets but still need authorization
-    pagination_class = StandardResultsSetPagination
-    settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
-    authentication_classes = [
-        TokenAuthentication
-        if "dev" in settings_module or "prod" in settings_module
-        else LocalAuthentication
-    ]
+class AuthorizedProgramViewSet(
+    AuthorizedMixin, BaseProgramViewSet, mixins.DestroyModelMixin
+):
+    def destroy(self, request, pk=None):
+        """
+        Delete a program, must be an admin that can access all programs
+        """
+        self.queryset = Program.objects.all()
+        try:
+            dataset = Program.objects.get(pk=pk)
+            dataset.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Program.DoesNotExist:
+            return Response(
+                {"detail": "Program matching query does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class AuthorizedDonorViewSet(AuthorizedMixin, BaseDonorViewSet):
@@ -219,36 +231,41 @@ class AuthorizedExposureViewSet(AuthorizedMixin, BaseExposureViewSet):
 ###############################################
 
 
-# TODO: redo this overview endpoint
-@extend_schema(
-    description="MoH Overview schema",
-    responses={
-        200: inline_serializer(
-            name="moh_overview_schema_response",
-            fields={
-                "cohort_count": serializers.IntegerField(),
-                "individual_count": serializers.IntegerField(),
-            },
-        )
-    },
-)
-@api_view(["GET"])
-@throttle_classes([MoHRateThrottle])
-def moh_overview(_request):
-    """
-    Return a summary of the statistics for the database:
-    - cohort_count: number of datasets
-    - individual_count: number of individuals
-    - ethnicity: the count of each ethenicity
-    - gender: the count of each gender
-    """
-    return Response(
-        {
-            "cohort_count": Program.objects.count(),
-            "individual_count": Donor.objects.count(),
-            # where to get ethnicity and gender?
-        }
+class OnDemandViewSet(AuthorizedMixin, viewsets.ViewSet):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="model",
+                description="Model name",
+                required=True,
+                type=str,
+                location=OpenApiParameter.QUERY,
+            ),
+            OpenApiParameter(
+                name="include_fields",
+                description="Comma-separated list of included fields",
+                required=True,
+                type=str,
+                location=OpenApiParameter.QUERY,
+            ),
+        ],
+        responses={201: OpenApiTypes.STR},
     )
+    def list(self, request):
+        model_name = request.query_params.get("model")
+        include_fields = request.query_params.getlist("include_fields")
+
+        try:
+            model = apps.get_model("mohpackets", model_name)
+        except LookupError:
+            return Response(
+                {"error": f"Model '{model_name}' not found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        queryset = model.objects.values(*include_fields)
+
+        return Response(queryset)
 
 
 @extend_schema_view(

@@ -34,6 +34,7 @@ from chord_metadata_service.mohpackets.api_discovery import (
     DiscoverySpecimenViewSet,
     DiscoverySurgeryViewSet,
     DiscoveryTreatmentViewSet,
+    SidebarListViewSet,
     cancer_type_count,
     cohort_count,
     diagnosis_age_count,
@@ -96,6 +97,7 @@ discovery_router.register(r"follow_ups", DiscoveryFollowUpViewSet)
 discovery_router.register(r"biomarkers", DiscoveryBiomarkerViewSet)
 discovery_router.register(r"comorbidities", DiscoveryComorbidityViewSet)
 discovery_router.register(r"exposures", DiscoveryExposureViewSet)
+discovery_router.register(r"sidebar_list", SidebarListViewSet, basename="sidebar_list")
 
 
 # ================== INGEST API ================== #
@@ -137,4 +139,3 @@ urlpatterns = [
         ),
     ),
 ]
-# added to trigger test
