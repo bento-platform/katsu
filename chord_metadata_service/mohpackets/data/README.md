@@ -5,9 +5,16 @@ This folder contains the necessary tools to generate synthetic data. Each datase
 - `mockaroo_schemas`: contains the blueprints needed to generate data using the Mockaroo service.
 - `no_relationships_data`: generated mock data that doesn't include any relationships.
 - `synthetic_data`: assigned relationships data, can be used for ingestion.
-- `fixtures`: contains Django-formatted data that can be directly loaded into the database (skip ingestion).
 
-## Loading Fixtures
+## Create Fixtures
+
+Run the following command and choose the dataset you want to generate fixtures for:
+
+```python
+python chord_metadata_service/mohpackets/data/convert.py
+```
+
+## Load Fixtures
 
 Run the following commands (change the `fixtures_path` variable to the dataset you want to load):
 
@@ -35,8 +42,4 @@ If you want to modify the mock data to your preferences, you can follow these st
 5. Modify `relationships.json` if needed
 6. Run `convert.py` to generate the final data
 
-```python
-python chord_metadata_service/mohpackets/data/convert.py
-```
-
-NOTE: Synthetic data simplifies data ingestion into the database for frontend testing. However, for other testing purposes it's recommended to create your own data to ensure accuracy and targeted testing.
+*NOTE*: The synthetic data provided is intended for frontend testing. For other types of testing purposes, it is recommended to create your own data to ensure accuracy.
