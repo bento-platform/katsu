@@ -285,6 +285,29 @@ Retrieves a list of authorized Donor with clinical data.
               "percent_tumour_cells_measurement_method": "Genomics",
               "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
               "specimen_laterality": "Left",
+              "surgery": {
+                "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+                "surgery_type": "Ablation",
+                "surgery_site": "string",
+                "surgery_location": "Local recurrence",
+                "tumour_focality": "Cannot be assessed",
+                "residual_tumour_classification": "Not applicable",
+                "margin_types_involved": [
+                  "Circumferential resection margin"
+                ],
+                "margin_types_not_involved": [
+                  "Circumferential resection margin"
+                ],
+                "margin_types_not_assessed": [
+                  "Circumferential resection margin"
+                ],
+                "lymphovascular_invasion": "Absent",
+                "perineural_invasion": "Absent",
+                "tumour_length": 32767,
+                "tumour_width": 32767,
+                "greatest_dimension_tumour": 32767,
+                "submitter_specimen_id": "string"
+              },
               "sample_registrations": [
                 {
                   "submitter_sample_id": "string",
@@ -407,11 +430,11 @@ Retrieves a list of authorized Donor with clinical data.
                   "disease_status_at_followup": "Complete remission",
                   "relapse_type": "Distant recurrence/metastasis",
                   "date_of_relapse": "string",
-                  "method_of_progression_status": "Imaging (procedure)",
-                  "anatomic_site_progression_or_recurrence": "string",
-                  "recurrence_tumour_staging_system": [
-                    "AJCC 8th edition"
+                  "method_of_progression_status": [
+                    "Imaging (procedure)"
                   ],
+                  "anatomic_site_progression_or_recurrence": "string",
+                  "recurrence_tumour_staging_system": "AJCC 8th edition",
                   "recurrence_t_category": "T0",
                   "recurrence_n_category": "N0",
                   "recurrence_m_category": "M0",
@@ -470,11 +493,11 @@ Retrieves a list of authorized Donor with clinical data.
               "disease_status_at_followup": "Complete remission",
               "relapse_type": "Distant recurrence/metastasis",
               "date_of_relapse": "string",
-              "method_of_progression_status": "Imaging (procedure)",
-              "anatomic_site_progression_or_recurrence": "string",
-              "recurrence_tumour_staging_system": [
-                "AJCC 8th edition"
+              "method_of_progression_status": [
+                "Imaging (procedure)"
               ],
+              "anatomic_site_progression_or_recurrence": "string",
+              "recurrence_tumour_staging_system": "AJCC 8th edition",
               "recurrence_t_category": "T0",
               "recurrence_n_category": "N0",
               "recurrence_m_category": "M0",
@@ -551,11 +574,11 @@ Retrieves a list of authorized Donor with clinical data.
           "disease_status_at_followup": "Complete remission",
           "relapse_type": "Distant recurrence/metastasis",
           "date_of_relapse": "string",
-          "method_of_progression_status": "Imaging (procedure)",
-          "anatomic_site_progression_or_recurrence": "string",
-          "recurrence_tumour_staging_system": [
-            "AJCC 8th edition"
+          "method_of_progression_status": [
+            "Imaging (procedure)"
           ],
+          "anatomic_site_progression_or_recurrence": "string",
+          "recurrence_tumour_staging_system": "AJCC 8th edition",
           "recurrence_t_category": "T0",
           "recurrence_n_category": "N0",
           "recurrence_m_category": "M0",
@@ -751,11 +774,11 @@ Retrieves a list of authorized follow ups.
       "disease_status_at_followup": "Complete remission",
       "relapse_type": "Distant recurrence/metastasis",
       "date_of_relapse": "string",
-      "method_of_progression_status": "Imaging (procedure)",
-      "anatomic_site_progression_or_recurrence": "string",
-      "recurrence_tumour_staging_system": [
-        "AJCC 8th edition"
+      "method_of_progression_status": [
+        "Imaging (procedure)"
       ],
+      "anatomic_site_progression_or_recurrence": "string",
+      "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
       "recurrence_n_category": "N0",
       "recurrence_m_category": "M0",
@@ -3295,6 +3318,29 @@ continued
           "percent_tumour_cells_measurement_method": "Genomics",
           "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
           "specimen_laterality": "Left",
+          "surgery": {
+            "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+            "surgery_type": "Ablation",
+            "surgery_site": "string",
+            "surgery_location": "Local recurrence",
+            "tumour_focality": "Cannot be assessed",
+            "residual_tumour_classification": "Not applicable",
+            "margin_types_involved": [
+              "Circumferential resection margin"
+            ],
+            "margin_types_not_involved": [
+              "Circumferential resection margin"
+            ],
+            "margin_types_not_assessed": [
+              "Circumferential resection margin"
+            ],
+            "lymphovascular_invasion": "Absent",
+            "perineural_invasion": "Absent",
+            "tumour_length": 32767,
+            "tumour_width": 32767,
+            "greatest_dimension_tumour": 32767,
+            "submitter_specimen_id": "string"
+          },
           "sample_registrations": [
             {
               "submitter_sample_id": "string",
@@ -3417,11 +3463,11 @@ continued
               "disease_status_at_followup": "Complete remission",
               "relapse_type": "Distant recurrence/metastasis",
               "date_of_relapse": "string",
-              "method_of_progression_status": "Imaging (procedure)",
-              "anatomic_site_progression_or_recurrence": "string",
-              "recurrence_tumour_staging_system": [
-                "AJCC 8th edition"
+              "method_of_progression_status": [
+                "Imaging (procedure)"
               ],
+              "anatomic_site_progression_or_recurrence": "string",
+              "recurrence_tumour_staging_system": "AJCC 8th edition",
               "recurrence_t_category": "T0",
               "recurrence_n_category": "N0",
               "recurrence_m_category": "M0",
@@ -3497,11 +3543,11 @@ continued
           "disease_status_at_followup": "Complete remission",
           "relapse_type": "Distant recurrence/metastasis",
           "date_of_relapse": "string",
-          "method_of_progression_status": "Imaging (procedure)",
-          "anatomic_site_progression_or_recurrence": "string",
-          "recurrence_tumour_staging_system": [
-            "AJCC 8th edition"
+          "method_of_progression_status": [
+            "Imaging (procedure)"
           ],
+          "anatomic_site_progression_or_recurrence": "string",
+          "recurrence_tumour_staging_system": "AJCC 8th edition",
           "recurrence_t_category": "T0",
           "recurrence_n_category": "N0",
           "recurrence_m_category": "M0",
@@ -3578,11 +3624,11 @@ continued
       "disease_status_at_followup": "Complete remission",
       "relapse_type": "Distant recurrence/metastasis",
       "date_of_relapse": "string",
-      "method_of_progression_status": "Imaging (procedure)",
-      "anatomic_site_progression_or_recurrence": "string",
-      "recurrence_tumour_staging_system": [
-        "AJCC 8th edition"
+      "method_of_progression_status": [
+        "Imaging (procedure)"
       ],
+      "anatomic_site_progression_or_recurrence": "string",
+      "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
       "recurrence_n_category": "N0",
       "recurrence_m_category": "M0",
@@ -3943,11 +3989,11 @@ continued
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
   "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": [
-    "AJCC 8th edition"
+  "method_of_progression_status": [
+    "Imaging (procedure)"
   ],
+  "anatomic_site_progression_or_recurrence": "string",
+  "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
   "recurrence_n_category": "N0",
   "recurrence_m_category": "M0",
@@ -4015,7 +4061,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |date_of_relapse|string¦null|false|none|none|
-|method_of_progression_status|any|false|none|none|
+|method_of_progression_status|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -4040,7 +4086,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |anatomic_site_progression_or_recurrence|string¦null|false|none|none|
-|recurrence_tumour_staging_system|[oneOf]¦null|false|none|none|
+|recurrence_tumour_staging_system|any|false|none|none|
 
 oneOf
 
@@ -5407,11 +5453,11 @@ continued
   "disease_status_at_followup": "Complete remission",
   "relapse_type": "Distant recurrence/metastasis",
   "date_of_relapse": "string",
-  "method_of_progression_status": "Imaging (procedure)",
-  "anatomic_site_progression_or_recurrence": "string",
-  "recurrence_tumour_staging_system": [
-    "AJCC 8th edition"
+  "method_of_progression_status": [
+    "Imaging (procedure)"
   ],
+  "anatomic_site_progression_or_recurrence": "string",
+  "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
   "recurrence_n_category": "N0",
   "recurrence_m_category": "M0",
@@ -5495,7 +5541,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |date_of_relapse|string¦null|false|none|none|
-|method_of_progression_status|any|false|none|none|
+|method_of_progression_status|[oneOf]¦null|false|none|none|
 
 oneOf
 
@@ -5520,7 +5566,7 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |anatomic_site_progression_or_recurrence|string¦null|false|none|none|
-|recurrence_tumour_staging_system|[oneOf]¦null|false|none|none|
+|recurrence_tumour_staging_system|any|false|none|none|
 
 oneOf
 
@@ -5865,6 +5911,29 @@ continued
       "percent_tumour_cells_measurement_method": "Genomics",
       "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
       "specimen_laterality": "Left",
+      "surgery": {
+        "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+        "surgery_type": "Ablation",
+        "surgery_site": "string",
+        "surgery_location": "Local recurrence",
+        "tumour_focality": "Cannot be assessed",
+        "residual_tumour_classification": "Not applicable",
+        "margin_types_involved": [
+          "Circumferential resection margin"
+        ],
+        "margin_types_not_involved": [
+          "Circumferential resection margin"
+        ],
+        "margin_types_not_assessed": [
+          "Circumferential resection margin"
+        ],
+        "lymphovascular_invasion": "Absent",
+        "perineural_invasion": "Absent",
+        "tumour_length": 32767,
+        "tumour_width": 32767,
+        "greatest_dimension_tumour": 32767,
+        "submitter_specimen_id": "string"
+      },
       "sample_registrations": [
         {
           "submitter_sample_id": "string",
@@ -5987,11 +6056,11 @@ continued
           "disease_status_at_followup": "Complete remission",
           "relapse_type": "Distant recurrence/metastasis",
           "date_of_relapse": "string",
-          "method_of_progression_status": "Imaging (procedure)",
-          "anatomic_site_progression_or_recurrence": "string",
-          "recurrence_tumour_staging_system": [
-            "AJCC 8th edition"
+          "method_of_progression_status": [
+            "Imaging (procedure)"
           ],
+          "anatomic_site_progression_or_recurrence": "string",
+          "recurrence_tumour_staging_system": "AJCC 8th edition",
           "recurrence_t_category": "T0",
           "recurrence_n_category": "N0",
           "recurrence_m_category": "M0",
@@ -6067,11 +6136,11 @@ continued
       "disease_status_at_followup": "Complete remission",
       "relapse_type": "Distant recurrence/metastasis",
       "date_of_relapse": "string",
-      "method_of_progression_status": "Imaging (procedure)",
-      "anatomic_site_progression_or_recurrence": "string",
-      "recurrence_tumour_staging_system": [
-        "AJCC 8th edition"
+      "method_of_progression_status": [
+        "Imaging (procedure)"
       ],
+      "anatomic_site_progression_or_recurrence": "string",
+      "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
       "recurrence_n_category": "N0",
       "recurrence_m_category": "M0",
@@ -6576,6 +6645,29 @@ xor
   "percent_tumour_cells_measurement_method": "Genomics",
   "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
   "specimen_laterality": "Left",
+  "surgery": {
+    "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+    "surgery_type": "Ablation",
+    "surgery_site": "string",
+    "surgery_location": "Local recurrence",
+    "tumour_focality": "Cannot be assessed",
+    "residual_tumour_classification": "Not applicable",
+    "margin_types_involved": [
+      "Circumferential resection margin"
+    ],
+    "margin_types_not_involved": [
+      "Circumferential resection margin"
+    ],
+    "margin_types_not_assessed": [
+      "Circumferential resection margin"
+    ],
+    "lymphovascular_invasion": "Absent",
+    "perineural_invasion": "Absent",
+    "tumour_length": 32767,
+    "tumour_width": 32767,
+    "greatest_dimension_tumour": 32767,
+    "submitter_specimen_id": "string"
+  },
   "sample_registrations": [
     {
       "submitter_sample_id": "string",
@@ -6953,6 +7045,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|surgery|[NestedSurgery](#schemanestedsurgery)|false|read-only|none|
 |sample_registrations|[[NestedSampleRegistration](#schemanestedsampleregistration)]|false|read-only|none|
 |biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
 
@@ -7315,11 +7408,11 @@ continued
       "disease_status_at_followup": "Complete remission",
       "relapse_type": "Distant recurrence/metastasis",
       "date_of_relapse": "string",
-      "method_of_progression_status": "Imaging (procedure)",
-      "anatomic_site_progression_or_recurrence": "string",
-      "recurrence_tumour_staging_system": [
-        "AJCC 8th edition"
+      "method_of_progression_status": [
+        "Imaging (procedure)"
       ],
+      "anatomic_site_progression_or_recurrence": "string",
+      "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
       "recurrence_n_category": "N0",
       "recurrence_m_category": "M0",
@@ -7806,6 +7899,29 @@ null
               "percent_tumour_cells_measurement_method": "Genomics",
               "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
               "specimen_laterality": "Left",
+              "surgery": {
+                "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+                "surgery_type": "Ablation",
+                "surgery_site": "string",
+                "surgery_location": "Local recurrence",
+                "tumour_focality": "Cannot be assessed",
+                "residual_tumour_classification": "Not applicable",
+                "margin_types_involved": [
+                  "Circumferential resection margin"
+                ],
+                "margin_types_not_involved": [
+                  "Circumferential resection margin"
+                ],
+                "margin_types_not_assessed": [
+                  "Circumferential resection margin"
+                ],
+                "lymphovascular_invasion": "Absent",
+                "perineural_invasion": "Absent",
+                "tumour_length": 32767,
+                "tumour_width": 32767,
+                "greatest_dimension_tumour": 32767,
+                "submitter_specimen_id": "string"
+              },
               "sample_registrations": [
                 {
                   "submitter_sample_id": "string",
@@ -7928,11 +8044,11 @@ null
                   "disease_status_at_followup": "Complete remission",
                   "relapse_type": "Distant recurrence/metastasis",
                   "date_of_relapse": "string",
-                  "method_of_progression_status": "Imaging (procedure)",
-                  "anatomic_site_progression_or_recurrence": "string",
-                  "recurrence_tumour_staging_system": [
-                    "AJCC 8th edition"
+                  "method_of_progression_status": [
+                    "Imaging (procedure)"
                   ],
+                  "anatomic_site_progression_or_recurrence": "string",
+                  "recurrence_tumour_staging_system": "AJCC 8th edition",
                   "recurrence_t_category": "T0",
                   "recurrence_n_category": "N0",
                   "recurrence_m_category": "M0",
@@ -7991,11 +8107,11 @@ null
               "disease_status_at_followup": "Complete remission",
               "relapse_type": "Distant recurrence/metastasis",
               "date_of_relapse": "string",
-              "method_of_progression_status": "Imaging (procedure)",
-              "anatomic_site_progression_or_recurrence": "string",
-              "recurrence_tumour_staging_system": [
-                "AJCC 8th edition"
+              "method_of_progression_status": [
+                "Imaging (procedure)"
               ],
+              "anatomic_site_progression_or_recurrence": "string",
+              "recurrence_tumour_staging_system": "AJCC 8th edition",
               "recurrence_t_category": "T0",
               "recurrence_n_category": "N0",
               "recurrence_m_category": "M0",
@@ -8072,11 +8188,11 @@ null
           "disease_status_at_followup": "Complete remission",
           "relapse_type": "Distant recurrence/metastasis",
           "date_of_relapse": "string",
-          "method_of_progression_status": "Imaging (procedure)",
-          "anatomic_site_progression_or_recurrence": "string",
-          "recurrence_tumour_staging_system": [
-            "AJCC 8th edition"
+          "method_of_progression_status": [
+            "Imaging (procedure)"
           ],
+          "anatomic_site_progression_or_recurrence": "string",
+          "recurrence_tumour_staging_system": "AJCC 8th edition",
           "recurrence_t_category": "T0",
           "recurrence_n_category": "N0",
           "recurrence_m_category": "M0",
@@ -8173,11 +8289,11 @@ null
       "disease_status_at_followup": "Complete remission",
       "relapse_type": "Distant recurrence/metastasis",
       "date_of_relapse": "string",
-      "method_of_progression_status": "Imaging (procedure)",
-      "anatomic_site_progression_or_recurrence": "string",
-      "recurrence_tumour_staging_system": [
-        "AJCC 8th edition"
+      "method_of_progression_status": [
+        "Imaging (procedure)"
       ],
+      "anatomic_site_progression_or_recurrence": "string",
+      "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
       "recurrence_n_category": "N0",
       "recurrence_m_category": "M0",
