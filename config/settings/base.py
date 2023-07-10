@@ -1,3 +1,10 @@
+############################################################
+#                   BASE SETTINGS                          #
+# Contain essential and default Django settings. Main      #
+# dependencies, strictly necessary to make the project run #
+# Common to all environments.                              #
+############################################################
+
 """
 Django settings for config project.
 
