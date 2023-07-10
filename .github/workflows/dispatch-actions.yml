@@ -1,0 +1,27 @@
+name: Dispatch
+on:
+    push:
+        branches: [test-dispatch]
+jobs:
+  CanDIG-dispatch:
+    runs-on: ubuntu-latest
+    env:
+      PARENT_REPOSITORY: 'CanDIG/CanDIGv2'
+      CHECKOUT_BRANCH: 'develop'
+      PR_AGAINST_BRANCH: 'develop'
+      OWNER: 'CanDIG'
+    steps:
+            - name: Check out repository code
+              uses: actions/checkout@v3
+            - name: Create PR in CanDIGv2
+              id: make_pr
+              uses: jman005/github-action-pr-expanded@v0
+              with:
+                  github_token: ${{ secrets.REPOSITORY_DISPATCH }}
+                  parent_repository: ${{ env.PARENT_REPOSITORY }}
+                  checkout_branch: ${{ env.CHECKOUT_BRANCH}}
+                  pr_against_branch: ${{ env.PR_AGAINST_BRANCH }}
+                  pr_description: "PR triggered by update to stable branch on ${{ github.repository }}. Commit hash: ${{ github.sha }} Commit message: ${{ github.event.head_commit.message }}"
+                  owner: ${{ env.OWNER }}
+                  submodule_path: lib/katsu/katsu_service
+                  label: Submodule update
