@@ -7,6 +7,7 @@
 # - local postgres database                                 #
 # - user1 set to authorize SYNTHETIC-1                      #
 # - user2 set to authorize SYNTHETIC-1, SYNTHETIC-2         #
+# - testing token is user1 and user2                        #
 #############################################################
 
 from .base import *
@@ -37,6 +38,7 @@ LOCAL_AUTHORIZED_DATASET = [
 ]
 
 # Debug toolbar settings
+# ----------------------
 if DEBUG:
     import socket
 
