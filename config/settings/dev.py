@@ -1,3 +1,14 @@
+#############################################################
+#                  DEV SETTINGS                             #
+# Customize configuration specific to the dev environment   #
+# Inherit from setting base.py and use:                     #
+# - candig.docker.internal                                  #
+# - debug toolbar enable                                    #
+# - docker postgres database                                #
+# - user and datasets permission from OPA                   #
+# - testing token obtain from keycloak                      #
+#############################################################
+
 import os
 from os.path import exists
 
@@ -17,6 +28,7 @@ INSTALLED_APPS.append("debug_toolbar")
 MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
 # CANDIG SETTINGS
+# ---------------
 KATSU_AUTHORIZATION = os.getenv("KATSU_AUTHORIZATION")
 CANDIG_OPA_URL = os.getenv("OPA_URL")
 CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("OPA_SITE_ADMIN_KEY")
@@ -37,7 +49,6 @@ def get_secret(path):
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
