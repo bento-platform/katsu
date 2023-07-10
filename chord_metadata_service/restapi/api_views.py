@@ -4,6 +4,7 @@ import logging
 from collections import Counter
 
 from django.conf import settings
+from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -29,6 +30,10 @@ from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
+from rest_framework import status
+
+from bento_lib.responses import errors
+from chord_metadata_service.chord import data_types as dt
 
 logger = logging.getLogger("restapi_api_views")
 logger.setLevel(logging.INFO)
@@ -426,3 +431,40 @@ def public_dataset(_request):
     return Response({
         "datasets": datasets
     })
+
+DT_QUERYSETS = {
+    dt.DATA_TYPE_EXPERIMENT: experiments_models.Experiment.objects.all(),
+    dt.DATA_TYPE_EXPERIMENT_RESULT: experiments_models.ExperimentResult.objects.all(),
+    dt.DATA_TYPE_MCODEPACKET: mcode_models.MCodePacket.objects.all(),
+    dt.DATA_TYPE_PHENOPACKET: pheno_models.Phenopacket.objects.all(),
+    # dt.DATA_TYPE_READSET: None,
+}
+
+@api_view(["GET", "DELETE"])
+@permission_classes([AllowAny])
+def dataset_data_type(request: HttpRequest, data_type: str, dataset_id: str):
+    # GET/DELETE all items in the dataset that match the data_type
+    if data_type not in dt.DATA_TYPES:
+        return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
+    
+    queryset = DT_QUERYSETS[data_type]
+    queryset.filter(dataset_id=dataset_id)
+
+    if request.method == "GET":
+        print(f"TODO: GET return list of {data_type} for dataset {dataset_id}")
+    if request.method == "DELETE":
+        print(f"TODO: DELETE list of {data_type} for dataset {dataset_id}")
+
+    return Response(queryset)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def datasets_data_types(request: HttpRequest, data_type: str):
+    if data_type not in dt.DATA_TYPES:
+        return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
+    
+    qs = DT_QUERYSETS[data_type]
+    
+
+    return Response(errors.not_implemented_error)

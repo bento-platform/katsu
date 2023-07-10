@@ -103,7 +103,7 @@ async def data_type_detail(request: HttpRequest, data_type: str):
     # TODO: Permissions: only return counts when we are authenticated/have access to counts or full data.
 
     if data_type not in dt.DATA_TYPES:
-        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
+        return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
 
     project = request.GET.get("project", "").strip() or None
     dataset = request.GET.get("dataset", "").strip() or None
@@ -118,7 +118,7 @@ async def data_type_detail(request: HttpRequest, data_type: str):
 @permission_classes([AllowAny])
 async def data_type_schema(_request: HttpRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
-        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
+        return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
 
     return Response(dt.DATA_TYPES[data_type]["schema"])
 
@@ -127,6 +127,6 @@ async def data_type_schema(_request: HttpRequest, data_type: str):
 @permission_classes([AllowAny])
 async def data_type_metadata_schema(_request: HttpRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
-        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
+        return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
 
     return Response(dt.DATA_TYPES[data_type]["metadata_schema"])

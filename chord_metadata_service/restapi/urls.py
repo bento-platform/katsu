@@ -13,12 +13,14 @@ from chord_metadata_service.phenopackets.autocomplete_views import (
 )
 from chord_metadata_service.resources import api_views as resources_views
 from .api_views import (
+     datasets_data_types,
      overview,
      mcode_overview,
      public_search_fields,
      public_overview,
      public_dataset,
-     search_overview
+     search_overview,
+     dataset_data_type
 )
 from chord_metadata_service.restapi.routers import BatchListRouter
 
@@ -108,4 +110,7 @@ urlpatterns = [
 
     # uncensored endpoint for beacon search using fields from config.json
     path('beacon_search', individual_views.BeaconListIndividuals.as_view(), name='beacon-search'),
+
+    path('data-types/<str:data_type>/dataset/<str:dataset_id>', dataset_data_type, name="dataset-data-type"),
+    path('datasets/<str:data_type>', datasets_data_types, name="datasets-data-types")
 ]
