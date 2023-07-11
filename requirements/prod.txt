@@ -1,0 +1,4 @@
+-r base.txt # inherit from base.txt
+uwsgi==2.0.21 #  web server
+whitenoise==6.4.0 # serve static files
+# sentry-sdk # Error reporting/logging tool
