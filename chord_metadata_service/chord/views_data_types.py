@@ -117,6 +117,7 @@ async def data_type_detail(request: HttpRequest, data_type: str):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 async def data_type_schema(_request: HttpRequest, data_type: str):
+    # TODO: exclude extra_properties schema
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
 

@@ -65,6 +65,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
     filter_backends = [DjangoFilterBackend]
     filterset_class = AuthorizedDatasetFilter
+    lookup_url_kwarg = "dataset_id"
 
     serializer_class = DatasetSerializer
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)

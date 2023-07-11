@@ -37,7 +37,7 @@ from chord_metadata_service.metadata.elastic import es
 from chord_metadata_service.patients.models import Individual
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
-from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
+from chord_metadata_service.phenopackets.models import Phenopacket, Biosample, Variant
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
@@ -54,19 +54,28 @@ OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 def experiment_dataset_summary(dataset):
     experiments = Experiment.objects.filter(dataset=dataset)
 
-    return Response({
+    return {
         "count": experiments.count(),
         "data_type_specific": {},  # TODO
-    })
+    }
 
 
 def mcodepacket_dataset_summary(dataset):
     mcodepackets = MCodePacket.objects.filter(dataset=dataset)  # TODO
 
-    return Response({
+    return {
         "count": mcodepackets.count(),
         "data_type_specific": {},  # TODO
-    })
+    }
+
+
+def variant_dataset_summary(dataset):
+    variants = Variant.objects.filter(dataset=dataset)
+
+    return {
+        "count": variants.count(),
+        "data_type_specific": {},  # TODO
+    }
 
 
 def phenopacket_dataset_summary(dataset):
@@ -77,7 +86,7 @@ def phenopacket_dataset_summary(dataset):
     individuals_sex = queryset_stats_for_field(phenopacket_qs, "subject__sex")
     individuals_k_sex = queryset_stats_for_field(phenopacket_qs, "subject__karyotypic_sex")
 
-    return Response({
+    return {
         "count": phenopacket_qs.count(),
         "data_type_specific": {
             "biosamples": {
@@ -95,14 +104,7 @@ def phenopacket_dataset_summary(dataset):
             },
             "phenotypic_features": queryset_stats_for_field(phenopacket_qs, "phenotypic_features__pftype__label"),
         }
-    })
-
-
-SUMMARY_HANDLERS: Dict[str, Callable[[Any], Response]] = {
-    DATA_TYPE_EXPERIMENT: experiment_dataset_summary,
-    DATA_TYPE_MCODEPACKET: mcodepacket_dataset_summary,
-    DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary,
-}
+    }
 
 
 # TODO: CHORD-standardized logging
@@ -253,6 +255,11 @@ QUERY_RESULT_SERIALIZERS = {
     DATA_TYPE_PHENOPACKET: PhenopacketSerializer,
 }
 
+QUERYSET_FN: Dict[str, Callable] = {
+    DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
+    DATA_TYPE_MCODEPACKET: lambda dataset_id: MCodePacket.objects.filter(dataset_id=dataset_id),
+    DATA_TYPE_PHENOPACKET: lambda dataset_id: Phenopacket.objects.filter(dataset_id=dataset_id),
+}
 
 def search(request, internal_data=False):
     """
@@ -545,7 +552,7 @@ def get_chord_search_parameters(request, data_type=None):
     }, None
 
 
-def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
+def chord_dataset_search(search_params, dataset_id, start, internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
     """
     Performs a search based on a psycopg2 object and paramaters and restricted
     to a given table.
@@ -555,8 +562,8 @@ def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[
     query_function = QUERY_RESULTS_FN[data_type]
 
     queryset = query_function(
-        query=sql.SQL("{} AND table_id = {}").format(search_params["compiled_query"], sql.Placeholder()),
-        params=search_params["params"] + (table_id,),
+        query=sql.SQL("{} AND dataset_id = {}").format(search_params["compiled_query"], sql.Placeholder()),
+        params=search_params["params"] + (dataset_id,),
         options=search_params
     )
     if not internal:
@@ -586,34 +593,32 @@ def chord_dataset_representation(dataset: Dataset):
 
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def datasets_list(request: HttpRequest):
-    datasets = Dataset.objects.all().order_by("title")
-    return Response([chord_dataset_representation(ds) for ds in datasets])
-
-
-@api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def dataset_detail(request: HttpRequest, dataset_id: str):
-    # search_params, err = get_chord_search_parameters(request)
-    return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
-
-
-@api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
 def dataset_summary(request: HttpRequest, dataset_id: str):
-    # search_params, err = get_chord_search_parameters(request)
-    return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+    dataset = Dataset.objects.get(identifier=dataset_id)
+    return Response({
+        "phenopackets": phenopacket_dataset_summary(dataset=dataset),
+        "experiments": experiment_dataset_summary(dataset=dataset),
+        "mcodepackets": mcodepacket_dataset_summary(dataset=dataset)
+    })
 
 
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
 def dataset_search(request: HttpRequest, dataset_id: str):
-    # search_params, err = get_chord_search_parameters(request)
-    return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+    start = datetime.now()
+    search_params = get_chord_search_parameters(request=request)
+
+    data, err = chord_dataset_search(search_params, dataset_id, start)
+    
+    if err:
+        return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
+    return Response(data=data)
 
 
-@api_view(["GET"])
+@api_view(["GET", "DELETE"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def private_dataset_search(request: HttpRequest, dataset_id: str):
-    # search_params, err = get_chord_search_parameters(request)
-    return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: str):
+    if data_type not in QUERYSET_FN:
+        return Response(errors.bad_request_error, status=status.HTTP_400_BAD_REQUEST)
+    data = QUERYSET_FN[data_type](dataset_id)
+    return Response(data=data)

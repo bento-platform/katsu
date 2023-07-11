@@ -28,7 +28,7 @@ class DatasetSerializer(GenericSerializer):
         "description",
         "contact_info",
         "linked_field_sets",
-        "table_ownership",
+        "project",
     )
 
     # noinspection PyMethodMayBeStatic
