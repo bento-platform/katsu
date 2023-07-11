@@ -15,6 +15,9 @@ from os.path import exists
 from .base import *
 
 DEBUG = True
+INSTALLED_APPS.append("debug_toolbar")
+MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
@@ -22,10 +25,6 @@ ALLOWED_HOSTS = [
     "candig.docker.internal",
     os.environ.get("HOST_CONTAINER_NAME"),
 ]
-
-INSTALLED_APPS.append("debug_toolbar")
-
-MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
 # CANDIG SETTINGS
 # ---------------
@@ -47,8 +46,10 @@ def get_secret(path):
         raise
 
 
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+# ==============================================================================
+# DATABASES SETTINGS
+# ==============================================================================
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
