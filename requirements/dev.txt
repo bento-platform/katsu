@@ -1,0 +1,11 @@
+-r base.txt # inherit from base.txt
+uwsgi==2.0.21 #  web server
+whitenoise==6.4.0 # serve static files
+coverage==7.2.2 # measures code coverage
+flake8==6.0.0 # style guide enforcement
+tox==4.4.8 # test command line tool 
+django-debug-toolbar==4.0.0 # display debug information
+# isort # Auto-formatter for imports
+# black # auto-formatter
+# factory-boy # setup test cases
+# model_bakery # setup test cases
