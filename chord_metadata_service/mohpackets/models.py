@@ -389,14 +389,14 @@ class FollowUp(models.Model):
     disease_status_at_followup = models.CharField(max_length=255, null=True, blank=True)
     relapse_type = models.CharField(max_length=128, null=True, blank=True)
     date_of_relapse = models.CharField(max_length=32, null=True, blank=True)
-    method_of_progression_status = models.CharField(
-        max_length=255, null=True, blank=True
+    method_of_progression_status = ArrayField(
+        models.CharField(max_length=255, null=True, blank=True), null=True, blank=True
     )
     anatomic_site_progression_or_recurrence = models.CharField(
         max_length=255, null=True, blank=True
     )
-    recurrence_tumour_staging_system = ArrayField(
-        models.CharField(max_length=255, null=True, blank=True), null=True, blank=True
+    recurrence_tumour_staging_system = models.CharField(
+        max_length=255, null=True, blank=True
     )
     recurrence_t_category = models.CharField(max_length=32, null=True, blank=True)
     recurrence_n_category = models.CharField(max_length=32, null=True, blank=True)
