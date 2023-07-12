@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [
 KATSU_AUTHORIZATION = os.getenv("KATSU_AUTHORIZATION")
 CANDIG_OPA_URL = os.getenv("OPA_URL")
 CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("OPA_SITE_ADMIN_KEY")
+CONN_MAX_AGE = int(os.getenv('CONN_MAX_AGE', 0))
 if exists("/run/secrets/opa-root-token"):
     with open("/run/secrets/opa-root-token", "r") as f:
         CANDIG_OPA_SECRET = f.read()
@@ -73,3 +74,41 @@ if DEBUG:
         "127.0.0.1",
         "10.0.2.2",
     ]
+
+# Logging
+# -------
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {
+            "format": "[%(asctime)s] [%(name)s] %(levelname)s: %(message)s",
+            "datefmt": "%d/%b/%Y %H:%M:%S",
+        },
+        "file": {
+            "format": "[%(asctime)s] [%(name)s] %(levelname)s: %(message)s",
+            "datefmt": "%d/%b/%Y %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "console",
+            "level": "DEBUG",  # Set the log level for the console handler
+        },
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "app.log"),
+            "formatter": "file",
+            "maxBytes": 1024 * 1024,
+            "backupCount": 5,
+            "level": "DEBUG",  # Set the log level for the file handler
+        },
+    },
+    "loggers": {
+        "": {
+            "level": "DEBUG",  # Set the root logger level
+            "handlers": ["console", "file"],
+        },
+    },
+}
