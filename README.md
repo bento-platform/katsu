@@ -99,7 +99,7 @@ Mock data are available [here](chord_metadata_service/mohpackets/data/README.md)
 Run all tests and linting checks for the whole project:
 
 ```bash
-tox -c tox-candig.ini
+tox
 ```
 
 Run all tests for mohpackets:
@@ -117,7 +117,7 @@ python manage.py test chord_metadata_service.mohpackets.tests.<test_name>
 Test and create `coverage` HTML report:
 
 ```bash
-tox -c tox-candig.ini
+tox
 coverage html
 ```
 
