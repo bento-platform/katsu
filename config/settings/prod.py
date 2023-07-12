@@ -1,6 +1,6 @@
 #####################################################################
 #                   PRODUCTION SETTINGS                             #
-# Inherit from setting dev.py. Contain only necessary settings to  #
+# Inherit from setting dev.py. Contain only necessary settings to   #
 # make the project run. Following:                                  #
 # https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/ #
 #####################################################################
