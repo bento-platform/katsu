@@ -620,5 +620,11 @@ def dataset_search(request: HttpRequest, dataset_id: str):
 def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: str):
     if data_type not in QUERYSET_FN:
         return Response(errors.bad_request_error, status=status.HTTP_400_BAD_REQUEST)
-    data = QUERYSET_FN[data_type](dataset_id)
+    qs = QUERYSET_FN[data_type](dataset_id)
+
+    if request.method == "DELETE":
+        qs.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    data = QUERY_RESULT_SERIALIZERS[data_type](qs, many=True).data
     return Response(data=data)

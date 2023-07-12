@@ -1,19 +1,34 @@
-import json
-from django.db.utils import IntegrityError
-
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.chord.models import Dataset
+from chord_metadata_service.phenopackets.models import Phenopacket
 
-from chord_metadata_service.chord.tests.helpers import ProjectTestCase
-from chord_metadata_service.chord.data_types import DATA_TYPES
+from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
+from chord_metadata_service.chord.data_types import DATA_TYPES, DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
+from chord_metadata_service.experiments.models import Experiment
+from chord_metadata_service.experiments.tests import constants as exp_consts
 
-class DatasetsTest(APITestCase, ProjectTestCase):
+class DatasetsTest(APITestCase, PhenoTestCase):
 
     def setUp(self) -> None:
-        return super().setUp()
-    
+        super().setUp()
+        self.experiment = Experiment.objects.create(
+            **exp_consts.valid_experiment(self.biosample_1, dataset=self.dataset),
+        )
+
+        self.entities_by_data_type = {
+            DATA_TYPE_PHENOPACKET: {
+                'class': Phenopacket,
+                'entity': self.phenopacket,
+            },
+            DATA_TYPE_EXPERIMENT: {
+                'class': Experiment,
+                'entity': self.experiment
+            }
+        }
+
+
     def test_list_datasets(self):
         r = self.client.get(reverse("chord-dataset-list"))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
@@ -30,7 +45,8 @@ class DatasetsTest(APITestCase, ProjectTestCase):
     def test_del_dataset(self):
         r = self.client.delete(reverse("chord-dataset-detail", kwargs={"dataset_id": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertRaises(Dataset.DoesNotExist)
+        with self.assertRaises(Dataset.DoesNotExist):
+            self.dataset.refresh_from_db()
 
     def test_dataset_summary(self):
         r = self.client.get(reverse("chord-dataset-summary", kwargs={"dataset_id": self.dataset.identifier}))
@@ -38,21 +54,25 @@ class DatasetsTest(APITestCase, ProjectTestCase):
 
     def test_get_dataset_datatype(self):
         for dt in DATA_TYPES:
-            r = self.client.get(
-                reverse("chord-dataset-data-type", kwargs={
-                    "dataset_id": self.dataset.identifier,
-                    "data_type": dt
-                })
-            )
-        pass
+            if DATA_TYPES[dt]['queryable']:
+                r = self.client.get(
+                    reverse("chord-dataset-data-type", kwargs={
+                        "dataset_id": self.dataset.identifier,
+                        "data_type": dt
+                    })
+                )
+                self.assertEqual(r.status_code, status.HTTP_200_OK)
+                self.assertEqual(self.entities_by_data_type[dt]['entity'].id, r.data[0]['id'])
 
     def test_del_dataset_datatype(self):
         for dt in DATA_TYPES:
-            r = self.client.delete(
-                reverse("chord-dataset-data-type", kwargs={
-                    "dataset_id": self.dataset.identifier,
-                    "data_type": dt
-                })
-            )
-            print(r.status_code)
-        pass
+            if DATA_TYPES[dt]['queryable']:
+                r = self.client.delete(
+                    reverse("chord-dataset-data-type", kwargs={
+                        "dataset_id": self.dataset.identifier,
+                        "data_type": dt
+                    })
+                )
+                self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
+                with self.assertRaises(self.entities_by_data_type[dt]['class'].DoesNotExist):
+                    self.entities_by_data_type[dt]['entity'].refresh_from_db()
