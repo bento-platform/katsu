@@ -27,6 +27,7 @@ from chord_metadata_service.mohpackets.serializers import (
     SurgerySerializer,
     TreatmentSerializer,
 )
+from chord_metadata_service.mohpackets.version import __version__
 
 """
     This module contains the API endpoints for ingesting bulk data into the database.
@@ -459,4 +460,4 @@ def ingest_exposures(request):
 @api_view(["GET"])
 @permission_classes([CanDIGAdminOrReadOnly])
 def version_check(_request):
-    return JsonResponse({"version": "2.1.0"}, status=status.HTTP_200_OK)
+    return JsonResponse({"version": __version__}, status=status.HTTP_200_OK)
