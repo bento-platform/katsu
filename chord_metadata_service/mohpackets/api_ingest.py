@@ -27,7 +27,7 @@ from chord_metadata_service.mohpackets.serializers import (
     SurgerySerializer,
     TreatmentSerializer,
 )
-from chord_metadata_service.mohpackets.version import __version__
+from chord_metadata_service.mohpackets.utils import __version__
 
 """
     This module contains the API endpoints for ingesting bulk data into the database.
