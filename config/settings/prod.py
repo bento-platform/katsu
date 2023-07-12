@@ -12,6 +12,11 @@ DEBUG = False
 INSTALLED_APPS.remove("debug_toolbar")
 MIDDLEWARE.remove("debug_toolbar.middleware.DebugToolbarMiddleware")
 
+# Override the log level for handlers and loggers
+LOGGING["handlers"]["console"]["level"] = "ERROR"
+LOGGING["handlers"]["file"]["level"] = "ERROR"
+LOGGING["loggers"][""]["level"] = "ERROR"
+
 # ==============================================================================
 # SECURITY SETTINGS
 # ==============================================================================
