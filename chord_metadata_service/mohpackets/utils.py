@@ -1,49 +1,82 @@
-import logging
+import os
+import subprocess
 
-logger = logging.getLogger(__name__)
+#####################################################
+#                                                   #
+#   CURRENT KATSU VERSION, MAKE CHANGE IF NEEDED    #
+#                                                   #
+#####################################################
+
+# Format: major.minor.patch.status
+VERSION = (2, 1, 0, "dev")
 
 
-# def get_authorized_datasets(request):
-#     """
-#     Returns a list of datasets that the user is authorized to see.
+def get_version():
+    """
+    Returns a version number in a standard format
 
-#     If the Django settings module is set to a development or production environment,
-#     this function retrieves the authorized datasets from the OPA service using the
-#     authorization header in the request. If the OPA service is not available or if
-#     the authorization fails, this function raises a ValueError.
+    Versioning Stages:
+        - Dev: work in progress during active development.
+        - Alpha: early releases with new features for testing
+        - Beta: later releases, some bugs may still exist.
+        - RC: stable releases pending user testing and feedback.
+        - Stable: ready for production.
 
-#     If the Django settings module is set to a local environment, this function returns
-#     a default list of authorized datasets from the Django settings.
+    Examples:
+        >>> VERSION = (1, 0, 0, "dev")
+        >>> get_version()
+        '1.0.0.dev<git_hash>'
 
-#     Otherwise, this function raises a ValueError.
-#     """
-#     settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
+        >>> VERSION = (1, 0, 0, "alpha")
+        >>> get_version()
+        '1.0.0.a'
 
-#     # Check for production or development environment
-#     if "dev" in settings_module or "prod" in settings_module:
-#         auth_header = request.headers.get("Authorization")
-#         if not auth_header:
-#             raise ValueError("No authorization header found")
+        >>> VERSION = (1, 0, 0, "beta")
+        >>> get_version()
+        '1.0.0.b'
 
-#         opa_url = settings.CANDIG_OPA_URL
-#         opa_secret = settings.CANDIG_OPA_SECRET
-#         try:
-#             authorized_datasets = get_opa_datasets(
-#                 request, opa_url=opa_url, admin_secret=opa_secret
-#             )
-#         except Exception as e:
-#             logging.exception(f"An error occurred in get_authorized_datasets: {e}")
-#             raise ValueError("Error retrieving authorized datasets")
+        >>> VERSION = (1, 0, 0, "rc")
+        >>> get_version()
+        '1.0.0.rc'
 
-#     # Check for local environment
-#     elif "local" in settings_module:
-#         authorized_datasets = settings.FAKE_AUTHORIZED_DATASETS
-#         logger.info(
-#             f"Local settings detected, using default authorized datasets {authorized_datasets}"
-#         )
+        >>> VERSION = (1, 0, 0, "stable")
+        >>> get_version()
+        '1.0.0'
+    """
 
-#     # Invalid settings module
-#     else:
-#         raise ValueError("Invalid or missing authorization settings.")
+    major, minor, patch, status = VERSION[:4]
 
-#     return authorized_datasets
+    version_string = f"{major}.{minor}.{patch}"
+
+    if status == "dev":
+        git_hash = get_git_hash()
+        version_string += f".dev.{git_hash}" if git_hash is not None else ".dev"
+    elif status in ("alpha", "beta", "rc"):
+        version_string += f".{status[0]}"
+    elif status != "stable":
+        return "Invalid version"
+
+    return version_string
+
+
+def get_git_hash():
+    """Return the git hash of the latest changeset."""
+    try:
+        # Repository may not be found if __file__ is undefined, e.g. in a frozen module.
+        if "__file__" not in globals():
+            return None
+        repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        git_log = subprocess.run(
+            "git rev-parse --short HEAD",
+            capture_output=True,
+            shell=True,
+            cwd=repo_dir,
+            text=True,
+        )
+        git_hash = git_log.stdout.strip()
+        return git_hash
+    except Exception:
+        return None
+
+
+__version__ = get_version()
