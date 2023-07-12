@@ -5,5 +5,3 @@ djangorestframework==3.14.0 #  toolkit for building Web APIs.
 django-cors-headers==3.14.0 # handling the server headers required for CORS
 django-filter==23.1 # filter down a queryset
 drf-spectacular==0.26.1 # schema generation for DRF
-# dj-database-url:
-# python-decouple: 
