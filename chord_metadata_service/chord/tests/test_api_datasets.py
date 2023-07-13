@@ -13,10 +13,6 @@ class DatasetsTest(APITestCase, PhenoTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        self.experiment = Experiment.objects.create(
-            **exp_consts.valid_experiment(self.biosample_1, dataset=self.dataset),
-        )
-
         self.entities_by_data_type = {
             DATA_TYPE_PHENOPACKET: {
                 'class': Phenopacket,

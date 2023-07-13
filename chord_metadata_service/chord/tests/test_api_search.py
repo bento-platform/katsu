@@ -20,19 +20,20 @@ from chord_metadata_service.experiments.tests.constants import (
 )
 
 from chord_metadata_service.chord.tests.es_mocks import SEARCH_SUCCESS
+from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 from .constants import (
     VALID_PROJECT_1,
     valid_dataset_1,
     valid_phenotypic_feature,
     TEST_SEARCH_QUERY_1,
     TEST_SEARCH_QUERY_2,
-    # TEST_SEARCH_QUERY_3, TODO: cover commented search queries in new tests
-    # TEST_SEARCH_QUERY_4,
-    # TEST_SEARCH_QUERY_5,
-    # TEST_SEARCH_QUERY_6,
+    TEST_SEARCH_QUERY_3,
+    TEST_SEARCH_QUERY_4,
+    TEST_SEARCH_QUERY_5,
+    TEST_SEARCH_QUERY_6,
     TEST_SEARCH_QUERY_7,
     TEST_SEARCH_QUERY_8,
-    # TEST_SEARCH_QUERY_9,
+    TEST_SEARCH_QUERY_9,
     TEST_SEARCH_QUERY_10,
     TEST_FHIR_SEARCH_QUERY,
 )
@@ -178,6 +179,42 @@ class SearchTest(APITestCase):
 
         # TODO: Check schema?
 
+    def test_dataset_search_1(self):
+        # No body
+        for method in POST_GET:
+            r = self._search_call("dataset-search", args=[str(self.dataset.identifier)], method=method)
+            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_private_table_search_2(self):
+        # No query
+        for method in POST_GET:
+            r = self._search_call("dataset-search", args=[str(self.dataset.identifier)], data={}, method=method)
+            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_private_table_search_3(self):
+        # Bad syntax for query
+        d = {"query": ["hello", "world"]}
+        for method in POST_GET:
+            r = self._search_call("dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    def test_private_table_search_4(self):
+        # Valid query with one result
+
+        d = {"query": TEST_SEARCH_QUERY_1}
+
+        for method in POST_GET:
+            r = self._search_call("dataset-search", args=[str(self.dataset.identifier), "experiment"], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            self.assertEqual(c, True)
+
+            r = self._search_call("dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            c = r.json()
+            self.assertEqual(len(c["results"]), 1)
+            self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
+    
     def test_private_search_10_experiment(self):
         # Valid search with result
 

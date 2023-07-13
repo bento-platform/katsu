@@ -602,11 +602,13 @@ def dataset_summary(request: HttpRequest, dataset_id: str):
     })
 
 
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def dataset_search(request: HttpRequest, dataset_id: str):
+def dataset_search(request: HttpRequest, dataset_id: str, data_type: str):
     start = datetime.now()
-    search_params = get_chord_search_parameters(request=request)
+    search_params, err = get_chord_search_parameters(request=request)
+    if err:
+        return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
 
     data, err = chord_dataset_search(search_params, dataset_id, start)
     

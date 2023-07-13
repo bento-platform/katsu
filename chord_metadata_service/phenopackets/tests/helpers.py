@@ -1,6 +1,8 @@
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
+from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.phenopackets import models as m
 from chord_metadata_service.phenopackets.tests import constants as c
+from chord_metadata_service.experiments.tests import constants as exp_consts
 
 class PhenoTestCase(ProjectTestCase):
 
@@ -33,4 +35,7 @@ class PhenoTestCase(ProjectTestCase):
             **c.valid_phenotypic_feature(biosample=self.biosample_1))
         self.phenotypic_feature_2 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(biosample=self.biosample_2, phenopacket=self.phenopacket))
+        self.experiment = Experiment.objects.create(
+            **exp_consts.valid_experiment(self.biosample_1, dataset=self.dataset),
+        )
         return super().setUp()
