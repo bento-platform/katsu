@@ -18,7 +18,7 @@ RUN mkdir /app
 WORKDIR /app
 ADD ./requirements-candig-base.txt /app
 ADD ./requirements-candig-dev.txt /app
-RUN pip install --no-cache-dir -r requirements-candig-dev.txt
+RUN pip install --no-cache-dir -r requirements/dev.txt
 
 COPY . /app/chord_metadata_service
 
