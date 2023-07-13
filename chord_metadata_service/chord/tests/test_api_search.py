@@ -182,20 +182,20 @@ class SearchTest(APITestCase):
     def test_dataset_search_1(self):
         # No body
         for method in POST_GET:
-            r = self._search_call("dataset-search", args=[str(self.dataset.identifier)], method=method)
+            r = self._search_call("public-dataset-search", args=[str(self.dataset.identifier)], method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_private_table_search_2(self):
         # No query
         for method in POST_GET:
-            r = self._search_call("dataset-search", args=[str(self.dataset.identifier)], data={}, method=method)
+            r = self._search_call("public-dataset-search", args=[str(self.dataset.identifier)], data={}, method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_private_table_search_3(self):
         # Bad syntax for query
         d = {"query": ["hello", "world"]}
         for method in POST_GET:
-            r = self._search_call("dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
+            r = self._search_call("public-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
     
     def test_private_table_search_4(self):
@@ -207,12 +207,12 @@ class SearchTest(APITestCase):
         }
 
         for method in POST_GET:
-            r = self._search_call("dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
+            r = self._search_call("public-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(c, True)
 
-            r = self._search_call("dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
+            r = self._search_call("private-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(len(c["results"]), 1)

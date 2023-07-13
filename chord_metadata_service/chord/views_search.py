@@ -601,21 +601,28 @@ def dataset_summary(request: HttpRequest, dataset_id: str):
         "mcodepackets": mcodepacket_dataset_summary(dataset=dataset)
     })
 
-
-@api_view(["GET", "POST"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def dataset_search(request: HttpRequest, dataset_id: str):
+def dataset_search(request: HttpRequest, dataset_id: str, internal=False):
     start = datetime.now()
     search_params, err = get_chord_search_parameters(request=request)
     if err:
         return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
 
-    data, err = chord_dataset_search(search_params, dataset_id, start)
+    data, err = chord_dataset_search(search_params, dataset_id, start, internal)
     
     if err:
         return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
-    return Response(data=data)
+    return Response(build_search_response(data, start) if internal else data)
 
+
+@api_view(["GET", "POST"])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+def public_dataset_search(request: HttpRequest, dataset_id: str):
+    return dataset_search(request=request, dataset_id=dataset_id)
+
+@api_view(["GET", "POST"])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+def private_dataset_search(request: HttpRequest, dataset_id: str):
+    return dataset_search(request=request, dataset_id=dataset_id, internal=True)
 
 @api_view(["GET", "DELETE"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
@@ -629,4 +636,4 @@ def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: str):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     data = QUERY_RESULT_SERIALIZERS[data_type](qs, many=True).data
-    return Response(data=data)
+    return Response(data)
