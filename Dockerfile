@@ -16,8 +16,8 @@ RUN apk add --no-cache bash build-base git postgresql-client postgresql-dev libf
 
 RUN mkdir /app
 WORKDIR /app
-ADD ./requirements-candig-base.txt /app
-ADD ./requirements-candig-dev.txt /app
+ADD ./requirements/base.txt /app
+ADD ./requirements/dev.txt /app
 RUN pip install --no-cache-dir -r requirements/dev.txt
 
 COPY . /app/chord_metadata_service
