@@ -201,10 +201,13 @@ class SearchTest(APITestCase):
     def test_private_table_search_4(self):
         # Valid query with one result
 
-        d = {"query": TEST_SEARCH_QUERY_1}
+        d = {
+            "data_type": DATA_TYPE_PHENOPACKET,
+            "query": TEST_SEARCH_QUERY_1,
+        }
 
         for method in POST_GET:
-            r = self._search_call("dataset-search", args=[str(self.dataset.identifier), "experiment"], data=d, method=method)
+            r = self._search_call("dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(c, True)

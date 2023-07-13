@@ -604,7 +604,7 @@ def dataset_summary(request: HttpRequest, dataset_id: str):
 
 @api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def dataset_search(request: HttpRequest, dataset_id: str, data_type: str):
+def dataset_search(request: HttpRequest, dataset_id: str):
     start = datetime.now()
     search_params, err = get_chord_search_parameters(request=request)
     if err:
