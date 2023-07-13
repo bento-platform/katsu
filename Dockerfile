@@ -15,10 +15,9 @@ RUN apk update
 RUN apk add --no-cache bash build-base git postgresql-client postgresql-dev libffi-dev
 
 RUN mkdir /app
-RUN mkdir /app/requirements
 WORKDIR /app
-ADD ./requirements/base.txt /app/requirements
-ADD ./requirements/dev.txt /app/requirements
+
+COPY ./requirements /app/requirements
 RUN pip install --no-cache-dir -r requirements/dev.txt
 
 COPY . /app/chord_metadata_service
