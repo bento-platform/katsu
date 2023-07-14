@@ -24,8 +24,13 @@ COPY . /app/chord_metadata_service
 
 WORKDIR /app/chord_metadata_service
 
-# Create a log directory and adjust permissions
+# Switch to the root user to create the log directory and set permissions
+USER root
+
 RUN mkdir /app/chord_metadata_service/logs && chown candig:candig /app/chord_metadata_service/logs
+
+# Switch back to the candig user
+USER candig
 
 RUN chmod +x /app/chord_metadata_service/entrypoint.sh
 CMD ["/app/chord_metadata_service/entrypoint.sh"]
