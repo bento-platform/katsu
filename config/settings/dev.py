@@ -77,38 +77,38 @@ if DEBUG:
 
 # Logging
 # -------
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "console": {
-            "format": "[%(asctime)s] [%(name)s] %(levelname)s: %(message)s",
-            "datefmt": "%d/%b/%Y %H:%M:%S",
-        },
-        "file": {
-            "format": "[%(asctime)s] [%(name)s] %(levelname)s: %(message)s",
-            "datefmt": "%d/%b/%Y %H:%M:%S",
-        },
-    },
-    # "handlers": {
-    #     "console": {
-    #         "class": "logging.StreamHandler",
-    #         "formatter": "console",
-    #         "level": "DEBUG",  # Set the log level for the console handler
-    #     },
-    #     "file": {
-    #         "class": "logging.handlers.RotatingFileHandler",
-    #         "filename": os.path.join(BASE_DIR, "logs", "app.log"),
-    #         "formatter": "file",
-    #         "maxBytes": 1024 * 1024,
-    #         "backupCount": 5,
-    #         "level": "DEBUG",  # Set the log level for the file handler
-    #     },
-    # },
-    "loggers": {
-        "": {
-            "level": "DEBUG",  # Set the root logger level
-            "handlers": ["console", "file"],
-        },
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "console": {
+#             "format": "[%(asctime)s] [%(name)s] %(levelname)s: %(message)s",
+#             "datefmt": "%d/%b/%Y %H:%M:%S",
+#         },
+#         "file": {
+#             "format": "[%(asctime)s] [%(name)s] %(levelname)s: %(message)s",
+#             "datefmt": "%d/%b/%Y %H:%M:%S",
+#         },
+#     },
+#     "handlers": {
+#         "console": {
+#             "class": "logging.StreamHandler",
+#             "formatter": "console",
+#             "level": "DEBUG",  # Set the log level for the console handler
+#         },
+#         "file": {
+#             "class": "logging.handlers.RotatingFileHandler",
+#             "filename": os.path.join(BASE_DIR, "logs", "app.log"),
+#             "formatter": "file",
+#             "maxBytes": 1024 * 1024,
+#             "backupCount": 5,
+#             "level": "DEBUG",  # Set the log level for the file handler
+#         },
+#     },
+#     "loggers": {
+#         "": {
+#             "level": "DEBUG",  # Set the root logger level
+#             "handlers": ["console", "file"],
+#         },
+#     },
+# }
