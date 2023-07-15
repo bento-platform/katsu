@@ -19,11 +19,7 @@ INSTALLED_APPS.append("debug_toolbar")
 MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
 ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "docker.localhost",
     "candig.docker.internal",
-    os.environ.get("HOST_CONTAINER_NAME"),
 ]
 
 # CANDIG SETTINGS
@@ -98,7 +94,7 @@ LOGGING = {
         },
         "file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "logs", "app.log"),
+            "filename": os.path.join(BASE_DIR, "logs", "logs.txt"),
             "formatter": "file",
             "maxBytes": 1024 * 1024,
             "backupCount": 5,
