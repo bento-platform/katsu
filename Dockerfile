@@ -21,10 +21,13 @@ COPY ./requirements /app/requirements
 
 # Conditionally install dependencies based on the environment
 RUN if [ "$DJANGO_SETTINGS_MODULE" = "config.settings.dev" ]; then \
+    echo "Installing dev.txt" && \
     pip install --no-cache-dir -r requirements/dev.txt; \
 else \
+    echo "Installing prod.txt" && \
     pip install --no-cache-dir -r requirements/prod.txt; \
 fi
+
 
 COPY . /app/chord_metadata_service
 
