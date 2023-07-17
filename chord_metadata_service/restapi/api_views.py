@@ -28,6 +28,7 @@ from chord_metadata_service.mcode import models as mcode_models
 from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
+from chord_metadata_service.restapi.models import SchemaType
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework import status
@@ -143,6 +144,17 @@ def overview(_request):
     }
 
     return Response(r)
+
+
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly])
+def extra_properties_schema_types(_request):
+    """
+    get:
+    Extra properties schema types
+    """
+    schema_types = dict(SchemaType.choices)
+    return Response(schema_types)
 
 
 @api_view(["GET", "POST"])
@@ -364,6 +376,9 @@ def public_overview(_request):
     if individuals_count < settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
         return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
 
+    # Get the rules config
+    rules_config = settings.CONFIG_PUBLIC["rules"]
+
     response = {
         "layout": settings.CONFIG_PUBLIC["overview"],
         "fields": {},
@@ -372,7 +387,8 @@ def public_overview(_request):
             "biosamples": biosamples_count,
             "experiments": experiments_count
         },
-        "max_query_parameters": settings.CONFIG_PUBLIC["rules"]["max_query_parameters"],
+        "max_query_parameters": rules_config["max_query_parameters"],
+        "count_threshold": rules_config["count_threshold"],
     }
 
     # Parse the public config to gather data for each field defined in the

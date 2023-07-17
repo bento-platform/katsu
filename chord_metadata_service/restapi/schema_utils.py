@@ -1,7 +1,10 @@
-from chord_metadata_service.logger import logger
 from bento_lib.search import queries as q
-from .description_utils import describe_schema
+from chord_metadata_service.logger import logger
+from copy import deepcopy
 from typing import List, Optional, Dict
+
+from .description_utils import describe_schema
+from .types import ExtensionSchemaDict
 
 __all__ = [
     "merge_schema_dictionaries",
@@ -12,6 +15,7 @@ __all__ = [
     "tag_ids_and_describe",
     "customize_schema",
     "schema_list",
+    "patch_project_schemas",
 ]
 
 
@@ -150,17 +154,17 @@ def schema_list(schema):
     }
 
 
-def patch_project_schemas(base_schema: dict, extension_schemas: Dict[str, object]) -> dict:
+def patch_project_schemas(base_schema: dict, extension_schemas: Dict[str, ExtensionSchemaDict]) -> dict:
     if not isinstance(base_schema, dict) or "type" not in base_schema:
         return base_schema
 
-    patched_schema = {**base_schema}
+    patched_schema = deepcopy(base_schema)
     if patched_schema["type"] == "object":
         # check if current object schema needs an extra_properties patch
 
         # Get the last term of the schema $id to match with SchemaType
         # e.g. 'katsu:phenopackets:phenopacket' -> 'phenopacket'
-        schema_id = base_schema["$id"].split(":")[-1] if "$id" in base_schema else None
+        schema_id = patched_schema["$id"].split(":")[-1] if "$id" in patched_schema else None
 
         if schema_id and schema_id in extension_schemas:
             ext_schema = extension_schemas[schema_id]

@@ -10,6 +10,7 @@ from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.schema_utils import patch_project_schemas
+from chord_metadata_service.restapi.types import ExtensionSchemaDict
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from .exceptions import IngestError
@@ -18,7 +19,7 @@ from .resources import ingest_resource
 from .schema import schema_validation
 from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, workflow_file_output_to_path
 
-from typing import Any, Optional, Union
+from typing import Any, Dict, Iterable, Optional, Union
 
 
 def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
@@ -309,14 +310,17 @@ def ingest_phenopacket_workflow(workflow_outputs, dataset_id) -> Union[list[pm.P
             json_data = json.load(jf)
 
     project_id = Project.objects.get(datasets=dataset_id)
-    project_schemas = ProjectJsonSchema.objects.filter(project_id=project_id).values(
+    project_schemas: Iterable[ExtensionSchemaDict] = ProjectJsonSchema.objects.filter(project_id=project_id).values(
         "json_schema",
         "required",
         "schema_type",
     )
 
     # Map with key:schema_type and value:json_schema
-    extension_schemas = {proj_schema["schema_type"].lower(): proj_schema for proj_schema in project_schemas}
+    extension_schemas: Dict[str, ExtensionSchemaDict] = {
+        proj_schema["schema_type"].lower(): proj_schema
+        for proj_schema in project_schemas
+    }
     json_schema = patch_project_schemas(PHENOPACKET_SCHEMA, extension_schemas)
 
     # First, validate all phenopackets
