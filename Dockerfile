@@ -20,7 +20,8 @@ WORKDIR /app
 COPY ./requirements /app/requirements
 
 # Conditionally install dependencies based on the environment
-RUN if [ "$DJANGO_SETTINGS_MODULE" = "config.settings.dev" ]; then \
+ARG katsu_env
+RUN if [ ${katsu_env} = "dev" ]; then \
     echo "Installing dev.txt" && \
     pip install --no-cache-dir -r requirements/dev.txt; \
 else \
