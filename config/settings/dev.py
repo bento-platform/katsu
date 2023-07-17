@@ -20,6 +20,7 @@ MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
 ALLOWED_HOSTS = [
     "candig.docker.internal",
+    os.environ.get("HOST_CONTAINER_NAME"),
 ]
 
 # CANDIG SETTINGS
