@@ -432,6 +432,7 @@ def public_dataset(_request):
         "datasets": datasets
     })
 
+
 DT_QUERYSETS = {
     dt.DATA_TYPE_EXPERIMENT: experiments_models.Experiment.objects.all(),
     dt.DATA_TYPE_EXPERIMENT_RESULT: experiments_models.ExperimentResult.objects.all(),
@@ -440,13 +441,14 @@ DT_QUERYSETS = {
     # dt.DATA_TYPE_READSET: None,
 }
 
+
 @api_view(["GET", "DELETE"])
 @permission_classes([AllowAny])
 def dataset_data_type(request: HttpRequest, data_type: str, dataset_id: str):
     # GET/DELETE all items in the dataset that match the data_type
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
-    
+
     queryset = DT_QUERYSETS[data_type]
     queryset.filter(dataset_id=dataset_id)
 
@@ -463,8 +465,7 @@ def dataset_data_type(request: HttpRequest, data_type: str, dataset_id: str):
 def datasets_data_types(request: HttpRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
-    
-    qs = DT_QUERYSETS[data_type]
-    
+
+    # qs = DT_QUERYSETS[data_type]
 
     return Response(errors.not_implemented_error)

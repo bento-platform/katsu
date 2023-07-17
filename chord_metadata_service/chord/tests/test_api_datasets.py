@@ -7,7 +7,7 @@ from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 from chord_metadata_service.chord.data_types import DATA_TYPES, DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments.models import Experiment
-from chord_metadata_service.experiments.tests import constants as exp_consts
+
 
 class DatasetsTest(APITestCase, PhenoTestCase):
 
@@ -24,7 +24,6 @@ class DatasetsTest(APITestCase, PhenoTestCase):
             }
         }
 
-
     def test_list_datasets(self):
         r = self.client.get(reverse("chord-dataset-list"))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
@@ -37,7 +36,7 @@ class DatasetsTest(APITestCase, PhenoTestCase):
         self.assertEqual(str(self.dataset.identifier), r.data["identifier"])
         self.assertEqual(self.dataset.title, r.data["title"])
         self.assertEqual(str(self.project.identifier), str(r.data["project"]))
-        
+
     def test_del_dataset(self):
         r = self.client.delete(reverse("chord-dataset-detail", kwargs={"dataset_id": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)

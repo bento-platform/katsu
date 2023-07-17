@@ -19,7 +19,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
 
 from chord_metadata_service.logger import logger
@@ -42,7 +42,6 @@ from chord_metadata_service.phenopackets.serializers import PhenopacketSerialize
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset
-from . import data_types as dt
 
 from collections import defaultdict
 
@@ -260,6 +259,7 @@ QUERYSET_FN: Dict[str, Callable] = {
     DATA_TYPE_MCODEPACKET: lambda dataset_id: MCodePacket.objects.filter(dataset_id=dataset_id),
     DATA_TYPE_PHENOPACKET: lambda dataset_id: Phenopacket.objects.filter(dataset_id=dataset_id),
 }
+
 
 def search(request, internal_data=False):
     """
@@ -552,7 +552,10 @@ def get_chord_search_parameters(request, data_type=None):
     }, None
 
 
-def chord_dataset_search(search_params, dataset_id, start, internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
+def chord_dataset_search(
+        search_params,
+        dataset_id, start,
+        internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
     """
     Performs a search based on a psycopg2 object and paramaters and restricted
     to a given table.
@@ -580,6 +583,7 @@ def chord_dataset_search(search_params, dataset_id, start, internal=False) -> Tu
 
     return serialized_data, None
 
+
 def chord_dataset_representation(dataset: Dataset):
     return {
         "id": dataset.identifier,
@@ -591,6 +595,7 @@ def chord_dataset_representation(dataset: Dataset):
         },
     }
 
+
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
 def dataset_summary(request: HttpRequest, dataset_id: str):
@@ -601,6 +606,7 @@ def dataset_summary(request: HttpRequest, dataset_id: str):
         "mcodepackets": mcodepacket_dataset_summary(dataset=dataset)
     })
 
+
 def dataset_search(request: HttpRequest, dataset_id: str, internal=False):
     start = datetime.now()
     search_params, err = get_chord_search_parameters(request=request)
@@ -608,7 +614,7 @@ def dataset_search(request: HttpRequest, dataset_id: str, internal=False):
         return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
 
     data, err = chord_dataset_search(search_params, dataset_id, start, internal)
-    
+
     if err:
         return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
     return Response(build_search_response(data, start) if internal else data)
@@ -619,10 +625,12 @@ def dataset_search(request: HttpRequest, dataset_id: str, internal=False):
 def public_dataset_search(request: HttpRequest, dataset_id: str):
     return dataset_search(request=request, dataset_id=dataset_id)
 
+
 @api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
 def private_dataset_search(request: HttpRequest, dataset_id: str):
     return dataset_search(request=request, dataset_id=dataset_id, internal=True)
+
 
 @api_view(["GET", "DELETE"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
@@ -634,6 +642,6 @@ def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: str):
     if request.method == "DELETE":
         qs.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     data = QUERY_RESULT_SERIALIZERS[data_type](qs, many=True).data
     return Response(data)

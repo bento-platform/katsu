@@ -20,7 +20,6 @@ from chord_metadata_service.experiments.tests.constants import (
 )
 
 from chord_metadata_service.chord.tests.es_mocks import SEARCH_SUCCESS
-from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 from .constants import (
     VALID_PROJECT_1,
     valid_dataset_1,
@@ -197,7 +196,7 @@ class SearchTest(APITestCase):
         for method in POST_GET:
             r = self._search_call("public-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-    
+
     def test_private_dataset_search_4(self):
         # Valid query with one result
 
@@ -217,7 +216,7 @@ class SearchTest(APITestCase):
             c = r.json()
             self.assertEqual(len(c["results"]), 1)
             self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
-    
+
     def test_private_search_5(self):
         d = {
             "query": True,
@@ -341,7 +340,7 @@ class SearchTest(APITestCase):
             self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
             self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["experiment_type"],
                              "DNA Methylation")
-    
+
     def test_private_dataset_search_12(self):
         # Valid query to search for subject id
 
@@ -375,7 +374,6 @@ class SearchTest(APITestCase):
                                              for b in phenopacket["biosamples"]
                                              ])
 
-
     def test_private_dataset_search_values_list(self):
         # Valid query to search for biosample id in list
         # Output as a list of values from a single field
@@ -393,7 +391,6 @@ class SearchTest(APITestCase):
             c = r.json()
             self.assertEqual(len(c["results"]), 2)  # 2 biosamples id for the matching phenopacket
             self.assertTrue(all([isinstance(item, str) for item in c["results"]]))
-
 
     def test_private_dataset_experiment_search_values_list(self):
         # Valid query to search for experiment

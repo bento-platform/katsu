@@ -27,9 +27,12 @@ urlpatterns = [
     path('private/search', views_search.chord_private_search, name="private-search"),
 
     path('datasets', DatasetViewSet.as_view({'get': 'list'}), name="chord-dataset-list"),
-    path('datasets/<str:dataset_id>', DatasetViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}), name="chord-dataset-detail"),
+    path('datasets/<str:dataset_id>', DatasetViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}),
+         name="chord-dataset-detail"),
     path('datasets/<str:dataset_id>/summary', views_search.dataset_summary, name="chord-dataset-summary"),
-    path('datasets/<str:dataset_id>/data-types/<str:data_type>', views_search.dataset_data_type, name="chord-dataset-data-type"),
+    path('datasets/<str:dataset_id>/data-types/<str:data_type>', views_search.dataset_data_type,
+         name="chord-dataset-data-type"),
     path('datasets/<str:dataset_id>/search', views_search.public_dataset_search, name="public-dataset-search"),
-    path('private/datasets/<str:dataset_id>/search', views_search.private_dataset_search, name="private-dataset-search"),
+    path('private/datasets/<str:dataset_id>/search', views_search.private_dataset_search,
+         name="private-dataset-search"),
 ]
