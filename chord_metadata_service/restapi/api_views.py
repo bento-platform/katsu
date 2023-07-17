@@ -4,7 +4,6 @@ import logging
 from collections import Counter
 
 from django.conf import settings
-from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -31,9 +30,7 @@ from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPA
 from chord_metadata_service.restapi.models import SchemaType
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
-from rest_framework import status
 
-from bento_lib.responses import errors
 from chord_metadata_service.chord import data_types as dt
 
 logger = logging.getLogger("restapi_api_views")
