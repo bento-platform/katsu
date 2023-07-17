@@ -57,7 +57,14 @@ class DatasetsTest(APITestCase, PhenoTestCase):
                     })
                 )
                 self.assertEqual(r.status_code, status.HTTP_200_OK)
-                self.assertEqual(self.entities_by_data_type[dt]['entity'].id, r.data[0]['id'])
+                c = r.json()
+                self.assertDictEqual(c, {
+                    "id": dt,
+                    "label": "Clinical Data",
+                    **DATA_TYPES[dt],
+                    "queryable": True,
+                    "count": 1,
+                })
 
     def test_del_dataset_datatype(self):
         for dt in DATA_TYPES:

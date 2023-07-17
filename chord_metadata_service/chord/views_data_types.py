@@ -9,13 +9,21 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from typing import Optional
+from typing import Callable, Dict, Optional
+from chord_metadata_service.chord.models import Project
+from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
+from chord_metadata_service.mcode.models import MCodePacket
 
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult
 
 from . import data_types as dt
 
+QUERYSET_FN: Dict[str, Callable] = {
+    dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
+    dt.DATA_TYPE_MCODEPACKET: lambda dataset_id: MCodePacket.objects.filter(dataset_id=dataset_id),
+    dt.DATA_TYPE_PHENOPACKET: lambda dataset_id: Phenopacket.objects.filter(dataset_id=dataset_id),
+}
 
 async def get_count_for_data_type(
     data_type: str,
@@ -131,3 +139,21 @@ async def data_type_metadata_schema(_request: HttpRequest, data_type: str):
         return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
 
     return Response(dt.DATA_TYPES[data_type]["metadata_schema"])
+
+
+@api_view(["GET", "DELETE"])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: str):
+    if data_type not in QUERYSET_FN:
+        return Response(errors.bad_request_error, status=status.HTTP_400_BAD_REQUEST)
+    qs = QUERYSET_FN[data_type](dataset_id)
+
+    if request.method == "DELETE":
+        await qs.adelete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    project = await Project.objects.aget(datasets=dataset_id)
+    response_object = await make_data_type_response_object(data_type, dt.DATA_TYPES[data_type], 
+                                                           project=str(project.identifier), dataset=dataset_id)
+
+    return Response(response_object)

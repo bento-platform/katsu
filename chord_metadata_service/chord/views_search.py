@@ -254,13 +254,6 @@ QUERY_RESULT_SERIALIZERS = {
     DATA_TYPE_PHENOPACKET: PhenopacketSerializer,
 }
 
-QUERYSET_FN: Dict[str, Callable] = {
-    DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
-    DATA_TYPE_MCODEPACKET: lambda dataset_id: MCodePacket.objects.filter(dataset_id=dataset_id),
-    DATA_TYPE_PHENOPACKET: lambda dataset_id: Phenopacket.objects.filter(dataset_id=dataset_id),
-}
-
-
 def search(request, internal_data=False):
     """
     Generic function that takes a request object containing the following parameters:
@@ -630,18 +623,3 @@ def public_dataset_search(request: HttpRequest, dataset_id: str):
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
 def private_dataset_search(request: HttpRequest, dataset_id: str):
     return dataset_search(request=request, dataset_id=dataset_id, internal=True)
-
-
-@api_view(["GET", "DELETE"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: str):
-    if data_type not in QUERYSET_FN:
-        return Response(errors.bad_request_error, status=status.HTTP_400_BAD_REQUEST)
-    qs = QUERYSET_FN[data_type](dataset_id)
-
-    if request.method == "DELETE":
-        qs.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    data = QUERY_RESULT_SERIALIZERS[data_type](qs, many=True).data
-    return Response(data)
