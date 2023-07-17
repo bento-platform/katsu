@@ -10,9 +10,7 @@ from .dev import *
 # remove dev settings
 DEBUG = False
 INSTALLED_APPS.remove("debug_toolbar")
-INSTALLED_APPS.remove("drf_spectacular")
 MIDDLEWARE.remove("debug_toolbar.middleware.DebugToolbarMiddleware")
-del REST_FRAMEWORK["DEFAULT_SCHEMA_CLASS"]
 
 # Override the log level for handlers and loggers
 LOGGING["handlers"]["console"]["level"] = "ERROR"
