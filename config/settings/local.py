@@ -21,9 +21,9 @@ INSTALLED_APPS.append("drf_spectacular")
 
 MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 REST_FRAMEWORK["DEFAULT_SCHEMA_CLASS"] = "drf_spectacular.openapi.AutoSchema"
+
 # DRF Spectacular settings
 # ------------------------
-
 SPECTACULAR_SETTINGS = {
     "TITLE": "MoH Service API",
     "DESCRIPTION": ("This is the RESTful API for the MoH Service."),
