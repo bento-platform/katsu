@@ -456,32 +456,3 @@ DT_QUERYSETS = {
     dt.DATA_TYPE_PHENOPACKET: pheno_models.Phenopacket.objects.all(),
     # dt.DATA_TYPE_READSET: None,
 }
-
-
-@api_view(["GET", "DELETE"])
-@permission_classes([AllowAny])
-def dataset_data_type(request: HttpRequest, data_type: str, dataset_id: str):
-    # GET/DELETE all items in the dataset that match the data_type
-    if data_type not in dt.DATA_TYPES:
-        return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
-
-    queryset = DT_QUERYSETS[data_type]
-    queryset.filter(dataset_id=dataset_id)
-
-    if request.method == "GET":
-        print(f"TODO: GET return list of {data_type} for dataset {dataset_id}")
-    if request.method == "DELETE":
-        print(f"TODO: DELETE list of {data_type} for dataset {dataset_id}")
-
-    return Response(queryset)
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def datasets_data_types(request: HttpRequest, data_type: str):
-    if data_type not in dt.DATA_TYPES:
-        return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
-
-    # qs = DT_QUERYSETS[data_type]
-
-    return Response(errors.not_implemented_error)
