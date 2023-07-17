@@ -12,11 +12,7 @@
 import os
 from os.path import exists
 
-from .base import *
-
-DEBUG = True
-INSTALLED_APPS.append("debug_toolbar")
-MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+from .local import *
 
 ALLOWED_HOSTS = [
     "candig.docker.internal",
@@ -60,17 +56,6 @@ DATABASES = {
         "PORT": os.environ.get("POSTGRES_PORT"),
     }
 }
-
-# Debug toolbar settings
-# ----------------------
-if DEBUG:
-    import socket
-
-    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + [
-        "127.0.0.1",
-        "10.0.2.2",
-    ]
 
 # Logging
 # -------
