@@ -11,6 +11,10 @@ from .dev import *
 DEBUG = False
 INSTALLED_APPS.remove("debug_toolbar")
 MIDDLEWARE.remove("debug_toolbar.middleware.DebugToolbarMiddleware")
+ALLOWED_HOSTS = [
+    "candig.docker.internal",
+    os.environ.get("HOST_CONTAINER_NAME"),
+]
 
 # Override the log level for handlers and loggers
 LOGGING["handlers"]["console"]["level"] = "ERROR"
