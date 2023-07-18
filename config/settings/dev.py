@@ -15,6 +15,8 @@ from os.path import exists
 from .local import *
 
 ALLOWED_HOSTS = [
+    "localhost", 
+    "127.0.0.1",
     "candig.docker.internal",
     os.environ.get("HOST_CONTAINER_NAME"),
 ]
