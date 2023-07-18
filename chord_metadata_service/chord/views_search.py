@@ -254,6 +254,7 @@ QUERY_RESULT_SERIALIZERS = {
     DATA_TYPE_PHENOPACKET: PhenopacketSerializer,
 }
 
+
 def search(request, internal_data=False):
     """
     Generic function that takes a request object containing the following parameters:
@@ -587,17 +588,6 @@ def chord_dataset_representation(dataset: Dataset):
             "updated": dataset.updated.isoformat(),
         },
     }
-
-
-@api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def dataset_summary(request: HttpRequest, dataset_id: str):
-    dataset = Dataset.objects.get(identifier=dataset_id)
-    return Response({
-        "phenopackets": phenopacket_dataset_summary(dataset=dataset),
-        "experiments": experiment_dataset_summary(dataset=dataset),
-        "mcodepackets": mcodepacket_dataset_summary(dataset=dataset)
-    })
 
 
 def dataset_search(request: HttpRequest, dataset_id: str, internal=False):

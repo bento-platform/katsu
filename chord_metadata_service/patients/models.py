@@ -21,7 +21,10 @@ class Individual(BaseExtraProperties, IndexableMixin):
             # Need to wait for phenopacket to exist
             return None
         model = apps.get_model("chord.Project")
-        project = model.objects.get(datasets=self.phenopackets.first().dataset_id)
+        try:
+            project = model.objects.get(datasets=self.phenopackets.first().dataset_id)
+        except model.DoesNotExist:
+            return None
         return project.identifier
 
     SEX = Sex.as_django_values()

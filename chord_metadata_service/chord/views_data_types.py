@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from typing import Callable, Dict, Optional
-from chord_metadata_service.chord.models import Project
+from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
 from chord_metadata_service.mcode.models import MCodePacket
 
@@ -24,6 +24,7 @@ QUERYSET_FN: Dict[str, Callable] = {
     dt.DATA_TYPE_MCODEPACKET: lambda dataset_id: MCodePacket.objects.filter(dataset_id=dataset_id),
     dt.DATA_TYPE_PHENOPACKET: lambda dataset_id: Phenopacket.objects.filter(dataset_id=dataset_id),
 }
+
 
 async def get_count_for_data_type(
     data_type: str,
@@ -151,9 +152,28 @@ async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: st
     if request.method == "DELETE":
         await qs.adelete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     project = await Project.objects.aget(datasets=dataset_id)
-    response_object = await make_data_type_response_object(data_type, dt.DATA_TYPES[data_type], 
+    response_object = await make_data_type_response_object(data_type, dt.DATA_TYPES[data_type],
                                                            project=str(project.identifier), dataset=dataset_id)
 
     return Response(response_object)
+
+
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+async def dataset_summary(request: HttpRequest, dataset_id: str):
+    dataset = await Dataset.objects.aget(identifier=dataset_id)
+    project = await Project.objects.aget(datasets=dataset)
+
+    dt_response = []
+    for dt_id, dt_d in dt.DATA_TYPES.items():
+        try:
+            dt_response.append(
+                await make_data_type_response_object(dt_id, dt_d, project.identifier, dataset.identifier)
+            )
+        except ValueError as e:
+            return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
+
+    dt_response.sort(key=lambda d: d["id"])
+    return Response(dt_response)
