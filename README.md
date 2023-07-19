@@ -57,10 +57,10 @@ py -3 -m venv .venv
 With your virtual environment activated, navigate to the project directory and install the project dependencies:
 
 ```bash
-pip install -r requirements-candig-dev.txt
+pip install -r requirements/dev.txt
 ```
 
-This will install all the packages listed in the requirements.txt file.
+This will install all the packages needed for development.
 
 ### Step 4: Set up PostgreSQL
 
