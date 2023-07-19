@@ -162,7 +162,7 @@ async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: st
 
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-async def dataset_summary(request: HttpRequest, dataset_id: str):
+async def dataset_datatype_summary(request: HttpRequest, dataset_id: str):
     dataset = await Dataset.objects.aget(identifier=dataset_id)
     project = await Project.objects.aget(datasets=dataset)
 

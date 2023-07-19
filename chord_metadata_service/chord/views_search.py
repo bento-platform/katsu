@@ -613,3 +613,13 @@ def public_dataset_search(request: HttpRequest, dataset_id: str):
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
 def private_dataset_search(request: HttpRequest, dataset_id: str):
     return dataset_search(request=request, dataset_id=dataset_id, internal=True)
+
+
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+def dataset_summary(request: HttpRequest, dataset_id: str):
+    dataset = Dataset.objects.get(identifier=dataset_id)
+    return Response({
+        DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary(dataset=dataset),
+        DATA_TYPE_EXPERIMENT: experiment_dataset_summary(dataset=dataset)
+    })
