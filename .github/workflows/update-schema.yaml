@@ -3,7 +3,7 @@ name: Docs
 on:
   pull_request:
     types: [review_requested, ready_for_review]
-
+    
 jobs:
   generate-moh-schema:
     name: Update MoH schema
@@ -51,10 +51,9 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-         
             const fs = require('fs');
             const { Octokit } = require('@octokit/rest');
-            const octokit = new Octokit({ request: {fetch: fetch, auth: "${{ secrets.GITHUB_TOKEN }}" });
+            const octokit = new Octokit({ request: { fetch: fetch, }, auth: "${{ secrets.GITHUB_TOKEN }}" });
 
             // get SHA from each file
             const repoPath = 'chord_metadata_service/mohpackets/docs/';
@@ -116,3 +115,7 @@ jobs:
               sha: openApiSha,
               branch: `${{ github.head_ref }}`
             });
+
+
+
+
