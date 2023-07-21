@@ -1,0 +1,7 @@
+git+https://github.com/CanDIG/candigv2-authx.git#egg=candigv2-authx # CANDIG authorization wrapper
+Django==4.2.3 # Python web framework
+psycopg==3.1.9 # PostgreSQL driver for Python
+djangorestframework==3.14.0 #  toolkit for building Web APIs.
+django-cors-headers==4.2.0 # handling the server headers required for CORS
+django-filter==23.2 # filter down a queryset
+drf-spectacular==0.26.3 # schema generation for DRF

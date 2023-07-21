@@ -1,9 +1,0 @@
-git+https://github.com/CanDIG/candigv2-authx.git#egg=candigv2-authx
-Django==4.2
-psycopg==3.1.8
-djangorestframework==3.14.0
-django-cors-headers==3.14.0
-django-filter==23.1
-drf-spectacular==0.26.1
-uwsgi==2.0.21
-whitenoise==6.4.0

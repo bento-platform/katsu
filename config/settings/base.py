@@ -1,3 +1,10 @@
+############################################################
+#                   BASE SETTINGS                          #
+# Contain essential and default Django settings. Main      #
+# dependencies, strictly necessary to make the project run #
+# Common to all environments.                              #
+############################################################
+
 """
 Django settings for config project.
 
@@ -14,11 +21,12 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
-# Base settings
-# -------------
+# ==============================================================================
+# CORE SETTINGS
+# ==============================================================================
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-30bq59j6h_8^_%c#t4&d@1spzp@z(p1z8)h$a@1s*0^=bv!i2b"
@@ -52,6 +60,10 @@ INSTALLED_APPS = [
     "chord_metadata_service.mohpackets",
 ]
 
+# ==============================================================================
+# MIDDLEWARE SETTINGS
+# ==============================================================================
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -67,6 +79,10 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = []
 
 ROOT_URLCONF = "config.urls"
+
+# ==============================================================================
+# TEMPLATES SETTINGS
+# ==============================================================================
 
 TEMPLATES = [
     {
@@ -122,8 +138,9 @@ CACHES = {
     }
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
+# ==============================================================================
+# AUTHENTICATION AND AUTHORIZATION SETTINGS
+# ==============================================================================
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -141,8 +158,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.1/topics/i18n/
+# ==============================================================================
+# I18N AND L10N SETTINGS
+# ==============================================================================
 
 LANGUAGE_CODE = "en-us"
 
@@ -153,8 +171,9 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
+# ==============================================================================
+# STATIC FILES SETTINGS
+# ==============================================================================
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -164,6 +183,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ==============================================================================
+# THIRD-PARTY SETTINGS
+# ==============================================================================
 
 # Whitenoise
 # ----------

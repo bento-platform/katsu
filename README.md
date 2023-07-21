@@ -2,6 +2,7 @@
 
 ![Test Status](https://github.com/CanDIG/katsu/workflows/Test/badge.svg)
 ![Lint Status](https://github.com/CanDIG/katsu/workflows/Lint/badge.svg)
+[![codecov](https://codecov.io/gh/CanDIG/katsu/branch/master/graph/badge.svg)](https://codecov.io/gh/CanDIG/katsu)
 
 ## Table of Contents
 
@@ -56,10 +57,10 @@ py -3 -m venv .venv
 With your virtual environment activated, navigate to the project directory and install the project dependencies:
 
 ```bash
-pip install -r requirements-candig-dev.txt
+pip install -r requirements/dev.txt
 ```
 
-This will install all the packages listed in the requirements.txt file.
+This will install all the packages needed for development.
 
 ### Step 4: Set up PostgreSQL
 
@@ -99,7 +100,7 @@ Mock data are available [here](chord_metadata_service/mohpackets/data/README.md)
 Run all tests and linting checks for the whole project:
 
 ```bash
-tox -c tox-candig.ini
+tox
 ```
 
 Run all tests for mohpackets:
@@ -117,7 +118,7 @@ python manage.py test chord_metadata_service.mohpackets.tests.<test_name>
 Test and create `coverage` HTML report:
 
 ```bash
-tox -c tox-candig.ini
+tox
 coverage html
 ```
 

@@ -16,14 +16,31 @@ RUN apk add --no-cache bash build-base git postgresql-client postgresql-dev libf
 
 RUN mkdir /app
 WORKDIR /app
-ADD ./requirements-candig-base.txt /app
-ADD ./requirements-candig-dev.txt /app
-RUN pip install --no-cache-dir -r requirements-candig-dev.txt
+
+COPY ./requirements /app/requirements
+
+# Conditionally install dependencies based on the environment
+ARG katsu_env
+RUN if [ ${katsu_env} = "dev" ]; then \
+    echo "Installing dev.txt" && \
+    pip install --no-cache-dir -r requirements/dev.txt; \
+else \
+    echo "Installing prod.txt" && \
+    pip install --no-cache-dir -r requirements/prod.txt; \
+fi
+
 
 COPY . /app/chord_metadata_service
 
 WORKDIR /app/chord_metadata_service
 
+# Create log and staticfiles directory and adjust permissions
+RUN mkdir -p /app/chord_metadata_service/logs /app/chord_metadata_service/staticfiles \
+    && chown -R candig:candig /app/chord_metadata_service
+
 RUN chmod +x /app/chord_metadata_service/entrypoint.sh
+
+USER candig
+
 CMD ["/app/chord_metadata_service/entrypoint.sh"]
 

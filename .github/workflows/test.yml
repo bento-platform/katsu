@@ -59,7 +59,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install requirements
-      run: pip install -r requirements-candig-dev.txt
+      run: pip install -r requirements/dev.txt
     - name: Run Tests with Coverage
       # Step specific environment variables
       env:
@@ -72,3 +72,8 @@ jobs:
         DB_PORT: ${{ env.POSTGRES_PORT }}
       run: |
         coverage run manage.py test chord_metadata_service/mohpackets
+    - uses: codecov/codecov-action@v3
+      with:
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        verbose: true

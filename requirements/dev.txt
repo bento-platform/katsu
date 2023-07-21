@@ -1,0 +1,3 @@
+-r local.txt # inherit from local.txt
+uwsgi==2.0.21 #  web server
+whitenoise==6.5.0 # serve static files

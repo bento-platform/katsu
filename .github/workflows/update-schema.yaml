@@ -20,12 +20,12 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: python -m pip install -r requirements-candig-dev.txt
+        run: python -m pip install -r requirements/dev.txt
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: 18
 
       - name: Create package.json file
         run: |
@@ -53,7 +53,7 @@ jobs:
           script: |
             const fs = require('fs');
             const { Octokit } = require('@octokit/rest');
-            const octokit = new Octokit({ auth: "${{ secrets.GITHUB_TOKEN }}" });
+            const octokit = new Octokit({ request: { fetch: fetch, }, auth: "${{ secrets.GITHUB_TOKEN }}" });
 
             // get SHA from each file
             const repoPath = 'chord_metadata_service/mohpackets/docs/';

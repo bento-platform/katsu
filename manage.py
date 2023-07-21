@@ -5,12 +5,7 @@ import sys
 
 
 def main():
-    # C3G settings
-    # os.environ.setdefault(
-    #     "DJANGO_SETTINGS_MODULE", "chord_metadata_service.metadata.settings"
-    # )
-
-    # CANDIG settings
+    # Use docker setting (dev or prod), otherwise local
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
 
     try:

@@ -1,0 +1,10 @@
+-r base.txt # inherit from base.txt
+coverage==7.2.7 # measures code coverage
+flake8==6.0.0 # style guide enforcement
+tox==4.6.4 # test command line tool 
+django-debug-toolbar==4.1.0 # display debug information
+isort==5.12.0 # Auto-formatter for imports
+black==23.7.0 # auto-formatter
+# factory-boy # setup test cases
+# model_bakery # setup test cases
+# django-silk # live profiling and inspection tool

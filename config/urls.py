@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.urls import include, path
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -24,10 +25,14 @@ from chord_metadata_service.mohpackets import urls as moh_urls
 
 urlpatterns = [
     path("v2/", include(moh_urls)),
-    # Debug toolbar
-    path("__debug__/", include("debug_toolbar.urls")),
     # OpenAPI 3 documentation with Swagger UI
     path("", SpectacularSwaggerView.as_view(), name="swagger-ui"),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        # Debug toolbar
+        path("__debug__/", include("debug_toolbar.urls")),
+    ]
