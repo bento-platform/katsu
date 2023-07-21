@@ -3,6 +3,7 @@ info:
   title: MoH Service API
   version: 1.0.0
   description: This is the RESTful API for the MoH Service. Based on commit "f4e70c5ba2eb72ae58529f403374cd6dffc93765".
+
 paths:
   /v2/authorized/biomarkers/:
     get:
