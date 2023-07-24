@@ -1,7 +1,7 @@
 name: Dispatch
 on:
     push:
-        branches: [test-dispatch]
+        branches: [stable]
 jobs:
   CanDIG-dispatch:
     runs-on: ubuntu-latest
