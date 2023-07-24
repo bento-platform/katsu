@@ -1,7 +1,7 @@
 name: Dispatch
 on:
     push:
-        branches: [stable]
+        branches: [test-dispatch]
 jobs:
   CanDIG-dispatch:
     runs-on: ubuntu-latest
@@ -17,7 +17,7 @@ jobs:
               id: make_pr
               uses: jman005/github-action-pr-expanded@v0
               with:
-                  github_token: ${{ secrets.REPOSITORY_DISPATCH }}
+                  github_token: ${{ secrets.SUBMODULE_PR }}
                   parent_repository: ${{ env.PARENT_REPOSITORY }}
                   checkout_branch: ${{ env.CHECKOUT_BRANCH}}
                   pr_against_branch: ${{ env.PR_AGAINST_BRANCH }}
