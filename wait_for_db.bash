@@ -18,7 +18,7 @@ fi
 : "${POSTGRES_USER:=admin}"
 
 until \
-  echo "Checking for Postgres on postgresql://${POSTGRES_USER}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}"
+  echo "Checking for Postgres on postgresql://${POSTGRES_USER}:[redacted]@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}"
   pg_isready \
   -d "${POSTGRES_DATABASE}" \
   -h "${POSTGRES_HOST}" \
