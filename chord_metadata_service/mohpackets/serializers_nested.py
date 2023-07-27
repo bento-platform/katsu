@@ -48,13 +48,13 @@ from chord_metadata_service.mohpackets.serializers import (
 class NestedExposureSerializer(ExposureSerializer):
     class Meta:
         model = Exposure
-        exclude = ["program_id", "submitter_donor_id"]
+        exclude = ["program_id", "submitter_donor_id", "id"]
 
 
 class NestedComorbiditySerializer(ComorbiditySerializer):
     class Meta:
         model = Comorbidity
-        exclude = ["program_id", "submitter_donor_id"]
+        exclude = ["program_id", "submitter_donor_id", "id"]
 
 
 class NestedSampleRegistrationSerializer(SampleRegistrationSerializer):
@@ -70,31 +70,31 @@ class NestedSampleRegistrationSerializer(SampleRegistrationSerializer):
 class NestedChemotherapySerializer(ChemotherapySerializer):
     class Meta:
         model = Chemotherapy
-        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id"]
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "id"]
 
 
 class NestedHormoneTherapySerializer(HormoneTherapySerializer):
     class Meta:
         model = HormoneTherapy
-        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id"]
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "id"]
 
 
 class NestedImmunotherapySerializer(ImmunotherapySerializer):
     class Meta:
         model = Immunotherapy
-        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id"]
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "id"]
 
 
 class NestedRadiationSerializer(RadiationSerializer):
     class Meta:
         model = Radiation
-        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id"]
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "id"]
 
 
 class NestedSurgerySerializer(SurgerySerializer):
     class Meta:
         model = Surgery
-        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id"]
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "id"]
 
 
 class NestedBiomarkerSerializer(BiomarkerSerializer):
@@ -107,6 +107,7 @@ class NestedBiomarkerSerializer(BiomarkerSerializer):
             "submitter_primary_diagnosis_id",
             "submitter_treatment_id",
             "submitter_follow_up_id",
+            "id"
         ]
 
 
