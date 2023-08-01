@@ -1,6 +1,7 @@
 import random
 
 import factory
+from django.db.models.signals import post_save
 
 from chord_metadata_service.mohpackets.models import *
 from chord_metadata_service.mohpackets.permissible_values import *
@@ -14,6 +15,21 @@ class ProgramFactory(factory.django.DjangoModelFactory):
     # default values
     program_id = factory.Sequence(lambda n: 'PROGRAM_%d' % n)
 
+
+    # @factory.post_generation
+    # def set_lost_to_followup_identifier(self, create, extracted, **kwargs):
+    #     if not create:
+    #         return
+    #     if extracted:
+    #         # If identifier is passed during creation, use it
+    #         self.lost_to_followup_after_clinical_event_identifier = extracted
+    #     else:
+    #         # If identifier is not passed, create one
+    #         DonorFactory(
+    #             lost_to_followup_after_clinical_event_identifier=self
+    #         )
+    
+
 class DonorFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Donor
@@ -24,17 +40,22 @@ class DonorFactory(factory.django.DjangoModelFactory):
     gender = factory.Faker('random_element', elements=GENDER)
     sex_at_birth = factory.Faker('random_element', elements=SEX_AT_BIRTH)
     is_deceased = factory.Faker('boolean')
-    lost_to_followup_reason = factory.Faker('random_element', elements=LOST_TO_FOLLOWUP_REASON)
-    lost_to_followup_after_clinical_event_identifier = factory.Faker('uuid4') 
-    date_alive_after_lost_to_followup = factory.Faker('random_int')
-    cause_of_death = factory.Faker('random_element', elements=CAUSE_OF_DEATH)
+    lost_to_followup_reason = None
+    lost_to_followup_after_clinical_event_identifier = None
+    date_alive_after_lost_to_followup = None
+    cause_of_death = None
     date_of_birth = factory.Faker('random_int')
     date_of_death = factory.Faker('random_int')
     primary_site = factory.Faker('random_elements', elements=PRIMARY_SITE, length=random.randint(1, 5), unique=True)
-
-    # Set the foreign key
     program_id = factory.SubFactory(ProgramFactory)
-    
+
+    @factory.lazy_attribute
+    def cause_of_death(self):
+        if self.is_deceased:
+            return factory.Faker('random_element', elements=CAUSE_OF_DEATH)
+
+
+
 class PrimaryDiagnosisFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = PrimaryDiagnosis
@@ -56,5 +77,14 @@ class PrimaryDiagnosisFactory(factory.django.DjangoModelFactory):
     clinical_stage_group = factory.Faker('random_element', elements=STAGE_GROUP)
 
     # Set the foreign key
-    program_id = factory.SubFactory(ProgramFactory)
+    program_id = factory.SelfAttribute('submitter_donor_id.program_id')
     submitter_donor_id = factory.SubFactory(DonorFactory)
+    
+    # @factory.post_generation
+    # def set_clinical_event_identifier(self, create, extracted, **kwargs):
+    #     donor = self.submitter_donor_id
+    #     if not donor.is_deceased:
+    #         donor.lost_to_followup_after_clinical_event_identifier = self.submitter_primary_diagnosis_id
+    #         donor.lost_to_followup_reason = random.choice(LOST_TO_FOLLOWUP_REASON)
+    #         donor.date_alive_after_lost_to_followup = factory.Faker('random_int')
+    #         donor.save()
