@@ -269,9 +269,9 @@ METADATA_WORKFLOWS = {
     }
 }
 
-# Tag all workflows with their purpose (ingestion/analysis/export)
-for purpose, workflows in METADATA_WORKFLOWS.items():
+# Tag all workflows with their action (ingestion/analysis/export)
+for action, workflows in METADATA_WORKFLOWS.items():
     for wf in workflows.values():
-        wf["purpose"] = purpose
+        wf["action"] = action
 
 WORKFLOWS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "wdls")
