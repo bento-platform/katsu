@@ -3,6 +3,10 @@ version 1.0
 workflow phenopackets_json {
     input {
         File json_document
+        String secret__access_token
+        String run_dir
+        String project_id
+        String dataset_id
     }
 
     call copy_task {
