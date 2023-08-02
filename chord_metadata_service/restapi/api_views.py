@@ -429,7 +429,7 @@ def public_dataset(_request):
         "dimensions", "primary_publications", "citations",
         "produced_by", "creators", "licenses",
         "acknowledges", "keywords", "version", "dats_file",
-        "extra_properties"
+        "extra_properties", "identifier"
     )
 
     # convert dats_file json content to dict
