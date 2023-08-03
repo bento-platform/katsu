@@ -14,6 +14,8 @@ urlpatterns = [
     path('private/ingest', views_ingest.ingest, name="ingest"),
     path('private/export', views_export.export, name="export"),
 
+    path('ingest/<str:dataset_id>/<str:data_type>', views_ingest.ingest_dataset, name="ingest-dataset"),
+
     path('data-types', views_data_types.data_type_list, name="data-type-list"),
     path('data-types/<str:data_type>', views_data_types.data_type_detail, name="data-type-detail"),
     path('data-types/<str:data_type>/schema', views_data_types.data_type_schema, name="data-type-schema"),
