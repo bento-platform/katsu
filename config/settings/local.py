@@ -37,8 +37,8 @@ DATABASES = {
 
 # You can change username and datasets to suit your needs
 LOCAL_AUTHORIZED_DATASET = [
-    {"username": "user1", "datasets": ["SYNTHETIC-1"]},
-    {"username": "user2", "datasets": ["SYNTHETIC-1", "SYNTHETIC-2"]},
+    {"username": "user1", "is_allowed": False, "datasets": ["SYNTHETIC-1"]},
+    {"username": "user2", "is_allowed": True, "datasets": ["SYNTHETIC-1", "SYNTHETIC-2"]},
 ]
 
 # Debug toolbar settings
