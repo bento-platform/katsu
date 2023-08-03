@@ -123,3 +123,49 @@ class SampleRegistrationFactory(factory.django.DjangoModelFactory):
     program_id = factory.SelfAttribute('submitter_specimen_id.program_id')
     submitter_donor_id = factory.SelfAttribute('submitter_specimen_id.submitter_donor_id')
     submitter_specimen_id = factory.SubFactory(SpecimenFactory)
+    
+class TreatmentFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Treatment
+        django_get_or_create = ("submitter_treatment_id",)
+
+    # default values
+    submitter_treatment_id = factory.Sequence(lambda n: 'TREATMENT_%d' % n)
+    treatment_type = factory.Faker('random_element', elements=SAMPLE_TYPE)
+    is_primary_treatment = factory.Faker('random_element', elements=['Yes', 'No'])
+    line_of_treatment = factory.Faker('random_int', min=1, max=5)
+    treatment_start_date = factory.Faker('random_int')
+    treatment_end_date = factory.Faker('random_int')
+    treatment_setting = factory.Faker('random_element', elements=TREATMENT_SETTING)
+    treatment_intent = factory.Faker('random_element', elements=TREATMENT_INTENT)
+    days_per_cycle = factory.Faker('random_int', min=1, max=30)
+    number_of_cycles = factory.Faker('random_int', min=1, max=10)
+    response_to_treatment_criteria_method = factory.Faker('random_element', elements=TREATMENT_RESPONSE_METHOD)
+    response_to_treatment = factory.Faker('random_element', elements=TREATMENT_RESPONSE)
+    status_of_treatment = factory.Faker('random_element', elements=TREATMENT_STATUS)
+
+    # set foregin keys
+    program_id = factory.SelfAttribute('submitter_primary_diagnosis_id.program_id')
+    submitter_donor_id = factory.SelfAttribute('submitter_primary_diagnosis_id.submitter_donor_id')
+    submitter_primary_diagnosis_id = factory.SubFactory(SpecimenFactory)
+
+import uuid
+
+
+class ChemotherapyFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Chemotherapy
+
+    # default values
+    id = factory.LazyFunction(uuid.uuid4)
+    drug_reference_database = factory.Faker('random_element', elements=DRUG_REFERENCE_DB)
+    drug_name = factory.Faker('word')
+    drug_reference_identifier = factory.Faker('word')
+    chemotherapy_drug_dose_units = factory.Faker('random_element', elements=DOSAGE_UNITS)
+    prescribed_cumulative_drug_dose = factory.Faker('random_int', min=1, max=100)
+    actual_cumulative_drug_dose = factory.Faker('random_int', min=1, max=100)
+
+    # set foregin keys
+    program_id = factory.SelfAttribute('submitter_treatment_id.program_id')
+    submitter_donor_id = factory.SelfAttribute('submitter_treatment_id.submitter_donor_id')
+    submitter_treatment_id = factory.SubFactory(TreatmentFactory)
