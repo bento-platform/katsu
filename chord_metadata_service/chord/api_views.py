@@ -82,8 +82,6 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         Return the DATS file as a JSON response or an error if not found.
         """
         dataset = self.get_object()
-        if not dataset.dats_file:
-            return Response({'error': 'No DATS file found'}, status=status.HTTP_404_NOT_FOUND)
         return Response(json.loads(dataset.dats_file))
 
 
