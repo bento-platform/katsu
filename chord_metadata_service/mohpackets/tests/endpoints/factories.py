@@ -21,7 +21,6 @@ class DonorFactory(factory.django.DjangoModelFactory):
         django_get_or_create = ("submitter_donor_id",)
     
     # default values
-    program_id = factory.SubFactory(ProgramFactory)
     submitter_donor_id = factory.Sequence(lambda n: 'DONOR_%d' % n)
     gender = factory.Faker('random_element', elements=GENDER)
     sex_at_birth = factory.Faker('random_element', elements=SEX_AT_BIRTH)
@@ -42,6 +41,8 @@ class DonorFactory(factory.django.DjangoModelFactory):
     )
     primary_site = factory.Faker('random_elements', elements=PRIMARY_SITE, length=random.randint(1, 5), unique=True)
 
+    # set foregin key
+    program_id = factory.SubFactory(ProgramFactory)
 
 class PrimaryDiagnosisFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -63,7 +64,7 @@ class PrimaryDiagnosisFactory(factory.django.DjangoModelFactory):
     clinical_m_category = factory.Faker('random_element', elements=M_CATEGORY)
     clinical_stage_group = factory.Faker('random_element', elements=STAGE_GROUP)
 
-    # Set the foreign key
+    # Set the foreign keys
     program_id = factory.SelfAttribute('submitter_donor_id.program_id')
     submitter_donor_id = factory.SubFactory(DonorFactory)
     
@@ -75,3 +76,50 @@ class PrimaryDiagnosisFactory(factory.django.DjangoModelFactory):
             donor.lost_to_followup_reason = random.choice(LOST_TO_FOLLOWUP_REASON)
             donor.date_alive_after_lost_to_followup = random.randint(1000, 5000)
             donor.save()
+            
+class SpecimenFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Specimen
+        django_get_or_create = ("submitter_specimen_id",)
+
+    # default values
+    submitter_specimen_id = factory.Sequence(lambda n: 'SPECIMEN_%d' % n)
+    pathological_tumour_staging_system = factory.Faker('random_element', elements=TUMOUR_STAGING_SYSTEM)
+    pathological_t_category = factory.Faker('random_element', elements=T_CATEGORY)
+    pathological_n_category = factory.Faker('random_element', elements=N_CATEGORY)
+    pathological_m_category = factory.Faker('random_element', elements=M_CATEGORY)
+    pathological_stage_group = factory.Faker('random_element', elements=STAGE_GROUP)
+    specimen_collection_date = factory.Faker('random_int')
+    specimen_storage = factory.Faker('random_element', elements=STORAGE)
+    specimen_processing = factory.Faker('random_element', elements=SPECIMEN_PROCESSING)
+    tumour_histological_type = factory.Faker('word')
+    specimen_anatomic_location = factory.Faker('word')
+    specimen_laterality = factory.Faker('random_element', elements=SPECIMEN_LATERALITY)
+    reference_pathology_confirmed_diagnosis = factory.Faker('random_element', elements=CONFIRMED_DIAGNOSIS_TUMOUR)
+    reference_pathology_confirmed_tumour_presence = factory.Faker('random_element', elements=CONFIRMED_DIAGNOSIS_TUMOUR)
+    tumour_grading_system = factory.Faker('random_element', elements=TUMOUR_GRADING_SYSTEM)
+    tumour_grade = factory.Faker('random_element', elements=TUMOUR_GRADE)
+    percent_tumour_cells_range = factory.Faker('random_element', elements=PERCENT_CELLS_RANGE)
+    percent_tumour_cells_measurement_method = factory.Faker('random_element', elements=CELLS_MEASURE_METHOD)
+
+    # set foregin keys
+    program_id = factory.SelfAttribute('submitter_primary_diagnosis_id.program_id')
+    submitter_donor_id = factory.SelfAttribute('submitter_primary_diagnosis_id.submitter_donor_id')
+    submitter_primary_diagnosis_id = factory.SubFactory(PrimaryDiagnosisFactory)
+    
+class SampleRegistrationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = SampleRegistration
+        django_get_or_create = ("submitter_sample_id",)
+
+    # default values
+    submitter_sample_id = factory.Sequence(lambda n: 'SAMPLE_%d' % n)
+    specimen_tissue_source = factory.Faker('random_element', elements=SPECIMEN_TISSUE_SOURCE)
+    tumour_normal_designation = factory.Faker('random_element', elements=["Normal", "Tumour"])
+    specimen_type = factory.Faker('random_element', elements=SPECIMEN_TYPE)
+    sample_type = factory.Faker('random_element', elements=SAMPLE_TYPE)
+
+    # set foregin keys
+    program_id = factory.SelfAttribute('submitter_specimen_id.program_id')
+    submitter_donor_id = factory.SelfAttribute('submitter_specimen_id.submitter_donor_id')
+    submitter_specimen_id = factory.SubFactory(SpecimenFactory)
