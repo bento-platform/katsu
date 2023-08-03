@@ -20,6 +20,8 @@ class BaseTestCase(TestCase):
         )
 
         # Define a custom authorized dataset for testing
+        # NOTE: this data mimic the access.json in OPA
+        # Once OPA is finished with the new implementation, update this accordingly
         cls.authorized_datasets = [
             {
                 "username": "test_user_0",
