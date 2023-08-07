@@ -89,6 +89,7 @@ def ingest(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def ingest_dataset(request):
-    logger.info(f"Received ingest request: {json.dumps(request.data)}")
+def ingest_dataset(request, dataset_id: str, data_type: str):
+    logger.info(f"Received ingest request.")
 
+    return Response(status=204)

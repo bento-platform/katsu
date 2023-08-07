@@ -17,11 +17,15 @@ workflow phenopackets_json {
     call ingest_task {
         input:
             json_document = copy_task.json_document,
-            service_url = service_url
+            service_url = service_url,
+            dataset_id = dataset_id,
+            token = secret__access_token
     }
 
     output {
         File json_document_out = copy_task.json_document
+        File stdout = ingest_task.txt_output
+        File stderr = ingest_task.err_output
     }
 }
 
@@ -41,8 +45,25 @@ task ingest_task {
     input {
         File json_document
         String service_url
+        String dataset_id
+        String token
     }
-    command {
-        echo '${service_url}'
+    command <<<
+        RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: ~{token}" \
+            -d ~{json_document} \
+            "~{service_url}/ingest/~{dataset_id}/phenopacket")
+        if [ "${RESPONSE}" != "204" ]
+        then
+            echo "Error: Metadata service replied with HTTP code ${RESPONSE}" 1>&2  # to stderr
+            exit 1
+        fi
+        echo ${RESPONSE}
+    >>>
+
+    output {
+        File txt_output = stdout()
+        File err_output = stderr()
     }
 }
