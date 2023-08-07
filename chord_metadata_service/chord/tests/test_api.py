@@ -95,8 +95,8 @@ class CreateDatasetTest(APITestCase):
             self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
 
     def test_dats(self):
-        self.dats_valid_payload['dats_file'] = json.dumps({})
-        r = self.client.post('/api/datasets', data=json.dumps(self.dats_valid_payload),
+        payload = {**self.dats_valid_payload, 'dats_file': json.dumps({})}
+        r = self.client.post('/api/datasets', data=json.dumps(payload),
                              content_type="application/json")
         r_invalid = self.client.post('/api/datasets', data=json.dumps(self.dats_invalid_payload),
                                      content_type="application/json")
@@ -109,7 +109,7 @@ class CreateDatasetTest(APITestCase):
         url = f'/api/datasets/{dataset_id}/dats'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, json.loads(self.dats_valid_payload['dats_file']))
+        self.assertDictEqual(response.data, json.loads(payload['dats_file']))
 
 # TODO: Update Dataset
 # TODO: Delete Dataset
