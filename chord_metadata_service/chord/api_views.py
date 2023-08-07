@@ -1,9 +1,11 @@
 import logging
+import json
 
 from rest_framework import status, viewsets
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from rest_framework.decorators import action
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -71,6 +73,16 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     serializer_class = DatasetSerializer
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
     queryset = Dataset.objects.all().order_by("title")
+
+    @action(detail=True, methods=['get'])
+    def dats(self, request, pk=None):
+        """
+        Retrieve a specific DATS file for a given dataset.
+
+        Return the DATS file as a JSON response or an error if not found.
+        """
+        dataset = self.get_object()
+        return Response(json.loads(dataset.dats_file))
 
 
 class TableOwnershipViewSet(CHORDPublicModelViewSet):
