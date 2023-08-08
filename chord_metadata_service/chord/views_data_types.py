@@ -23,6 +23,7 @@ QUERYSET_FN: Dict[str, Callable] = {
     dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
     dt.DATA_TYPE_MCODEPACKET: lambda dataset_id: MCodePacket.objects.filter(dataset_id=dataset_id),
     dt.DATA_TYPE_PHENOPACKET: lambda dataset_id: Phenopacket.objects.filter(dataset_id=dataset_id),
+    dt.DATA_TYPE_EXPERIMENT_RESULT: lambda dataset_id: ExperimentResult.objects.filter(experiment__dataset_id=dataset_id),
 }
 
 

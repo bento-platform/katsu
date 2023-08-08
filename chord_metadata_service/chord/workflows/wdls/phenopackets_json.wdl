@@ -52,8 +52,8 @@ task ingest_task {
         RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Authorization: ~{token}" \
-            -d ~{json_document} \
-            "~{service_url}/ingest/~{dataset_id}/phenopacket")
+            --data "@~{json_document}" \
+            "~{service_url}/ingest/~{dataset_id}/phenopackets_json")
         if [ "${RESPONSE}" != "204" ]
         then
             echo "Error: Metadata service replied with HTTP code ${RESPONSE}" 1>&2  # to stderr

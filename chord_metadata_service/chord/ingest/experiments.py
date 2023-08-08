@@ -140,12 +140,7 @@ def ingest_experiment(
     return new_experiment
 
 
-def ingest_experiments_workflow(workflow_outputs, dataset_id: str) -> list[em.Experiment]:
-    with workflow_file_output_to_path(get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
-        logger.info(f"Attempting ingestion of experiments from path: {json_doc_path}")
-        with open(json_doc_path, "r") as jf:
-            json_data: dict = json.load(jf)
-
+def ingest_experiments_workflow(json_data, dataset_id: str) -> list[em.Experiment]:
     dataset = Dataset.objects.get(identifier=dataset_id)
 
     for rs in json_data.get("resources", []):
@@ -211,10 +206,5 @@ def ingest_derived_experiment_results(json_data: list[dict]) -> list[em.Experime
 # The table_id is required to fit the bento_ingest.schema.json in bento_lib,
 # but it is unused. It can be set to any valid table_id or to one of the override
 # values defined in view_ingest.py
-def ingest_maf_derived_from_vcf_workflow(workflow_outputs, table_id: str) -> list[em.ExperimentResult]:
-    with workflow_file_output_to_path(get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
-        logger.info(f"Attempting ingestion of MAF-derived-from-VCF JSON from path: {json_doc_path}")
-        with open(json_doc_path, "r") as fh:
-            json_data = json.load(fh)
-
+def ingest_maf_derived_from_vcf_workflow(json_data, dataset_id: str) -> list[em.ExperimentResult]:
     return ingest_derived_experiment_results(json_data)

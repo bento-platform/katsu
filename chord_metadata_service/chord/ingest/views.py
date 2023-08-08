@@ -24,7 +24,7 @@ from ..workflows.metadata import METADATA_WORKFLOWS
 
 BENTO_INGEST_SCHEMA_VALIDATOR = Draft7Validator(BENTO_INGEST_SCHEMA)
 FROM_DERIVED_DATA = "FROM_DERIVED_DATA"
-TABLE_ID_OVERRIDES = {FROM_DERIVED_DATA}    # These special values skip the checks on the table
+DATASET_ID_OVERRIDES = {FROM_DERIVED_DATA}    # These special values skip the checks on the table
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ def ingest(request):
 
     dataset_id = request.data["dataset_id"]
 
-    if dataset_id not in TABLE_ID_OVERRIDES:
+    if dataset_id not in DATASET_ID_OVERRIDES:
         if not Dataset.objects.filter(identifier=dataset_id).exists():
             return Response(errors.bad_request_error(f"Dataset with ID {dataset_id} dows not exist"), status=400)
         dataset_id = str(uuid.UUID(dataset_id))  # Normalize dataset ID to UUID's str format.
@@ -92,4 +92,35 @@ def ingest(request):
 def ingest_dataset(request, dataset_id: str, data_type: str):
     logger.info(f"Received ingest request.")
 
+    if data_type not in WORKFLOW_INGEST_FUNCTION_MAP:
+        return Response(errors.bad_request_error(f"Ingestion data type {data_type} is invalid"), status=400)
+
+    if dataset_id not in DATASET_ID_OVERRIDES:
+        if not Dataset.objects.filter(identifier=dataset_id).exists():
+            return Response(errors.bad_request_error(f"Dataset with ID {dataset_id} does not exist"), status=400)
+        dataset_id = str(uuid.UUID(dataset_id))  # Normalize dataset ID to UUID's str format.
+    
+    try:
+        with transaction.atomic():
+            # Wrap ingestion in a transaction, so if it fails we don't end up in a partial state in the database.
+            WORKFLOW_INGEST_FUNCTION_MAP[data_type](request.data, dataset_id)
+
+    except IngestError as e:
+        return Response(errors.bad_request_error(f"Encountered ingest error: {e}"), status=400)
+
+    except json.decoder.JSONDecodeError as e:
+        return Response(errors.bad_request_error(f"Invalid JSON provided for ingest document (message: {e})"),
+                        status=400)
+
+    except ValidationError as e:
+        return Response(errors.bad_request_error(
+            "Encountered validation errors during ingestion",
+            *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
+        ))
+
+    except Exception as e:
+        # Encountered some other error from the ingestion attempt, return a somewhat detailed message
+        logger.error(f"Encountered an exception while processing an ingest attempt:\n{traceback.format_exc()}")
+        return Response(errors.internal_server_error(f"Encountered an exception while processing an ingest attempt "
+                                                     f"(error: {repr(e)}"), status=500)
     return Response(status=204)

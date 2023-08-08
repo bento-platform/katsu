@@ -303,12 +303,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     return new_phenopacket
 
 
-def ingest_phenopacket_workflow(workflow_outputs, dataset_id) -> Union[list[pm.Phenopacket], pm.Phenopacket]:
-    with workflow_file_output_to_path(get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
-        logger.info(f"Attempting ingestion of phenopackets from path: {json_doc_path}")
-        with open(json_doc_path, "r") as jf:
-            json_data = json.load(jf)
-
+def ingest_phenopacket_workflow(json_data, dataset_id) -> Union[list[pm.Phenopacket], pm.Phenopacket]:
     project_id = Project.objects.get(datasets=dataset_id)
     project_schemas: Iterable[ExtensionSchemaDict] = ProjectJsonSchema.objects.filter(project_id=project_id).values(
         "json_schema",
