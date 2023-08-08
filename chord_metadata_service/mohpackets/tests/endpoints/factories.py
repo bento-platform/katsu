@@ -206,3 +206,22 @@ class RadiationFactory(factory.django.DjangoModelFactory):
     program_id = factory.SelfAttribute('submitter_treatment_id.program_id')
     submitter_donor_id = factory.SelfAttribute('submitter_treatment_id.submitter_donor_id')
     submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+
+class ImmunotherapyFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Immunotherapy
+
+    # default values
+    id = factory.LazyFunction(uuid.uuid4)
+    drug_reference_database = factory.Faker('random_element', elements=DRUG_REFERENCE_DB)
+    immunotherapy_type = factory.Faker('random_element', elements=IMMUNOTHERAPY_TYPE)
+    drug_name = factory.Faker('word')
+    drug_reference_identifier = factory.Faker('word')
+    immunotherapy_drug_dose_units = factory.Faker('random_element', elements=DOSAGE_UNITS)
+    prescribed_cumulative_drug_dose = factory.Faker('random_int', min=1, max=100)
+    actual_cumulative_drug_dose = factory.Faker('random_int', min=1, max=100)
+
+    # set foreign keys
+    program_id = factory.SelfAttribute('submitter_treatment_id.program_id')
+    submitter_donor_id = factory.SelfAttribute('submitter_treatment_id.submitter_donor_id')
+    submitter_treatment_id = factory.SubFactory(TreatmentFactory)
