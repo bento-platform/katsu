@@ -251,3 +251,28 @@ class SurgeryFactory(factory.django.DjangoModelFactory):
     program_id = factory.SelfAttribute('submitter_treatment_id.program_id')
     submitter_donor_id = factory.SelfAttribute('submitter_treatment_id.submitter_donor_id')
     submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    
+class FollowUpFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = FollowUp
+
+    # default values
+    submitter_follow_up_id = factory.Sequence(lambda n: 'FOLLOW_UP_%d' % n)
+    date_of_followup = factory.Faker('random_int')
+    disease_status_at_followup = factory.Faker('random_element', elements=DISEASE_STATUS_FOLLOWUP)
+    relapse_type = factory.Faker('random_element', elements=RELAPSE_TYPE)
+    date_of_relapse = factory.Faker('date_this_decade')
+    method_of_progression_status = factory.Faker('random_element', elements=PROGRESSION_STATUS_METHOD)
+    anatomic_site_progression_or_recurrence = factory.Faker('word')
+    recurrence_tumour_staging_system = factory.Faker('random_element', elements=TUMOUR_STAGING_SYSTEM)
+    recurrence_t_category = factory.Faker('random_element', elements=T_CATEGORY)
+    recurrence_n_category = factory.Faker('random_element', elements=N_CATEGORY)
+    recurrence_m_category = factory.Faker('random_element', elements=M_CATEGORY)
+    recurrence_stage_group = factory.Faker('random_element', elements=STAGE_GROUP)
+
+    # set foreign keys
+    program_id = factory.SelfAttribute('submitter_treatment_id.program_id')
+    submitter_donor_id = factory.SelfAttribute('submitter_treatment_id.submitter_donor_id')
+    submitter_primary_diagnosis_id = factory.SelfAttribute('submitter_treatment_id.submitter_primary_diagnosis_id')
+    submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+
