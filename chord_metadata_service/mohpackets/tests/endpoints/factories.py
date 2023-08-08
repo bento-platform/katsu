@@ -225,3 +225,29 @@ class ImmunotherapyFactory(factory.django.DjangoModelFactory):
     program_id = factory.SelfAttribute('submitter_treatment_id.program_id')
     submitter_donor_id = factory.SelfAttribute('submitter_treatment_id.submitter_donor_id')
     submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+
+class SurgeryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Surgery
+
+    # default values
+    id = factory.LazyFunction(uuid.uuid4)
+    surgery_type = factory.Faker('random_element', elements=SURGERY_TYPE)
+    surgery_site = factory.Faker('word')
+    surgery_location = factory.Faker('random_element', elements=SURGERY_LOCATION)
+    tumour_length = factory.Faker('random_int', min=1, max=10)
+    tumour_width = factory.Faker('random_int', min=1, max=10)
+    greatest_dimension_tumour = factory.Faker('random_int', min=1, max=10)
+    tumour_focality = factory.Faker('random_element', elements=TUMOUR_FOCALITY)
+    residual_tumour_classification = factory.Faker('random_element', elements=TUMOUR_CLASSIFICATION)
+    margin_types_involved = factory.Faker('random_elements', elements=MARGIN_TYPES, length=random.randint(1, 5), unique=True)
+    margin_types_not_involved = factory.Faker('random_elements', elements=MARGIN_TYPES, length=random.randint(1, 5), unique=True)
+    margin_types_not_assessed = factory.Faker('random_elements', elements=MARGIN_TYPES, length=random.randint(1, 5), unique=True)
+    lymphovascular_invasion = factory.Faker('random_element', elements=LYMPHOVACULAR_INVASION)
+    perineural_invasion = factory.Faker('random_element', elements=PERINEURAL_INVASION)
+    submitter_specimen_id = factory.Faker('word') # just a text string
+    
+    # set foreign keys
+    program_id = factory.SelfAttribute('submitter_treatment_id.program_id')
+    submitter_donor_id = factory.SelfAttribute('submitter_treatment_id.submitter_donor_id')
+    submitter_treatment_id = factory.SubFactory(TreatmentFactory)
