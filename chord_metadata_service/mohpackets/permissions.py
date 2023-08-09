@@ -45,13 +45,12 @@ class CanDIGAdminOrReadOnly(BasePermission):
                 auth = get_authorization_header(request).split()
                 if not auth:
                     raise AuthenticationFailed("Authorization required")
-                username = auth[1].decode("utf-8")
-                # get role from local settings
-                is_allowed = None 
+                token = auth[1].decode("utf-8")
+                is_admin = None 
                 for d in settings.LOCAL_AUTHORIZED_DATASET:
-                    if d["username"] == username:
-                        is_allowed = d["is_allowed"]
+                    if d["token"] == token:
+                        is_admin = d["is_admin"]
                         break
-                if is_allowed:
+                if is_admin:
                     return True
             return False
