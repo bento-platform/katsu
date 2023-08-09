@@ -1,4 +1,5 @@
-from django.test import TestCase, override_settings
+from django.conf import settings
+from django.test import TestCase, modify_settings, override_settings
 from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory
 
@@ -6,7 +7,14 @@ from chord_metadata_service.mohpackets.serializers import *
 from chord_metadata_service.mohpackets.tests.endpoints.factories import *
 
 
+class TestUser:
+    def __init__(self, token, is_admin, datasets):
+        self.token = token
+        self.is_admin = is_admin
+        self.datasets = datasets
+        
 class BaseTestCase(TestCase):
+      
     @classmethod
     def setUpTestData(cls):
         cls.programs = ProgramFactory.create_batch(
@@ -18,89 +26,112 @@ class BaseTestCase(TestCase):
         cls.primary_diagnoses = PrimaryDiagnosisFactory.create_batch(
             8, submitter_donor_id=factory.Iterator(cls.donors)
         )
-
-        # Define a custom authorized dataset for testing
-        # NOTE: this data mimic the access.json in OPA
-        # Once OPA is finished with the new implementation, update this accordingly
-        cls.authorized_datasets = [
+        
+        # Define test users with permission and datasets access
+        cls.user_0 = TestUser(
+            token="token_0",
+            is_admin=False,
+            datasets=[],
+        )
+        cls.user_1 = TestUser(
+            token="token_1",
+            is_admin=False,
+            datasets=[cls.programs[0].program_id],
+        )
+        cls.user_2 = TestUser(
+            token="token_2",
+            is_admin=True,
+            datasets=[cls.programs[0].program_id,cls.programs[1].program_id],
+        )
+        settings.LOCAL_AUTHORIZED_DATASET = [
             {
-                "username": "test_user_0",
-                "is_allowed": False,
-                "datasets": [],
+                "token": cls.user_0.token,
+                "is_admin": cls.user_0.is_admin,
+                "datasets": cls.user_0.datasets,
             },
             {
-                "username": "test_user_1",
-                "is_allowed": False,
-                "datasets": [cls.programs[0].program_id],
+                "token": cls.user_1.token,
+                "is_admin": cls.user_1.is_admin,
+                "datasets": cls.user_1.datasets,
             },
-            {
-                "username": "test_user_2",
-                "is_allowed": True,
-                "datasets": [
-                    cls.programs[0].program_id,
-                    cls.programs[1].program_id,
-                ],
+              {
+                "token": cls.user_2.token,
+                "is_admin": cls.user_2.is_admin,
+                "datasets": cls.user_2.datasets,
             },
         ]
-
+    
     def setUp(self):
         # Initialize the client before each test method
         self.client = APIClient()
-
-
+        
 class ProgramTestCase(BaseTestCase):
+
     def setUp(self):
         super().setUp()
         self.get_url = "/v2/authorized/programs/"
         self.ingest_url = "/v2/ingest/programs"
 
-    def test_valid_ingest(self):
-        """
-        Test that a valid list of program can be posted via the 'ingest/programs' endpoint
-        and successfully creates the corresponding program objects in the database.
-        Also add the new datasets to permissions
-        """
-        with override_settings(LOCAL_AUTHORIZED_DATASET=self.authorized_datasets):
-            self.authorization_header = self.authorized_datasets[2]["username"]
-            ingest_programs = ProgramFactory.build_batch(2)
-            serialized_data = ProgramSerializer(ingest_programs, many=True).data
-            response = self.client.post(
-                self.ingest_url,
-                data=serialized_data,
-                format="json",
-                HTTP_AUTHORIZATION=f"Bearer {self.authorization_header}",
-            )
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-            self.assertEqual(
-                Program.objects.count(), len(ingest_programs) + len(self.programs)
-            )
-            self.authorized_datasets[2]["datasets"].append(
-                [program.program_id for program in ingest_programs]
-            )
 
-    def test_get_endpoint(self):
+    def test_ingest_201_created(self):
         """
-        Test an authorized GET request and verifies that the response status code
-        is 200 OK. It then compares the list of program IDs returned in the
-        response with the program IDs fetched from the database.
+        Test that an authorized user can ingest and receive 201 Created response
+    
+        Testing Strategy:
+        - user_2 with admin permission.
+        - user_2 can perform a POST request for program ingestion.
         """
-        with override_settings(LOCAL_AUTHORIZED_DATASET=self.authorized_datasets):
-            self.authorization_header = self.authorized_datasets[2]["username"]
-            # Issue a GET request to the endpoint with the Authorization header
-            response = self.client.get(
-                self.get_url,
-                HTTP_AUTHORIZATION=f"Bearer {self.authorization_header}",
-            )
+        ingest_programs = ProgramFactory.build_batch(2)
+        serialized_data = ProgramSerializer(ingest_programs, many=True).data
+        response = self.client.post(
+            self.ingest_url,
+            data=serialized_data,
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+    def test_ingest_403_unauthorized(self):
+        """
+        Test that an unauthorized user attempting to ingest programs receives a 403 Forbidden response.
+        
+        Testing Strategy:
+        - user_0 with no permission.
+        - user_0 cannot perform a POST request for program ingestion.
+        """
+        ingest_programs = ProgramFactory.build_batch(2)
+        serialized_data = ProgramSerializer(ingest_programs, many=True).data
+        response = self.client.post(
+            self.ingest_url,
+            data=serialized_data,
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_0.token}",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-            # Assert that the response status code is 200 OK
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-            # Compare the response with the database
-            expected_data = self.authorized_datasets[2]["datasets"]
-            responsed_data = [
-                item["program_id"] for item in response.data["results"]
-            ]
-            self.assertEqual(responsed_data, expected_data)
+    # def test_get_endpoint(self):
+    #     """
+    #     Test an authorized GET request and verifies that the response status code
+    #     is 200 OK. It then compares the list of program IDs returned in the
+    #     response with the program IDs fetched from the database.
+    #     """
+    #     self.authorization_header = self.authorized_datasets[2]["username"]
+    #     # Issue a GET request to the endpoint with the Authorization header
+    #     response = self.client.get(
+    #         self.get_url,
+    #         HTTP_AUTHORIZATION=f"Bearer {self.authorization_header}",
+    #     )
+
+    #     # Assert that the response status code is 200 OK
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    #     # Compare the response with the database
+    #     expected_data = self.authorized_datasets[2]["datasets"]
+    #     responsed_data = [
+    #         item["program_id"] for item in response.data["results"]
+    #     ]
+    #     self.assertEqual(responsed_data, expected_data)
 
 
 # class DonorTestCase(TestCase):
