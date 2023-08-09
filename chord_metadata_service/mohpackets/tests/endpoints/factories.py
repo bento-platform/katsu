@@ -245,7 +245,7 @@ class SurgeryFactory(factory.django.DjangoModelFactory):
     margin_types_not_assessed = factory.Faker('random_elements', elements=MARGIN_TYPES, length=random.randint(1, 5), unique=True)
     lymphovascular_invasion = factory.Faker('random_element', elements=LYMPHOVACULAR_INVASION)
     perineural_invasion = factory.Faker('random_element', elements=PERINEURAL_INVASION)
-    submitter_specimen_id = factory.Faker('word') # just a text string
+    submitter_specimen_id = None
     
     # set foreign keys
     program_id = factory.SelfAttribute('submitter_treatment_id.program_id')
@@ -261,7 +261,7 @@ class FollowUpFactory(factory.django.DjangoModelFactory):
     date_of_followup = factory.Faker('random_int')
     disease_status_at_followup = factory.Faker('random_element', elements=DISEASE_STATUS_FOLLOWUP)
     relapse_type = factory.Faker('random_element', elements=RELAPSE_TYPE)
-    date_of_relapse = factory.Faker('date_this_decade')
+    date_of_relapse = factory.Faker('random_int')
     method_of_progression_status = factory.Faker('random_element', elements=PROGRESSION_STATUS_METHOD)
     anatomic_site_progression_or_recurrence = factory.Faker('word')
     recurrence_tumour_staging_system = factory.Faker('random_element', elements=TUMOUR_STAGING_SYSTEM)
@@ -276,3 +276,61 @@ class FollowUpFactory(factory.django.DjangoModelFactory):
     submitter_primary_diagnosis_id = factory.SelfAttribute('submitter_treatment_id.submitter_primary_diagnosis_id')
     submitter_treatment_id = factory.SubFactory(TreatmentFactory)
 
+class BiomarkerFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Biomarker
+    
+    # default values
+    id = factory.LazyFunction(uuid.uuid4)
+    test_interval = factory.Faker('pyint', min_value=0, max_value=100)
+    psa_level = factory.Faker('pyint', min_value=0, max_value=100)
+    ca125 = factory.Faker('pyint', min_value=0, max_value=100)
+    cea = factory.Faker('pyint', min_value=0, max_value=100)
+    er_status = factory.Faker('random_element', elements=ER_PR_HPV_STATUS)
+    er_percent_positive = factory.Faker('pyfloat', positive=True, left_digits=2, right_digits=2)
+    pr_status = factory.Faker('random_element', elements=ER_PR_HPV_STATUS)
+    pr_percent_positive = factory.Faker('pyfloat', positive=True, left_digits=2, right_digits=2)
+    her2_ihc_status = factory.Faker('random_element', elements=HER2_STATUS)
+    her2_ish_status = factory.Faker('random_element', elements=HER2_STATUS)
+    hpv_ihc_status = factory.Faker('random_element', elements=ER_PR_HPV_STATUS)
+    hpv_pcr_status = factory.Faker('random_element', elements=ER_PR_HPV_STATUS)
+    hpv_strain = factory.Faker('random_elements', elements=HPV_STRAIN, length=random.randint(1, 5), unique=True)
+    submitter_specimen_id = None
+    submitter_primary_diagnosis_id = None
+    submitter_treatment_id = None
+    submitter_follow_up_id = None
+    
+    # set foreign keys
+    program_id = factory.SelfAttribute('submitter_donor_id.program_id')
+    submitter_donor_id = factory.SubFactory(DonorFactory)
+ 
+class ComorbidityFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Comorbidity
+    
+    # default values
+    id = factory.LazyFunction(uuid.uuid4)
+    prior_malignancy = factory.Faker('random_element', elements=UBOOLEAN)
+    laterality_of_prior_malignancy = factory.Faker('random_element', elements=MALIGNANCY_LATERALITY)
+    age_at_comorbidity_diagnosis = factory.Faker('pyint', min_value=0, max_value=100)
+    comorbidity_type_code = factory.Faker('word')
+    comorbidity_treatment_status = factory.Faker('random_element', elements=UBOOLEAN)
+    comorbidity_treatment = factory.Faker('word')
+
+    # set foreign keys
+    program_id = factory.SelfAttribute('submitter_donor_id.program_id')
+    submitter_donor_id = factory.SubFactory(DonorFactory)
+
+class ExposureFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Exposure
+    
+    # default values
+    id = factory.LazyFunction(uuid.uuid4)
+    tobacco_smoking_status = factory.Faker('random_element', elements=SMOKING_STATUS)
+    tobacco_type = factory.Faker('random_element', elements=TOBACCO_TYPE)
+    pack_years_smoked = factory.Faker('random_int')
+    
+    # set foreign keys
+    program_id = factory.SelfAttribute('submitter_donor_id.program_id')
+    submitter_donor_id = factory.SubFactory(DonorFactory)
