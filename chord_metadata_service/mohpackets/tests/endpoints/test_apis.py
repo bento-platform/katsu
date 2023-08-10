@@ -75,7 +75,7 @@ class ProgramTestCase(BaseTestCase):
 
     def test_ingest_201_created(self):
         """
-        Test that an authorized user can ingest and receive 201 Created response
+        Test that an admin user can ingest and receive 201 Created response
     
         Testing Strategy:
         - user_2 with admin permission.
@@ -90,10 +90,10 @@ class ProgramTestCase(BaseTestCase):
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        
+    
     def test_ingest_403_unauthorized(self):
         """
-        Test that an unauthorized user attempting to ingest programs receives a 403 Forbidden response.
+        Test that an non-admin user attempting to ingest programs receives a 403 Forbidden response.
         
         Testing Strategy:
         - user_0 with no permission.
@@ -109,6 +109,39 @@ class ProgramTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_get_200_ok(self):
+        """
+        Test a successful GET request to the 'authorized/programs' endpoint.
+
+        Testing Strategy:
+        - An authorized user (user_0) attempts a GET request for authorized programs.
+        - The request should receive a 200 OK response.
+        """
+        response = self.client.get(
+            self.get_url,
+            HTTP_AUTHORIZATION=f"Bearer {self.user_0.token}",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
+    def test_get_datasets_match(self):
+        """
+        Test that the response datasets match the authorized datasets for each user.
+
+        Testing Strategy:
+        - Verify that the response datasets match the datasets in the authorized dataset
+          for each of the three test users.
+        """
+        for user in [self.user_0, self.user_1, self.user_2]:
+            response = self.client.get(
+                self.get_url,
+                HTTP_AUTHORIZATION=f"Bearer {user.token}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            # Verify that the response datasets match the authorized datasets for the user
+            authorized_datasets = next(user_data['datasets'] for user_data in settings.LOCAL_AUTHORIZED_DATASET if user_data['token'] == user.token)
+            response_datasets = [program['program_id'] for program in response.data['results']]
+            self.assertEqual(response_datasets, authorized_datasets)
 
     # def test_get_endpoint(self):
     #     """
