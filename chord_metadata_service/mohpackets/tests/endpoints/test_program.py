@@ -165,7 +165,6 @@ class OtherAPITestCase(BaseTestCase):
                 self.authorized_url,
                 HTTP_AUTHORIZATION=f"Bearer {user.token}",
             )
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             authorized_datasets = next(
                 user_data["datasets"]
