@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import uuid
 
 from dateutil.parser import isoparse
@@ -14,10 +13,9 @@ from chord_metadata_service.restapi.types import ExtensionSchemaDict
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from .exceptions import IngestError
-from .logger import logger
 from .resources import ingest_resource
 from .schema import schema_validation
-from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, workflow_file_output_to_path
+from .utils import map_if_list, query_and_check_nulls
 
 from typing import Any, Dict, Iterable, Optional, Union
 

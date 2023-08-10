@@ -1,4 +1,3 @@
-import os
 import csv
 import io
 
@@ -13,14 +12,7 @@ from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
-
-EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_1 = {
-    "json_document": os.path.join(os.path.dirname(__file__), "phenopackets_example_1.json"),
-}
-
-EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_2 = {
-    "json_document": os.path.join(os.path.dirname(__file__), "phenopackets_example_2.json"),
-}
+from chord_metadata_service.restapi.tests import constants as restapi_c
 
 
 class CreateBiosampleTest(APITestCase):
@@ -350,9 +342,9 @@ class GetPhenopacketsApiTest(APITestCase):
                                          project=p)
 
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_1, self.d.identifier)
+            restapi_c.VALID_PHENOPACKET_1, self.d.identifier)
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON_2, self.d2.identifier)
+            restapi_c.VALID_PHENOPACKET_2, self.d2.identifier)
 
     def test_get_phenopackets(self):
         """

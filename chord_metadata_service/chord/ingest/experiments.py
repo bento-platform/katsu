@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import uuid
 
 from chord_metadata_service.chord.models import Dataset
@@ -13,7 +12,6 @@ from typing import Optional
 from .logger import logger
 from .resources import ingest_resource
 from .schema import schema_validation
-from .utils import get_output_or_raise, workflow_file_output_to_path
 
 __all__ = [
     "create_instrument",

@@ -90,7 +90,7 @@ def ingest(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def ingest_dataset(request, dataset_id: str, data_type: str):
-    logger.info(f"Received ingest request.")
+    logger.info(f"Received a {data_type} ingest request for dataset {dataset_id}.")
 
     if data_type not in WORKFLOW_INGEST_FUNCTION_MAP:
         return Response(errors.bad_request_error(f"Ingestion data type {data_type} is invalid"), status=400)
@@ -99,7 +99,7 @@ def ingest_dataset(request, dataset_id: str, data_type: str):
         if not Dataset.objects.filter(identifier=dataset_id).exists():
             return Response(errors.bad_request_error(f"Dataset with ID {dataset_id} does not exist"), status=400)
         dataset_id = str(uuid.UUID(dataset_id))  # Normalize dataset ID to UUID's str format.
-    
+
     try:
         with transaction.atomic():
             # Wrap ingestion in a transaction, so if it fails we don't end up in a partial state in the database.
