@@ -78,8 +78,8 @@ class ProgramTestCase(BaseTestCase):
         Test that an admin user can ingest and receive 201 Created response
     
         Testing Strategy:
-        - user_2 with admin permission.
-        - user_2 can perform a POST request for program ingestion.
+        - An authorized user (user_2) with admin permission.
+        - User can perform a POST request for program ingestion.
         """
         ingest_programs = ProgramFactory.build_batch(2)
         serialized_data = ProgramSerializer(ingest_programs, many=True).data
@@ -96,8 +96,8 @@ class ProgramTestCase(BaseTestCase):
         Test that an non-admin user attempting to ingest programs receives a 403 Forbidden response.
         
         Testing Strategy:
-        - user_0 with no permission.
-        - user_0 cannot perform a POST request for program ingestion.
+        - An unauthorized user (user_0) with no permission.
+        - User cannot perform a POST request for program ingestion.
         """
         ingest_programs = ProgramFactory.build_batch(2)
         serialized_data = ProgramSerializer(ingest_programs, many=True).data
@@ -111,25 +111,53 @@ class ProgramTestCase(BaseTestCase):
 
     def test_get_200_ok(self):
         """
-        Test a successful GET request to the 'authorized/programs' endpoint.
+        Test a successful GET request to the 'authorized/programs/' endpoint.
 
         Testing Strategy:
-        - An authorized user (user_0) attempts a GET request for authorized programs.
+        - An authorized user (user_1) attempts a GET request for authorized programs.
         - The request should receive a 200 OK response.
         """
         response = self.client.get(
             self.get_url,
-            HTTP_AUTHORIZATION=f"Bearer {self.user_0.token}",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
+    def test_get_301_redirect(self):
+        """
+        Test a GET request endpoint with a 301 redirection.
+
+        Testing Strategy:
+        - Send a GET request to the '/v2/authorized/programs' endpoint.
+        - The request should receive a 301 redirection response.
+        """
+        response = self.client.get(
+            "/v2/authorized/programs", 
+            HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY)
+    
+    def test_get_404_not_found(self):
+        """
+        Test a GET request for a 404 Not Found response.
+
+        Testing Strategy:
+        - Send a GET request to a non-existent endpoint ('/v2/authorized/programz').
+        - The request should receive a 404 Not Found response.
+        """
+        response = self.client.get(
+            "/v2/authorized/programz", 
+            HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         
-    def test_get_datasets_match(self):
+    def test_get_datasets_match_permission(self):
         """
         Test that the response datasets match the authorized datasets for each user.
 
         Testing Strategy:
         - Verify that the response datasets match the datasets in the authorized dataset
-          for each of the three test users.
+          for each of the test users.
         """
         for user in [self.user_0, self.user_1, self.user_2]:
             response = self.client.get(
@@ -138,7 +166,6 @@ class ProgramTestCase(BaseTestCase):
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-            # Verify that the response datasets match the authorized datasets for the user
             authorized_datasets = next(user_data['datasets'] for user_data in settings.LOCAL_AUTHORIZED_DATASET if user_data['token'] == user.token)
             response_datasets = [program['program_id'] for program in response.data['results']]
             self.assertEqual(response_datasets, authorized_datasets)
