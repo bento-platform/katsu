@@ -6,6 +6,26 @@ from django.db.models.signals import post_save
 from chord_metadata_service.mohpackets.models import *
 from chord_metadata_service.mohpackets.permissible_values import *
 
+"""
+    This file contains factory classes for generating test data.
+
+    These factories make it easy to create mock instances of various models
+    with customizable attributes, which simplifies the process of setting up
+    test data for unit and integration tests.
+
+    Example Usage:
+        # This will create a Program instance with the specified program_id.
+        program = ProgramFactory(program_id='CUSTOM_PROGRAM')
+ 
+        # This will create a Donor instance and a Program instance
+        donor = DonorFactory()
+        
+    Note:
+        These factories use the Factory Boy library (https://factoryboy.readthedocs.io/)
+        to generate test data.
+
+"""
+
 
 class ProgramFactory(factory.django.DjangoModelFactory):
     class Meta:
