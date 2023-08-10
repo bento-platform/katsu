@@ -136,11 +136,12 @@ class GETAPITestCase(BaseTestCase):
         Test a GET request for a 404 Not Found response.
 
         Testing Strategy:
-        - Send a GET request to a non-existent endpoint ('/v2/authorized/invalid').
+        - Send a GET request to a non-existent endpoint.
         - The request should receive a 404 Not Found response.
         """
         response = self.client.get(
-            "/v2/authorized/invalid", HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}"
+            "/v2/authorized/invalid/",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
