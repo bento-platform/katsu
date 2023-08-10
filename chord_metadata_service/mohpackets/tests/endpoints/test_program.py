@@ -5,15 +5,22 @@ from chord_metadata_service.mohpackets.serializers import ProgramSerializer
 from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 from chord_metadata_service.mohpackets.tests.endpoints.factories import ProgramFactory
 
+"""
+    This file contains test cases for Program API endpoints.
+    The tests cover various scenarios to ensure proper functionality and authorization 
+    for API endpoints.
+
+"""
+
 
 # INGEST API
 # ----------
 class IngestAPITestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.ingest_url = "/v2/ingest/programs"
+        self.ingest_url = "/v2/ingest/programs/"
 
-    def test_ingest_201_created(self):
+    def test_ingest_authorized(self):
         """
         Test that an admin user can ingest and receive 201 Created response
 
@@ -31,7 +38,7 @@ class IngestAPITestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_ingest_403_unauthorized(self):
+    def test_ingest_unauthorized(self):
         """
         Test that an non-admin user attempting to ingest programs receives a 403 Forbidden response.
 
@@ -57,7 +64,7 @@ class DeleteAPITestCase(BaseTestCase):
         super().setUp()
         self.authorized_url = "/v2/authorized/programs/"
 
-    def test_delete_204_no_content(self):
+    def test_delete_authorized(self):
         """
         Test an authorized DELETE request to the 'authorized/programs/{program_id}/' endpoint.
 
@@ -73,7 +80,7 @@ class DeleteAPITestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_delete_403_forbidden(self):
+    def test_delete_unauthorized(self):
         """
         Test an unauthorized DELETE request 'authorized/programs/{program_id}/' endpoint.
 
