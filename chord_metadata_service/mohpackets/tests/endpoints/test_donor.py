@@ -7,9 +7,9 @@ from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 from chord_metadata_service.mohpackets.tests.endpoints.factories import DonorFactory
 
 
-# DONOR API
+# INGEST API
 # ---------
-class DonorAPITestCase(BaseTestCase):
+class IngestAPITestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.donor_url = "/v2/ingest/donors/"
@@ -55,7 +55,7 @@ class DonorAPITestCase(BaseTestCase):
 
 # GET API
 # -------
-class GetDonorAPITestCase(BaseTestCase):
+class GETAPITestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.donor_url = "/v2/authorized/donors/"
@@ -86,19 +86,6 @@ class GetDonorAPITestCase(BaseTestCase):
             "/v2/authorized/donors", HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}"
         )
         self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY)
-
-    def test_get_donor_404_not_found(self):
-        """
-        Test a GET request for a 404 Not Found response.
-
-        Testing Strategy:
-        - Send a GET request to a non-existent endpoint ('/v2/authorized/invalid').
-        - The request should receive a 404 Not Found response.
-        """
-        response = self.client.get(
-            "/v2/authorized/invalid", HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}"
-        )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 # OTHERS
@@ -171,3 +158,18 @@ class OtherDonorAPITestCase(BaseTestCase):
             self.donor_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_delete_request_404(self):
+        """
+        Test a DELETE request 'authorized/donors/{id}/' endpoint.
+
+        Testing Strategy:
+        - Create a new donors to delete
+        - The request should receive a 404 response.
+        """
+        donor_to_delete = DonorFactory()
+        response = self.client.delete(
+            f"{self.donor_url}{donor_to_delete.submitter_donor_id}/",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
