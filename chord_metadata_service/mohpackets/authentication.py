@@ -36,16 +36,16 @@ class LocalAuthentication(BaseAuthentication):
         auth = get_authorization_header(request).split()
         if not auth:
             raise AuthenticationFailed("Authorization required")
-        username = auth[1].decode("utf-8")
+        token = auth[1].decode("utf-8")
         # get authorized datasets from local settings
         authorized_datasets = [
             d["datasets"]
             for d in settings.LOCAL_AUTHORIZED_DATASET
-            if d["username"] == username
+            if d["token"] == token
         ]
         if not authorized_datasets:
-            raise Exception(f"User {username} not authorized to access any datasets.")
-        # add dataset to request so we can access it in views
+            raise Exception(f"User {token} not authorized to access any datasets.")
+        # add datasets to request so we can access it in views
         request.authorized_datasets = authorized_datasets[0]
         return None
 
