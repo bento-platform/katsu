@@ -28,7 +28,6 @@ class TokenAuthentication(BaseAuthentication):
                     f"An error occurred in OPA get_authorized_datasets: {e}"
                 )
                 raise AuthenticationFailed("Error retrieving datasets from OPA.")
-        return None
 
 
 class LocalAuthentication(BaseAuthentication):
