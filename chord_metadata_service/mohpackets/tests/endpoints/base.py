@@ -23,12 +23,14 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import *
                 # Write your test logic here using the initialized data and test users.
 """
 
+
 class TestUser:
     def __init__(self, token, is_admin, datasets):
         self.token = token
         self.is_admin = is_admin
         self.datasets = datasets
-        
+
+
 class BaseTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -41,7 +43,7 @@ class BaseTestCase(TestCase):
         cls.primary_diagnoses = PrimaryDiagnosisFactory.create_batch(
             8, submitter_donor_id=factory.Iterator(cls.donors)
         )
-        
+
         # Define test users with permission and datasets access
         cls.user_0 = TestUser(
             token="token_0",
@@ -56,8 +58,10 @@ class BaseTestCase(TestCase):
         cls.user_2 = TestUser(
             token="token_2",
             is_admin=True,
-            datasets=[cls.programs[0].program_id,cls.programs[1].program_id],
+            datasets=[cls.programs[0].program_id, cls.programs[1].program_id],
         )
+        # remember to add all the custom users into this list
+        cls.users = [cls.user_0, cls.user_1, cls.user_2]
         settings.LOCAL_AUTHORIZED_DATASET = [
             {
                 "token": cls.user_0.token,
@@ -69,13 +73,13 @@ class BaseTestCase(TestCase):
                 "is_admin": cls.user_1.is_admin,
                 "datasets": cls.user_1.datasets,
             },
-              {
+            {
                 "token": cls.user_2.token,
                 "is_admin": cls.user_2.is_admin,
                 "datasets": cls.user_2.datasets,
             },
         ]
-    
+
     def setUp(self):
         # Initialize the client before each test method
         self.client = APIClient()
