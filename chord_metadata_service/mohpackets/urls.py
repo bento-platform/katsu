@@ -102,21 +102,21 @@ discovery_router.register(r"sidebar_list", SidebarListViewSet, basename="sidebar
 
 # ================== INGEST API ================== #
 ingest_patterns = [
-    path("programs", ingest_programs),
-    path("donors", ingest_donors),
-    path("specimens", ingest_specimens),
-    path("sample_registrations", ingest_sample_registrations),
-    path("primary_diagnoses", ingest_primary_diagnosises),
-    path("treatments", ingest_treatments),
-    path("chemotherapies", ingest_chemotherapies),
-    path("hormone_therapies", ingest_hormonetherapies),
-    path("radiations", ingest_radiations),
-    path("immunotherapies", ingest_immunotherapies),
-    path("surgeries", ingest_surgeries),
-    path("follow_ups", ingest_followups),
-    path("biomarkers", ingest_biomarkers),
-    path("comorbidities", ingest_comorbidities),
-    path("exposures", ingest_exposures),
+    path("programs/", ingest_programs),
+    path("donors/", ingest_donors),
+    path("specimens/", ingest_specimens),
+    path("sample_registrations/", ingest_sample_registrations),
+    path("primary_diagnoses/", ingest_primary_diagnosises),
+    path("treatments/", ingest_treatments),
+    path("chemotherapies/", ingest_chemotherapies),
+    path("hormone_therapies/", ingest_hormonetherapies),
+    path("radiations/", ingest_radiations),
+    path("immunotherapies/", ingest_immunotherapies),
+    path("surgeries/", ingest_surgeries),
+    path("follow_ups/", ingest_followups),
+    path("biomarkers/", ingest_biomarkers),
+    path("comorbidities/", ingest_comorbidities),
+    path("exposures/", ingest_exposures),
 ]
 
 urlpatterns = [
