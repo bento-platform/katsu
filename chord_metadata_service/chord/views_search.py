@@ -621,5 +621,6 @@ def dataset_summary(request: HttpRequest, dataset_id: str):
     dataset = Dataset.objects.get(identifier=dataset_id)
     return Response({
         DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary(dataset=dataset),
-        DATA_TYPE_EXPERIMENT: experiment_dataset_summary(dataset=dataset)
+        DATA_TYPE_EXPERIMENT: experiment_dataset_summary(dataset=dataset),
+        DATA_TYPE_MCODEPACKET: mcodepacket_dataset_summary(dataset=dataset),
     })
