@@ -144,6 +144,14 @@ class GETAPITestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+
+# OTHERS
+# ------
+class OtherAPITestCase(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.authorized_url = "/v2/authorized/programs/"
+
     def test_get_datasets_match_permission(self):
         """
         Test that the response datasets match the authorized datasets for each user.
@@ -169,24 +177,31 @@ class GETAPITestCase(BaseTestCase):
             ]
             self.assertEqual(response_datasets, authorized_datasets)
 
-    def test_405_method_not_allowed(self):
+    def test_post_request_405(self):
         """
-        Test requests for a 405 Method Not Allowed response.
-
-        Testing Strategy:
-        - Send a POST, PUT, PATCH request to the '/authorized/programs/' endpoint.
-        - The request should receive a 405 Method Not Allowed response.
+        Test a POST request to the '/authorized/programs/' endpoint.
+        The request should receive a 405 Method Not Allowed response.
         """
         response = self.client.post(
             self.authorized_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    def test_put_request_405(self):
+        """
+        Test a PUT request to the '/authorized/programs/' endpoint.
+        The request should receive a 405 Method Not Allowed response.
+        """
         response = self.client.put(
             self.authorized_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_patch_request_405(self):
+        """
+        Test a PATCH request to the '/authorized/programs/' endpoint.
+        The request should receive a 405 Method Not Allowed response.
+        """
         response = self.client.patch(
             self.authorized_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
