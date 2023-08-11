@@ -39,7 +39,11 @@ class SampleRegistrationTestCase(BaseTestCase):
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. Response content: {response.content}",
+        )
 
     def test_sample_registration_create_unauthorized(self):
         """
