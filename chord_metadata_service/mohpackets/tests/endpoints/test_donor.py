@@ -1,3 +1,4 @@
+import factory
 from django.conf import settings
 from rest_framework import status
 
@@ -23,7 +24,9 @@ class IngestAPITestCase(BaseTestCase):
         - An authorized user (user_2) with admin permission.
         - User can perform a POST request for donor creation.
         """
-        donor_data = DonorFactory.build_batch(program_id=self.programs[0], size=2)
+        donor_data = DonorFactory.build_batch(
+            program_id=factory.Iterator(self.programs), size=2
+        )
         serialized_data = DonorSerializer(donor_data, many=True).data
         response = self.client.post(
             self.donor_url,
@@ -42,7 +45,9 @@ class IngestAPITestCase(BaseTestCase):
         - An unauthorized user (user_0) with no permission.
         - User cannot perform a POST request for donor creation.
         """
-        donor_data = DonorFactory.build_batch(program_id=self.programs[0], size=2)
+        donor_data = DonorFactory.build_batch(
+            program_id=factory.Iterator(self.programs), size=2
+        )
         serialized_data = DonorSerializer(donor_data, many=True).data
         response = self.client.post(
             self.donor_url,
