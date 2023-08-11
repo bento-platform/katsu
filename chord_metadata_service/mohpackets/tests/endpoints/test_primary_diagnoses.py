@@ -1,3 +1,4 @@
+import factory
 from django.conf import settings
 from rest_framework import status
 
@@ -26,7 +27,7 @@ class IngestAPITestCase(BaseTestCase):
         - User can perform a POST request for primary diagnosis creation.
         """
         primary_diagnosis_data = PrimaryDiagnosisFactory.build_batch(
-            submitter_donor_id=self.donors[0], size=2
+            submitter_donor_id=factory.Iterator(self.donors), size=2
         )
         serialized_data = PrimaryDiagnosisSerializer(
             primary_diagnosis_data, many=True
@@ -49,7 +50,7 @@ class IngestAPITestCase(BaseTestCase):
         - User cannot perform a POST request for primary diagnosis creation.
         """
         primary_diagnosis_data = PrimaryDiagnosisFactory.build_batch(
-            submitter_donor_id=self.donors[0], size=2
+            submitter_donor_id=factory.Iterator(self.donors), size=2
         )
         serialized_data = PrimaryDiagnosisSerializer(
             primary_diagnosis_data, many=True
