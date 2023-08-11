@@ -9,8 +9,8 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import DonorFac
 
 
 # INGEST API
-# ---------
-class IngestAPITestCase(BaseTestCase):
+# ----------
+class IngestTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.donor_url = "/v2/ingest/donors/"
@@ -60,7 +60,7 @@ class IngestAPITestCase(BaseTestCase):
 
 # GET API
 # -------
-class GETAPITestCase(BaseTestCase):
+class GETTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.donor_url = "/v2/authorized/donors/"
@@ -95,7 +95,7 @@ class GETAPITestCase(BaseTestCase):
 
 # OTHERS
 # ------
-class OtherDonorAPITestCase(BaseTestCase):
+class OthersTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.donor_url = "/v2/authorized/donors/"
