@@ -383,10 +383,16 @@ class FollowUpFactory(factory.django.DjangoModelFactory):
     )
     relapse_type = factory.Faker("random_element", elements=RELAPSE_TYPE)
     date_of_relapse = factory.Faker("random_int")
+    # method_of_progression_status = factory.Faker(
+    #     "random_element", elements=PROGRESSION_STATUS_METHOD
+    # )
     method_of_progression_status = factory.Faker(
-        "random_element", elements=PROGRESSION_STATUS_METHOD
+        "random_elements",
+        elements=PROGRESSION_STATUS_METHOD,
+        length=random.randint(1, 5),
+        unique=True,
     )
-    anatomic_site_progression_or_recurrence = factory.Faker("word")
+    anatomic_site_progression_or_recurrence = None
     recurrence_tumour_staging_system = factory.Faker(
         "random_element", elements=TUMOUR_STAGING_SYSTEM
     )
