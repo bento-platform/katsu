@@ -5,6 +5,7 @@ from django.db.models.signals import post_save
 
 from chord_metadata_service.mohpackets.models import *
 from chord_metadata_service.mohpackets.permissible_values import *
+from chord_metadata_service.mohpackets.permissible_values import REGEX_PATTERNS
 
 """
     This file contains factory classes for generating test data.
@@ -130,8 +131,8 @@ class SpecimenFactory(factory.django.DjangoModelFactory):
     specimen_collection_date = factory.Faker("random_int")
     specimen_storage = factory.Faker("random_element", elements=STORAGE)
     specimen_processing = factory.Faker("random_element", elements=SPECIMEN_PROCESSING)
-    tumour_histological_type = factory.Faker("word")
-    specimen_anatomic_location = factory.Faker("word")
+    tumour_histological_type = None
+    specimen_anatomic_location = None
     specimen_laterality = factory.Faker("random_element", elements=SPECIMEN_LATERALITY)
     reference_pathology_confirmed_diagnosis = factory.Faker(
         "random_element", elements=CONFIRMED_DIAGNOSIS_TUMOUR
