@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.test import TestCase
 from rest_framework.test import APIClient
@@ -93,5 +95,6 @@ class BaseTestCase(TestCase):
         ]
 
     def setUp(self):
+        logging.disable(logging.CRITICAL)
         # Initialize the client before each test method
         self.client = APIClient()
