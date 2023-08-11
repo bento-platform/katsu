@@ -126,8 +126,8 @@ class ChemotherapyOthersTestCase(BaseTestCase):
             # get chemotherapy records' datasets from the database
             expected_datasets = list(
                 Chemotherapy.objects.filter(program_id__in=authorized_datasets)
-                .annotate(id_as_string=Cast("id", CharField()))
-                .values_list("id_as_string", flat=True)
+                .annotate(uuid_as_string=Cast("id", CharField()))
+                .values_list("uuid_as_string", flat=True)
             )
 
             # get chemotherapy records' datasets from the API
