@@ -103,39 +103,40 @@ class TreatmentsOthersTestCase(BaseTestCase):
         super().setUp()
         self.treatments_url = "/v2/authorized/treatments/"
 
-    # def test_get_datasets_match_permission(self):
-    #     """
-    #     Test that the response datasets match the authorized datasets for each user.
+    def test_get_datasets_match_permission(self):
+        """
+        Test that the response datasets match the authorized datasets for each user.
 
-    #     Testing Strategy:
-    #     - Get a list of datasets associated with treatments of each user
-    #     - Call the endpoint to get all treatments
-    #     - Verify that the response datasets match the datasets in the authorized datasets
-    #       for each of the test users.
-    #     """
-    #     for user in self.users:
-    #         authorized_datasets = next(
-    #             user_data["datasets"]
-    #             for user_data in settings.LOCAL_AUTHORIZED_DATASET
-    #             if user_data["token"] == user.token
-    #         )
-    #         # get treatments' datasets from the database
-    #         expected_datasets = list(
-    #             Treatment.objects.filter(
-    #                 program_id__in=authorized_datasets
-    #             ).values_list("program_id", flat=True)
-    #         )
+        Testing Strategy:
+        - Get a list of datasets associated with treatments of each user
+        - Call the endpoint to get all treatments
+        - Verify that the response datasets match the datasets in the authorized datasets
+          for each of the test users.
+        """
+        for user in self.users:
+            authorized_datasets = next(
+                user_data["datasets"]
+                for user_data in settings.LOCAL_AUTHORIZED_DATASET
+                if user_data["token"] == user.token
+            )
+            # get treatments' datasets from the database
+            expected_datasets = list(
+                Treatment.objects.filter(
+                    program_id__in=authorized_datasets
+                ).values_list("submitter_treatment_id", flat=True)
+            )
 
-    #         # get treatments' datasets from the API
-    #         response = self.client.get(
-    #             self.treatments_url,
-    #             HTTP_AUTHORIZATION=f"Bearer {user.token}",
-    #         )
-    #         response_data = [
-    #             treatment["program_id"] for treatment in response.data["results"]
-    #         ]
+            # get treatments' datasets from the API
+            response = self.client.get(
+                self.treatments_url,
+                HTTP_AUTHORIZATION=f"Bearer {user.token}",
+            )
+            response_data = [
+                treatment["submitter_treatment_id"]
+                for treatment in response.data["results"]
+            ]
 
-    #         self.assertEqual(response_data, expected_datasets)
+            self.assertEqual(response_data, expected_datasets)
 
     def test_post_request_405(self):
         """
