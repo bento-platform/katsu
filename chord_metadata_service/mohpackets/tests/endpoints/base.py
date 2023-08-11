@@ -11,12 +11,12 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import *
     It sets up initial test data, including programs, donors with other models,
     and defines test users with different permission levels and dataset access.
     By utilizing this, there is no need to create the same test data
-    for every individual test method, thereby speeding up the
-    tests and promoting consistency.
+    for every individual test method, thereby speeding up the tests and promoting
+    consistency.
 
     Example:
-        To use this base test case, inherit from it in your test classes and use the provided
-        attributes for testing API endpoints and permissions.
+        To use this base test case, inherit from it in your test classes and use 
+        the provided attributes for testing API endpoints and permissions.
 
         class MyAPITestCase(BaseTestCase):
             def test_my_endpoint(self):
@@ -42,6 +42,18 @@ class BaseTestCase(TestCase):
         )
         cls.primary_diagnoses = PrimaryDiagnosisFactory.create_batch(
             8, submitter_donor_id=factory.Iterator(cls.donors)
+        )
+        cls.specimens = SpecimenFactory.create_batch(
+            16, submitter_primary_diagnosis_id=factory.Iterator(cls.primary_diagnoses)
+        )
+        cls.sample_registrations = SampleRegistrationFactory.create_batch(
+            32, submitter_specimen_id=factory.Iterator(cls.specimens)
+        )
+        cls.treatments = TreatmentFactory.create_batch(
+            16, submitter_primary_diagnosis_id=factory.Iterator(cls.primary_diagnoses)
+        )
+        cls.chemotherapies = ChemotherapyFactory.create_batch(
+            4, submitter_treatment_id=factory.Iterator(cls.treatments)
         )
 
         # Define test users with permission and datasets access
