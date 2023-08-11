@@ -55,10 +55,10 @@ class DonorFactory(factory.django.DjangoModelFactory):
         yes_declaration=factory.Faker("random_element", elements=CAUSE_OF_DEATH),
         no_declaration=None,
     )
-    date_of_birth = factory.Faker("random_int")
+    date_of_birth = None  # factory.Faker("random_int")
     date_of_death = factory.Maybe(
         "is_deceased",
-        yes_declaration=factory.Faker("random_int", min=date_of_birth),
+        yes_declaration=None,  # factory.Faker("random_int", min=date_of_birth),
         no_declaration=None,
     )
     primary_site = factory.Faker(
@@ -128,7 +128,7 @@ class SpecimenFactory(factory.django.DjangoModelFactory):
     pathological_n_category = factory.Faker("random_element", elements=N_CATEGORY)
     pathological_m_category = factory.Faker("random_element", elements=M_CATEGORY)
     pathological_stage_group = factory.Faker("random_element", elements=STAGE_GROUP)
-    specimen_collection_date = factory.Faker("random_int")
+    specimen_collection_date = None
     specimen_storage = factory.Faker("random_element", elements=STORAGE)
     specimen_processing = factory.Faker("random_element", elements=SPECIMEN_PROCESSING)
     tumour_histological_type = None
@@ -198,8 +198,8 @@ class TreatmentFactory(factory.django.DjangoModelFactory):
     )
     is_primary_treatment = factory.Faker("random_element", elements=["Yes", "No"])
     line_of_treatment = factory.Faker("random_int", min=1, max=5)
-    treatment_start_date = factory.Faker("random_int")
-    treatment_end_date = factory.Faker("random_int")
+    treatment_start_date = None
+    treatment_end_date = None
     treatment_setting = factory.Faker("random_element", elements=TREATMENT_SETTING)
     treatment_intent = factory.Faker("random_element", elements=TREATMENT_INTENT)
     days_per_cycle = factory.Faker("random_int", min=1, max=30)
@@ -377,15 +377,12 @@ class FollowUpFactory(factory.django.DjangoModelFactory):
 
     # default values
     submitter_follow_up_id = factory.Sequence(lambda n: "FOLLOW_UP_%d" % n)
-    date_of_followup = factory.Faker("random_int")
+    date_of_followup = None
     disease_status_at_followup = factory.Faker(
         "random_element", elements=DISEASE_STATUS_FOLLOWUP
     )
     relapse_type = factory.Faker("random_element", elements=RELAPSE_TYPE)
-    date_of_relapse = factory.Faker("random_int")
-    # method_of_progression_status = factory.Faker(
-    #     "random_element", elements=PROGRESSION_STATUS_METHOD
-    # )
+    date_of_relapse = None
     method_of_progression_status = factory.Faker(
         "random_elements",
         elements=PROGRESSION_STATUS_METHOD,
