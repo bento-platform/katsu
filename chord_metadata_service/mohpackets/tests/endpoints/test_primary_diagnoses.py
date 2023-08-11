@@ -12,7 +12,7 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import (
 
 # INGEST API
 # ----------
-class IngestAPITestCase(BaseTestCase):
+class IngestTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.primary_diagnosis_url = "/v2/ingest/primary_diagnoses/"
@@ -66,7 +66,7 @@ class IngestAPITestCase(BaseTestCase):
 
 # GET API
 # -------
-class GETAPITestCase(BaseTestCase):
+class GETTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.primary_diagnosis_url = "/v2/authorized/primary_diagnoses/"
@@ -102,7 +102,7 @@ class GETAPITestCase(BaseTestCase):
 
 # OTHERS
 # ------
-class OtherAPITestCase(BaseTestCase):
+class OthersTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.primary_diagnosis_url = "/v2/authorized/primary_diagnoses/"
