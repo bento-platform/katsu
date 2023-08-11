@@ -192,7 +192,7 @@ class TreatmentFactory(factory.django.DjangoModelFactory):
     submitter_treatment_id = factory.Sequence(lambda n: "TREATMENT_%d" % n)
     treatment_type = factory.Faker(
         "random_elements",
-        elements=SAMPLE_TYPE,
+        elements=TREATMENT_TYPE,
         length=random.randint(1, 5),
         unique=True,
     )
