@@ -15,7 +15,7 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import ProgramF
 
 # INGEST API
 # ----------
-class IngestAPITestCase(BaseTestCase):
+class IngestTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.ingest_url = "/v2/ingest/programs/"
@@ -59,7 +59,7 @@ class IngestAPITestCase(BaseTestCase):
 
 # DELETE API
 # ----------
-class DeleteAPITestCase(BaseTestCase):
+class DeleteTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.authorized_url = "/v2/authorized/programs/"
@@ -99,7 +99,7 @@ class DeleteAPITestCase(BaseTestCase):
 
 # GET API
 # -------
-class GETAPITestCase(BaseTestCase):
+class GETTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.authorized_url = "/v2/authorized/programs/"
@@ -148,7 +148,7 @@ class GETAPITestCase(BaseTestCase):
 
 # OTHERS
 # ------
-class OtherAPITestCase(BaseTestCase):
+class OthersTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.authorized_url = "/v2/authorized/programs/"
