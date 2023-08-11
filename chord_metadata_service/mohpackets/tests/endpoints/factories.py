@@ -215,7 +215,7 @@ class TreatmentFactory(factory.django.DjangoModelFactory):
     submitter_donor_id = factory.SelfAttribute(
         "submitter_primary_diagnosis_id.submitter_donor_id"
     )
-    submitter_primary_diagnosis_id = factory.SubFactory(SpecimenFactory)
+    submitter_primary_diagnosis_id = factory.SubFactory(PrimaryDiagnosisFactory)
 
 
 import uuid
