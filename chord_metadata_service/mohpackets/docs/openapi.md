@@ -286,7 +286,6 @@ Retrieves a list of authorized Donor with clinical data.
               "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
               "specimen_laterality": "Left",
               "surgery": {
-                "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                 "surgery_type": "Ablation",
                 "surgery_site": "string",
                 "surgery_location": "Local recurrence",
@@ -319,7 +318,6 @@ Retrieves a list of authorized Donor with clinical data.
               ],
               "biomarkers": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "er_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
                   "her2_ihc_status": "Cannot be determined",
@@ -358,7 +356,6 @@ Retrieves a list of authorized Donor with clinical data.
               "response_to_treatment": "Complete response",
               "chemotherapies": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "chemotherapy_drug_dose_units": "mg/m2",
                   "drug_reference_database": "RxNorm",
                   "drug_name": "string",
@@ -369,7 +366,6 @@ Retrieves a list of authorized Donor with clinical data.
               ],
               "hormone_therapies": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "hormone_drug_dose_units": "mg/m2",
                   "drug_reference_database": "RxNorm",
                   "drug_name": "string",
@@ -380,7 +376,6 @@ Retrieves a list of authorized Donor with clinical data.
               ],
               "immunotherapies": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "immunotherapy_type": "Cell-based",
                   "drug_reference_database": "RxNorm",
                   "immunotherapy_drug_dose_units": "mg/m2",
@@ -391,7 +386,6 @@ Retrieves a list of authorized Donor with clinical data.
                 }
               ],
               "radiation": {
-                "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                 "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
                 "radiation_therapy_type": "External",
                 "anatomical_site_irradiated": "Left Abdomen",
@@ -401,7 +395,6 @@ Retrieves a list of authorized Donor with clinical data.
                 "reference_radiation_treatment_id": "string"
               },
               "surgery": {
-                "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                 "surgery_type": "Ablation",
                 "surgery_site": "string",
                 "surgery_location": "Local recurrence",
@@ -446,7 +439,6 @@ Retrieves a list of authorized Donor with clinical data.
               ],
               "biomarkers": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "er_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
                   "her2_ihc_status": "Cannot be determined",
@@ -468,7 +460,6 @@ Retrieves a list of authorized Donor with clinical data.
           ],
           "biomarkers": [
             {
-              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
               "er_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
               "her2_ihc_status": "Cannot be determined",
@@ -504,7 +495,6 @@ Retrieves a list of authorized Donor with clinical data.
               "recurrence_stage_group": "Stage 0",
               "biomarkers": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "er_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
                   "her2_ihc_status": "Cannot be determined",
@@ -528,7 +518,6 @@ Retrieves a list of authorized Donor with clinical data.
       ],
       "comorbidities": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "prior_malignancy": "Yes",
           "laterality_of_prior_malignancy": "Bilateral",
           "comorbidity_type_code": "string",
@@ -539,7 +528,6 @@ Retrieves a list of authorized Donor with clinical data.
       ],
       "exposures": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
           "tobacco_type": [
             "Chewing Tobacco"
@@ -549,7 +537,6 @@ Retrieves a list of authorized Donor with clinical data.
       ],
       "biomarkers": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "er_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
           "her2_ihc_status": "Cannot be determined",
@@ -585,7 +572,6 @@ Retrieves a list of authorized Donor with clinical data.
           "recurrence_stage_group": "Stage 0",
           "biomarkers": [
             {
-              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
               "er_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
               "her2_ihc_status": "Cannot be determined",
@@ -3319,7 +3305,6 @@ continued
           "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
           "specimen_laterality": "Left",
           "surgery": {
-            "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
             "surgery_type": "Ablation",
             "surgery_site": "string",
             "surgery_location": "Local recurrence",
@@ -3352,7 +3337,6 @@ continued
           ],
           "biomarkers": [
             {
-              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
               "er_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
               "her2_ihc_status": "Cannot be determined",
@@ -3391,7 +3375,6 @@ continued
           "response_to_treatment": "Complete response",
           "chemotherapies": [
             {
-              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
               "chemotherapy_drug_dose_units": "mg/m2",
               "drug_reference_database": "RxNorm",
               "drug_name": "string",
@@ -3402,7 +3385,6 @@ continued
           ],
           "hormone_therapies": [
             {
-              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
               "hormone_drug_dose_units": "mg/m2",
               "drug_reference_database": "RxNorm",
               "drug_name": "string",
@@ -3413,7 +3395,6 @@ continued
           ],
           "immunotherapies": [
             {
-              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
               "immunotherapy_type": "Cell-based",
               "drug_reference_database": "RxNorm",
               "immunotherapy_drug_dose_units": "mg/m2",
@@ -3424,7 +3405,6 @@ continued
             }
           ],
           "radiation": {
-            "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
             "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
             "radiation_therapy_type": "External",
             "anatomical_site_irradiated": "Left Abdomen",
@@ -3434,7 +3414,6 @@ continued
             "reference_radiation_treatment_id": "string"
           },
           "surgery": {
-            "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
             "surgery_type": "Ablation",
             "surgery_site": "string",
             "surgery_location": "Local recurrence",
@@ -3474,7 +3453,6 @@ continued
               "recurrence_stage_group": "Stage 0",
               "biomarkers": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "er_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
                   "her2_ihc_status": "Cannot be determined",
@@ -3496,7 +3474,6 @@ continued
           ],
           "biomarkers": [
             {
-              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
               "er_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
               "her2_ihc_status": "Cannot be determined",
@@ -3518,7 +3495,6 @@ continued
       ],
       "biomarkers": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "er_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
           "her2_ihc_status": "Cannot be determined",
@@ -3554,7 +3530,6 @@ continued
           "recurrence_stage_group": "Stage 0",
           "biomarkers": [
             {
-              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
               "er_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
               "her2_ihc_status": "Cannot be determined",
@@ -3578,7 +3553,6 @@ continued
   ],
   "comorbidities": [
     {
-      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "prior_malignancy": "Yes",
       "laterality_of_prior_malignancy": "Bilateral",
       "comorbidity_type_code": "string",
@@ -3589,7 +3563,6 @@ continued
   ],
   "exposures": [
     {
-      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
       "tobacco_type": [
         "Chewing Tobacco"
@@ -3599,7 +3572,6 @@ continued
   ],
   "biomarkers": [
     {
-      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "er_status": "Cannot be determined",
       "pr_status": "Cannot be determined",
       "her2_ihc_status": "Cannot be determined",
@@ -3635,7 +3607,6 @@ continued
       "recurrence_stage_group": "Stage 0",
       "biomarkers": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "er_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
           "her2_ihc_status": "Cannot be determined",
@@ -4986,7 +4957,6 @@ continued
 
 ```json
 {
-  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
   "er_status": "Cannot be determined",
   "pr_status": "Cannot be determined",
   "her2_ihc_status": "Cannot be determined",
@@ -5010,7 +4980,6 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|string(uuid)|false|none|none|
 |er_status|any|false|none|none|
 
 oneOf
@@ -5195,7 +5164,6 @@ continued
 
 ```json
 {
-  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
   "chemotherapy_drug_dose_units": "mg/m2",
   "drug_reference_database": "RxNorm",
   "drug_name": "string",
@@ -5210,7 +5178,6 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|string(uuid)|false|none|none|
 |chemotherapy_drug_dose_units|any|false|none|none|
 
 oneOf
@@ -5273,7 +5240,6 @@ continued
 
 ```json
 {
-  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
   "prior_malignancy": "Yes",
   "laterality_of_prior_malignancy": "Bilateral",
   "comorbidity_type_code": "string",
@@ -5288,7 +5254,6 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|string(uuid)|false|none|none|
 |prior_malignancy|any|false|none|none|
 
 oneOf
@@ -5374,7 +5339,6 @@ continued
 
 ```json
 {
-  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
   "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
   "tobacco_type": [
     "Chewing Tobacco"
@@ -5388,7 +5352,6 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|string(uuid)|false|none|none|
 |tobacco_smoking_status|any|false|none|none|
 
 oneOf
@@ -5464,7 +5427,6 @@ continued
   "recurrence_stage_group": "Stage 0",
   "biomarkers": [
     {
-      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "er_status": "Cannot be determined",
       "pr_status": "Cannot be determined",
       "her2_ihc_status": "Cannot be determined",
@@ -5697,7 +5659,6 @@ continued
 
 ```json
 {
-  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
   "hormone_drug_dose_units": "mg/m2",
   "drug_reference_database": "RxNorm",
   "drug_name": "string",
@@ -5712,7 +5673,6 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|string(uuid)|false|none|none|
 |hormone_drug_dose_units|any|false|none|none|
 
 oneOf
@@ -5775,7 +5735,6 @@ continued
 
 ```json
 {
-  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
   "immunotherapy_type": "Cell-based",
   "drug_reference_database": "RxNorm",
   "immunotherapy_drug_dose_units": "mg/m2",
@@ -5791,7 +5750,6 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|string(uuid)|false|none|none|
 |immunotherapy_type|any|false|none|none|
 
 oneOf
@@ -5912,7 +5870,6 @@ continued
       "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
       "specimen_laterality": "Left",
       "surgery": {
-        "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
         "surgery_type": "Ablation",
         "surgery_site": "string",
         "surgery_location": "Local recurrence",
@@ -5945,7 +5902,6 @@ continued
       ],
       "biomarkers": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "er_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
           "her2_ihc_status": "Cannot be determined",
@@ -5984,7 +5940,6 @@ continued
       "response_to_treatment": "Complete response",
       "chemotherapies": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "chemotherapy_drug_dose_units": "mg/m2",
           "drug_reference_database": "RxNorm",
           "drug_name": "string",
@@ -5995,7 +5950,6 @@ continued
       ],
       "hormone_therapies": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "hormone_drug_dose_units": "mg/m2",
           "drug_reference_database": "RxNorm",
           "drug_name": "string",
@@ -6006,7 +5960,6 @@ continued
       ],
       "immunotherapies": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "immunotherapy_type": "Cell-based",
           "drug_reference_database": "RxNorm",
           "immunotherapy_drug_dose_units": "mg/m2",
@@ -6017,7 +5970,6 @@ continued
         }
       ],
       "radiation": {
-        "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
         "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
         "radiation_therapy_type": "External",
         "anatomical_site_irradiated": "Left Abdomen",
@@ -6027,7 +5979,6 @@ continued
         "reference_radiation_treatment_id": "string"
       },
       "surgery": {
-        "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
         "surgery_type": "Ablation",
         "surgery_site": "string",
         "surgery_location": "Local recurrence",
@@ -6067,7 +6018,6 @@ continued
           "recurrence_stage_group": "Stage 0",
           "biomarkers": [
             {
-              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
               "er_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
               "her2_ihc_status": "Cannot be determined",
@@ -6089,7 +6039,6 @@ continued
       ],
       "biomarkers": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "er_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
           "her2_ihc_status": "Cannot be determined",
@@ -6111,7 +6060,6 @@ continued
   ],
   "biomarkers": [
     {
-      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "er_status": "Cannot be determined",
       "pr_status": "Cannot be determined",
       "her2_ihc_status": "Cannot be determined",
@@ -6147,7 +6095,6 @@ continued
       "recurrence_stage_group": "Stage 0",
       "biomarkers": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "er_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
           "her2_ihc_status": "Cannot be determined",
@@ -6409,7 +6356,6 @@ continued
 
 ```json
 {
-  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
   "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
   "radiation_therapy_type": "External",
   "anatomical_site_irradiated": "Left Abdomen",
@@ -6425,7 +6371,6 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|string(uuid)|false|none|none|
 |radiation_therapy_modality|any|false|none|none|
 
 oneOf
@@ -6646,7 +6591,6 @@ xor
   "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
   "specimen_laterality": "Left",
   "surgery": {
-    "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
     "surgery_type": "Ablation",
     "surgery_site": "string",
     "surgery_location": "Local recurrence",
@@ -6679,7 +6623,6 @@ xor
   ],
   "biomarkers": [
     {
-      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "er_status": "Cannot be determined",
       "pr_status": "Cannot be determined",
       "her2_ihc_status": "Cannot be determined",
@@ -7058,7 +7001,6 @@ continued
 
 ```json
 {
-  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
   "surgery_type": "Ablation",
   "surgery_site": "string",
   "surgery_location": "Local recurrence",
@@ -7087,7 +7029,6 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|string(uuid)|false|none|none|
 |surgery_type|any|false|none|none|
 
 oneOf
@@ -7336,7 +7277,6 @@ continued
   "response_to_treatment": "Complete response",
   "chemotherapies": [
     {
-      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "chemotherapy_drug_dose_units": "mg/m2",
       "drug_reference_database": "RxNorm",
       "drug_name": "string",
@@ -7347,7 +7287,6 @@ continued
   ],
   "hormone_therapies": [
     {
-      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "hormone_drug_dose_units": "mg/m2",
       "drug_reference_database": "RxNorm",
       "drug_name": "string",
@@ -7358,7 +7297,6 @@ continued
   ],
   "immunotherapies": [
     {
-      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "immunotherapy_type": "Cell-based",
       "drug_reference_database": "RxNorm",
       "immunotherapy_drug_dose_units": "mg/m2",
@@ -7369,7 +7307,6 @@ continued
     }
   ],
   "radiation": {
-    "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
     "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
     "radiation_therapy_type": "External",
     "anatomical_site_irradiated": "Left Abdomen",
@@ -7379,7 +7316,6 @@ continued
     "reference_radiation_treatment_id": "string"
   },
   "surgery": {
-    "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
     "surgery_type": "Ablation",
     "surgery_site": "string",
     "surgery_location": "Local recurrence",
@@ -7419,7 +7355,6 @@ continued
       "recurrence_stage_group": "Stage 0",
       "biomarkers": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "er_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
           "her2_ihc_status": "Cannot be determined",
@@ -7441,7 +7376,6 @@ continued
   ],
   "biomarkers": [
     {
-      "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
       "er_status": "Cannot be determined",
       "pr_status": "Cannot be determined",
       "her2_ihc_status": "Cannot be determined",
@@ -7900,7 +7834,6 @@ null
               "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
               "specimen_laterality": "Left",
               "surgery": {
-                "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                 "surgery_type": "Ablation",
                 "surgery_site": "string",
                 "surgery_location": "Local recurrence",
@@ -7933,7 +7866,6 @@ null
               ],
               "biomarkers": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "er_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
                   "her2_ihc_status": "Cannot be determined",
@@ -7972,7 +7904,6 @@ null
               "response_to_treatment": "Complete response",
               "chemotherapies": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "chemotherapy_drug_dose_units": "mg/m2",
                   "drug_reference_database": "RxNorm",
                   "drug_name": "string",
@@ -7983,7 +7914,6 @@ null
               ],
               "hormone_therapies": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "hormone_drug_dose_units": "mg/m2",
                   "drug_reference_database": "RxNorm",
                   "drug_name": "string",
@@ -7994,7 +7924,6 @@ null
               ],
               "immunotherapies": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "immunotherapy_type": "Cell-based",
                   "drug_reference_database": "RxNorm",
                   "immunotherapy_drug_dose_units": "mg/m2",
@@ -8005,7 +7934,6 @@ null
                 }
               ],
               "radiation": {
-                "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                 "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
                 "radiation_therapy_type": "External",
                 "anatomical_site_irradiated": "Left Abdomen",
@@ -8015,7 +7943,6 @@ null
                 "reference_radiation_treatment_id": "string"
               },
               "surgery": {
-                "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                 "surgery_type": "Ablation",
                 "surgery_site": "string",
                 "surgery_location": "Local recurrence",
@@ -8060,7 +7987,6 @@ null
               ],
               "biomarkers": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "er_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
                   "her2_ihc_status": "Cannot be determined",
@@ -8082,7 +8008,6 @@ null
           ],
           "biomarkers": [
             {
-              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
               "er_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
               "her2_ihc_status": "Cannot be determined",
@@ -8118,7 +8043,6 @@ null
               "recurrence_stage_group": "Stage 0",
               "biomarkers": [
                 {
-                  "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
                   "er_status": "Cannot be determined",
                   "pr_status": "Cannot be determined",
                   "her2_ihc_status": "Cannot be determined",
@@ -8142,7 +8066,6 @@ null
       ],
       "comorbidities": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "prior_malignancy": "Yes",
           "laterality_of_prior_malignancy": "Bilateral",
           "comorbidity_type_code": "string",
@@ -8153,7 +8076,6 @@ null
       ],
       "exposures": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
           "tobacco_type": [
             "Chewing Tobacco"
@@ -8163,7 +8085,6 @@ null
       ],
       "biomarkers": [
         {
-          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
           "er_status": "Cannot be determined",
           "pr_status": "Cannot be determined",
           "her2_ihc_status": "Cannot be determined",
@@ -8199,7 +8120,6 @@ null
           "recurrence_stage_group": "Stage 0",
           "biomarkers": [
             {
-              "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
               "er_status": "Cannot be determined",
               "pr_status": "Cannot be determined",
               "her2_ihc_status": "Cannot be determined",
