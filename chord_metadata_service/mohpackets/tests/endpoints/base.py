@@ -84,7 +84,6 @@ class BaseTestCase(TestCase):
         )
         # remember to add all the custom users into this list
         cls.users = [cls.user_0, cls.user_1, cls.user_2]
-        settings.DJANGO_SETTINGS_MODULE = "config.settings.local"
         settings.LOCAL_AUTHORIZED_DATASET = [
             {
                 "token": cls.user_0.token,
