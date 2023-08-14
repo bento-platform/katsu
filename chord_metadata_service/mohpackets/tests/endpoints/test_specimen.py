@@ -38,7 +38,8 @@ class IngestTestCase(BaseTestCase):
         self.assertEqual(
             response.status_code,
             status.HTTP_201_CREATED,
-            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. Response content: {response.content}",
+            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. "
+            f"Response content: {response.content}",
         )
 
     def test_specimen_create_unauthorized(self):
