@@ -46,7 +46,7 @@ class CanDIGAdminOrReadOnly(BasePermission):
                 if not auth:
                     raise AuthenticationFailed("Authorization required")
                 token = auth[1].decode("utf-8")
-                is_admin = None 
+                is_admin = None
                 for d in settings.LOCAL_AUTHORIZED_DATASET:
                     if d["token"] == token:
                         is_admin = d["is_admin"]
