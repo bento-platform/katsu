@@ -1,11 +1,19 @@
 import logging
 
+import factory
 from django.conf import settings
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from chord_metadata_service.mohpackets.serializers import *
-from chord_metadata_service.mohpackets.tests.endpoints.factories import *
+from chord_metadata_service.mohpackets.tests.endpoints.factories import (
+    ChemotherapyFactory,
+    DonorFactory,
+    PrimaryDiagnosisFactory,
+    ProgramFactory,
+    SampleRegistrationFactory,
+    SpecimenFactory,
+    TreatmentFactory,
+)
 
 """
     This file contains the base test case class for testing endpoints.
@@ -17,7 +25,7 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import *
     consistency.
 
     Example:
-        To use this base test case, inherit from it in your test classes and use 
+        To use this base test case, inherit from it in your test classes and use
         the provided attributes for testing API endpoints and permissions.
 
         class MyAPITestCase(BaseTestCase):
