@@ -41,7 +41,7 @@ class CanDIGAdminOrReadOnly(BasePermission):
                 except Exception as e:
                     logger.exception(f"An error occurred in OPA is_site_admin: {e}")
                     raise Exception("Error checking roles from OPA.")
-            elif "local" in settings_module:
+            elif "local" or "test" in settings_module:
                 auth = get_authorization_header(request).split()
                 if not auth:
                     raise AuthenticationFailed("Authorization required")
