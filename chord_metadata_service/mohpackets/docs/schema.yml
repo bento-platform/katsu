@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: MoH Service API
   version: 1.0.0
-  description: This is the RESTful API for the MoH Service. Based on commit "29fd55d173b7a01daa72fcc89187e3aabd1fb51e".
+  description: This is the RESTful API for the MoH Service. Based on commit "991c9e09e6467d7bd96b500558f05d362f6988cd".
 paths:
   /v2/authorized/biomarkers/:
     get:
@@ -4028,9 +4028,6 @@ components:
     NestedBiomarker:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         er_status:
           nullable: true
           oneOf:
@@ -4107,9 +4104,6 @@ components:
     NestedChemotherapy:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         chemotherapy_drug_dose_units:
           nullable: true
           oneOf:
@@ -4143,9 +4137,6 @@ components:
     NestedComorbidity:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         prior_malignancy:
           nullable: true
           oneOf:
@@ -4181,9 +4172,6 @@ components:
     NestedExposure:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         tobacco_smoking_status:
           nullable: true
           oneOf:
@@ -4284,9 +4272,6 @@ components:
     NestedHormoneTherapy:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         hormone_drug_dose_units:
           nullable: true
           oneOf:
@@ -4320,9 +4305,6 @@ components:
     NestedImmunotherapy:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         immunotherapy_type:
           nullable: true
           oneOf:
@@ -4459,9 +4441,6 @@ components:
     NestedRadiation:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         radiation_therapy_modality:
           nullable: true
           oneOf:
@@ -4655,9 +4634,6 @@ components:
     NestedSurgery:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         surgery_type:
           nullable: true
           oneOf:
