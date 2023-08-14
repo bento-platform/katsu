@@ -7,7 +7,7 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import ProgramF
 
 """
     This file contains test cases for Program API endpoints.
-    The tests cover various scenarios to ensure proper functionality and authorization 
+    The tests cover various scenarios to ensure proper functionality and authorization
     for API endpoints.
 
 """
@@ -39,7 +39,8 @@ class IngestTestCase(BaseTestCase):
         self.assertEqual(
             response.status_code,
             status.HTTP_201_CREATED,
-            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. Response content: {response.content}",
+            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. "
+            f"Response content: {response.content}",
         )
 
     def test_ingest_unauthorized(self):
