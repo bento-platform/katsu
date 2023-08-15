@@ -95,5 +95,14 @@ LOGGING = {
             "level": "DEBUG",  # Set the root logger level
             "handlers": ["console", "file"],
         },
+        "psycopg": {
+            "level": "ERROR",
+        },
+        "factory": {
+            "level": "ERROR",
+        },
+        "faker": {
+            "level": "ERROR",
+        },
     },
 }
