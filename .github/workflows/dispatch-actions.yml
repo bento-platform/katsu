@@ -21,7 +21,7 @@ jobs:
                   parent_repository: ${{ env.PARENT_REPOSITORY }}
                   checkout_branch: ${{ env.CHECKOUT_BRANCH}}
                   pr_against_branch: ${{ env.PR_AGAINST_BRANCH }}
-                  pr_description: "PR triggered by update to stable branch on ${{ github.repository }}. Commit hash: ${{ github.sha }} Commit message: ${{ github.event.head_commit.message }}"
+                  pr_description: "PR triggered by update to stable branch on ${{ github.repository }}. Commit hash: ${{ github.sha }}"
                   owner: ${{ env.OWNER }}
                   submodule_path: lib/katsu/katsu_service
                   label: Submodule update
