@@ -22,9 +22,6 @@ env/
 *.swo
 .vscode/*
 
-# Keep vscode debugger configuration
-!.vscode/launch.json
-
 # coverage
 .coverage
 htmlcov/

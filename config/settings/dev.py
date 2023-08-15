@@ -15,7 +15,7 @@ from os.path import exists
 from .local import *
 
 ALLOWED_HOSTS = [
-    "localhost", 
+    "localhost",
     "127.0.0.1",
     "candig.docker.internal",
     os.environ.get("HOST_CONTAINER_NAME"),
@@ -26,13 +26,14 @@ ALLOWED_HOSTS = [
 KATSU_AUTHORIZATION = os.getenv("KATSU_AUTHORIZATION")
 CANDIG_OPA_URL = os.getenv("OPA_URL")
 CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("OPA_SITE_ADMIN_KEY")
-CONN_MAX_AGE = int(os.getenv('CONN_MAX_AGE', 0))
+CONN_MAX_AGE = int(os.getenv("CONN_MAX_AGE", 0))
 if exists("/run/secrets/opa-root-token"):
     with open("/run/secrets/opa-root-token", "r") as f:
         CANDIG_OPA_SECRET = f.read()
 if exists("/run/secrets/katsu_secret"):
     with open("/run/secrets/katsu_secret", "r") as f:
         SECRET_KEY = f.read()
+
 
 # function to read docker secret password file
 def get_secret(path):
@@ -93,6 +94,15 @@ LOGGING = {
         "": {
             "level": "DEBUG",  # Set the root logger level
             "handlers": ["console", "file"],
+        },
+        "psycopg": {
+            "level": "ERROR",
+        },
+        "factory": {
+            "level": "ERROR",
+        },
+        "faker": {
+            "level": "ERROR",
         },
     },
 }

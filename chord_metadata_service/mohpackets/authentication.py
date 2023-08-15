@@ -28,7 +28,6 @@ class TokenAuthentication(BaseAuthentication):
                     f"An error occurred in OPA get_authorized_datasets: {e}"
                 )
                 raise AuthenticationFailed("Error retrieving datasets from OPA.")
-        return None
 
 
 class LocalAuthentication(BaseAuthentication):
@@ -36,18 +35,16 @@ class LocalAuthentication(BaseAuthentication):
         auth = get_authorization_header(request).split()
         if not auth:
             raise AuthenticationFailed("Authorization required")
-        username = auth[1].decode("utf-8")
+        token = auth[1].decode("utf-8")
         # get authorized datasets from local settings
         authorized_datasets = [
-            d["datasets"]
+            dataset
             for d in settings.LOCAL_AUTHORIZED_DATASET
-            if d["username"] == username
+            if d["token"] == token
+            for dataset in d["datasets"]
         ]
-        if not authorized_datasets:
-            raise Exception(f"User {username} not authorized to access any datasets.")
-        # add dataset to request so we can access it in views
-        request.authorized_datasets = authorized_datasets[0]
-        return None
+
+        request.authorized_datasets = authorized_datasets
 
 
 class TokenScheme(OpenApiAuthenticationExtension):

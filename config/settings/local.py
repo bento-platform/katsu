@@ -37,8 +37,16 @@ DATABASES = {
 
 # You can change username and datasets to suit your needs
 LOCAL_AUTHORIZED_DATASET = [
-    {"username": "user1", "datasets": ["SYNTHETIC-1"]},
-    {"username": "user2", "datasets": ["SYNTHETIC-1", "SYNTHETIC-2"]},
+    {
+        "token": "token_1",
+        "is_admin": False,
+        "datasets": ["SYNTHETIC-1"],
+    },
+    {
+        "token": "token_2",
+        "is_admin": True,
+        "datasets": ["SYNTHETIC-1", "SYNTHETIC-2"],
+    }
 ]
 
 # Debug toolbar settings

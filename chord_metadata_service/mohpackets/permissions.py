@@ -3,6 +3,8 @@ import os
 
 from authx.auth import is_site_admin
 from django.conf import settings
+from rest_framework.authentication import get_authorization_header
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 logger = logging.getLogger(__name__)
@@ -39,4 +41,16 @@ class CanDIGAdminOrReadOnly(BasePermission):
                 except Exception as e:
                     logger.exception(f"An error occurred in OPA is_site_admin: {e}")
                     raise Exception("Error checking roles from OPA.")
-            return True
+            elif "local" in settings_module:
+                auth = get_authorization_header(request).split()
+                if not auth:
+                    raise AuthenticationFailed("Authorization required")
+                token = auth[1].decode("utf-8")
+                is_admin = None
+                for d in settings.LOCAL_AUTHORIZED_DATASET:
+                    if d["token"] == token:
+                        is_admin = d["is_admin"]
+                        break
+                if is_admin:
+                    return True
+            return False
