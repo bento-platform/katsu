@@ -6,6 +6,8 @@ from django.conf import settings
 from django.test import TestCase
 from rest_framework.test import APIClient
 
+from chord_metadata_service.mohpackets.api_authorized import AuthorizedMixin
+from chord_metadata_service.mohpackets.authentication import LocalAuthentication
 from chord_metadata_service.mohpackets.tests.endpoints.factories import (
     ChemotherapyFactory,
     DonorFactory,
@@ -86,6 +88,7 @@ class BaseTestCase(TestCase):
         # remember to add all the custom users into this list
         cls.users = [cls.user_0, cls.user_1, cls.user_2]
         os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.local"
+
         settings.LOCAL_AUTHORIZED_DATASET = [
             {
                 "token": cls.user_0.token,
@@ -108,3 +111,4 @@ class BaseTestCase(TestCase):
         logging.disable(logging.CRITICAL)
         # Initialize the client before each test method
         self.client = APIClient()
+        AuthorizedMixin.authentication_classes = [LocalAuthentication]
