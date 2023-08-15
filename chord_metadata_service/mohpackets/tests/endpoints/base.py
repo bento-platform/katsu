@@ -108,7 +108,7 @@ class BaseTestCase(TestCase):
         ]
 
     def setUp(self):
-        logging.disable(logging.CRITICAL)
+        logging.disable(logging.WARNING)
         # Initialize the client before each test method
         self.client = APIClient()
         AuthorizedMixin.authentication_classes = [LocalAuthentication]
