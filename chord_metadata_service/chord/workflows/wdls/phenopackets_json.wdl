@@ -51,7 +51,7 @@ task ingest_task {
     command <<<
         RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
             -H "Content-Type: application/json" \
-            -H "Authorization: ~{token}" \
+            -H "Authorization: Bearer ~{token}" \
             --data "@~{json_document}" \
             "~{service_url}/ingest/~{dataset_id}/phenopackets_json")
         if [ "${RESPONSE}" != "204" ]
