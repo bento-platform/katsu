@@ -39,7 +39,7 @@ task ingest_task {
             "~{katsu_url}/ingest/~{dataset_id}/phenopackets_json")
         if [[ "${RESPONSE}" != "204" ]]
         then
-            echo "Error: Metadata service replied with HTTP code ${RESPONSE}" 1>&2  # to stderr
+            echo "Error: Metadata service replied with ${RESPONSE}" 1>&2  # to stderr
             exit 1
         fi
         echo ${RESPONSE}
