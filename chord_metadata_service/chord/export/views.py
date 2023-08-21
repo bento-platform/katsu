@@ -53,7 +53,7 @@ def export(request: Request):
         )
 
     object_id = request.data["object_id"]
-    object_type: str = request.data["object_type"]   # 'dataset', 'table',...
+    object_type: str = request.data["object_type"]   # 'project', 'dataset',...
 
     model = EXPORT_OBJECT_TYPE[object_type]["model"]
     if not model.objects.filter(identifier=object_id).exists():
@@ -86,7 +86,7 @@ def export(request: Request):
 
             # If no output path parameter has been provided, the generated export
             # is returned as an attachment to the Response and everything will
-            # be cleaned afterwards.
+            # be cleaned afterward.
             # Otherwise, the provided local path is under the responsibility of
             # the caller
             if not output_path:
