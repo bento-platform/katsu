@@ -4,14 +4,14 @@ workflow cbioportal {
     input {
         String dataset_id
         String run_dir
-        String metadata_url
+        String katsu_url
         String drs_url
     }
 
     call katsu_dataset_export {
         input: dataset_id = dataset_id,
                run_dir = run_dir,
-               metadata_url = metadata_url
+               katsu_url = katsu_url
     }
 
     call get_maf {
@@ -30,7 +30,7 @@ workflow cbioportal {
 task katsu_dataset_export {
     input {
         String dataset_id
-        String metadata_url
+        String katsu_url
         String run_dir
     }
 
@@ -42,7 +42,7 @@ task katsu_dataset_export {
         RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -d '{"format": "cbioportal", "object_type": "dataset", "object_id": "~{dataset_id}", "output_path": "~{run_dir}"}' \
-            "~{metadata_url}/private/export")
+            "~{katsu_url}/private/export")
 
         if [ "${RESPONSE}" != "204" ]
         then

@@ -5,46 +5,29 @@ workflow experiments_json {
         File json_document
         String run_dir
         String project_id
-        String secret__access_token
         String dataset_id
-        String service_url
-    }
-
-    call copy_task {
-        input: json_document_in = json_document
+        String katsu_url
+        String secret__access_token
     }
 
     call ingest_task {
         input:
-            json_document = copy_task.json_document,
-            service_url = service_url,
+            json_document = json_document,
+            katsu_url = katsu_url,
             dataset_id = dataset_id,
             token = secret__access_token
     }
 
     output {
-        File json_document_out = copy_task.json_document
         File stdout = ingest_task.txt_output
         File stderr = ingest_task.err_output
-    }
-}
-
-task copy_task {
-    input {
-        File json_document_in
-    }
-    command {
-        cp "~{json_document_in}" ingest.json
-    }
-    output {
-        File json_document = "ingest.json"
     }
 }
 
 task ingest_task {
     input {
         File json_document
-        String service_url
+        String katsu_url
         String dataset_id
         String token
     }
@@ -53,8 +36,8 @@ task ingest_task {
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ~{token}" \
             --data "@~{json_document}" \
-            "~{service_url}/ingest/~{dataset_id}/experiments_json")
-        if [ "${RESPONSE}" != "204" ]
+            "~{katsu_url}/ingest/~{dataset_id}/experiments_json")
+        if [[ "${RESPONSE}" != "204" ]]
         then
             echo "Error: Metadata service replied with HTTP code ${RESPONSE}" 1>&2  # to stderr
             exit 1
