@@ -418,18 +418,12 @@ class Biomarker(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_specimen_id = models.ForeignKey(
-        Specimen, on_delete=models.SET_NULL, blank=True, null=True
+    submitter_specimen_id = models.CharField(max_length=64, null=True, blank=True)
+    submitter_primary_diagnosis_id = models.CharField(
+        max_length=64, null=True, blank=True
     )
-    submitter_primary_diagnosis_id = models.ForeignKey(
-        PrimaryDiagnosis, on_delete=models.SET_NULL, blank=True, null=True
-    )
-    submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.SET_NULL, blank=True, null=True
-    )
-    submitter_follow_up_id = models.ForeignKey(
-        FollowUp, on_delete=models.SET_NULL, blank=True, null=True
-    )
+    submitter_treatment_id = models.CharField(max_length=64, null=True, blank=True)
+    submitter_follow_up_id = models.CharField(max_length=64, null=True, blank=True)
     test_interval = models.PositiveSmallIntegerField(null=True, blank=True)
     psa_level = models.PositiveSmallIntegerField(null=True, blank=True)
     ca125 = models.PositiveSmallIntegerField(null=True, blank=True)
