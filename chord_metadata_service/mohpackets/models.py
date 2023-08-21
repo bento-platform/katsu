@@ -353,13 +353,13 @@ class Surgery(models.Model):
         max_length=64, null=True, blank=True
     )
     margin_types_involved = ArrayField(
-        models.CharField(max_length=128, null=True, blank=True)
+        models.CharField(max_length=128, null=True, blank=True), null=True, blank=True
     )
     margin_types_not_involved = ArrayField(
-        models.CharField(max_length=128, null=True, blank=True)
+        models.CharField(max_length=128, null=True, blank=True), null=True, blank=True
     )
     margin_types_not_assessed = ArrayField(
-        models.CharField(max_length=128, null=True, blank=True)
+        models.CharField(max_length=128, null=True, blank=True), null=True, blank=True
     )
     lymphovascular_invasion = models.CharField(max_length=255, null=True, blank=True)
     perineural_invasion = models.CharField(max_length=128, null=True, blank=True)
