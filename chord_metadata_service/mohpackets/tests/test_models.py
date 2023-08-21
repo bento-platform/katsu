@@ -2013,34 +2013,9 @@ class BiomarkerTest(TestCase):
             program_id=self.program,
             primary_site=["Adrenal gland"],
         )
-        self.primary_diagnosis = PrimaryDiagnosis.objects.create(
-            submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
-            program_id=self.program,
-            submitter_donor_id=self.donor,
-        )
-        self.specimen = Specimen.objects.create(
-            program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
-        )
-        self.treatment = Treatment.objects.create(
-            submitter_treatment_id="TREATMENT_1",
-            program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
-        )
-        self.followup = FollowUp.objects.create(
-            submitter_follow_up_id="FOLLOW_UP_1",
-            program_id=self.program,
-            submitter_donor_id=self.donor,
-        )
         self.valid_values = {
             "program_id": self.program,
             "submitter_donor_id": self.donor,
-            "submitter_specimen_id": self.specimen,
-            "submitter_primary_diagnosis_id": self.primary_diagnosis,
-            "submitter_treatment_id": self.treatment,
-            "submitter_follow_up_id": self.followup,
             "test_interval": 8,
             "psa_level": 230,
             "ca125": 29,
@@ -2063,12 +2038,6 @@ class BiomarkerTest(TestCase):
     def test_biomarker_fields(self):
         self.assertEqual(self.biomarker.program_id, self.program)
         self.assertEqual(self.biomarker.submitter_donor_id, self.donor)
-        self.assertEqual(self.biomarker.submitter_specimen_id, self.specimen)
-        self.assertEqual(
-            self.biomarker.submitter_primary_diagnosis_id, self.primary_diagnosis
-        )
-        self.assertEqual(self.biomarker.submitter_treatment_id, self.treatment)
-        self.assertEqual(self.biomarker.submitter_follow_up_id, self.followup)
         self.assertEqual(self.biomarker.test_interval, 8)
         self.assertEqual(self.biomarker.psa_level, 230)
         self.assertEqual(self.biomarker.ca125, 29)
