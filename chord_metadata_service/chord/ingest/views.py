@@ -89,7 +89,7 @@ def ingest(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def ingest_dataset(request, dataset_id: str, data_type: str):
+def ingest_into_dataset(request, dataset_id: str, data_type: str):
     logger.info(f"Received a {data_type} ingest request for dataset {dataset_id}.")
 
     if data_type not in WORKFLOW_INGEST_FUNCTION_MAP:
