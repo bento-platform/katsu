@@ -2,6 +2,7 @@ from copy import deepcopy
 import json
 import csv
 import io
+import random
 from django.conf import settings
 from django.urls import reverse
 from django.test import override_settings
@@ -317,18 +318,21 @@ class PublicFilteringIndividualsTest(APITestCase):
     """ Test for api/public GET filtering """
 
     response_threshold = CONFIG_PUBLIC_TEST["rules"]["count_threshold"]
-    random_range = 137
+    num_individuals = 137
+    random_seed = 341  # do not change this please :))
 
     @staticmethod
     def response_threshold_check(response):
         return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
+        individuals = [c.generate_valid_individual() for _ in range(self.num_individuals)]
         for individual in individuals:
             Individual.objects.create(**individual)
         p = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
         ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0], p))
+
+        random.seed(self.random_seed)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_sex(self):
@@ -587,6 +591,20 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertEqual(1, response_obj["count"])
+
+
+class PublicFilteringIndividualsTestSmallCellCount(PublicFilteringIndividualsTest):
+    num_individuals = 3  # below configured test threshold
+    # rest of the methods are inherited
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_public_overview_sex(self):
+        response = self.client.get('/api/public_search_fields')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+
+        # overview for sex should have 0 entries due to small cell counts
+        self.assertEqual(len(response_obj["sections"][0]["fields"][0]["options"]), 0)  # path to sex field
 
 
 class PublicAgeRangeFilteringIndividualsTest(APITestCase):
