@@ -390,8 +390,8 @@ class FollowUp(models.Model):
     method_of_progression_status = ArrayField(
         models.CharField(max_length=255, null=True, blank=True), null=True, blank=True
     )
-    anatomic_site_progression_or_recurrence = models.CharField(
-        max_length=255, null=True, blank=True
+    anatomic_site_progression_or_recurrence = ArrayField(
+        models.CharField(max_length=255, null=True, blank=True), null=True, blank=True
     )
     recurrence_tumour_staging_system = models.CharField(
         max_length=255, null=True, blank=True
