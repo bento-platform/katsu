@@ -2,7 +2,7 @@ import chord_metadata_service.mcode.models as mm
 import chord_metadata_service.phenopackets.models as pm
 
 from chord_metadata_service.cleanup.remove import remove_not_referenced
-from chord_metadata_service.utils import dict_first_val
+from chord_metadata_service.utils import build_id_set_from_model
 from .models import Individual
 
 __all__ = [
@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 
-def clean_individuals() -> int:
+async def clean_individuals() -> int:
     """
     Deletes all individuals which aren't referenced anywhere in the application.
     Phenopackets/biosamples should be cleaned BEFORE running this.
@@ -19,12 +19,12 @@ def clean_individuals() -> int:
     individuals_referenced = set()
 
     # Collect references to individuals from MCode
-    individuals_referenced.update(map(dict_first_val, mm.LabsVital.objects.values("individual_id")))
-    individuals_referenced.update(map(dict_first_val, mm.MCodePacket.objects.values("subject_id")))
+    individuals_referenced |= await build_id_set_from_model(mm.LabsVital, "individual_id")
+    individuals_referenced |= await build_id_set_from_model(mm.MCodePacket, "subject_id")
 
     # Collect references to individuals from Phenopackets
-    individuals_referenced.update(map(dict_first_val, pm.Biosample.objects.values("individual_id")))
-    individuals_referenced.update(map(dict_first_val, pm.Phenopacket.objects.values("subject_id")))
+    individuals_referenced |= await build_id_set_from_model(pm.Biosample, "individual_id")
+    individuals_referenced |= await build_id_set_from_model(pm.Phenopacket, "subject_id")
 
     # Remove individuals not collected above
-    return remove_not_referenced(Individual, individuals_referenced, "individuals")
+    return await remove_not_referenced(Individual, individuals_referenced, "individuals")

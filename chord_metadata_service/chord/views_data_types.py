@@ -156,15 +156,19 @@ async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: st
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     project = await Project.objects.aget(datasets=dataset_id)
-    response_object = await make_data_type_response_object(data_type, dt.DATA_TYPES[data_type],
-                                                           project=str(project.identifier), dataset=dataset_id)
+    response_object = await make_data_type_response_object(
+        data_type,
+        dt.DATA_TYPES[data_type],
+        project=str(project.identifier),
+        dataset=dataset_id,
+    )
 
     return Response(response_object)
 
 
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-async def dataset_datatype_summary(request: HttpRequest, dataset_id: str):
+async def dataset_datatype_summary(_request: HttpRequest, dataset_id: str):
     dataset = await Dataset.objects.aget(identifier=dataset_id)
     project = await Project.objects.aget(datasets=dataset)
 
