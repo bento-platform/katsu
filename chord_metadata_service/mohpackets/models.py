@@ -336,12 +336,10 @@ class Surgery(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_specimen_id = models.OneToOneField(
-        Specimen, on_delete=models.CASCADE, null=True, blank=True
-    )
     submitter_treatment_id = models.OneToOneField(
         Treatment, on_delete=models.CASCADE, null=False, blank=False
     )
+    submitter_specimen_id = models.CharField(max_length=64, null=True, blank=True)
     surgery_type = models.CharField(max_length=255, null=True, blank=True)
     surgery_site = models.CharField(max_length=255, null=True, blank=True)
     surgery_location = models.CharField(max_length=128, null=True, blank=True)
