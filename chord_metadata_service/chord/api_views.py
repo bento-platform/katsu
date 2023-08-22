@@ -76,7 +76,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     queryset = Dataset.objects.all().order_by("title")
 
     @action(detail=True, methods=['get'])
-    def dats(self, request, pk=None):
+    def dats(self, _request, *_args, **_kwargs):
         """
         Retrieve a specific DATS file for a given dataset.
 
