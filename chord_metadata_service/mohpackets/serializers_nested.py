@@ -135,7 +135,7 @@ class NestedTreatmentSerializer(TreatmentSerializer):
     chemotherapies = serializers.SerializerMethodField()
     hormone_therapies = serializers.SerializerMethodField()
     immunotherapies = serializers.SerializerMethodField()
-    radiation = serializers.SerializerMethodField()
+    radiations = serializers.SerializerMethodField()
     surgery = serializers.SerializerMethodField()
     followups = serializers.SerializerMethodField()
 
@@ -154,13 +154,10 @@ class NestedTreatmentSerializer(TreatmentSerializer):
         immunotherapies = obj.immunotherapy_set.all()
         return NestedImmunotherapySerializer(immunotherapies, many=True).data
 
-    @extend_schema_field(NestedRadiationSerializer)
-    def get_radiation(self, obj):
-        try:
-            radiation = obj.radiation
-            return NestedRadiationSerializer(radiation).data
-        except Radiation.DoesNotExist:
-            return None
+    @extend_schema_field(ListSerializer(child=NestedRadiationSerializer()))
+    def get_radiations(self, obj):
+        radiations = obj.radiation_set.all()
+        return NestedRadiationSerializer(radiations, many=True).data
 
     @extend_schema_field(NestedSurgerySerializer)
     def get_surgery(self, obj):
