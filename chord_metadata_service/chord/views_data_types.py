@@ -10,12 +10,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from typing import Callable, Dict, Optional
+
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
-from chord_metadata_service.mcode.models import MCodePacket
-
-from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult
+from chord_metadata_service.logger import logger
+from chord_metadata_service.mcode.models import MCodePacket
+from chord_metadata_service.phenopackets.models import Phenopacket
 
 from . import data_types as dt
 
@@ -153,6 +155,11 @@ async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: st
 
     if request.method == "DELETE":
         await qs.adelete()
+
+        logger.info(f"Running cleanup after clearing data type {data_type} in dataset {dataset_id} via API")
+        n_removed = await run_all_cleanup()
+        logger.info(f"Cleanup: removed {n_removed} objects in total")
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     project = await Project.objects.aget(datasets=dataset_id)
