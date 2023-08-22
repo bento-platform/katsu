@@ -1,5 +1,7 @@
 import logging
 
+from asgiref.sync import async_to_sync, sync_to_async
+
 from rest_framework import status, viewsets
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.response import Response
@@ -71,12 +73,15 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
     queryset = Dataset.objects.all().order_by("title")
 
-    def destroy(self, request, *args, **kwargs):
-        dataset = self.get_object()
-        dataset.delete()
+    @async_to_sync
+    async def destroy(self, request, *args, **kwargs):
+        get_obj_async = sync_to_async(self.get_object)
+
+        dataset = await get_obj_async()
+        await dataset.adelete()
 
         logger.info(f"Running cleanup after deleting dataset {dataset.identifier} via DRF API")
-        n_removed = run_all_cleanup()
+        n_removed = await run_all_cleanup()
         logger.info(f"Cleanup: removed {n_removed} objects in total")
         return Response(status=status.HTTP_204_NO_CONTENT)
 

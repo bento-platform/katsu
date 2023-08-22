@@ -9,7 +9,7 @@ from chord_metadata_service.chord.export.utils import EXPORT_DIR
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from ..ingest.views import METADATA_WORKFLOWS
+from ..workflows.metadata import METADATA_WORKFLOWS
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON

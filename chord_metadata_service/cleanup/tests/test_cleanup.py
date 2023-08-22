@@ -69,52 +69,52 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
             **valid_phenotypic_feature(phenopacket=None)
         )
 
-    def _check_table_delete(self, delete_url: str):
+    async def _check_dataset_delete(self, delete_url: str):
         # Check individual exists pre-table-delete
-        Individual.objects.get(id="patient:1")
+        await Individual.objects.aget(id="patient:1")
 
         # Check we can run clean_biosamples and clean_individuals with nothing lost (in order),
         # except the unlinked phenotypic feature,
         # since the individual is referenced by the phenopacket and the biosample is in use.
-        self.assertEqual(pc.clean_biosamples(), 0)
-        self.assertEqual(pc.clean_phenotypic_features(), 1)
-        self.assertEqual(pc.clean_procedures(), 0)
-        self.assertEqual(clean_individuals(), 0)
-        self.assertEqual(clean_resources(), 0)
+        self.assertEqual(await pc.clean_biosamples(), 0)
+        self.assertEqual(await pc.clean_phenotypic_features(), 1)
+        self.assertEqual(await pc.clean_procedures(), 0)
+        self.assertEqual(await clean_individuals(), 0)
+        self.assertEqual(await clean_resources(), 0)
 
-        r = self.client.delete(delete_url)
+        r = await self.async_client.delete(delete_url)
         assert r.status_code == 204
 
         with self.assertRaises(PhenotypicFeature.DoesNotExist):  # PhenotypicFeature successfully deleted
-            self.phenotypic_feature.refresh_from_db()
+            await self.phenotypic_feature.arefresh_from_db()
 
         with self.assertRaises(PhenotypicFeature.DoesNotExist):  # PhenotypicFeature successfully deleted
-            self.unlinked_phenotypic_feature.refresh_from_db()
+            await self.unlinked_phenotypic_feature.arefresh_from_db()
 
-        self.assertEqual(pc.clean_biosamples(), 0)
-        self.assertEqual(pc.clean_phenotypic_features(), 0)
-        self.assertEqual(pc.clean_procedures(), 0)
-        self.assertEqual(clean_individuals(), 0)
-        self.assertEqual(clean_resources(), 0)
+        self.assertEqual(await pc.clean_biosamples(), 0)
+        self.assertEqual(await pc.clean_phenotypic_features(), 0)
+        self.assertEqual(await pc.clean_procedures(), 0)
+        self.assertEqual(await clean_individuals(), 0)
+        self.assertEqual(await clean_resources(), 0)
 
         with self.assertRaises(Individual.DoesNotExist):
-            Individual.objects.get(id="patient:1")
+            await Individual.objects.aget(id="patient:1")
 
         # Check we can run all cleaning again with no change...
-        self.assertEqual(run_all_cleanup(), 0)
+        self.assertEqual(await run_all_cleanup(), 0)
 
-    def test_no_cleanup(self):
-        self.unlinked_phenotypic_feature.refresh_from_db()
+    async def test_no_cleanup(self):
+        await self.unlinked_phenotypic_feature.arefresh_from_db()
 
         # No cleanup except the unlinked phenotypic feature should occur without removing the dataset/phenopacket first
-        self.assertEqual(run_all_cleanup(), 1)
+        self.assertEqual(await run_all_cleanup(), 1)
 
         with self.assertRaises(PhenotypicFeature.DoesNotExist):
-            self.unlinked_phenotypic_feature.refresh_from_db()
+            await self.unlinked_phenotypic_feature.arefresh_from_db()
 
-    def test_cleanup_basic(self):
+    async def test_cleanup_basic(self):
         # Delete dataset to remove the parent phenopacket
-        self.dataset.delete()
+        await self.dataset.adelete()
 
         # 1 metadata object +
         # 2 biosamples +
@@ -126,11 +126,11 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         # 0 instruments +
         # 1 resource
         # = 7 objects total
-        self.assertEqual(run_all_cleanup(), 7)
+        self.assertEqual(await run_all_cleanup(), 7)
 
         # Should have been removed via cascade with v2.17.0 database changes
         with self.assertRaises(PhenotypicFeature.DoesNotExist):
-            self.phenotypic_feature.refresh_from_db()
+            await self.phenotypic_feature.arefresh_from_db()
 
 
 class CleanUpExperimentsTestCase(APITestCase):
@@ -157,48 +157,48 @@ class CleanUpExperimentsTestCase(APITestCase):
             biosample=self.biosample_1, instrument=self.instrument, dataset=self.dataset))
         self.experiment.experiment_results.set([self.experiment_result])
 
-    def test_experiment_deletion(self):
+    async def test_experiment_deletion(self):
         # Check we can run clean_biosamples, clean_procedures, and clean_individuals with nothing lost (in order),
         # since the biosample is referenced by the experiment, references the individual, and uses the procedure.
-        self.assertEqual(pc.clean_biosamples(), 0)
-        self.assertEqual(pc.clean_procedures(), 0)
-        self.assertEqual(clean_individuals(), 0)
+        self.assertEqual(await pc.clean_biosamples(), 0)
+        self.assertEqual(await pc.clean_procedures(), 0)
+        self.assertEqual(await clean_individuals(), 0)
 
         # Check we can run clean_experiment_results and clean_instruments safely with nothing lost, since they are
         # used by / reference the experiment.
-        self.assertEqual(ec.clean_experiment_results(), 0)
-        self.assertEqual(ec.clean_instruments(), 0)
+        self.assertEqual(await ec.clean_experiment_results(), 0)
+        self.assertEqual(await ec.clean_instruments(), 0)
 
-        r = self.client.delete(f'/api/datasets/{self.dataset.identifier}')
+        r = await self.async_client.delete(f'/api/datasets/{self.dataset.identifier}')
         assert r.status_code == 204
 
         with self.assertRaises(Experiment.DoesNotExist):
-            self.experiment.refresh_from_db()
+            await self.experiment.arefresh_from_db()
 
         with self.assertRaises(ExperimentResult.DoesNotExist):  # ExperimentResult successfully deleted
-            self.experiment_result.refresh_from_db()
+            await self.experiment_result.arefresh_from_db()
 
         with self.assertRaises(Instrument.DoesNotExist):  # Instrument successfully deleted
-            self.instrument.refresh_from_db()
+            await self.instrument.arefresh_from_db()
 
         with self.assertRaises(Biosample.DoesNotExist):  # Biosample successfully deleted
-            self.biosample_1.refresh_from_db()
+            await self.biosample_1.arefresh_from_db()
 
-        self.assertEqual(pc.clean_biosamples(), 0)
-        self.assertEqual(pc.clean_procedures(), 0)
-        self.assertEqual(ec.clean_experiment_results(), 0)
-        self.assertEqual(ec.clean_instruments(), 0)
-        self.assertEqual(clean_individuals(), 0)
+        self.assertEqual(await pc.clean_biosamples(), 0)
+        self.assertEqual(await pc.clean_procedures(), 0)
+        self.assertEqual(await ec.clean_experiment_results(), 0)
+        self.assertEqual(await ec.clean_instruments(), 0)
+        self.assertEqual(await clean_individuals(), 0)
 
         with self.assertRaises(Individual.DoesNotExist):
-            Individual.objects.get(id="patient:1")
+            await Individual.objects.aget(id="patient:1")
 
         # Check we can run all cleaning again with no change...
-        self.assertEqual(run_all_cleanup(), 0)
+        self.assertEqual(await run_all_cleanup(), 0)
 
-    def test_cleanup_basic(self):
+    async def test_cleanup_basic(self):
         # Delete dataset to remove the parent phenopacket
-        self.dataset.delete()
+        await self.dataset.adelete()
 
         # 1 biosample +
         # 1 procedure +
@@ -206,4 +206,4 @@ class CleanUpExperimentsTestCase(APITestCase):
         # 1 experiment result +
         # 1 instrument +
         # = 5 objects total
-        self.assertEqual(run_all_cleanup(), 5)
+        self.assertEqual(await run_all_cleanup(), 5)
