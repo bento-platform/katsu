@@ -1580,11 +1580,6 @@ class SurgeryTest(TestCase):
             program_id=self.program,
             submitter_donor_id=self.donor,
         )
-        self.specimen = Specimen.objects.create(
-            program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
-        )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
@@ -1594,7 +1589,6 @@ class SurgeryTest(TestCase):
         self.valid_values = {
             "program_id": self.program,
             "submitter_donor_id": self.donor,
-            "submitter_specimen_id": self.specimen,
             "submitter_treatment_id": self.treatment,
             "surgery_type": "Drainage of abscess",
             "surgery_site": "C06",
@@ -1618,7 +1612,6 @@ class SurgeryTest(TestCase):
     def test_surgery_fields(self):
         self.assertEqual(self.surgery.program_id, self.program)
         self.assertEqual(self.surgery.submitter_donor_id, self.donor)
-        self.assertEqual(self.surgery.submitter_specimen_id, self.specimen)
         self.assertEqual(self.surgery.submitter_treatment_id, self.treatment)
         self.assertEqual(self.surgery.surgery_type, "Drainage of abscess")
         self.assertEqual(self.surgery.surgery_site, "C06")
