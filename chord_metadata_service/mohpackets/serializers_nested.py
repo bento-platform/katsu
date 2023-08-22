@@ -203,20 +203,11 @@ class NestedTreatmentSerializer(TreatmentSerializer):
 
 class NestedSpecimenSerializer(SpecimenSerializer):
     sample_registrations = serializers.SerializerMethodField()
-    surgery = serializers.SerializerMethodField()
 
     @extend_schema_field(ListSerializer(child=NestedSampleRegistrationSerializer()))
     def get_sample_registrations(self, obj):
         sample_registrations = obj.sampleregistration_set.all()
         return NestedSampleRegistrationSerializer(sample_registrations, many=True).data
-
-    @extend_schema_field(NestedSurgerySerializer)
-    def get_surgery(self, obj):
-        try:
-            surgery = obj.surgery
-            return NestedSurgerySerializer(surgery).data
-        except Surgery.DoesNotExist:
-            return None
 
     class Meta:
         model = Specimen
@@ -239,7 +230,6 @@ class NestedSpecimenSerializer(SpecimenSerializer):
             "percent_tumour_cells_measurement_method",
             "specimen_processing",
             "specimen_laterality",
-            "surgery",  # nested child
             "sample_registrations",  # nested child
             "biomarkers",  # nested child
         ]
