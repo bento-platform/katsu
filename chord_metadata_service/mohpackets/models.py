@@ -274,7 +274,7 @@ class Radiation(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_treatment_id = models.OneToOneField(
+    submitter_treatment_id = models.ForeignKey(
         Treatment, on_delete=models.CASCADE, null=False, blank=False
     )
     radiation_therapy_modality = models.CharField(max_length=255, null=True, blank=True)
