@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     replaces = [('chord', '0006_remove_tableownership_dataset'), ('chord', '0007_delete_table_delete_tableownership')]
 
     dependencies = [
-        ('phenopackets', '0004_v4_0_0'),
+        ('phenopackets', '0005_v4_0_0'),
         ('chord', '0005_v3_0_0'),
         ('mcode', '0005_v4_0_0'),
         ('experiments', '0007_v4_0_0'),
