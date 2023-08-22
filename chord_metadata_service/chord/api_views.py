@@ -1,4 +1,5 @@
 import logging
+import json
 
 from asgiref.sync import async_to_sync, sync_to_async
 
@@ -6,6 +7,7 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from rest_framework.decorators import action
 
 from django_filters.rest_framework import DjangoFilterBackend
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
@@ -72,6 +74,16 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     serializer_class = DatasetSerializer
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
     queryset = Dataset.objects.all().order_by("title")
+
+    @action(detail=True, methods=['get'])
+    def dats(self, request, pk=None):
+        """
+        Retrieve a specific DATS file for a given dataset.
+
+        Return the DATS file as a JSON response or an error if not found.
+        """
+        dataset = self.get_object()
+        return Response(json.loads(dataset.dats_file))
 
     @async_to_sync
     async def destroy(self, request, *args, **kwargs):
