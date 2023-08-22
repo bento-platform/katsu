@@ -218,6 +218,9 @@ class SurgeryFilter(filters.FilterSet):
 
 class FollowUpFilter(filters.FilterSet):
     method_of_progression_status = filters.CharFilter(lookup_expr="icontains")
+    anatomic_site_progression_or_recurrence = filters.CharFilter(
+        lookup_expr="icontains"
+    )
 
     class Meta:
         model = FollowUp
