@@ -9,7 +9,11 @@ from .models import Project, Dataset, ProjectJsonSchema
 from .schemas import LINKED_FIELD_SETS_SCHEMA
 
 
-__all__ = ["ProjectSerializer", "DatasetSerializer"]
+__all__ = [
+    "ProjectSerializer",
+    "ProjectJsonSchemaSerializer",
+    "DatasetSerializer",
+]
 
 
 BENTO_DATA_USE_SCHEMA_VALIDATOR = Draft7Validator(BENTO_DATA_USE_SCHEMA)
