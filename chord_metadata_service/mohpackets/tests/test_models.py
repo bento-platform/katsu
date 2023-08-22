@@ -1803,7 +1803,7 @@ class FollowUpTest(TestCase):
                 "Imaging (procedure)",
                 "Laboratory data interpretation (procedure)",
             ],
-            "anatomic_site_progression_or_recurrence": "C18",
+            "anatomic_site_progression_or_recurrence": ["C18"],
             "recurrence_tumour_staging_system": "Lugano staging system",
             "recurrence_t_category": "T2a",
             "recurrence_n_category": "N0a (biopsy)",
@@ -1833,7 +1833,7 @@ class FollowUpTest(TestCase):
             self.followup.method_of_progression_status,
             ["Imaging (procedure)", "Laboratory data interpretation (procedure)"],
         )
-        self.assertEqual(self.followup.anatomic_site_progression_or_recurrence, "C18")
+        self.assertEqual(self.followup.anatomic_site_progression_or_recurrence, ["C18"])
         self.assertEqual(
             self.followup.recurrence_tumour_staging_system,
             "Lugano staging system",
