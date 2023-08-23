@@ -33,6 +33,7 @@ class AutoDateTimeField(models.DateTimeField):
 
 class Program(models.Model):
     program_id = models.CharField(max_length=64, primary_key=True)
+    metadata = models.JSONField(null=True, blank=True)
     created = models.DateTimeField(default=timezone.now)
     updated = AutoDateTimeField(default=timezone.now)
 
