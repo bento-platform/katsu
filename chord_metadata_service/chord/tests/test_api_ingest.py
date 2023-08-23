@@ -59,7 +59,7 @@ class IngestTest(APITestCase):
     def test_phenopackets_ingest(self):
         # Invalid workflow ID
         r = self.client.post(
-            reverse("ingest-into-dataset", args=(self.dataset["identifier"],"phenopackets_json_invalid")),
+            reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json_invalid")),
             content_type="application/json",
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
