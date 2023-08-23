@@ -69,7 +69,7 @@ graph LR;
 
 ```mermaid
 ---
-title: 22 Treatments
+title: 25 Treatments
 ---
 graph LR;  
   Treatment_1_3 --> PrimaryDiagnosis_1 --> Donor_1 --> Program_1;  
