@@ -132,25 +132,21 @@ graph LR;
 
 ```mermaid
 ---
-title: 9 Radiations
+title: 4 Radiations
 ---
 graph LR;  
-  Radiation_1_3 --> Treatment_19 --> Donor_4 --> Program_1;  
-  Radiation_4_6 --> Treatment_20 --> Donor_5 --> Program_1; 
-  Radiation_7_8 --> Treatment_21 --> Donor_6 --> Program_1; 
-  Radiation_9 --> Treatment_22 --> Donor_7 --> Program_2; 
+  Radiation_1_3 --> Treatment_19_21 --> Donor_4_6 --> Program_1;  
+  Radiation_4 --> Treatment_22 --> Donor_7 --> Program_2; 
 ```
 
 ---
 
 ```mermaid
 ---
-title: 6 Surgeries
+title: 3 Surgeries
 ---
 graph LR;  
-  Surgery_1_3 --> Treatment_23 --> Donor_8 --> Program_2;  
-  Surgery_4_5 --> Treatment_24 --> Donor_9 --> Program_2; 
-  Surgery_6 --> Treatment_25 --> Donor_10 --> Program_2; 
+  Surgery_1_3 --> Treatment_23_25 --> Donor_8_10 --> Program_2;  
 ```
 
 ---
