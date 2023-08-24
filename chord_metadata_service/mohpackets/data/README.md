@@ -16,10 +16,10 @@ python chord_metadata_service/mohpackets/data/convert.py
 
 ## Load Fixtures
 
-Run the following commands (change the `fixtures_path` variable to the dataset you want to load):
+Run the following commands (change the `fixtures_path` to small_dataset, medium_dataset, or large_dataset):
 
 ```bash
-fixtures_path="chord_metadata_service/mohpackets/data/small_dataset/fixtures"
+fixtures_path="chord_metadata_service/mohpackets/data/{fixtures_path}/fixtures"
 python manage.py loaddata $fixtures_path/fixtures.json -v 3
 ```
 
