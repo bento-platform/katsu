@@ -3,8 +3,9 @@
 This folder contains the necessary tools to generate synthetic data. Each dataset is organized into the following subfolders:
 
 - `mockaroo_schemas`: contains the blueprints needed to generate data using the Mockaroo service.
-- `no_relationships_data`: generated mock data that doesn't include any relationships.
-- `synthetic_data`: assigned relationships data, can be used for ingestion.
+- `no_relationships_data`: generated from mockaroo that doesn't include any relationships.
+- `synthetic_data`: assigned relationships data, can be used for ingest APIs.
+- `fixtures`: Django fixtures, can be used to load directly into the database without ingest APIs.
 
 ## Create Fixtures
 
