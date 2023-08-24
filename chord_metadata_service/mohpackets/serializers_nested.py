@@ -127,7 +127,6 @@ class NestedFollowUpSerializer(FollowUpSerializer):
             "recurrence_n_category",
             "recurrence_m_category",
             "recurrence_stage_group",
-            "biomarkers",  # nested child
         ]
 
 
@@ -191,7 +190,6 @@ class NestedTreatmentSerializer(TreatmentSerializer):
             "radiations",  # nested child
             "surgeries",  # nested child
             "followups",  # nested child
-            "biomarkers",  # nested child
         ]
 
 
@@ -225,7 +223,6 @@ class NestedSpecimenSerializer(SpecimenSerializer):
             "specimen_processing",
             "specimen_laterality",
             "sample_registrations",  # nested child
-            "biomarkers",  # nested child
         ]
 
 
@@ -267,7 +264,6 @@ class NestedPrimaryDiagnosisSerializer(PrimaryDiagnosisSerializer):
             "laterality",
             "specimens",  # nested child
             "treatments",  # nested child
-            "biomarkers",  # nested child
             "followups",  # nested child
         ]
 
