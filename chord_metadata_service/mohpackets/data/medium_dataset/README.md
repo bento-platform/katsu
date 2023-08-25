@@ -142,30 +142,34 @@ graph LR;
 
 ```mermaid
 ---
-title: 750 Biomarkers
+title: 1000 Biomarkers
 ---
 graph LR;  
-  Biomarker_1_640 --> FollowUp_1_640 --> Specimen_1_640 --> Donor_1_40 --> Program_1;
-  Biomarker_641_720 ---> PrimaryDiagnosis_251_290 --> Donor_71_90 --> Program_3;
-  Biomarker_721_750 ----> Donor_91_100 --> Program_4; 
+  Biomarker_1_80 ------> Donor_1_40 --> Program_1;
+  Biomarker_81_400 -----> PrimaryDiagnosis_1_160 --> Donor_1_40 --> Program_1;
+  Biomarker_401_940 ----> Specimen_641_910 ---> Donor_41_70 --> Program_2;
+  Biomarker_940_980 ---> Treatment_911_990 ----> Donor_71_90 --> Program_3;
+  Biomarker_981_1000 --> FollowUp_991_1000 -----> Donor_91_100 --> Program_4;
+
 ```
 
 ---
 
 ```mermaid
 ---
-title: 250 Comorbidities
+title: 1000 Comorbidities
 ---
 graph LR;  
-  Comorbidity_1_160 --> Donor_1_40 --> Program_1;
-  Comorbidity_161_250 --> Donor_41_70 --> Program_2;
+  Exposure_1_600 --> Donor_1_40 --> Program_1;
+  Exposure_601_900 --> Donor_41_70 --> Program_2; 
+  Exposure_901_1000 --> Donor_91_100 --> Program_4; 
 ```
 
 ```mermaid
 ---
-title: 220 Exposures
+title: 1000 Exposures
 ---
 graph LR;  
-  Exposure_1_160 --> Donor_1_40 --> Program_1;
-  Exposure_161_220 --> Donor_71_90 --> Program_3;
+  Exposure_1_400 --> Donor_1_40 --> Program_1;
+  Exposure_401_1000 --> Donor_41_70 --> Program_2; 
 ```
