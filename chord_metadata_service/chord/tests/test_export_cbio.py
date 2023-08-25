@@ -30,10 +30,9 @@ from chord_metadata_service.phenopackets import models as pm
 
 from .constants import VALID_DATA_USE_1
 from .example_ingest import (
-    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
-    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT,
+    EXAMPLE_INGEST_EXPERIMENT,
+    EXAMPLE_INGEST_EXPERIMENT_RESULT,
     EXAMPLE_INGEST_PHENOPACKET,
-    EXAMPLE_INGEST_OUTPUTS,
 )
 
 
@@ -46,14 +45,14 @@ class ExportCBioTest(TestCase):
                                         project=p)
         self.study_id = str(self.d.identifier)
 
-        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
+        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
         # ingest list of experiments
         self.exp = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.d.identifier
+            EXAMPLE_INGEST_EXPERIMENT, self.d.identifier
         )
         # append derived MAF files to experiment results
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT, self.d.identifier
+            EXAMPLE_INGEST_EXPERIMENT_RESULT, self.d.identifier
         )
         self.exp_res = ExperimentResult.objects.all()
 

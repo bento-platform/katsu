@@ -1,4 +1,3 @@
-import os
 from jsonschema.validators import Draft7Validator
 
 from django.test import TestCase
@@ -12,15 +11,11 @@ from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON, WORKFLOW_EXPERIMENTS_JSON
+from chord_metadata_service.restapi.tests.utils import load_local_json
 
 
-EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON = {
-    "json_document": os.path.join(os.path.dirname(__file__), "example_phenopackets.json"),
-}
-
-EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON = {
-    "json_document": os.path.join(os.path.dirname(__file__), "example_experiments.json"),
-}
+EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON = load_local_json("example_experiments.json")
+EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON = load_local_json("example_phenopackets.json")
 
 
 class GetExperimentsAppApisTest(APITestCase):

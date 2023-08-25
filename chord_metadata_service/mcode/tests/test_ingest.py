@@ -1,5 +1,3 @@
-import os
-
 from django.test import TestCase
 
 from chord_metadata_service.chord.models import Project, Dataset
@@ -8,6 +6,7 @@ from chord_metadata_service.phenopackets.models import Gene
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_MCODE_JSON
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+from chord_metadata_service.restapi.tests.utils import load_local_json
 
 from ..models import (
     MCodePacket, CancerCondition, MedicationStatement,
@@ -15,9 +14,7 @@ from ..models import (
     CancerGeneticVariant, GenomicRegionStudied, TNMStaging,
 )
 
-EXAMPLE_INGEST_OUTPUTS_MCODE_JSON = {
-    "json_document": os.path.join(os.path.dirname(__file__), "example_mcode_json.json"),
-}
+EXAMPLE_INGEST_MCODE_JSON = load_local_json("example_mcode_json.json")
 
 
 class IngestMcodeJsonTest(TestCase):
@@ -29,7 +26,7 @@ class IngestMcodeJsonTest(TestCase):
                                         project=p)
 
     def test_ingest_mcodepacket_json(self):
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MCODE_JSON](EXAMPLE_INGEST_OUTPUTS_MCODE_JSON, self.d.identifier)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MCODE_JSON](EXAMPLE_INGEST_MCODE_JSON, self.d.identifier)
         self.assertEqual(len(MCodePacket.objects.all()), 1)
         self.assertEqual(len(Individual.objects.all()), 1)
         individual = Individual.objects.get(id="ind:HG00096")

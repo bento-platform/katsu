@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import uuid
 
 from dateutil.parser import isoparse
@@ -14,10 +13,9 @@ from chord_metadata_service.restapi.types import ExtensionSchemaDict
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from .exceptions import IngestError
-from .logger import logger
 from .resources import ingest_resource
 from .schema import schema_validation
-from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, workflow_file_output_to_path
+from .utils import map_if_list, query_and_check_nulls
 
 from typing import Any, Dict, Iterable, Optional, Union
 
@@ -303,12 +301,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     return new_phenopacket
 
 
-def ingest_phenopacket_workflow(workflow_outputs, dataset_id) -> Union[list[pm.Phenopacket], pm.Phenopacket]:
-    with workflow_file_output_to_path(get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
-        logger.info(f"Attempting ingestion of phenopackets from path: {json_doc_path}")
-        with open(json_doc_path, "r") as jf:
-            json_data = json.load(jf)
-
+def ingest_phenopacket_workflow(json_data, dataset_id) -> Union[list[pm.Phenopacket], pm.Phenopacket]:
     project_id = Project.objects.get(datasets=dataset_id)
     project_schemas: Iterable[ExtensionSchemaDict] = ProjectJsonSchema.objects.filter(project_id=project_id).values(
         "json_schema",

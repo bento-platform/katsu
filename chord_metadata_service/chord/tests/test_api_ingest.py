@@ -3,7 +3,6 @@ import json
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from uuid import uuid4
 
 from .constants import VALID_PROJECT_1, valid_dataset_1
 from ..workflows.metadata import METADATA_WORKFLOWS
@@ -58,26 +57,16 @@ class IngestTest(APITestCase):
         self.dataset = r.json()
 
     def test_phenopackets_ingest(self):
-        # No ingestion body
-        r = self.client.post(reverse("ingest"), content_type="application/json")
+        # Invalid workflow ID
+        r = self.client.post(
+            reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json_invalid")),
+            content_type="application/json",
+        )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-        bad_ingest_bodies = (
-            # Invalid ingest request
-            {},
-
-            # Non-existent table ID
-            generate_phenopackets_ingest(str(uuid4())),
-
-            # Non-existent workflow ID
-            {**generate_phenopackets_ingest(self.dataset["identifier"]), "workflow_id": "phenopackets_json_invalid"},
-
-            # json_document not in output
-            {**generate_phenopackets_ingest(self.dataset["identifier"]), "workflow_outputs": {}},
+        # No ingestion body
+        r = self.client.post(
+            reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json")),
+            content_type="application/json",
         )
-
-        for data in bad_ingest_bodies:
-            r = self.client.post(reverse("ingest"), data=json.dumps(data), content_type="application/json")
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
-        # TODO: More
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)

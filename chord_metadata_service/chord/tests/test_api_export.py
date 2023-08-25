@@ -9,13 +9,13 @@ from chord_metadata_service.chord.export.utils import EXPORT_DIR
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from ..ingest.views import METADATA_WORKFLOWS
+from ..workflows.metadata import METADATA_WORKFLOWS
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 
 from .constants import VALID_DATA_USE_1
-from .example_ingest import EXAMPLE_INGEST_OUTPUTS
+from .example_ingest import EXAMPLE_INGEST_PHENOPACKET
 
 
 def generate_phenopackets_ingest(table_id):
@@ -41,7 +41,7 @@ class ExportTest(APITestCase):
                                         project=p)
         self.study_id = str(self.d.identifier)
 
-        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
+        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
 
     def test_export_cbio(self):
         # Test with no export body

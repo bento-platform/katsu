@@ -11,8 +11,9 @@ urlpatterns = [
     path('workflows/<slug:workflow_id>', views_workflow.workflow_item, name="workflow-detail"),
     path('workflows/<slug:workflow_id>.wdl', views_workflow.workflow_file, name="workflow-file"),
 
-    path('private/ingest', views_ingest.ingest, name="ingest"),
     path('private/export', views_export.export, name="export"),
+
+    path('ingest/<str:dataset_id>/<str:workflow_id>', views_ingest.ingest_into_dataset, name="ingest-into-dataset"),
 
     path('data-types', views_data_types.data_type_list, name="data-type-list"),
     path('data-types/<str:data_type>', views_data_types.data_type_detail, name="data-type-detail"),

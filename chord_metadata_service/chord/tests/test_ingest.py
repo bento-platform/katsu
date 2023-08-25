@@ -1,5 +1,5 @@
 from django.test import TestCase
-from chord_metadata_service.chord.ingest.views import TABLE_ID_OVERRIDES
+from chord_metadata_service.chord.ingest.views import DATASET_ID_OVERRIDES
 from dateutil.parser import isoparse
 
 from chord_metadata_service.chord.models import Project, Dataset
@@ -30,16 +30,13 @@ from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from .constants import VALID_DATA_USE_1
 from .example_ingest import (
-    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT,
+    EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS,
     EXAMPLE_INGEST_PHENOPACKET,
-    EXAMPLE_INGEST_OUTPUTS,
-    EXAMPLE_INGEST_OUTPUTS_UPDATE,
+    EXAMPLE_INGEST_PHENOPACKET_UPDATE,
     EXAMPLE_INGEST_EXPERIMENT,
-    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
-    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_BAD_BIOSAMPLE,
+    EXAMPLE_INGEST_EXPERIMENT_BAD_BIOSAMPLE,
     EXAMPLE_INGEST_EXPERIMENT_RESULT,
     EXAMPLE_INGEST_INVALID_PHENOPACKET,
-    EXAMPLE_INGEST_MULTIPLE_OUTPUTS,
     EXAMPLE_INGEST_INVALID_EXPERIMENT,
 )
 
@@ -115,7 +112,7 @@ class IngestTest(TestCase):
     #     self.assertEqual(p3.pk, p1.pk)
 
     def test_ingesting_phenopackets_json(self):
-        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
         self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
 
         self.assertEqual(p.subject.id, EXAMPLE_INGEST_PHENOPACKET["subject"]["id"])
@@ -149,8 +146,9 @@ class IngestTest(TestCase):
         # TODO: More
 
     def test_reingesting_updating_phenopackets_json(self):
-        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
-        p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS_UPDATE, self.d.identifier)
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
+        p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET_UPDATE,
+                                                                      self.d.identifier)
 
         self.assertNotEqual(p.id, p2.id)
         self.assertEqual(p.subject.id, p2.subject.id)
@@ -189,12 +187,12 @@ class IngestTest(TestCase):
 
     def test_ingesting_experiments_json(self):
         # ingest phenopackets data in order to match to biosample ids
-        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
         self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
 
         # ingest list of experiments
         experiments = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.d.identifier
+            EXAMPLE_INGEST_EXPERIMENT, self.d.identifier
         )
 
         # experiments
@@ -216,7 +214,7 @@ class IngestTest(TestCase):
         # try ingesting the file with an invalid biosample ID
         with self.assertRaises(Biosample.DoesNotExist):
             WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-                EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_BAD_BIOSAMPLE, self.d.identifier
+                EXAMPLE_INGEST_EXPERIMENT_BAD_BIOSAMPLE, self.d.identifier
             )
 
     def test_ingesting_invalid_experiment_json(self):
@@ -236,13 +234,13 @@ class IngestTest(TestCase):
 
     def test_ingesting_experiment_results_json(self):
         # ingest list of experiments
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.d.identifier)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.d.identifier
+            EXAMPLE_INGEST_EXPERIMENT, self.d.identifier
         )
         # ingest list of experiment results
         experiment_results = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT, TABLE_ID_OVERRIDES
+            EXAMPLE_INGEST_EXPERIMENT_RESULT, DATASET_ID_OVERRIDES
         )
         self.assertEqual(len(experiment_results), len(EXAMPLE_INGEST_EXPERIMENT_RESULT))
         # check that it has been linked to the same experiment as the file it
@@ -263,7 +261,7 @@ class IngestISOAgeToNumberTest(TestCase):
 
     def test_ingesting_phenopackets_json(self):
         ingested_phenopackets = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_MULTIPLE_OUTPUTS, self.d.identifier
+            EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS, self.d.identifier
         )
         self.assertIsInstance(ingested_phenopackets, list)
         # test for a single individual ind:NA20509001

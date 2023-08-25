@@ -10,12 +10,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from typing import Callable, Dict, Optional
+
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
-from chord_metadata_service.mcode.models import MCodePacket
-
-from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult
+from chord_metadata_service.logger import logger
+from chord_metadata_service.mcode.models import MCodePacket
+from chord_metadata_service.phenopackets.models import Phenopacket
 
 from . import data_types as dt
 
@@ -23,6 +25,8 @@ QUERYSET_FN: Dict[str, Callable] = {
     dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
     dt.DATA_TYPE_MCODEPACKET: lambda dataset_id: MCodePacket.objects.filter(dataset_id=dataset_id),
     dt.DATA_TYPE_PHENOPACKET: lambda dataset_id: Phenopacket.objects.filter(dataset_id=dataset_id),
+    dt.DATA_TYPE_EXPERIMENT_RESULT: lambda dataset_id: ExperimentResult.objects.filter(
+        experiment__dataset_id=dataset_id),
 }
 
 
@@ -151,18 +155,27 @@ async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: st
 
     if request.method == "DELETE":
         await qs.adelete()
+
+        logger.info(f"Running cleanup after clearing data type {data_type} in dataset {dataset_id} via API")
+        n_removed = await run_all_cleanup()
+        logger.info(f"Cleanup: removed {n_removed} objects in total")
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     project = await Project.objects.aget(datasets=dataset_id)
-    response_object = await make_data_type_response_object(data_type, dt.DATA_TYPES[data_type],
-                                                           project=str(project.identifier), dataset=dataset_id)
+    response_object = await make_data_type_response_object(
+        data_type,
+        dt.DATA_TYPES[data_type],
+        project=str(project.identifier),
+        dataset=dataset_id,
+    )
 
     return Response(response_object)
 
 
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-async def dataset_datatype_summary(request: HttpRequest, dataset_id: str):
+async def dataset_datatype_summary(_request: HttpRequest, dataset_id: str):
     dataset = await Dataset.objects.aget(identifier=dataset_id)
     project = await Project.objects.aget(datasets=dataset)
 

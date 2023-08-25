@@ -4,6 +4,14 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+# noinspection PyPep8Naming
+def set_dataset_from_table(apps, _schema_editor):
+    Experiment = apps.get_model("experiments", "Experiment")
+    for exp in Experiment.objects.all():
+        exp.dataset = exp.table.ownership_record.dataset
+        exp.save()
+
+
 class Migration(migrations.Migration):
 
     replaces = [('experiments', '0007_experiment_dataset'), ('experiments', '0008_remove_experiment_table')]
@@ -17,8 +25,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='experiment',
             name='dataset',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='chord.dataset'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='chord.dataset'),
         ),
+        migrations.RunPython(set_dataset_from_table),
         migrations.RemoveField(
             model_name='experiment',
             name='table',
