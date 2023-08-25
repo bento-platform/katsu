@@ -33,7 +33,10 @@ from chord_metadata_service.mohpackets.authentication import (
     TokenAuthentication,
 )
 from chord_metadata_service.mohpackets.models import Donor, FollowUp, Program
-from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
+from chord_metadata_service.mohpackets.pagination import (
+    SmallResultsSetPagination,
+    StandardResultsSetPagination,
+)
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
 )
@@ -284,6 +287,7 @@ class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
     """
 
     serializer_class = DonorWithClinicalDataSerializer
+    pagination_class = SmallResultsSetPagination
 
     donor_followups_prefetch = Prefetch(
         "followup_set",
