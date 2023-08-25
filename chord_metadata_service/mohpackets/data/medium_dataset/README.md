@@ -147,10 +147,9 @@ title: 1000 Biomarkers
 graph LR;  
   Biomarker_1_80 ------> Donor_1_40 --> Program_1;
   Biomarker_81_400 -----> PrimaryDiagnosis_1_160 --> Donor_1_40 --> Program_1;
-  Biomarker_401_940 ----> Specimen_641_910 ---> Donor_41_70 --> Program_2;
-  Biomarker_940_980 ---> Treatment_911_990 ----> Donor_71_90 --> Program_3;
-  Biomarker_981_1000 --> FollowUp_991_1000 -----> Donor_91_100 --> Program_4;
-
+  Biomarker_401_670 ----> Specimen_641_910 ---> Donor_41_70 --> Program_2;
+  Biomarker_671_910 ---> Treatment_911_990 ----> Donor_71_90 --> Program_3;
+  Biomarker_911_1000 --> FollowUp_991_1000 -----> Donor_91_100 --> Program_4;
 ```
 
 ---
