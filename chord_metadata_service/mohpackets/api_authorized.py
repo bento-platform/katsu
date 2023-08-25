@@ -32,7 +32,7 @@ from chord_metadata_service.mohpackets.authentication import (
     LocalAuthentication,
     TokenAuthentication,
 )
-from chord_metadata_service.mohpackets.models import Biomarker, Donor, FollowUp, Program
+from chord_metadata_service.mohpackets.models import Donor, FollowUp, Program
 from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
