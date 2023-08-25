@@ -43,4 +43,4 @@ If you want to modify the mock data to your preferences, you can follow these st
 5. Modify `relationships.json` if needed
 6. Run `convert.py` to generate the final data
 
-*NOTE*: The synthetic data provided is intended for frontend testing. For other types of testing purposes, it is recommended to create your own data to ensure accuracy.
+*NOTE*: The synthetic data provided here is intended for frontend testing, and the logic is not strictly enforced. For other types of testing purposes, it is recommended to create your own data to ensure accuracy.
