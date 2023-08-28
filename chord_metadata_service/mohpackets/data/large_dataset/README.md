@@ -106,7 +106,7 @@ title: 10000 Chemotherapies
 ---
 graph LR;  
   Chemotherapy_1_8000 --> Treatment_1_2000 --> Donor_1_500 --> Program_1;
-  Chemotherapy_2001_4000 --> Treatment_2001_4000 --> Donor_501_1000 --> Program_2;
+  Chemotherapy_8001_10000 --> Treatment_2001_4000 --> Donor_501_1000 --> Program_2;
 ```
 
 ---
@@ -117,7 +117,7 @@ title: 10000 HormoneTherapies
 ---
 graph LR;  
   HormoneTherapy_1_8000 --> Treatment_4001_6000 --> Donor_1001_1500 --> Program_3;  
-  HormoneTherapy_2001_4000 --> Treatment_6001_8000 --> Donor_1501_2000 --> Program_4;  
+  HormoneTherapy_8001_10000 --> Treatment_6001_8000 --> Donor_1501_2000 --> Program_4;  
 
 ```
 
@@ -129,7 +129,7 @@ title: 10000 Immunotherapies
 ---
 graph LR;  
   Immunotherapy_1_8000 --> Treatment_8001_10000 -->  Donor_2001_2500 --> Program_5;  
-  Immunotherapy_2001_4000 -->  Treatment_10001_12000 --> Donor_2501_3000 --> Program_6;  
+  Immunotherapy_8001_10000 -->  Treatment_10001_12000 --> Donor_2501_3000 --> Program_6;  
 ```
 
 ---
