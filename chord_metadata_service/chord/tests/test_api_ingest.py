@@ -76,7 +76,7 @@ class IngestTest(APITestCase):
         r = self.client.post(
             reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json")),
             content_type="application/json",
-            data="\{\}\}",
+            data="\{\}\}",  # noqa: W605
         )
         self.assertEqual(r.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
