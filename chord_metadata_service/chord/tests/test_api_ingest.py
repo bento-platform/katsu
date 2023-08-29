@@ -4,6 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from chord_metadata_service.restapi.tests.utils import load_local_json
 from .constants import VALID_PROJECT_1, valid_dataset_1
 from ..workflows.metadata import METADATA_WORKFLOWS
 
@@ -70,3 +71,29 @@ class IngestTest(APITestCase):
             content_type="application/json",
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Bad ingestion body JSON
+        r = self.client.post(
+            reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json")),
+            content_type="application/json",
+            data="\{\}\}",
+        )
+        self.assertEqual(r.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Invalid phenopacket JSON validation
+        invalid_phenopacket = load_local_json("example_invalid_phenopacket.json")
+        r = self.client.post(
+            reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json")),
+            content_type="application/json",
+            data=json.dumps(invalid_phenopacket),
+        )
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Success
+        valid_phenopacket = load_local_json("example_phenopacket.json")
+        r = self.client.post(
+            reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json")),
+            content_type="application/json",
+            data=json.dumps(valid_phenopacket),
+        )
+        self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)

@@ -49,10 +49,6 @@ def ingest_into_dataset(request, dataset_id: str, workflow_id: str):
     except IngestError as e:
         return Response(errors.bad_request_error(f"Encountered ingest error: {e}"), status=400)
 
-    except json.decoder.JSONDecodeError as e:
-        return Response(errors.bad_request_error(f"Invalid JSON provided for ingest document (message: {e})"),
-                        status=400)
-
     except ValidationError as e:
         return Response(errors.bad_request_error(
             "Encountered validation errors during ingestion",
