@@ -28,7 +28,7 @@ Retrieves a list of authorized biomarkers.
 |submitter_primary_diagnosis_id|query|string|false|none|
 |submitter_treatment_id|query|string|false|none|
 |submitter_follow_up_id|query|string|false|none|
-|test_interval|query|integer|false|none|
+|test_date|query|integer|false|none|
 |psa_level|query|integer|false|none|
 |ca125|query|integer|false|none|
 |cea|query|integer|false|none|
@@ -65,18 +65,18 @@ Retrieves a list of authorized biomarkers.
       "hpv_strain": [
         "HPV16"
       ],
-      "test_interval": 32767,
+      "submitter_specimen_id": "string",
+      "submitter_primary_diagnosis_id": "string",
+      "submitter_treatment_id": "string",
+      "submitter_follow_up_id": "string",
+      "test_date": 32767,
       "psa_level": 32767,
       "ca125": 32767,
       "cea": 32767,
       "er_percent_positive": 0,
       "pr_percent_positive": 0,
       "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string",
-      "submitter_follow_up_id": "string"
+      "submitter_donor_id": "string"
     }
   ]
 }
@@ -285,28 +285,6 @@ Retrieves a list of authorized Donor with clinical data.
               "percent_tumour_cells_measurement_method": "Genomics",
               "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
               "specimen_laterality": "Left",
-              "surgery": {
-                "surgery_type": "Ablation",
-                "surgery_site": "string",
-                "surgery_location": "Local recurrence",
-                "tumour_focality": "Cannot be assessed",
-                "residual_tumour_classification": "Not applicable",
-                "margin_types_involved": [
-                  "Circumferential resection margin"
-                ],
-                "margin_types_not_involved": [
-                  "Circumferential resection margin"
-                ],
-                "margin_types_not_assessed": [
-                  "Circumferential resection margin"
-                ],
-                "lymphovascular_invasion": "Absent",
-                "perineural_invasion": "Absent",
-                "tumour_length": 32767,
-                "tumour_width": 32767,
-                "greatest_dimension_tumour": 32767,
-                "submitter_specimen_id": "string"
-              },
               "sample_registrations": [
                 {
                   "submitter_sample_id": "string",
@@ -314,25 +292,6 @@ Retrieves a list of authorized Donor with clinical data.
                   "tumour_normal_designation": "Normal",
                   "specimen_type": "Cell line - derived from normal",
                   "sample_type": "Amplified DNA"
-                }
-              ],
-              "biomarkers": [
-                {
-                  "er_status": "Cannot be determined",
-                  "pr_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
-                  "her2_ish_status": "Cannot be determined",
-                  "hpv_ihc_status": "Cannot be determined",
-                  "hpv_pcr_status": "Cannot be determined",
-                  "hpv_strain": [
-                    "HPV16"
-                  ],
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
-                  "er_percent_positive": 0,
-                  "pr_percent_positive": 0
                 }
               ]
             }
@@ -385,37 +344,41 @@ Retrieves a list of authorized Donor with clinical data.
                   "actual_cumulative_drug_dose": 32767
                 }
               ],
-              "radiation": {
-                "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-                "radiation_therapy_type": "External",
-                "anatomical_site_irradiated": "Left Abdomen",
-                "radiation_therapy_fractions": 32767,
-                "radiation_therapy_dosage": 32767,
-                "radiation_boost": true,
-                "reference_radiation_treatment_id": "string"
-              },
-              "surgery": {
-                "surgery_type": "Ablation",
-                "surgery_site": "string",
-                "surgery_location": "Local recurrence",
-                "tumour_focality": "Cannot be assessed",
-                "residual_tumour_classification": "Not applicable",
-                "margin_types_involved": [
-                  "Circumferential resection margin"
-                ],
-                "margin_types_not_involved": [
-                  "Circumferential resection margin"
-                ],
-                "margin_types_not_assessed": [
-                  "Circumferential resection margin"
-                ],
-                "lymphovascular_invasion": "Absent",
-                "perineural_invasion": "Absent",
-                "tumour_length": 32767,
-                "tumour_width": 32767,
-                "greatest_dimension_tumour": 32767,
-                "submitter_specimen_id": "string"
-              },
+              "radiations": [
+                {
+                  "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+                  "radiation_therapy_type": "External",
+                  "anatomical_site_irradiated": "Left Abdomen",
+                  "radiation_therapy_fractions": 32767,
+                  "radiation_therapy_dosage": 32767,
+                  "radiation_boost": true,
+                  "reference_radiation_treatment_id": "string"
+                }
+              ],
+              "surgeries": [
+                {
+                  "surgery_type": "Ablation",
+                  "surgery_site": "string",
+                  "surgery_location": "Local recurrence",
+                  "tumour_focality": "Cannot be assessed",
+                  "residual_tumour_classification": "Not applicable",
+                  "margin_types_involved": [
+                    "Circumferential resection margin"
+                  ],
+                  "margin_types_not_involved": [
+                    "Circumferential resection margin"
+                  ],
+                  "margin_types_not_assessed": [
+                    "Circumferential resection margin"
+                  ],
+                  "lymphovascular_invasion": "Absent",
+                  "perineural_invasion": "Absent",
+                  "submitter_specimen_id": "string",
+                  "tumour_length": 32767,
+                  "tumour_width": 32767,
+                  "greatest_dimension_tumour": 32767
+                }
+              ],
               "followups": [
                 {
                   "submitter_follow_up_id": "string",
@@ -426,55 +389,16 @@ Retrieves a list of authorized Donor with clinical data.
                   "method_of_progression_status": [
                     "Imaging (procedure)"
                   ],
-                  "anatomic_site_progression_or_recurrence": "string",
+                  "anatomic_site_progression_or_recurrence": [
+                    "string"
+                  ],
                   "recurrence_tumour_staging_system": "AJCC 8th edition",
                   "recurrence_t_category": "T0",
                   "recurrence_n_category": "N0",
                   "recurrence_m_category": "M0",
-                  "recurrence_stage_group": "Stage 0",
-                  "biomarkers": [
-                    {}
-                  ]
-                }
-              ],
-              "biomarkers": [
-                {
-                  "er_status": "Cannot be determined",
-                  "pr_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
-                  "her2_ish_status": "Cannot be determined",
-                  "hpv_ihc_status": "Cannot be determined",
-                  "hpv_pcr_status": "Cannot be determined",
-                  "hpv_strain": [
-                    "HPV16"
-                  ],
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
-                  "er_percent_positive": 0,
-                  "pr_percent_positive": 0
+                  "recurrence_stage_group": "Stage 0"
                 }
               ]
-            }
-          ],
-          "biomarkers": [
-            {
-              "er_status": "Cannot be determined",
-              "pr_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
-              "her2_ish_status": "Cannot be determined",
-              "hpv_ihc_status": "Cannot be determined",
-              "hpv_pcr_status": "Cannot be determined",
-              "hpv_strain": [
-                "HPV16"
-              ],
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
-              "er_percent_positive": 0,
-              "pr_percent_positive": 0
             }
           ],
           "followups": [
@@ -487,31 +411,14 @@ Retrieves a list of authorized Donor with clinical data.
               "method_of_progression_status": [
                 "Imaging (procedure)"
               ],
-              "anatomic_site_progression_or_recurrence": "string",
+              "anatomic_site_progression_or_recurrence": [
+                "string"
+              ],
               "recurrence_tumour_staging_system": "AJCC 8th edition",
               "recurrence_t_category": "T0",
               "recurrence_n_category": "N0",
               "recurrence_m_category": "M0",
-              "recurrence_stage_group": "Stage 0",
-              "biomarkers": [
-                {
-                  "er_status": "Cannot be determined",
-                  "pr_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
-                  "her2_ish_status": "Cannot be determined",
-                  "hpv_ihc_status": "Cannot be determined",
-                  "hpv_pcr_status": "Cannot be determined",
-                  "hpv_strain": [
-                    "HPV16"
-                  ],
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
-                  "er_percent_positive": 0,
-                  "pr_percent_positive": 0
-                }
-              ]
+              "recurrence_stage_group": "Stage 0"
             }
           ]
         }
@@ -546,7 +453,7 @@ Retrieves a list of authorized Donor with clinical data.
           "hpv_strain": [
             "HPV16"
           ],
-          "test_interval": 32767,
+          "test_date": 32767,
           "psa_level": 32767,
           "ca125": 32767,
           "cea": 32767,
@@ -564,31 +471,14 @@ Retrieves a list of authorized Donor with clinical data.
           "method_of_progression_status": [
             "Imaging (procedure)"
           ],
-          "anatomic_site_progression_or_recurrence": "string",
+          "anatomic_site_progression_or_recurrence": [
+            "string"
+          ],
           "recurrence_tumour_staging_system": "AJCC 8th edition",
           "recurrence_t_category": "T0",
           "recurrence_n_category": "N0",
           "recurrence_m_category": "M0",
-          "recurrence_stage_group": "Stage 0",
-          "biomarkers": [
-            {
-              "er_status": "Cannot be determined",
-              "pr_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
-              "her2_ish_status": "Cannot be determined",
-              "hpv_ihc_status": "Cannot be determined",
-              "hpv_pcr_status": "Cannot be determined",
-              "hpv_strain": [
-                "HPV16"
-              ],
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
-              "er_percent_positive": 0,
-              "pr_percent_positive": 0
-            }
-          ]
+          "recurrence_stage_group": "Stage 0"
         }
       ]
     }
@@ -763,7 +653,9 @@ Retrieves a list of authorized follow ups.
       "method_of_progression_status": [
         "Imaging (procedure)"
       ],
-      "anatomic_site_progression_or_recurrence": "string",
+      "anatomic_site_progression_or_recurrence": [
+        "string"
+      ],
       "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
       "recurrence_n_category": "N0",
@@ -967,8 +859,6 @@ get_queryset()
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |program_id|query|string|false|none|
-|created|query|string(date-time)|false|none|
-|updated|query|string(date-time)|false|none|
 |page|query|integer|false|A page number within the paginated result set.|
 |page_size|query|integer|false|Number of results to return per page.|
 
@@ -984,6 +874,10 @@ get_queryset()
   "results": [
     {
       "program_id": "string",
+      "metadata": {
+        "property1": null,
+        "property2": null
+      },
       "created": "2019-08-24T14:15:22Z",
       "updated": "2019-08-24T14:15:22Z"
     }
@@ -1193,8 +1087,8 @@ Retrieves a list of authorized surgeries.
 |id|query|string(uuid)|false|none|
 |program_id|query|string|false|none|
 |submitter_donor_id|query|string|false|none|
-|submitter_specimen_id|query|string|false|none|
 |submitter_treatment_id|query|string|false|none|
+|submitter_specimen_id|query|string|false|none|
 |surgery_type|query|string|false|none|
 |surgery_site|query|string|false|none|
 |surgery_location|query|string|false|none|
@@ -1239,12 +1133,12 @@ Retrieves a list of authorized surgeries.
       ],
       "lymphovascular_invasion": "Absent",
       "perineural_invasion": "Absent",
+      "submitter_specimen_id": "string",
       "tumour_length": 32767,
       "tumour_width": 32767,
       "greatest_dimension_tumour": 32767,
       "program_id": "string",
       "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
       "submitter_treatment_id": "string"
     }
   ]
@@ -1337,7 +1231,7 @@ Retrieves a number of discovery biomarkers.
 |submitter_primary_diagnosis_id|query|string|false|none|
 |submitter_treatment_id|query|string|false|none|
 |submitter_follow_up_id|query|string|false|none|
-|test_interval|query|integer|false|none|
+|test_date|query|integer|false|none|
 |psa_level|query|integer|false|none|
 |ca125|query|integer|false|none|
 |cea|query|integer|false|none|
@@ -1917,8 +1811,8 @@ Retrieves a number of discovery surgeries.
 |id|query|string(uuid)|false|none|
 |program_id|query|string|false|none|
 |submitter_donor_id|query|string|false|none|
-|submitter_specimen_id|query|string|false|none|
 |submitter_treatment_id|query|string|false|none|
+|submitter_specimen_id|query|string|false|none|
 |surgery_type|query|string|false|none|
 |surgery_site|query|string|false|none|
 |surgery_location|query|string|false|none|
@@ -2587,18 +2481,18 @@ Retrieves a number of discovery treatments.
   "hpv_strain": [
     "HPV16"
   ],
-  "test_interval": 32767,
+  "submitter_specimen_id": "string",
+  "submitter_primary_diagnosis_id": "string",
+  "submitter_treatment_id": "string",
+  "submitter_follow_up_id": "string",
+  "test_date": 32767,
   "psa_level": 32767,
   "ca125": 32767,
   "cea": 32767,
   "er_percent_positive": 0,
   "pr_percent_positive": 0,
   "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
-  "submitter_primary_diagnosis_id": "string",
-  "submitter_treatment_id": "string",
-  "submitter_follow_up_id": "string"
+  "submitter_donor_id": "string"
 }
 
 ```
@@ -2776,7 +2670,11 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|test_interval|integer¦null|false|none|none|
+|submitter_specimen_id|string¦null|false|none|none|
+|submitter_primary_diagnosis_id|string¦null|false|none|none|
+|submitter_treatment_id|string¦null|false|none|none|
+|submitter_follow_up_id|string¦null|false|none|none|
+|test_date|integer¦null|false|none|none|
 |psa_level|integer¦null|false|none|none|
 |ca125|integer¦null|false|none|none|
 |cea|integer¦null|false|none|none|
@@ -2784,10 +2682,6 @@ continued
 |pr_percent_positive|number(double)¦null|false|none|none|
 |program_id|string|true|none|none|
 |submitter_donor_id|string|true|none|none|
-|submitter_specimen_id|string¦null|false|none|none|
-|submitter_primary_diagnosis_id|string¦null|false|none|none|
-|submitter_treatment_id|string¦null|false|none|none|
-|submitter_follow_up_id|string¦null|false|none|none|
 
 <h2 id="tocS_BlankEnum">BlankEnum</h2>
 
@@ -3304,28 +3198,6 @@ continued
           "percent_tumour_cells_measurement_method": "Genomics",
           "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
           "specimen_laterality": "Left",
-          "surgery": {
-            "surgery_type": "Ablation",
-            "surgery_site": "string",
-            "surgery_location": "Local recurrence",
-            "tumour_focality": "Cannot be assessed",
-            "residual_tumour_classification": "Not applicable",
-            "margin_types_involved": [
-              "Circumferential resection margin"
-            ],
-            "margin_types_not_involved": [
-              "Circumferential resection margin"
-            ],
-            "margin_types_not_assessed": [
-              "Circumferential resection margin"
-            ],
-            "lymphovascular_invasion": "Absent",
-            "perineural_invasion": "Absent",
-            "tumour_length": 32767,
-            "tumour_width": 32767,
-            "greatest_dimension_tumour": 32767,
-            "submitter_specimen_id": "string"
-          },
           "sample_registrations": [
             {
               "submitter_sample_id": "string",
@@ -3333,25 +3205,6 @@ continued
               "tumour_normal_designation": "Normal",
               "specimen_type": "Cell line - derived from normal",
               "sample_type": "Amplified DNA"
-            }
-          ],
-          "biomarkers": [
-            {
-              "er_status": "Cannot be determined",
-              "pr_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
-              "her2_ish_status": "Cannot be determined",
-              "hpv_ihc_status": "Cannot be determined",
-              "hpv_pcr_status": "Cannot be determined",
-              "hpv_strain": [
-                "HPV16"
-              ],
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
-              "er_percent_positive": 0,
-              "pr_percent_positive": 0
             }
           ]
         }
@@ -3404,37 +3257,41 @@ continued
               "actual_cumulative_drug_dose": 32767
             }
           ],
-          "radiation": {
-            "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-            "radiation_therapy_type": "External",
-            "anatomical_site_irradiated": "Left Abdomen",
-            "radiation_therapy_fractions": 32767,
-            "radiation_therapy_dosage": 32767,
-            "radiation_boost": true,
-            "reference_radiation_treatment_id": "string"
-          },
-          "surgery": {
-            "surgery_type": "Ablation",
-            "surgery_site": "string",
-            "surgery_location": "Local recurrence",
-            "tumour_focality": "Cannot be assessed",
-            "residual_tumour_classification": "Not applicable",
-            "margin_types_involved": [
-              "Circumferential resection margin"
-            ],
-            "margin_types_not_involved": [
-              "Circumferential resection margin"
-            ],
-            "margin_types_not_assessed": [
-              "Circumferential resection margin"
-            ],
-            "lymphovascular_invasion": "Absent",
-            "perineural_invasion": "Absent",
-            "tumour_length": 32767,
-            "tumour_width": 32767,
-            "greatest_dimension_tumour": 32767,
-            "submitter_specimen_id": "string"
-          },
+          "radiations": [
+            {
+              "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+              "radiation_therapy_type": "External",
+              "anatomical_site_irradiated": "Left Abdomen",
+              "radiation_therapy_fractions": 32767,
+              "radiation_therapy_dosage": 32767,
+              "radiation_boost": true,
+              "reference_radiation_treatment_id": "string"
+            }
+          ],
+          "surgeries": [
+            {
+              "surgery_type": "Ablation",
+              "surgery_site": "string",
+              "surgery_location": "Local recurrence",
+              "tumour_focality": "Cannot be assessed",
+              "residual_tumour_classification": "Not applicable",
+              "margin_types_involved": [
+                "Circumferential resection margin"
+              ],
+              "margin_types_not_involved": [
+                "Circumferential resection margin"
+              ],
+              "margin_types_not_assessed": [
+                "Circumferential resection margin"
+              ],
+              "lymphovascular_invasion": "Absent",
+              "perineural_invasion": "Absent",
+              "submitter_specimen_id": "string",
+              "tumour_length": 32767,
+              "tumour_width": 32767,
+              "greatest_dimension_tumour": 32767
+            }
+          ],
           "followups": [
             {
               "submitter_follow_up_id": "string",
@@ -3445,71 +3302,16 @@ continued
               "method_of_progression_status": [
                 "Imaging (procedure)"
               ],
-              "anatomic_site_progression_or_recurrence": "string",
+              "anatomic_site_progression_or_recurrence": [
+                "string"
+              ],
               "recurrence_tumour_staging_system": "AJCC 8th edition",
               "recurrence_t_category": "T0",
               "recurrence_n_category": "N0",
               "recurrence_m_category": "M0",
-              "recurrence_stage_group": "Stage 0",
-              "biomarkers": [
-                {
-                  "er_status": "Cannot be determined",
-                  "pr_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
-                  "her2_ish_status": "Cannot be determined",
-                  "hpv_ihc_status": "Cannot be determined",
-                  "hpv_pcr_status": "Cannot be determined",
-                  "hpv_strain": [
-                    "HPV16"
-                  ],
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
-                  "er_percent_positive": 0,
-                  "pr_percent_positive": 0
-                }
-              ]
-            }
-          ],
-          "biomarkers": [
-            {
-              "er_status": "Cannot be determined",
-              "pr_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
-              "her2_ish_status": "Cannot be determined",
-              "hpv_ihc_status": "Cannot be determined",
-              "hpv_pcr_status": "Cannot be determined",
-              "hpv_strain": [
-                "HPV16"
-              ],
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
-              "er_percent_positive": 0,
-              "pr_percent_positive": 0
+              "recurrence_stage_group": "Stage 0"
             }
           ]
-        }
-      ],
-      "biomarkers": [
-        {
-          "er_status": "Cannot be determined",
-          "pr_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
-          "her2_ish_status": "Cannot be determined",
-          "hpv_ihc_status": "Cannot be determined",
-          "hpv_pcr_status": "Cannot be determined",
-          "hpv_strain": [
-            "HPV16"
-          ],
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
-          "er_percent_positive": 0,
-          "pr_percent_positive": 0
         }
       ],
       "followups": [
@@ -3522,31 +3324,14 @@ continued
           "method_of_progression_status": [
             "Imaging (procedure)"
           ],
-          "anatomic_site_progression_or_recurrence": "string",
+          "anatomic_site_progression_or_recurrence": [
+            "string"
+          ],
           "recurrence_tumour_staging_system": "AJCC 8th edition",
           "recurrence_t_category": "T0",
           "recurrence_n_category": "N0",
           "recurrence_m_category": "M0",
-          "recurrence_stage_group": "Stage 0",
-          "biomarkers": [
-            {
-              "er_status": "Cannot be determined",
-              "pr_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
-              "her2_ish_status": "Cannot be determined",
-              "hpv_ihc_status": "Cannot be determined",
-              "hpv_pcr_status": "Cannot be determined",
-              "hpv_strain": [
-                "HPV16"
-              ],
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
-              "er_percent_positive": 0,
-              "pr_percent_positive": 0
-            }
-          ]
+          "recurrence_stage_group": "Stage 0"
         }
       ]
     }
@@ -3581,7 +3366,7 @@ continued
       "hpv_strain": [
         "HPV16"
       ],
-      "test_interval": 32767,
+      "test_date": 32767,
       "psa_level": 32767,
       "ca125": 32767,
       "cea": 32767,
@@ -3599,31 +3384,14 @@ continued
       "method_of_progression_status": [
         "Imaging (procedure)"
       ],
-      "anatomic_site_progression_or_recurrence": "string",
+      "anatomic_site_progression_or_recurrence": [
+        "string"
+      ],
       "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
       "recurrence_n_category": "N0",
       "recurrence_m_category": "M0",
-      "recurrence_stage_group": "Stage 0",
-      "biomarkers": [
-        {
-          "er_status": "Cannot be determined",
-          "pr_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
-          "her2_ish_status": "Cannot be determined",
-          "hpv_ihc_status": "Cannot be determined",
-          "hpv_pcr_status": "Cannot be determined",
-          "hpv_strain": [
-            "HPV16"
-          ],
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
-          "er_percent_positive": 0,
-          "pr_percent_positive": 0
-        }
-      ]
+      "recurrence_stage_group": "Stage 0"
     }
   ]
 }
@@ -3963,7 +3731,9 @@ continued
   "method_of_progression_status": [
     "Imaging (procedure)"
   ],
-  "anatomic_site_progression_or_recurrence": "string",
+  "anatomic_site_progression_or_recurrence": [
+    "string"
+  ],
   "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
   "recurrence_n_category": "N0",
@@ -4056,7 +3826,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|anatomic_site_progression_or_recurrence|string¦null|false|none|none|
+|anatomic_site_progression_or_recurrence|[string]¦null|false|none|none|
 |recurrence_tumour_staging_system|any|false|none|none|
 
 oneOf
@@ -4966,7 +4736,7 @@ continued
   "hpv_strain": [
     "HPV16"
   ],
-  "test_interval": 32767,
+  "test_date": 32767,
   "psa_level": 32767,
   "ca125": 32767,
   "cea": 32767,
@@ -5148,7 +4918,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|test_interval|integer¦null|false|none|none|
+|test_date|integer¦null|false|none|none|
 |psa_level|integer¦null|false|none|none|
 |ca125|integer¦null|false|none|none|
 |cea|integer¦null|false|none|none|
@@ -5419,31 +5189,14 @@ continued
   "method_of_progression_status": [
     "Imaging (procedure)"
   ],
-  "anatomic_site_progression_or_recurrence": "string",
+  "anatomic_site_progression_or_recurrence": [
+    "string"
+  ],
   "recurrence_tumour_staging_system": "AJCC 8th edition",
   "recurrence_t_category": "T0",
   "recurrence_n_category": "N0",
   "recurrence_m_category": "M0",
-  "recurrence_stage_group": "Stage 0",
-  "biomarkers": [
-    {
-      "er_status": "Cannot be determined",
-      "pr_status": "Cannot be determined",
-      "her2_ihc_status": "Cannot be determined",
-      "her2_ish_status": "Cannot be determined",
-      "hpv_ihc_status": "Cannot be determined",
-      "hpv_pcr_status": "Cannot be determined",
-      "hpv_strain": [
-        "HPV16"
-      ],
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
-      "er_percent_positive": 0,
-      "pr_percent_positive": 0
-    }
-  ]
+  "recurrence_stage_group": "Stage 0"
 }
 
 ```
@@ -5527,7 +5280,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|anatomic_site_progression_or_recurrence|string¦null|false|none|none|
+|anatomic_site_progression_or_recurrence|[string]¦null|false|none|none|
 |recurrence_tumour_staging_system|any|false|none|none|
 
 oneOf
@@ -5643,12 +5396,6 @@ xor
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[NullEnum](#schemanullenum)|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
 
 <h2 id="tocS_NestedHormoneTherapy">NestedHormoneTherapy</h2>
 
@@ -5869,28 +5616,6 @@ continued
       "percent_tumour_cells_measurement_method": "Genomics",
       "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
       "specimen_laterality": "Left",
-      "surgery": {
-        "surgery_type": "Ablation",
-        "surgery_site": "string",
-        "surgery_location": "Local recurrence",
-        "tumour_focality": "Cannot be assessed",
-        "residual_tumour_classification": "Not applicable",
-        "margin_types_involved": [
-          "Circumferential resection margin"
-        ],
-        "margin_types_not_involved": [
-          "Circumferential resection margin"
-        ],
-        "margin_types_not_assessed": [
-          "Circumferential resection margin"
-        ],
-        "lymphovascular_invasion": "Absent",
-        "perineural_invasion": "Absent",
-        "tumour_length": 32767,
-        "tumour_width": 32767,
-        "greatest_dimension_tumour": 32767,
-        "submitter_specimen_id": "string"
-      },
       "sample_registrations": [
         {
           "submitter_sample_id": "string",
@@ -5898,25 +5623,6 @@ continued
           "tumour_normal_designation": "Normal",
           "specimen_type": "Cell line - derived from normal",
           "sample_type": "Amplified DNA"
-        }
-      ],
-      "biomarkers": [
-        {
-          "er_status": "Cannot be determined",
-          "pr_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
-          "her2_ish_status": "Cannot be determined",
-          "hpv_ihc_status": "Cannot be determined",
-          "hpv_pcr_status": "Cannot be determined",
-          "hpv_strain": [
-            "HPV16"
-          ],
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
-          "er_percent_positive": 0,
-          "pr_percent_positive": 0
         }
       ]
     }
@@ -5969,37 +5675,41 @@ continued
           "actual_cumulative_drug_dose": 32767
         }
       ],
-      "radiation": {
-        "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-        "radiation_therapy_type": "External",
-        "anatomical_site_irradiated": "Left Abdomen",
-        "radiation_therapy_fractions": 32767,
-        "radiation_therapy_dosage": 32767,
-        "radiation_boost": true,
-        "reference_radiation_treatment_id": "string"
-      },
-      "surgery": {
-        "surgery_type": "Ablation",
-        "surgery_site": "string",
-        "surgery_location": "Local recurrence",
-        "tumour_focality": "Cannot be assessed",
-        "residual_tumour_classification": "Not applicable",
-        "margin_types_involved": [
-          "Circumferential resection margin"
-        ],
-        "margin_types_not_involved": [
-          "Circumferential resection margin"
-        ],
-        "margin_types_not_assessed": [
-          "Circumferential resection margin"
-        ],
-        "lymphovascular_invasion": "Absent",
-        "perineural_invasion": "Absent",
-        "tumour_length": 32767,
-        "tumour_width": 32767,
-        "greatest_dimension_tumour": 32767,
-        "submitter_specimen_id": "string"
-      },
+      "radiations": [
+        {
+          "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+          "radiation_therapy_type": "External",
+          "anatomical_site_irradiated": "Left Abdomen",
+          "radiation_therapy_fractions": 32767,
+          "radiation_therapy_dosage": 32767,
+          "radiation_boost": true,
+          "reference_radiation_treatment_id": "string"
+        }
+      ],
+      "surgeries": [
+        {
+          "surgery_type": "Ablation",
+          "surgery_site": "string",
+          "surgery_location": "Local recurrence",
+          "tumour_focality": "Cannot be assessed",
+          "residual_tumour_classification": "Not applicable",
+          "margin_types_involved": [
+            "Circumferential resection margin"
+          ],
+          "margin_types_not_involved": [
+            "Circumferential resection margin"
+          ],
+          "margin_types_not_assessed": [
+            "Circumferential resection margin"
+          ],
+          "lymphovascular_invasion": "Absent",
+          "perineural_invasion": "Absent",
+          "submitter_specimen_id": "string",
+          "tumour_length": 32767,
+          "tumour_width": 32767,
+          "greatest_dimension_tumour": 32767
+        }
+      ],
       "followups": [
         {
           "submitter_follow_up_id": "string",
@@ -6010,71 +5720,16 @@ continued
           "method_of_progression_status": [
             "Imaging (procedure)"
           ],
-          "anatomic_site_progression_or_recurrence": "string",
+          "anatomic_site_progression_or_recurrence": [
+            "string"
+          ],
           "recurrence_tumour_staging_system": "AJCC 8th edition",
           "recurrence_t_category": "T0",
           "recurrence_n_category": "N0",
           "recurrence_m_category": "M0",
-          "recurrence_stage_group": "Stage 0",
-          "biomarkers": [
-            {
-              "er_status": "Cannot be determined",
-              "pr_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
-              "her2_ish_status": "Cannot be determined",
-              "hpv_ihc_status": "Cannot be determined",
-              "hpv_pcr_status": "Cannot be determined",
-              "hpv_strain": [
-                "HPV16"
-              ],
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
-              "er_percent_positive": 0,
-              "pr_percent_positive": 0
-            }
-          ]
-        }
-      ],
-      "biomarkers": [
-        {
-          "er_status": "Cannot be determined",
-          "pr_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
-          "her2_ish_status": "Cannot be determined",
-          "hpv_ihc_status": "Cannot be determined",
-          "hpv_pcr_status": "Cannot be determined",
-          "hpv_strain": [
-            "HPV16"
-          ],
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
-          "er_percent_positive": 0,
-          "pr_percent_positive": 0
+          "recurrence_stage_group": "Stage 0"
         }
       ]
-    }
-  ],
-  "biomarkers": [
-    {
-      "er_status": "Cannot be determined",
-      "pr_status": "Cannot be determined",
-      "her2_ihc_status": "Cannot be determined",
-      "her2_ish_status": "Cannot be determined",
-      "hpv_ihc_status": "Cannot be determined",
-      "hpv_pcr_status": "Cannot be determined",
-      "hpv_strain": [
-        "HPV16"
-      ],
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
-      "er_percent_positive": 0,
-      "pr_percent_positive": 0
     }
   ],
   "followups": [
@@ -6087,31 +5742,14 @@ continued
       "method_of_progression_status": [
         "Imaging (procedure)"
       ],
-      "anatomic_site_progression_or_recurrence": "string",
+      "anatomic_site_progression_or_recurrence": [
+        "string"
+      ],
       "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
       "recurrence_n_category": "N0",
       "recurrence_m_category": "M0",
-      "recurrence_stage_group": "Stage 0",
-      "biomarkers": [
-        {
-          "er_status": "Cannot be determined",
-          "pr_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
-          "her2_ish_status": "Cannot be determined",
-          "hpv_ihc_status": "Cannot be determined",
-          "hpv_pcr_status": "Cannot be determined",
-          "hpv_strain": [
-            "HPV16"
-          ],
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
-          "er_percent_positive": 0,
-          "pr_percent_positive": 0
-        }
-      ]
+      "recurrence_stage_group": "Stage 0"
     }
   ]
 }
@@ -6344,7 +5982,6 @@ continued
 |---|---|---|---|---|
 |specimens|[[NestedSpecimen](#schemanestedspecimen)]|false|read-only|none|
 |treatments|[[NestedTreatment](#schemanestedtreatment)]|false|read-only|none|
-|biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
 |followups|[[NestedFollowUp](#schemanestedfollowup)]|false|read-only|none|
 
 <h2 id="tocS_NestedRadiation">NestedRadiation</h2>
@@ -6590,28 +6227,6 @@ xor
   "percent_tumour_cells_measurement_method": "Genomics",
   "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
   "specimen_laterality": "Left",
-  "surgery": {
-    "surgery_type": "Ablation",
-    "surgery_site": "string",
-    "surgery_location": "Local recurrence",
-    "tumour_focality": "Cannot be assessed",
-    "residual_tumour_classification": "Not applicable",
-    "margin_types_involved": [
-      "Circumferential resection margin"
-    ],
-    "margin_types_not_involved": [
-      "Circumferential resection margin"
-    ],
-    "margin_types_not_assessed": [
-      "Circumferential resection margin"
-    ],
-    "lymphovascular_invasion": "Absent",
-    "perineural_invasion": "Absent",
-    "tumour_length": 32767,
-    "tumour_width": 32767,
-    "greatest_dimension_tumour": 32767,
-    "submitter_specimen_id": "string"
-  },
   "sample_registrations": [
     {
       "submitter_sample_id": "string",
@@ -6619,25 +6234,6 @@ xor
       "tumour_normal_designation": "Normal",
       "specimen_type": "Cell line - derived from normal",
       "sample_type": "Amplified DNA"
-    }
-  ],
-  "biomarkers": [
-    {
-      "er_status": "Cannot be determined",
-      "pr_status": "Cannot be determined",
-      "her2_ihc_status": "Cannot be determined",
-      "her2_ish_status": "Cannot be determined",
-      "hpv_ihc_status": "Cannot be determined",
-      "hpv_pcr_status": "Cannot be determined",
-      "hpv_strain": [
-        "HPV16"
-      ],
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
-      "er_percent_positive": 0,
-      "pr_percent_positive": 0
     }
   ]
 }
@@ -6988,9 +6584,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|surgery|[NestedSurgery](#schemanestedsurgery)|false|read-only|none|
 |sample_registrations|[[NestedSampleRegistration](#schemanestedsampleregistration)]|false|read-only|none|
-|biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
 
 <h2 id="tocS_NestedSurgery">NestedSurgery</h2>
 
@@ -7017,10 +6611,10 @@ continued
   ],
   "lymphovascular_invasion": "Absent",
   "perineural_invasion": "Absent",
+  "submitter_specimen_id": "string",
   "tumour_length": 32767,
   "tumour_width": 32767,
-  "greatest_dimension_tumour": 32767,
-  "submitter_specimen_id": "string"
+  "greatest_dimension_tumour": 32767
 }
 
 ```
@@ -7246,10 +6840,10 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|submitter_specimen_id|string¦null|false|none|none|
 |tumour_length|integer¦null|false|none|none|
 |tumour_width|integer¦null|false|none|none|
 |greatest_dimension_tumour|integer¦null|false|none|none|
-|submitter_specimen_id|string¦null|false|none|none|
 
 <h2 id="tocS_NestedTreatment">NestedTreatment</h2>
 
@@ -7306,37 +6900,41 @@ continued
       "actual_cumulative_drug_dose": 32767
     }
   ],
-  "radiation": {
-    "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-    "radiation_therapy_type": "External",
-    "anatomical_site_irradiated": "Left Abdomen",
-    "radiation_therapy_fractions": 32767,
-    "radiation_therapy_dosage": 32767,
-    "radiation_boost": true,
-    "reference_radiation_treatment_id": "string"
-  },
-  "surgery": {
-    "surgery_type": "Ablation",
-    "surgery_site": "string",
-    "surgery_location": "Local recurrence",
-    "tumour_focality": "Cannot be assessed",
-    "residual_tumour_classification": "Not applicable",
-    "margin_types_involved": [
-      "Circumferential resection margin"
-    ],
-    "margin_types_not_involved": [
-      "Circumferential resection margin"
-    ],
-    "margin_types_not_assessed": [
-      "Circumferential resection margin"
-    ],
-    "lymphovascular_invasion": "Absent",
-    "perineural_invasion": "Absent",
-    "tumour_length": 32767,
-    "tumour_width": 32767,
-    "greatest_dimension_tumour": 32767,
-    "submitter_specimen_id": "string"
-  },
+  "radiations": [
+    {
+      "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+      "radiation_therapy_type": "External",
+      "anatomical_site_irradiated": "Left Abdomen",
+      "radiation_therapy_fractions": 32767,
+      "radiation_therapy_dosage": 32767,
+      "radiation_boost": true,
+      "reference_radiation_treatment_id": "string"
+    }
+  ],
+  "surgeries": [
+    {
+      "surgery_type": "Ablation",
+      "surgery_site": "string",
+      "surgery_location": "Local recurrence",
+      "tumour_focality": "Cannot be assessed",
+      "residual_tumour_classification": "Not applicable",
+      "margin_types_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_involved": [
+        "Circumferential resection margin"
+      ],
+      "margin_types_not_assessed": [
+        "Circumferential resection margin"
+      ],
+      "lymphovascular_invasion": "Absent",
+      "perineural_invasion": "Absent",
+      "submitter_specimen_id": "string",
+      "tumour_length": 32767,
+      "tumour_width": 32767,
+      "greatest_dimension_tumour": 32767
+    }
+  ],
   "followups": [
     {
       "submitter_follow_up_id": "string",
@@ -7347,50 +6945,14 @@ continued
       "method_of_progression_status": [
         "Imaging (procedure)"
       ],
-      "anatomic_site_progression_or_recurrence": "string",
+      "anatomic_site_progression_or_recurrence": [
+        "string"
+      ],
       "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
       "recurrence_n_category": "N0",
       "recurrence_m_category": "M0",
-      "recurrence_stage_group": "Stage 0",
-      "biomarkers": [
-        {
-          "er_status": "Cannot be determined",
-          "pr_status": "Cannot be determined",
-          "her2_ihc_status": "Cannot be determined",
-          "her2_ish_status": "Cannot be determined",
-          "hpv_ihc_status": "Cannot be determined",
-          "hpv_pcr_status": "Cannot be determined",
-          "hpv_strain": [
-            "HPV16"
-          ],
-          "test_interval": 32767,
-          "psa_level": 32767,
-          "ca125": 32767,
-          "cea": 32767,
-          "er_percent_positive": 0,
-          "pr_percent_positive": 0
-        }
-      ]
-    }
-  ],
-  "biomarkers": [
-    {
-      "er_status": "Cannot be determined",
-      "pr_status": "Cannot be determined",
-      "her2_ihc_status": "Cannot be determined",
-      "her2_ish_status": "Cannot be determined",
-      "hpv_ihc_status": "Cannot be determined",
-      "hpv_pcr_status": "Cannot be determined",
-      "hpv_strain": [
-        "HPV16"
-      ],
-      "test_interval": 32767,
-      "psa_level": 32767,
-      "ca125": 32767,
-      "cea": 32767,
-      "er_percent_positive": 0,
-      "pr_percent_positive": 0
+      "recurrence_stage_group": "Stage 0"
     }
   ]
 }
@@ -7578,10 +7140,9 @@ continued
 |chemotherapies|[[NestedChemotherapy](#schemanestedchemotherapy)]|false|read-only|none|
 |hormone_therapies|[[NestedHormoneTherapy](#schemanestedhormonetherapy)]|false|read-only|none|
 |immunotherapies|[[NestedImmunotherapy](#schemanestedimmunotherapy)]|false|read-only|none|
-|radiation|[NestedRadiation](#schemanestedradiation)|false|read-only|none|
-|surgery|[NestedSurgery](#schemanestedsurgery)|false|read-only|none|
+|radiations|[[NestedRadiation](#schemanestedradiation)]|false|read-only|none|
+|surgeries|[[NestedSurgery](#schemanestedsurgery)]|false|read-only|none|
 |followups|[[NestedFollowUp](#schemanestedfollowup)]|false|read-only|none|
-|biomarkers|[[NestedBiomarker](#schemanestedbiomarker)]|false|read-only|none|
 
 <h2 id="tocS_NullEnum">NullEnum</h2>
 
@@ -7623,18 +7184,18 @@ null
       "hpv_strain": [
         "HPV16"
       ],
-      "test_interval": 32767,
+      "submitter_specimen_id": "string",
+      "submitter_primary_diagnosis_id": "string",
+      "submitter_treatment_id": "string",
+      "submitter_follow_up_id": "string",
+      "test_date": 32767,
       "psa_level": 32767,
       "ca125": 32767,
       "cea": 32767,
       "er_percent_positive": 0,
       "pr_percent_positive": 0,
       "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string",
-      "submitter_follow_up_id": "string"
+      "submitter_donor_id": "string"
     }
   ]
 }
@@ -7833,28 +7394,6 @@ null
               "percent_tumour_cells_measurement_method": "Genomics",
               "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
               "specimen_laterality": "Left",
-              "surgery": {
-                "surgery_type": "Ablation",
-                "surgery_site": "string",
-                "surgery_location": "Local recurrence",
-                "tumour_focality": "Cannot be assessed",
-                "residual_tumour_classification": "Not applicable",
-                "margin_types_involved": [
-                  "Circumferential resection margin"
-                ],
-                "margin_types_not_involved": [
-                  "Circumferential resection margin"
-                ],
-                "margin_types_not_assessed": [
-                  "Circumferential resection margin"
-                ],
-                "lymphovascular_invasion": "Absent",
-                "perineural_invasion": "Absent",
-                "tumour_length": 32767,
-                "tumour_width": 32767,
-                "greatest_dimension_tumour": 32767,
-                "submitter_specimen_id": "string"
-              },
               "sample_registrations": [
                 {
                   "submitter_sample_id": "string",
@@ -7862,25 +7401,6 @@ null
                   "tumour_normal_designation": "Normal",
                   "specimen_type": "Cell line - derived from normal",
                   "sample_type": "Amplified DNA"
-                }
-              ],
-              "biomarkers": [
-                {
-                  "er_status": "Cannot be determined",
-                  "pr_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
-                  "her2_ish_status": "Cannot be determined",
-                  "hpv_ihc_status": "Cannot be determined",
-                  "hpv_pcr_status": "Cannot be determined",
-                  "hpv_strain": [
-                    "HPV16"
-                  ],
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
-                  "er_percent_positive": 0,
-                  "pr_percent_positive": 0
                 }
               ]
             }
@@ -7933,37 +7453,41 @@ null
                   "actual_cumulative_drug_dose": 32767
                 }
               ],
-              "radiation": {
-                "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-                "radiation_therapy_type": "External",
-                "anatomical_site_irradiated": "Left Abdomen",
-                "radiation_therapy_fractions": 32767,
-                "radiation_therapy_dosage": 32767,
-                "radiation_boost": true,
-                "reference_radiation_treatment_id": "string"
-              },
-              "surgery": {
-                "surgery_type": "Ablation",
-                "surgery_site": "string",
-                "surgery_location": "Local recurrence",
-                "tumour_focality": "Cannot be assessed",
-                "residual_tumour_classification": "Not applicable",
-                "margin_types_involved": [
-                  "Circumferential resection margin"
-                ],
-                "margin_types_not_involved": [
-                  "Circumferential resection margin"
-                ],
-                "margin_types_not_assessed": [
-                  "Circumferential resection margin"
-                ],
-                "lymphovascular_invasion": "Absent",
-                "perineural_invasion": "Absent",
-                "tumour_length": 32767,
-                "tumour_width": 32767,
-                "greatest_dimension_tumour": 32767,
-                "submitter_specimen_id": "string"
-              },
+              "radiations": [
+                {
+                  "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+                  "radiation_therapy_type": "External",
+                  "anatomical_site_irradiated": "Left Abdomen",
+                  "radiation_therapy_fractions": 32767,
+                  "radiation_therapy_dosage": 32767,
+                  "radiation_boost": true,
+                  "reference_radiation_treatment_id": "string"
+                }
+              ],
+              "surgeries": [
+                {
+                  "surgery_type": "Ablation",
+                  "surgery_site": "string",
+                  "surgery_location": "Local recurrence",
+                  "tumour_focality": "Cannot be assessed",
+                  "residual_tumour_classification": "Not applicable",
+                  "margin_types_involved": [
+                    "Circumferential resection margin"
+                  ],
+                  "margin_types_not_involved": [
+                    "Circumferential resection margin"
+                  ],
+                  "margin_types_not_assessed": [
+                    "Circumferential resection margin"
+                  ],
+                  "lymphovascular_invasion": "Absent",
+                  "perineural_invasion": "Absent",
+                  "submitter_specimen_id": "string",
+                  "tumour_length": 32767,
+                  "tumour_width": 32767,
+                  "greatest_dimension_tumour": 32767
+                }
+              ],
               "followups": [
                 {
                   "submitter_follow_up_id": "string",
@@ -7974,55 +7498,16 @@ null
                   "method_of_progression_status": [
                     "Imaging (procedure)"
                   ],
-                  "anatomic_site_progression_or_recurrence": "string",
+                  "anatomic_site_progression_or_recurrence": [
+                    "string"
+                  ],
                   "recurrence_tumour_staging_system": "AJCC 8th edition",
                   "recurrence_t_category": "T0",
                   "recurrence_n_category": "N0",
                   "recurrence_m_category": "M0",
-                  "recurrence_stage_group": "Stage 0",
-                  "biomarkers": [
-                    {}
-                  ]
-                }
-              ],
-              "biomarkers": [
-                {
-                  "er_status": "Cannot be determined",
-                  "pr_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
-                  "her2_ish_status": "Cannot be determined",
-                  "hpv_ihc_status": "Cannot be determined",
-                  "hpv_pcr_status": "Cannot be determined",
-                  "hpv_strain": [
-                    "HPV16"
-                  ],
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
-                  "er_percent_positive": 0,
-                  "pr_percent_positive": 0
+                  "recurrence_stage_group": "Stage 0"
                 }
               ]
-            }
-          ],
-          "biomarkers": [
-            {
-              "er_status": "Cannot be determined",
-              "pr_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
-              "her2_ish_status": "Cannot be determined",
-              "hpv_ihc_status": "Cannot be determined",
-              "hpv_pcr_status": "Cannot be determined",
-              "hpv_strain": [
-                "HPV16"
-              ],
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
-              "er_percent_positive": 0,
-              "pr_percent_positive": 0
             }
           ],
           "followups": [
@@ -8035,31 +7520,14 @@ null
               "method_of_progression_status": [
                 "Imaging (procedure)"
               ],
-              "anatomic_site_progression_or_recurrence": "string",
+              "anatomic_site_progression_or_recurrence": [
+                "string"
+              ],
               "recurrence_tumour_staging_system": "AJCC 8th edition",
               "recurrence_t_category": "T0",
               "recurrence_n_category": "N0",
               "recurrence_m_category": "M0",
-              "recurrence_stage_group": "Stage 0",
-              "biomarkers": [
-                {
-                  "er_status": "Cannot be determined",
-                  "pr_status": "Cannot be determined",
-                  "her2_ihc_status": "Cannot be determined",
-                  "her2_ish_status": "Cannot be determined",
-                  "hpv_ihc_status": "Cannot be determined",
-                  "hpv_pcr_status": "Cannot be determined",
-                  "hpv_strain": [
-                    "HPV16"
-                  ],
-                  "test_interval": 32767,
-                  "psa_level": 32767,
-                  "ca125": 32767,
-                  "cea": 32767,
-                  "er_percent_positive": 0,
-                  "pr_percent_positive": 0
-                }
-              ]
+              "recurrence_stage_group": "Stage 0"
             }
           ]
         }
@@ -8094,7 +7562,7 @@ null
           "hpv_strain": [
             "HPV16"
           ],
-          "test_interval": 32767,
+          "test_date": 32767,
           "psa_level": 32767,
           "ca125": 32767,
           "cea": 32767,
@@ -8112,31 +7580,14 @@ null
           "method_of_progression_status": [
             "Imaging (procedure)"
           ],
-          "anatomic_site_progression_or_recurrence": "string",
+          "anatomic_site_progression_or_recurrence": [
+            "string"
+          ],
           "recurrence_tumour_staging_system": "AJCC 8th edition",
           "recurrence_t_category": "T0",
           "recurrence_n_category": "N0",
           "recurrence_m_category": "M0",
-          "recurrence_stage_group": "Stage 0",
-          "biomarkers": [
-            {
-              "er_status": "Cannot be determined",
-              "pr_status": "Cannot be determined",
-              "her2_ihc_status": "Cannot be determined",
-              "her2_ish_status": "Cannot be determined",
-              "hpv_ihc_status": "Cannot be determined",
-              "hpv_pcr_status": "Cannot be determined",
-              "hpv_strain": [
-                "HPV16"
-              ],
-              "test_interval": 32767,
-              "psa_level": 32767,
-              "ca125": 32767,
-              "cea": 32767,
-              "er_percent_positive": 0,
-              "pr_percent_positive": 0
-            }
-          ]
+          "recurrence_stage_group": "Stage 0"
         }
       ]
     }
@@ -8212,7 +7663,9 @@ null
       "method_of_progression_status": [
         "Imaging (procedure)"
       ],
-      "anatomic_site_progression_or_recurrence": "string",
+      "anatomic_site_progression_or_recurrence": [
+        "string"
+      ],
       "recurrence_tumour_staging_system": "AJCC 8th edition",
       "recurrence_t_category": "T0",
       "recurrence_n_category": "N0",
@@ -8376,6 +7829,10 @@ null
   "results": [
     {
       "program_id": "string",
+      "metadata": {
+        "property1": null,
+        "property2": null
+      },
       "created": "2019-08-24T14:15:22Z",
       "updated": "2019-08-24T14:15:22Z"
     }
@@ -8551,12 +8008,12 @@ null
       ],
       "lymphovascular_invasion": "Absent",
       "perineural_invasion": "Absent",
+      "submitter_specimen_id": "string",
       "tumour_length": 32767,
       "tumour_width": 32767,
       "greatest_dimension_tumour": 32767,
       "program_id": "string",
       "submitter_donor_id": "string",
-      "submitter_specimen_id": "string",
       "submitter_treatment_id": "string"
     }
   ]
@@ -9145,6 +8602,10 @@ continued
 ```json
 {
   "program_id": "string",
+  "metadata": {
+    "property1": null,
+    "property2": null
+  },
   "created": "2019-08-24T14:15:22Z",
   "updated": "2019-08-24T14:15:22Z"
 }
@@ -9156,6 +8617,8 @@ continued
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |program_id|string|true|none|none|
+|metadata|object¦null|false|none|none|
+|» **additionalProperties**|any|false|none|none|
 |created|string(date-time)|false|none|none|
 |updated|string(date-time)|false|none|none|
 
@@ -10732,12 +10195,12 @@ continued
   ],
   "lymphovascular_invasion": "Absent",
   "perineural_invasion": "Absent",
+  "submitter_specimen_id": "string",
   "tumour_length": 32767,
   "tumour_width": 32767,
   "greatest_dimension_tumour": 32767,
   "program_id": "string",
   "submitter_donor_id": "string",
-  "submitter_specimen_id": "string",
   "submitter_treatment_id": "string"
 }
 
@@ -10965,12 +10428,12 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|submitter_specimen_id|string¦null|false|none|none|
 |tumour_length|integer¦null|false|none|none|
 |tumour_width|integer¦null|false|none|none|
 |greatest_dimension_tumour|integer¦null|false|none|none|
 |program_id|string|true|none|none|
 |submitter_donor_id|string|true|none|none|
-|submitter_specimen_id|string¦null|false|none|none|
 |submitter_treatment_id|string|true|none|none|
 
 <h2 id="tocS_SurgeryLocationEnum">SurgeryLocationEnum</h2>
