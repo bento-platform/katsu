@@ -1,3 +1,4 @@
+import uuid
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -46,6 +47,15 @@ class DatasetsTest(APITestCase, PhenoTestCase):
     def test_dataset_summary(self):
         r = self.client.get(reverse("chord-dataset-summary", kwargs={"dataset_id": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
+
+    def test_dataset_datatype_summary(self):
+        r = self.client.get(reverse("chord-dataset-data-type-summary", kwargs={"dataset_id": self.dataset.identifier}))
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+
+        bad_dataset_id = str(uuid.uuid4())
+        with self.assertRaises(Dataset.DoesNotExist):
+            r = self.client.get(reverse("chord-dataset-data-type-summary", kwargs={"dataset_id": bad_dataset_id}))
+            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_dataset_datatype(self):
         for dt in DATA_TYPES:
