@@ -169,49 +169,6 @@ class Dataset(models.Model):
         return f"{self.title} (ID: {self.identifier})"
 
 
-# class TableOwnership(models.Model):
-#     """
-#     Class to represent a Table, which are organizationally part of a Dataset and can optionally be
-#     attached to a Phenopacket (and possibly a Biosample).
-#     """
-
-#     table_id = models.CharField(primary_key=True, max_length=200)
-#     service_id = models.CharField(max_length=200)
-#     service_artifact = models.CharField(max_length=200, default="")
-
-#     # Delete table ownership upon project/dataset deletion
-#     # dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name='table_ownership')
-
-#     def __str__(self):
-#         return f"{self.dataset} -> {self.table_id}"
-
-
-# class Table(models.Model):
-#     TABLE_DATA_TYPE_CHOICES = (
-#         (DATA_TYPE_EXPERIMENT, DATA_TYPE_EXPERIMENT),
-#         (DATA_TYPE_PHENOPACKET, DATA_TYPE_PHENOPACKET),
-#         (DATA_TYPE_MCODEPACKET, DATA_TYPE_MCODEPACKET),
-#     )
-
-#     ownership_record = models.OneToOneField(TableOwnership, on_delete=models.CASCADE, primary_key=True)
-#     name = models.CharField(max_length=200, unique=True)
-#     data_type = models.CharField(max_length=30, choices=TABLE_DATA_TYPE_CHOICES)
-
-#     created = models.DateTimeField(auto_now_add=True)
-#     updated = models.DateTimeField(auto_now=True)
-
-#     @property
-#     def identifier(self):
-#         return self.ownership_record_id
-
-#     @property
-#     def dataset(self):
-#         return self.ownership_record.dataset
-
-#     def __str__(self):
-#         return f"{self.name} (ID: {self.ownership_record.table_id}, Type: {self.data_type})"
-
-
 class ProjectJsonSchema(models.Model):
     id = models.CharField(primary_key=True, max_length=200, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")
