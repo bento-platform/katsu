@@ -309,6 +309,11 @@ class Phenopacket(BaseExtraProperties, IndexableMixin):
     FHIR: Composition
     """
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["id", "dataset_id"], name="unique_pheno_dataset")
+        ]
+
     @property
     def schema_type(self) -> SchemaType:
         return SchemaType.PHENOPACKET
@@ -316,7 +321,7 @@ class Phenopacket(BaseExtraProperties, IndexableMixin):
     def get_project_id(self) -> Optional[str]:
         model = apps.get_model("chord.Project")
         try:
-            project = model.objects.get(datasets__table_ownership=self.table_id)
+            project = model.objects.get(datasets=self.dataset)
             return project.identifier
         except ObjectDoesNotExist:
             return None
@@ -337,7 +342,8 @@ class Phenopacket(BaseExtraProperties, IndexableMixin):
     hts_files = models.ManyToManyField(HtsFile, blank=True, help_text=rec_help(d.PHENOPACKET, "hts_files"))
     # TODO OneToOneField
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
-    table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+    dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOPACKET, "extra_properties"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

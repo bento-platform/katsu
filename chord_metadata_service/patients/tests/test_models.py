@@ -18,7 +18,7 @@ class IndividualTest(ProjectTestCase):
             id="phenopacket_id:1",
             subject=self.individual_one,
             meta_data=self.meta_data,
-            table=self.table,
+            dataset=self.dataset
         )
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)

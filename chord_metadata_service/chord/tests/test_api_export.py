@@ -2,7 +2,6 @@ import json
 import os
 import shutil
 import tempfile
-import uuid
 
 from django.urls import reverse
 from chord_metadata_service.chord.export.cbioportal import CBIO_FILES_SET
@@ -10,14 +9,13 @@ from chord_metadata_service.chord.export.utils import EXPORT_DIR
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from ..ingest.views import METADATA_WORKFLOWS
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+from ..workflows.metadata import METADATA_WORKFLOWS
+from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 
 from .constants import VALID_DATA_USE_1
-from .example_ingest import EXAMPLE_INGEST_OUTPUTS
+from .example_ingest import EXAMPLE_INGEST_PHENOPACKET
 
 
 def generate_phenopackets_ingest(table_id):
@@ -43,18 +41,7 @@ class ExportTest(APITestCase):
                                         project=p)
         self.study_id = str(self.d.identifier)
 
-        # TODO: Real service ID
-        # table for phenopackets
-        to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
-                                           dataset=self.d)
-        self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
-
-        # table for experiments metadata
-        to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
-                                               service_artifact="experiments", dataset=self.d)
-        self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
-
-        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
 
     def test_export_cbio(self):
         # Test with no export body

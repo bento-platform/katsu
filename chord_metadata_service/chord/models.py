@@ -7,10 +7,9 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.resources.models import Resource
 from ..restapi.models import SchemaType
-from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
 
 
-__all__ = ["Project", "Dataset", "TableOwnership", "Table", "ProjectJsonSchema"]
+__all__ = ["Project", "Dataset", "ProjectJsonSchema"]
 
 
 def version_default():
@@ -69,17 +68,18 @@ class Dataset(models.Model):
         return Resource.objects.filter(id__in={
             *(r.id for r in self.additional_resources.all()),
             *(
+                # r.id
+                # for p in Phenopacket.objects.filter(
+                #     table_id__in={t.table_id for t in self.table_ownership.all()}
+                # ).prefetch_related("meta_data", "meta_data__resources")
+                # for r in p.meta_data.resources.all()
                 r.id
                 for p in Phenopacket.objects.filter(
-                    table_id__in={t.table_id for t in self.table_ownership.all()}
+                    dataset_id=self.identifier
                 ).prefetch_related("meta_data", "meta_data__resources")
                 for r in p.meta_data.resources.all()
             ),
         })
-
-    @property
-    def n_of_tables(self):
-        return TableOwnership.objects.filter(dataset=self).count()
 
     # --------------------------- DATS model fields ---------------------------
 
@@ -169,49 +169,6 @@ class Dataset(models.Model):
         return f"{self.title} (ID: {self.identifier})"
 
 
-class TableOwnership(models.Model):
-    """
-    Class to represent a Table, which are organizationally part of a Dataset and can optionally be
-    attached to a Phenopacket (and possibly a Biosample).
-    """
-
-    table_id = models.CharField(primary_key=True, max_length=200)
-    service_id = models.CharField(max_length=200)
-    service_artifact = models.CharField(max_length=200, default="")
-
-    # Delete table ownership upon project/dataset deletion
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name='table_ownership')
-
-    def __str__(self):
-        return f"{self.dataset} -> {self.table_id}"
-
-
-class Table(models.Model):
-    TABLE_DATA_TYPE_CHOICES = (
-        (DATA_TYPE_EXPERIMENT, DATA_TYPE_EXPERIMENT),
-        (DATA_TYPE_PHENOPACKET, DATA_TYPE_PHENOPACKET),
-        (DATA_TYPE_MCODEPACKET, DATA_TYPE_MCODEPACKET),
-    )
-
-    ownership_record = models.OneToOneField(TableOwnership, on_delete=models.CASCADE, primary_key=True)
-    name = models.CharField(max_length=200, unique=True)
-    data_type = models.CharField(max_length=30, choices=TABLE_DATA_TYPE_CHOICES)
-
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    @property
-    def identifier(self):
-        return self.ownership_record_id
-
-    @property
-    def dataset(self):
-        return self.ownership_record.dataset
-
-    def __str__(self):
-        return f"{self.name} (ID: {self.ownership_record.table_id}, Type: {self.data_type})"
-
-
 class ProjectJsonSchema(models.Model):
     id = models.CharField(primary_key=True, max_length=200, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")
@@ -231,15 +188,15 @@ class ProjectJsonSchema(models.Model):
         target_count = 0
         if self.schema_type == SchemaType.PHENOPACKET:
             target_count = Phenopacket.objects.filter(
-                table__ownership_record__dataset__project_id=self.project_id
+                dataset__project_id=self.project_id
             ).count()
         elif self.schema_type == SchemaType.INDIVIDUAL:
             target_count = Individual.objects.filter(
-                phenopackets__table__ownership_record__dataset__project_id=self.project_id
+                phenopackets__dataset__project_id=self.project_id
             ).count()
         elif self.schema_type == SchemaType.BIOSAMPLE:
             target_count = Biosample.objects.filter(
-                individual__phenopackets__table__ownership_record__dataset__project_id=self.project_id
+                individual__phenopackets__dataset__project_id=self.project_id
             ).count()
 
         if target_count > 0:

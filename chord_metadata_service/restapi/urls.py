@@ -31,8 +31,6 @@ batch_router = BatchListRouter()
 # CHORD app urls
 router.register(r'projects', chord_views.ProjectViewSet)
 router.register(r'datasets', chord_views.DatasetViewSet, basename="datasets")
-router.register(r'table_ownership', chord_views.TableOwnershipViewSet)
-router.register(r'tables', chord_views.TableViewSet)
 router.register(r'project_json_schemas', chord_views.ProjectJsonSchemaViewSet)
 
 # Experiments app urls

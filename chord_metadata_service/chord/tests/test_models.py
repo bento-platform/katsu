@@ -12,8 +12,7 @@ from chord_metadata_service.phenopackets.tests.constants import (
     VALID_INDIVIDUAL_1
 )
 from chord_metadata_service.restapi.models import SchemaType
-from ..data_types import DATA_TYPE_PHENOPACKET
-from ..models import Project, Dataset, ProjectJsonSchema, TableOwnership, Table
+from ..models import Project, Dataset, ProjectJsonSchema
 from .constants import VALID_DATA_USE_1
 
 
@@ -55,51 +54,6 @@ class DatasetTest(TestCase):
 
 TABLE_ID = str(uuid4())
 SERVICE_ID = str(uuid4())
-
-
-class TableOwnershipTest(TestCase):
-    def setUp(self) -> None:
-        p = Project.objects.create(title="Project 1", description="")
-        d = Dataset.objects.create(title="Dataset 1", description="", data_use=VALID_DATA_USE_1, project=p)
-        TableOwnership.objects.create(
-            table_id=TABLE_ID,
-            service_id=SERVICE_ID,
-            service_artifact="variant",
-            dataset=d
-        )
-
-    def test_table_ownership(self):
-        d = Dataset.objects.get(title="Dataset 1")
-        t = TableOwnership.objects.get(table_id=TABLE_ID, service_id=SERVICE_ID)
-
-        self.assertEqual(t.service_artifact, "variant")
-        self.assertEqual(t.dataset, d)
-
-        self.assertIn(t, d.table_ownership.all())
-
-        self.assertEqual(str(t), f"{str(d)} -> {t.table_id}")
-
-
-class TableTest(TestCase):
-    def setUp(self) -> None:
-        p = Project.objects.create(title="Project 1", description="")
-        self.d = Dataset.objects.create(title="Dataset 1", description="", data_use=VALID_DATA_USE_1, project=p)
-        to = TableOwnership.objects.create(
-            table_id=TABLE_ID,
-            service_id=SERVICE_ID,
-            service_artifact="variant",
-            dataset=self.d
-        )
-        Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
-
-    def test_table(self):
-        t = Table.objects.get(ownership_record_id=TABLE_ID)
-
-        self.assertEqual(t.data_type, DATA_TYPE_PHENOPACKET)
-        self.assertEqual(t.identifier, TABLE_ID)
-        self.assertEqual(t.dataset, self.d)
-
-        self.assertEqual(str(t), f"{t.name} (ID: {TABLE_ID}, Type: {DATA_TYPE_PHENOPACKET})")
 
 
 class ProjectJsonSchemaTest(ProjectTestCase):
@@ -149,7 +103,7 @@ class ProjectJsonSchemaTest(ProjectTestCase):
         phenopacket = Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=individual,
-            table=self.table,
+            dataset=self.dataset,
             extra_properties={
                 "prop_a": "extra property text"
             },

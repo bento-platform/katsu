@@ -60,6 +60,23 @@ def json_file_output(id_: str, output_name: Optional[str] = None):
     }
 
 
+DRS_URL_INPUT = {
+    "id": "drs_url",
+    "type": "string",
+    "required": True,
+    "value": FROM_CONFIG,
+    "hidden": True,
+}
+
+KATSU_URL_INPUT = {
+    "id": "katsu_url",
+    "type": "string",
+    "required": True,
+    "value": FROM_CONFIG,
+    "hidden": True,
+}
+
+
 METADATA_WORKFLOWS = {
     "ingestion": {
         WORKFLOW_PHENOPACKETS_JSON: {
@@ -68,8 +85,8 @@ METADATA_WORKFLOWS = {
                            "JSON document.",
             "data_type": DATA_TYPE_PHENOPACKET,
             "file": "phenopackets_json.wdl",
-            "inputs": [json_file_input("json_document")],
-            "outputs": [json_file_output("json_document", "ingest.json")],
+            "inputs": [KATSU_URL_INPUT, json_file_input("json_document")],
+            "outputs": [],
         },
         WORKFLOW_EXPERIMENTS_JSON: {
             "name": "Bento Experiments JSON",
@@ -77,8 +94,8 @@ METADATA_WORKFLOWS = {
                            "JSON document.",
             "data_type": DATA_TYPE_EXPERIMENT,
             "file": "experiments_json.wdl",
-            "inputs": [json_file_input("json_document")],
-            "outputs": [json_file_output("json_document", "ingest.json")]
+            "inputs": [KATSU_URL_INPUT, json_file_input("json_document")],
+            "outputs": []
         },
         WORKFLOW_FHIR_JSON: {
             "name": "FHIR Resources JSON",
@@ -88,6 +105,7 @@ METADATA_WORKFLOWS = {
             "data_type": DATA_TYPE_PHENOPACKET,
             "file": "fhir_json.wdl",
             "inputs": [
+                KATSU_URL_INPUT,
                 json_file_input("patients"),
                 json_file_input("observations", required=False),
                 json_file_input("conditions", required=False),
@@ -119,7 +137,7 @@ METADATA_WORKFLOWS = {
                            "data model.",
             "data_type": DATA_TYPE_MCODEPACKET,
             "file": "mcode_fhir_json.wdl",
-            "inputs": [json_file_input("json_document")],
+            "inputs": [KATSU_URL_INPUT, json_file_input("json_document")],
             "outputs": [json_file_output("json_document", "ingest.json")],
         },
         WORKFLOW_MCODE_JSON: {
@@ -128,7 +146,7 @@ METADATA_WORKFLOWS = {
                            "internal mCODE-based JSON document",
             "data_type": DATA_TYPE_MCODEPACKET,
             "file": "mcode_json.wdl",
-            "inputs": [json_file_input("json_document")],
+            "inputs": [KATSU_URL_INPUT, json_file_input("json_document")],
             "outputs": [json_file_output("json_document", "ingest.json")],
         },
         WORKFLOW_READSET: {
@@ -206,20 +224,8 @@ METADATA_WORKFLOWS = {
                     "value": FROM_CONFIG,
                     "hidden": True,
                 },
-                {
-                    "id": "drs_url",
-                    "type": "string",
-                    "required": True,
-                    "value": FROM_CONFIG,
-                    "hidden": True,
-                },
-                {
-                    "id": "metadata_url",
-                    "type": "string",
-                    "required": True,
-                    "value": FROM_CONFIG,
-                    "hidden": True,
-                },
+                DRS_URL_INPUT,
+                KATSU_URL_INPUT,
             ],
             "outputs": [
                 {
@@ -242,20 +248,8 @@ METADATA_WORKFLOWS = {
                     "type": "string",
                     "required": True,
                 },
-                {
-                    "id": "metadata_url",
-                    "type": "string",
-                    "required": True,
-                    "value": FROM_CONFIG,
-                    "hidden": True,
-                },
-                {
-                    "id": "drs_url",
-                    "type": "string",
-                    "required": True,
-                    "value": FROM_CONFIG,
-                    "hidden": True,
-                },
+                DRS_URL_INPUT,
+                KATSU_URL_INPUT,
             ],
             "outputs": [
                 {
@@ -269,9 +263,9 @@ METADATA_WORKFLOWS = {
     }
 }
 
-# Tag all workflows with their purpose (ingestion/analysis/export)
-for purpose, workflows in METADATA_WORKFLOWS.items():
+# Tag all workflows with their action (ingestion/analysis/export)
+for action, workflows in METADATA_WORKFLOWS.items():
     for wf in workflows.values():
-        wf["purpose"] = purpose
+        wf["action"] = action
 
 WORKFLOWS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "wdls")

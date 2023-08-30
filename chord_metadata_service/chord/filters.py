@@ -45,10 +45,10 @@ def authorize_datasets(qs, name, value):
 
 class AuthorizedDatasetFilter(django_filters.rest_framework.FilterSet):
     datasets = django_filters.CharFilter(
-        method=filter_datasets, field_name="table_ownership__dataset__title",
+        method=filter_datasets, field_name="dataset__title",
         label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets, field_name="table_ownership__dataset__title",
+        method=authorize_datasets, field_name="dataset__title",
         label="Authorized datasets"
     )

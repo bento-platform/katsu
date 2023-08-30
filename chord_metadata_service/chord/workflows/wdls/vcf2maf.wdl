@@ -4,7 +4,7 @@ workflow vcf2maf {
     input {
         String chord_url
         String drs_url
-        String metadata_url
+        String katsu_url
         String one_time_token_metadata_ingest
         String temp_token_drs
         String auth_host
@@ -20,7 +20,7 @@ workflow vcf2maf {
     call katsu_dataset_export_vcf {
         input:  dataset_name = dataset_name,
                 drs_url  = drs_url,
-                metadata_url = metadata_url
+                katsu_url = katsu_url
     }
 
     call vcf_2_maf {
@@ -38,7 +38,7 @@ workflow vcf2maf {
         input:  dataset_id = dataset_id,
                 experiment_results_json = katsu_dataset_export_vcf.experiment_results_json,
                 maf_list = vcf_2_maf.maf_list,
-                metadata_url  = metadata_url,
+                katsu_url  = katsu_url,
                 one_time_token_metadata_ingest = one_time_token_metadata_ingest,
                 auth_host = auth_host,
                 run_dir = run_dir
@@ -53,7 +53,7 @@ task katsu_dataset_export_vcf {
     input {
         String dataset_name
         String drs_url
-        String metadata_url
+        String katsu_url
     }
 
     # Enclosing command with curly braces {} causes issues with parsing in this
@@ -75,7 +75,7 @@ task katsu_dataset_export_vcf {
         # (actually the upper limit)
         # TODO: handle pagination, i.e. if the `next` property is set, loop
         # over the pages of results
-        metadata_url = "~{metadata_url}/api/experimentresults?datasets=~{dataset_name}&file_format=vcf&page_size=10000"
+        metadata_url = "~{katsu_url}/api/experimentresults?datasets=~{dataset_name}&file_format=vcf&page_size=10000"
         response = requests.get(metadata_url, verify=False)
         r = response.json()
 
@@ -252,7 +252,7 @@ task vcf_2_maf {
 task katsu_update_experiment_results_with_maf {
     input {
         String dataset_id
-        String metadata_url
+        String katsu_url
         String one_time_token_metadata_ingest
         String auth_host
         String run_dir
@@ -317,7 +317,7 @@ task katsu_update_experiment_results_with_maf {
             else {}
         )
 
-        metadata_url = f"~{metadata_url}/private/ingest"
+        metadata_url = f"~{katsu_url}/private/ingest"
         data = {
             "table_id": "FROM_DERIVED_DATA",
             "workflow_id": "maf_derived_from_vcf_json",

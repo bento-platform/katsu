@@ -90,7 +90,7 @@ def study_export(get_path: Callable[[str], str], dataset_id: str):
     # Export patients.
     with open(get_path(PATIENT_DATA_FILENAME), "w", newline="\n") as file_patient:
         # Note: plural in `phenopackets` is intentional (related_name property in model)
-        indiv = Individual.objects.filter(phenopackets__table__ownership_record__dataset_id=dataset.identifier)
+        indiv = Individual.objects.filter(phenopackets__dataset_id=dataset.identifier)
         individual_export(indiv, file_patient)
 
     with open(get_path(PATIENT_META_FILENAME), "w", newline="\n") as file_patient_meta:
@@ -98,7 +98,7 @@ def study_export(get_path: Callable[[str], str], dataset_id: str):
 
     # Export samples
     with open(get_path(SAMPLE_DATA_FILENAME), "w", newline="\n") as file_sample:
-        sampl = pm.Biosample.objects.filter(phenopacket__table__ownership_record__dataset_id=dataset.identifier)
+        sampl = pm.Biosample.objects.filter(phenopacket__dataset_id=dataset.identifier)
         sample_export(sampl, file_sample)
 
     with open(get_path(SAMPLE_META_FILENAME), "w", newline="\n") as file_sample_meta:
@@ -109,7 +109,7 @@ def study_export(get_path: Callable[[str], str], dataset_id: str):
          open(get_path(CASE_LIST_SEQUENCED), "w", newline="\n") as file_case_list:
         exp_res = (
             ExperimentResult.objects
-            .filter(experiment__table__ownership_record__dataset_id=dataset.identifier, file_format="MAF")
+            .filter(experiment__dataset_id=dataset.identifier, file_format="MAF")
             .annotate(biosample_id=F("experiment__biosample"))
         )
 

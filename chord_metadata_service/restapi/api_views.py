@@ -31,6 +31,8 @@ from chord_metadata_service.restapi.models import SchemaType
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 
+from chord_metadata_service.chord import data_types as dt
+
 logger = logging.getLogger("restapi_api_views")
 logger.setLevel(logging.INFO)
 
@@ -442,3 +444,12 @@ def public_dataset(_request):
     return Response({
         "datasets": datasets
     })
+
+
+DT_QUERYSETS = {
+    dt.DATA_TYPE_EXPERIMENT: experiments_models.Experiment.objects.all(),
+    dt.DATA_TYPE_EXPERIMENT_RESULT: experiments_models.ExperimentResult.objects.all(),
+    dt.DATA_TYPE_MCODEPACKET: mcode_models.MCodePacket.objects.all(),
+    dt.DATA_TYPE_PHENOPACKET: pheno_models.Phenopacket.objects.all(),
+    # dt.DATA_TYPE_READSET: None,
+}

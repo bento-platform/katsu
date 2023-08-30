@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import json
 import uuid
 
 from dateutil.parser import isoparse
 from decimal import Decimal
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
-from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Table
+from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Dataset
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.patients.values import KaryotypicSex
@@ -15,10 +13,9 @@ from chord_metadata_service.restapi.types import ExtensionSchemaDict
 from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from .exceptions import IngestError
-from .logger import logger
 from .resources import ingest_resource
 from .schema import schema_validation
-from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, workflow_file_output_to_path
+from .utils import map_if_list, query_and_check_nulls
 
 from typing import Any, Dict, Iterable, Optional, Union
 
@@ -200,7 +197,7 @@ def get_or_create_hts_file(hts_file) -> pm.HtsFile:
 
 
 def ingest_phenopacket(phenopacket_data: dict[str, Any],
-                       table_id: str,
+                       dataset_id: str,
                        json_schema: dict = PHENOPACKET_SCHEMA,
                        validate: bool = True,
                        idx: Optional[int] = None) -> pm.Phenopacket:
@@ -288,7 +285,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
         id=new_phenopacket_id,
         subject=subject_obj,
         meta_data=meta_data_obj,
-        table=Table.objects.get(ownership_record_id=table_id, data_type=DATA_TYPE_PHENOPACKET),
+        dataset=Dataset.objects.get(identifier=dataset_id),
     )
 
     # ... save it to the database...
@@ -304,13 +301,8 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     return new_phenopacket
 
 
-def ingest_phenopacket_workflow(workflow_outputs, table_id) -> Union[list[pm.Phenopacket], pm.Phenopacket]:
-    with workflow_file_output_to_path(get_output_or_raise(workflow_outputs, "json_document")) as json_doc_path:
-        logger.info(f"Attempting ingestion of phenopackets from path: {json_doc_path}")
-        with open(json_doc_path, "r") as jf:
-            json_data = json.load(jf)
-
-    project_id = Project.objects.get(datasets__table_ownership=table_id)
+def ingest_phenopacket_workflow(json_data, dataset_id) -> Union[list[pm.Phenopacket], pm.Phenopacket]:
+    project_id = Project.objects.get(datasets=dataset_id)
     project_schemas: Iterable[ExtensionSchemaDict] = ProjectJsonSchema.objects.filter(project_id=project_id).values(
         "json_schema",
         "required",
@@ -328,4 +320,4 @@ def ingest_phenopacket_workflow(workflow_outputs, table_id) -> Union[list[pm.Phe
     map_if_list(validate_phenopacket, json_data, json_schema)
 
     # Then, actually try to ingest them (if the validation passes); we don't need to re-do validation here.
-    return map_if_list(ingest_phenopacket, json_data, table_id, json_schema=json_schema, validate=False)
+    return map_if_list(ingest_phenopacket, json_data, dataset_id, json_schema=json_schema, validate=False)

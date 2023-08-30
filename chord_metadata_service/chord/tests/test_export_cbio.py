@@ -1,4 +1,3 @@
-import uuid
 import io
 from typing import Dict, TextIO
 from os import walk, path
@@ -16,9 +15,8 @@ from chord_metadata_service.chord.export.cbioportal import (
     SAMPLE_DATA_FILENAME,
     SAMPLE_DATATYPE,
 )
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.export.utils import ExportFileContext
-from chord_metadata_service.chord.models import Project, Dataset, TableOwnership, Table
+from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import (
@@ -32,10 +30,9 @@ from chord_metadata_service.phenopackets import models as pm
 
 from .constants import VALID_DATA_USE_1
 from .example_ingest import (
-    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT,
-    EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT,
+    EXAMPLE_INGEST_EXPERIMENT,
+    EXAMPLE_INGEST_EXPERIMENT_RESULT,
     EXAMPLE_INGEST_PHENOPACKET,
-    EXAMPLE_INGEST_OUTPUTS,
 )
 
 
@@ -48,25 +45,14 @@ class ExportCBioTest(TestCase):
                                         project=p)
         self.study_id = str(self.d.identifier)
 
-        # TODO: Real service ID
-        # table for phenopackets
-        to = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(), service_artifact="metadata",
-                                           dataset=self.d)
-        self.t = Table.objects.create(ownership_record=to, name="Table 1", data_type=DATA_TYPE_PHENOPACKET)
-
-        # table for experiments metadata
-        to_exp = TableOwnership.objects.create(table_id=uuid.uuid4(), service_id=uuid.uuid4(),
-                                               service_artifact="experiments", dataset=self.d)
-        self.t_exp = Table.objects.create(ownership_record=to_exp, name="Table 2", data_type=DATA_TYPE_EXPERIMENT)
-
-        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS, self.t.identifier)
+        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
         # ingest list of experiments
         self.exp = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT, self.t_exp.identifier
+            EXAMPLE_INGEST_EXPERIMENT, self.d.identifier
         )
         # append derived MAF files to experiment results
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENT_RESULT, self.t_exp.identifier
+            EXAMPLE_INGEST_EXPERIMENT_RESULT, self.d.identifier
         )
         self.exp_res = ExperimentResult.objects.all()
 
@@ -214,7 +200,7 @@ class ExportCBioTest(TestCase):
             self.assertEqual(sample_count, samples.count())
 
     def test_export_maf_list(self):
-        exp_res = self.exp_res.filter(experiment__table__ownership_record__dataset_id=self.study_id)\
+        exp_res = self.exp_res.filter(experiment__dataset_id=self.study_id)\
             .filter(file_format="MAF") \
             .annotate(biosample_id=F("experiment__biosample"))
         maf_count = exp_res.count()
@@ -240,7 +226,7 @@ class ExportCBioTest(TestCase):
         self.assertEqual(content["data_filename"], MUTATION_DATA_FILENAME)
 
     def test_export_case_list(self):
-        exp_res = self.exp_res.filter(experiment__table__ownership_record__dataset_id=self.study_id)\
+        exp_res = self.exp_res.filter(experiment__dataset_id=self.study_id)\
             .filter(file_format="MAF") \
             .annotate(biosample_id=F("experiment__biosample"))
         self.assertGreater(exp_res.count(), 0)
