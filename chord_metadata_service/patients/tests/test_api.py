@@ -592,6 +592,15 @@ class PublicFilteringIndividualsTest(APITestCase):
         response_obj = response.json()
         self.assertEqual(1, response_obj["count"])
 
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_public_overview_sex(self):
+        response = self.client.get('/api/public_search_fields')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+
+        # overview for sex should have entries due to large cell counts: MALE, FEMALE, UNKNOWN, OTHER
+        self.assertEqual(len(response_obj["sections"][0]["fields"][0]["options"]), 4)  # path to sex field
+
 
 class PublicFilteringIndividualsTestSmallCellCount(PublicFilteringIndividualsTest):
     num_individuals = 3  # below configured test threshold
