@@ -604,7 +604,7 @@ def get_distinct_field_values(field_props: dict) -> list[Any]:
     model, field = get_model_and_field(field_props["mapping"])
     threshold = get_threshold()
 
-    values_with_counts = model.objects.values_list(field).annotate(count=Count(field, distinct=True))
+    values_with_counts = model.objects.values_list(field).annotate(count=Count(field))
     return [val for val, count in values_with_counts if count > threshold]
 
 
