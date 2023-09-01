@@ -8,7 +8,7 @@ import subprocess
 #####################################################
 
 # Format: major.minor.patch.status
-VERSION = (2, 2, 2, "stable")
+VERSION = (2, 3, 0, "stable")
 
 
 def get_version():

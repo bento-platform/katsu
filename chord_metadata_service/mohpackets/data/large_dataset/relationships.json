@@ -942,7 +942,7 @@
   ],
   "chemotherapies": [
     {
-      "range": [1, 2000],
+      "range": [1, 8000],
       "targets": [
         {
           "range": [1, 2000],
@@ -959,7 +959,7 @@
       ]
     },
     {
-      "range": [2001, 4000],
+      "range": [8001, 10000],
       "targets": [
         {
           "range": [2001, 4000],
@@ -978,7 +978,7 @@
   ],
   "hormone_therapies": [
     {
-      "range": [1, 2000],
+      "range": [1, 8000],
       "targets": [
         {
           "range": [4001, 6000],
@@ -995,7 +995,7 @@
       ]
     },
     {
-      "range": [2001, 4000],
+      "range": [8001, 10000],
       "targets": [
         {
           "range": [6001, 8000],
@@ -1014,7 +1014,7 @@
   ],
   "immunotherapies": [
     {
-      "range": [1, 2000],
+      "range": [1, 8000],
       "targets": [
         {
           "range": [8001, 10000],
@@ -1031,7 +1031,7 @@
       ]
     },
     {
-      "range": [2001, 4000],
+      "range": [8001, 10000],
       "targets": [
         {
           "range": [10001, 12000],
@@ -1378,10 +1378,6 @@
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
-          "range": [1001, 2000],
-          "field_name": "submitter_specimen_id"
-        },
-        {
           "range": [501, 1000],
           "field_name": "submitter_donor_id"
         },
@@ -1394,10 +1390,6 @@
     {
       "range": [4001, 6000],
       "targets": [
-        {
-          "range": [2001, 3000],
-          "field_name": "submitter_primary_diagnosis_id"
-        },
         {
           "range": [2001, 3000],
           "field_name": "submitter_specimen_id"
@@ -1420,14 +1412,6 @@
           "field_name": "submitter_treatment_id"
         },
         {
-          "range": [3001, 4000],
-          "field_name": "submitter_primary_diagnosis_id"
-        },
-        {
-          "range": [3001, 4000],
-          "field_name": "submitter_specimen_id"
-        },
-        {
           "range": [1501, 2000],
           "field_name": "submitter_donor_id"
         },
@@ -1443,18 +1427,6 @@
         {
           "range": [8001, 10000],
           "field_name": "submitter_follow_up_id"
-        },
-        {
-          "range": [8001, 10000],
-          "field_name": "submitter_treatment_id"
-        },
-        {
-          "range": [4001, 5000],
-          "field_name": "submitter_primary_diagnosis_id"
-        },
-        {
-          "range": [4001, 5000],
-          "field_name": "submitter_specimen_id"
         },
         {
           "range": [2001, 2500],
@@ -1474,14 +1446,6 @@
           "field_name": "submitter_follow_up_id"
         },
         {
-          "range": [5001, 6000],
-          "field_name": "submitter_primary_diagnosis_id"
-        },
-        {
-          "range": [5001, 6000],
-          "field_name": "submitter_specimen_id"
-        },
-        {
           "range": [2501, 3000],
           "field_name": "submitter_donor_id"
         },
@@ -1496,15 +1460,7 @@
       "targets": [
         {
           "range": [12001, 14000],
-          "field_name": "submitter_follow_up_id"
-        },
-        {
-          "range": [12001, 14000],
           "field_name": "submitter_treatment_id"
-        },
-        {
-          "range": [6001, 7000],
-          "field_name": "submitter_primary_diagnosis_id"
         },
         {
           "range": [3001, 3500],
@@ -1519,14 +1475,6 @@
     {
       "range": [14001, 16000],
       "targets": [
-        {
-          "range": [14001, 16000],
-          "field_name": "submitter_follow_up_id"
-        },
-        {
-          "range": [14001, 16000],
-          "field_name": "submitter_treatment_id"
-        },
         {
           "range": [7001, 8000],
           "field_name": "submitter_specimen_id"
@@ -1544,14 +1492,6 @@
     {
       "range": [16001, 18000],
       "targets": [
-        {
-          "range": [16001, 18000],
-          "field_name": "submitter_follow_up_id"
-        },
-        {
-          "range": [16001, 18000],
-          "field_name": "submitter_treatment_id"
-        },
         {
           "range": [4001, 4500],
           "field_name": "submitter_donor_id"

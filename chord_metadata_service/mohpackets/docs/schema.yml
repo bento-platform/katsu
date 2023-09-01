@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: MoH Service API
   version: 1.0.0
-  description: This is the RESTful API for the MoH Service. Based on commit "565ab2d45b8802bb404e181b76111309433783a5".
+  description: This is the RESTful API for the MoH Service. Based on commit "0699c0b58a3f5272eadf151bb253d318c5a912a6".
 paths:
   /v2/authorized/biomarkers/:
     get:
@@ -39,7 +39,7 @@ paths:
         schema:
           type: string
       - in: query
-        name: test_interval
+        name: test_date
         schema:
           type: integer
       - in: query
@@ -925,16 +925,6 @@ paths:
         name: program_id
         schema:
           type: string
-      - in: query
-        name: created
-        schema:
-          type: string
-          format: date-time
-      - in: query
-        name: updated
-        schema:
-          type: string
-          format: date-time
       - name: page
         required: false
         in: query
@@ -1240,11 +1230,11 @@ paths:
         schema:
           type: string
       - in: query
-        name: submitter_specimen_id
+        name: submitter_treatment_id
         schema:
           type: string
       - in: query
-        name: submitter_treatment_id
+        name: submitter_specimen_id
         schema:
           type: string
       - in: query
@@ -1449,7 +1439,7 @@ paths:
         schema:
           type: string
       - in: query
-        name: test_interval
+        name: test_date
         schema:
           type: integer
       - in: query
@@ -2393,11 +2383,11 @@ paths:
         schema:
           type: string
       - in: query
-        name: submitter_specimen_id
+        name: submitter_treatment_id
         schema:
           type: string
       - in: query
-        name: submitter_treatment_id
+        name: submitter_specimen_id
         schema:
           type: string
       - in: query
@@ -3136,7 +3126,23 @@ components:
             - $ref: '#/components/schemas/BlankEnum'
             - $ref: '#/components/schemas/NullEnum'
           nullable: true
-        test_interval:
+        submitter_specimen_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        submitter_primary_diagnosis_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        submitter_treatment_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        submitter_follow_up_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        test_date:
           type: integer
           maximum: 32767
           minimum: 0
@@ -3168,18 +3174,6 @@ components:
           type: string
         submitter_donor_id:
           type: string
-        submitter_specimen_id:
-          type: string
-          nullable: true
-        submitter_primary_diagnosis_id:
-          type: string
-          nullable: true
-        submitter_treatment_id:
-          type: string
-          nullable: true
-        submitter_follow_up_id:
-          type: string
-          nullable: true
       required:
       - program_id
       - submitter_donor_id
@@ -3583,10 +3577,13 @@ components:
             - $ref: '#/components/schemas/NullEnum'
           nullable: true
         anatomic_site_progression_or_recurrence:
-          type: string
+          type: array
+          items:
+            type: string
+            nullable: true
+            maxLength: 32
+            pattern: ^[C][0-9]{2}(.[0-9]{1})?$
           nullable: true
-          maxLength: 32
-          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         recurrence_tumour_staging_system:
           nullable: true
           oneOf:
@@ -4073,7 +4070,7 @@ components:
             - $ref: '#/components/schemas/BlankEnum'
             - $ref: '#/components/schemas/NullEnum'
           nullable: true
-        test_interval:
+        test_date:
           type: integer
           maximum: 32767
           minimum: 0
@@ -4228,10 +4225,13 @@ components:
             - $ref: '#/components/schemas/NullEnum'
           nullable: true
         anatomic_site_progression_or_recurrence:
-          type: string
+          type: array
+          items:
+            type: string
+            nullable: true
+            maxLength: 32
+            pattern: ^[C][0-9]{2}(.[0-9]{1})?$
           nullable: true
-          maxLength: 32
-          pattern: ^[C][0-9]{2}(.[0-9]{1})?$
         recurrence_tumour_staging_system:
           nullable: true
           oneOf:
@@ -4262,11 +4262,6 @@ components:
           - $ref: '#/components/schemas/StageGroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        biomarkers:
-          type: array
-          items:
-            $ref: '#/components/schemas/NestedBiomarker'
-          readOnly: true
       required:
       - submitter_follow_up_id
     NestedHormoneTherapy:
@@ -4425,11 +4420,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NestedTreatment'
-          readOnly: true
-        biomarkers:
-          type: array
-          items:
-            $ref: '#/components/schemas/NestedBiomarker'
           readOnly: true
         followups:
           type: array
@@ -4615,19 +4605,10 @@ components:
           - $ref: '#/components/schemas/SpecimenLateralityEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        surgery:
-          allOf:
-          - $ref: '#/components/schemas/NestedSurgery'
-          readOnly: true
         sample_registrations:
           type: array
           items:
             $ref: '#/components/schemas/NestedSampleRegistration'
-          readOnly: true
-        biomarkers:
-          type: array
-          items:
-            $ref: '#/components/schemas/NestedBiomarker'
           readOnly: true
       required:
       - submitter_specimen_id
@@ -4702,6 +4683,10 @@ components:
           - $ref: '#/components/schemas/PerineuralInvasionEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        submitter_specimen_id:
+          type: string
+          nullable: true
+          maxLength: 64
         tumour_length:
           type: integer
           maximum: 32767
@@ -4716,9 +4701,6 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
-          nullable: true
-        submitter_specimen_id:
-          type: string
           nullable: true
     NestedTreatment:
       type: object
@@ -4812,23 +4794,20 @@ components:
           items:
             $ref: '#/components/schemas/NestedImmunotherapy'
           readOnly: true
-        radiation:
-          allOf:
-          - $ref: '#/components/schemas/NestedRadiation'
+        radiations:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedRadiation'
           readOnly: true
-        surgery:
-          allOf:
-          - $ref: '#/components/schemas/NestedSurgery'
+        surgeries:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedSurgery'
           readOnly: true
         followups:
           type: array
           items:
             $ref: '#/components/schemas/NestedFollowUp'
-          readOnly: true
-        biomarkers:
-          type: array
-          items:
-            $ref: '#/components/schemas/NestedBiomarker'
           readOnly: true
       required:
       - submitter_treatment_id
@@ -5425,6 +5404,10 @@ components:
           type: string
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
+        metadata:
+          type: object
+          additionalProperties: {}
+          nullable: true
         created:
           type: string
           format: date-time
@@ -6307,6 +6290,10 @@ components:
           - $ref: '#/components/schemas/PerineuralInvasionEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        submitter_specimen_id:
+          type: string
+          nullable: true
+          maxLength: 64
         tumour_length:
           type: integer
           maximum: 32767
@@ -6326,9 +6313,6 @@ components:
           type: string
         submitter_donor_id:
           type: string
-        submitter_specimen_id:
-          type: string
-          nullable: true
         submitter_treatment_id:
           type: string
       required:
