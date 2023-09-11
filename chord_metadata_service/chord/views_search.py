@@ -37,7 +37,7 @@ from chord_metadata_service.metadata.elastic import es
 from chord_metadata_service.patients.models import Individual
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
-from chord_metadata_service.phenopackets.models import Phenopacket, Biosample, Variant
+from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
