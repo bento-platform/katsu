@@ -213,3 +213,71 @@ class PublicListIndividuals(APIView):
                 "experiment_type": experiment_types
             }
         })
+
+
+class BeaconListIndividuals(APIView):
+    """
+    View to return lists of individuals filtered using search terms from katsu's config.json.
+    Uncensored equivalent of PublicListIndividuals.
+    """
+    def filter_queryset(self, queryset):
+        # Check query parameters validity
+        qp = self.request.query_params
+        if len(qp) > settings.CONFIG_PUBLIC["rules"]["max_query_parameters"]:
+            raise ValidationError(f"Wrong number of fields: {len(qp)}")
+
+        search_conf = settings.CONFIG_PUBLIC["search"]
+        field_conf = settings.CONFIG_PUBLIC["fields"]
+        queryable_fields = {
+            f: field_conf[f] for section in search_conf for f in section["fields"]
+        }
+
+        for field, value in qp.items():
+            if field not in queryable_fields:
+                raise ValidationError(f"Unsupported field used in query: {field}")
+
+            field_props = queryable_fields[field]
+            options = get_field_options(field_props)
+            if value not in options \
+                    and not (
+                        # case-insensitive search on categories
+                        field_props["datatype"] == "string"
+                        and value.lower() in [o.lower() for o in options]
+                    ) \
+                    and not (
+                        # no restriction when enum is not set for categories
+                        field_props["datatype"] == "string"
+                        and field_props["config"]["enum"] is None
+                    ):
+                raise ValidationError(f"Invalid value used in query: {value}")
+
+            # recursion
+            queryset = filter_queryset_field_value(queryset, field_props, value)
+
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        if not settings.CONFIG_PUBLIC:
+            return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=404)
+
+        base_qs = Individual.objects.all()
+        try:
+            filtered_qs = self.filter_queryset(base_qs)
+        except ValidationError as e:
+            return Response(errors.bad_request_error(
+                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items())), status=400)
+
+        tissues_count, sampled_tissues = biosample_tissue_stats(filtered_qs)
+        experiments_count, experiment_types = experiment_type_stats(filtered_qs)
+
+        return Response({
+            "matches": filtered_qs.values_list("id", flat=True),
+            "biosamples": {
+                "count": tissues_count,
+                "sampled_tissue": sampled_tissues
+            },
+            "experiments": {
+                "count": experiments_count,
+                "experiment_type": experiment_types
+            }
+        })

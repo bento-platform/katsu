@@ -1,4 +1,4 @@
-from chord_metadata_service.chord.models import Dataset, Project, Table
+from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_CBIOPORTAL
 
 from .cbioportal import study_export as export_cbioportal_workflow
@@ -6,7 +6,6 @@ from .cbioportal import study_export as export_cbioportal_workflow
 __all__ = [
     "OBJECT_TYPE_PROJECT",
     "OBJECT_TYPE_DATASET",
-    "OBJECT_TYPE_TABLE",
 
     "EXPORT_OBJECT_TYPE",
     "EXPORT_FORMATS",
@@ -17,7 +16,6 @@ __all__ = [
 
 OBJECT_TYPE_PROJECT = "project"
 OBJECT_TYPE_DATASET = "dataset"
-OBJECT_TYPE_TABLE = "table"
 
 EXPORT_OBJECT_TYPE = {
     OBJECT_TYPE_PROJECT: {
@@ -25,9 +23,6 @@ EXPORT_OBJECT_TYPE = {
     },
     OBJECT_TYPE_DATASET: {
         "model": Dataset
-    },
-    OBJECT_TYPE_TABLE: {
-        "model": Table
     },
 }
 

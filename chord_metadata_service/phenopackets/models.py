@@ -1,12 +1,14 @@
+from typing import Optional
+from django.apps import apps
 from django.db import models
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.description_utils import rec_help
-from chord_metadata_service.restapi.models import IndexableMixin, BaseTimeStamp
 from chord_metadata_service.restapi.schema_utils import validation_schema_list
+from chord_metadata_service.restapi.models import IndexableMixin, BaseExtraProperties, SchemaType, BaseTimeStamp
 from chord_metadata_service.restapi.validators import (
     JsonSchemaValidator,
     ontology_validator,
@@ -212,7 +214,7 @@ class Disease(BaseTimeStamp, IndexableMixin):
         return str(self.id)
 
 
-class Biosample(BaseTimeStamp, IndexableMixin):
+class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     """
     Class to describe a unit of biological material
 
@@ -270,6 +272,16 @@ class Biosample(BaseTimeStamp, IndexableMixin):
             'display': self.sampled_tissue.get('label')
         }
         }
+
+    @property
+    def schema_type(self) -> SchemaType:
+        return SchemaType.BIOSAMPLE
+
+    def get_project_id(self) -> Optional[str]:
+        model = apps.get_model("phenopackets.Phenopacket")
+        if len(phenopackets := model.objects.filter(biosamples__id=self.id)) < 1:
+            return None
+        return phenopackets.first().get_project_id()
 
 
 #############################################################
@@ -468,12 +480,29 @@ class Interpretation(BaseTimeStamp):
 #                                                           #
 #############################################################
 
-class Phenopacket(BaseTimeStamp, IndexableMixin):
+class Phenopacket(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     """
     Class to aggregate Individual's experiments data
 
     FHIR: Composition
     """
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["id", "dataset_id"], name="unique_pheno_dataset")
+        ]
+
+    @property
+    def schema_type(self) -> SchemaType:
+        return SchemaType.PHENOPACKET
+
+    def get_project_id(self) -> Optional[str]:
+        model = apps.get_model("chord.Project")
+        try:
+            project = model.objects.get(datasets=self.dataset)
+            return project.identifier
+        except ObjectDoesNotExist:
+            return None
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.PHENOPACKET, "id"))
     # if Individual instance is deleted Phenopacket instance is deleted too
@@ -502,7 +531,7 @@ class Phenopacket(BaseTimeStamp, IndexableMixin):
 
     # TODO OneToOneField
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
-    table = models.ForeignKey("chord.Table", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+    dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOPACKET, "extra_properties"))
 
     def __str__(self):

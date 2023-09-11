@@ -37,12 +37,12 @@ def authorize_datasets(qs, name, value):
 class GeneticSpecimenFilter(django_filters.rest_framework.FilterSet):
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="genomicsreport__mcodepacket__table__ownership_record__dataset__title",
+        field_name="genomicsreport__mcodepacket__dataset__title",
         label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="genomicsreport__mcodepacket__table__ownership_record__dataset__title",
+        field_name="genomicsreport__mcodepacket__dataset__title",
         label="Authorized datasets"
     )
 
@@ -50,12 +50,12 @@ class GeneticSpecimenFilter(django_filters.rest_framework.FilterSet):
 class CancerGeneticVariantFilter(django_filters.rest_framework.FilterSet):
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="genomicsreport__mcodepacket__table__ownership_record__dataset__title",
+        field_name="genomicsreport__mcodepacket__dataset__title",
         label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="genomicsreport__mcodepacket__table__ownership_record__dataset__title",
+        field_name="genomicsreport__mcodepacket__dataset__title",
         label="Authorized datasets"
     )
 
@@ -63,12 +63,12 @@ class CancerGeneticVariantFilter(django_filters.rest_framework.FilterSet):
 class GenomicRegionStudiedFilter(django_filters.rest_framework.FilterSet):
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="genomicsreport__mcodepacket__table__ownership_record__dataset__title",
+        field_name="genomicsreport__mcodepacket__dataset__title",
         label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="genomicsreport__mcodepacket__table__ownership_record__dataset__title",
+        field_name="genomicsreport__mcodepacket__dataset__title",
         label="Authorized datasets"
     )
 
@@ -76,12 +76,12 @@ class GenomicRegionStudiedFilter(django_filters.rest_framework.FilterSet):
 class GenomicsReportFilter(django_filters.rest_framework.FilterSet):
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="mcodepacket__table__ownership_record__dataset__title",
+        field_name="mcodepacket__dataset__title",
         label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="mcodepacket__table__ownership_record__dataset__title",
+        field_name="mcodepacket__dataset__title",
         label="Authorized datasets"
     )
 
@@ -89,12 +89,12 @@ class GenomicsReportFilter(django_filters.rest_framework.FilterSet):
 class LabsVitalFilter(django_filters.rest_framework.FilterSet):
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="individual__mcodepacket__table__ownership_record__dataset__title",
+        field_name="individual__mcodepacket__dataset__title",
         label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="individual__mcodepacket__table__ownership_record__dataset__title",
+        field_name="individual__mcodepacket__dataset__title",
         label="Authorized datasets"
     )
 
@@ -102,12 +102,12 @@ class LabsVitalFilter(django_filters.rest_framework.FilterSet):
 class CancerConditionFilter(django_filters.rest_framework.FilterSet):
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="mcodepacket__table__ownership_record__dataset__title",
+        field_name="mcodepacket__dataset__title",
         label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="mcodepacket__table__ownership_record__dataset__title",
+        field_name="mcodepacket__dataset__title",
         label="Authorized datasets"
     )
 
@@ -115,12 +115,12 @@ class CancerConditionFilter(django_filters.rest_framework.FilterSet):
 class TNMStagingFilter(django_filters.rest_framework.FilterSet):
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="cancer_condition_id__mcodepacket__table__ownership_record__dataset__title",
+        field_name="cancer_condition_id__mcodepacket__dataset__title",
         label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="cancer_condition_id__mcodepacket__table__ownership_record__dataset__title",
+        field_name="cancer_condition_id__mcodepacket__dataset__title",
         label="Authorized datasets"
     )
 
@@ -128,12 +128,12 @@ class TNMStagingFilter(django_filters.rest_framework.FilterSet):
 class CancerRelatedProcedureFilter(django_filters.rest_framework.FilterSet):
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="mcodepacket__table__ownership_record__dataset__title",
+        field_name="mcodepacket__dataset__title",
         label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="mcodepacket__table__ownership_record__dataset__title",
+        field_name="mcodepacket__dataset__title",
         label="Authorized datasets"
     )
 
@@ -141,22 +141,22 @@ class CancerRelatedProcedureFilter(django_filters.rest_framework.FilterSet):
 class MedicationStatementFilter(django_filters.rest_framework.FilterSet):
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="mcodepacket__table__ownership_record__dataset__title",
+        field_name="mcodepacket__dataset__title",
         label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
         method=authorize_datasets,
-        field_name="mcodepacket__table__ownership_record__dataset__title",
+        field_name="mcodepacket__dataset__title",
         label="Authorized datasets"
     )
 
 
 class MCodePacketFilter(django_filters.rest_framework.FilterSet):
     datasets = django_filters.CharFilter(
-        method=filter_datasets, field_name="table__ownership_record__dataset__title",
+        method=filter_datasets, field_name="dataset__title",
         label="Datasets"
     )
     authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets, field_name="table__ownership_record__dataset__title",
+        method=authorize_datasets, field_name="dataset__title",
         label="Authorized datasets"
     )

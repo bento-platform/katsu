@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to Katsu Metadata service's documentation!
-============================================
+==================================================
 
 .. toctree::
    :maxdepth: 2

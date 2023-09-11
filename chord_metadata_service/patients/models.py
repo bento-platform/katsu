@@ -1,7 +1,9 @@
+from typing import Optional
+from django.apps import apps
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
-from chord_metadata_service.restapi.models import IndexableMixin, BaseTimeStamp
+from chord_metadata_service.restapi.models import BaseExtraProperties, IndexableMixin, BaseTimeStamp, SchemaType
 from chord_metadata_service.restapi.validators import ontology_validator, JsonSchemaValidator
 from .values import Sex, KaryotypicSex, PatientStatus
 from .validators import comorbid_condition_validator
@@ -21,8 +23,23 @@ class VitalStatus(BaseTimeStamp, IndexableMixin):
                                                                                  " after their primary diagnosis")
 
 
-class Individual(BaseTimeStamp, IndexableMixin):
+class Individual(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     """ Class to store demographic information about an Individual (Patient) """
+
+    @property
+    def schema_type(self) -> SchemaType:
+        return SchemaType.INDIVIDUAL
+
+    def get_project_id(self) -> Optional[str]:
+        if not self.phenopackets.count():
+            # Need to wait for phenopacket to exist
+            return None
+        model = apps.get_model("chord.Project")
+        try:
+            project = model.objects.get(datasets=self.phenopackets.first().dataset_id)
+        except model.DoesNotExist:
+            return None
+        return project.identifier
 
     SEX = Sex.as_django_values()
     KARYOTYPIC_SEX = KaryotypicSex.as_django_values()

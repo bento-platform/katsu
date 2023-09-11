@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.db.models import Q
+from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 
 from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
 from chord_metadata_service.phenopackets.filters import (
@@ -10,12 +11,13 @@ from chord_metadata_service.phenopackets.filters import (
     PhenopacketFilter,
     GenomicInterpretationFilter
 )
+from chord_metadata_service.restapi.models import SchemaType
 
 from . import constants as c
 from .. import models as m
 
 
-class BiosampleTest(TestCase):
+class BiosampleTest(ProjectTestCase):
     """ Test module for Biosample model """
 
     def setUp(self):
@@ -23,13 +25,19 @@ class BiosampleTest(TestCase):
         self.procedure = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
         self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual, self.procedure))
         self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(None, self.procedure))
+        self.biosample_3 = m.Biosample.objects.create(**{
+            **c.valid_biosample_2(None, self.procedure),
+            "id": 'biosample_id:3'
+        })
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
 
         self.phenopacket = m.Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=self.individual,
             meta_data=self.meta_data,
+            dataset=self.dataset,
         )
+        # biosample_3 is not added to the phenopacket
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
     def test_biosample(self):
@@ -38,6 +46,11 @@ class BiosampleTest(TestCase):
             sampled_tissue__label__icontains='urinary bladder'
         )
         self.assertEqual(biosample_one.id, 'biosample_id:1')
+        self.assertEqual(biosample_one.schema_type, SchemaType.BIOSAMPLE)
+        self.assertEqual(biosample_one.get_project_id(), self.project.identifier)
+
+        # does not belong to a phenopacket => has no project
+        self.assertIsNone(self.biosample_3.get_project_id())
 
     def test_string_representations(self):
         # Test __str__
@@ -302,7 +315,7 @@ class MetaDataTest(TestCase):
         self.assertEqual(str(self.metadata), str(self.metadata.id))
 
 
-class PhenopacketTest(TestCase):
+class PhenopacketTest(ProjectTestCase):
     """ Test module for Phenopacket model """
 
     def setUp(self):
@@ -322,7 +335,8 @@ class PhenopacketTest(TestCase):
             subject=self.individual,
             meta_data=self.meta_data,
             measurements=[c.VALID_MEASUREMENT_1, c.VALID_MEASUREMENT_2],
-            medical_actions=c.VALID_MEDICAL_ACTIONS
+            medical_actions=c.VALID_MEDICAL_ACTIONS,
+            dataset=self.dataset,
         )
         self.phenopacket.diseases.set([self.disease])
         self.phenopacket.interpretations.set([self.interpretation])
@@ -338,6 +352,9 @@ class PhenopacketTest(TestCase):
         self.assertEqual(len(phenopacket), 1)
         self.assertEqual(len(phenopacket.values("phenotypic_features")), 2)
         self.assertEqual(len(phenopacket.values("diseases")), 1)
+        instance = phenopacket.get()
+        self.assertEqual(instance.schema_type, SchemaType.PHENOPACKET)
+        self.assertEqual(instance.get_project_id(), self.project.identifier)
 
     def test_filtering(self):
         f = PhenopacketFilter()

@@ -14,6 +14,7 @@ __all__ = [
     "DATA_TYPES",
 ]
 
+
 DATA_TYPE_EXPERIMENT = "experiment"
 DATA_TYPE_EXPERIMENT_RESULT = "experiment_result"
 DATA_TYPE_PHENOPACKET = "phenopacket"
@@ -23,6 +24,7 @@ DATA_TYPE_READSET = "readset"
 DATA_TYPES = {
     DATA_TYPE_EXPERIMENT: {
         "label": "Experiments",
+        "queryable": True,
         "schema": EXPERIMENT_SEARCH_SCHEMA,
         "metadata_schema": {
             "type": "object",  # TODO
@@ -30,6 +32,7 @@ DATA_TYPES = {
     },
     DATA_TYPE_PHENOPACKET: {
         "label": settings.KATSU_PHENOPACKET_LABEL,
+        "queryable": True,
         "schema": PHENOPACKET_SEARCH_SCHEMA,
         "metadata_schema": {
             "type": "object",  # TODO
@@ -44,6 +47,7 @@ DATA_TYPES = {
     # },
     DATA_TYPE_READSET: {
         "label": "Readsets",
+        "queryable": False,
         "schema": {
             "file_format": EXPERIMENT_RESULT_SCHEMA["properties"]["file_format"]
         },
@@ -53,6 +57,7 @@ DATA_TYPES = {
     },
     DATA_TYPE_EXPERIMENT_RESULT: {
         "label": "Experiment Results",
+        "queryable": False,
         "schema": EXPERIMENT_RESULT_SCHEMA,
         "metadata_schema": {
             "type": "object"

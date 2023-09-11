@@ -16,7 +16,7 @@ class ExperimentFilter(django_filters.rest_framework.FilterSet):
     # filter by datasets
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="table__ownership_record__dataset__title",
+        field_name="dataset__title",
         label="Datasets"
     )
 
@@ -41,7 +41,7 @@ class ExperimentResultFilter(django_filters.rest_framework.FilterSet):
     # filter by datasets
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="experiment__table__ownership_record__dataset__title",
+        field_name="experiment__dataset__title",
         label="Datasets"
     )
 

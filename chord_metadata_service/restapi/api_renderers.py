@@ -106,6 +106,16 @@ class RDFDatasetRenderer(PhenopacketsRenderer):
         return rdf_data
 
 
+def generate_csv_response(data, filename, columns):
+    headers = {key: key.replace('_', ' ').capitalize() for key in columns}
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f"attachment; filename='{filename}'"
+    dict_writer = csv.DictWriter(response, fieldnames=columns)
+    dict_writer.writerow(headers)
+    dict_writer.writerows(data)
+    return response
+
+
 class IndividualCSVRenderer(JSONRenderer):
     media_type = 'text/csv'
     format = 'csv'
@@ -147,13 +157,64 @@ class IndividualCSVRenderer(JSONRenderer):
             individuals.append(ind_obj)
         columns = individuals[0].keys()
         # remove underscore and capitalize column names
-        headers = {key: key.replace('_', ' ').capitalize() for key in individuals[0].keys()}
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = "attachment; filename='export.csv'"
-        dict_writer = csv.DictWriter(response, fieldnames=columns)
-        dict_writer.writerow(headers)
-        dict_writer.writerows(individuals)
-        return response
+        return generate_csv_response(individuals, 'data.csv', columns)
+
+
+class BiosamplesCSVRenderer(JSONRenderer):
+    media_type = 'text/csv'
+    format = 'csv'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        if not data:
+            return
+
+        biosamples = []
+        for biosample in data:
+            bio_obj = {
+                'id': biosample['id'],
+                'description': biosample.get('description', 'NA'),
+                'sampled_tissue': biosample.get('sampled_tissue', {}).get('label', 'NA'),
+                'individual_age_at_collection': biosample.get('individual_age_at_collection', {}).get('age', 'NA'),
+                'histological_diagnosis': biosample.get('histological_diagnosis', {}).get('label', 'NA'),
+                'extra_properties': f"Material: {biosample.get('extra_properties', {}).get('material', 'NA')}",
+                'created': biosample['created'],
+                'updated': biosample['updated'],
+                'individual': biosample['individual']
+            }
+            biosamples.append(bio_obj)
+
+        columns = biosamples[0].keys()
+        return generate_csv_response(biosamples, 'biosamples.csv', columns)
+
+
+class ExperimentCSVRenderer(JSONRenderer):
+    media_type = 'text/csv'
+    format = 'csv'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        if not data:
+            return
+
+        experiments = []
+        for experiment in data:
+            exp_obj = {
+                'id': experiment.get('id'),
+                'study_type': experiment.get('study_type'),
+                'experiment_type': experiment.get('experiment_type', 'NA'),
+                'molecule': experiment.get('molecule'),
+                'library_strategy': experiment.get('library_strategy'),
+                'library_source': experiment.get('library_source', 'NA'),
+                'library_selection': experiment.get('library_selection'),
+                'library_layout': experiment.get('library_layout'),
+                'created': experiment.get('created'),
+                'updated': experiment.get('updated'),
+                'biosample': experiment.get('biosample'),
+                'individual_id': experiment.get('biosample_individual', {}).get('id', 'NA'),
+            }
+            experiments.append(exp_obj)
+
+        columns = experiments[0].keys()
+        return generate_csv_response(experiments, 'experiments.csv', columns)
 
 
 class IndividualBentoSearchRenderer(JSONRenderer):

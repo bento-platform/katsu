@@ -4,6 +4,11 @@
 ![Lint Status](https://github.com/bento-platform/katsu/workflows/Lint/badge.svg)
 [![codecov](https://codecov.io/gh/bento-platform/katsu/branch/master/graph/badge.svg)](https://codecov.io/gh/bento-platform/katsu)
 
+<img src="docs/_static/katsu_logo_final.png" width="298" height="50" alt="Katsu logo" />
+
+A Phenopackets-based clinical and phenotypic metadata service for the Bento platform.
+
+
 ## Table of Contents
 
 - [Katsu Metadata Service](#katsu-metadata-service)
@@ -270,6 +275,16 @@ Test and create `coverage` HTML report:
 tox
 coverage html
 ```
+
+### Developing and debugging inside a container with VS Code (*Bento*)
+
+The development Docker image includes metadata for the 
+[`devcontainer.json`](https://code.visualstudio.com/docs/devcontainers/attach-container)
+specification. Using VS Code, you can attach to a running instance of a `*-dev` Katsu container
+and launch the `Attach Debugger (Bento)` task to set breakpoints and step through code, as well
+as interacting with and Git-committing inside the container via a remote terminal using the 
+pre-configured `bento_user` user, if the `BENTO_GIT_NAME` and `BENTO_GIT_EMAIL` environment
+variables are set.
 
 ### Terminal Commands
 

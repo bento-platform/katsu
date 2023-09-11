@@ -1,16 +1,15 @@
 import collections
 import uuid
-
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.resources.models import Resource
+from ..restapi.models import SchemaType
 
-from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPE_MCODEPACKET
 
-
-__all__ = ["Project", "Dataset", "TableOwnership", "Table"]
+__all__ = ["Project", "Dataset", "ProjectJsonSchema"]
 
 
 def version_default():
@@ -69,17 +68,18 @@ class Dataset(models.Model):
         return Resource.objects.filter(id__in={
             *(r.id for r in self.additional_resources.all()),
             *(
+                # r.id
+                # for p in Phenopacket.objects.filter(
+                #     table_id__in={t.table_id for t in self.table_ownership.all()}
+                # ).prefetch_related("meta_data", "meta_data__resources")
+                # for r in p.meta_data.resources.all()
                 r.id
                 for p in Phenopacket.objects.filter(
-                    table_id__in={t.table_id for t in self.table_ownership.all()}
+                    dataset_id=self.identifier
                 ).prefetch_related("meta_data", "meta_data__resources")
                 for r in p.meta_data.resources.all()
             ),
         })
-
-    @property
-    def n_of_tables(self):
-        return TableOwnership.objects.filter(dataset=self).count()
 
     # --------------------------- DATS model fields ---------------------------
 
@@ -169,44 +169,45 @@ class Dataset(models.Model):
         return f"{self.title} (ID: {self.identifier})"
 
 
-class TableOwnership(models.Model):
-    """
-    Class to represent a Table, which are organizationally part of a Dataset and can optionally be
-    attached to a Phenopacket (and possibly a Biosample).
-    """
+class ProjectJsonSchema(models.Model):
+    id = models.CharField(primary_key=True, max_length=200, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")
+    required = models.BooleanField(default=False,
+                                   help_text="Determines if the extra_properties field is required or not.")
+    json_schema = models.JSONField()
+    schema_type = models.CharField(max_length=200, choices=SchemaType.choices)
 
-    table_id = models.CharField(primary_key=True, max_length=200)
-    service_id = models.CharField(max_length=200)
-    service_artifact = models.CharField(max_length=200, default="")
+    def clean(self):
+        """
+        Creation of ProjectJsonSchema is prohibited if the target project already
+        contains data matching the schema_type
+        """
 
-    # Delete table ownership upon project/dataset deletion
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name='table_ownership')
+        super().clean()
 
-    def __str__(self):
-        return f"{self.dataset} -> {self.table_id}"
+        target_count = 0
+        if self.schema_type == SchemaType.PHENOPACKET:
+            target_count = Phenopacket.objects.filter(
+                dataset__project_id=self.project_id
+            ).count()
+        elif self.schema_type == SchemaType.INDIVIDUAL:
+            target_count = Individual.objects.filter(
+                phenopackets__dataset__project_id=self.project_id
+            ).count()
+        elif self.schema_type == SchemaType.BIOSAMPLE:
+            target_count = Biosample.objects.filter(
+                individual__phenopackets__dataset__project_id=self.project_id
+            ).count()
 
+        if target_count > 0:
+            raise ValidationError(f"Project {self.project_id} already contains data for {self.schema_type}")
 
-class Table(models.Model):
-    TABLE_DATA_TYPE_CHOICES = (
-        (DATA_TYPE_EXPERIMENT, DATA_TYPE_EXPERIMENT),
-        (DATA_TYPE_PHENOPACKET, DATA_TYPE_PHENOPACKET),
-        (DATA_TYPE_MCODEPACKET, DATA_TYPE_MCODEPACKET),
-    )
+    def save(self, *args, **kwargs):
+        # Override in order to call self.clean to validate data
+        self.clean()
+        return super().save(*args, **kwargs)
 
-    ownership_record = models.OneToOneField(TableOwnership, on_delete=models.CASCADE, primary_key=True)
-    name = models.CharField(max_length=200, unique=True)
-    data_type = models.CharField(max_length=30, choices=TABLE_DATA_TYPE_CHOICES)
-
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    @property
-    def identifier(self):
-        return self.ownership_record_id
-
-    @property
-    def dataset(self):
-        return self.ownership_record.dataset
-
-    def __str__(self):
-        return f"{self.name} (ID: {self.ownership_record.table_id}, Type: {self.data_type})"
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["project", "schema_type"], name="unique_project_schema")
+        ]

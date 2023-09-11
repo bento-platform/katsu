@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -11,9 +11,18 @@ from .serializers import ExperimentSerializer, ExperimentResultSerializer
 from .models import Experiment, ExperimentResult
 from .schemas import EXPERIMENT_SCHEMA
 from .filters import ExperimentFilter, ExperimentResultFilter
-from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
+from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
+from rest_framework import serializers, status
+
+
+from chord_metadata_service.restapi.api_renderers import (
+    FHIRRenderer,
+    PhenopacketsRenderer,
+    ExperimentCSVRenderer,
+)
+
+from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 
 __all__ = [
     "EXPERIMENT_SELECT_REL",
@@ -28,6 +37,7 @@ EXPERIMENT_SELECT_REL = (
 
 EXPERIMENT_PREFETCH = (
     "experiment_results",
+    "biosample__individual"
 )
 
 
@@ -52,6 +62,48 @@ class ExperimentViewSet(viewsets.ModelViewSet):
 
     def dispatch(self, *args, **kwargs):
         return super(ExperimentViewSet, self).dispatch(*args, **kwargs)
+
+
+class BatchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    A viewset that only implements the 'list' action.
+    To be used with the BatchListRouter which maps the POST method to .list()
+    """
+    pass
+
+
+class ExperimentBatchViewSet(BatchViewSet):
+    """
+    get:
+    Return a list of all existing experiments
+
+    post:
+    return a list of experiments based on a list of ids
+    """
+
+    serializer_class = ExperimentSerializer
+    pagination_class = BatchResultsSetPagination
+    renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
+                        PhenopacketsRenderer, ExperimentCSVRenderer)
+    content_negotiation_class = FormatInPostContentNegotiation
+
+    def get_queryset(self):
+        experiment_ids = self.request.data.get("id", None)
+        filter_by_id = {"id__in": experiment_ids} if experiment_ids else {}
+        queryset = Experiment.objects.filter(**filter_by_id)\
+            .select_related(*EXPERIMENT_SELECT_REL)\
+            .prefetch_related(*EXPERIMENT_PREFETCH)\
+            .order_by("id")
+
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        ids_list = request.data.get('id', [])
+        request.data["id"] = ids_list
+        queryset = self.get_queryset()
+
+        serializer = ExperimentSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ExperimentResultViewSet(viewsets.ModelViewSet):

@@ -26,8 +26,11 @@ from chord_metadata_service.mcode import models as mcode_models
 from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
+from chord_metadata_service.restapi.models import SchemaType
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
+
+from chord_metadata_service.chord import data_types as dt
 
 logger = logging.getLogger("restapi_api_views")
 logger.setLevel(logging.INFO)
@@ -139,6 +142,17 @@ def overview(_request):
     return Response(r)
 
 
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly])
+def extra_properties_schema_types(_request):
+    """
+    get:
+    Extra properties schema types
+    """
+    schema_types = dict(SchemaType.choices)
+    return Response(schema_types)
+
+
 @api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly])
 def search_overview(request):
@@ -152,7 +166,8 @@ def search_overview(request):
     queryset = patients_models.Individual.objects.all().filter(id__in=individual_id)
 
     individuals_count = len(individual_id)
-    biosamples_count = queryset.values("phenopackets__biosamples__id").count()
+    biosamples_count = queryset.values("phenopackets__biosamples__id").exclude(
+        phenopackets__biosamples__id__isnull=True).count()
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema
@@ -355,6 +370,9 @@ def public_overview(_request):
     if individuals_count < settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
         return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
 
+    # Get the rules config
+    rules_config = settings.CONFIG_PUBLIC["rules"]
+
     response = {
         "layout": settings.CONFIG_PUBLIC["overview"],
         "fields": {},
@@ -363,6 +381,8 @@ def public_overview(_request):
             "biosamples": biosamples_count,
             "experiments": experiments_count
         },
+        "max_query_parameters": rules_config["max_query_parameters"],
+        "count_threshold": rules_config["count_threshold"],
     }
 
     # Parse the public config to gather data for each field defined in the
@@ -408,7 +428,7 @@ def public_dataset(_request):
         "dimensions", "primary_publications", "citations",
         "produced_by", "creators", "licenses",
         "acknowledges", "keywords", "version", "dats_file",
-        "extra_properties"
+        "extra_properties", "identifier"
     )
 
     # convert dats_file json content to dict
@@ -421,3 +441,12 @@ def public_dataset(_request):
     return Response({
         "datasets": datasets
     })
+
+
+DT_QUERYSETS = {
+    dt.DATA_TYPE_EXPERIMENT: experiments_models.Experiment.objects.all(),
+    dt.DATA_TYPE_EXPERIMENT_RESULT: experiments_models.ExperimentResult.objects.all(),
+    dt.DATA_TYPE_MCODEPACKET: mcode_models.MCodePacket.objects.all(),
+    dt.DATA_TYPE_PHENOPACKET: pheno_models.Phenopacket.objects.all(),
+    # dt.DATA_TYPE_READSET: None,
+}

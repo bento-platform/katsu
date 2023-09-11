@@ -1,7 +1,6 @@
 import itertools
 import json
 import logging
-import uuid
 
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response, postgres
@@ -12,15 +11,17 @@ from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
+from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework import status
 
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
+from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
 
-from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.utils import queryset_stats_for_field
 
@@ -32,174 +33,59 @@ from chord_metadata_service.mcode.models import MCodePacket
 from chord_metadata_service.mcode.serializers import MCodePacketSerializer
 
 from chord_metadata_service.metadata.elastic import es
-from chord_metadata_service.metadata.settings import CHORD_SERVICE_ARTIFACT, CHORD_SERVICE_ID
 
 from chord_metadata_service.patients.models import Individual
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
-from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.phenopackets.models import Phenopacket, Biosample, Variant
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
-from .models import Dataset, TableOwnership, Table
-from .permissions import ReadOnly, OverrideOrSuperUserOnly
+from .models import Dataset
+
+from collections import defaultdict
+
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def data_type_list(_request):
-    return Response(sorted(
-        ({"id": k, "label": dt["label"], "schema": dt["schema"]} for k, dt in DATA_TYPES.items()),
-        key=lambda dt: dt["id"]
-    ))
+def experiment_dataset_summary(dataset):
+    experiments = Experiment.objects.filter(dataset=dataset)
 
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def data_type_detail(_request, data_type: str):
-    if data_type not in DATA_TYPES:
-        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
-
-    return Response({"id": data_type, **DATA_TYPES[data_type]})
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def data_type_schema(_request, data_type: str):
-    if data_type not in DATA_TYPES:
-        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
-
-    return Response(DATA_TYPES[data_type]["schema"])
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def data_type_metadata_schema(_request, data_type: str):
-    if data_type not in DATA_TYPES:
-        return Response(errors.not_found_error(f"Date type {data_type} not found"), status=404)
-
-    return Response(DATA_TYPES[DATA_TYPE_PHENOPACKET]["metadata_schema"])
-
-
-def chord_table_representation(table: Table) -> dict:
     return {
-        "id": table.identifier,
-        "name": table.name,
-        "metadata": {
-            "dataset_id": table.ownership_record.dataset_id,
-            "created": table.created.isoformat(),
-            "updated": table.updated.isoformat()
-        },
-        "data_type": table.data_type,
-        "schema": DATA_TYPES[table.data_type]["schema"],
+        "count": experiments.count(),
+        "data_type_specific": {},  # TODO
     }
 
 
-@api_view(["GET", "POST"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def table_list(request):
-    if request.method == "POST":
-        request_data = json.loads(request.body)  # TODO: Handle JSON errors here
+def mcodepacket_dataset_summary(dataset):
+    mcodepackets = MCodePacket.objects.filter(dataset=dataset)  # TODO
 
-        name = request_data.get("name", "").strip()
-        data_type = request_data.get("data_type", "")
-        dataset = request_data.get("dataset")
-
-        if name == "":
-            return Response(errors.bad_request_error("Missing or blank name field"), status=400)
-
-        if data_type not in DATA_TYPES:
-            return Response(errors.bad_request_error(f"Invalid data type for table: {data_type}"), status=400)
-
-        table_id = str(uuid.uuid4())
-
-        table_ownership = TableOwnership.objects.create(
-            table_id=table_id,
-            service_id=CHORD_SERVICE_ID,
-            service_artifact=CHORD_SERVICE_ARTIFACT,
-            dataset=Dataset.objects.get(identifier=dataset),
-        )
-
-        table = Table.objects.create(
-            ownership_record=table_ownership,
-            name=name,
-            data_type=data_type,
-        )
-
-        return Response(chord_table_representation(table))
-
-    # GET
-
-    data_types = request.query_params.getlist("data-type")
-
-    if len(data_types) == 0 or next((dt for dt in data_types if dt not in DATA_TYPES), None) is not None:
-        return Response(errors.bad_request_error(f"Missing or invalid data type(s) (Specified: {data_types})"),
-                        status=400)
-
-    return Response([chord_table_representation(t) for t in Table.objects.filter(data_type__in=data_types)])
-
-
-# TODO: Remove pragma: no cover when POST implemented
-@api_view(["GET", "DELETE"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def table_detail(request, table_id):  # pragma: no cover
-    # TODO: Implement GET, POST
-    # TODO: Permissions: Check if user has control / more direct access over this table and/or dataset?
-    #  Or just always use owner...
-    try:
-        table = Table.objects.get(ownership_record_id=table_id)
-        table_ownership = TableOwnership.objects.get(table_id=table_id)
-    except Table.DoesNotExist:
-        return Response(errors.not_found_error(f"Table with ID {table_id} not found"), status=404)
-    except TableOwnership.DoesNotExist:
-        return Response(
-            errors.not_found_error(f"Table ownership record for table with ID {table_id} not found"), status=404)
-
-    if request.method == "DELETE":
-        # First, delete the table record itself - use the cascade from the ownership record
-        table_ownership.delete()  # also deletes table
-
-        # Then, run cleanup
-        logger.info(f"Running cleanup after deleting table {table_id} via /tables Bento data service endpoint")
-        n_removed = run_all_cleanup()
-        logger.info(f"Cleanup: removed {n_removed} objects in total")
-
-        return Response(status=204)
-
-    # GET
-    return Response(chord_table_representation(table))
-
-
-def experiment_table_summary(table):
-    experiments = Experiment.objects.filter(table=table)  # TODO
-
-    return Response({
-        "count": experiments.count(),
-        "data_type_specific": {},  # TODO
-    })
-
-
-def mcodepacket_table_summary(table):
-    mcodepackets = MCodePacket.objects.filter(table=table)  # TODO
-
-    return Response({
+    return {
         "count": mcodepackets.count(),
         "data_type_specific": {},  # TODO
-    })
+    }
 
 
-def phenopacket_table_summary(table):
-    phenopacket_qs = Phenopacket.objects.filter(table=table)  # TODO
+def variant_dataset_summary(dataset):
+    variants = Variant.objects.filter(dataset=dataset)
+
+    return {
+        "count": variants.count(),
+        "data_type_specific": {},  # TODO
+    }
+
+
+def phenopacket_dataset_summary(dataset):
+    phenopacket_qs = Phenopacket.objects.filter(dataset=dataset)  # TODO
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema
     individuals_sex = queryset_stats_for_field(phenopacket_qs, "subject__sex")
     individuals_k_sex = queryset_stats_for_field(phenopacket_qs, "subject__karyotypic_sex")
 
-    return Response({
+    return {
         "count": phenopacket_qs.count(),
         "data_type_specific": {
             "biosamples": {
@@ -217,26 +103,7 @@ def phenopacket_table_summary(table):
             },
             "phenotypic_features": queryset_stats_for_field(phenopacket_qs, "phenotypic_features__pftype__label"),
         }
-    })
-
-
-SUMMARY_HANDLERS: Dict[str, Callable[[Any], Response]] = {
-    DATA_TYPE_EXPERIMENT: experiment_table_summary,
-    DATA_TYPE_MCODEPACKET: mcodepacket_table_summary,
-    DATA_TYPE_PHENOPACKET: phenopacket_table_summary,
-}
-
-
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
-@api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly])
-def chord_table_summary(_request, table_id):
-    try:
-        table = Table.objects.get(ownership_record_id=table_id)
-        return SUMMARY_HANDLERS[table.data_type](table)
-    except Table.DoesNotExist:
-        return Response(errors.not_found_error(f"Table with ID {table_id} not found"), status=404)
+    }
 
 
 # TODO: CHORD-standardized logging
@@ -305,6 +172,25 @@ def mcodepacket_query_results(query, params, options=None):
     return queryset
 
 
+def get_biosamples_with_experiment_details(subject_ids):
+    """
+    The function returns a queryset where each entry represents a biosample obtained from a subject, along with
+    details of any associated experiment. If a biosample does not have an associated experiment, the experiment
+    details are returned as None.
+    """
+    biosamples_exp_tissue_details = Biosample.objects.filter(phenopacket__subject_id__in=subject_ids)\
+        .values(
+            subject_id=F("phenopacket__subject_id"),
+            biosample_id=F("id"),
+            experiment_id=F("experiment__id"),
+            experiment_type=F("experiment__experiment_type"),
+            study_type=F("experiment__study_type"),
+            tissue_id=F("sampled_tissue__id"),
+            tissue_label=F("sampled_tissue__label")
+        )
+    return biosamples_exp_tissue_details
+
+
 def phenopacket_query_results(query, params, options=None):
     queryset = Phenopacket.objects \
         .filter(id__in=data_type_results(query, params, "id"))
@@ -318,29 +204,42 @@ def phenopacket_query_results(query, params, options=None):
         if "add_field" in options:
             fields.append(options["add_field"])
 
-        # Results displayed as 4/5 columns:
-        # "individuals ID", "table ID" (optional), [Alternate ids list], number of experiments, [Biosamples list...]
-        return queryset.values(
+        results = queryset.values(
             *fields,
-            alternate_ids=Coalesce(F("subject__alternate_ids"), [])
+            alternate_ids=Coalesce(F("subject__alternate_ids"), []),
         ).annotate(
-            # Weird bug with Django 4.1 here: num_experiments must come before the use of ArrayAgg or biosamples
-            # is considered as an ArrayField...
             num_experiments=Count("biosamples__experiment"),
-            # Postgre specific: aggregates multiple values in a list
-            biosamples=Coalesce(
-                ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
-                []
-            )
+            biosamples=Coalesce(ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)), []),
         )
 
-    # To expand further on this query : the select_related call
-    # will join on these tables we'd call anyway, thus 2 less request
-    # to the DB. prefetch_related works on M2M relationships and makes
-    # sure that, for instance, when querying diseases, we won't make multiple call
-    # for the same set of data
-    return queryset.select_related(*PHENOPACKET_SELECT_REL) \
-        .prefetch_related(*PHENOPACKET_PREFETCH)
+        # Get the biosamples with experiments data
+        phenopacket_ids = [result['subject_id'] for result in results]
+        biosamples_experiments_details = get_biosamples_with_experiment_details(phenopacket_ids)
+
+        # Group the experiments with biosamples by subject_id
+        experiments_with_biosamples = defaultdict(list)
+        for b in biosamples_experiments_details:
+            experiments_with_biosamples[b["subject_id"]].append({
+                "biosample_id": b["biosample_id"],
+                "sampled_tissue": {
+                    "id": b["tissue_id"],
+                    "label": b["tissue_label"]
+                },
+                "experiment": {
+                    "experiment_id": b["experiment_id"],
+                    "experiment_type": b["experiment_type"],
+                    "study_type": b["study_type"]
+                }
+            })
+
+        # Add the experiments_with_biosamples data to the results
+        for result in results:
+            result["experiments_with_biosamples"] = experiments_with_biosamples[result['subject_id']]
+
+        return results
+    else:
+        return queryset.select_related(*PHENOPACKET_SELECT_REL) \
+            .prefetch_related(*PHENOPACKET_PREFETCH)
 
 
 QUERY_RESULTS_FN: Dict[str, Callable] = {
@@ -374,7 +273,7 @@ def search(request, internal_data=False):
 
     if (search_params["output"] == OUTPUT_FORMAT_VALUES_LIST
        or search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT):
-        search_params["add_field"] = "table_id"
+        search_params["add_field"] = "dataset_id"
 
     start = datetime.now()
     data_type = search_params["data_type"]
@@ -382,53 +281,55 @@ def search(request, internal_data=False):
     query_params = search_params["params"]
 
     if not internal_data:
-        tables = Table.objects.filter(ownership_record_id__in=data_type_results(
+        datasets = Dataset.objects.filter(identifier__in=data_type_results(
             query=compiled_query,
             params=query_params,
-            key="table_id"
-        ))  # TODO: Maybe can avoid hitting DB here
-        return Response(build_search_response([{"id": t.identifier, "data_type": data_type} for t in tables], start))
+            key="dataset_id"
+        ))
+        return Response(build_search_response([{"id": d.identifier, "data_type": data_type} for d in datasets], start))
 
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
     query_function = QUERY_RESULTS_FN[data_type]
     queryset = query_function(compiled_query, query_params, search_params)
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
-        return Response(build_search_response({
-            table_id: {
+        result = {
+            dataset_id: {
                 "data_type": data_type,
-                "matches": [p["value"] for p in table_dicts]
-            } for table_id, table_dicts in itertools.groupby(
+                "matches": [p["value"] for p in dataset_dicts]
+            } for dataset_id, dataset_dicts in itertools.groupby(
                 queryset,
-                key=lambda d: str(d["table_id"])    # dict here
+                key=lambda d: str(d["dataset_id"])    # dict here
             )
-        }, start))
+        }
+        return Response(build_search_response(result, start))
 
     if search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
         # The queryset for the bento_search_result output is based on the
         # usage of Django ORM `values()` to restrict its content to specific fields.
         # This result in a slight change of the queryset iterable where
         # items are dictionaries instead of objects.
-        return Response(build_search_response({
-            table_id: {
+        result = {
+            dataset_id: {
                 "data_type": data_type,
                 "matches": [
-                    {key: value for key, value in p.items() if key != "table_id"}
-                    for p in table_dicts
+                    {key: value for key, value in p.items() if key != "dataset_id"}
+                    for p in dataset_dicts
                 ]
-            } for table_id, table_dicts in itertools.groupby(
+            } for dataset_id, dataset_dicts in itertools.groupby(
                 queryset,
-                key=lambda d: str(d["table_id"])    # dict here
+                key=lambda d: str(d["dataset_id"])    # dict here
             )
-        }, start))
+        }
+        return Response(build_search_response(result, start))
 
     return Response(build_search_response({
-        table_id: {
+        dataset_id: {
             "data_type": data_type,
-            "matches": list(serializer_class(p).data for p in table_objects)
-        } for table_id, table_objects in itertools.groupby(
-            queryset,
-            key=lambda o: str(o.table_id)           # object here
+            "matches": list(serializer_class(p).data for p in dataset_objects)
+        } for dataset_id, dataset_objects in itertools.groupby(
+            queryset if queryset is not None else [],
+            key=lambda o: str(o.dataset_id)  # object here
         )
     }, start))
 
@@ -553,15 +454,17 @@ def fhir_search(request, internal_data=False):
 
     if not internal_data:
         # TODO: Maybe can avoid hitting DB here
-        datasets = Table.objects.filter(ownership_record_id__in=frozenset(p.table_id for p in phenopackets))
+        datasets = Dataset.objects.filter(identifier__in=frozenset(p.dataset_id for p in phenopackets))
         return Response(build_search_response([{"id": d.identifier, "data_type": DATA_TYPE_PHENOPACKET}
                                                for d in datasets], start))
-    return Response(build_search_response({
-        table_id: {
+
+    ext_result = {
+        dataset_id: {
             "data_type": DATA_TYPE_PHENOPACKET,
-            "matches": list(PhenopacketSerializer(p).data for p in table_phenopackets)
-        } for table_id, table_phenopackets in itertools.groupby(phenopackets, key=lambda p: str(p.table_id))
-    }, start))
+            "matches": list(PhenopacketSerializer(p).data for p in dataset_phenopackets)
+        } for dataset_id, dataset_phenopackets in itertools.groupby(phenopackets, key=lambda p: str(p.dataset_id))
+    }
+    return Response(build_search_response(ext_result, start))
 
 
 @api_view(["GET", "POST"])
@@ -643,7 +546,10 @@ def get_chord_search_parameters(request, data_type=None):
     }, None
 
 
-def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
+def chord_dataset_search(
+        search_params,
+        dataset_id, start,
+        internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
     """
     Performs a search based on a psycopg2 object and paramaters and restricted
     to a given table.
@@ -653,11 +559,10 @@ def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[
     query_function = QUERY_RESULTS_FN[data_type]
 
     queryset = query_function(
-        query=sql.SQL("{} AND table_id = {}").format(search_params["compiled_query"], sql.Placeholder()),
-        params=search_params["params"] + (table_id,),
+        query=sql.SQL("{} AND dataset_id = {}").format(search_params["compiled_query"], sql.Placeholder()),
+        params=search_params["params"] + (dataset_id,),
         options=search_params
     )
-
     if not internal:
         return queryset.exists(), None    # True if at least one match
 
@@ -673,92 +578,49 @@ def chord_table_search(search_params, table_id, start, internal=False) -> Tuple[
     return serialized_data, None
 
 
-def chord_table_search_response(request, table_id, internal=False):
-    """
-    Executes a free-form query using the Bento specific syntax, restricted to
-    a given table and generates DRF Responses.
-    - Parameters:
-        - request: DRF Request object, see `chord_table_private_search` for
-            the expected values
-        - table_id: table_id to restrict the results to. Extracted from the
-            URL (hence, unverified)
-        - internal: if set to True, the response contains values from records.
-            if set to False, the response is a Boolean (no private data can
-            be leaked).
-    """
+def chord_dataset_representation(dataset: Dataset):
+    return {
+        "id": dataset.identifier,
+        "title": dataset.title,
+        "metadata": {
+            "project_id": dataset.project_id,
+            "created": dataset.created.isoformat(),
+            "updated": dataset.updated.isoformat(),
+        },
+    }
+
+
+def dataset_search(request: HttpRequest, dataset_id: str, internal=False):
     start = datetime.now()
-    debug_log(f"Started {'private' if internal else 'public'} table search")
-
-    table = Table.objects.get(ownership_record_id=table_id)
-    data_type = table.data_type
-
-    search_params, err = get_chord_search_parameters(request, data_type)
+    search_params, err = get_chord_search_parameters(request=request)
     if err:
-        return Response(errors.bad_request_error(err), status=400)
+        return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
 
-    debug_log(f"Finished compiling query in {datetime.now() - start}")
-    data, err = chord_table_search(search_params, table_id, start, internal)
+    data, err = chord_dataset_search(search_params, dataset_id, start, internal)
 
     if err:
-        return Response(errors.bad_request_error(err), status=400)
-
-    if internal:
-        return Response(build_search_response(data, start))
-
-    return Response(data)
+        return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
+    return Response(build_search_response(data, start) if internal else data)
 
 
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
 @api_view(["GET", "POST"])
-@permission_classes([AllowAny])
-def chord_public_table_search(request, table_id):
-    """
-    Returns a Boolean value to indicate that a match with the query exists in
-    the given table.
-    See `chord_private_table_search for a detail of the request parameters
-
-    - Returns
-      {
-        time: query duration,
-        results: boolean
-      }
-    """
-    # Search data types in specific tables without leaking internal data
-    return chord_table_search_response(request, table_id, internal=False)
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+def public_dataset_search(request: HttpRequest, dataset_id: str):
+    return dataset_search(request=request, dataset_id=dataset_id)
 
 
-# Mounted on /private/, so will get protected anyway; this allows for access from federation service
-# TODO: Ugly and misleading permissions
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
 @api_view(["GET", "POST"])
-@permission_classes([AllowAny])
-def chord_private_table_search(request, table_id):
-    """
-    Free-form search using Bento specific syntax in a given table.
-    request parameters (either via GET or POST) must contain:
-    - query: a Bento specific object representing a query e.g.:
-        ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
-        Note: for GET method, it must be encoded as a JSON string.
-    - optional parameters:
-        - output: predefined output types in {"values_list", "bento_search_result"}
-          If not set, the objects in the results
-          set will be serialized using the default serializer for this data-type
-          (for example: phenopackets serializer)
-        - field: when `output="values_list"`, defines which field should be in
-           used to get the list of values.
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+def private_dataset_search(request: HttpRequest, dataset_id: str):
+    return dataset_search(request=request, dataset_id=dataset_id, internal=True)
 
-    - Returns:
-        {
-            time: query duration,
-            results: [] see infra.
-        }
-        Serialized objects of the result set. If the table `data-type` is `experiment`
-        the Experiments serializer will be used.
-        The optional `output` parameter can be used to define a more restrictive
-        response.
-    """
-    # Search data types in specific tables
-    # Private search endpoints are protected by URL namespace, not by Django permissions.
-    return chord_table_search_response(request, table_id, internal=True)
+
+@api_view(["GET"])
+@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+def dataset_summary(request: HttpRequest, dataset_id: str):
+    dataset = Dataset.objects.get(identifier=dataset_id)
+    return Response({
+        DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary(dataset=dataset),
+        DATA_TYPE_EXPERIMENT: experiment_dataset_summary(dataset=dataset),
+        DATA_TYPE_MCODEPACKET: mcodepacket_dataset_summary(dataset=dataset),
+    })

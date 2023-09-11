@@ -95,7 +95,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
             "type": "string",
             "enum": ["DNA Methylation", "mRNA-Seq", "smRNA-Seq", "RNA-Seq", "WES",
                      "WGS", "Genotyping", "Proteomic profiling",
-                     "Enzyme-linked immunosorbent assay", "Metabolite profiling",
+                     "Neutralizing antibody titers", "Metabolite profiling",
                      "Antibody measurement", "Other"]
         },
         "experiment_ontology": ONTOLOGY_CLASS_LIST,

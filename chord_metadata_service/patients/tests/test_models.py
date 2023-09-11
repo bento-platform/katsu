@@ -1,13 +1,13 @@
-from django.test import TestCase
-from chord_metadata_service.patients.tests.es_mocks import es  # noqa: F401
+from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.phenopackets.tests import constants as c
 from chord_metadata_service.phenopackets import models as m
+from chord_metadata_service.restapi.models import SchemaType
 
 from ..models import Individual
 from ..filters import IndividualFilter
 
 
-class IndividualTest(TestCase):
+class IndividualTest(ProjectTestCase):
     """ Test module for Individual model """
 
     def setUp(self):
@@ -22,6 +22,7 @@ class IndividualTest(TestCase):
             id="phenopacket_id:1",
             subject=self.individual_one,
             meta_data=self.meta_data,
+            dataset=self.dataset
         )
         self.phenopacket.diseases.set(self.diseases)
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
@@ -39,6 +40,8 @@ class IndividualTest(TestCase):
         self.assertEqual(number_of_pf_one, 2)
         number_of_pf_two = len(m.PhenotypicFeature.objects.filter(phenopacket__subject=individual_two))
         self.assertEqual(number_of_pf_two, 0)
+        self.assertEqual(individual_one.schema_type, SchemaType.INDIVIDUAL)
+        self.assertEqual(individual_one.get_project_id(), self.project.identifier)
 
     def test_filtering(self):
         f = IndividualFilter()

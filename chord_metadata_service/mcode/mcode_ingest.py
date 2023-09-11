@@ -17,7 +17,7 @@ def _logger_message(created, obj):
         logger.info(f"Existing {obj.__class__.__name__} {obj.id} retrieved")
 
 
-def ingest_mcodepacket(mcodepacket_data, table_id, idx: Optional[int] = None):
+def ingest_mcodepacket(mcodepacket_data, dataset_id, idx: Optional[int] = None):
     """ Ingests a single mcodepacket in mcode app and patients' metadata into patients app."""
 
     new_mcodepacket = {"id": mcodepacket_data["id"]}
@@ -271,7 +271,7 @@ def ingest_mcodepacket(mcodepacket_data, table_id, idx: Optional[int] = None):
         date_of_death=new_mcodepacket.get("date_of_death", ""),
         cancer_disease_status=new_mcodepacket.get("cancer_disease_status", None),
         extra_properties=mcodepacket_data.get("extra_properties", None),
-        table_id=table_id,
+        dataset_id=dataset_id,
         updated=timezone.now()
     )
     mcodepacket.save()

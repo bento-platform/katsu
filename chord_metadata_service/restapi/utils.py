@@ -584,6 +584,9 @@ def get_field_options(field_props: dict) -> list[Any]:
         options = field_props["config"].get("enum")
         # Special case: no list of values specified
         if options is None:
+            # We must be careful here not to leak 'small cell' values as options
+            # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
+            #   should be treated as if the field isn't in the database at all.
             options = get_distinct_field_values(field_props)
     elif field_props["datatype"] == "number":
         options = [label for floor, ceil, label in labelled_range_generator(field_props)]
@@ -599,8 +602,15 @@ def get_field_options(field_props: dict) -> list[Any]:
 
 
 def get_distinct_field_values(field_props: dict) -> list[Any]:
+    # We must be careful here not to leak 'small cell' values as options
+    # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
+    #   should be treated as if the field isn't in the database at all.
+
     model, field = get_model_and_field(field_props["mapping"])
-    return model.objects.values_list(field, flat=True).order_by(field).distinct()
+    threshold = get_threshold()
+
+    values_with_counts = model.objects.values_list(field).annotate(count=Count(field))
+    return [val for val, count in values_with_counts if count > threshold]
 
 
 def filter_queryset_field_value(qs, field_props, value: str):

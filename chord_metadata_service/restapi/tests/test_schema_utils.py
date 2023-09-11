@@ -1,6 +1,6 @@
-from django.test import TestCase
-from ..schema_utils import merge_schema_dictionaries, tag_schema_with_nested_ids
-
+from django.test import SimpleTestCase, TestCase
+from ..schema_utils import merge_schema_dictionaries, tag_schema_with_nested_ids, patch_project_schemas
+from . import constants as c
 
 SCHEMA_1 = {
     "$id": "schema1",
@@ -53,3 +53,32 @@ class TestSchemaMerge(TestCase):
     def test_id_raises(self):
         with self.assertRaises(ValueError):
             tag_schema_with_nested_ids({"type": "object", "properties": {"a": {"type": "string"}}})
+
+
+class TestPatchSchema(SimpleTestCase):
+
+    def test_ignored(self):
+        # patch_project_schemas simply returns the base_schema if it has no "type" property
+        base_schema = {"$schema": "https://json-schema.org/draft/2020-12/schema"}
+        ext_schemas = {
+            "phenopacket": {
+                "type": "object"
+            }
+        }
+        patched = patch_project_schemas(base_schema=base_schema, extension_schemas=ext_schemas)
+        self.assertDictEqual(patched, base_schema)
+
+    def test_patched_object(self):
+        base_schema = c.VALID_PHENOPACKET_SCHEMA
+        ext_schemas = c.VALID_EXTRA_PROPERTIES_EXTENSIONS
+        base_schema = tag_schema_with_nested_ids(base_schema)
+        patched_schema = patch_project_schemas(base_schema=base_schema, extension_schemas=ext_schemas)
+        self.assertDictEqual(
+            patched_schema["properties"]["phenopacket"]["properties"]["extra_properties"],
+            ext_schemas["phenopacket"]["json_schema"]
+        )
+        self.assertDictEqual(
+            (patched_schema["properties"]["phenopacket"]["properties"]["biosamples"]["items"]
+                ["properties"]["extra_properties"]),
+            ext_schemas["biosample"]["json_schema"]
+        )

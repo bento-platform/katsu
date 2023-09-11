@@ -2,15 +2,17 @@ from copy import deepcopy
 import json
 import csv
 import io
+import random
 from django.conf import settings
 from django.urls import reverse
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.restapi.tests.constants import CONFIG_PUBLIC_TEST
+from chord_metadata_service.restapi.tests.constants import CONFIG_PUBLIC_TEST, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
+from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from . import constants as c
 
@@ -316,18 +318,21 @@ class PublicFilteringIndividualsTest(APITestCase):
     """ Test for api/public GET filtering """
 
     response_threshold = CONFIG_PUBLIC_TEST["rules"]["count_threshold"]
-    random_range = 137
+    num_individuals = 137
+    random_seed = 341  # do not change this please :))
 
     @staticmethod
     def response_threshold_check(response):
         return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
+        individuals = [c.generate_valid_individual() for _ in range(self.num_individuals)]
         for individual in individuals:
             Individual.objects.create(**individual)
         p = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
         ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0], p))
+
+        random.seed(self.random_seed)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_sex(self):
@@ -586,3 +591,129 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertEqual(1, response_obj["count"])
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_public_overview_sex(self):
+        response = self.client.get('/api/public_search_fields')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+
+        # overview for sex should have entries due to large cell counts: MALE, FEMALE, UNKNOWN, OTHER
+        self.assertEqual(len(response_obj["sections"][0]["fields"][0]["options"]), 4)  # path to sex field
+
+
+class PublicFilteringIndividualsTestSmallCellCount(PublicFilteringIndividualsTest):
+    num_individuals = 3  # below configured test threshold
+    # rest of the methods are inherited
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_public_overview_sex(self):
+        response = self.client.get('/api/public_search_fields')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+
+        # overview for sex should have 0 entries due to small cell counts
+        self.assertEqual(len(response_obj["sections"][0]["fields"][0]["options"]), 0)  # path to sex field
+
+
+class PublicAgeRangeFilteringIndividualsTest(APITestCase):
+    """ Test for api/public GET filtering """
+
+    response_threshold = 5
+    random_range = 45
+
+    @staticmethod
+    def response_threshold_check(response):
+        return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
+
+    def setUp(self):
+        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
+        for individual in individuals:
+            Individual.objects.create(**individual)
+
+        for individual in Individual.objects.all():
+            if individual.age:
+                if "age" in individual.age:
+                    age_numeric, age_unit = iso_duration_to_years(individual.age["age"])
+                    individual.age_numeric = age_numeric
+                    individual.age_unit = age_unit if age_unit else ""
+                    individual.save()
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_public_filtering_age_range(self):
+        # age valid range search
+        response = self.client.get('/api/public?age=[20, 30)')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_count = Individual.objects.filter(age_numeric__gte=20, age_numeric__lt=30).count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        if db_count <= self.response_threshold:
+            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+        else:
+            self.assertEqual(db_count, response_obj['count'])
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_public_filtering_age_invalid_range(self):
+        # age invalid range max search
+        response = self.client.get('/api/public?age=[10, 50)')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(response_obj["code"], 400)
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY)
+    def test_public_filtering_age_range_min_and_max_no_age_in_config(self):
+        # test with config without age field, returns error
+        response = self.client.get('/api/public?age=[20, 30)')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(response_obj["code"], 400)
+
+    @override_settings(CONFIG_PUBLIC={})
+    def test_public_filtering_age_range_min_and_max_no_config(self):
+        # test when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
+        response = self.client.get('/api/public?age=[20, 30)')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertIsInstance(response_obj, dict)
+        self.assertIsInstance(response_obj, dict)
+        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+
+
+class BeaconSearchTest(APITestCase):
+
+    random_range = 20
+
+    def setUp(self):
+        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]
+        for individual in individuals:
+            Individual.objects.create(**individual)
+
+    # test beacon formatted response
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_beacon_search_response(self):
+        response = self.client.get('/api/beacon_search?sex=MALE')
+        male_count = Individual.objects.filter(sex="MALE").count()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(len(response_obj["matches"]), male_count)
+
+    @override_settings(CONFIG_PUBLIC={})
+    def test_beacon_search_response_no_config(self):
+        # test when config is not provided, returns NOT FOUND
+        response = self.client.get('/api/beacon_search?sex=MALE')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_beacon_search_response_invalid_search_key(self):
+        response = self.client.get('/api/beacon_search?birdwatcher=yes')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_beacon_search_response_invalid_search_value(self):
+        response = self.client.get('/api/beacon_search?smoking=on_Sundays')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    def test_beacon_search_too_many_params(self):
+        response = self.client.get('/api/beacon_search?sex=MALE&smoking=Non-smoker&death_dc=Deceased')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

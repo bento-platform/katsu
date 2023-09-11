@@ -4,21 +4,21 @@ import chord_metadata_service.phenopackets.models as pm
 from .models import Resource
 
 from chord_metadata_service.cleanup.remove import remove_not_referenced
-from chord_metadata_service.utils import dict_first_val
+from chord_metadata_service.utils import build_id_set_from_model
 
 __all__ = [
     "clean_resources",
 ]
 
 
-def clean_resources() -> int:
+async def clean_resources() -> int:
     """
     Removes any resources not referenced by any datasets/phenopackets.
     """
 
     resources_referenced = set()
 
-    resources_referenced.update(map(dict_first_val, cm.Dataset.objects.values("additional_resources__id")))
-    resources_referenced.update(map(dict_first_val, pm.MetaData.objects.values("resources__id")))
+    resources_referenced |= await build_id_set_from_model(cm.Dataset, "additional_resources__id")
+    resources_referenced |= await build_id_set_from_model(pm.MetaData, "resources__id")
 
-    return remove_not_referenced(Resource, resources_referenced, "resources")
+    return await remove_not_referenced(Resource, resources_referenced, "resources")

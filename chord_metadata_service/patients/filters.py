@@ -148,6 +148,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 "phenopackets__biosamples__experiment__experiment_results__description",
                                 "phenopackets__biosamples__experiment__experiment_results__filename",
                                 "phenopackets__biosamples__experiment__experiment_results__file_format",
+                                "phenopackets__biosamples__experiment__experiment_results__genome_assembly_id",
                                 "phenopackets__biosamples__experiment__experiment_results__data_output_type",
                                 "phenopackets__biosamples__experiment__experiment_results__usage",
                                 "phenopackets__biosamples__experiment__experiment_results__creation_date",

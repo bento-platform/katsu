@@ -236,6 +236,96 @@ VALID_INDIVIDUALS = [
     VALID_INDIVIDUAL_8,
 ]
 
+VALID_PHENOPACKET_1 = {
+    "id": "8670db4d-77ad-4bee-b38c-599453510c6a",
+    "subject": {
+        "id": "patient:1",
+        "date_of_birth": "1967-01-01",
+        "sex": "MALE",
+        "age": {
+            "age": "P45Y"
+        },
+        "extra_properties": {
+            "education": "Bachelor's Degree"
+        }
+    },
+    "meta_data": {
+        "created_by": "David Lougheed",
+        "submitted_by": "David Lougheed"
+    }
+}
+
+VALID_PHENOPACKET_2 = {
+    "id": "ae8fbf37-2029-4e07-87c2-f3fecb3c1f89",
+    "subject": {
+        "id": "patient:2",
+        "date_of_birth": "1967-01-01",
+        "sex": "MALE",
+        "age": {
+            "age": "P45Y"
+        },
+        "extra_properties": {
+            "education": "Bachelor's Degree"
+        }
+    },
+    "meta_data": {
+        "created_by": "David Lougheed",
+        "submitted_by": "David Lougheed"
+    }
+}
+
+VALID_PHENOPACKET_SCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "katsu:phenopackets",
+    "type": "object",
+    "properties": {
+        "phenopacket": {
+            "$id": "katsu:phenopackets:phenopacket",
+            "type": "object",
+            "properties": {
+                "biosamples": {
+                    "type": "array",
+                    "items": {
+                        "$id": "katsu:phenopackets:biosample",
+                        "type": "object",
+                        "properties": {
+                            "original_biosample_extra_prop": {"type": "string"}
+                        }
+                    }
+                },
+                "extra_properties": {
+                    "type": "object",
+                    "properties": {
+                        "original_pheno_extra_prop": {"type": "string"}
+                    }
+                }
+            }
+        }
+    }
+}
+
+VALID_EXTRA_PROPERTIES_EXTENSIONS = {
+    "phenopacket": {
+        "schema_type": "PHENOPACKET",
+        "required": True,
+        "json_schema": {
+            "type": "object",
+            "properties": {
+                "new_pheno_prop": {"type": "string"}
+            },
+        }
+    },
+    "biosample": {
+        "schema_type": "BIOSAMPLE",
+        "required": False,
+        "json_schema": {
+            "type": "object",
+            "properties": {
+                "new_biosample_prop": {"type": "string"}
+            }
+        }
+    }
+}
 
 extra_properties_with_list = {
     "smoking": "Former smoker",

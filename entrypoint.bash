@@ -11,9 +11,6 @@ mkdir -p /app/tmp
 # Fix permissions on /app/tmp and /env
 chown -R bento_user:bento_user /app/tmp
 chmod -R o-rwx /app/tmp  # Remove all access from others
-if [[ -d /env ]]; then
-  chown -R bento_user:bento_user /env
-fi
 
 # Drop into bento_user from root and execute the CMD specified for the image
 exec gosu bento_user "$@"

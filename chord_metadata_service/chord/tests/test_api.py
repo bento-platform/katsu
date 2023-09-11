@@ -1,4 +1,5 @@
 import json
+from django.db.utils import IntegrityError
 
 from django.urls import reverse
 from rest_framework import status
@@ -10,8 +11,9 @@ from .constants import (
     dats_dataset,
     VALID_DATS_CREATORS,
     INVALID_DATS_CREATORS,
+    valid_project_json_schema,
 )
-from ..models import Project, Dataset
+from ..models import Project, Dataset, ProjectJsonSchema
 
 
 class CreateProjectTest(APITestCase):
@@ -93,7 +95,8 @@ class CreateDatasetTest(APITestCase):
             self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
 
     def test_dats(self):
-        r = self.client.post('/api/datasets', data=json.dumps(self.dats_valid_payload),
+        payload = {**self.dats_valid_payload, 'dats_file': json.dumps({})}
+        r = self.client.post('/api/datasets', data=json.dumps(payload),
                              content_type="application/json")
         r_invalid = self.client.post('/api/datasets', data=json.dumps(self.dats_invalid_payload),
                                      content_type="application/json")
@@ -101,12 +104,47 @@ class CreateDatasetTest(APITestCase):
         self.assertEqual(r_invalid.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Dataset.objects.count(), 1)
 
+        dataset_id = Dataset.objects.first().identifier
+
+        url = f'/api/datasets/{dataset_id}/dats'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDictEqual(response.data, json.loads(payload['dats_file']))
 
 # TODO: Update Dataset
 # TODO: Delete Dataset
-# TODO: Create TableOwnership
-# TODO: Update TableOwnership
-# TODO: Delete TableOwnership
-# TODO: Create Table
-# TODO: Update Table
-# TODO: Delete Table
+
+
+class CreateProjectJsonSchema(APITestCase):
+
+    def setUp(self) -> None:
+        # Create project
+        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
+        self.project = r.json()
+
+        # Valid payload and project_id
+        self.project_json_schema_valid_payload = valid_project_json_schema(project_id=self.project["identifier"])
+        # Invalid project_id
+        self.project_json_schema_invalid_payload = valid_project_json_schema(project_id="an-id-that-does-not-exist")
+
+    def test_create_project_json_schema(self):
+        r = self.client.post('/api/project_json_schemas',
+                             data=json.dumps(self.project_json_schema_valid_payload),
+                             content_type="application/json")
+        r_invalid = self.client.post('/api/project_json_schemas',
+                                     data=json.dumps(self.project_json_schema_invalid_payload),
+                                     content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r_invalid.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(ProjectJsonSchema.objects.count(), 1)
+
+    def test_create_constraint(self):
+        r = self.client.post('/api/project_json_schemas',
+                             data=json.dumps(self.project_json_schema_valid_payload),
+                             content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        with self.assertRaises(IntegrityError):
+            r_duplicate = self.client.post('/api/project_json_schemas',
+                                           data=json.dumps(self.project_json_schema_valid_payload),
+                                           content_type="application/json")
+            self.assertEqual(r_duplicate, status.HTTP_500_INTERNAL_SERVER_ERROR)

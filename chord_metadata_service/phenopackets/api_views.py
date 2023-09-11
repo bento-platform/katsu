@@ -8,12 +8,15 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 
-from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, FHIRRenderer
-from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
+from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer,
+                                                          BiosamplesCSVRenderer, ARGORenderer,
+                                                          IndividualBentoSearchRenderer)
+from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
+from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from . import models as m, serializers as s, filters as f
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
+from rest_framework import serializers, status
 
 
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
@@ -152,6 +155,47 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.BiosampleFilter
     queryset = m.Biosample.objects.all().prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
+
+
+class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
+    """
+    get:
+    Return a list of all existing biosamples
+
+    post:
+    Filter biosamples by a list of ids
+    """
+    serializer_class = s.BiosampleSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = f.BiosampleFilter
+    pagination_class = BatchResultsSetPagination
+    renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
+                        PhenopacketsRenderer, BiosamplesCSVRenderer, ARGORenderer,
+                        IndividualBentoSearchRenderer)
+    content_negotiation_class = FormatInPostContentNegotiation
+
+    def _get_filtered_queryset(self, ids_list=None):
+        queryset = m.Biosample.objects.all()
+
+        if ids_list:
+            queryset = queryset.filter(id__in=ids_list)
+
+        queryset = queryset.prefetch_related(*BIOSAMPLE_PREFETCH) \
+            .select_related(*BIOSAMPLE_SELECT_REL) \
+            .order_by("id")
+
+        return queryset
+
+    def get_queryset(self):
+        individual_ids = self.request.data.get("id", None)
+        return self._get_filtered_queryset(ids_list=individual_ids)
+
+    def create(self, request, *args, **kwargs):
+        ids_list = request.data.get('id', [])
+        queryset = self._get_filtered_queryset(ids_list=ids_list)
+
+        serializer = s.BiosampleSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 PHENOPACKET_PREFETCH = (

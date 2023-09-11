@@ -13,12 +13,13 @@ from chord_metadata_service.phenopackets.autocomplete_views import (
 )
 from chord_metadata_service.resources import api_views as resources_views
 from .api_views import (
-    overview,
-    mcode_overview,
-    public_search_fields,
-    public_overview,
-    public_dataset,
-    search_overview
+     overview,
+     mcode_overview,
+     public_search_fields,
+     public_overview,
+     public_dataset,
+     search_overview,
+     extra_properties_schema_types,
 )
 from chord_metadata_service.restapi.routers import BatchListRouter
 
@@ -30,16 +31,19 @@ batch_router = BatchListRouter()
 # CHORD app urls
 router.register(r'projects', chord_views.ProjectViewSet)
 router.register(r'datasets', chord_views.DatasetViewSet, basename="datasets")
-router.register(r'table_ownership', chord_views.TableOwnershipViewSet)
-router.register(r'tables', chord_views.TableViewSet)
+router.register(r'project_json_schemas', chord_views.ProjectJsonSchemaViewSet)
 
 # Experiments app urls
 router.register(r'experiments', experiment_views.ExperimentViewSet)
 router.register(r'experimentresults', experiment_views.ExperimentResultViewSet)
+router.register(r'batch/experiments', experiment_views.ExperimentBatchViewSet, basename="batch/experiments")
 
 # Patients app urls
 router.register(r'individuals', individual_views.IndividualViewSet, basename="individuals")
 batch_router.register(r'batch/individuals', individual_views.IndividualBatchViewSet, basename="batch/individuals")
+
+# Biosamples app urls
+router.register(r'batch/biosamples', phenopacket_views.BiosampleBatchViewSet, basename="batch/biosamples")
 
 # Phenopackets app urls
 router.register(r'phenotypicfeatures', phenopacket_views.PhenotypicFeatureViewSet, basename="phenotypicfeatures")
@@ -83,6 +87,9 @@ urlpatterns = [
     path('mcode_schema', mcode_views.get_mcode_schema,
          name="mcode-schema"),
 
+    # extra properties schema types
+    path('extra_properties_schema_types', extra_properties_schema_types, name="extra-properties-schema-types"),
+
     # overviews (statistics)
     path('overview', overview, name="overview"),
     path('mcode_overview', mcode_overview, name="mcode-overview"),
@@ -101,4 +108,7 @@ urlpatterns = [
     path('public_search_fields', public_search_fields, name='public-search-fields',),
     path('public_overview', public_overview, name='public-overview',),
     path('public_dataset', public_dataset, name='public-dataset'),
+
+    # uncensored endpoint for beacon search using fields from config.json
+    path('beacon_search', individual_views.BeaconListIndividuals.as_view(), name='beacon-search'),
 ]

@@ -1,9 +1,18 @@
-from typing import Any
+from django.db.models import Model, QuerySet
+from typing import Any, Set, Type
 
 __all__ = [
-    "dict_first_val",
+    "build_id_set",
+    "build_id_set_from_model",
 ]
 
 
-def dict_first_val(x: dict) -> Any:
-    return tuple(x.values())[0]
+async def build_id_set(qs: QuerySet, field: str) -> Set[Any]:
+    s = set()
+    async for v in qs.values_list(field, flat=True):
+        s.add(v)
+    return s
+
+
+async def build_id_set_from_model(m: Type[Model], field: str) -> Set[Any]:
+    return await build_id_set(m.objects.all(), field)

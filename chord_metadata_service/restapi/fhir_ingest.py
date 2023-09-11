@@ -12,7 +12,7 @@ from .fhir_utils import (
     condition_to_disease,
     specimen_to_biosample
 )
-from chord_metadata_service.chord.models import Table
+from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import (
     Biosample,
@@ -47,7 +47,7 @@ def check_schema(schema, obj, additional_info=None):
         raise ValidationError(f"{additional_info + ' ' if additional_info else None}errors: {error_messages}")
 
 
-def ingest_patients(patients_data, table_id, created_by):
+def ingest_patients(patients_data, dataset_id, created_by):
     """ Takes FHIR Bundle containing Patient resources. """
     # check if Patients data follows FHIR Bundle schema
     check_schema(FHIR_BUNDLE_SCHEMA, patients_data, 'patients data')
@@ -68,7 +68,7 @@ def ingest_patients(patients_data, table_id, created_by):
             id=phenopacket_ids[individual.id],
             subject=individual,
             meta_data=meta_data_obj,
-            table=Table.objects.get(ownership_record_id=table_id)
+            dataset=Dataset.objects.get(identifier=dataset_id),
         )
         logger.info(f'Phenopacket {phenopacket.id} created')
 
