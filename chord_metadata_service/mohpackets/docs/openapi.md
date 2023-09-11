@@ -453,6 +453,10 @@ Retrieves a list of authorized Donor with clinical data.
           "hpv_strain": [
             "HPV16"
           ],
+          "submitter_specimen_id": "string",
+          "submitter_primary_diagnosis_id": "string",
+          "submitter_treatment_id": "string",
+          "submitter_follow_up_id": "string",
           "test_date": "string",
           "psa_level": 32767,
           "ca125": 32767,
@@ -3366,6 +3370,10 @@ continued
       "hpv_strain": [
         "HPV16"
       ],
+      "submitter_specimen_id": "string",
+      "submitter_primary_diagnosis_id": "string",
+      "submitter_treatment_id": "string",
+      "submitter_follow_up_id": "string",
       "test_date": "string",
       "psa_level": 32767,
       "ca125": 32767,
@@ -4736,6 +4744,10 @@ continued
   "hpv_strain": [
     "HPV16"
   ],
+  "submitter_specimen_id": "string",
+  "submitter_primary_diagnosis_id": "string",
+  "submitter_treatment_id": "string",
+  "submitter_follow_up_id": "string",
   "test_date": "string",
   "psa_level": 32767,
   "ca125": 32767,
@@ -4918,6 +4930,10 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|submitter_specimen_id|string¦null|false|none|none|
+|submitter_primary_diagnosis_id|string¦null|false|none|none|
+|submitter_treatment_id|string¦null|false|none|none|
+|submitter_follow_up_id|string¦null|false|none|none|
 |test_date|string¦null|false|none|none|
 |psa_level|integer¦null|false|none|none|
 |ca125|integer¦null|false|none|none|
@@ -7562,6 +7578,10 @@ null
           "hpv_strain": [
             "HPV16"
           ],
+          "submitter_specimen_id": "string",
+          "submitter_primary_diagnosis_id": "string",
+          "submitter_treatment_id": "string",
+          "submitter_follow_up_id": "string",
           "test_date": "string",
           "psa_level": 32767,
           "ca125": 32767,
