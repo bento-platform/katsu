@@ -103,10 +103,6 @@ class NestedBiomarkerSerializer(BiomarkerSerializer):
         exclude = [
             "program_id",
             "submitter_donor_id",
-            "submitter_specimen_id",
-            "submitter_primary_diagnosis_id",
-            "submitter_treatment_id",
-            "submitter_follow_up_id",
             "id",
         ]
 
