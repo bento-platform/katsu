@@ -28,7 +28,7 @@ Retrieves a list of authorized biomarkers.
 |submitter_primary_diagnosis_id|query|string|false|none|
 |submitter_treatment_id|query|string|false|none|
 |submitter_follow_up_id|query|string|false|none|
-|test_date|query|integer|false|none|
+|test_date|query|string|false|none|
 |psa_level|query|integer|false|none|
 |ca125|query|integer|false|none|
 |cea|query|integer|false|none|
@@ -69,7 +69,7 @@ Retrieves a list of authorized biomarkers.
       "submitter_primary_diagnosis_id": "string",
       "submitter_treatment_id": "string",
       "submitter_follow_up_id": "string",
-      "test_date": 32767,
+      "test_date": "string",
       "psa_level": 32767,
       "ca125": 32767,
       "cea": 32767,
@@ -453,7 +453,7 @@ Retrieves a list of authorized Donor with clinical data.
           "hpv_strain": [
             "HPV16"
           ],
-          "test_date": 32767,
+          "test_date": "string",
           "psa_level": 32767,
           "ca125": 32767,
           "cea": 32767,
@@ -1231,7 +1231,7 @@ Retrieves a number of discovery biomarkers.
 |submitter_primary_diagnosis_id|query|string|false|none|
 |submitter_treatment_id|query|string|false|none|
 |submitter_follow_up_id|query|string|false|none|
-|test_date|query|integer|false|none|
+|test_date|query|string|false|none|
 |psa_level|query|integer|false|none|
 |ca125|query|integer|false|none|
 |cea|query|integer|false|none|
@@ -2485,7 +2485,7 @@ Retrieves a number of discovery treatments.
   "submitter_primary_diagnosis_id": "string",
   "submitter_treatment_id": "string",
   "submitter_follow_up_id": "string",
-  "test_date": 32767,
+  "test_date": "string",
   "psa_level": 32767,
   "ca125": 32767,
   "cea": 32767,
@@ -2674,7 +2674,7 @@ continued
 |submitter_primary_diagnosis_id|string¦null|false|none|none|
 |submitter_treatment_id|string¦null|false|none|none|
 |submitter_follow_up_id|string¦null|false|none|none|
-|test_date|integer¦null|false|none|none|
+|test_date|string¦null|false|none|none|
 |psa_level|integer¦null|false|none|none|
 |ca125|integer¦null|false|none|none|
 |cea|integer¦null|false|none|none|
@@ -3366,7 +3366,7 @@ continued
       "hpv_strain": [
         "HPV16"
       ],
-      "test_date": 32767,
+      "test_date": "string",
       "psa_level": 32767,
       "ca125": 32767,
       "cea": 32767,
@@ -4736,7 +4736,7 @@ continued
   "hpv_strain": [
     "HPV16"
   ],
-  "test_date": 32767,
+  "test_date": "string",
   "psa_level": 32767,
   "ca125": 32767,
   "cea": 32767,
@@ -4918,7 +4918,7 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|test_date|integer¦null|false|none|none|
+|test_date|string¦null|false|none|none|
 |psa_level|integer¦null|false|none|none|
 |ca125|integer¦null|false|none|none|
 |cea|integer¦null|false|none|none|
@@ -7188,7 +7188,7 @@ null
       "submitter_primary_diagnosis_id": "string",
       "submitter_treatment_id": "string",
       "submitter_follow_up_id": "string",
-      "test_date": 32767,
+      "test_date": "string",
       "psa_level": 32767,
       "ca125": 32767,
       "cea": 32767,
@@ -7562,7 +7562,7 @@ null
           "hpv_strain": [
             "HPV16"
           ],
-          "test_date": 32767,
+          "test_date": "string",
           "psa_level": 32767,
           "ca125": 32767,
           "cea": 32767,

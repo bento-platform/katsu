@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: MoH Service API
   version: 1.0.0
-  description: This is the RESTful API for the MoH Service. Based on commit "0699c0b58a3f5272eadf151bb253d318c5a912a6".
+  description: This is the RESTful API for the MoH Service. Based on commit "686f4350691e2a0d88d9ad724f4c56c974199bff".
 paths:
   /v2/authorized/biomarkers/:
     get:
@@ -41,7 +41,7 @@ paths:
       - in: query
         name: test_date
         schema:
-          type: integer
+          type: string
       - in: query
         name: psa_level
         schema:
@@ -1441,7 +1441,7 @@ paths:
       - in: query
         name: test_date
         schema:
-          type: integer
+          type: string
       - in: query
         name: psa_level
         schema:
@@ -3143,10 +3143,9 @@ components:
           nullable: true
           maxLength: 64
         test_date:
-          type: integer
-          maximum: 32767
-          minimum: 0
+          type: string
           nullable: true
+          maxLength: 32
         psa_level:
           type: integer
           maximum: 32767
@@ -4071,10 +4070,9 @@ components:
             - $ref: '#/components/schemas/NullEnum'
           nullable: true
         test_date:
-          type: integer
-          maximum: 32767
-          minimum: 0
+          type: string
           nullable: true
+          maxLength: 32
         psa_level:
           type: integer
           maximum: 32767
