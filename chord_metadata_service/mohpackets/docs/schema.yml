@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: MoH Service API
   version: 1.0.0
-  description: This is the RESTful API for the MoH Service. Based on commit "686f4350691e2a0d88d9ad724f4c56c974199bff".
+  description: This is the RESTful API for the MoH Service. Based on commit "08dba3a7af546f3bb3eb761a068385bb5311264a".
 paths:
   /v2/authorized/biomarkers/:
     get:
@@ -4069,6 +4069,22 @@ components:
             - $ref: '#/components/schemas/BlankEnum'
             - $ref: '#/components/schemas/NullEnum'
           nullable: true
+        submitter_specimen_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        submitter_primary_diagnosis_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        submitter_treatment_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        submitter_follow_up_id:
+          type: string
+          nullable: true
+          maxLength: 64
         test_date:
           type: string
           nullable: true
