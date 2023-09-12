@@ -154,7 +154,7 @@ class IndividualCSVRendererTest(APITestCase):
             self.assertIn(column, [column_name.lower() for column_name in headers])
 
 
-class IndividualFullTextSearchTest(APITestCase):
+class IndividualWithPhenopacketSearchTest(APITestCase):
     """ Test for api/individuals?search= """
 
     def setUp(self):
@@ -165,7 +165,7 @@ class IndividualFullTextSearchTest(APITestCase):
             **ph_c.valid_phenopacket(subject=self.individual_one, meta_data=self.metadata_1)
         )
 
-    def test_search(self):
+    def test_search(self):  # test full-text search
         get_resp_1 = self.client.get('/api/individuals?search=P49Y')
         self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
         response_obj_1 = get_resp_1.json()
@@ -176,12 +176,18 @@ class IndividualFullTextSearchTest(APITestCase):
         response_obj_2 = get_resp_2.json()
         self.assertEqual(len(response_obj_2['results']), 2)
 
-    def test_search_bento_search_format(self):
+    def test_search_bento_search_format(self):  # test full-text search - bento search result format
         get_resp_1 = self.client.get('/api/individuals?search=P49Y&format=bento_search_result')
         self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
         response_obj_1 = get_resp_1.json()
         self.assertEqual(len(response_obj_1['results']), 1)
         self.assertEqual(len(response_obj_1['results'][0]), 4)  # 4 fields in the bento search response
+
+    def test_individual_phenopackets(self):
+        get_resp_1 = self.client.get(f"/api/individuals/{self.individual_one.id}/phenopackets")
+        self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
+        response_obj_1 = get_resp_1.json()
+        self.assertEqual(len(response_obj_1), 1)  # 1 phenopacket for individual
 
 
 # Note: the next five tests use the same setUp method. Initially they were
