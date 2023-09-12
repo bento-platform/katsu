@@ -101,7 +101,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
 
         return super(IndividualViewSet, self).list(request, *args, **kwargs)
 
-    @action(detail=True, methods=["GET"])
+    @action(detail=True, methods=["GET", "POST"])
     def phenopackets(self, request, *_args, **_kwargs):
         as_attachment = request.query_params.get("attachment", "") in ("1", "true", "yes")
         individual = self.get_object()
