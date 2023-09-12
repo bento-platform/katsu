@@ -1,9 +1,12 @@
+import re
+
 from datetime import datetime
 
 from rest_framework import viewsets, filters, mixins, serializers
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.settings import api_settings
+from rest_framework.views import APIView
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -22,6 +25,7 @@ from .filters import IndividualFilter
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer,
     PhenopacketsRenderer,
@@ -96,6 +100,27 @@ class IndividualViewSet(viewsets.ModelViewSet):
             return Response(build_search_response(list(qs), start))
 
         return super(IndividualViewSet, self).list(request, *args, **kwargs)
+
+    @action(detail=True, methods=["GET", "POST"])
+    def phenopackets(self, request, *_args, **_kwargs):
+        as_attachment = request.query_params.get("attachment", "") in ("1", "true", "yes")
+        individual = self.get_object()
+
+        phenopackets = (
+            Phenopacket.objects
+            .filter(subject=individual)
+            .prefetch_related(*PHENOPACKET_PREFETCH)
+            .order_by("id")
+        )
+
+        filename_safe_id = re.sub(r"[\\/:*?\"<>|]", "_", individual.id)
+        return Response(
+            PhenopacketSerializer(phenopackets, many=True).data,
+            headers=(
+                {"Content-Disposition": f"attachment; filename=\"{filename_safe_id}_phenopackets.json\""}
+                if as_attachment else {}
+            ),
+        )
 
 
 class BatchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
