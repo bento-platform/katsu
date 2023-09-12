@@ -189,6 +189,12 @@ class IndividualWithPhenopacketSearchTest(APITestCase):
         response_obj_1 = get_resp_1.json()
         self.assertEqual(len(response_obj_1), 1)  # 1 phenopacket for individual
 
+        get_resp_2 = self.client.get(f"/api/individuals/{self.individual_one.id}/phenopackets?attachment=1")
+        self.assertEqual(get_resp_2.status_code, status.HTTP_200_OK)
+        self.assertIn("attachment; filename=", get_resp_2.headers.get("Content-Disposition", ""))
+        response_obj_2 = get_resp_2.json()
+        self.assertEqual(len(response_obj_2), 1)  # 1 phenopacket for individual, still
+
 
 # Note: the next five tests use the same setUp method. Initially they were
 # all combined in the same class. But this caused bugs with regard to unavailable
