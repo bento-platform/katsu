@@ -422,6 +422,8 @@ def named_one_of(prop_name: str, prop_schema: dict):
 
 
 DATE_TIME = string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME)
+
+
 def patch_project_schemas(base_schema: dict, extension_schemas: Dict[str, ExtensionSchemaDict]) -> dict:
     if not isinstance(base_schema, dict) or "type" not in base_schema:
         return base_schema

@@ -11,12 +11,12 @@ from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, PHEN
 from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.schema_utils import patch_project_schemas
 from chord_metadata_service.restapi.types import ExtensionSchemaDict
-from chord_metadata_service.restapi.utils import iso_duration_to_years, time_element_to_years
+from chord_metadata_service.restapi.utils import time_element_to_years
 
 from .exceptions import IngestError
 from .resources import ingest_resource
 from .schema import schema_validation
-from .utils import get_output_or_raise, map_if_list, query_and_check_nulls, workflow_file_output_to_path
+from .utils import map_if_list, query_and_check_nulls
 from typing import Any, Dict, Iterable, Optional, Union, Callable, TypeVar
 from django.db.models import Model
 

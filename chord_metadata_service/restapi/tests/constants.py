@@ -240,18 +240,22 @@ VALID_PHENOPACKET_1 = {
     "id": "8670db4d-77ad-4bee-b38c-599453510c6a",
     "subject": {
         "id": "patient:1",
-        "date_of_birth": "1967-01-01",
+        "date_of_birth": "1967-01-01T00:00:00Z",
         "sex": "MALE",
-        "age": {
-            "age": "P45Y"
+        "time_at_last_encounter": {
+            "age": {
+                "iso8601duration": "P45Y",
+            }
         },
         "extra_properties": {
             "education": "Bachelor's Degree"
         }
     },
     "meta_data": {
+        "phenopacket_schema_version": "2.0",
+        "created": "2023-09-12T00:25:54.662Z",
         "created_by": "David Lougheed",
-        "submitted_by": "David Lougheed"
+        "submitted_by": "David Lougheed",
     }
 }
 
@@ -259,18 +263,22 @@ VALID_PHENOPACKET_2 = {
     "id": "ae8fbf37-2029-4e07-87c2-f3fecb3c1f89",
     "subject": {
         "id": "patient:2",
-        "date_of_birth": "1967-01-01",
+        "date_of_birth": "1967-01-01T00:00:00Z",
         "sex": "MALE",
-        "age": {
-            "age": "P45Y"
+        "time_at_last_encounter": {
+            "age": {
+                "iso8601duration": "P45Y",
+            }
         },
         "extra_properties": {
             "education": "Bachelor's Degree"
         }
     },
     "meta_data": {
+        "phenopacket_schema_version": "2.0",
+        "created": "2023-09-12T00:25:54.662Z",
         "created_by": "David Lougheed",
-        "submitted_by": "David Lougheed"
+        "submitted_by": "David Lougheed",
     }
 }
 

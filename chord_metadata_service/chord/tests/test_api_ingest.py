@@ -90,7 +90,7 @@ class IngestTest(APITestCase):
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Success
-        valid_phenopacket = load_local_json("example_phenopacket.json")
+        valid_phenopacket = load_local_json("example_phenopacket_v2.json")
         r = self.client.post(
             reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json")),
             content_type="application/json",

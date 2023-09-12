@@ -1,7 +1,9 @@
+from typing import Tuple
 import uuid
 import random
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
+import isodate
 
 
 def generate_random_date(years_from: int, years_to: int):
@@ -83,8 +85,10 @@ INDIVIDUAL_1_CSV = "patient:1,FEMALE,1960-01-01,human,UNKNOWN_KARYOTYPE,,,,--IGN
 INDIVIDUAL_2_CSV = "patient:2,MALE,1967-01-01,human,UNKNOWN_KARYOTYPE,,,,--IGNORE--,--IGNORE--"
 
 
-def generate_valid_individual():
-    return {
+def generate_valid_individual(age=None, age_range=None, gen_random_age: None | Tuple[int, int] = None):
+    if age and age_range:
+        raise ValueError("Cannot use 'age' and 'age_range' simultaneously for Individual.time_at_last_encounter.")
+    individual = {
         "id": str(uuid.uuid4()),
         "taxonomy": {
             "id": "NCBITaxon:9606",
@@ -100,3 +104,15 @@ def generate_valid_individual():
             "date_of_consent": generate_random_date(3, 0)
         }
     }
+
+    if age:
+        individual["time_at_last_encounter"] = {"age": age}
+    if age_range:
+        individual["time_at_last_encounter"] = {"age_range": age_range}
+    if gen_random_age:
+        min_age, max_age = gen_random_age
+        years = random.randrange(min_age, max_age)
+        individual["time_at_last_encounter"] = {
+            "age": isodate.duration_isoformat(isodate.Duration(years=years)),
+        }
+    return individual

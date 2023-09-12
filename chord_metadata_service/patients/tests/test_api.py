@@ -627,14 +627,17 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
+        individuals = [
+            c.generate_valid_individual(gen_random_age=(1, 100))
+            for _ in range(self.random_range)
+        ]
         for individual in individuals:
             Individual.objects.create(**individual)
 
         for individual in Individual.objects.all():
-            if individual.age:
-                if "age" in individual.age:
-                    age_numeric, age_unit = iso_duration_to_years(individual.age["age"])
+            if individual.time_at_last_encounter:
+                if "age" in individual.time_at_last_encounter:
+                    age_numeric, age_unit = iso_duration_to_years(individual.time_at_last_encounter["age"])
                     individual.age_numeric = age_numeric
                     individual.age_unit = age_unit if age_unit else ""
                     individual.save()

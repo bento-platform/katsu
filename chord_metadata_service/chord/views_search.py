@@ -68,15 +68,6 @@ def mcodepacket_dataset_summary(dataset):
     }
 
 
-def variant_dataset_summary(dataset):
-    variants = Variant.objects.filter(dataset=dataset)
-
-    return {
-        "count": variants.count(),
-        "data_type_specific": {},  # TODO
-    }
-
-
 def phenopacket_dataset_summary(dataset):
     phenopacket_qs = Phenopacket.objects.filter(dataset=dataset)  # TODO
 
