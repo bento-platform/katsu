@@ -1,7 +1,6 @@
 from collections import Counter, defaultdict
 from datetime import date, datetime
 
-import yaml
 from django.conf import settings
 from django.db.models import Count
 from django.http import JsonResponse
