@@ -1,7 +1,10 @@
+import logging
 import re
 
 import yaml
 from django.core.cache import cache
+
+logger = logging.getLogger(__name__)
 
 
 def get_schema_url():
@@ -25,5 +28,8 @@ def get_schema_url():
                 # Cache the schema_version so we won't read it each time
                 cache.set("schema_url", schema_url)
         except Exception as e:
+            logger.debug(
+                f"An error occurred while fetching the schema URL. Details: {str(e)}"
+            )
             schema_url = None
     return schema_url
