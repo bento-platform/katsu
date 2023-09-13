@@ -621,10 +621,10 @@
       ]
     },
     {
-      "range": [7, 8],
+      "range": [7, 9],
       "targets": [
         {
-          "range": [7, 8],
+          "range": [7, 9],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -642,10 +642,10 @@
       ]
     },
     {
-      "range": [9, 10],
+      "range": [10, 11],
       "targets": [
         {
-          "range": [9, 10],
+          "range": [10, 11],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -663,14 +663,14 @@
       ]
     },
     {
-      "range": [11, 12],
+      "range": [12, 13],
       "targets": [
         {
-          "range": [11, 12],
+          "range": [12, 13],
           "field_name": "submitter_treatment_id"
         },
         {
-          "range": [5, 6],
+          "range": [5, 5],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
@@ -684,10 +684,31 @@
       ]
     },
     {
-      "range": [13, 14],
+      "range": [14, 15],
       "targets": [
         {
-          "range": [13, 14],
+          "range": [14, 15],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [6, 6],
+          "field_name": "submitter_primary_diagnosis_id"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [16, 17],
+      "targets": [
+        {
+          "range": [16, 17],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -705,10 +726,10 @@
       ]
     },
     {
-      "range": [15, 16],
+      "range": [18, 19],
       "targets": [
         {
-          "range": [15, 16],
+          "range": [18, 19],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -726,10 +747,10 @@
       ]
     },
     {
-      "range": [17, 18],
+      "range": [20, 21],
       "targets": [
         {
-          "range": [17, 18],
+          "range": [20, 21],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -747,10 +768,10 @@
       ]
     },
     {
-      "range": [19, 22],
+      "range": [22, 25],
       "targets": [
         {
-          "range": [19, 22],
+          "range": [22, 25],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -787,7 +808,7 @@
       ]
     },
     {
-      "range": [4, 5],
+      "range": [4, 6],
       "targets": [
         {
           "range": [2, 2],
@@ -804,10 +825,61 @@
       ]
     },
     {
-      "range": [6, 7],
+      "range": [7, 9],
       "targets": [
         {
-          "range": [3, 4],
+          "range": [3, 3],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [10, 11],
+      "targets": [
+        {
+          "range": [4, 4],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [12, 13],
+      "targets": [
+        {
+          "range": [5, 5],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [14, 15],
+      "targets": [
+        {
+          "range": [6, 7],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -826,7 +898,7 @@
       "range": [1, 3],
       "targets": [
         {
-          "range": [5, 5],
+          "range": [8, 8],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -840,10 +912,10 @@
       ]
     },
     {
-      "range": [4, 5],
+      "range": [4, 6],
       "targets": [
         {
-          "range": [6, 6],
+          "range": [9, 9],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -857,29 +929,10 @@
       ]
     },
     {
-      "range": [6, 7],
+      "range": [7, 9],
       "targets": [
         {
-          "range": [7, 8],
-          "field_name": "submitter_treatment_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "submitter_donor_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "program_id"
-        }
-      ]
-    }
-  ],
-  "radiations": [
-    {
-      "range": [1, 2],
-      "targets": [
-        {
-          "range": [9, 10],
+          "range": [10, 10],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -893,10 +946,10 @@
       ]
     },
     {
-      "range": [3, 4],
+      "range": [10, 11],
       "targets": [
         {
-          "range": [11, 12],
+          "range": [11, 11],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -910,14 +963,31 @@
       ]
     },
     {
-      "range": [5, 5],
+      "range": [12, 13],
+      "targets": [
+        {
+          "range": [12, 12],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [14, 14],
       "targets": [
         {
           "range": [13, 13],
           "field_name": "submitter_treatment_id"
         },
         {
-          "range": [3, 3],
+          "range": [2, 2],
           "field_name": "submitter_donor_id"
         },
         {
@@ -936,6 +1006,40 @@
           "field_name": "submitter_treatment_id"
         },
         {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [4, 6],
+      "targets": [
+        {
+          "range": [15, 15],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [7, 8],
+      "targets": [
+        {
+          "range": [16, 16],
+          "field_name": "submitter_treatment_id"
+        },
+        {
           "range": [3, 3],
           "field_name": "submitter_donor_id"
         },
@@ -946,10 +1050,27 @@
       ]
     },
     {
-      "range": [4, 5],
+      "range": [9, 10],
       "targets": [
         {
-          "range": [15, 15],
+          "range": [17, 17],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [3, 3],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [11, 11],
+      "targets": [
+        {
+          "range": [18, 18],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -961,20 +1082,39 @@
           "field_name": "program_id"
         }
       ]
-    },
+    }
+  ],
+  "radiations": [
     {
-      "range": [6, 7],
+      "range": [1, 3],
       "targets": [
         {
-          "range": [16, 17],
+          "range": [19, 21],
           "field_name": "submitter_treatment_id"
         },
         {
-          "range": [4, 5],
+          "range": [4, 6],
           "field_name": "submitter_donor_id"
         },
         {
           "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [4, 4],
+      "targets": [
+        {
+          "range": [22, 22],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [7, 7],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [2, 2],
           "field_name": "program_id"
         }
       ]
@@ -982,35 +1122,14 @@
   ],
   "surgeries": [
     {
-      "range": [1, 1],
+      "range": [1, 3],
       "targets": [
         {
-          "range": [18, 18],
+          "range": [23, 25],
           "field_name": "submitter_treatment_id"
         },
         {
-          "range": [18, 18],
-          "field_name": "submitter_specimen_id"
-        },
-        {
-          "range": [6, 6],
-          "field_name": "submitter_donor_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "program_id"
-        }
-      ]
-    },
-    {
-      "range": [2, 5],
-      "targets": [
-        {
-          "range": [19, 22],
-          "field_name": "submitter_treatment_id"
-        },
-        {
-          "range": [7, 10],
+          "range": [8, 10],
           "field_name": "submitter_donor_id"
         },
         {
@@ -1072,10 +1191,10 @@
       ]
     },
     {
-      "range": [7, 8],
+      "range": [7, 9],
       "targets": [
         {
-          "range": [7, 8],
+          "range": [7, 9],
           "field_name": "submitter_follow_up_id"
         },
         {
@@ -1097,10 +1216,10 @@
       ]
     },
     {
-      "range": [9, 10],
+      "range": [10, 11],
       "targets": [
         {
-          "range": [9, 10],
+          "range": [10, 11],
           "field_name": "submitter_follow_up_id"
         },
         {
@@ -1122,14 +1241,14 @@
       ]
     },
     {
-      "range": [11, 12],
+      "range": [12, 13],
       "targets": [
         {
-          "range": [11, 12],
+          "range": [12, 13],
           "field_name": "submitter_follow_up_id"
         },
         {
-          "range": [5, 6],
+          "range": [5, 5],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -1147,68 +1266,43 @@
       ]
     },
     {
-      "range": [13, 14],
+      "range": [14, 15],
       "targets": [
         {
-          "range": [13, 14],
+          "range": [14, 15],
           "field_name": "submitter_follow_up_id"
         },
         {
-          "range": [7, 8],
+          "range": [6, 6],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_primary_diagnosis_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [16, 18],
+      "targets": [
+        {
+          "range": [16, 18],
+          "field_name": "submitter_follow_up_id"
+        },
+        {
+          "range": [7, 9],
           "field_name": "submitter_treatment_id"
         },
         {
           "range": [3, 3],
-          "field_name": "submitter_primary_diagnosis_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "submitter_donor_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "program_id"
-        }
-      ]
-    },
-    {
-      "range": [15, 16],
-      "targets": [
-        {
-          "range": [15, 16],
-          "field_name": "submitter_follow_up_id"
-        },
-        {
-          "range": [9, 10],
-          "field_name": "submitter_treatment_id"
-        },
-        {
-          "range": [4, 4],
-          "field_name": "submitter_primary_diagnosis_id"
-        },
-        {
-          "range": [2, 2],
-          "field_name": "submitter_donor_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "program_id"
-        }
-      ]
-    },
-    {
-      "range": [17, 18],
-      "targets": [
-        {
-          "range": [17, 18],
-          "field_name": "submitter_follow_up_id"
-        },
-        {
-          "range": [11, 12],
-          "field_name": "submitter_treatment_id"
-        },
-        {
-          "range": [5, 6],
           "field_name": "submitter_primary_diagnosis_id"
         },
         {
@@ -1229,7 +1323,82 @@
           "field_name": "submitter_follow_up_id"
         },
         {
-          "range": [13, 14],
+          "range": [10, 11],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [5, 5],
+          "field_name": "submitter_primary_diagnosis_id"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [21, 22],
+      "targets": [
+        {
+          "range": [21, 22],
+          "field_name": "submitter_follow_up_id"
+        },
+        {
+          "range": [12, 13],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [5, 5],
+          "field_name": "submitter_primary_diagnosis_id"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [23, 24],
+      "targets": [
+        {
+          "range": [23, 24],
+          "field_name": "submitter_follow_up_id"
+        },
+        {
+          "range": [14, 15],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [6, 6],
+          "field_name": "submitter_primary_diagnosis_id"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [25, 26],
+      "targets": [
+        {
+          "range": [25, 26],
+          "field_name": "submitter_follow_up_id"
+        },
+        {
+          "range": [16, 17],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -1247,14 +1416,14 @@
       ]
     },
     {
-      "range": [21, 22],
+      "range": [27, 28],
       "targets": [
         {
-          "range": [21, 22],
+          "range": [27, 28],
           "field_name": "submitter_follow_up_id"
         },
         {
-          "range": [15, 16],
+          "range": [18, 19],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -1272,14 +1441,14 @@
       ]
     },
     {
-      "range": [23, 24],
+      "range": [29, 30],
       "targets": [
         {
-          "range": [23, 24],
+          "range": [29, 30],
           "field_name": "submitter_follow_up_id"
         },
         {
-          "range": [17, 18],
+          "range": [20, 21],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -1297,14 +1466,14 @@
       ]
     },
     {
-      "range": [25, 28],
+      "range": [31, 34],
       "targets": [
         {
-          "range": [25, 28],
+          "range": [31, 34],
           "field_name": "submitter_follow_up_id"
         },
         {
-          "range": [19, 22],
+          "range": [22, 25],
           "field_name": "submitter_treatment_id"
         },
         {
@@ -1324,16 +1493,8 @@
   ],
   "biomarkers": [
     {
-      "range": [1, 3],
+      "range": [1, 5],
       "targets": [
-        {
-          "range": [1, 1],
-          "field_name": "submitter_follow_up_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "submitter_specimen_id"
-        },
         {
           "range": [1, 1],
           "field_name": "submitter_donor_id"
@@ -1345,62 +1506,7 @@
       ]
     },
     {
-      "range": [4, 6],
-      "targets": [
-        {
-          "range": [2, 2],
-          "field_name": "submitter_follow_up_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "submitter_donor_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "program_id"
-        }
-      ]
-    },
-    {
-      "range": [7, 8],
-      "targets": [
-        {
-          "range": [1, 1],
-          "field_name": "submitter_specimen_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "submitter_treatment_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "submitter_donor_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "program_id"
-        }
-      ]
-    },
-    {
-      "range": [9, 10],
-      "targets": [
-        {
-          "range": [2, 2],
-          "field_name": "submitter_treatment_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "submitter_donor_id"
-        },
-        {
-          "range": [1, 1],
-          "field_name": "program_id"
-        }
-      ]
-    },
-    {
-      "range": [11, 11],
+      "range": [6, 9],
       "targets": [
         {
           "range": [4, 4],
@@ -1417,17 +1523,53 @@
       ]
     },
     {
-      "range": [12, 12],
+      "range": [10, 12],
       "targets": [
         {
+          "range": [13, 13],
+          "field_name": "submitter_specimen_id"
+        },
+        {
           "range": [3, 3],
-          "field_name": "submitter_donor_id",
-          "field_value": "DONOR_"
+          "field_name": "submitter_donor_id"
         },
         {
           "range": [1, 1],
-          "field_name": "program_id",
-          "field_value": "SYNTHETIC_"
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [13, 14],
+      "targets": [
+        {
+          "range": [15, 15],
+          "field_name": "submitter_treatment_id"
+        },
+        {
+          "range": [4, 4],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [1, 1],
+          "field_name": "program_id"
+        }
+      ]
+    },
+    {
+      "range": [15, 15],
+      "targets": [
+        {
+          "range": [31, 31],
+          "field_name": "submitter_follow_up_id"
+        },
+        {
+          "range": [7, 7],
+          "field_name": "submitter_donor_id"
+        },
+        {
+          "range": [2, 2],
+          "field_name": "program_id"
         }
       ]
     }

@@ -37,7 +37,7 @@ from chord_metadata_service.mohpackets.models import (
 class ProgramFilter(filters.FilterSet):
     class Meta:
         model = Program
-        fields = "__all__"
+        fields = ["program_id"]
 
 
 class DonorFilter(filters.FilterSet):
@@ -218,6 +218,9 @@ class SurgeryFilter(filters.FilterSet):
 
 class FollowUpFilter(filters.FilterSet):
     method_of_progression_status = filters.CharFilter(lookup_expr="icontains")
+    anatomic_site_progression_or_recurrence = filters.CharFilter(
+        lookup_expr="icontains"
+    )
 
     class Meta:
         model = FollowUp

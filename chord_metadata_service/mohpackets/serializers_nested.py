@@ -107,18 +107,11 @@ class NestedBiomarkerSerializer(BiomarkerSerializer):
             "submitter_primary_diagnosis_id",
             "submitter_treatment_id",
             "submitter_follow_up_id",
-            "id"
+            "id",
         ]
 
 
 class NestedFollowUpSerializer(FollowUpSerializer):
-    biomarkers = serializers.SerializerMethodField()
-
-    @extend_schema_field(ListSerializer(child=NestedBiomarkerSerializer()))
-    def get_biomarkers(self, obj):
-        biomarkers = obj.biomarker_set.all()
-        return NestedBiomarkerSerializer(biomarkers, many=True).data
-
     class Meta:
         model = FollowUp
         fields = [
@@ -134,7 +127,6 @@ class NestedFollowUpSerializer(FollowUpSerializer):
             "recurrence_n_category",
             "recurrence_m_category",
             "recurrence_stage_group",
-            "biomarkers",  # nested child
         ]
 
 
@@ -142,10 +134,9 @@ class NestedTreatmentSerializer(TreatmentSerializer):
     chemotherapies = serializers.SerializerMethodField()
     hormone_therapies = serializers.SerializerMethodField()
     immunotherapies = serializers.SerializerMethodField()
-    radiation = serializers.SerializerMethodField()
-    surgery = serializers.SerializerMethodField()
+    radiations = serializers.SerializerMethodField()
+    surgeries = serializers.SerializerMethodField()
     followups = serializers.SerializerMethodField()
-    biomarkers = serializers.SerializerMethodField()
 
     @extend_schema_field(ListSerializer(child=NestedChemotherapySerializer()))
     def get_chemotherapies(self, obj):
@@ -162,31 +153,20 @@ class NestedTreatmentSerializer(TreatmentSerializer):
         immunotherapies = obj.immunotherapy_set.all()
         return NestedImmunotherapySerializer(immunotherapies, many=True).data
 
-    @extend_schema_field(NestedRadiationSerializer)
-    def get_radiation(self, obj):
-        try:
-            radiation = obj.radiation
-            return NestedRadiationSerializer(radiation).data
-        except Radiation.DoesNotExist:
-            return None
+    @extend_schema_field(ListSerializer(child=NestedRadiationSerializer()))
+    def get_radiations(self, obj):
+        radiations = obj.radiation_set.all()
+        return NestedRadiationSerializer(radiations, many=True).data
 
-    @extend_schema_field(NestedSurgerySerializer)
-    def get_surgery(self, obj):
-        try:
-            surgery = obj.surgery
-            return NestedSurgerySerializer(surgery).data
-        except Surgery.DoesNotExist:
-            return None
+    @extend_schema_field(ListSerializer(child=NestedSurgerySerializer()))
+    def get_surgeries(self, obj):
+        surgeries = obj.surgery_set.all()
+        return NestedSurgerySerializer(surgeries, many=True).data
 
     @extend_schema_field(ListSerializer(child=NestedFollowUpSerializer()))
     def get_followups(self, obj):
         followups = obj.followup_set.all()
         return NestedFollowUpSerializer(followups, many=True).data
-
-    @extend_schema_field(ListSerializer(child=NestedBiomarkerSerializer()))
-    def get_biomarkers(self, obj):
-        biomarkers = obj.biomarker_set.all()
-        return NestedBiomarkerSerializer(biomarkers, many=True).data
 
     class Meta:
         model = Treatment
@@ -207,35 +187,19 @@ class NestedTreatmentSerializer(TreatmentSerializer):
             "chemotherapies",  # nested child
             "hormone_therapies",  # nested child
             "immunotherapies",  # nested child
-            "radiation",  # nested child
-            "surgery",  # nested child
+            "radiations",  # nested child
+            "surgeries",  # nested child
             "followups",  # nested child
-            "biomarkers",  # nested child
         ]
 
 
 class NestedSpecimenSerializer(SpecimenSerializer):
     sample_registrations = serializers.SerializerMethodField()
-    surgery = serializers.SerializerMethodField()
-    biomarkers = serializers.SerializerMethodField()
 
     @extend_schema_field(ListSerializer(child=NestedSampleRegistrationSerializer()))
     def get_sample_registrations(self, obj):
         sample_registrations = obj.sampleregistration_set.all()
         return NestedSampleRegistrationSerializer(sample_registrations, many=True).data
-
-    @extend_schema_field(NestedSurgerySerializer)
-    def get_surgery(self, obj):
-        try:
-            surgery = obj.surgery
-            return NestedSurgerySerializer(surgery).data
-        except Surgery.DoesNotExist:
-            return None
-
-    @extend_schema_field(ListSerializer(child=NestedBiomarkerSerializer()))
-    def get_biomarkers(self, obj):
-        biomarkers = obj.biomarker_set.all()
-        return NestedBiomarkerSerializer(biomarkers, many=True).data
 
     class Meta:
         model = Specimen
@@ -258,16 +222,13 @@ class NestedSpecimenSerializer(SpecimenSerializer):
             "percent_tumour_cells_measurement_method",
             "specimen_processing",
             "specimen_laterality",
-            "surgery",  # nested child
             "sample_registrations",  # nested child
-            "biomarkers",  # nested child
         ]
 
 
 class NestedPrimaryDiagnosisSerializer(PrimaryDiagnosisSerializer):
     specimens = serializers.SerializerMethodField()
     treatments = serializers.SerializerMethodField()
-    biomarkers = serializers.SerializerMethodField()
     followups = serializers.SerializerMethodField()
 
     @extend_schema_field(ListSerializer(child=NestedSpecimenSerializer()))
@@ -279,11 +240,6 @@ class NestedPrimaryDiagnosisSerializer(PrimaryDiagnosisSerializer):
     def get_treatments(self, obj):
         treatments = obj.treatment_set.all()
         return NestedTreatmentSerializer(treatments, many=True).data
-
-    @extend_schema_field(ListSerializer(child=NestedBiomarkerSerializer()))
-    def get_biomarkers(self, obj):
-        biomarkers = obj.biomarker_set.all()
-        return NestedBiomarkerSerializer(biomarkers, many=True).data
 
     @extend_schema_field(ListSerializer(child=NestedFollowUpSerializer()))
     def get_followups(self, obj):
@@ -308,7 +264,6 @@ class NestedPrimaryDiagnosisSerializer(PrimaryDiagnosisSerializer):
             "laterality",
             "specimens",  # nested child
             "treatments",  # nested child
-            "biomarkers",  # nested child
             "followups",  # nested child
         ]
 

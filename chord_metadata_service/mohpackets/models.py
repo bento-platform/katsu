@@ -33,6 +33,7 @@ class AutoDateTimeField(models.DateTimeField):
 
 class Program(models.Model):
     program_id = models.CharField(max_length=64, primary_key=True)
+    metadata = models.JSONField(null=True, blank=True)
     created = models.DateTimeField(default=timezone.now)
     updated = AutoDateTimeField(default=timezone.now)
 
@@ -274,7 +275,7 @@ class Radiation(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_treatment_id = models.OneToOneField(
+    submitter_treatment_id = models.ForeignKey(
         Treatment, on_delete=models.CASCADE, null=False, blank=False
     )
     radiation_therapy_modality = models.CharField(max_length=255, null=True, blank=True)
@@ -336,12 +337,10 @@ class Surgery(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_specimen_id = models.OneToOneField(
-        Specimen, on_delete=models.CASCADE, null=True, blank=True
-    )
-    submitter_treatment_id = models.OneToOneField(
+    submitter_treatment_id = models.ForeignKey(
         Treatment, on_delete=models.CASCADE, null=False, blank=False
     )
+    submitter_specimen_id = models.CharField(max_length=64, null=True, blank=True)
     surgery_type = models.CharField(max_length=255, null=True, blank=True)
     surgery_site = models.CharField(max_length=255, null=True, blank=True)
     surgery_location = models.CharField(max_length=128, null=True, blank=True)
@@ -353,13 +352,13 @@ class Surgery(models.Model):
         max_length=64, null=True, blank=True
     )
     margin_types_involved = ArrayField(
-        models.CharField(max_length=128, null=True, blank=True)
+        models.CharField(max_length=128, null=True, blank=True), null=True, blank=True
     )
     margin_types_not_involved = ArrayField(
-        models.CharField(max_length=128, null=True, blank=True)
+        models.CharField(max_length=128, null=True, blank=True), null=True, blank=True
     )
     margin_types_not_assessed = ArrayField(
-        models.CharField(max_length=128, null=True, blank=True)
+        models.CharField(max_length=128, null=True, blank=True), null=True, blank=True
     )
     lymphovascular_invasion = models.CharField(max_length=255, null=True, blank=True)
     perineural_invasion = models.CharField(max_length=128, null=True, blank=True)
@@ -392,8 +391,8 @@ class FollowUp(models.Model):
     method_of_progression_status = ArrayField(
         models.CharField(max_length=255, null=True, blank=True), null=True, blank=True
     )
-    anatomic_site_progression_or_recurrence = models.CharField(
-        max_length=255, null=True, blank=True
+    anatomic_site_progression_or_recurrence = ArrayField(
+        models.CharField(max_length=255, null=True, blank=True), null=True, blank=True
     )
     recurrence_tumour_staging_system = models.CharField(
         max_length=255, null=True, blank=True
@@ -418,19 +417,13 @@ class Biomarker(models.Model):
     submitter_donor_id = models.ForeignKey(
         Donor, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_specimen_id = models.ForeignKey(
-        Specimen, on_delete=models.SET_NULL, blank=True, null=True
+    submitter_specimen_id = models.CharField(max_length=64, null=True, blank=True)
+    submitter_primary_diagnosis_id = models.CharField(
+        max_length=64, null=True, blank=True
     )
-    submitter_primary_diagnosis_id = models.ForeignKey(
-        PrimaryDiagnosis, on_delete=models.SET_NULL, blank=True, null=True
-    )
-    submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.SET_NULL, blank=True, null=True
-    )
-    submitter_follow_up_id = models.ForeignKey(
-        FollowUp, on_delete=models.SET_NULL, blank=True, null=True
-    )
-    test_interval = models.PositiveSmallIntegerField(null=True, blank=True)
+    submitter_treatment_id = models.CharField(max_length=64, null=True, blank=True)
+    submitter_follow_up_id = models.CharField(max_length=64, null=True, blank=True)
+    test_date = models.PositiveSmallIntegerField(null=True, blank=True)
     psa_level = models.PositiveSmallIntegerField(null=True, blank=True)
     ca125 = models.PositiveSmallIntegerField(null=True, blank=True)
     cea = models.PositiveSmallIntegerField(null=True, blank=True)

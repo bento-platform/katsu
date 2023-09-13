@@ -1580,11 +1580,6 @@ class SurgeryTest(TestCase):
             program_id=self.program,
             submitter_donor_id=self.donor,
         )
-        self.specimen = Specimen.objects.create(
-            program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
-        )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
@@ -1594,7 +1589,6 @@ class SurgeryTest(TestCase):
         self.valid_values = {
             "program_id": self.program,
             "submitter_donor_id": self.donor,
-            "submitter_specimen_id": self.specimen,
             "submitter_treatment_id": self.treatment,
             "surgery_type": "Drainage of abscess",
             "surgery_site": "C06",
@@ -1618,7 +1612,6 @@ class SurgeryTest(TestCase):
     def test_surgery_fields(self):
         self.assertEqual(self.surgery.program_id, self.program)
         self.assertEqual(self.surgery.submitter_donor_id, self.donor)
-        self.assertEqual(self.surgery.submitter_specimen_id, self.specimen)
         self.assertEqual(self.surgery.submitter_treatment_id, self.treatment)
         self.assertEqual(self.surgery.surgery_type, "Drainage of abscess")
         self.assertEqual(self.surgery.surgery_site, "C06")
@@ -1810,7 +1803,7 @@ class FollowUpTest(TestCase):
                 "Imaging (procedure)",
                 "Laboratory data interpretation (procedure)",
             ],
-            "anatomic_site_progression_or_recurrence": "C18",
+            "anatomic_site_progression_or_recurrence": ["C18"],
             "recurrence_tumour_staging_system": "Lugano staging system",
             "recurrence_t_category": "T2a",
             "recurrence_n_category": "N0a (biopsy)",
@@ -1840,7 +1833,7 @@ class FollowUpTest(TestCase):
             self.followup.method_of_progression_status,
             ["Imaging (procedure)", "Laboratory data interpretation (procedure)"],
         )
-        self.assertEqual(self.followup.anatomic_site_progression_or_recurrence, "C18")
+        self.assertEqual(self.followup.anatomic_site_progression_or_recurrence, ["C18"])
         self.assertEqual(
             self.followup.recurrence_tumour_staging_system,
             "Lugano staging system",
@@ -2013,35 +2006,10 @@ class BiomarkerTest(TestCase):
             program_id=self.program,
             primary_site=["Adrenal gland"],
         )
-        self.primary_diagnosis = PrimaryDiagnosis.objects.create(
-            submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
-            program_id=self.program,
-            submitter_donor_id=self.donor,
-        )
-        self.specimen = Specimen.objects.create(
-            program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
-        )
-        self.treatment = Treatment.objects.create(
-            submitter_treatment_id="TREATMENT_1",
-            program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
-        )
-        self.followup = FollowUp.objects.create(
-            submitter_follow_up_id="FOLLOW_UP_1",
-            program_id=self.program,
-            submitter_donor_id=self.donor,
-        )
         self.valid_values = {
             "program_id": self.program,
             "submitter_donor_id": self.donor,
-            "submitter_specimen_id": self.specimen,
-            "submitter_primary_diagnosis_id": self.primary_diagnosis,
-            "submitter_treatment_id": self.treatment,
-            "submitter_follow_up_id": self.followup,
-            "test_interval": 8,
+            "test_date": 8,
             "psa_level": 230,
             "ca125": 29,
             "cea": 11,
@@ -2063,13 +2031,7 @@ class BiomarkerTest(TestCase):
     def test_biomarker_fields(self):
         self.assertEqual(self.biomarker.program_id, self.program)
         self.assertEqual(self.biomarker.submitter_donor_id, self.donor)
-        self.assertEqual(self.biomarker.submitter_specimen_id, self.specimen)
-        self.assertEqual(
-            self.biomarker.submitter_primary_diagnosis_id, self.primary_diagnosis
-        )
-        self.assertEqual(self.biomarker.submitter_treatment_id, self.treatment)
-        self.assertEqual(self.biomarker.submitter_follow_up_id, self.followup)
-        self.assertEqual(self.biomarker.test_interval, 8)
+        self.assertEqual(self.biomarker.test_date, 8)
         self.assertEqual(self.biomarker.psa_level, 230)
         self.assertEqual(self.biomarker.ca125, 29)
         self.assertEqual(self.biomarker.cea, 11)

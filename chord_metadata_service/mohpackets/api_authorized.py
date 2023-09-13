@@ -32,8 +32,11 @@ from chord_metadata_service.mohpackets.authentication import (
     LocalAuthentication,
     TokenAuthentication,
 )
-from chord_metadata_service.mohpackets.models import Biomarker, Donor, FollowUp, Program
-from chord_metadata_service.mohpackets.pagination import StandardResultsSetPagination
+from chord_metadata_service.mohpackets.models import Donor, FollowUp, Program
+from chord_metadata_service.mohpackets.pagination import (
+    SmallResultsSetPagination,
+    StandardResultsSetPagination,
+)
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
 )
@@ -284,44 +287,7 @@ class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
     """
 
     serializer_class = DonorWithClinicalDataSerializer
-    donor_biomarkers_prefetch = Prefetch(
-        "biomarker_set",
-        queryset=Biomarker.objects.filter(
-            submitter_primary_diagnosis_id__isnull=True,
-            submitter_specimen_id__isnull=True,
-            submitter_treatment_id__isnull=True,
-            submitter_follow_up_id__isnull=True,
-        ),
-    )
-    primary_diagnosis_biomarkers_prefetch = Prefetch(
-        "primarydiagnosis_set__biomarker_set",
-        queryset=Biomarker.objects.filter(
-            submitter_primary_diagnosis_id__isnull=False,
-            submitter_specimen_id__isnull=True,
-            submitter_treatment_id__isnull=True,
-            submitter_follow_up_id__isnull=True,
-        ),
-    )
-    specimen_biomarkers_prefetch = Prefetch(
-        "primarydiagnosis_set__specimen_set__biomarker_set",
-        queryset=Biomarker.objects.filter(
-            submitter_specimen_id__isnull=False,
-            submitter_follow_up_id__isnull=True,
-        ),
-    )
-    treatment_biomarkers_prefetch = Prefetch(
-        "primarydiagnosis_set__treatment_set__biomarker_set",
-        queryset=Biomarker.objects.filter(
-            submitter_treatment_id__isnull=False,
-            submitter_follow_up_id__isnull=True,
-        ),
-    )
-    followup_biomarkers_prefetch = Prefetch(
-        "primarydiagnosis_set__treatment_set__followup_set__biomarker_set",
-        queryset=Biomarker.objects.filter(
-            submitter_follow_up_id__isnull=False,
-        ),
-    )
+    pagination_class = SmallResultsSetPagination
 
     donor_followups_prefetch = Prefetch(
         "followup_set",
@@ -340,18 +306,16 @@ class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
     )
 
     queryset = Donor.objects.prefetch_related(
-        donor_biomarkers_prefetch,
-        primary_diagnosis_biomarkers_prefetch,
-        specimen_biomarkers_prefetch,
-        treatment_biomarkers_prefetch,
-        followup_biomarkers_prefetch,
         donor_followups_prefetch,
         primary_diagnosis_followups_prefetch,
+        "biomarker_set",
         "comorbidity_set",
+        "exposure_set",
         "primarydiagnosis_set__treatment_set__chemotherapy_set",
         "primarydiagnosis_set__treatment_set__hormonetherapy_set",
         "primarydiagnosis_set__treatment_set__immunotherapy_set",
-        "primarydiagnosis_set__treatment_set__radiation",
-        "primarydiagnosis_set__treatment_set__surgery",
+        "primarydiagnosis_set__treatment_set__radiation_set",
+        "primarydiagnosis_set__treatment_set__surgery_set",
+        "primarydiagnosis_set__treatment_set__followup_set",
         "primarydiagnosis_set__specimen_set__sampleregistration_set",
     ).all()

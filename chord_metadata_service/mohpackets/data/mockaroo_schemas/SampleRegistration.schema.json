@@ -1,0 +1,61 @@
+{
+  "id": 469108,
+  "num_rows": 1000,
+  "file_format": "json",
+  "name": "SampleRegistration",
+  "array": true,
+  "columns": [
+    {
+      "name": "submitter_sample_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "program_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_donor_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "submitter_specimen_id",
+      "null_percentage": 0,
+      "type": "Blank",
+      "formula": ""
+    },
+    {
+      "name": "specimen_tissue_source",
+      "null_percentage": 10,
+      "type": "Template",
+      "value": "",
+      "formula": "[\n    \"Abdominal fluid\",\n    \"Amniotic fluid\",\n    \"Arterial blood\",\n    \"Bile\",\n    \"Blood derived - bone marrow\",\n    \"Blood derived - peripheral blood\",\n    \"Bone marrow fluid\",\n    \"Bone marrow derived mononuclear cells\",\n    \"Buccal cell\",\n    \"Buffy coat\",\n    \"Cerebrospinal fluid\",\n    \"Cervical mucus\",\n    \"Convalescent plasma\",\n    \"Cord blood\",\n    \"Duodenal fluid\",\n    \"Female genital fluid\",\n    \"Fetal blood\",\n    \"Hydrocele fluid\",\n    \"Male genital fluid\",\n    \"Pancreatic fluid\",\n    \"Pericardial effusion\",\n    \"Pleural fluid\",\n    \"Renal cyst fluid\",\n    \"Saliva\",\n    \"Seminal fluid\",\n    \"Serum\",\n    \"Solid tissue\",\n    \"Sputum\",\n    \"Synovial fluid\",\n    \"Urine\",\n    \"Venous blood\",\n    \"Vitreous fluid\",\n    \"Whole blood\",\n    \"Wound\",\n][random(0,31)]"
+    },
+    {
+      "name": "tumour_normal_designation",
+      "null_percentage": 11,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Normal\",\"Tumour\"][random(0,1)]"
+    },
+    {
+      "name": "specimen_type",
+      "null_percentage": 12,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Cell line - derived from normal\",\"Cell line - derived from primary tumour\",\"Cell line - derived from metastatic tumour\",\"Cell line - derived from xenograft tumour\",\"Metastatic tumour - additional metastatic\",\"Metastatic tumour - metastasis local to lymph node\",\"Metastatic tumour - metastasis to distant location\",\"Metastatic tumour\",\"Normal - tissue adjacent to primary tumour\",\"Normal\",\"Primary tumour - additional new primary\",\"Primary tumour - adjacent to normal\",\"Primary tumour\",\"Recurrent tumour\",\"Xenograft - derived from primary tumour\",\"Xenograft - derived from metastatic tumour\",\"Xenograft - derived from tumour cell line\"][random(0,16)]"
+    },
+    {
+      "name": "sample_type",
+      "null_percentage": 13,
+      "type": "Template",
+      "value": "",
+      "formula": "[\"Amplified DNA\",\n\"ctDNA\",\n\"Other DNA enrichments\",\n\"Other RNA fractions\",\n\"polyA+ RNA\",\n\"Protein\",\n\"rRNA-depleted RNA\",\n\"Total DNA\",\n\"Total RNA\"][random(0,8)]"
+    }
+  ]
+}
