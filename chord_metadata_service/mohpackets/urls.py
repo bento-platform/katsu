@@ -41,6 +41,7 @@ from chord_metadata_service.mohpackets.api_discovery import (
     gender_count,
     individual_count,
     patient_per_cohort_count,
+    service_info,
     treatment_type_count,
 )
 from chord_metadata_service.mohpackets.api_ingest import (
@@ -59,7 +60,6 @@ from chord_metadata_service.mohpackets.api_ingest import (
     ingest_specimens,
     ingest_surgeries,
     ingest_treatments,
-    version_check,
 )
 
 # ================== AUTHORIZED API ================== #
@@ -123,7 +123,7 @@ urlpatterns = [
     path("authorized/", include(router.urls)),
     path("discovery/", include(discovery_router.urls)),
     path("ingest/", include(ingest_patterns)),
-    path("version_check", version_check),
+    path("service-info", service_info),
     path(
         "discovery/overview/",
         include(
