@@ -55,6 +55,7 @@ strict-rfc3339 = "^0.7"
 tabulate = "^0.9.0"
 uritemplate = "^4.1.1"
 adrf = "^0.1.1"
+xmltodict="0.13.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^6.5.0"
