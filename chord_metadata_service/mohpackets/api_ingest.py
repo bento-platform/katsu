@@ -1,7 +1,6 @@
 import logging
 
 from django.db import transaction
-from django.http import JsonResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -27,7 +26,6 @@ from chord_metadata_service.mohpackets.serializers import (
     SurgerySerializer,
     TreatmentSerializer,
 )
-from chord_metadata_service.mohpackets.utils import __version__
 
 """
     This module contains the API endpoints for ingesting bulk data into the database.
@@ -452,12 +450,3 @@ def ingest_exposures(request):
         status=status.HTTP_201_CREATED,
         data={f"{len(objs)} exposures were created."},
     )
-
-
-@extend_schema(
-    responses={200: OpenApiTypes.STR},
-)
-@api_view(["GET"])
-@permission_classes([CanDIGAdminOrReadOnly])
-def version_check(_request):
-    return JsonResponse({"version": __version__}, status=status.HTTP_200_OK)
