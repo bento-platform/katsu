@@ -208,13 +208,18 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {"moh_rate_limit": "60/minute"},
 }
 
+# CURRENT KATSU VERSION ACCORDING TO MODEL CHANGES
+# ------------------------------------------------
+
+KATSU_VERSION = "2.3.0"
+
 # DRF Spectacular settings
 # ------------------------
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "MoH Service API",
     "DESCRIPTION": ("This is the RESTful API for the MoH Service."),
-    "VERSION": "1.0.0",
+    "VERSION": KATSU_VERSION,
     # include schema endpoint into schema
     "SERVE_INCLUDE_SCHEMA": False,
     # Filter out the url patterns we don't want documented
