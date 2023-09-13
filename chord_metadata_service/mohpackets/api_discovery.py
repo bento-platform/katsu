@@ -46,7 +46,7 @@ from chord_metadata_service.mohpackets.permissible_values import (
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 
-from .utils import get_schema_version
+from .utils import get_schema_url
 
 """
     This module inheriting from the base views and adding the discovery mixin,
@@ -498,14 +498,14 @@ def diagnosis_age_count(_request):
 )
 @api_view(["GET"])
 def service_info(_request):
-    schema_version = get_schema_version()
+    schema_url = get_schema_url()
 
     return JsonResponse(
         {
             "name": "katsu",
             "description": "A CanDIG clinical service",
             "version": settings.KATSU_VERSION,
-            "schema": schema_version,
+            "schema_url": schema_url,
         },
         status=status.HTTP_200_OK,
         safe=False,
