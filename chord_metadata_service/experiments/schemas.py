@@ -7,7 +7,7 @@ from chord_metadata_service.ontologies import readXsdSimpleTypeValues
 __all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
 
 LIBRARY_STRATEGIES = readXsdSimpleTypeValues(
-    'chord_metadata_service/ontologies/sra/SRA.experiment.xsd.xml',
+    'chord_metadata_service/ontologies/xsd/SRA.experiment.xsd.xml',
     'typeLibraryStrategy',
 )
 
