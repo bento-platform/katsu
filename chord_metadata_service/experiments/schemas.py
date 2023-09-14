@@ -2,13 +2,12 @@ import requests
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe
-import xmltodict
+from chord_metadata_service.ontologies import readXsdSimpleTypeValues
+
 
 __all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
 
-sra_common_response = requests.get('http://ftp.ebi.ac.uk/pub/databases/ena/doc/xsd/sra_1_5/SRA.common.xsd')
-sra_experiment_response = requests.get('http://ftp.ebi.ac.uk/pub/databases/ena/doc/xsd/sra_1_5/SRA.experiment.xsd')
-sra_experiment_data = xmltodict.parse(sra_experiment_response.content)
+LIBRARY_STRATEGIES = readXsdSimpleTypeValues('chord_metadata_service/ontologies/sra/SRA.experiment.xsd.xml', 'typeLibraryStrategy')
 
 EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -108,7 +107,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         "molecule_ontology": ONTOLOGY_CLASS_LIST,
         "library_strategy": {
             "type": "string",
-            "enum": ["Bisulfite-Seq", "RNA-Seq", "ChIP-Seq", "WES", "Other"]
+            "enum": LIBRARY_STRATEGIES
         },
         "library_source": {
             "type": "string",

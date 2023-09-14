@@ -361,13 +361,6 @@ def public_overview(_request):
     get:
     Overview of all public data in the database
     """
-    import xmltodict
-    namespace = { 'xs': None }
-    sra_experiment_response = requests.get('http://ftp.ebi.ac.uk/pub/databases/ena/doc/xsd/sra_1_5/SRA.experiment.xsd')
-    sra_experiment_data = xmltodict.parse(sra_experiment_response.content, namespaces=namespace)
-    for simple_type in sra_experiment_data['schema']['simpleType']:
-        simple_type['restriction']['enumeration']
-        print(simple_type)
     if not settings.CONFIG_PUBLIC:
         return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
 
