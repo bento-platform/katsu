@@ -360,7 +360,7 @@ def public_overview(_request):
     get:
     Overview of all public data in the database
     """
-    
+
     if not settings.CONFIG_PUBLIC:
         return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
 
