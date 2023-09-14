@@ -1,13 +1,13 @@
-from typing import List
+from typing import List, Tuple
 from django.db import migrations
 
-LIB_STRATEGY_CONVERSIONS: List[tuple[str, str]] = [
+LIB_STRATEGY_CONVERSIONS: List[Tuple[str, str]] = [
     # Convert WES -> WXS ...
     ("WES", "WXS"),
-    ("Other", "OTHER")
+    ("Other", "OTHER"),
 ]
 
-LIB_SELECTION_CONVERIONS: List[tuple[str, str]] = [
+LIB_SELECTION_CONVERIONS: List[Tuple[str, str]] = [
     ("Random", "RANDOM"),
     ("Random PCR", "RANDOM PCR"),
     ("Exome capture", "other"), # 'Exome capture' no longer supported
