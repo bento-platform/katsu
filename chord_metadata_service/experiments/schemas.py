@@ -1,14 +1,21 @@
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe
-from chord_metadata_service.ontologies import read_xsd_simple_type_values
-
+from chord_metadata_service.ontologies import read_xsd_simple_type_values, SRA_EXPERIMENT_FILE_NAME
 
 __all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
 
+# Experiment library strategy options are read from the EBI xsd file
 LIBRARY_STRATEGIES = read_xsd_simple_type_values(
-    'chord_metadata_service/ontologies/xsd/SRA.experiment.xsd.xml',
-    'typeLibraryStrategy',
+    SRA_EXPERIMENT_FILE_NAME,
+    "typeLibraryStrategy",
+)
+
+
+# Experiment library selection options are read from the EBI xsd file
+LIBRARY_SELECTION = read_xsd_simple_type_values(
+    SRA_EXPERIMENT_FILE_NAME,
+    "typeLibrarySelection",
 )
 
 EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
@@ -118,7 +125,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         },
         "library_selection": {
             "type": "string",
-            "enum": ["Random", "PCR", "Random PCR", "RT-PCR", "MF", "Exome capture", "Other"]
+            "enum": LIBRARY_SELECTION
         },
         "library_layout": {
             "type": "string",

@@ -21,6 +21,7 @@ include = [
     "chord_metadata_service/chord/tests/*.json",
     "chord_metadata_service/dats/*",
     "chord_metadata_service/mcode/tests/*.json",
+    "chord_metadata_service/ontologies/xsd/*.xml",
     "chord_metadata_service/restapi/tests/*.json",
 ]
 repository = "https://github.com/bento-platform/katsu"
