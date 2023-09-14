@@ -1,5 +1,5 @@
-from .utils import readXsdSimpleTypeValues
+from .utils import read_xsd_simple_type_values
 
 __all__ = [
-    "readXsdSimpleTypeValues",
+    "read_xsd_simple_type_values",
 ]

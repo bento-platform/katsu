@@ -1,12 +1,12 @@
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe
-from chord_metadata_service.ontologies import readXsdSimpleTypeValues
+from chord_metadata_service.ontologies import read_xsd_simple_type_values
 
 
 __all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
 
-LIBRARY_STRATEGIES = readXsdSimpleTypeValues(
+LIBRARY_STRATEGIES = read_xsd_simple_type_values(
     'chord_metadata_service/ontologies/xsd/SRA.experiment.xsd.xml',
     'typeLibraryStrategy',
 )
