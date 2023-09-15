@@ -1,5 +1,5 @@
 
-<h1 id="moh-service-api">MoH Service API v1.0.0</h1>
+<h1 id="moh-service-api">MoH Service API v2.3.0</h1>
 
 This is the RESTful API for the MoH Service.
 
