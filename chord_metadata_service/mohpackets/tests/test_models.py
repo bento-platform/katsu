@@ -2009,7 +2009,7 @@ class BiomarkerTest(TestCase):
         self.valid_values = {
             "program_id": self.program,
             "submitter_donor_id": self.donor,
-            "test_date": 8,
+            "test_date": "8",
             "psa_level": 230,
             "ca125": 29,
             "cea": 11,
@@ -2031,7 +2031,7 @@ class BiomarkerTest(TestCase):
     def test_biomarker_fields(self):
         self.assertEqual(self.biomarker.program_id, self.program)
         self.assertEqual(self.biomarker.submitter_donor_id, self.donor)
-        self.assertEqual(self.biomarker.test_date, 8)
+        self.assertEqual(self.biomarker.test_date, "8")
         self.assertEqual(self.biomarker.psa_level, 230)
         self.assertEqual(self.biomarker.ca125, 29)
         self.assertEqual(self.biomarker.cea, 11)

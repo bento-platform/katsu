@@ -44,10 +44,7 @@
     {
       "name": "test_date",
       "null_percentage": 10,
-      "type": "Number",
-      "min": 3,
-      "max": 8,
-      "decimals": 0,
+      "type": "Street Number",
       "formula": null
     },
     {

@@ -473,7 +473,7 @@ class BiomarkerFactory(factory.django.DjangoModelFactory):
 
     # default values
     id = factory.LazyFunction(uuid.uuid4)
-    test_interval = factory.Faker("pyint", min_value=0, max_value=100)
+    test_date = factory.Faker("word")
     psa_level = factory.Faker("pyint", min_value=0, max_value=100)
     ca125 = factory.Faker("pyint", min_value=0, max_value=100)
     cea = factory.Faker("pyint", min_value=0, max_value=100)

@@ -423,7 +423,7 @@ class Biomarker(models.Model):
     )
     submitter_treatment_id = models.CharField(max_length=64, null=True, blank=True)
     submitter_follow_up_id = models.CharField(max_length=64, null=True, blank=True)
-    test_date = models.PositiveSmallIntegerField(null=True, blank=True)
+    test_date = models.CharField(max_length=32, null=True, blank=True)
     psa_level = models.PositiveSmallIntegerField(null=True, blank=True)
     ca125 = models.PositiveSmallIntegerField(null=True, blank=True)
     cea = models.PositiveSmallIntegerField(null=True, blank=True)

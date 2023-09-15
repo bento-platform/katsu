@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: MoH Service API
   version: 1.0.0
-  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/1fb740334112a9eef08c1e5a9cd01caf83c75681/chord_metadata_service/mohpackets/docs/schema.yml
+  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/556b96e26385c4f5f0f7327cb8420809a2e64f8a/chord_metadata_service/mohpackets/docs/schema.yml
 paths:
   /v2/authorized/biomarkers/:
     get:
@@ -41,7 +41,7 @@ paths:
       - in: query
         name: test_date
         schema:
-          type: integer
+          type: string
       - in: query
         name: psa_level
         schema:
@@ -1441,7 +1441,7 @@ paths:
       - in: query
         name: test_date
         schema:
-          type: integer
+          type: string
       - in: query
         name: psa_level
         schema:
@@ -3143,10 +3143,9 @@ components:
           nullable: true
           maxLength: 64
         test_date:
-          type: integer
-          maximum: 32767
-          minimum: 0
+          type: string
           nullable: true
+          maxLength: 32
         psa_level:
           type: integer
           maximum: 32767
@@ -4070,11 +4069,26 @@ components:
             - $ref: '#/components/schemas/BlankEnum'
             - $ref: '#/components/schemas/NullEnum'
           nullable: true
-        test_date:
-          type: integer
-          maximum: 32767
-          minimum: 0
+        submitter_specimen_id:
+          type: string
           nullable: true
+          maxLength: 64
+        submitter_primary_diagnosis_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        submitter_treatment_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        submitter_follow_up_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        test_date:
+          type: string
+          nullable: true
+          maxLength: 32
         psa_level:
           type: integer
           maximum: 32767
