@@ -10,9 +10,10 @@ LIB_STRATEGY_CONVERSIONS: List[Tuple[str, str]] = [
 LIB_SELECTION_CONVERIONS: List[Tuple[str, str]] = [
     ("Random", "RANDOM"),
     ("Random PCR", "RANDOM PCR"),
-    ("Exome capture", "other"), # 'Exome capture' no longer supported
+    ("Exome capture", "Hybrid Selection"), # 'Exome capture' no longer supported
     ("Other", "other"),
 ]
+
 
 def set_experiment_library(apps, _schema_editor):
     Experiment = apps.get_model("experiments", "Experiment")
@@ -27,6 +28,7 @@ def set_experiment_library(apps, _schema_editor):
         for exp in Experiment.objects.filter(library_selection=old_val):
             exp.library_selection = new_val
             exp.save()
+
 
 class Migration(migrations.Migration):
     dependencies = [
