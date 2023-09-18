@@ -10,6 +10,7 @@ from jsonschema import Draft7Validator
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from typing import List
 
 from bento_lib.schemas.bento import BENTO_INGEST_SCHEMA
 from bento_lib.responses import errors
@@ -26,18 +27,53 @@ DATASET_ID_OVERRIDES = {FROM_DERIVED_DATA}    # These special values skip the ch
 logger = logging.getLogger(__name__)
 
 
+class IngestResponseBuilder:
+
+    def __init__(self, workflow_id: str, dataset_id: str):
+        self.workflow_id = workflow_id
+        self.dataset_id = dataset_id
+        self.success = False
+        self.errors = [] 
+        self.warnings = []
+
+    def set_success(self, success: bool):
+        self.success = success
+
+    def add_error(self, error):
+        self.errors.append(error)
+
+    def add_errors(self, errors: List[any]):
+        self.errors.extend(errors)
+
+    def add_warning(self, warnings: List[any]):
+        self.warnings.extend(warnings)
+
+    def as_response(self, status_code: int):
+        body = {
+            "success": self.success,
+            "warnings": self.warnings,
+            "errors": self.errors,
+        }
+        logger.info(f"Finished {self.workflow_id} ingest request for dataset {self.dataset_id}", body)
+        return Response(body, status=status_code)
+
+
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def ingest_into_dataset(request, dataset_id: str, workflow_id: str):
     logger.info(f"Received a {workflow_id} ingest request for dataset {dataset_id}.")
 
+    response_builder = IngestResponseBuilder(workflow_id=workflow_id, dataset_id=dataset_id)
+
     # Check that the workflow exists
     if workflow_id not in WORKFLOW_INGEST_FUNCTION_MAP:
-        return Response(errors.bad_request_error(f"Ingestion workflow ID {workflow_id} does not exist"), status=400)
+        response_builder.add_error(f"Ingestion workflow ID {workflow_id} does not exist")
+        return response_builder.as_response(400)
 
     if dataset_id not in DATASET_ID_OVERRIDES:
         if not Dataset.objects.filter(identifier=dataset_id).exists():
-            return Response(errors.bad_request_error(f"Dataset with ID {dataset_id} does not exist"), status=400)
+            response_builder.add_error(f"Dataset with ID {dataset_id} does not exist")
+            return response_builder.as_response(400)
         dataset_id = str(uuid.UUID(dataset_id))  # Normalize dataset ID to UUID's str format.
 
     try:
@@ -46,18 +82,23 @@ def ingest_into_dataset(request, dataset_id: str, workflow_id: str):
             WORKFLOW_INGEST_FUNCTION_MAP[workflow_id](request.data, dataset_id)
 
     except IngestError as e:
-        # return Response(errors.bad_request_error(e.validation_errors), status=400)
-        return Response(errors.bad_request_error(f"Encountered ingest error: {e.validation_errors}"), status=400)
+        if e.validation_errors:
+            response_builder.add_errors(e.validation_errors)
+        else:
+            response_builder.add_error(e.message)
+        return response_builder.as_response(400)
 
     except ValidationError as e:
-        return Response(errors.bad_request_error(
-            "Encountered validation errors during ingestion",
-            *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
-        ))
+        response_builder.add_errors(e.error_list if hasattr(e, "error_list") else e.error_dict.items())
+        return response_builder.as_response(400)
 
     except Exception as e:
         # Encountered some other error from the ingestion attempt, return a somewhat detailed message
-        logger.error(f"Encountered an exception while processing an ingest attempt:\n{traceback.format_exc()}")
-        return Response(errors.internal_server_error(f"Encountered an exception while processing an ingest attempt "
-                                                     f"(error: {repr(e)}"), status=500)
-    return Response(status=204)
+        error_message = f"Encountered an exception while processing an ingest attempt:\n{traceback.format_exc()}"
+        logger.error(error_message)
+        response_builder.add_error(error_message)
+        return response_builder.as_response(500)
+    
+    # return Response(status=204)
+    response_builder.set_success(True)
+    return response_builder.as_response(204)
