@@ -56,12 +56,14 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
 
 def validate_experiment(experiment_data, idx: Optional[int] = None) -> None:
     # Validate experiment data against experiments schema.
-    validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA)
-    if not validation:
+    val_errors = schema_validation(experiment_data, EXPERIMENT_SCHEMA)
+    if val_errors:
         # TODO: Report more precise errors
         raise IngestError(
-            f"Failed schema validation for experiment{(' ' + str(idx)) if idx is not None else ''} "
-            f"(check Katsu logs for more information)")
+            schema_validation_errors=val_errors,
+            message=f"Failed schema validation for experiment{(' ' + str(idx)) if idx is not None else ''} "
+                    f"(check Katsu logs for more information)"
+        )
 
 
 def ingest_experiment(
@@ -164,12 +166,14 @@ def ingest_derived_experiment_results(json_data: list[dict]) -> list[em.Experime
     # First, validate all experiment results with the schema before creating anything in the database.
 
     for idx, exp_result in enumerate(json_data):
-        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
-        if not validation:
+        val_errors = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
+        if val_errors:
             # TODO: Report more precise errors
             raise IngestError(
-                f"Failed schema validation for experiment result {idx} "
-                f"(check Katsu logs for more information)")
+                schema_validation_errors=val_errors,
+                message=f"Failed schema validation for experiment result {idx} "
+                        f"(check Katsu logs for more information)"
+            )
 
     # If everything passes, perform the actual ingestion next.
 

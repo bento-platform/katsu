@@ -168,22 +168,22 @@ class IngestTest(TestCase):
     def test_phenopackets_validation(self):
         # check invalid phenopacket, must fail validation & validate_phenopacket must raise
 
-        validation = schema_validation(EXAMPLE_INGEST_INVALID_PHENOPACKET, PHENOPACKET_SCHEMA)
-        self.assertEqual(validation, False)
+        val_errs = schema_validation(EXAMPLE_INGEST_INVALID_PHENOPACKET, PHENOPACKET_SCHEMA)
+        self.assertTrue(len(val_errs) > 0)
         with self.assertRaises(IngestError):
             validate_phenopacket(EXAMPLE_INGEST_INVALID_PHENOPACKET)
         with self.assertRaises(IngestError):
             ingest_phenopacket(EXAMPLE_INGEST_INVALID_PHENOPACKET, "dummy", validate=True)
 
         # valid phenopacket passes validation & doesn't raise
-        validation_2 = schema_validation(EXAMPLE_INGEST_PHENOPACKET, PHENOPACKET_SCHEMA)
-        self.assertEqual(validation_2, True)
+        val_errors_2 = schema_validation(EXAMPLE_INGEST_PHENOPACKET, PHENOPACKET_SCHEMA)
+        self.assertEqual(val_errors_2, None)
         validate_phenopacket(EXAMPLE_INGEST_PHENOPACKET)
 
         # valid experiments pass validation
         for exp in EXAMPLE_INGEST_EXPERIMENT["experiments"]:
-            validation_3 = schema_validation(exp, EXPERIMENT_SCHEMA)
-            self.assertEqual(validation_3, True)
+            val_errors_3 = schema_validation(exp, EXPERIMENT_SCHEMA)
+            self.assertEqual(val_errors_3, None)
 
     def test_ingesting_experiments_json(self):
         # ingest phenopackets data in order to match to biosample ids
@@ -220,8 +220,8 @@ class IngestTest(TestCase):
     def test_ingesting_invalid_experiment_json(self):
         # check invalid experiment, must fail validation
         for exp in EXAMPLE_INGEST_INVALID_EXPERIMENT["experiments"]:
-            validation = schema_validation(exp, EXPERIMENT_SCHEMA)
-            self.assertEqual(validation, False)
+            val_errs = schema_validation(exp, EXPERIMENT_SCHEMA)
+            self.assertTrue(len(val_errs) > 0)
             with self.assertRaises(IngestError):
                 validate_experiment(exp)
             with self.assertRaises(IngestError):
@@ -229,8 +229,8 @@ class IngestTest(TestCase):
 
         # check valid experiment, must pass validation
         for exp in EXAMPLE_INGEST_EXPERIMENT["experiments"]:
-            validation_2 = schema_validation(exp, EXPERIMENT_SCHEMA)
-            self.assertEqual(validation_2, True)
+            val_errs_2 = schema_validation(exp, EXPERIMENT_SCHEMA)
+            self.assertEqual(val_errs_2, None)
 
     def test_ingesting_experiment_results_json(self):
         # ingest list of experiments

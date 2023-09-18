@@ -10,10 +10,10 @@ def schema_validation(obj, schema):
     try:
         v.validate(obj)
         logger.info("JSON schema validation passed.")
-        return True
+        return None
     except jsonschema.exceptions.ValidationError:
         errors = [e for e in v.iter_errors(obj)]
         logger.info("JSON schema validation failed.")
         for i, error in enumerate(errors, 1):
             logger.error(f"{i} Validation error in {'.'.join(str(v) for v in error.path)}: {error.message}")
-        return False
+        return errors

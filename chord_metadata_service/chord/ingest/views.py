@@ -46,7 +46,8 @@ def ingest_into_dataset(request, dataset_id: str, workflow_id: str):
             WORKFLOW_INGEST_FUNCTION_MAP[workflow_id](request.data, dataset_id)
 
     except IngestError as e:
-        return Response(errors.bad_request_error(f"Encountered ingest error: {e}"), status=400)
+        # return Response(errors.bad_request_error(e.validation_errors), status=400)
+        return Response(errors.bad_request_error(f"Encountered ingest error: {e.validation_errors}"), status=400)
 
     except ValidationError as e:
         return Response(errors.bad_request_error(
