@@ -1,82 +1,35 @@
-import os
-import subprocess
+import logging
+import re
 
-#####################################################
-#                                                   #
-#   CURRENT KATSU VERSION, MAKE CHANGE IF NEEDED    #
-#                                                   #
-#####################################################
+import yaml
+from django.core.cache import cache
 
-# Format: major.minor.patch.status
-VERSION = (2, 3, 0, "stable")
+logger = logging.getLogger(__name__)
 
 
-def get_version():
+def get_schema_url():
     """
-    Returns a version number in a standard format
-
-    Versioning Stages:
-        - Dev: work in progress during active development.
-        - Alpha: early releases with new features for testing
-        - Beta: later releases, some bugs may still exist.
-        - RC: stable releases pending user testing and feedback.
-        - Stable: ready for production.
-
-    Examples:
-        >>> VERSION = (1, 0, 0, "dev")
-        >>> get_version()
-        '1.0.0.dev<git_hash>'
-
-        >>> VERSION = (1, 0, 0, "alpha")
-        >>> get_version()
-        '1.0.0.a'
-
-        >>> VERSION = (1, 0, 0, "beta")
-        >>> get_version()
-        '1.0.0.b'
-
-        >>> VERSION = (1, 0, 0, "rc")
-        >>> get_version()
-        '1.0.0.rc'
-
-        >>> VERSION = (1, 0, 0, "stable")
-        >>> get_version()
-        '1.0.0'
+    Retrieve the schema URL either from cached or by parsing a YAML file.
+    It first checks if the URL is cached in "schema_url".
+    If not cached, it reads the YAML file and extracts the URL from the "description".
     """
 
-    major, minor, patch, status = VERSION[:4]
+    schema_url = cache.get("schema_url")
+    url_pattern = r"https://[^\s]+"  # get everything after https
 
-    version_string = f"{major}.{minor}.{patch}"
-
-    if status == "dev":
-        git_hash = get_git_hash()
-        version_string += f".dev.{git_hash}" if git_hash is not None else ".dev"
-    elif status in ("alpha", "beta", "rc"):
-        version_string += f".{status[0]}"
-    elif status != "stable":
-        return "Invalid version"
-
-    return version_string
-
-
-def get_git_hash():
-    """Return the git hash of the latest changeset."""
-    try:
-        # Repository may not be found if __file__ is undefined, e.g. in a frozen module.
-        if "__file__" not in globals():
-            return None
-        repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        git_log = subprocess.run(
-            "git rev-parse --short HEAD",
-            capture_output=True,
-            shell=True,
-            cwd=repo_dir,
-            text=True,
-        )
-        git_hash = git_log.stdout.strip()
-        return git_hash
-    except Exception:
-        return None
-
-
-__version__ = get_version()
+    if schema_url is None:
+        try:
+            with open(
+                "chord_metadata_service/mohpackets/docs/schema.yml", "r"
+            ) as yaml_file:
+                data = yaml.safe_load(yaml_file)
+                desc_str = data["info"]["description"]
+                schema_url = re.search(url_pattern, desc_str).group()
+                # Cache the schema_version so we won't read it each time
+                cache.set("schema_url", schema_url)
+        except Exception as e:
+            logger.debug(
+                f"An error occurred while fetching the schema URL. Details: {str(e)}"
+            )
+            schema_url = None
+    return schema_url

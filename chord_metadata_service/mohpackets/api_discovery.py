@@ -1,14 +1,16 @@
 from collections import Counter, defaultdict
 from datetime import date, datetime
 
+from django.conf import settings
 from django.db.models import Count
+from django.http import JsonResponse
 from drf_spectacular.utils import (
     OpenApiTypes,
     extend_schema,
     extend_schema_serializer,
     inline_serializer,
 )
-from rest_framework import serializers, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 
@@ -42,6 +44,8 @@ from chord_metadata_service.mohpackets.permissible_values import (
     TREATMENT_TYPE,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
+
+from .utils import get_schema_url
 
 """
     This module inheriting from the base views and adding the discovery mixin,
@@ -486,3 +490,23 @@ def diagnosis_age_count(_request):
             age_counts["80+"] += 1
 
     return Response(age_counts)
+
+
+@extend_schema(
+    responses={200: OpenApiTypes.STR},
+)
+@api_view(["GET"])
+def service_info(_request):
+    schema_url = get_schema_url()
+
+    return JsonResponse(
+        {
+            "name": "katsu",
+            "description": "A CanDIG clinical data service",
+            "version": settings.KATSU_VERSION,
+            "schema_url": schema_url,
+        },
+        status=status.HTTP_200_OK,
+        safe=False,
+        json_dumps_params={"indent": 2},
+    )
