@@ -502,7 +502,7 @@ def service_info(_request):
     return JsonResponse(
         {
             "name": "katsu",
-            "description": "A CanDIG clinical service",
+            "description": "A CanDIG clinical data service",
             "version": settings.KATSU_VERSION,
             "schema_url": schema_url,
         },
