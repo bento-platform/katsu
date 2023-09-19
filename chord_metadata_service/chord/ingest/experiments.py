@@ -58,8 +58,9 @@ def validate_experiment(experiment_data, idx: Optional[int] = None) -> None:
     # Validate experiment data against experiments schema.
     val_errors = schema_validation(experiment_data, EXPERIMENT_SCHEMA)
     if val_errors:
-        # TODO: Report more precise errors
         raise IngestError(
+            data=experiment_data,
+            schema=EXPERIMENT_SCHEMA,
             schema_validation_errors=val_errors,
             message=f"Failed schema validation for experiment{(' ' + str(idx)) if idx is not None else ''} "
                     f"(check Katsu logs for more information)"

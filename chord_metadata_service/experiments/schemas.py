@@ -155,3 +155,24 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
     },
     "required": ["id", "experiment_type"]
 }, EXPERIMENT)
+
+
+"""
+Dictionary of schema changes for warnings.
+"""
+EXPERIMENT_SCHEMA_CHANGES = {
+    "4.1.0": {
+        "properties": {
+            "library_strategy": [
+                    ("WES", "WXS"),
+                    ("Other", "OTHER"),
+            ],
+            "library_selection": [
+                    ("Random", "RANDOM"),
+                    ("Random PCR", "RANDOM PCR"),
+                    ("Exome capture", "Hybrid Selection"),
+                    ("Other", "other"),
+            ]
+        }
+    }
+}

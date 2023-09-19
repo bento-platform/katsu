@@ -13,7 +13,6 @@ from rest_framework.response import Response
 from typing import List
 
 from bento_lib.schemas.bento import BENTO_INGEST_SCHEMA
-from bento_lib.responses import errors
 
 from . import WORKFLOW_INGEST_FUNCTION_MAP
 from .exceptions import IngestError
@@ -33,7 +32,7 @@ class IngestResponseBuilder:
         self.workflow_id = workflow_id
         self.dataset_id = dataset_id
         self.success = False
-        self.errors = [] 
+        self.errors = []
         self.warnings = []
 
     def set_success(self, success: bool):
@@ -42,11 +41,20 @@ class IngestResponseBuilder:
     def add_error(self, error):
         self.errors.append(error)
 
-    def add_errors(self, errors: List[any]):
+    def add_errors(self, errors: List):
         self.errors.extend(errors)
 
-    def add_warning(self, warnings: List[any]):
+    def add_warning(self, warnings: List):
         self.warnings.extend(warnings)
+
+    def add_ingest_error(self, error: IngestError):
+        if error.validation_errors:
+            self.add_errors(error.validation_errors)
+        else:
+            self.add_error(error.message)
+
+        if error.schema_warnings:
+            self.warnings.extend(error.schema_warnings)
 
     def as_response(self, status_code: int):
         body = {
@@ -82,10 +90,7 @@ def ingest_into_dataset(request, dataset_id: str, workflow_id: str):
             WORKFLOW_INGEST_FUNCTION_MAP[workflow_id](request.data, dataset_id)
 
     except IngestError as e:
-        if e.validation_errors:
-            response_builder.add_errors(e.validation_errors)
-        else:
-            response_builder.add_error(e.message)
+        response_builder.add_ingest_error(e)
         return response_builder.as_response(400)
 
     except ValidationError as e:
@@ -94,11 +99,10 @@ def ingest_into_dataset(request, dataset_id: str, workflow_id: str):
 
     except Exception as e:
         # Encountered some other error from the ingestion attempt, return a somewhat detailed message
-        error_message = f"Encountered an exception while processing an ingest attempt:\n{traceback.format_exc()}"
-        logger.error(error_message)
-        response_builder.add_error(error_message)
+        logger.error(f"Encountered an exception while processing an ingest attempt:\n{traceback.format_exc()}")
+        response_builder.add_error(f"Encountered an exception while processing an ingest attempt (error: {repr(e)})")
         return response_builder.as_response(500)
-    
+
     # return Response(status=204)
     response_builder.set_success(True)
     return response_builder.as_response(204)
