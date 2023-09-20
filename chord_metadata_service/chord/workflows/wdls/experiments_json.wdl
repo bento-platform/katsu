@@ -15,12 +15,14 @@ workflow experiments_json {
             json_document = json_document,
             katsu_url = katsu_url,
             dataset_id = dataset_id,
-            token = secret__access_token
+            token = secret__access_token,
+            ingest_report = "~{run_dir}/ingest_report.json"
     }
 
     output {
         File stdout = ingest_task.txt_output
         File stderr = ingest_task.err_output
+        File ingest_report = ingest_task.ingest_report
     }
 }
 
@@ -30,14 +32,17 @@ task ingest_task {
         String katsu_url
         String dataset_id
         String token
+        String ingest_report
     }
     command <<<
         RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ~{token}" \
             --data "@~{json_document}" \
-            "~{katsu_url}/ingest/~{dataset_id}/experiments_json")
-        if [[ "${RESPONSE}" != "201" ]]
+            -o "~{ingest_report}" \
+            "~{katsu_url}/ingest/~{dataset_id}/experiments_json" | jq)
+
+        if [[ "${RESPONSE}" != true ]]
         then
             echo "Error: Metadata service replied with ${RESPONSE}" 1>&2  # to stderr
             exit 1
@@ -48,5 +53,6 @@ task ingest_task {
     output {
         File txt_output = stdout()
         File err_output = stderr()
+        File ingest_report = "~{ingest_report}"
     }
 }
