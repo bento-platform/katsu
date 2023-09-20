@@ -97,5 +97,4 @@ def ingest_into_dataset(request, dataset_id: str, workflow_id: str):
         response_builder.add_error(f"Encountered an exception while processing an ingest attempt (error: {repr(e)})")
         return response_builder.as_response(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    response_builder.set_success(True)
     return response_builder.as_response(status.HTTP_201_CREATED)
