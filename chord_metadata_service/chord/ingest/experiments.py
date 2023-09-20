@@ -56,7 +56,7 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
 
 def validate_experiment(experiment_data, idx: Optional[int] = None) -> None:
     # Validate experiment data against experiments schema.
-    if val_errors:= schema_validation(experiment_data, EXPERIMENT_SCHEMA):
+    if val_errors := schema_validation(experiment_data, EXPERIMENT_SCHEMA):
         raise IngestError(
             data=experiment_data,
             schema=EXPERIMENT_SCHEMA,

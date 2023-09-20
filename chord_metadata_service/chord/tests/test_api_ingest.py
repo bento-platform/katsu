@@ -3,9 +3,8 @@ import json
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from chord_metadata_service.chord.tests.example_ingest import EXAMPLE_INGEST_EXPERIMENT, EXAMPLE_INGEST_INVALID_EXPERIMENT, EXAMPLE_INGEST_INVALID_PHENOPACKET, EXAMPLE_INGEST_PHENOPACKET
-
-from chord_metadata_service.restapi.tests.utils import load_local_json
+from chord_metadata_service.chord.tests.example_ingest import EXAMPLE_INGEST_EXPERIMENT, \
+    EXAMPLE_INGEST_INVALID_EXPERIMENT, EXAMPLE_INGEST_INVALID_PHENOPACKET, EXAMPLE_INGEST_PHENOPACKET
 from .constants import VALID_PROJECT_1, valid_dataset_1
 from ..workflows.metadata import METADATA_WORKFLOWS
 
@@ -88,7 +87,7 @@ class IngestTest(APITestCase):
         c = r.json()
         self.assertEqual(r.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.assertEqual(c["success"], False)
-        self.assertEqual(len(c["errors"]), 1) # 1 required property
+        self.assertEqual(len(c["errors"]), 1)  # 1 required property
 
         # Invalid phenopacket JSON validation
         r = self.client.post(
@@ -113,7 +112,6 @@ class IngestTest(APITestCase):
         self.assertEqual(len(c["warnings"]), 0)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
-
     def test_experiments_ingest_failures(self):
         # Invalid workflow ID
         r = self.client.post(
@@ -133,7 +131,7 @@ class IngestTest(APITestCase):
         c = r.json()
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(c["success"], False)
-        self.assertEqual(len(c["errors"]), 2) # 2 required properties
+        self.assertEqual(len(c["errors"]), 2)  # 2 required properties
 
         # Bad ingestion body JSON
         r = self.client.post(
@@ -156,7 +154,7 @@ class IngestTest(APITestCase):
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(c["success"], False)
         self.assertEqual(len(c["errors"]), 4)
-        
+
         # Two of the errors concern experiment schema changes
         warnings = c["warnings"]
         self.assertEqual(len(warnings), 2)
@@ -174,7 +172,7 @@ class IngestTest(APITestCase):
         self.assertEqual(c["success"], False)
         self.assertEqual(len(c["errors"]), 1)
         self.assertEqual(r.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     def test_experiment_ingest_success(self):
         # Create the required phenopacket with a biosample first
         r = self.client.post(

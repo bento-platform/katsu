@@ -60,7 +60,7 @@ def validate_phenopacket(phenopacket_data: dict[str, Any],
                          schema: dict = PHENOPACKET_SCHEMA,
                          idx: Optional[int] = None) -> None:
     # Validate phenopacket data against phenopackets schema.
-    if val_errors:= schema_validation(phenopacket_data, schema):
+    if val_errors := schema_validation(phenopacket_data, schema):
         raise IngestError(
             data=phenopacket_data,
             schema=PHENOPACKET_SCHEMA,

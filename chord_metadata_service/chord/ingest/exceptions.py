@@ -94,7 +94,7 @@ def parse_schema_warnings(data: dict, schema: dict) -> Optional[List[dict]]:
     warnings = []
     for (version, version_changes) in applicable_changes.items():
         for (prop_name, changes) in version_changes.get("properties", {}).items():
-            if property_warning:= parse_property_warnings(data, prop_name, changes):
+            if property_warning := parse_property_warnings(data, prop_name, changes):
                 property_warning["version"] = version
                 warnings.append(property_warning)
     return warnings if len(warnings) else None
