@@ -32,12 +32,8 @@ class IngestResponseBuilder:
     def __init__(self, workflow_id: str, dataset_id: str):
         self.workflow_id = workflow_id
         self.dataset_id = dataset_id
-        self.success = False
         self.errors = []
         self.warnings = []
-
-    def set_success(self, success: bool):
-        self.success = success
 
     def add_error(self, error):
         self.errors.append(error)
@@ -56,7 +52,7 @@ class IngestResponseBuilder:
 
     def as_response(self, status_code: int) -> Response:
         body = {
-            "success": self.success,
+            "success": status_code < status.HTTP_400_BAD_REQUEST,
             "warnings": self.warnings,
             "errors": self.errors,
         }
