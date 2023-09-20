@@ -184,6 +184,8 @@ def ingest_derived_experiment_results(json_data: list[dict]) -> list[em.Experime
         if val_errors:
             # TODO: Report more precise errors
             raise IngestError(
+                data=exp_result,
+                schema=EXPERIMENT_RESULT_SCHEMA,
                 schema_validation_errors=val_errors,
                 message=f"Failed schema validation for experiment result {idx} "
                         f"(check Katsu logs for more information)"
