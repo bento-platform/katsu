@@ -37,7 +37,7 @@ task ingest_task {
             -H "Authorization: Bearer ~{token}" \
             --data "@~{json_document}" \
             "~{katsu_url}/ingest/~{dataset_id}/experiments_json")
-        if [[ "${RESPONSE}" != "204" ]]
+        if [[ "${RESPONSE}" != "201" ]]
         then
             echo "Error: Metadata service replied with ${RESPONSE}" 1>&2  # to stderr
             exit 1

@@ -60,10 +60,10 @@ def validate_phenopacket(phenopacket_data: dict[str, Any],
                          schema: dict = PHENOPACKET_SCHEMA,
                          idx: Optional[int] = None) -> None:
     # Validate phenopacket data against phenopackets schema.
-    val_errors = schema_validation(phenopacket_data, schema)
-    if val_errors:
-        # TODO: Report more precise errors
+    if val_errors:= schema_validation(phenopacket_data, schema):
         raise IngestError(
+            data=phenopacket_data,
+            schema=PHENOPACKET_SCHEMA,
             schema_validation_errors=val_errors,
             message=f"Failed schema validation for phenopacket{(' ' + str(idx)) if idx is not None else ''} "
                     f"(check Katsu logs for more information)"

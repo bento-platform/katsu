@@ -56,8 +56,7 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
 
 def validate_experiment(experiment_data, idx: Optional[int] = None) -> None:
     # Validate experiment data against experiments schema.
-    val_errors = schema_validation(experiment_data, EXPERIMENT_SCHEMA)
-    if val_errors:
+    if val_errors:= schema_validation(experiment_data, EXPERIMENT_SCHEMA):
         raise IngestError(
             data=experiment_data,
             schema=EXPERIMENT_SCHEMA,
@@ -148,6 +147,11 @@ def ingest_experiments_workflow(json_data, dataset_id: str) -> list[em.Experimen
         dataset.additional_resources.add(ingest_resource(rs))
 
     exps = json_data.get("experiments", [])
+
+    if len(exps) == 0:
+        # If empty experiments array
+        # Validate an empty json to raise an IngestError with validation details
+        validate_experiment({})
 
     # First, validate all experiments with the schema before creating anything in the database.
     for idx, exp in enumerate(exps):

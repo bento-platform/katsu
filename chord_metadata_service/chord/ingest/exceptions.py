@@ -79,6 +79,7 @@ def parse_schema_warnings(data: dict, schema: dict) -> Optional[List[dict]]:
                 property_value (str | dict)
                 deprecated_value (str | dict): The deprecated property option
                 suggested_replacement (str | dict): The new suggested property option
+                version (str): The Katsu release version associated with the schema change
     """
     if not data or not schema:
         return None
@@ -91,10 +92,11 @@ def parse_schema_warnings(data: dict, schema: dict) -> Optional[List[dict]]:
         return None
 
     warnings = []
-    for (prop_name, changes) in applicable_changes[__version__].get("properties", {}).items():
-        property_warning = parse_property_warnings(data=data, prop_name=prop_name, property_changes=changes)
-        if property_warning:
-            warnings.append(property_warning)
+    for (version, version_changes) in applicable_changes.items():
+        for (prop_name, changes) in version_changes.get("properties", {}).items():
+            if property_warning:= parse_property_warnings(data, prop_name, changes):
+                property_warning["version"] = version
+                warnings.append(property_warning)
     return warnings if len(warnings) else None
 
 

@@ -44,9 +44,6 @@ class IngestResponseBuilder:
     def add_errors(self, errors: List):
         self.errors.extend(errors)
 
-    def add_warning(self, warnings: List):
-        self.warnings.extend(warnings)
-
     def add_ingest_error(self, error: IngestError):
         if error.validation_errors:
             self.add_errors(error.validation_errors)
@@ -56,7 +53,7 @@ class IngestResponseBuilder:
         if error.schema_warnings:
             self.warnings.extend(error.schema_warnings)
 
-    def as_response(self, status_code: int):
+    def as_response(self, status_code: int) -> Response:
         body = {
             "success": self.success,
             "warnings": self.warnings,
@@ -103,6 +100,5 @@ def ingest_into_dataset(request, dataset_id: str, workflow_id: str):
         response_builder.add_error(f"Encountered an exception while processing an ingest attempt (error: {repr(e)})")
         return response_builder.as_response(500)
 
-    # return Response(status=204)
     response_builder.set_success(True)
-    return response_builder.as_response(204)
+    return response_builder.as_response(201)
