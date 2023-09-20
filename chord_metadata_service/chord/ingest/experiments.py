@@ -4,7 +4,8 @@ import uuid
 
 from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.experiments import models as em
-from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERIMENT_RESULT_SCHEMA
+from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, \
+    EXPERIMENT_RESULT_SCHEMA, EXPERIMENT_WORKFLOW_SCHEMA
 from chord_metadata_service.phenopackets import models as pm
 
 from typing import Optional
@@ -63,6 +64,16 @@ def validate_experiment(experiment_data, idx: Optional[int] = None) -> None:
             schema_validation_errors=val_errors,
             message=f"Failed schema validation for experiment{(' ' + str(idx)) if idx is not None else ''} "
                     f"(check Katsu logs for more information)"
+        )
+
+
+def validate_experiment_workflow(json_data: dict) -> None:
+    if val_errors := schema_validation(json_data, EXPERIMENT_WORKFLOW_SCHEMA):
+        raise IngestError(
+            data=json_data,
+            schema=EXPERIMENT_WORKFLOW_SCHEMA,
+            schema_validation_errors=val_errors,
+            message="Failed schema validation for experiments ingestion workflow payload.",
         )
 
 
@@ -141,6 +152,9 @@ def ingest_experiment(
 
 
 def ingest_experiments_workflow(json_data, dataset_id: str) -> list[em.Experiment]:
+    # First, validate the workflow's json_data
+    validate_experiment_workflow(json_data)
+
     dataset = Dataset.objects.get(identifier=dataset_id)
 
     for rs in json_data.get("resources", []):
@@ -148,12 +162,7 @@ def ingest_experiments_workflow(json_data, dataset_id: str) -> list[em.Experimen
 
     exps = json_data.get("experiments", [])
 
-    if len(exps) == 0:
-        # If empty experiments array
-        # Validate an empty json to raise an IngestError with validation details
-        validate_experiment({})
-
-    # First, validate all experiments with the schema before creating anything in the database.
+    # Second, validate all experiments with the schema before creating anything in the database.
     for idx, exp in enumerate(exps):
         validate_experiment(exp, idx)
 

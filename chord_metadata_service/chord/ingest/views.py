@@ -7,6 +7,7 @@ import uuid
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from jsonschema import Draft7Validator
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -73,12 +74,12 @@ def ingest_into_dataset(request, dataset_id: str, workflow_id: str):
     # Check that the workflow exists
     if workflow_id not in WORKFLOW_INGEST_FUNCTION_MAP:
         response_builder.add_error(f"Ingestion workflow ID {workflow_id} does not exist")
-        return response_builder.as_response(400)
+        return response_builder.as_response(status.HTTP_400_BAD_REQUEST)
 
     if dataset_id not in DATASET_ID_OVERRIDES:
         if not Dataset.objects.filter(identifier=dataset_id).exists():
             response_builder.add_error(f"Dataset with ID {dataset_id} does not exist")
-            return response_builder.as_response(400)
+            return response_builder.as_response(status.HTTP_400_BAD_REQUEST)
         dataset_id = str(uuid.UUID(dataset_id))  # Normalize dataset ID to UUID's str format.
 
     try:
@@ -88,17 +89,17 @@ def ingest_into_dataset(request, dataset_id: str, workflow_id: str):
 
     except IngestError as e:
         response_builder.add_ingest_error(e)
-        return response_builder.as_response(400)
+        return response_builder.as_response(status.HTTP_400_BAD_REQUEST)
 
     except ValidationError as e:
         response_builder.add_errors(e.error_list if hasattr(e, "error_list") else e.error_dict.items())
-        return response_builder.as_response(400)
+        return response_builder.as_response(status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
         # Encountered some other error from the ingestion attempt, return a somewhat detailed message
         logger.error(f"Encountered an exception while processing an ingest attempt:\n{traceback.format_exc()}")
         response_builder.add_error(f"Encountered an exception while processing an ingest attempt (error: {repr(e)})")
-        return response_builder.as_response(500)
+        return response_builder.as_response(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     response_builder.set_success(True)
-    return response_builder.as_response(201)
+    return response_builder.as_response(status.HTTP_201_CREATED)

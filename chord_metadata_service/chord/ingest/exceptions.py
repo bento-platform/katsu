@@ -60,7 +60,7 @@ def parse_property_warnings(data: dict, prop_name: str, property_changes: List[t
             if value.lower() == old_value.lower():
                 return property_warning
 
-        # Only warn when mecessary
+        # Only warn when necessary
         return None
 
 

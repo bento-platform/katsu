@@ -157,6 +157,27 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
 }, EXPERIMENT)
 
 
+EXPERIMENT_WORKFLOW_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:experiments:experiment_workflow_schema",
+    "title": "Experiment workflow schema",
+    "description": "Schema that describes the shape \
+        of an experiment workflow ingestion",
+    "type": "object",
+    "properties": {
+        "experiments": {
+            "type": "array",
+            "items": {"type": "object"},
+            "minItems": 1,
+        },
+        "resources": {
+            "type": "array",
+            "items": {"type": "object"},
+        }
+    },
+    "required": ["experiments"]
+}
+
 """
 Dictionary of schema changes for warnings.
 """
