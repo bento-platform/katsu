@@ -7,10 +7,10 @@ class DiseaseTermAutocomplete(autocomplete.Select2QuerySetView):
 
     # get_result_value return result.pk
 
-    def get_result_label(self, item):
-        return item.term["label"]
+    def get_result_value(self, item):
+        return item.term["id"]
 
-    def get_selected_result_label(self, item):
+    def get_result_label(self, item):
         return item.term["label"]
 
     def get_queryset(self):

@@ -104,7 +104,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         "molecule_ontology": ONTOLOGY_CLASS_LIST,
         "library_strategy": {
             "type": "string",
-            "enum": ["Bisulfite-Seq", "RNA-Seq", "ChIP-Seq", "WES", "Other"]
+            "enum": ["Bisulfite-Seq", "RNA-Seq", "ChIP-Seq", "WES", "WGS", "RAD-Seq", "AMPLICON", "Other"]
         },
         "library_source": {
             "type": "string",
