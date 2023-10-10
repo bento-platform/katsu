@@ -12,6 +12,7 @@ from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
 
+from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
@@ -84,6 +85,15 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         """
         dataset = self.get_object()
         return Response(json.loads(dataset.dats_file))
+
+    @action(detail=True, methods=["get"])
+    def resources(self, _request, *_args, **_kwargs):
+        """
+        Retrieve all resources (phenopackets/additional_resources) for a dataset and return a JSON response serialized
+        using ResourceSerializer
+        """
+        dataset = self.get_object()
+        return Response(ResourceSerializer(dataset.resources.all(), many=True).data)
 
     @async_to_sync
     async def destroy(self, request, *args, **kwargs):

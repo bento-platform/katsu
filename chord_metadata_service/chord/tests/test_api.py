@@ -111,6 +111,35 @@ class CreateDatasetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(response.data, json.loads(payload['dats_file']))
 
+    def test_resources(self):
+        resource = {
+            "id": "NCBITaxon:2023-09-14",
+            "name": "NCBI Taxonomy OBO Edition",
+            "version": "2023-09-14",
+            "namespace_prefix": "NCBITaxon",
+            "url": "http://purl.obolibrary.org/obo/ncbitaxon/2023-09-14/ncbitaxon.owl",
+            "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_",
+        }
+
+        r = self.client.post("/api/resources", data=json.dumps(resource), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+        r = self.client.post(
+            "/api/datasets",
+            data=json.dumps({
+                **valid_dataset_1(self.project["identifier"]),
+                "additional_resources": [resource["id"]],
+            }),
+            content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+        dataset_id = Dataset.objects.first().identifier
+        r = self.client.get(f"/api/datasets/{dataset_id}/resources")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]["id"], resource["id"])
+
+
 # TODO: Update Dataset
 # TODO: Delete Dataset
 

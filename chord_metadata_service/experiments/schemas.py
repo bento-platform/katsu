@@ -96,7 +96,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
             "enum": ["DNA Methylation", "mRNA-Seq", "smRNA-Seq", "RNA-Seq", "WES",
                      "WGS", "Genotyping", "Proteomic profiling",
                      "Neutralizing antibody titers", "Metabolite profiling",
-                     "Antibody measurement", "Other"]
+                     "Antibody measurement", "Viral WGS", "Other"]
         },
         "experiment_ontology": ONTOLOGY_CLASS_LIST,
         "molecule": {
@@ -107,7 +107,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         "molecule_ontology": ONTOLOGY_CLASS_LIST,
         "library_strategy": {
             "type": "string",
-            "enum": ["Bisulfite-Seq", "RNA-Seq", "ChIP-Seq", "WES", "Other"]
+            "enum": ["Bisulfite-Seq", "RNA-Seq", "ChIP-Seq", "WES", "WGS", "RAD-Seq", "AMPLICON", "Other"]
         },
         "library_source": {
             "type": "string",
