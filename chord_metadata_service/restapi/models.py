@@ -20,8 +20,8 @@ class BaseTimeStamp(models.Model):
     columns for 'created' and 'updated' timestamps.
     Use in inheritance.
     """
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now=True, null=True, blank=True)
+    updated = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     class Meta:
         # Abstract prevents the creation of a BaseTimeStamp table
