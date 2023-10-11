@@ -447,6 +447,12 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                     }}}}),
             "search": {
                 "database": {
+                    "relation": models.Phenopacket._meta.get_field("diseases").remote_field.through._meta.db_table,
+                    "relationship": {
+                        "type": "ONE_TO_MANY",
+                        "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
+                        "parent_primary_key": models.Phenopacket._meta.pk.column  # TODO: Redundant?
+                    },
                     "type": "jsonb"
                 }
             }
