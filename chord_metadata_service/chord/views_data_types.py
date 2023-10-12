@@ -29,7 +29,9 @@ QUERYSET_FN: Dict[str, Callable] = {
         experiment__dataset_id=dataset_id),
 }
 
-async def _filtered_query(data_type: str, project: Optional[str] = None, dataset: Optional[str] = None) -> Optional[QuerySet]:
+
+async def _filtered_query(data_type: str, project: Optional[str] = None,
+                          dataset: Optional[str] = None) -> Optional[QuerySet]:
     """
     Returns a filtered query based on the data type, project, and dataset.
     """
@@ -70,7 +72,9 @@ async def _filtered_query(data_type: str, project: Optional[str] = None, dataset
 
     return q
 
-async def get_count_for_data_type(data_type: str, project: Optional[str] = None, dataset: Optional[str] = None) -> Optional[int]:
+
+async def get_count_for_data_type(data_type: str, project: Optional[str] = None,
+                                  dataset: Optional[str] = None) -> Optional[int]:
     """
     Returns the count for a particular data type. If dataset is provided, project will be ignored. If neither are
     provided, the count will be for the whole node.
@@ -78,7 +82,10 @@ async def get_count_for_data_type(data_type: str, project: Optional[str] = None,
     q = await _filtered_query(data_type, project, dataset)
     return None if q is None else await q.acount()
 
-async def get_last_ingested_for_data_type(data_type: str, project: Optional[str] = None, dataset: Optional[str] = None) -> Optional[dict]:
+
+async def get_last_ingested_for_data_type(data_type: str, project: Optional[str] = None,
+                                          dataset: Optional[str] = None) -> Optional[dict]:
+
     q = await _filtered_query(data_type, project, dataset)
     if q is None:
         return None
@@ -88,6 +95,7 @@ async def get_last_ingested_for_data_type(data_type: str, project: Optional[str]
         return None
 
     return latest_obj.created
+
 
 async def make_data_type_response_object(
     data_type_id: str,
