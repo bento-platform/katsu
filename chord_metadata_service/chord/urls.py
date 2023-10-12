@@ -16,7 +16,6 @@ urlpatterns = [
     path('ingest/<str:dataset_id>/<str:workflow_id>', views_ingest.ingest_into_dataset, name="ingest-into-dataset"),
 
     path('data-types', views_data_types.data_type_list, name="data-type-list"),
-    path ('public/data-types', views_data_types.data_type_list_public, name="data-type-list-public"),
     path('data-types/<str:data_type>', views_data_types.data_type_detail, name="data-type-detail"),
     path('data-types/<str:data_type>/schema', views_data_types.data_type_schema, name="data-type-schema"),
     # TODO: Consistent snake or kebab

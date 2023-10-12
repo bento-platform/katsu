@@ -124,34 +124,6 @@ async def data_type_list(request: HttpRequest):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-async def data_type_list_public(request: HttpRequest):
-    # TODO: Permissions: only return counts when we are authenticated/have access to counts or full data.
-
-    project = request.GET.get("project", "").strip() or None
-    dataset = request.GET.get("dataset", "").strip() or None
-
-    dt_response = []
-    for dt_id, dt_d in dt.DATA_TYPES.items():
-        try:
-            full_response = await make_data_type_response_object(dt_id, dt_d, project, dataset)
-
-            filtered_response = {
-                "count": full_response.get("count"),
-                "id": full_response.get("id"),
-                "label": full_response.get("label"),
-                "last_ingested": full_response.get("last_ingested"),
-                "queryable": full_response.get("queryable")
-            }
-            dt_response.append(filtered_response)
-        except ValueError as e:
-            return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
-
-    dt_response.sort(key=lambda d: d["id"])
-    return Response(dt_response)
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
 async def data_type_detail(request: HttpRequest, data_type: str):
     # TODO: Permissions: only return counts when we are authenticated/have access to counts or full data.
 
