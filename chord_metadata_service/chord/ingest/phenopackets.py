@@ -145,6 +145,10 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
         id=bs["id"],
         description=bs.get("description", ""),
         procedure=procedure,
+        derived_from_id=bs.get("derived_from_id", ""),
+        sample_type=bs.get("sample_type", {}),
+        measurements=bs.get("measurements", []),
+        pathological_stage=bs.get("pathological_stage", {}),
         is_control_sample=bs.get("is_control_sample", False),
         diagnostic_markers=bs.get("diagnostic_markers", []),
         extra_properties=bs.get("extra_properties", {}),
@@ -292,7 +296,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     #     explicitly says of the biosamples field:
     #       "This field describes samples that have been derived from the patient who is the object of the Phenopacket"
     biosamples = [
-        {**bs, "individual_id": subject["id"]} if subject else bs
+        {**bs, "individual_id": subject["id"]} if "individual_id" not in bs and subject else bs
         for bs in phenopacket_data.get("biosamples", [])
     ]
 
