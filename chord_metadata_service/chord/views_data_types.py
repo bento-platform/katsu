@@ -187,38 +187,6 @@ async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: st
 
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-async def public_dataset_data_type(request: HttpRequest, dataset_id: str, data_type: str):
-    if data_type not in QUERYSET_FN:
-        return Response(errors.bad_request_error, status=status.HTTP_400_BAD_REQUEST)
-    qs = QUERYSET_FN[data_type](dataset_id)
-
-    data_type_details = dt.DATA_TYPES[data_type]
-
-    project = await Project.objects.aget(datasets=dataset_id)
-
-    response_object = {
-        "id": data_type,
-        "count": None,
-        "last_ingested": None,
-        "queryable": data_type_details.get("queryable", False),
-        "label": data_type_details.get("label", False)
-    }
-
-    count_last_ingested_data = await make_data_type_response_object(
-        data_type,
-        data_type_details,
-        project=str(project.identifier),
-        dataset=dataset_id,
-    )
-
-    response_object["count"] = count_last_ingested_data["count"]
-    response_object["last_ingested"] = count_last_ingested_data["last_ingested"]
-
-    return Response(response_object)
-
-
-@api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
 async def dataset_datatype_summary(_request: HttpRequest, dataset_id: str):
     dataset = await Dataset.objects.aget(identifier=dataset_id)
     project = await Project.objects.aget(datasets=dataset)
