@@ -1,4 +1,5 @@
 import uuid
+import re
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -68,12 +69,18 @@ class DatasetsTest(APITestCase, PhenoTestCase):
                 )
                 self.assertEqual(r.status_code, status.HTTP_200_OK)
                 c = r.json()
+                self.assertIn("last_ingested", c)
+                # Check timestamp format for last_ingested
+                timestamp_pattern = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z")
+                self.assertTrue(timestamp_pattern.match(c["last_ingested"]))
+                del c["last_ingested"]
+
                 self.assertDictEqual(c, {
                     "id": dt,
                     "label": "Clinical Data",
                     **DATA_TYPES[dt],
                     "queryable": True,
-                    "count": 1,
+                    "count": 1
                 })
 
     def test_del_dataset_datatype(self):
