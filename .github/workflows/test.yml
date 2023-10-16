@@ -17,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.10"]
+        python-version: ["3.10", "3.11"]
     services:
       postgres:
-        image: postgres:13
+        image: postgres:15
         env:
           POSTGRES_DB: postgres
           POSTGRES_PASSWORD: postgres
@@ -30,7 +30,7 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - name: Set up Python ${{ matrix.python-version }}
@@ -44,6 +44,6 @@ jobs:
     - name: Test
       run: |
         export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5432
-        coverage run ./manage.py test
+        poetry run coverage run ./manage.py test
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v3
