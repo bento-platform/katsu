@@ -221,6 +221,14 @@ GENE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENE_
 # TODO: Search? Probably not
 HTS_FILE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_HTS_FILE_SCHEMA, {})
 
+PROCEDURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_PROCEDURE_SCHEMA, {
+    "properties": {
+        "code": ONTOLOGY_SEARCH_SCHEMA,
+        "body_site": ONTOLOGY_SEARCH_SCHEMA,
+        "performed": TIME_ELEMENT_SEARCH_SCHEMA,
+    }
+})
+
 BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_BIOSAMPLE_SCHEMA, {
     "properties": {
         "id": {
@@ -268,22 +276,7 @@ BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
             "items": ONTOLOGY_SEARCH_SCHEMA,
             "search": {"database": {"type": "array"}}
         },
-        "procedure": {
-            "properties": {
-                "code": ONTOLOGY_SEARCH_SCHEMA,
-                "body_site": ONTOLOGY_SEARCH_SCHEMA
-            },
-            "search": {
-                "database": {
-                    "primary_key": models.Procedure._meta.pk.column,
-                    "relation": models.Procedure._meta.db_table,
-                    "relationship": {
-                        "type": "MANY_TO_ONE",
-                        "foreign_key": models.Biosample._meta.get_field("procedure").column
-                    }
-                }
-            }
-        },
+        "procedure": PROCEDURE_SEARCH_SCHEMA,
         "hts_files": {
             "items": HTS_FILE_SEARCH_SCHEMA  # TODO
         },

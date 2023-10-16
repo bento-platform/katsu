@@ -88,6 +88,11 @@ def filter_json_array(qs, name, value):
         ).distinct()
     return qs
 
+def filter_time_element(qs, name, value):
+    # TODO: better filters
+    lookup = "__".join([name, "icontains"])
+    return qs.filter(**{lookup: value})
+
 
 # FILTERS
 
@@ -152,25 +157,8 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
 class ProcedureFilter(django_filters.rest_framework.FilterSet):
     code = django_filters.CharFilter(method=filter_ontology, field_name="code", label="Code")
     body_site = django_filters.CharFilter(method=filter_ontology, field_name="body_site", label="Body site")
-    biosample = django_filters.ModelMultipleChoiceFilter(
-        queryset=m.Biosample.objects.all(), widget=CSVWidget, field_name="biosample",
-        method=filter_related_model_ids, label="Biosample"
-    )
+    performed = django_filters.CharFilter(method=filter_time_element, field_name="performed", label="Performed")
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="biosample__phenopacket__dataset__title",
-        label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="biosample__phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
-
-    class Meta:
-        model = m.Procedure
-        fields = ["id"]
 
 
 class HtsFileFilter(django_filters.rest_framework.FilterSet):
@@ -270,10 +258,12 @@ class BiosampleFilter(django_filters.rest_framework.FilterSet):
         field_name="phenopacket__dataset__title",
         label="Authorized datasets"
     )
+    procedure = django_filters.CharFilter(
+        method=filter_time_element, field_name="procedure", label="Procedure")
 
     class Meta:
         model = m.Biosample
-        fields = ["id", "individual", "procedure", "is_control_sample"]
+        fields = ["id", "individual", "is_control_sample"]
 
 
 class PhenopacketFilter(django_filters.rest_framework.FilterSet):

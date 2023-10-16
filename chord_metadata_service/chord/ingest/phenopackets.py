@@ -133,9 +133,6 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
 
 
 def get_or_create_biosample(bs: dict) -> pm.Biosample:
-    # TODO: This should probably be a JSON field, or compound key with code/body_site
-    procedure, _ = pm.Procedure.objects.get_or_create(**bs["procedure"])
-
     bs_query = query_and_check_nulls(bs, "individual_id", lambda i: pm.Individual.objects.get(id=i))
     for k in ("sampled_tissue", "taxonomy", "time_of_collection", "histological_diagnosis",
               "tumor_progression", "tumor_grade"):
@@ -144,7 +141,7 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
     bs_obj, bs_created = pm.Biosample.objects.get_or_create(
         id=bs["id"],
         description=bs.get("description", ""),
-        procedure=procedure,
+        procedure=bs.get("procedure", {}),
         derived_from_id=bs.get("derived_from_id", ""),
         sample_type=bs.get("sample_type", {}),
         measurements=bs.get("measurements", []),

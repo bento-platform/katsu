@@ -65,9 +65,8 @@ class OverviewTest(APITestCase):
             id='phenopacket:2', subject=self.individual_2, meta_data=self.metadata_2
         )
         self.disease = ph_m.Disease.objects.create(**ph_c.VALID_DISEASE_1)
-        self.procedure = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
-        self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_1, self.procedure))
-        self.biosample_2 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_2(self.individual_2, self.procedure))
+        self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_1))
+        self.biosample_2 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_2(self.individual_2))
         self.phenotypic_feature = ph_m.PhenotypicFeature.objects.create(
             **ph_c.valid_phenotypic_feature(self.biosample_1, self.phenopacket_1)
         )
@@ -192,8 +191,7 @@ class PublicSearchFieldsTest(APITestCase):
             **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1)
         )
         self.disease = ph_m.Disease.objects.create(**ph_c.VALID_DISEASE_1)
-        self.procedure = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
-        self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_1, self.procedure))
+        self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_1))
         self.phenotypic_feature = ph_m.PhenotypicFeature.objects.create(
             **ph_c.valid_phenotypic_feature(self.biosample_1, self.phenopacket_1)
         )
@@ -243,12 +241,11 @@ class PublicOverviewTest(APITestCase):
             f"individual_{i}": ph_m.Individual.objects.create(**ind) for i, ind in enumerate(VALID_INDIVIDUALS, start=1)
         }
         # biosamples
-        self.procedure = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
         self.biosample_1 = ph_m.Biosample.objects.create(
-            **ph_c.valid_biosample_1(individuals["individual_1"], self.procedure)
+            **ph_c.valid_biosample_1(individuals["individual_1"])
         )
         self.biosample_2 = ph_m.Biosample.objects.create(
-            **ph_c.valid_biosample_2(individuals["individual_2"], self.procedure)
+            **ph_c.valid_biosample_2(individuals["individual_2"])
         )
         # experiments
         self.instrument = exp_m.Instrument.objects.create(**exp_c.valid_instrument())

@@ -9,11 +9,10 @@ class PhenoTestCase(ProjectTestCase):
 
     def setUp(self) -> None:
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
-        self.procedure = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
-        self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual, self.procedure))
-        self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(None, self.procedure))
+        self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual))
+        self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(None))
         self.biosample_3 = m.Biosample.objects.create(**{
-            **c.valid_biosample_2(None, self.procedure),
+            **c.valid_biosample_2(None),
             "id": 'biosample_id:3'
         })
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)

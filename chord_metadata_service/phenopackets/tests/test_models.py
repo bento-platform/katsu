@@ -22,11 +22,10 @@ class BiosampleTest(ProjectTestCase):
 
     def setUp(self):
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
-        self.procedure = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
-        self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual, self.procedure))
-        self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(None, self.procedure))
+        self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual))
+        self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(None))
         self.biosample_3 = m.Biosample.objects.create(**{
-            **c.valid_biosample_2(None, self.procedure),
+            **c.valid_biosample_2(None),
             "id": 'biosample_id:3'
         })
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
@@ -55,7 +54,6 @@ class BiosampleTest(ProjectTestCase):
     def test_string_representations(self):
         # Test __str__
         self.assertEqual(str(self.individual), str(self.individual.pk))
-        self.assertEqual(str(self.procedure), str(self.procedure.pk))
         self.assertEqual(str(self.biosample_1), str(self.biosample_1.pk))
         self.assertEqual(str(self.meta_data), str(self.meta_data.pk))
         self.assertEqual(str(self.phenopacket), str(self.phenopacket.pk))
@@ -67,12 +65,11 @@ class PhenotypicFeatureTest(TestCase):
     def setUp(self):
         self.individual_1 = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.individual_2 = m.Individual.objects.create(**c.VALID_INDIVIDUAL_2)
-        self.procedure = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
         self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(
-            self.individual_1, self.procedure)
+            self.individual_1)
         )
         self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(
-            self.individual_2, self.procedure)
+            self.individual_2)
         )
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
         self.phenopacket = m.Phenopacket.objects.create(
@@ -114,22 +111,6 @@ class PhenotypicFeatureTest(TestCase):
                                     data={"individual": "patient:2,patient:1"})
         result = f.qs
         self.assertEqual(len(result), 1)
-
-
-class ProcedureTest(TestCase):
-    """ Test module for Procedure model. """
-
-    def setUp(self):
-        self.procedure_1 = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
-        self.procedure_2 = m.Procedure.objects.create(**c.VALID_PROCEDURE_2)
-
-    def test_procedure(self):
-        procedure_query_1 = m.Procedure.objects.filter(
-            body_site__label__icontains='arm'
-        )
-        procedure_query_2 = m.Procedure.objects.filter(code__id='NCIT:C28743')
-        self.assertEqual(procedure_query_1.count(), 2)
-        self.assertEqual(procedure_query_2.count(), 2)
 
 
 class HtsFileTest(TestCase):

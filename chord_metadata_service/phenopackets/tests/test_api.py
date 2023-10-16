@@ -82,8 +82,7 @@ class CreateBiosampleTest(APITestCase):
 class BatchBiosamplesCSVTest(APITestCase):
     def setUp(self):
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
-        self.procedure = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
-        self.valid_payload = c.valid_biosample_1(self.individual, self.procedure)
+        self.valid_payload = c.valid_biosample_1(self.individual)
         self.biosample = m.Biosample.objects.create(**self.valid_payload)
         self.view = 'batch/biosamples-list'
 
@@ -138,25 +137,6 @@ class CreatePhenotypicFeatureTest(APITestCase):
     def test_modifier(self):
         serializer = s.PhenotypicFeatureSerializer(data=self.invalid_phenotypic_feature)
         self.assertEqual(serializer.is_valid(), False)
-
-
-class CreateProcedureTest(APITestCase):
-
-    def setUp(self):
-        self.valid_procedure = c.VALID_PROCEDURE_1
-        self.duplicate_procedure = c.VALID_PROCEDURE_1
-        self.valid_procedure_duplicate_code = c.VALID_PROCEDURE_2
-
-    def test_procedure(self):
-        response = get_response('procedures-list', self.valid_procedure)
-        response_duplicate = get_response(
-            'procedures-list', self.duplicate_procedure)
-        response_duplicate_code = get_response(
-            'procedures-list', self.valid_procedure_duplicate_code)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response_duplicate.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response_duplicate_code.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(m.Procedure.objects.count(), 2)
 
 
 class CreateHtsFileTest(APITestCase):

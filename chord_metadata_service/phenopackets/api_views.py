@@ -48,21 +48,6 @@ class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
     queryset = m.PhenotypicFeature.objects.all().order_by("id")
 
 
-class ProcedureViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing procedures
-
-    post:
-    Create a new procedure
-
-    """
-    serializer_class = s.ProcedureSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.ProcedureFilter
-    queryset = m.Procedure.objects.all().order_by("id")
-
-
 class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
     """
     get:
@@ -130,12 +115,7 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
 BIOSAMPLE_PREFETCH = (
     "hts_files",
     "phenotypic_features",
-    "procedure",
     "experiment_set",
-)
-
-BIOSAMPLE_SELECT_REL = (
-    "procedure",
 )
 
 
@@ -149,7 +129,6 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     """
     queryset = m.Biosample.objects.all() \
         .prefetch_related(*BIOSAMPLE_PREFETCH) \
-        .select_related(*BIOSAMPLE_SELECT_REL) \
         .order_by("id")
     serializer_class = s.BiosampleSerializer
     filter_backends = [DjangoFilterBackend]
@@ -181,7 +160,6 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
             queryset = queryset.filter(id__in=ids_list)
 
         queryset = queryset.prefetch_related(*BIOSAMPLE_PREFETCH) \
-            .select_related(*BIOSAMPLE_SELECT_REL) \
             .order_by("id")
 
         return queryset

@@ -341,8 +341,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         individuals = [c.generate_valid_individual() for _ in range(self.num_individuals)]
         for individual in individuals:
             Individual.objects.create(**individual)
-        p = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
-        ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0], p))
+        ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0]))
 
         random.seed(self.random_seed)
 

@@ -108,23 +108,23 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
         return str(self.id)
 
 
-class Procedure(BaseTimeStamp, IndexableMixin):
-    """
-    Class to represent a clinical procedure performed on an individual
-    (subject) in order to extract a biosample
+# class Procedure(BaseTimeStamp, IndexableMixin):
+#     """
+#     Class to represent a clinical procedure performed on an individual
+#     (subject) in order to extract a biosample
 
-    FHIR: Procedure
-    """
+#     FHIR: Procedure
+#     """
 
-    code = JSONField(validators=[ontology_validator], help_text=rec_help(d.PROCEDURE, "code"))
-    body_site = JSONField(blank=True, null=True, validators=[ontology_validator],
-                          help_text=rec_help(d.PROCEDURE, "body_site"))
-    performed = JSONField(blank=True, null=True, validators=[
-        JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
-    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "extra_properties"))
+#     code = JSONField(validators=[ontology_validator], help_text=rec_help(d.PROCEDURE, "code"))
+#     body_site = JSONField(blank=True, null=True, validators=[ontology_validator],
+#                           help_text=rec_help(d.PROCEDURE, "body_site"))
+#     performed = JSONField(blank=True, null=True, validators=[
+#         JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
+#     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "extra_properties"))
 
-    def __str__(self):
-        return str(self.id)
+#     def __str__(self):
+#         return str(self.id)
 
 
 class File(BaseTimeStamp, IndexableMixin):
@@ -256,7 +256,7 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     diagnostic_markers = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                                    help_text=rec_help(d.BIOSAMPLE, "diagnostic_markers"))
     # CHECK! if Procedure instance is deleted Biosample instance is deleted too
-    procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE, help_text=rec_help(d.BIOSAMPLE, "procedure"))
+    procedure = models.JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "procedure"))
     hts_files = models.ManyToManyField(
         HtsFile, blank=True, related_name='biosample_hts_files', help_text=rec_help(d.BIOSAMPLE, "hts_files"))
     is_control_sample = models.BooleanField(default=False, help_text=rec_help(d.BIOSAMPLE, "is_control_sample"))

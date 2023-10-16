@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .models import (
     MetaData,
     PhenotypicFeature,
-    Procedure,
     HtsFile,
     Gene,
     Disease,
@@ -24,7 +23,6 @@ from chord_metadata_service.restapi.serializers import GenericSerializer
 __all__ = [
     "MetaDataSerializer",
     "PhenotypicFeatureSerializer",
-    "ProcedureSerializer",
     "HtsFileSerializer",
     "GeneSerializer",
     "DiseaseSerializer",
@@ -76,24 +74,6 @@ class PhenotypicFeatureSerializer(GenericSerializer):
         class_converter = fhir_utils.fhir_observation
 
 
-class ProcedureSerializer(GenericSerializer):
-
-    class Meta:
-        model = Procedure
-        fields = '__all__'
-        # meta info for converting to FHIR
-        fhir_datatype_plural = 'specimen.collections'
-        class_converter = fhir_utils.fhir_specimen_collection
-
-    def create(self, validated_data):
-        if validated_data.get('body_site'):
-            instance, _ = Procedure.objects.get_or_create(**validated_data)
-        else:
-            instance, _ = Procedure.objects.get_or_create(
-                code=validated_data.get('code'), body_site__isnull=True)
-        return instance
-
-
 class HtsFileSerializer(GenericSerializer):
 
     class Meta:
@@ -130,7 +110,6 @@ class DiseaseSerializer(GenericSerializer):
 class BiosampleSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
-    procedure = ProcedureSerializer(exclude_when_nested=['id'])
     experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
 
     class Meta:
@@ -141,9 +120,7 @@ class BiosampleSerializer(GenericSerializer):
         class_converter = fhir_utils.fhir_specimen
 
     def create(self, validated_data):
-        procedure_data = validated_data.pop('procedure')
-        procedure_model, _ = Procedure.objects.get_or_create(**procedure_data)
-        biosample = Biosample.objects.create(procedure=procedure_model, **validated_data)
+        biosample = Biosample.objects.create(**validated_data)
         return biosample
 
     def update(self, instance, validated_data):
@@ -154,10 +131,7 @@ class BiosampleSerializer(GenericSerializer):
         instance.tumor_progression = validated_data.get('tumor_progression', instance.tumor_progression)
         instance.tumor_grade = validated_data.get('tumor_grade', instance.tumor_grade)
         instance.diagnostic_markers = validated_data.get('diagnostic_markers', instance.diagnostic_markers)
-        instance.save()
-        procedure_data = validated_data.pop('procedure', None)
-        if procedure_data:
-            instance.procedure, _ = Procedure.objects.get_or_create(**procedure_data)
+        instance.procedure = validated_data.get('procedure', instance.procedure)
         instance.save()
         return instance
 

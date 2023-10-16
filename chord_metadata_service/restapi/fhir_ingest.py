@@ -20,7 +20,6 @@ from chord_metadata_service.phenopackets.models import (
     MetaData,
     Phenopacket,
     PhenotypicFeature,
-    Procedure,
 )
 
 
@@ -128,7 +127,6 @@ def ingest_specimens(phenopacket_ids: Dict[str, str], specimens_data):
 
     for item in specimens_data["entry"]:
         biosample_data = specimen_to_biosample(item["resource"])
-        procedure, _ = Procedure.objects.get_or_create(**biosample_data["procedure"])
 
         # Specimen must have a subject
         if not biosample_data.get("individual"):
@@ -137,7 +135,7 @@ def ingest_specimens(phenopacket_ids: Dict[str, str], specimens_data):
         individual_id = _parse_reference(biosample_data["individual"])
         biosample, _ = Biosample.objects.get_or_create(
             id=biosample_data["id"],
-            procedure=procedure,
+            procedure=biosample_data["procedure"],
             individual=Individual.objects.get(id=individual_id),
             sampled_tissue=biosample_data["sampled_tissue"]
         )
