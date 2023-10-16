@@ -5,7 +5,6 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample
 from ..models import Experiment, ExperimentResult, Instrument
 from chord_metadata_service.phenopackets.tests.constants import (
-    VALID_PROCEDURE_1,
     VALID_INDIVIDUAL_1,
     valid_biosample_1
 )

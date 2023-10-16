@@ -47,7 +47,6 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
                 }
             })
 
-
         self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual))
         self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, VALID_PROCEDURE_1))
 

@@ -8,7 +8,6 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket
 from chord_metadata_service.phenopackets.tests.constants import (
     valid_biosample_1,
-    VALID_PROCEDURE_1,
     VALID_INDIVIDUAL_1
 )
 from chord_metadata_service.restapi.models import SchemaType

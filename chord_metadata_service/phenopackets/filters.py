@@ -88,6 +88,7 @@ def filter_json_array(qs, name, value):
         ).distinct()
     return qs
 
+
 def filter_time_element(qs, name, value):
     # TODO: better filters
     lookup = "__".join([name, "icontains"])
