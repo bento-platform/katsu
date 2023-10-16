@@ -1,4 +1,4 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2023.03.22
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2023.09.08
 
 LABEL org.opencontainers.image.description="Local development image for Katsu."
 LABEL devcontainer.metadata='[{ \
@@ -18,19 +18,19 @@ SHELL ["/bin/bash", "-c"]
 RUN apt-get update -y && \
     apt-get install -y postgresql-client && \
     rm -rf /var/lib/apt/lists/* && \
-    pip install --no-cache-dir "uvicorn[standard]==0.20.0"
+    pip install --no-cache-dir "uvicorn[standard]==0.23.2"
 
 # Backwards-compatible with old BentoV2 container layout
 WORKDIR /app
 
 COPY pyproject.toml .
 COPY poetry.lock .
-COPY poetry.toml .
 
 # Install production + development dependencies
 # Without --no-root, we get errors related to the code not being copied in yet.
 # But we don't want the code here, otherwise Docker cache doesn't work well.
-RUN poetry install --no-root
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-root
 
 # Create temporary directory for downloading files etc.
 RUN mkdir -p /app/tmp
