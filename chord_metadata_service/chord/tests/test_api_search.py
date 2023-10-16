@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, Procedure, PhenotypicFeature
+from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, PhenotypicFeature
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
 from chord_metadata_service.phenopackets.tests.constants import (
     VALID_PROCEDURE_1,
@@ -61,10 +61,8 @@ class SearchTest(APITestCase):
                 }
             })
 
-        self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
-
-        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual, self.procedure))
-        self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, self.procedure))
+        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual))
+        self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, VALID_PROCEDURE_1))
 
         self.meta_data = MetaData.objects.create(**VALID_META_DATA_1)
 

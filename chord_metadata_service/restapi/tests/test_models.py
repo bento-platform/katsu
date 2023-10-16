@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.chord.models import ProjectJsonSchema
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets.models import Biosample, Phenopacket, Procedure, MetaData
+from chord_metadata_service.phenopackets.models import Biosample, Phenopacket, MetaData
 from chord_metadata_service.phenopackets.tests import constants as pheno_consts
 from chord_metadata_service.restapi.models import SchemaType
 
@@ -29,8 +29,7 @@ class TestBaseExtraProperties(ProjectTestCase):
         )
 
         self.individual = Individual.objects.create(**pheno_consts.VALID_INDIVIDUAL_1)
-        procedure = Procedure.objects.create(**pheno_consts.VALID_PROCEDURE_1)
-        self.biosample = Biosample.objects.create(**pheno_consts.valid_biosample_1(self.individual, procedure))
+        self.biosample = Biosample.objects.create(**pheno_consts.valid_biosample_1(self.individual))
         meta_data = MetaData.objects.create(
             created_by="test",
             submitted_by="test"

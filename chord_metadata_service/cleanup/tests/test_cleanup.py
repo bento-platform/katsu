@@ -6,7 +6,7 @@ from chord_metadata_service.experiments.models import Experiment, ExperimentResu
 from chord_metadata_service.patients.cleanup import clean_individuals
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import cleanup as pc
-from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, Procedure, PhenotypicFeature
+from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, PhenotypicFeature
 from chord_metadata_service.phenopackets.tests.constants import (
     VALID_PROCEDURE_1,
     valid_biosample_1,
@@ -47,10 +47,9 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
                 }
             })
 
-        self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
 
-        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual, self.procedure))
-        self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, self.procedure))
+        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual))
+        self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, VALID_PROCEDURE_1))
 
         self.resource = Resource.objects.create(**VALID_RESOURCE_1)
 
@@ -83,7 +82,6 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         # since the individual is referenced by the phenopacket and the biosample is in use.
         self.assertEqual(await pc.clean_biosamples(), 0)
         self.assertEqual(await pc.clean_phenotypic_features(), 1)
-        self.assertEqual(await pc.clean_procedures(), 0)
         self.assertEqual(await clean_individuals(), 0)
         self.assertEqual(await clean_resources(), 0)
 
@@ -98,7 +96,6 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
 
         self.assertEqual(await pc.clean_biosamples(), 0)
         self.assertEqual(await pc.clean_phenotypic_features(), 0)
-        self.assertEqual(await pc.clean_procedures(), 0)
         self.assertEqual(await clean_individuals(), 0)
         self.assertEqual(await clean_resources(), 0)
 
@@ -123,15 +120,14 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
 
         # 1 metadata object +
         # 2 biosamples +
-        # 1 procedure +
         # 0 linked phenotypic feature (removed via cascade with v2.17.0 database changes) +
         # 1 unlinked phenotypic feature (pretend left-over from pre v2.17.0 or created manually) +
         # 1 individual +
         # 0 experiment results +
         # 0 instruments +
         # 1 resource
-        # = 7 objects total
-        self.assertEqual(await run_all_cleanup(), 7)
+        # = 6 objects total
+        self.assertEqual(await run_all_cleanup(), 6)
 
         # Should have been removed via cascade with v2.17.0 database changes
         with self.assertRaises(PhenotypicFeature.DoesNotExist):
@@ -156,9 +152,7 @@ class CleanUpExperimentsTestCase(APITestCase):
                 }
             })
 
-        self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
-
-        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual, self.procedure))
+        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual))
 
         # add Experiments metadata and link to self.biosample_1
         self.instrument = Instrument.objects.create(**valid_instrument())
@@ -168,10 +162,9 @@ class CleanUpExperimentsTestCase(APITestCase):
         self.experiment.experiment_results.set([self.experiment_result])
 
     async def test_experiment_deletion(self):
-        # Check we can run clean_biosamples, clean_procedures, and clean_individuals with nothing lost (in order),
+        # Check we can run clean_biosamples, and clean_individuals with nothing lost (in order),
         # since the biosample is referenced by the experiment, references the individual, and uses the procedure.
         self.assertEqual(await pc.clean_biosamples(), 0)
-        self.assertEqual(await pc.clean_procedures(), 0)
         self.assertEqual(await clean_individuals(), 0)
 
         # Check we can run clean_experiment_results and clean_instruments safely with nothing lost, since they are
@@ -195,7 +188,6 @@ class CleanUpExperimentsTestCase(APITestCase):
             await self.biosample_1.arefresh_from_db()
 
         self.assertEqual(await pc.clean_biosamples(), 0)
-        self.assertEqual(await pc.clean_procedures(), 0)
         self.assertEqual(await ec.clean_experiment_results(), 0)
         self.assertEqual(await ec.clean_instruments(), 0)
         self.assertEqual(await clean_individuals(), 0)
@@ -211,9 +203,8 @@ class CleanUpExperimentsTestCase(APITestCase):
         await self.dataset.adelete()
 
         # 1 biosample +
-        # 1 procedure +
         # 1 individual +
         # 1 experiment result +
         # 1 instrument +
-        # = 5 objects total
-        self.assertEqual(await run_all_cleanup(), 5)
+        # = 4 objects total
+        self.assertEqual(await run_all_cleanup(), 4)

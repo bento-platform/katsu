@@ -8,7 +8,6 @@ __all__ = [
     "clean_meta_data",
     "clean_biosamples",
     "clean_phenotypic_features",
-    "clean_procedures",
 ]
 
 
@@ -61,17 +60,3 @@ async def clean_phenotypic_features() -> int:
         field="id",
     )
     return await remove_items(pm.PhenotypicFeature, pf_to_remove, "phenotypic features")
-
-
-async def clean_procedures() -> int:
-    """
-    Deletes all procedures which aren't pointed to by at least one biosample, since
-    there is a many biosample -> one procedure style relationship currently (2023-01-19).
-    """
-
-    procedures_referenced = set()
-
-    # Collect references to procedures in biosamples
-    procedures_referenced |= await build_id_set_from_model(pm.Biosample, "procedure_id")
-
-    return await remove_not_referenced(pm.Procedure, procedures_referenced, "procedures")

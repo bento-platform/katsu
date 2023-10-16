@@ -5,7 +5,6 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.patients.tests.constants import VALID_INDIVIDUAL, VALID_INDIVIDUAL_2
 from chord_metadata_service.phenopackets.models import (
     MetaData,
-    Procedure,
     Biosample,
     Phenopacket,
     PhenotypicFeature,
@@ -32,9 +31,8 @@ class FHIRPhenopacketTest(APITestCase):
     def setUp(self):
         self.subject = Individual.objects.create(**VALID_INDIVIDUAL_1)
         self.metadata = MetaData.objects.create(**VALID_META_DATA_2)
-        self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
-        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.subject, self.procedure))
-        self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, self.procedure))
+        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.subject))
+        self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, VALID_PROCEDURE_1))
         self.phenopacket = Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=self.subject,
@@ -93,10 +91,9 @@ class FHIRPhenotypicFeatureTest(APITestCase):
     def setUp(self):
         self.individual_1 = Individual.objects.create(**VALID_INDIVIDUAL_1)
         self.individual_2 = Individual.objects.create(**VALID_INDIVIDUAL_2)
-        self.procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
-        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual_1, self.procedure))
+        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual_1))
         self.biosample_2 = Biosample.objects.create(**valid_biosample_2(
-            self.individual_2, self.procedure))
+            self.individual_2, VALID_PROCEDURE_1))
         self.phenotypic_feature_1 = PhenotypicFeature.objects.create(
             **valid_phenotypic_feature(biosample=self.biosample_1))
         self.phenotypic_feature_2 = PhenotypicFeature.objects.create(
@@ -130,21 +127,6 @@ class FHIRPhenotypicFeatureTest(APITestCase):
         self.assertIsNotNone(get_resp_obj['observations'][0]['specimen'])
         self.assertIsInstance(get_resp_obj['observations'][0]['specimen'], dict)
         self.assertEqual(get_resp_obj['observations'][0]['specimen']['reference'], 'biosample_id:1')
-
-
-class FHIRProcedureTest(APITestCase):
-
-    def setUp(self):
-        self.valid_procedure = VALID_PROCEDURE_1
-
-    def test_get_fhir(self):
-        get_response('procedures-list', self.valid_procedure)
-        get_resp = self.client.get('/api/procedures?format=fhir')
-        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
-        get_resp_obj = get_resp.json()
-        self.assertIsNotNone(get_resp_obj['specimen.collections'][0]['method'])
-        self.assertIsInstance(get_resp_obj['specimen.collections'][0]['bodySite'], dict)
-        self.assertIsNot(get_resp_obj['specimen.collections'][0]['method']['coding'], [])
 
 
 class FHIRBiosampleTest(APITestCase):
