@@ -45,13 +45,18 @@ logging.info(f"DEBUG: {DEBUG}")
 LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").upper()
 
 
-# CHORD-specific settings
+# Bento-specific settings
+
+# SECURITY WARNING: Don't run with AUTHZ_ENABLED turned off in production,
+# unless an alternative permissions system is in place.
+#  - This needs to be here to avoid a circular import with settings.py
+BENTO_AUTHZ_ENABLED: bool = os.environ.get("BENTO_AUTHZ_ENABLED", "true").strip().lower() == "true"
+
+BENTO_AUTHZ_SERVICE_URL: str = (
+    os.environ.get("BENTO_AUTHZ_SERVICE_URL").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
+)
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
-
-# SECURITY WARNING: Don't run with CHORD_PERMISSIONS turned off in production,
-# unless an alternative permissions system is in place.
-CHORD_PERMISSIONS = os.environ.get("CHORD_PERMISSIONS", str(not DEBUG)).lower() == "true"
 
 CHORD_SERVICE_ARTIFACT = "metadata"
 # NOTE: LEAVE CHORD UNLESS YOU WANT A BUNCH OF BROKEN TABLES... vvv
@@ -64,9 +69,6 @@ CHORD_SERVICE_TYPE: GA4GHServiceType = {
 }
 CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE_NO_VER)
 BENTO_SERVICE_KIND = "metadata"
-
-# SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
-AUTH_OVERRIDE = not CHORD_PERMISSIONS
 
 # When Katsu is hosted on a subpath (e.g. http://myportal.com/api/katsu), this
 # parameter is used by Django to compute correct URLs in templates (for example
@@ -145,6 +147,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'adrf',
     'drf_spectacular',
+
+    # Keep authz middleware last!
+    'chord_metadata_service.metadata.authz.AuthzMiddleware'
 ]
 
 MIDDLEWARE = [
