@@ -14,10 +14,10 @@ WORKDIR /app
 
 COPY pyproject.toml .
 COPY poetry.lock .
-COPY poetry.toml .
 
 # Install production dependencies
-RUN poetry install --no-root --without dev
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-root --without dev
 
 # Copy all application code
 COPY . .
