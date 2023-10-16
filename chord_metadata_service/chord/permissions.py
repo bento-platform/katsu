@@ -8,6 +8,9 @@ __all__ = [
 ]
 
 
+# TODO: new base permissions for authz
+
+
 class ReadOnly(BasePermission):
     def has_permission(self, request, view):
         return request.method in SAFE_METHODS

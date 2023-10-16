@@ -147,9 +147,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'adrf',
     'drf_spectacular',
-
-    # Keep authz middleware last!
-    'chord_metadata_service.metadata.authz.AuthzMiddleware'
 ]
 
 MIDDLEWARE = [
@@ -159,7 +156,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
+    'chord_metadata_service.metadata.authz.AuthzMiddleware'
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -270,16 +267,14 @@ FHIR_INDEX_NAME = 'fhir_metadata'
 ELASTICSEARCH = False
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'bento_lib.auth.django_remote_user.BentoRemoteUserAuthentication'
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PARSER_CLASSES': (
         # allows serializers to use snake_case field names, but parse incoming data as camelCase
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
-    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
+    'DEFAULT_PERMISSION_CLASSES': [],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'JSON_UNDERSCOREIZE': {
@@ -306,8 +301,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTHENTICATION_BACKENDS = ['bento_lib.auth.django_remote_user.BentoRemoteUserBackend'] + (
-    ['django.contrib.auth.backends.ModelBackend'] if DEBUG else [])
+AUTHENTICATION_BACKENDS = (['django.contrib.auth.backends.ModelBackend'] if DEBUG else [])
 
 # Models
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
