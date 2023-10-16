@@ -81,7 +81,7 @@ PHENOPACKETS_ON_FHIR_MAPPING = {
         "title": "Phenotypic Feature",
         "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/PhenotypicFeature",
         "severity": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-severity",
-        "modifier": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-modifier",
+        "modifiers": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-modifier",
         "onset": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-onset",
         "evidence": {
             "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/evidence",

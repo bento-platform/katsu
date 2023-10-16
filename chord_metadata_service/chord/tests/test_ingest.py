@@ -54,7 +54,7 @@ class IngestTest(TestCase):
                 "label": "Hematuria"
             },
             "excluded": False,
-            "modifier": [],
+            "modifiers": [],
             "evidence": []
         })
 

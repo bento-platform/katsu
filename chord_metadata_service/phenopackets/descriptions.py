@@ -111,7 +111,7 @@ def phenotypic_feature(subject="a subject or biosample"):
             "type": ontology_class("which describes the phenotype"),
             "negated": "Whether the feature is present (false) or absent (true, feature is negated); default is false.",
             "severity": ontology_class("that describes the severity of the condition"),
-            "modifier": {  # TODO: Plural?
+            "modifiers": {
                 "description": "A list of ontology terms that provide more expressive / precise descriptions of a "
                                "phenotypic feature, including e.g. positionality or external factors.",
                 "items": ontology_class("that expounds on the phenotypic feature")

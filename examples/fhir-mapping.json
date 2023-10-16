@@ -33,7 +33,7 @@
           }
         ]
       },
-      "modifier": {
+      "modifiers": {
         "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-modifier",
          "coding": [
           {
