@@ -10,12 +10,15 @@ from rest_framework.response import Response
 
 from typing import Callable
 
-from chord_metadata_service.chord.models import Dataset, Project
+from chord_metadata_service.authz.constants import PERMISSION_QUERY_DATA, PERMISSION_DELETE_DATA
+from chord_metadata_service.authz.counts import get_counts_permission, has_counts_permission_for_data_types
+from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.authz.utils import create_resource
+from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult
 from chord_metadata_service.logger import logger
-from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.mcode.models import MCodePacket
 from chord_metadata_service.phenopackets.models import Phenopacket
 
@@ -87,16 +90,6 @@ async def make_data_type_response_object(
     return res
 
 
-RESOURCE_EVERYTHING = {"everything": True}
-PERMISSION_QUERY_DATA = "query:data"
-
-
-def get_counts_permission(dataset_level: bool) -> str:
-    if dataset_level:
-        return "query:dataset_level_counts"
-    return "query:project_level_counts"  # TODO: we don't have a node-level counts permission
-
-
 async def can_see_counts(request: HttpRequest, resource: dict) -> bool:
     return await authz_middleware.async_authz_post(request, "/policy/evaluate", {
         "requested_resource": resource,
@@ -110,34 +103,20 @@ async def can_see_counts(request: HttpRequest, resource: dict) -> bool:
     )
 
 
-def create_resource(project: str | None, dataset: str | None, data_type: str | None) -> dict:
-    resource = RESOURCE_EVERYTHING
-    if project:
-        resource = {"project": project}
-        if dataset:
-            resource["dataset"] = dataset
-        if data_type:
-            resource["data_type"] = data_type
-    return resource
-
-
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
 async def data_type_list(request: HttpRequest):
-    # TODO: Permissions: only return counts when we are authenticated/have access to counts or full data.
-
     project = request.GET.get("project", "").strip() or None
     dataset = request.GET.get("dataset", "").strip() or None
 
-    has_permission: bool = await can_see_counts(request, create_resource(project, dataset, None))
+    data_types = list(dt.DATA_TYPES.values())
+    data_type_count_perms = await has_counts_permission_for_data_types(request, project, dataset, data_types)
 
     dt_response = []
-    for dt_id, dt_d in dt.DATA_TYPES.items():
+    for dt_id, dt_d, dt_counts_perm in zip(data_types, dt.DATA_TYPES.values(), data_type_count_perms):
         try:
-            has_dt_permission: bool = has_permission or (
-                await can_see_counts(request, create_resource(project, dataset, dt_id)))
             dt_response.append(
-                await make_data_type_response_object(dt_id, dt_d, project, dataset, include_counts=has_dt_permission))
+                await make_data_type_response_object(dt_id, dt_d, project, dataset, include_counts=dt_counts_perm))
         except ValueError as e:
             return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
@@ -199,7 +178,7 @@ async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: st
     if request.method == "DELETE":
         has_permission: bool = await authz_middleware.async_authz_post(request, "/permissions/evaluate", {
             "requested_resource": resource,
-            "required_permissions": ["delete:data"],
+            "required_permissions": [PERMISSION_DELETE_DATA],
         })
         authz_middleware.mark_authz_done(request)
 
@@ -232,21 +211,19 @@ async def dataset_data_type_summary(request: HttpRequest, dataset_id: str):
     dataset = await Dataset.objects.aget(identifier=dataset_id)
     project = await Project.objects.aget(datasets=dataset)
 
-    base_resource = create_resource(project, dataset, None)
-    has_permission: bool = await can_see_counts(request, dataset, base_resource)
+    data_types = list(dt.DATA_TYPES.values())
+    data_type_count_perms = await has_counts_permission_for_data_types(request, project, dataset, data_types)
 
     dt_response = []
-    for dt_id, dt_d in dt.DATA_TYPES.items():
+    for dt_id, dt_d, dt_count_perm in zip(data_types, dt.DATA_TYPES.values(), data_type_count_perms):
         try:
-            has_dt_permission: bool = has_permission or (
-                await can_see_counts(request, create_resource(project, dataset, dt_id)))
             dt_response.append(
                 await make_data_type_response_object(
                     dt_id,
                     dt_d,
                     project.identifier,
                     dataset.identifier,
-                    include_counts=has_dt_permission,
+                    include_counts=dt_count_perm,
                 )
             )
         except ValueError as e:
