@@ -34,7 +34,7 @@ urlpatterns = [
     path('datasets/<str:dataset_id>/data-types/<str:data_type>', views_data_types.dataset_data_type,
          name="chord-dataset-data-type"),
 
-    path('datasets/<str:dataset_id>/data-types', views_data_types.dataset_datatype_summary,
+    path('datasets/<str:dataset_id>/data-types', views_data_types.dataset_data_type_summary,
          name="chord-dataset-data-type-summary"),
 
     path('datasets/<str:dataset_id>/search', views_search.public_dataset_search, name="public-dataset-search"),

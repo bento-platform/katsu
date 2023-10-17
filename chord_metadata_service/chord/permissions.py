@@ -1,14 +1,23 @@
 from django.conf import settings
 from rest_framework.permissions import BasePermission, SAFE_METHODS
+from chord_metadata_service.metadata.authz import authz_middleware
 
 
 __all__ = [
+    "BentoAllowAny",
     "ReadOnly",
     "OverrideOrSuperUserOnly",
 ]
 
 
 # TODO: new base permissions for authz
+
+
+class BentoAllowAny(BasePermission):
+    def has_permission(self, request, view):
+        # Mutate the request object using the middlware call
+        authz_middleware.mark_authz_done(request)
+        return True
 
 
 class ReadOnly(BasePermission):

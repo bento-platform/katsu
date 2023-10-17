@@ -6,22 +6,22 @@ from django.http import HttpRequest
 from adrf.decorators import api_view
 from rest_framework import status
 from rest_framework.decorators import permission_classes
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from typing import Callable, Dict, Optional
+from typing import Callable
 
 from chord_metadata_service.chord.models import Dataset, Project
-from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
+from chord_metadata_service.chord.permissions import BentoAllowAny
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult
 from chord_metadata_service.logger import logger
+from chord_metadata_service.metadata.authz import authz_middleware
 from chord_metadata_service.mcode.models import MCodePacket
 from chord_metadata_service.phenopackets.models import Phenopacket
 
 from . import data_types as dt
 
-QUERYSET_FN: Dict[str, Callable] = {
+QUERYSET_FN: dict[str, Callable] = {
     dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
     dt.DATA_TYPE_MCODEPACKET: lambda dataset_id: MCodePacket.objects.filter(dataset_id=dataset_id),
     dt.DATA_TYPE_PHENOPACKET: lambda dataset_id: Phenopacket.objects.filter(dataset_id=dataset_id),
@@ -30,11 +30,7 @@ QUERYSET_FN: Dict[str, Callable] = {
 }
 
 
-async def get_count_for_data_type(
-    data_type: str,
-    project: Optional[str] = None,
-    dataset: Optional[str] = None,
-) -> Optional[int]:
+async def get_count_for_data_type(data_type: str, project: str | None = None, dataset: str | None = None) -> int | None:
     """
     Returns the count for a particular data type. If dataset is provided, project will be ignored. If neither are
     provided, the count will be for the whole node.
@@ -44,7 +40,7 @@ async def get_count_for_data_type(
         # No counts for readset, it's a fake data type inside Katsu...
         return None
 
-    q: Optional[QuerySet] = None
+    q: QuerySet | None = None
 
     if data_type in (dt.DATA_TYPE_PHENOPACKET, dt.DATA_TYPE_EXPERIMENT):
         q = (Phenopacket if data_type == dt.DATA_TYPE_PHENOPACKET else Experiment).objects.all()
@@ -81,28 +77,67 @@ async def get_count_for_data_type(
 async def make_data_type_response_object(
     data_type_id: str,
     data_type_details: dict,
-    project: Optional[str],
-    dataset: Optional[str],
+    project: str | None,
+    dataset: str | None,
+    include_counts: bool = False,
 ) -> dict:
-    return {
-        **data_type_details,
-        "id": data_type_id,
-        "count": await get_count_for_data_type(data_type_id, project, dataset),
-    }
+    res = {**data_type_details, "id": data_type_id}
+    if include_counts:
+        res["count"] = await get_count_for_data_type(data_type_id, project, dataset)
+    return res
+
+
+RESOURCE_EVERYTHING = {"everything": True}
+PERMISSION_QUERY_DATA = "query:data"
+
+
+def get_counts_permission(dataset_level: bool) -> str:
+    if dataset_level:
+        return "query:dataset_level_counts"
+    return "query:project_level_counts"  # TODO: we don't have a node-level counts permission
+
+
+async def can_see_counts(request: HttpRequest, resource: dict) -> bool:
+    return await authz_middleware.async_authz_post(request, "/policy/evaluate", {
+        "requested_resource": resource,
+        "required_permissions": [get_counts_permission(resource.get("dataset") is not None)],
+    })["result"] or (
+        # If we don't have a count permission, we may still have a query:data permission (no cascade)
+        await authz_middleware.async_authz_post(request, "/policy/evaluate", {
+            "requested_resource": resource,
+            "required_permissions": [PERMISSION_QUERY_DATA],
+        })["result"]
+    )
+
+
+def create_resource(project: str | None, dataset: str | None, data_type: str | None) -> dict:
+    resource = RESOURCE_EVERYTHING
+    if project:
+        resource = {"project": project}
+        if dataset:
+            resource["dataset"] = dataset
+        if data_type:
+            resource["data_type"] = data_type
+    return resource
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 async def data_type_list(request: HttpRequest):
     # TODO: Permissions: only return counts when we are authenticated/have access to counts or full data.
 
     project = request.GET.get("project", "").strip() or None
     dataset = request.GET.get("dataset", "").strip() or None
 
+    has_permission: bool = await can_see_counts(request, create_resource(project, dataset, None))
+
     dt_response = []
     for dt_id, dt_d in dt.DATA_TYPES.items():
         try:
-            dt_response.append(await make_data_type_response_object(dt_id, dt_d, project, dataset))
+            has_dt_permission: bool = has_permission or (
+                await can_see_counts(request, create_resource(project, dataset, dt_id)))
+            dt_response.append(
+                await make_data_type_response_object(dt_id, dt_d, project, dataset, include_counts=has_dt_permission))
         except ValueError as e:
             return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
@@ -111,10 +146,8 @@ async def data_type_list(request: HttpRequest):
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 async def data_type_detail(request: HttpRequest, data_type: str):
-    # TODO: Permissions: only return counts when we are authenticated/have access to counts or full data.
-
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
 
@@ -122,15 +155,21 @@ async def data_type_detail(request: HttpRequest, data_type: str):
     dataset = request.GET.get("dataset", "").strip() or None
 
     try:
-        return Response(await make_data_type_response_object(data_type, dt.DATA_TYPES[data_type], project, dataset))
+        return Response(
+            await make_data_type_response_object(
+                data_type,
+                dt.DATA_TYPES[data_type],
+                project,
+                dataset,
+                include_counts=await can_see_counts(request, create_resource(project, dataset, data_type)),
+            ))
     except ValueError as e:
         return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 async def data_type_schema(_request: HttpRequest, data_type: str):
-    # TODO: exclude extra_properties schema
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
 
@@ -138,7 +177,7 @@ async def data_type_schema(_request: HttpRequest, data_type: str):
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 async def data_type_metadata_schema(_request: HttpRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
@@ -147,13 +186,26 @@ async def data_type_metadata_schema(_request: HttpRequest, data_type: str):
 
 
 @api_view(["GET", "DELETE"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
 async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: str):
     if data_type not in QUERYSET_FN:
+        authz_middleware.mark_authz_done(request)
         return Response(errors.bad_request_error, status=status.HTTP_400_BAD_REQUEST)
+
+    project = await Project.objects.aget(datasets=dataset_id)
+    resource = create_resource(project.identifier, dataset_id, data_type)
+
     qs = QUERYSET_FN[data_type](dataset_id)
 
     if request.method == "DELETE":
+        has_permission: bool = await authz_middleware.async_authz_post(request, "/permissions/evaluate", {
+            "requested_resource": resource,
+            "required_permissions": ["delete:data"],
+        })
+        authz_middleware.mark_authz_done(request)
+
+        if not has_permission:
+            return Response(errors.forbidden_error, status=status.HTTP_403_FORBIDDEN)
+
         await qs.adelete()
 
         logger.info(f"Running cleanup after clearing data type {data_type} in dataset {dataset_id} via API")
@@ -162,28 +214,40 @@ async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: st
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    project = await Project.objects.aget(datasets=dataset_id)
-    response_object = await make_data_type_response_object(
+    # Otherwise: GET
+
+    authz_middleware.mark_authz_done(request)
+    return Response(await make_data_type_response_object(
         data_type,
         dt.DATA_TYPES[data_type],
         project=str(project.identifier),
         dataset=dataset_id,
-    )
-
-    return Response(response_object)
+        include_counts=(await can_see_counts(request, resource)),
+    ))
 
 
 @api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-async def dataset_datatype_summary(_request: HttpRequest, dataset_id: str):
+@permission_classes([BentoAllowAny])
+async def dataset_data_type_summary(request: HttpRequest, dataset_id: str):
     dataset = await Dataset.objects.aget(identifier=dataset_id)
     project = await Project.objects.aget(datasets=dataset)
+
+    base_resource = create_resource(project, dataset, None)
+    has_permission: bool = await can_see_counts(request, dataset, base_resource)
 
     dt_response = []
     for dt_id, dt_d in dt.DATA_TYPES.items():
         try:
+            has_dt_permission: bool = has_permission or (
+                await can_see_counts(request, create_resource(project, dataset, dt_id)))
             dt_response.append(
-                await make_data_type_response_object(dt_id, dt_d, project.identifier, dataset.identifier)
+                await make_data_type_response_object(
+                    dt_id,
+                    dt_d,
+                    project.identifier,
+                    dataset.identifier,
+                    include_counts=has_dt_permission,
+                )
             )
         except ValueError as e:
             return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)

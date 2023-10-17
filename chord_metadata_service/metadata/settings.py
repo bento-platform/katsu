@@ -274,7 +274,8 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
-    'DEFAULT_PERMISSION_CLASSES': [],
+    # Allow any by default for DRF auth - the Bento authorization middleware will take care of denying.
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'JSON_UNDERSCOREIZE': {
