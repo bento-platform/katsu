@@ -5,6 +5,7 @@ from ..logger import logger
 
 __all__ = [
     "authz_middleware",
+    "AuthzMiddleware",
 ]
 
 authz_middleware = DjangoAuthMiddleware(

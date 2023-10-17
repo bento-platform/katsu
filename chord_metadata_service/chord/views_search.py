@@ -20,7 +20,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from typing import Callable, Dict, Optional, Tuple, Union
-from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
+from chord_metadata_service.authz.permissions import OverrideOrSuperUserOnly, ReadOnly
 
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.utils import queryset_stats_for_field

@@ -18,7 +18,7 @@ from chord_metadata_service.restapi.utils import (
     get_date_stats,
     get_range_stats
 )
-from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
+from chord_metadata_service.authz.permissions import OverrideOrSuperUserOnly
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
 from chord_metadata_service.chord import models as chord_models
 from chord_metadata_service.phenopackets import models as pheno_models

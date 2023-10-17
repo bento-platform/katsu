@@ -17,7 +17,7 @@ from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, J
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 from .models import Project, Dataset, ProjectJsonSchema
-from .permissions import OverrideOrSuperUserOnly
+from chord_metadata_service.authz.permissions import OverrideOrSuperUserOnly
 from .serializers import (
     ProjectJsonSchemaSerializer,
     ProjectSerializer,

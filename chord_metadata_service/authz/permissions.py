@@ -1,6 +1,6 @@
 from django.conf import settings
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from chord_metadata_service.metadata.authz import authz_middleware
+from chord_metadata_service.authz.middleware import authz_middleware
 
 
 __all__ = [

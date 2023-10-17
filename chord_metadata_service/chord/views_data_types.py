@@ -11,11 +11,11 @@ from rest_framework.response import Response
 from typing import Callable
 
 from chord_metadata_service.chord.models import Dataset, Project
-from chord_metadata_service.chord.permissions import BentoAllowAny
+from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult
 from chord_metadata_service.logger import logger
-from chord_metadata_service.metadata.authz import authz_middleware
+from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.mcode.models import MCodePacket
 from chord_metadata_service.phenopackets.models import Phenopacket
 
