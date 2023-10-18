@@ -474,8 +474,8 @@ async def get_date_stats(field_props: dict, low_counts_censored: bool = True) ->
         raise NotImplementedError(msg)
 
     # Note: lexical sort works on ISO dates
-    query_set = await (
-        model.objects.all()
+    query_set = (
+        model.objects
         .values(field_name)
         .order_by(field_name)
         .annotate(total=Count(field_name))
@@ -485,7 +485,7 @@ async def get_date_stats(field_props: dict, low_counts_censored: bool = True) ->
     start: str | None = None
     end: str | None = None
     # Key the counts on yyyy-mm combination (aggregate same month counts)
-    for item in query_set:
+    async for item in query_set:
         key = "missing" if item[field_name] is None else item[field_name][:LENGTH_Y_M]
         stats[key] += item["total"]
 
@@ -518,7 +518,7 @@ async def get_date_stats(field_props: dict, low_counts_censored: bool = True) ->
     return bins
 
 
-def get_month_date_range(field_props: dict) -> tuple[str | None, str | None]:
+async def get_month_date_range(field_props: dict) -> tuple[str | None, str | None]:
     """
     Get start date and end date from the database
     Note that dates within a JSON are stored as strings, not instances of datetime.
@@ -547,11 +547,11 @@ def get_month_date_range(field_props: dict) -> tuple[str | None, str | None]:
         .order_by(field_name)
     )
 
-    if query_set.count() == 0:
+    if (await query_set.acount()) == 0:
         return None, None
 
-    start = query_set.first()[field_name][:LENGTH_Y_M]
-    end = query_set.last()[field_name][:LENGTH_Y_M]
+    start = (await query_set.afirst())[field_name][:LENGTH_Y_M]
+    end = (await query_set.alast())[field_name][:LENGTH_Y_M]
 
     return start, end
 
@@ -612,7 +612,7 @@ async def get_field_options(field_props: dict, low_counts_censored: bool) -> lis
     elif field_props["datatype"] == "date":
         # Assumes the field is in extra_properties, thus can not be aggregated
         # using SQL MIN/MAX functions
-        start, end = get_month_date_range(field_props)
+        start, end = await get_month_date_range(field_props)
         options = [f"{month_abbr[m].capitalize()} {y}" for y, m in monthly_generator(start, end)] if start else []
     else:
         raise NotImplementedError()
