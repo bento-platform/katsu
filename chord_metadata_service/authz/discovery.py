@@ -1,8 +1,10 @@
+import asyncio
+
 from django.http import HttpRequest
-from typing import overload
+from typing import overload, TypedDict
 
 from .constants import PERMISSION_QUERY_PROJECT_LEVEL_COUNTS, PERMISSION_QUERY_DATASET_LEVEL_COUNTS
-from .queries import query_permission, can_query_data
+from .queries import query_permission, can_query_data, has_query_data_permission_for_data_types
 from .utils import create_resource
 
 
@@ -10,6 +12,9 @@ __all__ = [
     "get_counts_permission",
     "can_see_counts",
     "has_counts_permission_for_data_types",
+    "DiscoveryPermissionsDict",
+    "DataTypeDiscoveryPermissions",
+    "get_data_type_discovery_permissions",
 ]
 
 
@@ -64,3 +69,37 @@ async def has_counts_permission_for_data_types_bulk_resources(
     dataset_level: bool,
 ):
     pass  # TODO
+
+
+class DiscoveryPermissionsDict(TypedDict):
+    counts: bool
+    data: bool
+
+
+DataTypeDiscoveryPermissions = dict[str, DiscoveryPermissionsDict]
+
+
+async def get_data_type_discovery_permissions(
+    request: HttpRequest, data_types: list[str]
+) -> DataTypeDiscoveryPermissions:
+    # For all of these required data types, figure out if we have:
+    #  a) full-response query:data permissions, and
+    #  b) count-level permissions (at the project level) - will also re-check the query:data permissions currently :(
+
+    query_data_perms, counts_perms = await asyncio.gather(
+        has_query_data_permission_for_data_types(request, None, None, data_types),
+        has_counts_permission_for_data_types(request, None, None, data_types),
+    )
+
+    # Collect these permissions, organized by data type, in a dictionary, so we can query them later:
+    return {
+        dt: {
+            "counts": c_perm,
+            "data": qd_perm,
+        }
+        for dt, qd_perm, c_perm in zip(
+            data_types,  # List of data type IDs
+            query_data_perms,  # query:data permissions for each data type
+            counts_perms,  # query:project_level_counts permissions for each data type
+        )
+    }

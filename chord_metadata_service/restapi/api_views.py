@@ -1,6 +1,5 @@
 import asyncio
 import json
-import logging
 
 from collections import Counter
 
@@ -12,12 +11,14 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from typing import TypedDict
 
-from chord_metadata_service.authz.discovery import has_counts_permission_for_data_types
+from chord_metadata_service.authz.discovery import (
+    DiscoveryPermissionsDict,
+    DataTypeDiscoveryPermissions,
+    get_data_type_discovery_permissions,
+)
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import OverrideOrSuperUserOnly, BentoAllowAny
-from chord_metadata_service.authz.queries import has_query_data_permission_for_data_types
 from chord_metadata_service.chord import models as chord_models
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments import models as experiments_models
@@ -309,40 +310,6 @@ def mcode_overview(_request):
             },
         }
     })
-
-
-class DiscoveryPermissionsDict(TypedDict):
-    counts: bool
-    data: bool
-
-
-DataTypeDiscoveryPermissions = dict[str, DiscoveryPermissionsDict]
-
-
-async def get_data_type_discovery_permissions(
-    request: HttpRequest, data_types: list[str]
-) -> DataTypeDiscoveryPermissions:
-    # For all of these required data types, figure out if we have:
-    #  a) full-response query:data permissions, and
-    #  b) count-level permissions (at the project level) - will also re-check the query:data permissions currently :(
-
-    query_data_perms, counts_perms = await asyncio.gather(
-        has_query_data_permission_for_data_types(request, None, None, data_types),
-        has_counts_permission_for_data_types(request, None, None, data_types),
-    )
-
-    # Collect these permissions, organized by data type, in a dictionary, so we can query them later:
-    return {
-        dt: {
-            "counts": c_perm,
-            "data": qd_perm,
-        }
-        for dt, qd_perm, c_perm in zip(
-            data_types,  # List of data type IDs
-            query_data_perms,  # query:data permissions for each data type
-            counts_perms,  # query:project_level_counts permissions for each data type
-        )
-    }
 
 
 async def get_public_data_type_permissions(request: HttpRequest) -> DataTypeDiscoveryPermissions:
