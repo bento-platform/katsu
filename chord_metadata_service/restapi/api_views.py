@@ -14,7 +14,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from typing import TypedDict
 
-from chord_metadata_service.authz.counts import has_counts_permission_for_data_types
+from chord_metadata_service.authz.discovery import has_counts_permission_for_data_types
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import OverrideOrSuperUserOnly, BentoAllowAny
 from chord_metadata_service.authz.queries import has_query_data_permission_for_data_types

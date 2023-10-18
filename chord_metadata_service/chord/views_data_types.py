@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from typing import Callable
 
 from chord_metadata_service.authz.constants import PERMISSION_QUERY_DATA, PERMISSION_DELETE_DATA
-from chord_metadata_service.authz.counts import get_counts_permission, has_counts_permission_for_data_types
+from chord_metadata_service.authz.discovery import get_counts_permission, has_counts_permission_for_data_types
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.authz.utils import create_resource
