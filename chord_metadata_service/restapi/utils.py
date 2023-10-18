@@ -8,7 +8,7 @@ from calendar import month_abbr
 from decimal import Decimal, ROUND_HALF_EVEN
 from typing import Any, Type, TypedDict, Mapping, Generator
 
-from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value
+from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value, QuerySet
 from django.db.models.functions import Cast
 from django.conf import settings
 
@@ -288,7 +288,7 @@ def get_public_model_name_and_field_path(field_id: str) -> tuple[str, tuple[str,
     return model_name, tuple(field_path)
 
 
-def get_model_and_field(field_id: str) -> tuple[any, str]:
+def get_model_and_field(field_id: str) -> tuple[Type[Model], str]:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
     where the first crumb represents the object in the DB model, and the next ones
@@ -308,7 +308,7 @@ def get_model_and_field(field_id: str) -> tuple[any, str]:
     return model, field_name
 
 
-async def stats_for_field(model, field: str, add_missing=False) -> Mapping[str, int]:
+async def stats_for_field(model: Type[Model], field: str, add_missing: bool = False) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a given field. Mainly applicable to
     char fields representing categories
@@ -316,7 +316,7 @@ async def stats_for_field(model, field: str, add_missing=False) -> Mapping[str, 
     return await queryset_stats_for_field(model.objects.all(), field, add_missing)
 
 
-async def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping[str, int]:
+async def queryset_stats_for_field(queryset: QuerySet, field: str, add_missing: bool = False) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a queryset.
     """
@@ -347,7 +347,7 @@ async def queryset_stats_for_field(queryset, field: str, add_missing=False) -> M
     return stats
 
 
-async def get_field_bins(query_set, field, bin_size):
+async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
     # computes a new column "binned" by substracting the modulo by bin size to
     # the value which requires binning (e.g. 28 => 28 - 28 % 10 = 20)
     # cast to integer to avoid numbers such as 60.00 if that was a decimal,
@@ -362,7 +362,7 @@ async def get_field_bins(query_set, field, bin_size):
     return stats
 
 
-async def compute_binned_ages(individual_queryset, bin_size: int) -> list[int]:
+async def compute_binned_ages(individual_queryset: QuerySet, bin_size: int) -> list[int]:
     """
     When age_numeric field is not available, use this function to process
     the age field in its various formats.
@@ -384,7 +384,7 @@ async def compute_binned_ages(individual_queryset, bin_size: int) -> list[int]:
     return binned_ages
 
 
-async def get_age_numeric_binned(individual_queryset, bin_size: int) -> dict:
+async def get_age_numeric_binned(individual_queryset: QuerySet, bin_size: int) -> dict:
     """
     age_numeric is computed at ingestion time of phenopackets. On some instances
     it might be unavailable and as a fallback must be computed from the age JSON field which
@@ -639,7 +639,7 @@ async def get_distinct_field_values(field_props: dict, low_counts_censored: bool
     ]
 
 
-def filter_queryset_field_value(qs, field_props, value: str):
+def filter_queryset_field_value(qs: QuerySet, field_props, value: str):
     """
     Further filter a queryset using the field defined by field_props and the
     given value.
@@ -687,7 +687,7 @@ def filter_queryset_field_value(qs, field_props, value: str):
     return qs.filter(**condition)
 
 
-async def experiment_type_stats(queryset):
+async def experiment_type_stats(queryset: QuerySet) -> tuple[int, list[BinWithValue]]:
     """
     returns count and bento_public format list of stats for experiment type
     note that queryset_stats_for_field() does not count "missing" correctly when the field has multiple foreign keys
@@ -699,7 +699,7 @@ async def experiment_type_stats(queryset):
     )
 
 
-async def biosample_tissue_stats(queryset):
+async def biosample_tissue_stats(queryset) -> tuple[int, list[BinWithValue]]:
     """
     returns count and bento_public format list of stats for biosample sampled_tissue
     """
@@ -710,7 +710,7 @@ async def biosample_tissue_stats(queryset):
     )
 
 
-async def bento_public_format_count_and_stats_list(annotated_queryset) -> tuple[int, list[BinWithValue]]:
+async def bento_public_format_count_and_stats_list(annotated_queryset: QuerySet) -> tuple[int, list[BinWithValue]]:
     stats_list: list[BinWithValue] = []
     total: int = 0
 
