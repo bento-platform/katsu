@@ -1,6 +1,7 @@
 import asyncio
 
 from django.http import HttpRequest
+from rest_framework.request import Request
 from typing import overload, TypedDict
 
 from .constants import PERMISSION_QUERY_PROJECT_LEVEL_COUNTS, PERMISSION_QUERY_DATASET_LEVEL_COUNTS
@@ -80,7 +81,7 @@ DataTypeDiscoveryPermissions = dict[str, DiscoveryPermissionsDict]
 
 
 async def get_data_type_discovery_permissions(
-    request: HttpRequest, data_types: list[str]
+    request: Request | HttpRequest, data_types: list[str]
 ) -> DataTypeDiscoveryPermissions:
     # For all of these required data types, figure out if we have:
     #  a) full-response query:data permissions, and

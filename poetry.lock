@@ -216,13 +216,13 @@ tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pyte
 
 [[package]]
 name = "bento-lib"
-version = "8.0.0"
+version = "8.1.0"
 description = "A set of common utilities and helpers for Bento platform services."
 optional = false
 python-versions = ">=3.10.0"
 files = [
-    {file = "bento_lib-8.0.0-py3-none-any.whl", hash = "sha256:fb0de8ee16d4be1a87965316c6a0994086bed1b475ee1b04f7942221ec4c98cd"},
-    {file = "bento_lib-8.0.0.tar.gz", hash = "sha256:a404f7c2193adddedf3b3ce1f437d68384956eb2207944dc3cd10927e5d20664"},
+    {file = "bento_lib-8.1.0-py3-none-any.whl", hash = "sha256:4c4777942ec20594a7a3e8d1e387641d206efbb9adffde3cf02f1813fb66db2e"},
+    {file = "bento_lib-8.1.0.tar.gz", hash = "sha256:e51e8e8f40d4fa682533a98471b4ef7c91a1907c2dc24c7fb948725719bcad73"},
 ]
 
 [package.dependencies]

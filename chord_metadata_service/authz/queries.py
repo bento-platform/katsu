@@ -1,4 +1,5 @@
 from django.http import HttpRequest
+from rest_framework.request import Request
 from typing import overload
 
 from .constants import PERMISSION_QUERY_DATA

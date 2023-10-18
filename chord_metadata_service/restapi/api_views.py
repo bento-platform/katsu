@@ -3,13 +3,14 @@ import json
 
 from collections import Counter
 
+from adrf.decorators import api_view
 from bento_lib.responses import errors
 from django.conf import settings
-from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import permission_classes
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from chord_metadata_service.authz.discovery import (
@@ -45,9 +46,9 @@ from chord_metadata_service.restapi.utils import (
 OVERVIEW_AGE_BIN_SIZE = 10
 
 
-@api_view()
+@api_view(["GET"])
 @permission_classes([BentoAllowAny])
-def service_info(_request):
+def service_info(_request: Request):
     """
     get:
     Return service info
@@ -70,7 +71,7 @@ def service_info(_request):
 )
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly])
-async def overview(_request):
+async def overview(_request: Request):
     """
     get:
     Overview of all Phenopackets in the database
@@ -151,7 +152,7 @@ async def overview(_request):
 
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly])
-def extra_properties_schema_types(_request):
+def extra_properties_schema_types(_request: Request):
     """
     get:
     Extra properties schema types
@@ -162,7 +163,7 @@ def extra_properties_schema_types(_request):
 
 @api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly])
-async def search_overview(request):
+async def search_overview(request: Request):
     """
     get+post:
     Overview statistics of a list of patients (associated with a search result)
@@ -236,7 +237,7 @@ async def search_overview(request):
 @cache_page(60 * 60 * 2)
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly])
-def mcode_overview(_request):
+def mcode_overview(_request: Request):
     """
     get:
     Overview of all mCode data in the database
@@ -312,7 +313,7 @@ def mcode_overview(_request):
     })
 
 
-async def get_public_data_type_permissions(request: HttpRequest) -> DataTypeDiscoveryPermissions:
+async def get_public_data_type_permissions(request: Request) -> DataTypeDiscoveryPermissions:
     return await get_data_type_discovery_permissions(
         request,
 
@@ -336,7 +337,7 @@ async def get_public_data_type_permissions(request: HttpRequest) -> DataTypeDisc
     }
 )
 @api_view(["GET"])
-async def public_search_fields(request: HttpRequest):
+async def public_search_fields(request: Request):
     """
     get:
     Return public search fields with their configuration
@@ -401,7 +402,7 @@ def get_count_and_query_data_permissions_for_field(
     }
 )
 @api_view(["GET"])  # Don't use BentoAllowAny, we want to be more careful of cases here.
-async def public_overview(request: HttpRequest):
+async def public_overview(request: Request):
     """
     get:
     Overview of all public data in the database
@@ -494,7 +495,7 @@ async def public_overview(request: HttpRequest):
 
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def public_dataset(_request):
+async def public_dataset(_request: Request):
     """
     get:
     Properties of the datasets
