@@ -53,8 +53,7 @@ async def has_counts_permission_for_data_types(
 ) -> list[bool]:
     dataset_level: bool = dataset is not None
 
-    has_permission: bool = await can_see_counts(
-        request, create_resource(project, dataset, None), dataset_level)
+    has_permission: bool = await can_see_counts(request, create_resource(project, dataset), dataset_level)
 
     return [
         # Either we have permission for all (saves many calls via or-shortcutting) or we have for a specific data type:

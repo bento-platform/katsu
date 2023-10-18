@@ -1,3 +1,6 @@
+from django.http import HttpRequest
+from rest_framework.request import Request
+
 from .constants import RESOURCE_EVERYTHING
 
 
@@ -6,7 +9,7 @@ __all__ = [
 ]
 
 
-def create_resource(project: str | None, dataset: str | None, data_type: str | None) -> dict:
+def create_resource(project: str | None = None, dataset: str | None = None, data_type: str | None = None) -> dict:
     resource = RESOURCE_EVERYTHING
     if project:
         resource = {"project": project}
