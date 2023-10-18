@@ -1,5 +1,8 @@
 __all__ = [
     "RESOURCE_EVERYTHING",
+    "PERMISSION_CREATE_DATASET",
+    "PERMISSION_DELETE_DATASET",
+    "PERMISSION_DELETE_PROJECT",
     "PERMISSION_QUERY_DATA",
     "PERMISSION_DELETE_DATA",
     "PERMISSION_QUERY_DATASET_LEVEL_COUNTS",
@@ -9,6 +12,11 @@ __all__ = [
 # TODO: this should be a shared module in bento_lib
 
 RESOURCE_EVERYTHING = {"everything": True}
+
+PERMISSION_CREATE_DATASET = "create:dataset"
+PERMISSION_DELETE_DATASET = "delete:dataset"
+PERMISSION_DELETE_PROJECT = "delete:project"
+
 PERMISSION_QUERY_DATA = "query:data"
 PERMISSION_DELETE_DATA = "delete:data"
 

@@ -13,6 +13,7 @@ __all__ = [
     "get_counts_permission",
     "can_see_counts",
     "has_counts_permission_for_data_types",
+    "has_counts_permission_for_data_types_bulk_resources",
     "DiscoveryPermissionsDict",
     "DataTypeDiscoveryPermissions",
     "get_data_type_discovery_permissions",
@@ -68,7 +69,18 @@ async def has_counts_permission_for_data_types_bulk_resources(
     data_types: list[str],
     dataset_level: bool,
 ):
-    pass  # TODO
+    resources_without_dts = [create_resource(project, dataset) for project, dataset in resource_tuples]
+
+    has_permission_by_resource: tuple[bool, ...] = await can_see_counts(request, resources_without_dts, dataset_level)
+
+    return [
+        # Either we have permission for all (saves many calls via or-shortcutting) or we have for a specific
+        # data type and resource:
+        [True] * len(data_types) if has_permission else (
+            await can_see_counts(request, [{**resource, "data_type": dt_id} for dt_id in data_types], dataset_level)
+        )
+        for has_permission, resource in zip(has_permission_by_resource, resources_without_dts)
+    ]
 
 
 class DiscoveryPermissionsDict(TypedDict):
