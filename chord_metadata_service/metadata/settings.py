@@ -53,7 +53,7 @@ LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").uppe
 BENTO_AUTHZ_ENABLED: bool = os.environ.get("BENTO_AUTHZ_ENABLED", "true").strip().lower() == "true"
 
 BENTO_AUTHZ_SERVICE_URL: str = (
-    os.environ.get("BENTO_AUTHZ_SERVICE_URL").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
+    os.environ.get("BENTO_AUTHZ_SERVICE_URL", "").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
 )
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
@@ -156,7 +156,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'chord_metadata_service.authz.middleware.AuthzMiddleware'
+    'chord_metadata_service.authz.middleware.AuthzMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

@@ -78,18 +78,20 @@ async def overview(_request: Request):
     """
 
     # TODO: parallel
-    phenopackets_count = await pheno_models.Phenopacket.objects.all().count()
-    biosamples_count = await pheno_models.Biosample.objects.all().count()
-    individuals_count = await patients_models.Individual.objects.all().count()
-    experiments_count = await experiments_models.Experiment.objects.all().count()
-    experiment_results_count = await experiments_models.ExperimentResult.objects.all().count()
-    instruments_count = await experiments_models.Instrument.objects.all().count()
-    phenotypic_features_count = await pheno_models.PhenotypicFeature.objects.all().distinct('pftype').count()
+    phenopackets_count = await pheno_models.Phenopacket.objects.all().acount()
+    biosamples_count = await pheno_models.Biosample.objects.all().acount()
+    individuals_count = await patients_models.Individual.objects.all().acount()
+    experiments_count = await experiments_models.Experiment.objects.all().acount()
+    experiment_results_count = await experiments_models.ExperimentResult.objects.all().acount()
+    instruments_count = await experiments_models.Instrument.objects.all().acount()
+    phenotypic_features_count = await pheno_models.PhenotypicFeature.objects.all().distinct('pftype').acount()
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema
-    individuals_sex = await stats_for_field(patients_models.Individual, "sex")
-    individuals_k_sex = await stats_for_field(patients_models.Individual, "karyotypic_sex")
+    individuals_sex, individuals_k_sex = await asyncio.gather(
+        stats_for_field(patients_models.Individual, "sex"),
+        stats_for_field(patients_models.Individual, "karyotypic_sex"),
+    )
 
     diseases_stats = await stats_for_field(pheno_models.Phenopacket, "diseases__term__label")
     diseases_count = len(diseases_stats)
@@ -181,7 +183,7 @@ async def search_overview(request: Request):
         queryset
         .values("phenopackets__biosamples__id")
         .exclude(phenopackets__biosamples__id__isnull=True)
-        .count()
+        .acount()
     )
 
     # Sex related fields stats are precomputed here and post processed later
@@ -422,7 +424,7 @@ async def public_overview(request: Request):
     # If we don't have AT LEAST one count permission, assume we're not supposed to see this page and return forbidden.
     if not any(dpd["counts"] for dpd in dt_permissions.values()):
         authz_middleware.mark_authz_done(request)
-        return Response(errors.forbidden_error, status=status.HTTP_403_FORBIDDEN)
+        return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 
     # Predefined counts
     async def _counts_for_model_name(mn: str) -> tuple[str, int]:
@@ -462,7 +464,7 @@ async def public_overview(request: Request):
     fields = [chart["field"] for section in config_public["overview"] for chart in section["charts"]]
     field_conf = config_public["fields"]
 
-    async def _get_field_response(field_props: dict) -> dict:
+    async def _get_field_response(field_id: str, field_props: dict) -> dict:
         field_perms = get_count_and_query_data_permissions_for_field(dt_permissions, field_props)
 
         # Permissions incorporation: only censor small cell counts when we don't have query:data access
@@ -480,16 +482,17 @@ async def public_overview(request: Request):
 
         return {
             **field_props,
-            "id": field,
+            "id": field_id,
             **({"data": stats} if stats is not None else {}),
         }
 
     # Parallel async collection of field responses for public overview
-    field_responses = await asyncio.gather(*(_get_field_response(field_conf[field]) for field in fields))
+    field_responses = await asyncio.gather(*(_get_field_response(field, field_conf[field]) for field in fields))
 
     for field, field_res in zip(fields, field_responses):
         response["fields"][field] = field_res
 
+    authz_middleware.mark_authz_done(request)
     return Response(response)
 
 

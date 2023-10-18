@@ -58,7 +58,7 @@ async def has_counts_permission_for_data_types(
     return [
         # Either we have permission for all (saves many calls via or-shortcutting) or we have for a specific data type:
         has_permission or await can_see_counts(request, create_resource(project, dataset, dt_id), dataset_level)
-        for dt_id, can_see_counts_for_dt in data_types
+        for dt_id in data_types
     ]
 
 
