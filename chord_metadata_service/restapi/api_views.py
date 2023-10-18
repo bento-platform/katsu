@@ -1,45 +1,51 @@
+import asyncio
 import json
 import logging
 
 from collections import Counter
 
+from bento_lib.responses import errors
 from django.conf import settings
+from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers, status
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from typing import TypedDict
 
+from chord_metadata_service.authz.counts import has_counts_permission_for_data_types
+from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.authz.permissions import OverrideOrSuperUserOnly, BentoAllowAny
+from chord_metadata_service.authz.queries import has_query_data_permission_for_data_types
+from chord_metadata_service.chord import models as chord_models
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
+from chord_metadata_service.experiments import models as experiments_models
+from chord_metadata_service.logger import logger
+from chord_metadata_service.mcode import models as mcode_models
+from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
+from chord_metadata_service.metadata.service_info import SERVICE_INFO
+from chord_metadata_service.patients import models as patients_models
+from chord_metadata_service.phenopackets import models as pheno_models
+from chord_metadata_service.restapi.models import SchemaType
 from chord_metadata_service.restapi.utils import (
     get_age_numeric_binned,
+    get_public_model_name_and_field_path,
     get_field_options,
     stats_for_field,
     queryset_stats_for_field,
     get_categorical_stats,
     get_date_stats,
-    get_range_stats
+    get_range_stats,
+    PUBLIC_MODEL_NAMES_TO_MODEL,
+    PUBLIC_MODEL_NAMES_TO_DATA_TYPE, BinWithValue,
 )
-from chord_metadata_service.authz.permissions import OverrideOrSuperUserOnly
-from chord_metadata_service.metadata.service_info import SERVICE_INFO
-from chord_metadata_service.chord import models as chord_models
-from chord_metadata_service.phenopackets import models as pheno_models
-from chord_metadata_service.mcode import models as mcode_models
-from chord_metadata_service.patients import models as patients_models
-from chord_metadata_service.experiments import models as experiments_models
-from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
-from chord_metadata_service.restapi.models import SchemaType
-from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
-
-from chord_metadata_service.chord import data_types as dt
-
-logger = logging.getLogger("restapi_api_views")
-logger.setLevel(logging.INFO)
 
 OVERVIEW_AGE_BIN_SIZE = 10
 
 
 @api_view()
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 def service_info(_request):
     """
     get:
@@ -63,36 +69,38 @@ def service_info(_request):
 )
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly])
-def overview(_request):
+async def overview(_request):
     """
     get:
     Overview of all Phenopackets in the database
     """
-    phenopackets_count = pheno_models.Phenopacket.objects.all().count()
-    biosamples_count = pheno_models.Biosample.objects.all().count()
-    individuals_count = patients_models.Individual.objects.all().count()
-    experiments_count = experiments_models.Experiment.objects.all().count()
-    experiment_results_count = experiments_models.ExperimentResult.objects.all().count()
-    instruments_count = experiments_models.Instrument.objects.all().count()
-    phenotypic_features_count = pheno_models.PhenotypicFeature.objects.all().distinct('pftype').count()
+
+    # TODO: parallel
+    phenopackets_count = await pheno_models.Phenopacket.objects.all().count()
+    biosamples_count = await pheno_models.Biosample.objects.all().count()
+    individuals_count = await patients_models.Individual.objects.all().count()
+    experiments_count = await experiments_models.Experiment.objects.all().count()
+    experiment_results_count = await experiments_models.ExperimentResult.objects.all().count()
+    instruments_count = await experiments_models.Instrument.objects.all().count()
+    phenotypic_features_count = await pheno_models.PhenotypicFeature.objects.all().distinct('pftype').count()
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema
-    individuals_sex = stats_for_field(patients_models.Individual, "sex")
-    individuals_k_sex = stats_for_field(patients_models.Individual, "karyotypic_sex")
+    individuals_sex = await stats_for_field(patients_models.Individual, "sex")
+    individuals_k_sex = await stats_for_field(patients_models.Individual, "karyotypic_sex")
 
-    diseases_stats = stats_for_field(pheno_models.Phenopacket, "diseases__term__label")
+    diseases_stats = await stats_for_field(pheno_models.Phenopacket, "diseases__term__label")
     diseases_count = len(diseases_stats)
 
-    individuals_age = get_age_numeric_binned(patients_models.Individual.objects.all(), OVERVIEW_AGE_BIN_SIZE)
+    individuals_age = await get_age_numeric_binned(patients_models.Individual.objects.all(), OVERVIEW_AGE_BIN_SIZE)
 
-    r = {
+    return Response({
         "phenopackets": phenopackets_count,
         "data_type_specific": {
             "biosamples": {
                 "count": biosamples_count,
-                "taxonomy": stats_for_field(pheno_models.Biosample, "taxonomy__label"),
-                "sampled_tissue": stats_for_field(pheno_models.Biosample, "sampled_tissue__label"),
+                "taxonomy": await stats_for_field(pheno_models.Biosample, "taxonomy__label"),
+                "sampled_tissue": await stats_for_field(pheno_models.Biosample, "sampled_tissue__label"),
             },
             "diseases": {
                 # count is a number of unique disease terms (not all diseases in the database)
@@ -105,41 +113,39 @@ def overview(_request):
                 "karyotypic_sex": {
                     k: individuals_k_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.KARYOTYPIC_SEX)
                 },
-                "taxonomy": stats_for_field(patients_models.Individual, "taxonomy__label"),
+                "taxonomy": await stats_for_field(patients_models.Individual, "taxonomy__label"),
                 "age": individuals_age,
-                "ethnicity": stats_for_field(patients_models.Individual, "ethnicity"),
+                "ethnicity": await stats_for_field(patients_models.Individual, "ethnicity"),
             },
             "phenotypic_features": {
                 # count is a number of unique phenotypic feature types (not all pfs in the database)
                 "count": phenotypic_features_count,
-                "type": stats_for_field(pheno_models.PhenotypicFeature, "pftype__label")
+                "type": await stats_for_field(pheno_models.PhenotypicFeature, "pftype__label")
             },
             "experiments": {
                 "count": experiments_count,
-                "study_type": stats_for_field(experiments_models.Experiment, "study_type"),
-                "experiment_type": stats_for_field(experiments_models.Experiment, "experiment_type"),
-                "molecule": stats_for_field(experiments_models.Experiment, "molecule"),
-                "library_strategy": stats_for_field(experiments_models.Experiment, "library_strategy"),
-                "library_source": stats_for_field(experiments_models.Experiment, "library_source"),
-                "library_selection": stats_for_field(experiments_models.Experiment, "library_selection"),
-                "library_layout": stats_for_field(experiments_models.Experiment, "library_layout"),
-                "extraction_protocol": stats_for_field(experiments_models.Experiment, "extraction_protocol"),
+                "study_type": await stats_for_field(experiments_models.Experiment, "study_type"),
+                "experiment_type": await stats_for_field(experiments_models.Experiment, "experiment_type"),
+                "molecule": await stats_for_field(experiments_models.Experiment, "molecule"),
+                "library_strategy": await stats_for_field(experiments_models.Experiment, "library_strategy"),
+                "library_source": await stats_for_field(experiments_models.Experiment, "library_source"),
+                "library_selection": await stats_for_field(experiments_models.Experiment, "library_selection"),
+                "library_layout": await stats_for_field(experiments_models.Experiment, "library_layout"),
+                "extraction_protocol": await stats_for_field(experiments_models.Experiment, "extraction_protocol"),
             },
             "experiment_results": {
                 "count": experiment_results_count,
-                "file_format": stats_for_field(experiments_models.ExperimentResult, "file_format"),
-                "data_output_type": stats_for_field(experiments_models.ExperimentResult, "data_output_type"),
-                "usage": stats_for_field(experiments_models.ExperimentResult, "usage")
+                "file_format": await stats_for_field(experiments_models.ExperimentResult, "file_format"),
+                "data_output_type": await stats_for_field(experiments_models.ExperimentResult, "data_output_type"),
+                "usage": await stats_for_field(experiments_models.ExperimentResult, "usage")
             },
             "instruments": {
                 "count": instruments_count,
-                "platform": stats_for_field(experiments_models.Experiment, "instrument__platform"),
-                "model": stats_for_field(experiments_models.Experiment, "instrument__model")
+                "platform": await stats_for_field(experiments_models.Experiment, "instrument__platform"),
+                "model": await stats_for_field(experiments_models.Experiment, "instrument__model")
             },
         }
-    }
-
-    return Response(r)
+    })
 
 
 @api_view(["GET"])
@@ -155,7 +161,7 @@ def extra_properties_schema_types(_request):
 
 @api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly])
-def search_overview(request):
+async def search_overview(request):
     """
     get+post:
     Overview statistics of a list of patients (associated with a search result)
@@ -165,44 +171,52 @@ def search_overview(request):
     individual_id = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
     queryset = patients_models.Individual.objects.all().filter(id__in=individual_id)
 
+    # TODO: filter to only individuals where we have project/dataset-level access? or can we at least pass a dataset
+    #  in too to make this less annoying...
+
     individuals_count = len(individual_id)
-    biosamples_count = queryset.values("phenopackets__biosamples__id").exclude(
-        phenopackets__biosamples__id__isnull=True).count()
+    biosamples_count = await (
+        queryset
+        .values("phenopackets__biosamples__id")
+        .exclude(phenopackets__biosamples__id__isnull=True)
+        .count()
+    )
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema
-    individuals_sex = queryset_stats_for_field(queryset, "sex")
+    individuals_sex = await queryset_stats_for_field(queryset, "sex")
 
     # several obvious approaches to experiment counts give incorrect answers
-    experiment_types = queryset_stats_for_field(queryset, "phenopackets__biosamples__experiment__experiment_type")
+    experiment_types = await queryset_stats_for_field(
+        queryset, "phenopackets__biosamples__experiment__experiment_type")
     experiments_count = sum(experiment_types.values())
 
-    r = {
+    return Response({
         "biosamples": {
             "count": biosamples_count,
-            "sampled_tissue": queryset_stats_for_field(queryset, "phenopackets__biosamples__sampled_tissue__label"),
-            "histological_diagnosis": queryset_stats_for_field(
+            "sampled_tissue": await queryset_stats_for_field(
+                queryset, "phenopackets__biosamples__sampled_tissue__label"),
+            "histological_diagnosis": await queryset_stats_for_field(
                 queryset,
                 "phenopackets__biosamples__histological_diagnosis__label"
             ),
         },
         "diseases": {
-            "term": queryset_stats_for_field(queryset, "phenopackets__diseases__term__label"),
+            "term": await queryset_stats_for_field(queryset, "phenopackets__diseases__term__label"),
         },
         "individuals": {
             "count": individuals_count,
             "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.SEX)},
-            "age": get_age_numeric_binned(queryset, OVERVIEW_AGE_BIN_SIZE),
+            "age": await get_age_numeric_binned(queryset, OVERVIEW_AGE_BIN_SIZE),
         },
         "phenotypic_features": {
-            "type": queryset_stats_for_field(queryset, "phenopackets__phenotypic_features__pftype__label")
+            "type": await queryset_stats_for_field(queryset, "phenopackets__phenotypic_features__pftype__label"),
         },
         "experiments": {
             "count": experiments_count,
             "experiment_type": experiment_types,
         },
-    }
-    return Response(r)
+    })
 
 
 @extend_schema(
@@ -214,7 +228,7 @@ def search_overview(request):
                 'mcodepackets': serializers.IntegerField(),
                 'data_type_specific': serializers.JSONField(),
             }
-        )
+        ),
     }
 )
 # Cache page for the requested url for 2 hours
@@ -297,156 +311,252 @@ def mcode_overview(_request):
     })
 
 
+class DiscoveryPermissionsDict(TypedDict):
+    counts: bool
+    data: bool
+
+
+DataTypeDiscoveryPermissions = dict[str, DiscoveryPermissionsDict]
+
+
+async def get_data_type_discovery_permissions(
+    request: HttpRequest, data_types: list[str]
+) -> DataTypeDiscoveryPermissions:
+    # For all of these required data types, figure out if we have:
+    #  a) full-response query:data permissions, and
+    #  b) count-level permissions (at the project level) - will also re-check the query:data permissions currently :(
+
+    query_data_perms, counts_perms = await asyncio.gather(
+        has_query_data_permission_for_data_types(request, None, None, data_types),
+        has_counts_permission_for_data_types(request, None, None, data_types),
+    )
+
+    # Collect these permissions, organized by data type, in a dictionary, so we can query them later:
+    return {
+        dt: {
+            "counts": c_perm,
+            "data": qd_perm,
+        }
+        for dt, qd_perm, c_perm in zip(
+            data_types,  # List of data type IDs
+            query_data_perms,  # query:data permissions for each data type
+            counts_perms,  # query:project_level_counts permissions for each data type
+        )
+    }
+
+
+async def get_public_data_type_permissions(request: HttpRequest) -> DataTypeDiscoveryPermissions:
+    return await get_data_type_discovery_permissions(
+        request,
+
+        # Collect all data types that we need permissions for to give various parts of the public overview response.
+        #  - individuals & biosamples are in the 'phenopacket' data type, experiments are in the 'experiment' data type
+        list(set(PUBLIC_MODEL_NAMES_TO_DATA_TYPE.values()))
+    )
+
+
 @extend_schema(
     description="Public search fields with their configuration",
     responses={
-        200: inline_serializer(
+        status.HTTP_200_OK: inline_serializer(
             name='public_search_fields_response',
-            fields={
-                'sections': serializers.JSONField(),
-            }
-        )
+            fields={'sections': serializers.JSONField()}
+        ),
+        status.HTTP_404_NOT_FOUND: inline_serializer(
+            name='public_search_fields_not_configured',
+            fields={'message': serializers.CharField()},
+        ),
     }
 )
 @api_view(["GET"])
-@permission_classes([AllowAny])
-def public_search_fields(_request):
+async def public_search_fields(request: HttpRequest):
     """
     get:
     Return public search fields with their configuration
     """
-    if not settings.CONFIG_PUBLIC:
-        return Response(settings.NO_PUBLIC_FIELDS_CONFIGURED)
 
-    search_conf = settings.CONFIG_PUBLIC["search"]
-    field_conf = settings.CONFIG_PUBLIC["fields"]
+    # TODO: should be project-scoped
+
+    config_public = settings.CONFIG_PUBLIC
+
+    if not config_public:
+        authz_middleware.mark_authz_done(request)
+        return Response(settings.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
+
+    # Access (counts/data) permissions by Bento data type
+    dt_permissions = await get_public_data_type_permissions(request)
+
+    field_conf = config_public["fields"]
+
     # Note: the array is wrapped in a dictionary structure to help with JSON
     # processing by some services.
-    r = {
-        "sections": [
-            {
-                **section,
-                "fields": [
-                    {
-                        **field_conf[f],
-                        "id": f,
-                        "options": get_field_options(field_conf[f])
-                    } for f in section["fields"]
-                ]
-            } for section in search_conf
-        ]
-    }
-    return Response(r)
+
+    async def _get_field_response(field) -> dict:
+        field_props = field_conf[field]
+        field_perms = get_count_and_query_data_permissions_for_field(dt_permissions, field_props)
+
+        return {
+            **field_props,
+            "id": field,
+            "options": await get_field_options(field_props, low_counts_censored=not field_perms["data"]),
+        }
+
+    async def _get_section_response(section) -> dict:
+        return {
+            **section,
+            "fields": await asyncio.gather(*map(_get_field_response, section["fields"])),
+        }
+
+    return Response({
+        "sections": await asyncio.gather(*map(_get_section_response, config_public["search"])),
+    })
+
+
+def get_count_and_query_data_permissions_for_field(
+    dt_permissions: DataTypeDiscoveryPermissions, field_props: dict
+) -> DiscoveryPermissionsDict:
+    public_model_name, _ = get_public_model_name_and_field_path(field_props["mapping"])
+    field_bento_data_type = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[public_model_name]
+    return dt_permissions[field_bento_data_type]
 
 
 @extend_schema(
     description="Overview of all public data in the database",
     responses={
-        200: inline_serializer(
+        status.HTTP_200_OK: inline_serializer(
             name='public_overview_response',
-            fields={
-                'datasets': serializers.CharField(),
-            }
-        )
+            fields={'datasets': serializers.CharField()}
+        ),
+        status.HTTP_404_NOT_FOUND: inline_serializer(
+            name='public_overview_not_available',
+            fields={'message': serializers.CharField()},
+        ),
     }
 )
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def public_overview(_request):
+@api_view(["GET"])  # Don't use BentoAllowAny, we want to be more careful of cases here.
+async def public_overview(request: HttpRequest):
     """
     get:
     Overview of all public data in the database
     """
 
-    if not settings.CONFIG_PUBLIC:
-        return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
+    config_public = settings.CONFIG_PUBLIC
+
+    if not config_public:
+        authz_middleware.mark_authz_done(request)
+        return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
+
+    # TODO: public overviews SHOULD be project-scoped at least.
+
+    # Access (counts/data) permissions by Bento data type
+    dt_permissions = await get_public_data_type_permissions(request)
+
+    # If we don't have AT LEAST one count permission, assume we're not supposed to see this page and return forbidden.
+    if not any(dpd["counts"] for dpd in dt_permissions.values()):
+        authz_middleware.mark_authz_done(request)
+        return Response(errors.forbidden_error, status=status.HTTP_403_FORBIDDEN)
 
     # Predefined counts
-    individuals_count = patients_models.Individual.objects.all().count()
-    biosamples_count = pheno_models.Biosample.objects.all().count()
-    experiments_count = experiments_models.Experiment.objects.all().count()
-
-    # Early return when there is not enough data
-    if individuals_count < settings.CONFIG_PUBLIC["rules"]["count_threshold"]:
-        return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
+    async def _counts_for_model_name(mn: str) -> tuple[str, int]:
+        return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all().count()
+    counts = dict(await asyncio.gather(*map(_counts_for_model_name, PUBLIC_MODEL_NAMES_TO_MODEL)))
 
     # Get the rules config
     rules_config = settings.CONFIG_PUBLIC["rules"]
+    count_threshold = rules_config["count_threshold"]
+
+    # Set counts to 0 if they're under the count threshold, and we don't have full data access permissions for the
+    # data type corresponding to the model.
+    for public_model_name in counts:
+        data_type = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[public_model_name]
+        if counts[public_model_name] < count_threshold and not dt_permissions[data_type]["data"]:
+            logger.info(f"Public overview: {public_model_name} count is below count threshold")
+            counts[public_model_name] = 0
 
     response = {
-        "layout": settings.CONFIG_PUBLIC["overview"],
+        "layout": config_public["overview"],
         "fields": {},
         "counts": {
-            "individuals": individuals_count,
-            "biosamples": biosamples_count,
-            "experiments": experiments_count
+            **({
+                "individuals": counts["individual"],
+                "biosamples": counts["biosample"],
+            } if dt_permissions[DATA_TYPE_PHENOPACKET]["counts"] else {}),
+            **({
+                "experiments": counts["experiment"],
+            } if dt_permissions[DATA_TYPE_EXPERIMENT]["counts"] else {}),
         },
         "max_query_parameters": rules_config["max_query_parameters"],
-        "count_threshold": rules_config["count_threshold"],
+        "count_threshold": count_threshold,
     }
 
-    # Parse the public config to gather data for each field defined in the
-    # overview
-    fields = [chart["field"] for section in settings.CONFIG_PUBLIC["overview"] for chart in section["charts"]]
+    # Parse the public config to gather data for each field defined in the overview
 
-    for field in fields:
-        field_props = settings.CONFIG_PUBLIC["fields"][field]
-        if field_props["datatype"] == "string":
-            stats = get_categorical_stats(field_props)
+    fields = [chart["field"] for section in config_public["overview"] for chart in section["charts"]]
+    field_conf = config_public["fields"]
+
+    async def _get_field_response(field_props: dict) -> dict:
+        field_perms = get_count_and_query_data_permissions_for_field(dt_permissions, field_props)
+
+        # Permissions incorporation: only censor small cell counts when we don't have query:data access
+        stats: list[BinWithValue] | None
+        if not field_perms["counts"]:
+            stats = None
+        elif field_props["datatype"] == "string":
+            stats = await get_categorical_stats(field_props, low_counts_censored=not field_perms["data"])
         elif field_props["datatype"] == "number":
-            stats = get_range_stats(field_props)
+            stats = await get_range_stats(field_props, low_counts_censored=not field_perms["data"])
         elif field_props["datatype"] == "date":
-            stats = get_date_stats(field_props)
+            stats = await get_date_stats(field_props, low_counts_censored=not field_perms["data"])
         else:
             raise NotImplementedError()
 
-        response["fields"][field] = {
+        return {
             **field_props,
             "id": field,
-            "data": stats
+            **({"data": stats} if stats is not None else {}),
         }
+
+    # Parallel async collection of field responses for public overview
+    field_responses = await asyncio.gather(*(_get_field_response(field_conf[field]) for field in fields))
+
+    for field, field_res in zip(fields, field_responses):
+        response["fields"][field] = field_res
 
     return Response(response)
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
-def public_dataset(_request):
+@permission_classes([BentoAllowAny])
+async def public_dataset(_request):
     """
     get:
     Properties of the datasets
     """
 
+    # For now, we don't have any permissions checks for this.
+    # In the future, we could introduce a view:dataset permission or something.
+
     if not settings.CONFIG_PUBLIC:
-        return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
-
-    # Datasets provenance metadata
-    datasets = chord_models.Dataset.objects.values(
-        "title", "description", "contact_info",
-        "dates", "stored_in", "spatial_coverage",
-        "types", "privacy", "distributions",
-        "dimensions", "primary_publications", "citations",
-        "produced_by", "creators", "licenses",
-        "acknowledges", "keywords", "version", "dats_file",
-        "extra_properties", "identifier"
-    )
-
-    # convert dats_file json content to dict
-    datasets = [
-        {
-            **d,
-            "dats_file": json.loads(d["dats_file"]) if d["dats_file"] else None
-        } for d in datasets]
+        return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     return Response({
-        "datasets": datasets
+        "datasets": [
+            {
+                **d,
+                # convert dats_file json content to dict
+                "dats_file": json.loads(d["dats_file"]) if d["dats_file"] else None,
+            }
+            async for d in (
+                # Datasets provenance metadata:
+                chord_models.Dataset.objects.values(
+                    "title", "description", "contact_info",
+                    "dates", "stored_in", "spatial_coverage",
+                    "types", "privacy", "distributions",
+                    "dimensions", "primary_publications", "citations",
+                    "produced_by", "creators", "licenses",
+                    "acknowledges", "keywords", "version", "dats_file",
+                    "extra_properties", "identifier"
+                )
+            )
+        ]
     })
-
-
-DT_QUERYSETS = {
-    dt.DATA_TYPE_EXPERIMENT: experiments_models.Experiment.objects.all(),
-    dt.DATA_TYPE_EXPERIMENT_RESULT: experiments_models.ExperimentResult.objects.all(),
-    dt.DATA_TYPE_MCODEPACKET: mcode_models.MCodePacket.objects.all(),
-    dt.DATA_TYPE_PHENOPACKET: pheno_models.Phenopacket.objects.all(),
-    # dt.DATA_TYPE_READSET: None,
-}

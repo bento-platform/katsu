@@ -6,12 +6,14 @@ import datetime
 from collections import defaultdict, Counter
 from calendar import month_abbr
 from decimal import Decimal, ROUND_HALF_EVEN
-from typing import Any, Optional, Type, TypedDict, Mapping, Generator
+from typing import Any, Type, TypedDict, Mapping, Generator
 
 from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value
 from django.db.models.functions import Cast
 from django.conf import settings
 
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
+from chord_metadata_service.patients import models as patient_models
 from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.logger import logger
@@ -19,10 +21,16 @@ from chord_metadata_service.logger import logger
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 
-MODEL_NAMES_TO_MODEL: dict[str, Type[Model]] = {
-    "individual": pheno_models.Individual,
-    "experiment": experiments_models.Experiment,
+PUBLIC_MODEL_NAMES_TO_MODEL: dict[str, Type[Model]] = {
+    "individual": patient_models.Individual,
     "biosample": pheno_models.Biosample,
+    "experiment": experiments_models.Experiment,
+}
+
+PUBLIC_MODEL_NAMES_TO_DATA_TYPE = {
+    "individual": DATA_TYPE_PHENOPACKET,
+    "biosample": DATA_TYPE_PHENOPACKET,
+    "experiment": DATA_TYPE_EXPERIMENT,
 }
 
 
@@ -31,12 +39,12 @@ class BinWithValue(TypedDict):
     value: int
 
 
-def get_threshold() -> int:
+def get_threshold(low_counts_censored: bool) -> int:
     """
     Gets the maximum count threshold for hiding censored data (i.e., rounding to 0).
     This is a function to prevent settings errors if not running/importing this file in a Django context.
     """
-    return settings.CONFIG_PUBLIC["rules"]["count_threshold"]
+    return settings.CONFIG_PUBLIC["rules"]["count_threshold"] if low_counts_censored else 0
 
 
 def camel_case_field_names(string) -> str:
@@ -112,9 +120,9 @@ def _round_decimal_two_places(d: float) -> Decimal:
     return Decimal(d).quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
 
 
-def time_element_to_years(time_element: dict, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
-    time_value: Optional[Decimal] = None
-    time_unit: Optional[str] = None
+def time_element_to_years(time_element: dict, unit: str = "years") -> tuple[Decimal | None, str | None]:
+    time_value: Decimal | None = None
+    time_unit: str | None = None
     if "age" in time_element:
         return iso_duration_to_years(time_element["age"], unit=unit)
     elif "age_range" in time_element:
@@ -125,7 +133,7 @@ def time_element_to_years(time_element: dict, unit: str = "years") -> tuple[Opti
     return time_value, time_unit
 
 
-def iso_duration_to_years(iso_age_duration: str | dict, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
+def iso_duration_to_years(iso_age_duration: str | dict, unit: str = "years") -> tuple[Decimal | None, str | None]:
     """
     This function takes ISO8601 Duration string in the format e.g 'P20Y6M4D' and converts it to years.
     """
@@ -184,8 +192,8 @@ def custom_binning_generator(field_props: dict) -> Generator[tuple[int, int, str
     """
 
     c = field_props["config"]
-    minimum: Optional[int] = int(c["minimum"]) if "minimum" in c else None
-    maximum: Optional[int] = int(c["maximum"]) if "maximum" in c else None
+    minimum: int | None = int(c["minimum"]) if "minimum" in c else None
+    maximum: int | None = int(c["maximum"]) if "maximum" in c else None
     bins: list[int] = [int(value) for value in c["bins"]]
 
     # check prerequisites
@@ -275,6 +283,11 @@ def monthly_generator(start: str, end: str) -> tuple[int, int]:
         yield year, month
 
 
+def get_public_model_name_and_field_path(field_id: str) -> tuple[str, tuple[str, ...]]:
+    model_name, *field_path = field_id.split("/")
+    return model_name, tuple(field_path)
+
+
 def get_model_and_field(field_id: str) -> tuple[any, str]:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
@@ -284,9 +297,9 @@ def get_model_and_field(field_id: str) -> tuple[any, str]:
     field for this object.
     """
 
-    model_name, *field_path = field_id.split("/")
+    model_name, field_path = get_public_model_name_and_field_path(field_id)
 
-    model: Optional[Type[Model]] = MODEL_NAMES_TO_MODEL.get(model_name)
+    model: Type[Model] | None = PUBLIC_MODEL_NAMES_TO_MODEL.get(model_name)
     if model is None:
         msg = f"Accessing field on model {model_name} not implemented"
         raise NotImplementedError(msg)
@@ -295,16 +308,15 @@ def get_model_and_field(field_id: str) -> tuple[any, str]:
     return model, field_name
 
 
-def stats_for_field(model, field: str, add_missing=False) -> Mapping[str, int]:
+async def stats_for_field(model, field: str, add_missing=False) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a given field. Mainly applicable to
     char fields representing categories
     """
-    queryset = model.objects.all()
-    return queryset_stats_for_field(queryset, field, add_missing)
+    return await queryset_stats_for_field(model.objects.all(), field, add_missing)
 
 
-def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping[str, int]:
+async def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a queryset.
     """
@@ -318,7 +330,7 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
 
     stats: dict[str, int] = {}
 
-    for item in annotated_queryset:
+    async for item in annotated_queryset:
         key = item[field]
         if key is None:
             num_missing = item["total"]
@@ -335,7 +347,7 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
     return stats
 
 
-def get_field_bins(query_set, field, bin_size):
+async def get_field_bins(query_set, field, bin_size):
     # computes a new column "binned" by substracting the modulo by bin size to
     # the value which requires binning (e.g. 28 => 28 - 28 % 10 = 20)
     # cast to integer to avoid numbers such as 60.00 if that was a decimal,
@@ -346,11 +358,11 @@ def get_field_bins(query_set, field, bin_size):
             IntegerField()
         )
     ).values("binned").annotate(total=Count("binned"))
-    stats = {item["binned"]: item["total"] for item in query_set}
+    stats = {item["binned"]: item["total"] async for item in query_set}
     return stats
 
 
-def compute_binned_ages(individual_queryset, bin_size: int) -> list[int]:
+async def compute_binned_ages(individual_queryset, bin_size: int) -> list[int]:
     """
     When age_numeric field is not available, use this function to process
     the age field in its various formats.
@@ -363,7 +375,7 @@ def compute_binned_ages(individual_queryset, bin_size: int) -> list[int]:
 
     a = individual_queryset.filter(age_numeric__isnull=True).values('time_at_last_encounter')
     binned_ages = []
-    for r in a.iterator():  # reduce memory footprint (no caching)
+    async for r in a.iterator():  # reduce memory footprint (no caching)
         if r["time_at_last_encounter"] is None:
             continue
         age = parse_individual_age(r["time_at_last_encounter"])
@@ -372,33 +384,36 @@ def compute_binned_ages(individual_queryset, bin_size: int) -> list[int]:
     return binned_ages
 
 
-def get_age_numeric_binned(individual_queryset, bin_size: int) -> dict:
+async def get_age_numeric_binned(individual_queryset, bin_size: int) -> dict:
     """
     age_numeric is computed at ingestion time of phenopackets. On some instances
     it might be unavailable and as a fallback must be computed from the age JSON field which
     has two alternate formats (hence more complex and slower to process)
     """
-    individuals_age = get_field_bins(individual_queryset, "age_numeric", bin_size)
+    individuals_age = await get_field_bins(individual_queryset, "age_numeric", bin_size)
     if None not in individuals_age:
         return individuals_age
 
     del individuals_age[None]
     individuals_age = Counter(individuals_age)
     individuals_age.update(
-        compute_binned_ages(individual_queryset, bin_size)   # single update instead of creating iterables in a loop
+        # single update instead of creating iterables in a loop
+        await compute_binned_ages(individual_queryset, bin_size)
     )
     return individuals_age
 
 
-def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
+async def get_categorical_stats(field_props: dict, low_counts_censored: bool) -> list[BinWithValue]:
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
+
     model, field_name = get_model_and_field(field_props["mapping"])
-    stats = stats_for_field(model, field_name, add_missing=True)
+
+    stats: Mapping[str, int] = await stats_for_field(model, field_name, add_missing=True)
 
     # Enforce values order from config and apply policies
-    labels: Optional[list[str]] = field_props["config"].get("enum")
+    labels: list[str] | None = field_props["config"].get("enum")
     derived_labels: bool = labels is None
 
     # Special case: for some fields, values are based on what's present in the
@@ -414,7 +429,7 @@ def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
             key=lambda x: x.lower()
         )
 
-    threshold = get_threshold()
+    threshold = get_threshold(low_counts_censored)
     bins: list[BinWithValue] = []
 
     for category in labels:
@@ -438,7 +453,7 @@ def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
     return bins
 
 
-def get_date_stats(field_props: dict) -> list[BinWithValue]:
+async def get_date_stats(field_props: dict, low_counts_censored: bool = True) -> list[BinWithValue]:
     """
     Fetches statistics for a given date field, fill the gaps in the date range
     and apply privacy policies.
@@ -459,7 +474,7 @@ def get_date_stats(field_props: dict) -> list[BinWithValue]:
         raise NotImplementedError(msg)
 
     # Note: lexical sort works on ISO dates
-    query_set = (
+    query_set = await (
         model.objects.all()
         .values(field_name)
         .order_by(field_name)
@@ -467,8 +482,8 @@ def get_date_stats(field_props: dict) -> list[BinWithValue]:
     )
 
     stats = defaultdict(int)
-    start: Optional[str] = None
-    end: Optional[str] = None
+    start: str | None = None
+    end: str | None = None
     # Key the counts on yyyy-mm combination (aggregate same month counts)
     for item in query_set:
         key = "missing" if item[field_name] is None else item[field_name][:LENGTH_Y_M]
@@ -484,7 +499,7 @@ def get_date_stats(field_props: dict) -> list[BinWithValue]:
             start = key
 
     # All the bins between start and end date must be represented
-    threshold = get_threshold()
+    threshold = get_threshold(low_counts_censored)
     bins: list[BinWithValue] = []
     if start:   # at least one month
         for year, month in monthly_generator(start, end or start):
@@ -503,7 +518,7 @@ def get_date_stats(field_props: dict) -> list[BinWithValue]:
     return bins
 
 
-def get_month_date_range(field_props: dict) -> tuple[Optional[str], Optional[str]]:
+def get_month_date_range(field_props: dict) -> tuple[str | None, str | None]:
     """
     Get start date and end date from the database
     Note that dates within a JSON are stored as strings, not instances of datetime.
@@ -541,16 +556,19 @@ def get_month_date_range(field_props: dict) -> tuple[Optional[str], Optional[str
     return start, end
 
 
-def get_range_stats(field_props: dict) -> list[BinWithValue]:
+async def get_range_stats(field_props: dict, low_counts_censored: bool = True) -> list[BinWithValue]:
     model, field = get_model_and_field(field_props["mapping"])
 
     # Generate a list of When conditions that return a label for the given bin.
     # This is equivalent to an SQL CASE statement.
-    whens = [When(
-        **{f"{field}__gte": floor} if floor is not None else {},
-        **{f"{field}__lt": ceil} if ceil is not None else {},
-        then=Value(label)
-    ) for floor, ceil, label in labelled_range_generator(field_props)]
+    whens = [
+        When(
+            **{f"{field}__gte": floor} if floor is not None else {},
+            **{f"{field}__lt": ceil} if ceil is not None else {},
+            then=Value(label),
+        )
+        for floor, ceil, label in labelled_range_generator(field_props)
+    ]
 
     query_set = (
         model.objects
@@ -558,9 +576,10 @@ def get_range_stats(field_props: dict) -> list[BinWithValue]:
         .annotate(total=Count("label"))
     )
 
-    threshold = get_threshold()  # Maximum number of entries needed to round a count down to 0 (censored discovery)
+    # Maximum number of entries needed to round a count from its true value down to 0 (censored discovery)
+    threshold = get_threshold(low_counts_censored)
     stats: dict[str, int] = dict()
-    for item in query_set:
+    async for item in query_set:
         key = item["label"]
         stats[key] = item["total"] if item["total"] > threshold else 0
 
@@ -575,7 +594,7 @@ def get_range_stats(field_props: dict) -> list[BinWithValue]:
     return bins
 
 
-def get_field_options(field_props: dict) -> list[Any]:
+async def get_field_options(field_props: dict, low_counts_censored: bool) -> list[Any]:
     """
     Given properties for a public field, return the list of authorized options for
     querying this field.
@@ -587,7 +606,7 @@ def get_field_options(field_props: dict) -> list[Any]:
             # We must be careful here not to leak 'small cell' values as options
             # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
             #   should be treated as if the field isn't in the database at all.
-            options = get_distinct_field_values(field_props)
+            options = await get_distinct_field_values(field_props, low_counts_censored)
     elif field_props["datatype"] == "number":
         options = [label for floor, ceil, label in labelled_range_generator(field_props)]
     elif field_props["datatype"] == "date":
@@ -601,16 +620,23 @@ def get_field_options(field_props: dict) -> list[Any]:
     return options
 
 
-def get_distinct_field_values(field_props: dict) -> list[Any]:
+async def get_distinct_field_values(field_props: dict, low_counts_censored: bool) -> list[Any]:
     # We must be careful here not to leak 'small cell' values as options
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
 
     model, field = get_model_and_field(field_props["mapping"])
-    threshold = get_threshold()
+    threshold = get_threshold(low_counts_censored)
 
-    values_with_counts = model.objects.values_list(field).annotate(count=Count(field))
-    return [val for val, count in values_with_counts if count > threshold]
+    return [
+        val
+        async for val, count in (
+            model.objects
+            .values_list(field)
+            .annotate(count=Count(field))
+        )
+        if count > threshold
+    ]
 
 
 def filter_queryset_field_value(qs, field_props, value: str):
@@ -661,29 +687,34 @@ def filter_queryset_field_value(qs, field_props, value: str):
     return qs.filter(**condition)
 
 
-def experiment_type_stats(queryset):
+async def experiment_type_stats(queryset):
     """
     returns count and bento_public format list of stats for experiment type
     note that queryset_stats_for_field() does not count "missing" correctly when the field has multiple foreign keys
     """
-    e_types = queryset.values(label=F("phenopackets__biosamples__experiment__experiment_type")).annotate(
-        value=Count("phenopackets__biosamples__experiment", distinct=True))
-    return bento_public_format_count_and_stats_list(e_types)
+    return await bento_public_format_count_and_stats_list(
+        queryset
+        .values(label=F("phenopackets__biosamples__experiment__experiment_type"))
+        .annotate(value=Count("phenopackets__biosamples__experiment", distinct=True))
+    )
 
 
-def biosample_tissue_stats(queryset):
+async def biosample_tissue_stats(queryset):
     """
     returns count and bento_public format list of stats for biosample sampled_tissue
     """
-    b_tissue = queryset.values(label=F("phenopackets__biosamples__sampled_tissue__label")).annotate(
-        value=Count("phenopackets__biosamples", distinct=True))
-    return bento_public_format_count_and_stats_list(b_tissue)
+    return await bento_public_format_count_and_stats_list(
+        queryset
+        .values(label=F("phenopackets__biosamples__sampled_tissue__label"))
+        .annotate(value=Count("phenopackets__biosamples", distinct=True))
+    )
 
 
-def bento_public_format_count_and_stats_list(annotated_queryset) -> tuple[int, list[BinWithValue]]:
+async def bento_public_format_count_and_stats_list(annotated_queryset) -> tuple[int, list[BinWithValue]]:
     stats_list: list[BinWithValue] = []
-    total = 0
-    for q in annotated_queryset:
+    total: int = 0
+
+    async for q in annotated_queryset:
         label = q["label"]
         value = int(q["value"])
         total += value

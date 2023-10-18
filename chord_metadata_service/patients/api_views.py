@@ -1,8 +1,8 @@
 import re
 
+from asgiref.sync import async_to_sync
 from datetime import datetime
-
-from rest_framework import viewsets, filters, mixins, serializers
+from rest_framework import filters, mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -22,6 +22,7 @@ from bento_lib.search import build_search_response
 from .serializers import IndividualSerializer
 from .models import Individual
 from .filters import IndividualFilter
+from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
@@ -35,10 +36,11 @@ from chord_metadata_service.restapi.api_renderers import (
 )
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.utils import (
+    get_threshold,
     get_field_options,
     filter_queryset_field_value,
     biosample_tissue_stats,
-    experiment_type_stats
+    experiment_type_stats,
 )
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 
@@ -168,14 +170,16 @@ class PublicListIndividuals(APIView):
     View to return only count of all individuals after filtering.
     """
 
-    def filter_queryset(self, queryset):
+    async def filter_queryset(self, queryset, can_query_data: bool):
         # Check query parameters validity
         qp = self.request.query_params
-        if len(qp) > settings.CONFIG_PUBLIC["rules"]["max_query_parameters"]:
+        config_public = settings.CONFIG_PUBLIC
+
+        if not can_query_data and len(qp) > config_public["rules"]["max_query_parameters"]:
             raise ValidationError(f"Wrong number of fields: {len(qp)}")
 
-        search_conf = settings.CONFIG_PUBLIC["search"]
-        field_conf = settings.CONFIG_PUBLIC["fields"]
+        search_conf = config_public["search"]
+        field_conf = config_public["fields"]
         queryable_fields = {
             f"{f}": field_conf[f] for section in search_conf for f in section["fields"]
         }
@@ -185,7 +189,7 @@ class PublicListIndividuals(APIView):
                 raise ValidationError(f"Unsupported field used in query: {field}")
 
             field_props = queryable_fields[field]
-            options = get_field_options(field_props)
+            options = await get_field_options(field_props, low_counts_censored=not can_query_data)
             if value not in options \
                     and not (
                         # case-insensitive search on categories
@@ -204,38 +208,46 @@ class PublicListIndividuals(APIView):
 
         return queryset
 
-    def get(self, request, *args, **kwargs):
+    # TODO: should be project-scoped
+
+    @async_to_sync
+    async def get(self, request, *_args, **_kwargs):
         if not settings.CONFIG_PUBLIC:
-            return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
+            authz_middleware.mark_authz_done(request)
+            return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
+
+        # TODO: permissions
 
         base_qs = Individual.objects.all()
         try:
-            filtered_qs = self.filter_queryset(base_qs)
+            filtered_qs = await self.filter_queryset(base_qs)
         except ValidationError as e:
-            return Response(errors.bad_request_error(
-                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
-            ))
+            return Response(
+                errors.bad_request_error(*(e.error_list if hasattr(e, "error_list") else e.error_dict.items())),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        qct = filtered_qs.count()
+        qct = await filtered_qs.count()
 
-        if qct <= (threshold := settings.CONFIG_PUBLIC["rules"]["count_threshold"]):
+        if qct <= (threshold := get_threshold()):  # TODO: permissions
+            authz_middleware.mark_authz_done(request)
             logger.info(
                 f"Public individuals endpoint recieved query params {request.query_params} which resulted in "
                 f"sub-threshold count: {qct} <= {threshold}")
             return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
 
-        tissues_count, sampled_tissues = biosample_tissue_stats(filtered_qs)
-        experiments_count, experiment_types = experiment_type_stats(filtered_qs)
+        tissues_count, sampled_tissues = await biosample_tissue_stats(filtered_qs)
+        experiments_count, experiment_types = await experiment_type_stats(filtered_qs)
 
         return Response({
             "count": qct,
             "biosamples": {
                 "count": tissues_count,
-                "sampled_tissue": sampled_tissues
+                "sampled_tissue": sampled_tissues,
             },
             "experiments": {
                 "count": experiments_count,
-                "experiment_type": experiment_types
+                "experiment_type": experiment_types,
             }
         })
 
@@ -245,14 +257,16 @@ class BeaconListIndividuals(APIView):
     View to return lists of individuals filtered using search terms from katsu's config.json.
     Uncensored equivalent of PublicListIndividuals.
     """
-    def filter_queryset(self, queryset):
+    async def filter_queryset(self, queryset, can_query_data: bool):
         # Check query parameters validity
         qp = self.request.query_params
-        if len(qp) > settings.CONFIG_PUBLIC["rules"]["max_query_parameters"]:
+        config_public = settings.CONFIG_PUBLIC
+
+        if not can_query_data and len(qp) > config_public["rules"]["max_query_parameters"]:
             raise ValidationError(f"Wrong number of fields: {len(qp)}")
 
-        search_conf = settings.CONFIG_PUBLIC["search"]
-        field_conf = settings.CONFIG_PUBLIC["fields"]
+        search_conf = config_public["search"]
+        field_conf = config_public["fields"]
         queryable_fields = {
             f: field_conf[f] for section in search_conf for f in section["fields"]
         }
@@ -262,7 +276,7 @@ class BeaconListIndividuals(APIView):
                 raise ValidationError(f"Unsupported field used in query: {field}")
 
             field_props = queryable_fields[field]
-            options = get_field_options(field_props)
+            options = await get_field_options(field_props, low_counts_censored=not can_query_data)
             if value not in options \
                     and not (
                         # case-insensitive search on categories
@@ -281,28 +295,40 @@ class BeaconListIndividuals(APIView):
 
         return queryset
 
-    def get(self, request, *args, **kwargs):
+    @async_to_sync
+    async def get(self, request, *_args, **_kwargs):
         if not settings.CONFIG_PUBLIC:
-            return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=404)
+            authz_middleware.mark_authz_done(request)
+            return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
+
+        # Steps for permissions
+        #  - Obtain all datasets
+        #  - Do a bulk request to authz for permissions to see counts for the data types for each...
 
         base_qs = Individual.objects.all()
-        try:
-            filtered_qs = self.filter_queryset(base_qs)
-        except ValidationError as e:
-            return Response(errors.bad_request_error(
-                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items())), status=400)
 
-        tissues_count, sampled_tissues = biosample_tissue_stats(filtered_qs)
-        experiments_count, experiment_types = experiment_type_stats(filtered_qs)
+        # TODO: permissions
+
+        try:
+            filtered_qs = await self.filter_queryset(base_qs)
+        except ValidationError as e:
+            authz_middleware.mark_authz_done(request)
+            return Response(
+                errors.bad_request_error(*(e.error_list if hasattr(e, "error_list") else e.error_dict.items())),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        tissues_count, sampled_tissues = await biosample_tissue_stats(filtered_qs)
+        experiments_count, experiment_types = await experiment_type_stats(filtered_qs)
 
         return Response({
-            "matches": filtered_qs.values_list("id", flat=True),
+            "matches": await filtered_qs.values_list("id", flat=True),
             "biosamples": {
                 "count": tissues_count,
-                "sampled_tissue": sampled_tissues
+                "sampled_tissue": sampled_tissues,
             },
             "experiments": {
                 "count": experiments_count,
-                "experiment_type": experiment_types
+                "experiment_type": experiment_types,
             }
         })
