@@ -122,7 +122,7 @@ if exists("/run/secrets/opa-root-token"):
 
 # Application definition
 
-INSTALLED_APPS = [
+INSTALLED_APPS = (['daphne'] if DEBUG else []) + [
     'dal',
     'dal_select2',
 
@@ -188,6 +188,7 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = 'chord_metadata_service.metadata.asgi.application'
 WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
 
 LOGGING = {
