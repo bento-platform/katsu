@@ -442,7 +442,7 @@ async def public_overview(request: Request):
     # data type corresponding to the model.
     for public_model_name in counts:
         data_type = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[public_model_name]
-        if counts[public_model_name] < count_threshold and not dt_permissions[data_type]["data"]:
+        if 0 < counts[public_model_name] <= count_threshold and not dt_permissions[data_type]["data"]:
             logger.info(f"Public overview: {public_model_name} count is below count threshold")
             counts[public_model_name] = 0
 
