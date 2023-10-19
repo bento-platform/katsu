@@ -156,7 +156,7 @@ async def overview(_request: Request):
 
 
 @api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly])
+@permission_classes([BentoAllowAny])
 def extra_properties_schema_types(_request: Request):
     """
     get:
