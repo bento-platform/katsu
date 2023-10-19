@@ -227,7 +227,7 @@ class PublicListIndividuals(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        qct = await filtered_qs.count()
+        qct = await filtered_qs.acount()
 
         if qct <= (threshold := get_threshold()):  # TODO: permissions
             authz_middleware.mark_authz_done(request)

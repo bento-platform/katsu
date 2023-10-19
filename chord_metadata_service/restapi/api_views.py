@@ -428,7 +428,7 @@ async def public_overview(request: Request):
 
     # Predefined counts
     async def _counts_for_model_name(mn: str) -> tuple[str, int]:
-        return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all().count()
+        return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all().acount()
     counts = dict(await asyncio.gather(*map(_counts_for_model_name, PUBLIC_MODEL_NAMES_TO_MODEL)))
 
     # Get the rules config
