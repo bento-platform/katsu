@@ -1,3 +1,5 @@
+from bento_lib.auth.permissions import P_QUERY_DATA, P_DELETE_DATA
+from bento_lib.auth.resources import build_resource
 from bento_lib.responses import errors
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
@@ -10,11 +12,9 @@ from rest_framework.response import Response
 
 from typing import Callable
 
-from chord_metadata_service.authz.constants import PERMISSION_QUERY_DATA, PERMISSION_DELETE_DATA
 from chord_metadata_service.authz.discovery import get_counts_permission, has_counts_permission_for_data_types
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
-from chord_metadata_service.authz.utils import create_resource
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult
@@ -91,15 +91,12 @@ async def make_data_type_response_object(
 
 
 async def can_see_counts(request: HttpRequest, resource: dict) -> bool:
-    return await authz_middleware.async_authz_post(request, "/policy/evaluate", {
-        "requested_resource": resource,
-        "required_permissions": [get_counts_permission(resource.get("dataset") is not None)],
-    })["result"] or (
-        # If we don't have a count permission, we may still have a query:data permission (no cascade)
-        await authz_middleware.async_authz_post(request, "/policy/evaluate", {
-            "requested_resource": resource,
-            "required_permissions": [PERMISSION_QUERY_DATA],
-        })["result"]
+    return any(
+        await authz_middleware.async_evaluate(
+            request,
+            (resource,),
+            (get_counts_permission(resource.get("dataset") is not None), P_QUERY_DATA),
+        )[0]  # tuple of [bool for counts permission, bool for query:data]
     )
 
 
@@ -140,7 +137,7 @@ async def data_type_detail(request: HttpRequest, data_type: str):
                 dt.DATA_TYPES[data_type],
                 project,
                 dataset,
-                include_counts=await can_see_counts(request, create_resource(project, dataset, data_type)),
+                include_counts=await can_see_counts(request, build_resource(project, dataset, data_type)),
             ))
     except ValueError as e:
         return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
@@ -171,18 +168,15 @@ async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: st
         return Response(errors.bad_request_error, status=status.HTTP_400_BAD_REQUEST)
 
     project = await Project.objects.aget(datasets=dataset_id)
-    resource = create_resource(project.identifier, dataset_id, data_type)
+    resource = build_resource(project.identifier, dataset_id, data_type)
 
     qs = QUERYSET_FN[data_type](dataset_id)
 
     if request.method == "DELETE":
-        has_permission: bool = await authz_middleware.async_authz_post(request, "/permissions/evaluate", {
-            "requested_resource": resource,
-            "required_permissions": [PERMISSION_DELETE_DATA],
-        })
-        authz_middleware.mark_authz_done(request)
+        can_delete: bool = await authz_middleware.async_evaluate_one(
+            request, resource, P_DELETE_DATA, mark_authz_done=True)
 
-        if not has_permission:
+        if not can_delete:
             return Response(errors.forbidden_error, status=status.HTTP_403_FORBIDDEN)
 
         await qs.adelete()

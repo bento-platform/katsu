@@ -1,12 +1,15 @@
-import asyncio
-
+from bento_lib.auth.permissions import (
+    Permission,
+    P_QUERY_DATASET_LEVEL_COUNTS,
+    P_QUERY_PROJECT_LEVEL_COUNTS,
+    P_QUERY_DATA,
+)
+from bento_lib.auth.resources import RESOURCE_EVERYTHING, build_resource
 from django.http import HttpRequest
 from rest_framework.request import Request
-from typing import overload, TypedDict
+from typing import TypedDict
 
-from .constants import PERMISSION_QUERY_PROJECT_LEVEL_COUNTS, PERMISSION_QUERY_DATASET_LEVEL_COUNTS
-from .queries import query_permission, can_query_data, has_query_data_permission_for_data_types
-from .utils import create_resource
+from .middleware import authz_middleware
 
 
 __all__ = [
@@ -20,47 +23,28 @@ __all__ = [
 ]
 
 
-def get_counts_permission(dataset_level: bool) -> str:
-    if dataset_level:
-        return PERMISSION_QUERY_DATASET_LEVEL_COUNTS
-    return PERMISSION_QUERY_PROJECT_LEVEL_COUNTS  # We don't have a node-level counts permission
+def get_counts_permission(dataset_level: bool) -> Permission:
+    # We don't have a node-level counts permission
+    return P_QUERY_DATASET_LEVEL_COUNTS if dataset_level else P_QUERY_PROJECT_LEVEL_COUNTS
 
 
-@overload
-async def can_see_counts(request: HttpRequest, resource: dict, dataset_level: bool) -> bool:
-    ...
-
-
-@overload
-async def can_see_counts(request: HttpRequest, resource: list[dict], dataset_level: bool) -> tuple[bool, ...]:
-    ...
-
-
-async def can_see_counts(
-    request: HttpRequest, resource: dict | list[dict], dataset_level: bool
-) -> bool | tuple[bool, ...]:
-    # First, check if we have counts permission on either the project or dataset level, depending on the resource.
-    # If we don't have a count permission, we may still have a query:data permission (no cascade) which gives us these
-    # for free.
-
-    return (
-        await query_permission(request, resource, get_counts_permission(dataset_level))
-        or await can_query_data(request, resource)   # or-shortcut means this only runs if it needs to be checked.
-    )
+async def can_see_counts(request: HttpRequest, resources: list[dict], dataset_level: bool) -> tuple[bool, ...]:
+    return tuple(map(any, (
+        await authz_middleware.async_evaluate(request, resources, [get_counts_permission(dataset_level), P_QUERY_DATA])
+    )))
 
 
 async def has_counts_permission_for_data_types(
     request: HttpRequest, project: str | None, dataset: str | None, data_types: list[str]
-) -> list[bool]:
+) -> tuple[bool, ...]:
     dataset_level: bool = dataset is not None
 
-    has_permission: bool = await can_see_counts(request, create_resource(project, dataset), dataset_level)
+    if project is None:
+        res_everything = (await can_see_counts(request, [RESOURCE_EVERYTHING], dataset_level))[0]
+        return tuple([res_everything] * len(data_types))
 
-    return [
-        # Either we have permission for all (saves many calls via or-shortcutting) or we have for a specific data type:
-        has_permission or await can_see_counts(request, create_resource(project, dataset, dt_id), dataset_level)
-        for dt_id in data_types
-    ]
+    return await can_see_counts(
+        request, [build_resource(project, dataset, dt_id) for dt_id in data_types], dataset_level)
 
 
 async def has_counts_permission_for_data_types_bulk_resources(
@@ -69,8 +53,7 @@ async def has_counts_permission_for_data_types_bulk_resources(
     data_types: list[str],
     dataset_level: bool,
 ):
-    resources_without_dts = [create_resource(project, dataset) for project, dataset in resource_tuples]
-
+    resources_without_dts = [build_resource(project, dataset) for project, dataset in resource_tuples]
     has_permission_by_resource: tuple[bool, ...] = await can_see_counts(request, resources_without_dts, dataset_level)
 
     return [
@@ -98,20 +81,18 @@ async def get_data_type_discovery_permissions(
     #  a) full-response query:data permissions, and
     #  b) count-level permissions (at the project level) - will also re-check the query:data permissions currently :(
 
-    query_data_perms, counts_perms = await asyncio.gather(
-        has_query_data_permission_for_data_types(request, None, None, data_types),
-        has_counts_permission_for_data_types(request, None, None, data_types),
-    )
+    # TODO: PROJECT PASSED IN + PROPER DATA TYPE LIST - eventually this should change based on project/dataset/etc perms
+    #  query_data_perms,  # query:data permissions for each data type
+    #  counts_perms,  # query:project_level_counts permissions for each data type
+
+    p_query_counts, p_query_data = await authz_middleware.async_evaluate(
+        request, (RESOURCE_EVERYTHING,), (P_QUERY_PROJECT_LEVEL_COUNTS, P_QUERY_DATA))[0]
 
     # Collect these permissions, organized by data type, in a dictionary, so we can query them later:
     return {
         dt: {
-            "counts": c_perm,
-            "data": qd_perm,
+            "counts": p_query_counts,
+            "data": p_query_data,
         }
-        for dt, qd_perm, c_perm in zip(
-            data_types,  # List of data type IDs
-            query_data_perms,  # query:data permissions for each data type
-            counts_perms,  # query:project_level_counts permissions for each data type
-        )
+        for dt in data_types
     }
