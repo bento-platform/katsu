@@ -40,7 +40,8 @@ from chord_metadata_service.restapi.utils import (
     get_date_stats,
     get_range_stats,
     PUBLIC_MODEL_NAMES_TO_MODEL,
-    PUBLIC_MODEL_NAMES_TO_DATA_TYPE, BinWithValue,
+    PUBLIC_MODEL_NAMES_TO_DATA_TYPE,
+    BinWithValue,
 )
 
 OVERVIEW_AGE_BIN_SIZE = 10
@@ -76,6 +77,8 @@ async def overview(_request: Request):
     get:
     Overview of all Phenopackets in the database
     """
+
+    # TODO: permissions
 
     # TODO: parallel
     phenopackets_count = await pheno_models.Phenopacket.objects.all().acount()

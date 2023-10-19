@@ -101,9 +101,9 @@ urlpatterns = [
     path('biosample_sampled_tissue_autocomplete', BiosampleSampledTissueAutocomplete.as_view(),
          name='biosample-sampled-tissue-autocomplete',),
 
-    # public endpoints (no confidential information leak)
-    path('public', individual_views.PublicListIndividuals.as_view(),
-         name='public',),
+    # public endpoints (no confidential information leak unless we have a token)
+    #  TODO: scope these to projects and move these to aggregation or beacon or something
+    path('public', individual_views.PublicListIndividuals.as_view(), name='public',),
     path('public_search_fields', public_search_fields, name='public-search-fields',),
     path('public_overview', public_overview, name='public-overview',),
     path('public_dataset', public_dataset, name='public-dataset'),

@@ -239,6 +239,7 @@ class PublicListIndividuals(APIView):
         tissues_count, sampled_tissues = await biosample_tissue_stats(filtered_qs)
         experiments_count, experiment_types = await experiment_type_stats(filtered_qs)
 
+        # TODO: permissions
         return Response({
             "count": qct,
             "biosamples": {
