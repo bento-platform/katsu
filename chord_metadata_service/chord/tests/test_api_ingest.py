@@ -6,17 +6,14 @@ from rest_framework.test import APITestCase
 
 from chord_metadata_service.restapi.tests.utils import load_local_json
 from .constants import VALID_PROJECT_1, valid_dataset_1
-from ..workflows.metadata import METADATA_WORKFLOWS
+from ..workflows.metadata import workflow_set, WORKFLOW_PHENOPACKETS_JSON
 
 
 def generate_phenopackets_ingest(dataset_id):
     return {
         "dataset_id": dataset_id,
         "workflow_id": "phenopackets_json",
-        "workflow_metadata": METADATA_WORKFLOWS["ingestion"]["phenopackets_json"],
-        "workflow_outputs": {
-            "json_document": ""  # TODO
-        },
+        "workflow_metadata": workflow_set.get_workflow(WORKFLOW_PHENOPACKETS_JSON),
         "workflow_params": {
             "json_document": ""  # TODO
         }
@@ -27,7 +24,7 @@ class WorkflowTest(APITestCase):
     def test_workflows(self):
         r = self.client.get(reverse("workflows"), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(r.json(), METADATA_WORKFLOWS)
+        self.assertDictEqual(r.json(), workflow_set.workflow_dicts_by_type_and_id())
 
         # Non-existent workflow
         r = self.client.get(reverse("workflow-detail", args=("invalid_workflow",)), content_type="application/json")
@@ -36,7 +33,7 @@ class WorkflowTest(APITestCase):
         # Valid workflow
         r = self.client.get(reverse("workflow-detail", args=("phenopackets_json",)), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(r.json(), METADATA_WORKFLOWS["ingestion"]["phenopackets_json"])
+        self.assertDictEqual(r.json(), workflow_set.get_workflow(WORKFLOW_PHENOPACKETS_JSON).model_dump(mode="json"))
 
         # Non-existent workflow file
         r = self.client.get(reverse("workflow-file", args=("invalid_workflow",)), content_type="text/plain")
