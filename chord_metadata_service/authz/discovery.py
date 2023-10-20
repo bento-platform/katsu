@@ -30,7 +30,7 @@ def get_counts_permission(dataset_level: bool) -> Permission:
 
 async def can_see_counts(request: HttpRequest, resources: list[dict], dataset_level: bool) -> tuple[bool, ...]:
     return tuple(map(any, (
-        await authz_middleware.async_evaluate(request, resources, [get_counts_permission(dataset_level), P_QUERY_DATA])
+        await authz_middleware.async_evaluate(request, resources, (get_counts_permission(dataset_level), P_QUERY_DATA))
     )))
 
 
@@ -85,8 +85,11 @@ async def get_data_type_discovery_permissions(
     #  query_data_perms,  # query:data permissions for each data type
     #  counts_perms,  # query:project_level_counts permissions for each data type
 
-    p_query_counts, p_query_data = await authz_middleware.async_evaluate(
-        request, (RESOURCE_EVERYTHING,), (P_QUERY_PROJECT_LEVEL_COUNTS, P_QUERY_DATA))[0]
+    p_query_counts, p_query_data = (
+        await authz_middleware.async_evaluate(
+            request, (RESOURCE_EVERYTHING,), (P_QUERY_PROJECT_LEVEL_COUNTS, P_QUERY_DATA)
+        )
+    )[0]
 
     # Collect these permissions, organized by data type, in a dictionary, so we can query them later:
     return {

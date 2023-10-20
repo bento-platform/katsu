@@ -375,7 +375,7 @@ async def compute_binned_ages(individual_queryset: QuerySet, bin_size: int) -> l
 
     a = individual_queryset.filter(age_numeric__isnull=True).values('time_at_last_encounter')
     binned_ages = []
-    async for r in a.iterator():  # reduce memory footprint (no caching)
+    async for r in a:
         if r["time_at_last_encounter"] is None:
             continue
         age = parse_individual_age(r["time_at_last_encounter"])
