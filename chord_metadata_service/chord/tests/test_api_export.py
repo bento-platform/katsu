@@ -9,7 +9,7 @@ from chord_metadata_service.chord.export.utils import EXPORT_DIR
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from ..workflows.metadata import METADATA_WORKFLOWS
+from ..workflows.metadata import workflow_set
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
@@ -21,11 +21,8 @@ from .example_ingest import EXAMPLE_INGEST_PHENOPACKET
 def generate_phenopackets_ingest(table_id):
     return {
         "table_id": table_id,
-        "workflow_id": "phenopackets_json",
-        "workflow_metadata": METADATA_WORKFLOWS["ingestion"]["phenopackets_json"],
-        "workflow_outputs": {
-            "json_document": ""  # TODO
-        },
+        "workflow_id": WORKFLOW_PHENOPACKETS_JSON,
+        "workflow_metadata": workflow_set.get_workflow(WORKFLOW_PHENOPACKETS_JSON).model_dump(mode="json"),
         "workflow_params": {
             "json_document": ""  # TODO
         }
