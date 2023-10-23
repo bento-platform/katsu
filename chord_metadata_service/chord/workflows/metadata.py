@@ -4,8 +4,6 @@ __all__ = [
     "WORKFLOW_PHENOPACKETS_JSON",
     "WORKFLOW_EXPERIMENTS_JSON",
     "WORKFLOW_FHIR_JSON",
-    "WORKFLOW_MCODE_FHIR_JSON",
-    "WORKFLOW_MCODE_JSON",
     "WORKFLOW_READSET",
     "WORKFLOW_MAF_DERIVED_FROM_VCF_JSON",
     "WORKFLOW_VCF2MAF",
@@ -22,7 +20,6 @@ from chord_metadata_service.chord.data_types import (
     DATA_TYPE_EXPERIMENT,
     DATA_TYPE_EXPERIMENT_RESULT,
     DATA_TYPE_PHENOPACKET,
-    DATA_TYPE_MCODEPACKET,
     DATA_TYPE_READSET,
 )
 
@@ -31,8 +28,6 @@ from .constants import FROM_CONFIG
 WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
-WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
-WORKFLOW_MCODE_JSON = "mcode_json"
 WORKFLOW_READSET = "readset"
 WORKFLOW_MAF_DERIVED_FROM_VCF_JSON = "maf_derived_from_vcf_json"
 WORKFLOW_VCF2MAF = "vcf2maf"
@@ -129,25 +124,6 @@ METADATA_WORKFLOWS = {
                 },
 
             ]
-        },
-        WORKFLOW_MCODE_FHIR_JSON: {
-            "name": "MCODE FHIR Resources JSON",
-            "description": "This ingestion workflow will validate and import a mCODE FHIR 4.0. schema-compatible "
-                           "JSON document, and convert it to the Bento metadata service's internal mCODE-based "
-                           "data model.",
-            "data_type": DATA_TYPE_MCODEPACKET,
-            "file": "mcode_fhir_json.wdl",
-            "inputs": [KATSU_URL_INPUT, json_file_input("json_document")],
-            "outputs": [json_file_output("json_document", "ingest.json")],
-        },
-        WORKFLOW_MCODE_JSON: {
-            "name": "MCODE Resources JSON",
-            "description": "This ingestion workflow will validate and import the Bento metadata service's "
-                           "internal mCODE-based JSON document",
-            "data_type": DATA_TYPE_MCODEPACKET,
-            "file": "mcode_json.wdl",
-            "inputs": [KATSU_URL_INPUT, json_file_input("json_document")],
-            "outputs": [json_file_output("json_document", "ingest.json")],
         },
         WORKFLOW_READSET: {
             "name": "Readset",

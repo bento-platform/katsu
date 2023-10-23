@@ -11,8 +11,6 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
     alternate_ids = django_filters.CharFilter(lookup_expr="icontains")
     sex = django_filters.CharFilter(lookup_expr="iexact")
     karyotypic_sex = django_filters.CharFilter(lookup_expr="iexact")
-    ethnicity = django_filters.CharFilter(lookup_expr="icontains")
-    race = django_filters.CharFilter(lookup_expr="icontains")
     disease = django_filters.CharFilter(
         method="filter_disease", field_name="phenopackets__diseases",
         label="Disease"
@@ -46,14 +44,6 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         ).distinct()
         return qs
 
-    def filter_on_cancer_condition_name(self, qs, name, value):
-        qs = qs.filter(mcodepacket__cancer_condition__body_site__icontains=value).distinct()
-        return qs
-
-    def filter_on_treatment_name(self, qs, name, value):
-        qs = qs.filter(mcodepacket__cancer_related_procedures__code__icontains=value).distinct()
-        return qs
-
     def filter_disease(self, qs, name, value):
         qs = qs.filter(
             Q(phenopackets__diseases__term__id__icontains=value) |
@@ -71,10 +61,6 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 Cast("age", TextField()),
                                 "sex", "karyotypic_sex",
                                 Cast("taxonomy", TextField()),
-                                Cast("comorbid_condition", TextField()),
-                                Cast("ecog_performance_status", TextField()),
-                                Cast("karnofsky", TextField()),
-                                "ethnicity", "race",
                                 Cast("extra_properties", TextField()),
 
                                 # Phenotypic feature fields
