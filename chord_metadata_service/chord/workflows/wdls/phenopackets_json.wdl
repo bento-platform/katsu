@@ -3,10 +3,8 @@ version 1.0
 workflow phenopackets_json {
     input {
         File json_document
-        String secret__access_token
-        String run_dir
-        String project_id
-        String dataset_id
+        String access_token
+        String project_dataset
         String katsu_url
     }
 
@@ -14,8 +12,8 @@ workflow phenopackets_json {
         input:
             json_document = json_document,
             katsu_url = katsu_url,
-            dataset_id = dataset_id,
-            token = secret__access_token
+            project_dataset = project_dataset,
+            token = access_token
     }
 
     output {
@@ -28,15 +26,16 @@ task ingest_task {
     input {
         File json_document
         String katsu_url
-        String dataset_id
+        String project_dataset
         String token
     }
     command <<<
+        dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1]))'))
         RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ~{token}" \
             --data "@~{json_document}" \
-            "~{katsu_url}/ingest/~{dataset_id}/phenopackets_json")
+            "~{katsu_url}/ingest/${dataset_id}/phenopackets_json")
         if [[ "${RESPONSE}" != "204" ]]
         then
             echo "Error: Metadata service replied with ${RESPONSE}" 1>&2  # to stderr

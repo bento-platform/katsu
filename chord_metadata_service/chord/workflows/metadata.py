@@ -57,6 +57,7 @@ def json_file_output(id_: str, output_name: Optional[str] = None):
 DRS_URL_INPUT = wm.WorkflowServiceUrlInput(id="drs_url", service_kind="drs")
 KATSU_URL_INPUT = wm.WorkflowServiceUrlInput(id="katsu_url", service_kind="metadata")
 PROJECT_DATASET_INPUT = wm.WorkflowProjectDatasetInput(id="project_dataset")
+ACCESS_TOKEN_INPUT = wm.WorkflowConfigInput(id="access_token", key="access_token")
 
 
 workflow_set = WorkflowSet()
@@ -69,7 +70,14 @@ workflow_set.add_workflow(WORKFLOW_PHENOPACKETS_JSON, wm.WorkflowDefinition(
     description="This ingestion workflow will validate and import a Phenopackets schema-compatible JSON document.",
     tags=[DATA_TYPE_PHENOPACKET],
     file="phenopackets_json.wdl",
-    inputs=[PROJECT_DATASET_INPUT, KATSU_URL_INPUT, json_file_input("json_document")],
+    inputs=[
+        # injected
+        ACCESS_TOKEN_INPUT,
+        KATSU_URL_INPUT,
+        # user
+        PROJECT_DATASET_INPUT,
+        json_file_input("json_document"),
+    ],
 ))
 
 workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON, wm.WorkflowDefinition(
@@ -78,7 +86,14 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON, wm.WorkflowDefinition(
     description="This ingestion workflow will validate and import a Bento Experiments schema-compatible JSON document.",
     tags=[DATA_TYPE_EXPERIMENT],
     file="experiments_json.wdl",
-    inputs=[PROJECT_DATASET_INPUT, KATSU_URL_INPUT, json_file_input("json_document")],
+    inputs=[
+        # injected
+        ACCESS_TOKEN_INPUT,
+        KATSU_URL_INPUT,
+        # user
+        PROJECT_DATASET_INPUT,
+        json_file_input("json_document"),
+    ],
 ))
 
 workflow_set.add_workflow(WORKFLOW_READSET, wm.WorkflowDefinition(
@@ -88,6 +103,9 @@ workflow_set.add_workflow(WORKFLOW_READSET, wm.WorkflowDefinition(
     tags=[DATA_TYPE_EXPERIMENT_RESULT, DATA_TYPE_READSET],
     file="readset.wdl",
     inputs=[
+        # injected
+        ACCESS_TOKEN_INPUT,
+        # user
         PROJECT_DATASET_INPUT,
         wm.WorkflowFileArrayInput(
             id="readset_files",
@@ -104,7 +122,13 @@ workflow_set.add_workflow(WORKFLOW_MAF_DERIVED_FROM_VCF_JSON, wm.WorkflowDefinit
                 "VCF files found in the Dataset.",
     tags=[DATA_TYPE_EXPERIMENT_RESULT],
     file="maf_derived_from_vcf_json.wdl",
-    inputs=[PROJECT_DATASET_INPUT, json_file_input("json_document")],
+    inputs=[
+        # injected
+        ACCESS_TOKEN_INPUT,
+        # user
+        PROJECT_DATASET_INPUT,
+        json_file_input("json_document"),
+    ],
 ))
 
 # Analysis workflows ---------------------------------------------------------------------------------------------------
@@ -115,10 +139,13 @@ workflow_set.add_workflow(WORKFLOW_VCF2MAF, wm.WorkflowDefinition(
     description="This analysis workflow will create MAF files from every VCF file found in a dataset.",
     file="vcf2maf.wdl",
     inputs=[
-        PROJECT_DATASET_INPUT,
-        wm.WorkflowStringInput(id="vep_cache_dir"),  # TODO: injected, from config
+        # injected
+        ACCESS_TOKEN_INPUT,
+        wm.WorkflowConfigInput(key="vep_cache_dir"),
         DRS_URL_INPUT,
         KATSU_URL_INPUT,
+        # user
+        PROJECT_DATASET_INPUT,
     ]
 ))
 
@@ -130,7 +157,13 @@ workflow_set.add_workflow(WORKFLOW_CBIOPORTAL, wm.WorkflowDefinition(
     description="This workflow creates a bundle for cBioPortal ingestion.",
     tags=["cbioportal"],
     file="cbioportal_export.wdl",
-    inputs=[PROJECT_DATASET_INPUT, DRS_URL_INPUT, KATSU_URL_INPUT],
+    inputs=[
+        # injected
+        DRS_URL_INPUT,
+        KATSU_URL_INPUT,
+        # user
+        PROJECT_DATASET_INPUT,
+    ],
 ))
 
 # ----------------------------------------------------------------------------------------------------------------------
