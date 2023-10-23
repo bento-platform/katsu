@@ -1,4 +1,4 @@
-from chord_metadata_service.restapi.schema_utils import customize_schema, tag_ids_and_describe
+from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, AGE_OR_AGE_RANGE, EXTRA_PROPERTIES_SCHEMA
 
 from .descriptions import INDIVIDUAL

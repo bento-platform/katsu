@@ -1,10 +1,7 @@
 import json
 import logging
 
-from collections import Counter
-
 from django.conf import settings
-from django.views.decorators.cache import cache_page
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -12,7 +9,6 @@ from rest_framework.decorators import api_view, permission_classes
 from chord_metadata_service.restapi.utils import (
     get_age_numeric_binned,
     get_field_options,
-    parse_individual_age,
     stats_for_field,
     queryset_stats_for_field,
     get_categorical_stats,
