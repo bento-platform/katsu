@@ -177,10 +177,15 @@ class GenomicInterpretationSerializer(GenericSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        response["gene_descriptor"] = GeneDescriptorSerializer(
-            instance.gene_descriptor, many=False, required=False).data
-        response["variant_interpretation"] = VariantInterpretationSerializer(
-            instance.variant_interpretation, many=False, required=False).data
+        
+        # May contain a gene_descriptor or a variant_interpretation, not both
+        if instance.gene_descriptor:
+            response["gene_descriptor"] = GeneDescriptorSerializer(
+                instance.gene_descriptor, many=False, required=False).data
+        elif instance.variant_interpretation:
+            response["variant_interpretation"] = VariantInterpretationSerializer(
+                instance.variant_interpretation, many=False, required=False).data
+        
         return response
 
 

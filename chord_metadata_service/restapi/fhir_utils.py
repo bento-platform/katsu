@@ -182,7 +182,7 @@ def fhir_observation(obj):
         )
     observation.extension = []
     concept_extensions = codeable_concepts_fields(
-        ['severity', 'modifier', 'onset'], 'phenotypic_feature', obj
+        ['severity', 'modifiers', 'onset'], 'phenotypic_feature', obj
     )
     for ce in concept_extensions:
         observation.extension.append(ce)

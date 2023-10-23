@@ -538,7 +538,7 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
             "id": "HP: 0012825",
             "label": "Mild"
         },
-        modifier=[
+        modifiers=[
             {
                 "id": "HP: 0012825 ",
                 "label": "Mild"
@@ -581,7 +581,7 @@ def invalid_phenotypic_feature():
             "id": "HP: 0012825",
             "label": "Mild"
         },
-        modifier=[
+        modifiers=[
             {
                 "label": "Mild"
             },

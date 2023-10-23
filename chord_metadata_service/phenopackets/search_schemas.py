@@ -2,6 +2,7 @@ from . import models, schemas
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.search_schemas import RESOURCE_SEARCH_SCHEMA
 from chord_metadata_service.restapi.schema_utils import (
+    array_of,
     merge_schema_dictionaries,
     search_db_fk,
     search_db_pk,
@@ -176,13 +177,11 @@ PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
                 }
             }
         }),
-        "negated": {
+        "excluded": {
             "search": search_optional_eq(1),
         },
         "severity": ONTOLOGY_SEARCH_SCHEMA,
-        "modifier": {  # TODO: Plural?
-            "items": ONTOLOGY_SEARCH_SCHEMA
-        },
+        "modifiers": array_of(ONTOLOGY_SEARCH_SCHEMA),
         "onset": TIME_ELEMENT_SEARCH_SCHEMA,
         "resolution": TIME_ELEMENT_SEARCH_SCHEMA,
         "evidence": EVIDENCE_SEARCH_SCHEMA,
@@ -301,11 +300,11 @@ DISEASE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DI
         "onset": DISEASE_ONSET_SEARCH_SCHEMA,
         "disease_stage": {
             "items": ONTOLOGY_SEARCH_SCHEMA,
-            "search": {"database": {"type": "array"}}
+            "search": {"database": {"type": "jsonb"}}
         },
-        "tnm_finding": {
+        "clinical_tnm_finding": {
             "items": ONTOLOGY_SEARCH_SCHEMA,
-            "search": {"database": {"type": "array"}}
+            "search": {"database": {"type": "jsonb"}}
         },
     },
     "search": {

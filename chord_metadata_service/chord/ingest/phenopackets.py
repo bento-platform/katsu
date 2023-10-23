@@ -60,7 +60,7 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
         description=pf.get("description", ""),
         pftype=pf["type"],
         excluded=pf.get("excluded", False),
-        modifier=pf.get("modifier", []),  # TODO: Validate ontology term in schema...
+        modifiers=pf.get("modifiers", []),  # TODO: Validate ontology term in schema...
         severity=pf.get("severity"),
         onset=pf.get("onset"),
         evidence=pf.get("evidence"),  # TODO: Separate class for evidence?
@@ -208,11 +208,22 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
     gene_descriptor = _get_or_create_opt("gene_descriptor", gen_interp, get_or_create_gene_descriptor)
     variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
 
+    # Check if a Biosample or Individual with subject_or_biosample_id exists
+    subject_or_biosample_id = gen_interp["subject_or_biosample_id"]
+    is_biosample = pm.Biosample.objects.filter(id=subject_or_biosample_id).exists()
+    is_subject = pm.Individual.objects.filter(id=subject_or_biosample_id).exists()
+    
+    # Store the type the ID refers to in extra_properties
+    element_type = "biosample" if is_biosample and not is_subject else "subject"
+    extra_properties = gen_interp.get("extra_properties", {})
+    extra_properties["related_type"] = element_type
+
     gen_obj, _ = pm.GenomicInterpretation.objects.get_or_create(
-        subject_or_biosample_id=gen_interp["subject_or_biosample_id"],
+        subject_or_biosample_id=subject_or_biosample_id,
         interpretation_status=gen_interp["interpretation_status"],
         gene_descriptor=gene_descriptor,
-        variant_interpretation=variant_interpretation
+        variant_interpretation=variant_interpretation,
+        extra_properties=extra_properties,
     )
     return gen_obj
 

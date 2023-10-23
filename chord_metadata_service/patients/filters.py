@@ -86,7 +86,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 "phenopackets__phenotypic_features__description",
                                 Cast("phenopackets__phenotypic_features__pftype", TextField()),
                                 Cast("phenopackets__phenotypic_features__severity", TextField()),
-                                Cast("phenopackets__phenotypic_features__modifier", TextField()),
+                                Cast("phenopackets__phenotypic_features__modifiers", TextField()),
                                 Cast("phenopackets__phenotypic_features__onset", TextField()),
                                 Cast("phenopackets__phenotypic_features__evidence", TextField()),
                                 Cast("phenopackets__phenotypic_features__extra_properties", TextField()),
