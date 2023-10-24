@@ -2,16 +2,22 @@
 
 from django.db import migrations
 
+MCODE_FIELDS = ['comorbid_condition', 'ecog_performance_status', 'ethnicity', 'karnofsky', 'race']
+
 def migrate_mcode_fields(apps, _schema_editor):
-    Individual = apps.get_model("patients", " Individual")
+    Individual = apps.get_model("patients", "Individual")
     for ind in Individual.objects.all():
-        ind.extra_properties['comorbid_condition'] = ind.comorbid_condition
-        ind.extra_properties['ecog_performance_status'] = ind.ecog_performance_status
-        ind.extra_properties['ethnicity'] = ind.ethnicity
-        ind.extra_properties['karnofsky'] = ind.karnofsky
-        ind.extra_properties['race'] = ind.race
+        for field in MCODE_FIELDS:
+          ind.extra_properties[field] = getattr(ind, field)
         ind.save()
 
+
+def reverse_migrate_mcode_fields(apps, _schema_editor):
+    Individual = apps.get_model("patients", "Individual")
+    for ind in Individual.objects.all():
+        for field in MCODE_FIELDS:
+              setattr(ind, field, ind.extra_properties.pop(field))
+        ind.save()
 
 class Migration(migrations.Migration):
 
@@ -19,10 +25,8 @@ class Migration(migrations.Migration):
         ('patients', '0004_v2_18_0'),
     ]
 
-    # TODO: data migration of removed fields to extra_properties
-
     operations = [
-        migrations.RunPython(migrate_mcode_fields),
+        migrations.RunPython(migrate_mcode_fields, reverse_migrate_mcode_fields),
         migrations.RemoveField(
             model_name='individual',
             name='comorbid_condition',
