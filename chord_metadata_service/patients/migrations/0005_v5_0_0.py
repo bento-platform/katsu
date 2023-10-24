@@ -8,7 +8,9 @@ def migrate_mcode_fields(apps, _schema_editor):
     Individual = apps.get_model("patients", "Individual")
     for ind in Individual.objects.all():
         for field in MCODE_FIELDS:
-          ind.extra_properties[field] = getattr(ind, field)
+            if field_value := getattr(ind, field):
+                ind.extra_properties[field] = field_value
+
         ind.save()
 
 
