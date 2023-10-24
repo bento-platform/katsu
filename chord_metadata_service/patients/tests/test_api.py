@@ -338,7 +338,10 @@ class PublicFilteringIndividualsTest(APITestCase):
         return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
-        individuals = [c.generate_valid_individual(date_of_consent_range=(2020, 2023)) for _ in range(self.num_individuals)]
+        individuals = [
+            c.generate_valid_individual(date_of_consent_range=(2020, 2023))
+            for _ in range(self.num_individuals)
+        ]
         for individual in individuals:
             Individual.objects.create(**individual)
         p = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)

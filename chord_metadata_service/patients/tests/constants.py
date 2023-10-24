@@ -1,3 +1,4 @@
+from typing import Tuple
 import uuid
 import random
 from datetime import date, timedelta
@@ -69,7 +70,7 @@ INDIVIDUAL_1_CSV = "patient:1,FEMALE,1960-01-01,human,UNKNOWN_KARYOTYPE,P45Y - P
 INDIVIDUAL_2_CSV = "patient:2,MALE,1967-01-01,human,UNKNOWN_KARYOTYPE,P55Y,,--IGNORE--,--IGNORE--"
 
 
-def generate_valid_individual(date_of_consent_range: tuple[int, int] = (2020, 2023)):
+def generate_valid_individual(date_of_consent_range: Tuple[int, int] = (2020, 2023)):
     return {
         "id": str(uuid.uuid4()),
         "taxonomy": {
