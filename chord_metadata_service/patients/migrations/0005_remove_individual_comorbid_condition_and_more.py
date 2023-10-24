@@ -2,6 +2,16 @@
 
 from django.db import migrations
 
+def migrate_mcode_fields(apps, _schema_editor):
+    Individual = apps.get_model("patients", " Individual")
+    for ind in Individual.objects.all():
+        ind.extra_properties['comorbid_condition'] = ind.comorbid_condition
+        ind.extra_properties['ecog_performance_status'] = ind.ecog_performance_status
+        ind.extra_properties['ethnicity'] = ind.ethnicity
+        ind.extra_properties['karnofsky'] = ind.karnofsky
+        ind.extra_properties['race'] = ind.race
+        ind.save()
+
 
 class Migration(migrations.Migration):
 
@@ -12,6 +22,7 @@ class Migration(migrations.Migration):
     # TODO: data migration of removed fields to extra_properties
 
     operations = [
+        migrations.RunPython(migrate_mcode_fields),
         migrations.RemoveField(
             model_name='individual',
             name='comorbid_condition',
