@@ -141,7 +141,7 @@ workflow_set.add_workflow(WORKFLOW_VCF2MAF, wm.WorkflowDefinition(
     inputs=[
         # injected
         ACCESS_TOKEN_INPUT,
-        wm.WorkflowConfigInput(key="vep_cache_dir"),
+        wm.WorkflowConfigInput(id="vep_cache_dir", key="vep_cache_dir"),
         DRS_URL_INPUT,
         KATSU_URL_INPUT,
         # user

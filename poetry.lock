@@ -273,19 +273,17 @@ visualize = ["Twisted (>=16.1.1)", "graphviz (>0.5.1)"]
 
 [[package]]
 name = "bento-lib"
-version = "9.0.0a4"
+version = "9.0.0a7"
 description = "A set of common utilities and helpers for Bento platform services."
 optional = false
 python-versions = ">=3.10.0"
 files = [
-    {file = "bento_lib-9.0.0a4-py3-none-any.whl", hash = "sha256:26b1ff7d868ec968a4746cb1aa4e2d0dd3d6b80985f99ecb2a7f73a127923087"},
-    {file = "bento_lib-9.0.0a4.tar.gz", hash = "sha256:299e24f9cddd5f41af27265febd37a344f382ec69e1cb343dd37f3cafc185cce"},
+    {file = "bento_lib-9.0.0a7-py3-none-any.whl", hash = "sha256:c6c1d3d84c58c65e434b5ed5e4a6f364cbe9128acd709debcc81c5451bc8366e"},
+    {file = "bento_lib-9.0.0a7.tar.gz", hash = "sha256:962315cfe049585094270446eba412806a0c21b232e6fe9ad6bc5aaf0d7650ba"},
 ]
 
 [package.dependencies]
 aiohttp = ">=3.8.4,<4"
-Django = {version = ">=4.2.1,<5", optional = true, markers = "extra == \"django\""}
-djangorestframework = {version = ">=3.14.0,<3.15", optional = true, markers = "extra == \"django\""}
 jsonschema = ">=4.17.3,<5"
 psycopg2-binary = ">=2.9.5,<3.0"
 pydantic = ">=2.3.0,<3"
@@ -2313,4 +2311,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.0"
-content-hash = "37425c3f87dfad125ddf90881d9e3e0df1af4e148d48b6968e7070f41cd3fd78"
+content-hash = "4e3532c4ccc8682e954d7e414580e2b4d4b6716ac76962c6535eef47d1c963b1"
