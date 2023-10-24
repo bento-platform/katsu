@@ -1,16 +1,15 @@
 import uuid
 import random
 from datetime import date, timedelta
-from dateutil.relativedelta import relativedelta
 
 
-def generate_random_date(years_from: int, years_to: int):
-    # generates random date in the format YYYY-MM-DD, e.g. 2020-01-01
-    start_date = date.today() - relativedelta(years=years_from)
-    end_date = date.today() - relativedelta(years=years_to)
-    delta = end_date - start_date
-    random_number = random.randint(1, delta.days)
-    new_date = start_date + timedelta(days=random_number)
+def generate_date_in_range(lower_year: int, upper_year: int):
+    # generates a random date contained between lower_year and upper_year
+    lower_date = date(lower_year, 1, 1)
+    upper_date = date(upper_year, 1, 1)
+    delta = upper_date - lower_date
+    random_day_in_range = random.randint(1, delta.days)
+    new_date = lower_date + timedelta(days=random_day_in_range)
     return new_date.strftime('%Y-%m-%d')
 
 
@@ -70,7 +69,7 @@ INDIVIDUAL_1_CSV = "patient:1,FEMALE,1960-01-01,human,UNKNOWN_KARYOTYPE,P45Y - P
 INDIVIDUAL_2_CSV = "patient:2,MALE,1967-01-01,human,UNKNOWN_KARYOTYPE,P55Y,,--IGNORE--,--IGNORE--"
 
 
-def generate_valid_individual():
+def generate_valid_individual(date_of_consent_range: tuple[int, int] = (2020, 2023)):
     return {
         "id": str(uuid.uuid4()),
         "taxonomy": {
@@ -87,6 +86,6 @@ def generate_valid_individual():
             "covidstatus": random.choice(["Positive", "Negative"]),
             "lab_test_result_value": round(random.uniform(0, 999.99), 2),
             "baseline_creatinine": round(random.uniform(30, 600), 0),
-            "date_of_consent": generate_random_date(3, 0)
+            "date_of_consent": generate_date_in_range(date_of_consent_range[0], date_of_consent_range[1]),
         }
     }

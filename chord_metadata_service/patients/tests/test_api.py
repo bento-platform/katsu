@@ -6,7 +6,6 @@ import random
 from django.conf import settings
 from django.urls import reverse
 from django.test import override_settings
-from datetime import datetime
 from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.patients.models import Individual
@@ -339,7 +338,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(self.num_individuals)]
+        individuals = [c.generate_valid_individual(date_of_consent_range=(2020, 2023)) for _ in range(self.num_individuals)]
         for individual in individuals:
             Individual.objects.create(**individual)
         p = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
@@ -563,14 +562,13 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_date_range_1(self):
         # extra_properties date range search (only after or before, single value)
         # Testing with a date of consent from 1 year ago
-        year_of_consent = datetime.now().year - 1
         response = self.client.get(
-            f'/api/public?date_of_consent=Mar {year_of_consent}'
+            '/api/public?date_of_consent=Mar 2021'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
-            "extra_properties__date_of_consent__startswith": f"{year_of_consent}-03"
+            "extra_properties__date_of_consent__startswith": "2021-03"
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
@@ -583,14 +581,13 @@ class PublicFilteringIndividualsTest(APITestCase):
     def test_public_filtering_extra_properties_date_range_and_other_range(self):
         # extra_properties date range search (both after and before, single value) and other number range search
         # Testing with a date of consent from 2 years ago
-        year_of_consent = datetime.now().year - 1
         response = self.client.get(
-            f'/api/public?date_of_consent=Mar {year_of_consent}&lab_test_result_value=< 200'
+            '/api/public?date_of_consent=Mar 2021&lab_test_result_value=< 200'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
-            "extra_properties__date_of_consent__startswith": f"{year_of_consent}-03",
+            "extra_properties__date_of_consent__startswith": "2021-03",
             "extra_properties__lab_test_result_value__gte": 0,
             "extra_properties__lab_test_result_value__lt": 200,
         }
