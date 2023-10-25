@@ -63,7 +63,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = IndividualFilter
     ordering_fields = ["id"]
-    search_fields = ["sex", "ethnicity"]
+    search_fields = ["sex"]
     queryset = Individual.objects.all().prefetch_related(
         *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
         *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),

@@ -1,4 +1,3 @@
-import chord_metadata_service.mcode.models as mm
 import chord_metadata_service.phenopackets.models as pm
 
 from chord_metadata_service.cleanup.remove import remove_not_referenced
@@ -17,10 +16,6 @@ async def clean_individuals() -> int:
     """
 
     individuals_referenced = set()
-
-    # Collect references to individuals from MCode
-    individuals_referenced |= await build_id_set_from_model(mm.LabsVital, "individual_id")
-    individuals_referenced |= await build_id_set_from_model(mm.MCodePacket, "subject_id")
 
     # Collect references to individuals from Phenopackets
     individuals_referenced |= await build_id_set_from_model(pm.Biosample, "individual_id")

@@ -103,8 +103,6 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
         id=subject["id"],
         # if left out/null, karyotypic_sex defaults to UNKNOWN_KARYOTYPE
         karyotypic_sex=subject.get("karyotypic_sex") or KaryotypicSex.UNKNOWN_KARYOTYPE,
-        race=subject.get("race", ""),
-        ethnicity=subject.get("ethnicity", ""),
         age_numeric=age_numeric_value,
         age_unit=age_unit_value if age_unit_value else "",
         extra_properties=existing_extra_properties,

@@ -150,7 +150,7 @@ class IndividualCSVRendererTest(APITestCase):
         self.assertEqual(body[1][1], c.VALID_INDIVIDUAL['sex'])
         headers = body.pop(0)
         for column in ['id', 'sex', 'date of birth', 'taxonomy', 'karyotypic sex',
-                       'race', 'ethnicity', 'age', 'diseases', 'created', 'updated']:
+                       'age', 'diseases', 'created', 'updated']:
             self.assertIn(column, [column_name.lower() for column_name in headers])
 
 
@@ -338,7 +338,10 @@ class PublicFilteringIndividualsTest(APITestCase):
         return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(self.num_individuals)]
+        individuals = [
+            c.generate_valid_individual(date_of_consent_range=(2020, 2023))
+            for _ in range(self.num_individuals)
+        ]
         for individual in individuals:
             Individual.objects.create(**individual)
         p = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
@@ -561,6 +564,7 @@ class PublicFilteringIndividualsTest(APITestCase):
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_extra_properties_date_range_1(self):
         # extra_properties date range search (only after or before, single value)
+        # Testing with a date of consent from 1 year ago
         response = self.client.get(
             '/api/public?date_of_consent=Mar 2021'
         )
@@ -579,6 +583,7 @@ class PublicFilteringIndividualsTest(APITestCase):
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_extra_properties_date_range_and_other_range(self):
         # extra_properties date range search (both after and before, single value) and other number range search
+        # Testing with a date of consent from 2 years ago
         response = self.client.get(
             '/api/public?date_of_consent=Mar 2021&lab_test_result_value=< 200'
         )
