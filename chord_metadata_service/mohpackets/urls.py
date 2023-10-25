@@ -18,6 +18,7 @@ from chord_metadata_service.mohpackets.api_authorized import (
     AuthorizedSpecimenViewSet,
     AuthorizedSurgeryViewSet,
     AuthorizedTreatmentViewSet,
+    api,
 )
 from chord_metadata_service.mohpackets.api_discovery import (
     DiscoveryBiomarkerViewSet,
@@ -121,6 +122,7 @@ ingest_patterns = [
 
 urlpatterns = [
     path("authorized/", include(router.urls)),
+    path("authorized/api/", api.urls),
     path("discovery/", include(discovery_router.urls)),
     path("ingest/", include(ingest_patterns)),
     path("service-info", service_info),

@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework",
     "drf_spectacular",
+    "ninja",
     # Local
     # -----
     "chord_metadata_service.mohpackets",
@@ -205,7 +206,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.ScopedRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"moh_rate_limit": "60/minute"},
+    "DEFAULT_THROTTLE_RATES": {"moh_rate_limit": "6000/minute"},
 }
 
 # CURRENT KATSU VERSION ACCORDING TO MODEL CHANGES

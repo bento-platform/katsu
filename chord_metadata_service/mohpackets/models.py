@@ -2,6 +2,8 @@ import uuid
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils import timezone
 
 """
@@ -45,7 +47,8 @@ class Program(models.Model):
 
 
 class Donor(models.Model):
-    submitter_donor_id = models.CharField(max_length=64, primary_key=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
@@ -74,13 +77,17 @@ class Donor(models.Model):
 
 
 class PrimaryDiagnosis(models.Model):
-    submitter_primary_diagnosis_id = models.CharField(max_length=64, primary_key=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=True, blank=True
     )
+    submitter_primary_diagnosis_id = models.CharField(
+        max_length=64, null=True, blank=True
+    )
+    submitter_donor_id = models.CharField(max_length=64, null=True, blank=True)
     date_of_diagnosis = models.CharField(max_length=32, null=True, blank=True)
     cancer_type_code = models.CharField(max_length=64, null=True, blank=True)
     basis_of_diagnosis = models.CharField(max_length=128, null=True, blank=True)
@@ -108,15 +115,20 @@ class PrimaryDiagnosis(models.Model):
 
 
 class Specimen(models.Model):
-    submitter_specimen_id = models.CharField(max_length=64, primary_key=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    primary_diagnosis_uuid = models.ForeignKey(
+        PrimaryDiagnosis, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_specimen_id = models.CharField(max_length=64, null=False, blank=False)
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
-    )
-    submitter_primary_diagnosis_id = models.ForeignKey(
-        PrimaryDiagnosis, on_delete=models.CASCADE, null=False, blank=False
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
+    submitter_primary_diagnosis_id = models.CharField(
+        max_length=64, null=False, blank=False
     )
     pathological_tumour_staging_system = models.CharField(
         max_length=255, null=True, blank=True
@@ -152,16 +164,19 @@ class Specimen(models.Model):
 
 
 class SampleRegistration(models.Model):
-    submitter_sample_id = models.CharField(max_length=64, primary_key=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    specimen_uuid = models.ForeignKey(
+        Specimen, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_sample_id = models.CharField(max_length=64, null=False, blank=False)
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
-    )
-    submitter_specimen_id = models.ForeignKey(
-        Specimen, on_delete=models.CASCADE, null=False, blank=False
-    )
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
+    submitter_specimen_id = models.CharField(max_length=64, null=False, blank=False)
     specimen_tissue_source = models.CharField(max_length=255, null=True, blank=True)
     tumour_normal_designation = models.CharField(max_length=32, null=True, blank=True)
     specimen_type = models.CharField(max_length=255, null=True, blank=True)
@@ -175,15 +190,20 @@ class SampleRegistration(models.Model):
 
 
 class Treatment(models.Model):
-    submitter_treatment_id = models.CharField(max_length=64, primary_key=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    primary_diagnosis_uuid = models.ForeignKey(
+        PrimaryDiagnosis, on_delete=models.CASCADE, null=False, blank=False
+    )
+    submitter_treatment_id = models.CharField(max_length=64, null=False, blank=False)
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
-    )
-    submitter_primary_diagnosis_id = models.ForeignKey(
-        PrimaryDiagnosis, on_delete=models.CASCADE, null=False, blank=False
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
+    submitter_primary_diagnosis_id = models.CharField(
+        max_length=64, null=False, blank=False
     )
     treatment_type = ArrayField(models.CharField(max_length=255), null=True, blank=True)
     is_primary_treatment = models.CharField(max_length=32, null=True, blank=True)
@@ -208,16 +228,18 @@ class Treatment(models.Model):
 
 
 class Chemotherapy(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    treatment_uuid = models.ForeignKey(
+        Treatment, on_delete=models.CASCADE, null=False, blank=False
+    )
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
-    )
-    submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.CASCADE, null=False, blank=False
-    )
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
+    submitter_treatment_id = models.CharField(max_length=64, null=False, blank=False)
     drug_reference_database = models.CharField(max_length=64, null=True, blank=True)
     drug_name = models.CharField(max_length=255, null=True, blank=True)
     drug_reference_identifier = models.CharField(max_length=64, null=True, blank=True)
@@ -232,23 +254,25 @@ class Chemotherapy(models.Model):
     )
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["uuid"]
 
     def __str__(self):
         return f"{self.id}"
 
 
 class HormoneTherapy(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    treatment_uuid = models.ForeignKey(
+        Treatment, on_delete=models.CASCADE, null=False, blank=False
+    )
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
-    )
-    submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.CASCADE, null=False, blank=False
-    )
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
+    submitter_treatment_id = models.CharField(max_length=64, null=False, blank=False)
     drug_reference_database = models.CharField(max_length=64, null=True, blank=True)
     drug_name = models.CharField(max_length=255, null=True, blank=True)
     drug_reference_identifier = models.CharField(max_length=64, null=True, blank=True)
@@ -261,23 +285,25 @@ class HormoneTherapy(models.Model):
     )
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["uuid"]
 
     def __str__(self):
         return f"{self.id}"
 
 
 class Radiation(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    treatment_uuid = models.ForeignKey(
+        Treatment, on_delete=models.CASCADE, null=False, blank=False
+    )
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
-    )
-    submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.CASCADE, null=False, blank=False
-    )
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
+    submitter_treatment_id = models.CharField(max_length=64, null=False, blank=False)
     radiation_therapy_modality = models.CharField(max_length=255, null=True, blank=True)
     radiation_therapy_type = models.CharField(max_length=64, null=True, blank=True)
     radiation_therapy_fractions = models.PositiveSmallIntegerField(
@@ -291,23 +317,25 @@ class Radiation(models.Model):
     )
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["uuid"]
 
     def __str__(self):
         return f"{self.id}"
 
 
 class Immunotherapy(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    treatment_uuid = models.ForeignKey(
+        Treatment, on_delete=models.CASCADE, null=False, blank=False
+    )
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
-    )
-    submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.CASCADE, null=False, blank=False
-    )
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
+    submitter_treatment_id = models.CharField(max_length=64, null=False, blank=False)
     drug_reference_database = models.CharField(max_length=64, null=True, blank=True)
     immunotherapy_type = models.CharField(max_length=255, null=True, blank=True)
     drug_name = models.CharField(max_length=255, null=True, blank=True)
@@ -323,23 +351,25 @@ class Immunotherapy(models.Model):
     )
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["uuid"]
 
     def __str__(self):
         return f"{self.id}"
 
 
 class Surgery(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    treatment_uuid = models.ForeignKey(
+        Treatment, on_delete=models.CASCADE, null=False, blank=False
+    )
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
-    )
-    submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.CASCADE, null=False, blank=False
-    )
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
+    submitter_treatment_id = models.CharField(max_length=64, null=False, blank=False)
     submitter_specimen_id = models.CharField(max_length=64, null=True, blank=True)
     surgery_type = models.CharField(max_length=255, null=True, blank=True)
     surgery_site = models.CharField(max_length=255, null=True, blank=True)
@@ -364,26 +394,32 @@ class Surgery(models.Model):
     perineural_invasion = models.CharField(max_length=128, null=True, blank=True)
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["uuid"]
 
     def __str__(self):
         return f"{self.id}"
 
 
 class FollowUp(models.Model):
-    submitter_follow_up_id = models.CharField(max_length=64, primary_key=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
+    treatment_uuid = models.ForeignKey(
+        Treatment, on_delete=models.CASCADE, null=True, blank=True
+    )
+    primary_diagnosis_uuid = models.ForeignKey(
+        PrimaryDiagnosis, on_delete=models.CASCADE, null=True, blank=True
+    )
+    submitter_follow_up_id = models.CharField(max_length=64, null=False, blank=False)
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
+    submitter_primary_diagnosis_id = models.CharField(
+        max_length=64, null=False, blank=False
     )
-    submitter_primary_diagnosis_id = models.ForeignKey(
-        PrimaryDiagnosis, on_delete=models.SET_NULL, blank=True, null=True
-    )
-    submitter_treatment_id = models.ForeignKey(
-        Treatment, on_delete=models.SET_NULL, blank=True, null=True
-    )
+    submitter_treatment_id = models.CharField(max_length=64, null=False, blank=False)
     date_of_followup = models.CharField(max_length=32, null=True, blank=True)
     disease_status_at_followup = models.CharField(max_length=255, null=True, blank=True)
     relapse_type = models.CharField(max_length=128, null=True, blank=True)
@@ -410,13 +446,14 @@ class FollowUp(models.Model):
 
 
 class Biomarker(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
-    )
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
     submitter_specimen_id = models.CharField(max_length=64, null=True, blank=True)
     submitter_primary_diagnosis_id = models.CharField(
         max_length=64, null=True, blank=True
@@ -440,20 +477,21 @@ class Biomarker(models.Model):
     )
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["uuid"]
 
     def __str__(self):
         return f"{self.id}"
 
 
 class Comorbidity(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
-    )
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
     prior_malignancy = models.CharField(max_length=32, null=True, blank=True)
     laterality_of_prior_malignancy = models.CharField(
         max_length=64, null=True, blank=True
@@ -468,22 +506,220 @@ class Comorbidity(models.Model):
     comorbidity_treatment = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["uuid"]
 
     def __str__(self):
         return f"{self.id}"
 
 
 class Exposure(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    donor_uuid = models.ForeignKey(
+        Donor, on_delete=models.CASCADE, null=False, blank=False
+    )
     program_id = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=False, blank=False
     )
-    submitter_donor_id = models.ForeignKey(
-        Donor, on_delete=models.CASCADE, null=False, blank=False
-    )
+    submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
     tobacco_smoking_status = models.CharField(max_length=255, null=True, blank=True)
     tobacco_type = ArrayField(
         models.CharField(max_length=128, null=True, blank=True), null=True, blank=True
     )
     pack_years_smoked = models.FloatField(null=True, blank=True)
+
+
+# ================================================================================
+@receiver(pre_save, sender=Biomarker)
+def create_biomarker_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=Comorbidity)
+def create_comorbidity_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=Exposure)
+def create_exposure_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=PrimaryDiagnosis)
+def create_primary_diagnosis_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=Specimen)
+def create_specimen_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+            pd = PrimaryDiagnosis.objects.filter(
+                submitter_primary_diagnosis_id=instance.submitter_primary_diagnosis_id
+            ).first()
+            instance.primary_diagnosis_uuid_id = pd.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=SampleRegistration)
+def create_sample_registration_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+            specimen = Specimen.objects.filter(
+                submitter_specimen_id=instance.submitter_specimen_id
+            ).first()
+            instance.specimen_uuid_id = specimen.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=Treatment)
+def create_treatment_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+            pd = PrimaryDiagnosis.objects.filter(
+                submitter_primary_diagnosis_id=instance.submitter_primary_diagnosis_id
+            ).first()
+            instance.primary_diagnosis_uuid_id = pd.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=Chemotherapy)
+def create_chemotherapy_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+            treatment = Treatment.objects.filter(
+                submitter_treatment_id=instance.submitter_treatment_id
+            ).first()
+            instance.treatment_uuid_id = treatment.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=HormoneTherapy)
+def create_hormone_therapy_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+            treatment = Treatment.objects.filter(
+                submitter_treatment_id=instance.submitter_treatment_id
+            ).first()
+            instance.treatment_uuid_id = treatment.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=Radiation)
+def create_radiation_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+            treatment = Treatment.objects.filter(
+                submitter_treatment_id=instance.submitter_treatment_id
+            ).first()
+            instance.treatment_uuid_id = treatment.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=Immunotherapy)
+def create_immunotherapy_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+            treatment = Treatment.objects.filter(
+                submitter_treatment_id=instance.submitter_treatment_id
+            ).first()
+            instance.treatment_uuid_id = treatment.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=Surgery)
+def create_surgery_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+            treatment = Treatment.objects.filter(
+                submitter_treatment_id=instance.submitter_treatment_id
+            ).first()
+            instance.treatment_uuid_id = treatment.uuid
+        except Donor.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=FollowUp)
+def create_follow_up_foreign_key(sender, instance, **kwargs):
+    if not instance.donor_uuid_id:
+        try:
+            donor = Donor.objects.filter(
+                submitter_donor_id=instance.submitter_donor_id
+            ).first()
+            instance.donor_uuid_id = donor.uuid
+            treatment = Treatment.objects.filter(
+                submitter_treatment_id=instance.submitter_treatment_id
+            ).first()
+            instance.treatment_uuid_id = treatment.uuid
+            pd = PrimaryDiagnosis.objects.filter(
+                submitter_primary_diagnosis_id=instance.submitter_primary_diagnosis_id
+            ).first()
+            instance.primary_diagnosis_uuid_id = pd.uuid
+        except Donor.DoesNotExist:
+            pass

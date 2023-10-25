@@ -48,13 +48,13 @@ from chord_metadata_service.mohpackets.serializers import (
 class NestedExposureSerializer(ExposureSerializer):
     class Meta:
         model = Exposure
-        exclude = ["program_id", "submitter_donor_id", "id"]
+        exclude = ["program_id", "submitter_donor_id", "uuid"]
 
 
 class NestedComorbiditySerializer(ComorbiditySerializer):
     class Meta:
         model = Comorbidity
-        exclude = ["program_id", "submitter_donor_id", "id"]
+        exclude = ["program_id", "submitter_donor_id", "uuid"]
 
 
 class NestedSampleRegistrationSerializer(SampleRegistrationSerializer):
@@ -70,31 +70,31 @@ class NestedSampleRegistrationSerializer(SampleRegistrationSerializer):
 class NestedChemotherapySerializer(ChemotherapySerializer):
     class Meta:
         model = Chemotherapy
-        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "id"]
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "uuid"]
 
 
 class NestedHormoneTherapySerializer(HormoneTherapySerializer):
     class Meta:
         model = HormoneTherapy
-        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "id"]
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "uuid"]
 
 
 class NestedImmunotherapySerializer(ImmunotherapySerializer):
     class Meta:
         model = Immunotherapy
-        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "id"]
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "uuid"]
 
 
 class NestedRadiationSerializer(RadiationSerializer):
     class Meta:
         model = Radiation
-        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "id"]
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "uuid"]
 
 
 class NestedSurgerySerializer(SurgerySerializer):
     class Meta:
         model = Surgery
-        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "id"]
+        exclude = ["program_id", "submitter_donor_id", "submitter_treatment_id", "uuid"]
 
 
 class NestedBiomarkerSerializer(BiomarkerSerializer):
@@ -103,7 +103,7 @@ class NestedBiomarkerSerializer(BiomarkerSerializer):
         exclude = [
             "program_id",
             "submitter_donor_id",
-            "id",
+            "uuid",
         ]
 
 
