@@ -7,6 +7,7 @@ __all__ = [
     "WORKFLOW_MCODE_FHIR_JSON",
     "WORKFLOW_MCODE_JSON",
     "WORKFLOW_READSET",
+    "WORKFLOW_READDOC",
     "WORKFLOW_MAF_DERIVED_FROM_VCF_JSON",
     "WORKFLOW_VCF2MAF",
     "WORKFLOW_CBIOPORTAL",
@@ -34,6 +35,7 @@ WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
 WORKFLOW_MCODE_JSON = "mcode_json"
 WORKFLOW_READSET = "readset"
+WORKFLOW_READDOC = "readdoc"
 WORKFLOW_MAF_DERIVED_FROM_VCF_JSON = "maf_derived_from_vcf_json"
 WORKFLOW_VCF2MAF = "vcf2maf"
 WORKFLOW_CBIOPORTAL = "cbioportal"
@@ -170,6 +172,30 @@ METADATA_WORKFLOWS = {
                     "value": "{}"
                 }
             ]
+        },
+        WORKFLOW_READDOC: {
+            "name": "Document",
+            "description": "XThis workflow will send document files to the specified ingestion service.",
+            "data_type": DATA_TYPE_EXPERIMENT_RESULT,
+            "file": "readdoc.wdl",
+            "inputs": [
+                {
+                    "id": "readdoc_files",
+                    "type": "file[]",
+                    "required": True,
+                    "extensions": [".pdf", ".csv", ".tsv", ".txt", ".doc", ".docx", ".xls", ".xlsx",
+                                   ".jpeg", ".jpg", ".png", ".gif", ".md", ".mp3", ".m4a", ".mp4"]
+                },
+                DRS_URL_INPUT,
+            ],
+            "outputs": [
+                {
+                    "id": "readdoc_files_out",
+                    "type": "file",
+                    "value": "{readdoc_files_out}"
+                },
+            ],
+
         },
         WORKFLOW_MAF_DERIVED_FROM_VCF_JSON: {
             "name": "MAF files derived from VCF files as a JSON",
