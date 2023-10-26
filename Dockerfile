@@ -1,19 +1,16 @@
 ARG venv_python
-ARG alpine_version
-FROM python:${venv_python}-alpine${alpine_version}
+FROM python:${venv_python}
 
 LABEL Maintainer="CanDIG Team"
 LABEL "candigv2"="chord_metadata_service"
 
 USER root
 
-RUN addgroup -S candig && adduser -S candig -G candig
+RUN groupadd -r candig && useradd -r -g candig candig
 
-RUN apk update
-
-# Install the required packages for building Python packages with native extensions and PostgreSQL support
-RUN apk add --no-cache bash build-base git postgresql-client postgresql-dev libffi-dev
-
+RUN apt-get update && apt-get -y install \
+	postgresql-client
+	
 RUN mkdir /app
 WORKDIR /app
 
