@@ -539,7 +539,7 @@ VARIANT_DESCRIPTOR = describe_schema({
         },
         "label": base_type(SCHEMA_TYPES.STRING),
         "description": base_type(SCHEMA_TYPES.STRING),
-        "gene_descriptor": GENE_DESCRIPTOR,
+        "gene_context": GENE_DESCRIPTOR,
         "expressions": array_of(EXPRESSION_SCHEMA),
         "vcf_record": VCF_RECORD_SCHEMA,
         "xrefs": array_of(base_type(SCHEMA_TYPES.STRING)),

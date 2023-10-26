@@ -163,7 +163,7 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
 
 def get_or_create_gene_descriptor(gene_desc) -> pm.GeneDescriptor:
     gene_descriptor, _ = pm.GeneDescriptor.objects.get_or_create(
-        id=gene_desc["value_id"],
+        value_id=gene_desc["value_id"],
         symbol=gene_desc["symbol"],
         description=gene_desc.get("description", ""),
         alternate_ids=gene_desc.get("alternate_ids", []),
