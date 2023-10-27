@@ -6,20 +6,17 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
-"""
-    This module contains the MODELS for the Marathon of Hope app.
-    --------------------------------
-    MOHCCN Clinical Data Model V2: Data Standards Sub-Committee (DSC)
-    Model Schema (Excel): https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/moh-clinical-data-model-v2---feb-202381759e70b6034dcfa0b7bde4174e9822.xlsx?Status=Master&sfvrsn=2932cab_7 # noqa: E501
+""" 
+    Marathon of Hope MODELS module containing MOHCCN Clinical Data Model V2.
+    
+    Model Schema: https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/moh-clinical-data-model-v2---feb-202381759e70b6034dcfa0b7bde4174e9822.xlsx?Status=Master&sfvrsn=2932cab_7 # noqa: E501
     ER Diagram: https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/mohccn_data_standard_er_diagram_endorsed6oct22.pdf?Status=Master&sfvrsn=dd57a75e_5 # noqa: E501
-    Schema last updated: Feb 15, 2023
-    --------------------------------
-    NOTES:
-    - Permissible values are not enforced in the model.
-        They are checked in the serializer and ingest process.
 
-    - It is important to have a __str__ method to return just the ID as
-        the validator regex relies on this for primary key validation.
+    Note: UUID and FK fields are added to the original Model Schema. 
+    For the list of changes, see "Notes on the changes from the Entity Model (ER)" 
+    on Confluence page.
+    
+    Author: Son Chau
 """
 
 
@@ -70,6 +67,7 @@ class Donor(models.Model):
     )
 
     class Meta:
+        unique_together = ["program_id", "submitter_donor_id"]
         ordering = ["submitter_donor_id"]
 
     def __str__(self):
@@ -108,6 +106,7 @@ class PrimaryDiagnosis(models.Model):
     clinical_stage_group = models.CharField(max_length=64, null=True, blank=True)
 
     class Meta:
+        unique_together = ["program_id", "submitter_primary_diagnosis_id"]
         ordering = ["submitter_primary_diagnosis_id"]
 
     def __str__(self):
@@ -157,6 +156,7 @@ class Specimen(models.Model):
     )
 
     class Meta:
+        unique_together = ["program_id", "submitter_specimen_id"]
         ordering = ["submitter_specimen_id"]
 
     def __str__(self):
@@ -183,6 +183,7 @@ class SampleRegistration(models.Model):
     sample_type = models.CharField(max_length=128, null=True, blank=True)
 
     class Meta:
+        unique_together = ["program_id", "submitter_sample_id"]
         ordering = ["submitter_sample_id"]
 
     def __str__(self):
@@ -221,6 +222,7 @@ class Treatment(models.Model):
     status_of_treatment = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
+        unique_together = ["program_id", "submitter_treatment_id"]
         ordering = ["submitter_treatment_id"]
 
     def __str__(self):
@@ -257,7 +259,7 @@ class Chemotherapy(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.id}"
+        return f"{self.submitter_treatment_id}"
 
 
 class HormoneTherapy(models.Model):
@@ -288,7 +290,7 @@ class HormoneTherapy(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.id}"
+        return f"{self.submitter_treatment_id}"
 
 
 class Radiation(models.Model):
@@ -320,7 +322,7 @@ class Radiation(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.id}"
+        return f"{self.submitter_treatment_id}"
 
 
 class Immunotherapy(models.Model):
@@ -354,7 +356,7 @@ class Immunotherapy(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.id}"
+        return f"{self.submitter_treatment_id}"
 
 
 class Surgery(models.Model):
@@ -397,7 +399,7 @@ class Surgery(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.id}"
+        return f"{self.submitter_treatment_id}"
 
 
 class FollowUp(models.Model):
@@ -439,6 +441,7 @@ class FollowUp(models.Model):
     recurrence_stage_group = models.CharField(max_length=64, null=True, blank=True)
 
     class Meta:
+        unique_together = ["program_id", "submitter_follow_up_id"]
         ordering = ["submitter_follow_up_id"]
 
     def __str__(self):
@@ -480,7 +483,7 @@ class Biomarker(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.id}"
+        return f"{self.submitter_donor_id}"
 
 
 class Comorbidity(models.Model):
@@ -509,7 +512,7 @@ class Comorbidity(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.id}"
+        return f"{self.donor_uuid}"
 
 
 class Exposure(models.Model):
@@ -526,3 +529,9 @@ class Exposure(models.Model):
         models.CharField(max_length=128, null=True, blank=True), null=True, blank=True
     )
     pack_years_smoked = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["uuid"]
+
+    def __str__(self):
+        return f"{self.donor_uuid}"
