@@ -1,8 +1,8 @@
 version 1.0
 
-workflow readdoc {
+workflow document {
     input {
-        Array[File] readdoc_files
+        Array[File] document_files
         String run_dir
         String drs_url
         String project_id
@@ -10,7 +10,7 @@ workflow readdoc {
         String secret__access_token
     }
 
-    scatter(file in readdoc_files) {
+    scatter(file in document_files) {
         call post_to_drs {
             input:
                 file_path = file,
@@ -22,7 +22,7 @@ workflow readdoc {
     }
 
     output {
-        Array[String] readdoc_files_out = post_to_drs.response_message
+        Array[String] document_files_out = post_to_drs.response_message
     }
 }
 

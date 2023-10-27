@@ -5,7 +5,7 @@ __all__ = [
     "WORKFLOW_EXPERIMENTS_JSON",
     "WORKFLOW_FHIR_JSON",
     "WORKFLOW_READSET",
-    "WORKFLOW_READDOC",
+    "WORKFLOW_DOCUMENT",
     "WORKFLOW_MAF_DERIVED_FROM_VCF_JSON",
     "WORKFLOW_VCF2MAF",
     "WORKFLOW_CBIOPORTAL",
@@ -30,7 +30,7 @@ WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_READSET = "readset"
-WORKFLOW_READDOC = "readdoc"
+WORKFLOW_DOCUMENT = "document"
 WORKFLOW_MAF_DERIVED_FROM_VCF_JSON = "maf_derived_from_vcf_json"
 WORKFLOW_VCF2MAF = "vcf2maf"
 WORKFLOW_CBIOPORTAL = "cbioportal"
@@ -149,14 +149,14 @@ METADATA_WORKFLOWS = {
                 }
             ]
         },
-        WORKFLOW_READDOC: {
+        WORKFLOW_DOCUMENT: {
             "name": "Document",
-            "description": "XThis workflow will send document files to the specified ingestion service.",
+            "description": "This workflow ingests into DRS documents which have been already listed as experiment results.",
             "data_type": DATA_TYPE_EXPERIMENT_RESULT,
-            "file": "readdoc.wdl",
+            "file": "document.wdl",
             "inputs": [
                 {
-                    "id": "readdoc_files",
+                    "id": "document_files",
                     "type": "file[]",
                     "required": True,
                     "extensions": [".pdf", ".csv", ".tsv", ".txt", ".doc", ".docx", ".xls", ".xlsx",
@@ -166,9 +166,9 @@ METADATA_WORKFLOWS = {
             ],
             "outputs": [
                 {
-                    "id": "readdoc_files_out",
+                    "id": "document_files_out",
                     "type": "file",
-                    "value": "{readdoc_files_out}"
+                    "value": "{document_files_out}"
                 },
             ],
 
