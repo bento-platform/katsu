@@ -1,4 +1,3 @@
-from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
@@ -12,13 +11,21 @@ from chord_metadata_service.mohpackets.models import (
     HormoneTherapy,
     Immunotherapy,
     PrimaryDiagnosis,
-    Program,
     Radiation,
     SampleRegistration,
     Specimen,
     Surgery,
     Treatment,
 )
+
+"""
+    This module contains the SIGNALS for the MoH Models.
+    Due to the change to include UUID in each models, the UUID and FK have to be either provided 
+    upon ingest or in katsu before saving the object
+    The pre_save signal should check this saving process before saving to the database
+    to ensure the the FK is properly link
+    
+"""
 
 
 @receiver(pre_save, sender=Biomarker)
