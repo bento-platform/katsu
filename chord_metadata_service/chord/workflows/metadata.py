@@ -151,7 +151,8 @@ METADATA_WORKFLOWS = {
         },
         WORKFLOW_DOCUMENT: {
             "name": "Document",
-            "description": "This workflow ingests into DRS documents which have been already listed as experiment results.",
+            "description": "This workflow ingests into DRS documents which "
+                           "have been already listed as experiment results. ",
             "data_type": DATA_TYPE_EXPERIMENT_RESULT,
             "file": "document.wdl",
             "inputs": [
