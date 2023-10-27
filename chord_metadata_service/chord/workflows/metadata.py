@@ -165,13 +165,7 @@ METADATA_WORKFLOWS = {
                 },
                 DRS_URL_INPUT,
             ],
-            "outputs": [
-                {
-                    "id": "document_files_out",
-                    "type": "file",
-                    "value": "{document_files_out}"
-                },
-            ],
+            "outputs": [],
 
         },
         WORKFLOW_MAF_DERIVED_FROM_VCF_JSON: {
