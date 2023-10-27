@@ -29,7 +29,8 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
         "file_format": {
             "type": "string",
             "enum": ["SAM", "BAM", "CRAM", "BAI", "CRAI", "VCF", "BCF", "MAF", "GVCF", "BigWig", "BigBed", "FASTA",
-                     "FASTQ", "TAB", "SRA", "SRF", "SFF", "GFF", "TABIX", "UNKNOWN", "OTHER"]
+                     "FASTQ", "TAB", "SRA", "SRF", "SFF", "GFF", "TABIX", "PDF", "CSV", "TSV", "JPEG", "PNG", "GIF",
+                     "MARKDOWN", "MP3", "M4A", "MP4", "DOCX", "XLS", "XLSX", "UNKNOWN", "OTHER"]
         },
         "data_output_type": {
             "type": "string",
