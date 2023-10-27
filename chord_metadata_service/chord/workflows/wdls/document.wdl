@@ -22,7 +22,7 @@ workflow document {
     }
 
     output {
-        Array[String] document_files_out = post_to_drs.response_message
+        Array[String] drs_responses = post_to_drs.response_message
     }
 }
 
