@@ -24,7 +24,6 @@ class DataTypeTest(APITestCase):
         self.assertEqual(len(c), len(DATA_TYPES))
         ids = [dt["id"] for dt in c]
         self.assertIn(DATA_TYPE_EXPERIMENT, ids)
-        # self.assertIn(DATA_TYPE_MCODEPACKET, ids)
         self.assertIn(DATA_TYPE_PHENOPACKET, ids)
         self.assertIn(DATA_TYPE_READSET, ids)
         self.assertIn(DATA_TYPE_EXPERIMENT_RESULT, ids)
