@@ -167,7 +167,6 @@ def extra_properties_schema_types(_request: Request):
 
 
 @api_view(["GET", "POST"])
-@permission_classes([OverrideOrSuperUserOnly])
 async def search_overview(request: Request):
     """
     get+post:
@@ -176,7 +175,17 @@ async def search_overview(request: Request):
         - id: a list of patient ids
     """
     individual_id = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
+
     queryset = patients_models.Individual.objects.all().filter(id__in=individual_id)
+
+    datasets_accessed = frozenset({ds_id async for ds_id in (
+        queryset
+        .values("phenopackets__dataset__identifier")
+        .exclude(phenopackets__dataset__identifier__isnull=True)
+        .values_list("phenopackets__dataset__identifier", flat=True)
+    )})
+
+    print(datasets_accessed)
 
     # TODO: filter to only individuals where we have project/dataset-level access? or can we at least pass a dataset
     #  in too to make this less annoying...
