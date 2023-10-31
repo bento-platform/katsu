@@ -25,6 +25,8 @@ from chord_metadata_service.mohpackets.models import (
     The pre_save signal should check this saving process before saving to the database
     to ensure the the FK is properly link
     
+    Author: Son Chau
+    
 """
 
 
