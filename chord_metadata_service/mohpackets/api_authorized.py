@@ -64,21 +64,20 @@ from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
 )
 
+# class ORJSONRenderer(BaseRenderer):
+#     media_type = "application/json"
 
-class ORJSONRenderer(BaseRenderer):
-    media_type = "application/json"
-
-    def render(self, request, data, *, response_status):
-        return orjson.dumps(data)
-
-
-class ORJSONParser(Parser):
-    def parse_body(self, request):
-        return orjson.loads(request.body)
+#     def render(self, request, data, *, response_status):
+#         return orjson.dumps(data)
 
 
-api = NinjaAPI(renderer=ORJSONRenderer(), parser=ORJSONParser())
-# api = NinjaAPI()
+# class ORJSONParser(Parser):
+#     def parse_body(self, request):
+#         return orjson.loads(request.body)
+
+
+# api = NinjaAPI(renderer=ORJSONRenderer(), parser=ORJSONParser())
+
 """
     This module inheriting from the base views and adding the authorized mixin,
     which returns the objects related to the datasets that the user is authorized to see.
@@ -361,152 +360,150 @@ class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
     # queryset = Donor.objects.all()
 
 
-from typing import List
+# from typing import List
 
 
-class ExposureSchema(ModelSchema):
-    class Config:
-        model = Exposure
-        model_fields = "__all__"
+# class ExposureSchema(ModelSchema):
+#     class Config:
+#         model = Exposure
+#         model_fields = "__all__"
 
 
-class ComorbiditySchema(ModelSchema):
-    class Config:
-        model = Comorbidity
-        model_fields = "__all__"
+# class ComorbiditySchema(ModelSchema):
+#     class Config:
+#         model = Comorbidity
+#         model_fields = "__all__"
 
 
-class SampleRegistrationSchema(ModelSchema):
-    class Config:
-        model = SampleRegistration
-        model_fields = "__all__"
+# class SampleRegistrationSchema(ModelSchema):
+#     class Config:
+#         model = SampleRegistration
+#         model_fields = "__all__"
 
 
-class SpecimenSchema(ModelSchema):
-    samplesregistrations: List[SampleRegistrationSchema] = Field(
-        ..., alias="sampleregistration_set"
-    )
+# class SpecimenSchema(ModelSchema):
+#     samplesregistrations: List[SampleRegistrationSchema] = Field(
+#         ..., alias="sampleregistration_set"
+#     )
 
-    class Config:
-        model = Specimen
-        model_fields = "__all__"
-
-
-class ChemotherapySchema(ModelSchema):
-    class Config:
-        model = Chemotherapy
-        model_fields = "__all__"
+#     class Config:
+#         model = Specimen
+#         model_fields = "__all__"
 
 
-class ImmunotherapySchema(ModelSchema):
-    class Config:
-        model = Immunotherapy
-        model_fields = "__all__"
+# class ChemotherapySchema(ModelSchema):
+#     class Config:
+#         model = Chemotherapy
+#         model_fields = "__all__"
 
 
-class HormoneTherapySchema(ModelSchema):
-    class Config:
-        model = HormoneTherapy
-        model_fields = "__all__"
+# class ImmunotherapySchema(ModelSchema):
+#     class Config:
+#         model = Immunotherapy
+#         model_fields = "__all__"
 
 
-class RadiationSchema(ModelSchema):
-    class Config:
-        model = Radiation
-        model_fields = "__all__"
+# class HormoneTherapySchema(ModelSchema):
+#     class Config:
+#         model = HormoneTherapy
+#         model_fields = "__all__"
 
 
-class SurgerySchema(ModelSchema):
-    class Config:
-        model = Surgery
-        model_fields = "__all__"
+# class RadiationSchema(ModelSchema):
+#     class Config:
+#         model = Radiation
+#         model_fields = "__all__"
 
 
-class FollowUpSchema(Schema):
-    class Config:
-        model = FollowUp
-        model_fields = "__all__"
+# class SurgerySchema(ModelSchema):
+#     class Config:
+#         model = Surgery
+#         model_fields = "__all__"
 
 
-class TreatmentSchema(ModelSchema):
-    chemotherapies: List[ChemotherapySchema] = Field(..., alias="chemotherapy_set")
-    immunotherapies: List[ImmunotherapySchema] = Field(..., alias="immunotherapy_set")
-    hormonetherapies: List[HormoneTherapySchema] = Field(
-        ..., alias="hormonetherapy_set"
-    )
-    radiations: List[RadiationSchema] = Field(..., alias="radiation_set")
-    surgeries: List[SurgerySchema] = Field(..., alias="surgery_set")
-    followups: List[FollowUpSchema] = Field(..., alias="followup_set")
-
-    class Config:
-        model = Treatment
-        model_fields = "__all__"
+# class FollowUpSchema(Schema):
+#     class Config:
+#         model = FollowUp
+#         model_fields = "__all__"
 
 
-class PrimaryDiagnosisSchema(ModelSchema):
-    specimens: List[SpecimenSchema] = Field(..., alias="specimen_set")
-    treatments: List[TreatmentSchema] = Field(..., alias="treatment_set")
-    followups: List[FollowUpSchema] = Field(..., alias="followup_set")
+# class TreatmentSchema(ModelSchema):
+#     chemotherapies: List[ChemotherapySchema] = Field(..., alias="chemotherapy_set")
+#     immunotherapies: List[ImmunotherapySchema] = Field(..., alias="immunotherapy_set")
+#     hormonetherapies: List[HormoneTherapySchema] = Field(
+#         ..., alias="hormonetherapy_set"
+#     )
+#     radiations: List[RadiationSchema] = Field(..., alias="radiation_set")
+#     surgeries: List[SurgerySchema] = Field(..., alias="surgery_set")
+#     followups: List[FollowUpSchema] = Field(..., alias="followup_set")
 
-    class Config:
-        model = PrimaryDiagnosis
-        model_fields = "__all__"
-
-
-class BiomarkerSchema(ModelSchema):
-    class Config:
-        model = Biomarker
-        model_fields = "__all__"
-
-
-class DonorSchema(ModelSchema):
-    comorbidities: List[ComorbiditySchema] = Field(..., alias="comorbidity_set")
-    exposures: List[ExposureSchema] = Field(..., alias="exposure_set")
-    biomarkers: List[BiomarkerSchema] = Field(..., alias="biomarker_set")
-    primarydiagnosis: List[PrimaryDiagnosisSchema] = Field(
-        ..., alias="primarydiagnosis_set"
-    )
-    followups: List[FollowUpSchema] = Field(..., alias="followup_set")
-
-    class Config:
-        model = Donor
-        model_fields = "__all__"
+#     class Config:
+#         model = Treatment
+#         model_fields = "__all__"
 
 
-@api.get("/ninja_donors", response=List[DonorSchema])
-@paginate(PageNumberPagination, page_size=10)
-def tasks(request):
-    # queryset = Donor.objects.all()
+# class PrimaryDiagnosisSchema(ModelSchema):
+#     specimens: List[SpecimenSchema] = Field(..., alias="specimen_set")
+#     treatments: List[TreatmentSchema] = Field(..., alias="treatment_set")
+#     followups: List[FollowUpSchema] = Field(..., alias="followup_set")
 
-    donor_followups_prefetch = Prefetch(
-        "followup_set",
-        queryset=FollowUp.objects.filter(
-            submitter_primary_diagnosis_id__isnull=True,
-            submitter_treatment_id__isnull=True,
-        ),
-    )
+#     class Config:
+#         model = PrimaryDiagnosis
+#         model_fields = "__all__"
 
-    primary_diagnosis_followups_prefetch = Prefetch(
-        "primarydiagnosis_set__followup_set",
-        queryset=FollowUp.objects.filter(
-            submitter_primary_diagnosis_id__isnull=False,
-            submitter_treatment_id__isnull=True,
-        ),
-    )
-    queryset = Donor.objects.prefetch_related(
-        donor_followups_prefetch,
-        primary_diagnosis_followups_prefetch,
-        "biomarker_set",
-        "comorbidity_set",
-        "exposure_set",
-        "primarydiagnosis_set__treatment_set__chemotherapy_set",
-        "primarydiagnosis_set__treatment_set__hormonetherapy_set",
-        "primarydiagnosis_set__treatment_set__immunotherapy_set",
-        "primarydiagnosis_set__treatment_set__radiation_set",
-        "primarydiagnosis_set__treatment_set__surgery_set",
-        "primarydiagnosis_set__treatment_set__followup_set",
-        "primarydiagnosis_set__specimen_set__sampleregistration_set",
-    ).all()
-    return list(queryset)
-    # queryset = Donor.objects.all()
-    # return list(queryset)
+
+# class BiomarkerSchema(ModelSchema):
+#     class Config:
+#         model = Biomarker
+#         model_fields = "__all__"
+
+
+# class DonorSchema(ModelSchema):
+#     comorbidities: List[ComorbiditySchema] = Field(..., alias="comorbidity_set")
+#     exposures: List[ExposureSchema] = Field(..., alias="exposure_set")
+#     biomarkers: List[BiomarkerSchema] = Field(..., alias="biomarker_set")
+#     primarydiagnosis: List[PrimaryDiagnosisSchema] = Field(
+#         ..., alias="primarydiagnosis_set"
+#     )
+#     followups: List[FollowUpSchema] = Field(..., alias="followup_set")
+
+#     class Config:
+#         model = Donor
+#         model_fields = "__all__"
+
+
+# @api.get("/ninja_donors", response=List[DonorSchema])
+# @paginate(PageNumberPagination, page_size=10)
+# def tasks(request):
+#     # queryset = Donor.objects.all()
+
+#     donor_followups_prefetch = Prefetch(
+#         "followup_set",
+#         queryset=FollowUp.objects.filter(
+#             submitter_primary_diagnosis_id__isnull=True,
+#             submitter_treatment_id__isnull=True,
+#         ),
+#     )
+
+#     primary_diagnosis_followups_prefetch = Prefetch(
+#         "primarydiagnosis_set__followup_set",
+#         queryset=FollowUp.objects.filter(
+#             submitter_primary_diagnosis_id__isnull=False,
+#             submitter_treatment_id__isnull=True,
+#         ),
+#     )
+#     queryset = Donor.objects.prefetch_related(
+#         donor_followups_prefetch,
+#         primary_diagnosis_followups_prefetch,
+#         "biomarker_set",
+#         "comorbidity_set",
+#         "exposure_set",
+#         "primarydiagnosis_set__treatment_set__chemotherapy_set",
+#         "primarydiagnosis_set__treatment_set__hormonetherapy_set",
+#         "primarydiagnosis_set__treatment_set__immunotherapy_set",
+#         "primarydiagnosis_set__treatment_set__radiation_set",
+#         "primarydiagnosis_set__treatment_set__surgery_set",
+#         "primarydiagnosis_set__treatment_set__followup_set",
+#         "primarydiagnosis_set__specimen_set__sampleregistration_set",
+#     ).all()
+#     return list(queryset)
