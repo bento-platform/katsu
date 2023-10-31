@@ -18,7 +18,6 @@ from chord_metadata_service.mohpackets.api_authorized import (
     AuthorizedSpecimenViewSet,
     AuthorizedSurgeryViewSet,
     AuthorizedTreatmentViewSet,
-    api,
 )
 from chord_metadata_service.mohpackets.api_discovery import (
     DiscoveryBiomarkerViewSet,
@@ -62,6 +61,7 @@ from chord_metadata_service.mohpackets.api_ingest import (
     ingest_surgeries,
     ingest_treatments,
 )
+from chord_metadata_service.mohpackets.new_api import api
 
 # ================== AUTHORIZED API ================== #
 router = routers.SimpleRouter()
