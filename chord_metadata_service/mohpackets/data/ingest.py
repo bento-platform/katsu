@@ -6,7 +6,6 @@ from collections import OrderedDict
 import django
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from tqdm import tqdm
 
 # Add your Django project's root directory to the Python path
 sys.path.append(
@@ -37,11 +36,19 @@ from chord_metadata_service.mohpackets.models import (
 
 
 def ingest_data(path):
+    # Install tqdm if needed
+    try:
+        from tqdm import tqdm
+    except ImportError:
+        import subprocess
+
+        subprocess.check_call(["pip", "install", "tqdm"])
+        from tqdm import tqdm
+
     script_dir = os.path.dirname(__file__)
     synthetic_data_folder = os.path.join(script_dir, f"{path}/synthetic_data")
     file_mapping = OrderedDict(
         [
-            # (Program, "Program.json"),
             (Donor, "Donor.json"),
             (PrimaryDiagnosis, "PrimaryDiagnosis.json"),
             (Specimen, "Specimen.json"),
@@ -76,7 +83,7 @@ def ingest_data(path):
 
         # Iterate through the data and create model instances
         with transaction.atomic():
-            for item in tqdm(data, desc=f"{filename}", ascii=True):
+            for item in tqdm(data, desc=f"{filename}", ascii=True, ncols=0):
                 item["program_id_id"] = item.pop("program_id", None)
                 model_instance = model(**item)
                 model_instance.save()
