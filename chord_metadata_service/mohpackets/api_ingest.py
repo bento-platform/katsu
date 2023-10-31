@@ -452,18 +452,3 @@ def ingest_exposures(request):
         status=status.HTTP_201_CREATED,
         data={f"{len(objs)} exposures were created."},
     )
-
-
-# api = NinjaAPI()
-
-
-# @api.post("/employees")
-# def create_employee(request):
-#     item = {
-#         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
-#         "program_id_id": "SYNTHETIC-1",
-#         "submitter_donor_id": "DONOR_1",
-#     }
-#     pd = PrimaryDiagnosis(**item)
-#     pd.save()
-#     return {"id": pd.uuid}
