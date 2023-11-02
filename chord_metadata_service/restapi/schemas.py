@@ -2,7 +2,7 @@ from pathlib import Path
 from . import descriptions
 from .description_utils import EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
 from .schema_utils import DATE_TIME, DRAFT_07, SCHEMA_TYPES, base_type, tag_ids_and_describe, \
-    tag_schema_with_nested_ids, named_one_of, get_schema_base_path, base_schema_uri, sub_schema_uri
+    tag_schema_with_nested_ids, named_one_of, get_schema_app_id, sub_schema_uri
 
 # Individual schemas for validation of JSONField values
 
@@ -24,8 +24,7 @@ __all__ = [
 
 # ======================== Phenopackets based schemas =========================
 
-base_path = get_schema_base_path(Path(__file__).parent.name)
-base_uri = base_schema_uri(base_path)
+base_uri = get_schema_app_id(Path(__file__).parent.name)
 
 ONTOLOGY_CLASS = tag_ids_and_describe({
     "$schema": DRAFT_07,

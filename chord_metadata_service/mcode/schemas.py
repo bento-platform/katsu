@@ -3,8 +3,7 @@ from chord_metadata_service.restapi.schema_utils import (
     customize_schema,
     tag_schema_with_nested_ids,
     tag_ids_and_describe,
-    base_schema_uri,
-    get_schema_base_path,
+    get_schema_app_id,
     sub_schema_uri
 )
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ONTOLOGY_CLASS_LIST, EXTRA_PROPERTIES_SCHEMA
@@ -12,8 +11,7 @@ from chord_metadata_service.phenopackets.schemas import PHENOPACKET_GENE_SCHEMA
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from . import descriptions as d
 
-base_path = get_schema_base_path(Path(__file__).parent.name)
-base_uri = base_schema_uri(base_path)
+base_uri = get_schema_app_id(Path(__file__).parent.name)
 
 # ========================= mCode/FHIR based schemas =========================
 

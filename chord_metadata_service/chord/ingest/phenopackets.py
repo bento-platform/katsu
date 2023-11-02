@@ -7,7 +7,7 @@ from dateutil.parser import isoparse
 from decimal import Decimal
 from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Dataset
 from chord_metadata_service.phenopackets import models as pm
-from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, PHENOPACKET_REF_RESOLVER
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
 from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.schema_utils import patch_project_schemas
 from chord_metadata_service.restapi.types import ExtensionSchemaDict
@@ -75,7 +75,7 @@ def validate_phenopacket(phenopacket_data: dict[str, Any],
                          idx: Optional[int] = None) -> None:
     # Validate phenopacket data against phenopackets schema.
     # validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
-    validation = schema_validation(phenopacket_data, schema, resolver=PHENOPACKET_REF_RESOLVER)
+    validation = schema_validation(phenopacket_data, schema, registry=VRS_REF_REGISTRY)
     if not validation:
         # TODO: Report more precise errors
         raise IngestError(
@@ -212,7 +212,7 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
     subject_or_biosample_id = gen_interp["subject_or_biosample_id"]
     is_biosample = pm.Biosample.objects.filter(id=subject_or_biosample_id).exists()
     is_subject = pm.Individual.objects.filter(id=subject_or_biosample_id).exists()
-    
+
     # Store the type the ID refers to in extra_properties
     element_type = "biosample" if is_biosample and not is_subject else "subject"
     extra_properties = gen_interp.get("extra_properties", {})

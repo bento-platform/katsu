@@ -58,21 +58,15 @@ class SCHEMA_STRING_FORMATS(Enum):
     IRI_REFERENCE = "iri-reference"
 
 
-def get_schema_base_path(name: str):
-    return Path(f"/chord_metadata_service/{name}")
-
-
-def base_schema_uri(path: Path):
-    # Creates a valid file URI for json-schema
-    return f"{path.as_uri()}/"
+def get_schema_app_id(app_name: str):
+    return f"/chord_metadata_service/{app_name}"
 
 
 def sub_schema_uri(base_uri: str, name: str):
-    return f"{base_uri}{name}"
+    return f"{base_uri}/{name}"
 
 
-base_path = get_schema_base_path(Path(__file__).parent.name)
-base_uri = base_schema_uri(base_path)
+base_uri = get_schema_app_id(Path(__file__).parent.name)
 
 
 def merge_schema_dictionaries(dict1: dict, dict2: dict):
