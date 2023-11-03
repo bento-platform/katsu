@@ -1,15 +1,25 @@
+import os
 from collections import Counter, defaultdict
 from datetime import date, datetime
+from typing import Any, Dict, List, Optional, Type
 
+import orjson
+from authx.auth import get_opa_datasets
 from django.conf import settings
-from django.db.models import Count
-from django.http import JsonResponse
+from django.db.models import Count, Model, Prefetch, Q
+from django.http import HttpResponse, JsonResponse
 from drf_spectacular.utils import (
     OpenApiTypes,
     extend_schema,
     extend_schema_serializer,
     inline_serializer,
 )
+from ninja import Field, FilterSchema, ModelSchema, NinjaAPI, Query, Router, Schema
+from ninja.orm import create_schema
+from ninja.pagination import PageNumberPagination, paginate
+from ninja.parser import Parser
+from ninja.renderers import BaseRenderer
+from ninja.security import HttpBearer
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
@@ -31,17 +41,32 @@ from chord_metadata_service.mohpackets.api_base import (
     BaseTreatmentViewSet,
 )
 from chord_metadata_service.mohpackets.models import (
+    Biomarker,
     Chemotherapy,
+    Comorbidity,
     Donor,
+    Exposure,
+    FollowUp,
     HormoneTherapy,
     Immunotherapy,
     PrimaryDiagnosis,
     Program,
+    Radiation,
+    SampleRegistration,
+    Specimen,
+    Surgery,
     Treatment,
 )
 from chord_metadata_service.mohpackets.permissible_values import (
     PRIMARY_SITE,
     TREATMENT_TYPE,
+)
+from chord_metadata_service.mohpackets.schema import (
+    DiscoverySchema,
+    DonorFilterSchema,
+    DonorSchema,
+    ProgramDiscoverSchema,
+    SpecimenFilterSchema,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
 
@@ -510,3 +535,139 @@ def service_info(_request):
         safe=False,
         json_dumps_params={"indent": 2},
     )
+
+
+# ===========================================================
+
+router = Router()
+
+
+def count_donors(model: Type[Model], filters=None) -> Dict[str, int]:
+    queryset = model.objects.all()
+    if model == Donor:
+        count_field = "uuid"
+    else:
+        count_field = "donor_uuid"
+
+    if filters is not None:
+        queryset = filters.filter(queryset)
+
+    item_counts = (
+        queryset.values("program_id")
+        .annotate(donor_count=Count(count_field, distinct=True))
+        .order_by("program_id")
+    )
+
+    return {f"{item['program_id']}": item["donor_count"] for item in item_counts}
+
+
+@router.get("/programs/", response=List[ProgramDiscoverSchema])
+def discover_programs(request):
+    programs = Program.objects.all()
+    return list(programs)
+
+
+@router.get("/donors/", response=DiscoverySchema)
+def discover_donors(request, filters: DonorFilterSchema = Query(...)):
+    donors = count_donors(Donor, filters)
+    return DiscoverySchema(discovery_donor=donors)
+
+
+@router.get("/donors-with-clinical/", response=List[DonorSchema])
+# @router.get("/donors-with-clinical/", response=List[Dict[str, Any]])
+def discover_donors_with_clinical(request):
+    primary_site_input = ["Adrenal gland", "Trachea", "Penis"]
+    treatment_type_input = []
+    chemotherapy_drug_name_input = []
+    hormonetherapy_drug_name_input = []
+    immunotherapy_drug_name_input = []
+    donors = (
+        Donor.objects.filter(
+            primary_site__overlap=primary_site_input,
+            # treatment__treatment_type=treatment_type_input,
+            # chemotherapy__drug_name=chemotherapy_drug_name_input,
+            # hormonetherapy__drug_name=hormonetherapy_drug_name_input,
+            # immunotherapy__drug_name=immunotherapy_drug_name_input,
+        )
+        # .values("program_id")
+        # .annotate(count=Count("program_id"))
+    )
+    return donors
+
+
+@router.get("/specimen/", response=DiscoverySchema)
+def discover_specimens(request, filters: SpecimenFilterSchema = Query(...)):
+    specimens = count_donors(Specimen, filters)
+    return DiscoverySchema(discovery_donor=specimens)
+
+
+@router.get("/sample_registrations/", response=DiscoverySchema)
+def discover_sample_registrations(request):
+    sample_registrations = count_donors(SampleRegistration)
+    return DiscoverySchema(discovery_donor=sample_registrations)
+
+
+@router.get("/primary_diagnoses/", response=DiscoverySchema)
+def discover_primary_diagnoses(request):
+    primary_diagnoses = count_donors(PrimaryDiagnosis)
+    return DiscoverySchema(discovery_donor=primary_diagnoses)
+
+
+@router.get("/treatments/", response=DiscoverySchema)
+def discover_treatments(request):
+    treatments = count_donors(Treatment)
+    return DiscoverySchema(discovery_donor=treatments)
+
+
+@router.get("/chemotherapies/", response=DiscoverySchema)
+def discover_chemotherapies(request):
+    chemotherapies = count_donors(Chemotherapy)
+    return DiscoverySchema(discovery_donor=chemotherapies)
+
+
+@router.get("/hormone_therapies/", response=DiscoverySchema)
+def discover_hormone_therapies(request):
+    hormone_therapies = count_donors(HormoneTherapy)
+    return DiscoverySchema(discovery_donor=hormone_therapies)
+
+
+@router.get("/radiations/", response=DiscoverySchema)
+def discover_radiations(request):
+    radiations = count_donors(Radiation)
+    return DiscoverySchema(discovery_donor=radiations)
+
+
+@router.get("/immunotherapies/", response=DiscoverySchema)
+def discover_immunotherapies(request):
+    immunotherapies = count_donors(Immunotherapy)
+    return DiscoverySchema(discovery_donor=immunotherapies)
+
+
+@router.get("/surgeries/", response=DiscoverySchema)
+def discover_surgeries(request):
+    surgeries = count_donors(Surgery)
+    return DiscoverySchema(discovery_donor=surgeries)
+
+
+@router.get("/follow_ups/", response=DiscoverySchema)
+def discover_follow_ups(request):
+    follow_ups = count_donors(FollowUp)
+    return DiscoverySchema(discovery_donor=follow_ups)
+
+
+@router.get("/biomarkers/", response=DiscoverySchema)
+def discover_biomarkers(request):
+    biomarkers = count_donors(Biomarker)
+    return DiscoverySchema(discovery_donor=biomarkers)
+
+
+@router.get("/comorbidities/", response=DiscoverySchema)
+def discover_comorbidities(request):
+    comorbidities = count_donors(Comorbidity)
+    return DiscoverySchema(discovery_donor=comorbidities)
+
+
+@router.get("/exposures/", response=DiscoverySchema)
+def discover_exposures(request):
+    exposures = count_donors(Exposure)
+    return DiscoverySchema(discovery_donor=exposures)
