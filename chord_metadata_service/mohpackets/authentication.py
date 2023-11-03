@@ -1,9 +1,10 @@
 import logging
 
-from authx.auth import get_opa_datasets
+from authx.auth import get_opa_datasets, is_site_admin
 from django.conf import settings
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from drf_spectacular.plumbing import build_bearer_security_scheme_object
+from ninja.security import HttpBearer
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed
 
@@ -69,3 +70,6 @@ class LocalAuthScheme(OpenApiAuthenticationExtension):
             header_name="Authorization",
             token_prefix="Bearer",
         )
+
+
+# =========================================================
