@@ -82,39 +82,69 @@ async def overview(_request: Request):
 
     # TODO: permissions
 
-    # TODO: parallel
-    phenopackets_count = await pheno_models.Phenopacket.objects.all().acount()
-    biosamples_count = await pheno_models.Biosample.objects.all().acount()
-    individuals_count = await patients_models.Individual.objects.all().acount()
-    experiments_count = await experiments_models.Experiment.objects.all().acount()
-    experiment_results_count = await experiments_models.ExperimentResult.objects.all().acount()
-    instruments_count = await experiments_models.Instrument.objects.all().acount()
-    phenotypic_features_count = await pheno_models.PhenotypicFeature.objects.all().distinct('pftype').acount()
-
-    # Sex related fields stats are precomputed here and post processed later
-    # to include missing values inferred from the schema
-    individuals_sex, individuals_k_sex = await asyncio.gather(
+    # Parallel-gather all counts and statistics we may need for this response
+    (
+        phenopackets_count,
+        biosamples_count,
+        individuals_count,
+        experiments_count,
+        experiment_results_count,
+        instruments_count,
+        phenotypic_features_count,
+        # --------------------------------------------------------------------------------------------------------------
+        individuals_sex,
+        individuals_k_sex,
+        individuals_age,
+        individuals_taxonomy,
+        # --------------------------------------------------------------------------------------------------------------
+        biosamples_taxonomy,
+        biosamples_sampled_tissue,
+        # --------------------------------------------------------------------------------------------------------------
+        diseases_stats,
+        # --------------------------------------------------------------------------------------------------------------
+        phenotypic_features_type,
+    ) = await asyncio.gather(
+        pheno_models.Phenopacket.objects.all().acount(),
+        pheno_models.Biosample.objects.all().acount(),
+        patients_models.Individual.objects.all().acount(),
+        experiments_models.Experiment.objects.all().acount(),
+        experiments_models.ExperimentResult.objects.all().acount(),
+        experiments_models.Instrument.objects.all().acount(),
+        pheno_models.PhenotypicFeature.objects.all().distinct('pftype').acount(),
+        # --------------------------------------------------------------------------------------------------------------
+        # INDIVIDUALS
+        #  - Sex related fields stats are precomputed here and post processed later
+        #    to include missing values inferred from the schema
         stats_for_field(patients_models.Individual, "sex"),
         stats_for_field(patients_models.Individual, "karyotypic_sex"),
+        #  - Age
+        get_age_numeric_binned(patients_models.Individual.objects.all(), OVERVIEW_AGE_BIN_SIZE),
+        #  - Taxonomy
+        stats_for_field(patients_models.Individual, "taxonomy__label"),
+        # --------------------------------------------------------------------------------------------------------------
+        # BIOSAMPLES
+        stats_for_field(pheno_models.Biosample, "taxonomy__label"),
+        stats_for_field(pheno_models.Biosample, "sampled_tissue__label"),
+        # --------------------------------------------------------------------------------------------------------------
+        # DISEASES
+        stats_for_field(pheno_models.Phenopacket, "diseases__term__label"),
+        # --------------------------------------------------------------------------------------------------------------
+        # PHENOTYPIC FEATURES
+        stats_for_field(pheno_models.PhenotypicFeature, "pftype__label"),
     )
-
-    diseases_stats = await stats_for_field(pheno_models.Phenopacket, "diseases__term__label")
-    diseases_count = len(diseases_stats)
-
-    individuals_age = await get_age_numeric_binned(patients_models.Individual.objects.all(), OVERVIEW_AGE_BIN_SIZE)
 
     return Response({
         "phenopackets": phenopackets_count,
         "data_type_specific": {
             "biosamples": {
                 "count": biosamples_count,
-                "taxonomy": await stats_for_field(pheno_models.Biosample, "taxonomy__label"),
-                "sampled_tissue": await stats_for_field(pheno_models.Biosample, "sampled_tissue__label"),
+                "taxonomy": biosamples_taxonomy,
+                "sampled_tissue": biosamples_sampled_tissue,
             },
             "diseases": {
                 # count is a number of unique disease terms (not all diseases in the database)
-                "count": diseases_count,
-                "term": diseases_stats
+                "count": len(diseases_stats),
+                "term": diseases_stats,
             },
             "individuals": {
                 "count": individuals_count,
@@ -122,14 +152,13 @@ async def overview(_request: Request):
                 "karyotypic_sex": {
                     k: individuals_k_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.KARYOTYPIC_SEX)
                 },
-                "taxonomy": await stats_for_field(patients_models.Individual, "taxonomy__label"),
+                "taxonomy": individuals_taxonomy,
                 "age": individuals_age,
-                "ethnicity": await stats_for_field(patients_models.Individual, "ethnicity"),
             },
             "phenotypic_features": {
                 # count is a number of unique phenotypic feature types (not all pfs in the database)
                 "count": phenotypic_features_count,
-                "type": await stats_for_field(pheno_models.PhenotypicFeature, "pftype__label")
+                "type": phenotypic_features_type,
             },
             "experiments": {
                 "count": experiments_count,
