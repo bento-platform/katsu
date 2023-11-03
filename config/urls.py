@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.urls import include, path
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -23,10 +24,16 @@ from drf_spectacular.views import (
 
 from chord_metadata_service.mohpackets import urls as moh_urls
 
+
+def redirect_to_default(request):
+    return HttpResponseRedirect("/v2/docs")
+
+
 urlpatterns = [
     path("v2/", include(moh_urls)),
+    path("", redirect_to_default),  # how do i set default to url v2/api/docs
     # OpenAPI 3 documentation with Swagger UI
-    path("", SpectacularSwaggerView.as_view(), name="swagger-ui"),
+    path("v1", SpectacularSwaggerView.as_view(), name="swagger-ui"),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
