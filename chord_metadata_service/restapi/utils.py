@@ -316,6 +316,10 @@ async def stats_for_field(model: Type[Model], field: str, add_missing: bool = Fa
     return await queryset_stats_for_field(model.objects.all(), field, add_missing)
 
 
+def thresholded_count(c: int, threshold: int) -> int:
+    return 0 if c <= threshold else c
+
+
 async def queryset_stats_for_field(queryset: QuerySet, field: str, add_missing: bool = False) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a queryset.
@@ -433,17 +437,17 @@ async def get_categorical_stats(field_props: dict, low_counts_censored: bool) ->
     bins: list[BinWithValue] = []
 
     for category in labels:
-        v: int = stats.get(category, 0)
-
         # Censor small counts by rounding them to 0
-        if v <= threshold:
+        v: int = thresholded_count(stats.get(category, 0), threshold)
+
+        if v == 0 and derived_labels:
             # We cannot append 0-counts for derived labels, since that indicates
             # there is a non-0 count for this label in the database - i.e., if the label is pulled
             # from the values in the database, someone could otherwise learn 1 <= this field <= threshold
             # given it being present at all.
-            if derived_labels:
-                continue
-            v = 0  # Otherwise (pre-made labels, so we aren't leaking anything), censor the small count
+            continue
+
+            # Otherwise (pre-made labels, so we aren't leaking anything), keep the 0-count.
 
         bins.append({"label": category, "value": v})
 
@@ -505,10 +509,9 @@ async def get_date_stats(field_props: dict, low_counts_censored: bool = True) ->
         for year, month in monthly_generator(start, end or start):
             key = f"{year}-{month:02d}"
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
-            v = stats.get(key, 0)
             bins.append({
                 "label": label,
-                "value": 0 if v <= threshold else v
+                "value": thresholded_count(stats.get(key, 0), threshold),
             })
 
     # Append missing items at the end if any
@@ -580,8 +583,7 @@ async def get_range_stats(field_props: dict, low_counts_censored: bool = True) -
     threshold = get_threshold(low_counts_censored)
     stats: dict[str, int] = dict()
     async for item in query_set:
-        key = item["label"]
-        stats[key] = item["total"] if item["total"] > threshold else 0
+        stats[item["label"]] = thresholded_count(item["total"], threshold)
 
     # All the bins between start and end must be represented and ordered
     bins: list[BinWithValue] = []
@@ -719,6 +721,6 @@ async def bento_public_format_count_and_stats_list(annotated_queryset: QuerySet)
         value = int(q["value"])
         total += value
         if label is not None:
-            stats_list.append({"label": label, "value": value})
+            stats_list.append({"label": label, "value": value})  # TODO: should this be thresholded?
 
     return total, stats_list
