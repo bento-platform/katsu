@@ -168,12 +168,13 @@ CauseOfDeathEnum = list_to_enum("CauseOfDeathEnum", CAUSE_OF_DEATH)
 class DonorSchema(ModelSchema):
     cause_of_death: Optional[CauseOfDeathEnum] = None
     # submitter_donor_id: str = Field(pattern=r"^[0-9]+.[0-9]+.[0-9]$", max_length=64)
-    program_id_id: str = Field(..., alias="program_id")
+    # program_id_id: str = Field(..., alias="program_id")
 
     class Config:
         model = Donor
         # model_fields = "__all__"
-        model_exclude = ["uuid", "program_id"]
+        # model_exclude = ["uuid", "program_id"]
+        model_exclude = ["uuid"]
 
 
 class DonorFilterSchema(FilterSchema):
@@ -188,7 +189,7 @@ class DonorFilterSchema(FilterSchema):
     cause_of_death: Optional[str] = Field(None)
     date_of_birth: Optional[str] = Field(None)
     date_of_death: Optional[str] = Field(None)
-    primary_site: Optional[List[str]] = Field(None)
+    primary_site: List[str] = Field(None, q="primary_site__overlap")
 
 
 class SpecimenFilterSchema(FilterSchema):
