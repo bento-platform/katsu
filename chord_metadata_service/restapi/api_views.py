@@ -73,7 +73,6 @@ def service_info(_request: Request):
     }
 )
 @api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly])
 async def overview(_request: Request):
     """
     get:

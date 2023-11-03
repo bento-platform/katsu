@@ -1,19 +1,19 @@
-from rest_framework import viewsets, mixins
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema, inline_serializer
+
+from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 
 from .serializers import ExperimentSerializer, ExperimentResultSerializer
 from .models import Experiment, ExperimentResult
 from .schemas import EXPERIMENT_SCHEMA
 from .filters import ExperimentFilter, ExperimentResultFilter
-from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
-from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers, status
 
 
 from chord_metadata_service.restapi.api_renderers import (
@@ -146,7 +146,7 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     }
 )
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 def get_experiment_schema(_request):
     """
     get:
