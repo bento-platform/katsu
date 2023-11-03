@@ -14,13 +14,12 @@ from bento_lib.responses import errors
 from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.decorators import action
 
-from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
 from chord_metadata_service.logger import logger
@@ -41,12 +40,12 @@ __all__ = ["ProjectViewSet", "DatasetViewSet"]
 
 
 def forbidden(request: Request):
-    authz_middleware.mark_authz_done(request)
+    authz.mark_authz_done(request)
     return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 
 
 def not_found(request: Request):
-    authz_middleware.mark_authz_done(request)
+    authz.mark_authz_done(request)
     return Response(errors.not_found_error(), status=status.HTTP_404_NOT_FOUND)
 
 
@@ -78,15 +77,15 @@ class ProjectViewSet(CHORDPublicModelViewSet):
     async def list(self, request, *args, **kwargs):
         # For now, we don't have a view:project type permission - we can always view
         # TODO: check permissions for project viewing instead
-        authz_middleware.mark_authz_done(request)
+        authz.mark_authz_done(request)
         return super().list(request, *args, **kwargs)
 
     @async_to_sync
     async def create(self, request, *args, **kwargs):
-        if not (await authz_middleware.async_evaluate_one(request, RESOURCE_EVERYTHING, P_CREATE_PROJECT)):
+        if not (await authz.async_evaluate_one(request, RESOURCE_EVERYTHING, P_CREATE_PROJECT)):
             return forbidden(request)
 
-        authz_middleware.mark_authz_done(request)
+        authz.mark_authz_done(request)
         return super().create(request, *args, **kwargs)
 
     @async_to_sync
@@ -97,12 +96,11 @@ class ProjectViewSet(CHORDPublicModelViewSet):
             return not_found(request)
 
         if not (
-            await authz_middleware.async_evaluate_one(
-                request, build_resource(project=project.identifier), P_EDIT_PROJECT)
+            await authz.async_evaluate_one(request, build_resource(project=project.identifier), P_EDIT_PROJECT)
         ):
             return forbidden(request)
 
-        authz_middleware.mark_authz_done(request)
+        authz.mark_authz_done(request)
         return super().update(request, *args, **kwargs)
 
     @async_to_sync
@@ -112,12 +110,10 @@ class ProjectViewSet(CHORDPublicModelViewSet):
         except Http404:
             return not_found(request)
 
-        can_delete = await authz_middleware.async_evaluate_one(
-            request, build_resource(project=project.identifier), P_DELETE_PROJECT)
-        if not can_delete:
+        if not (await authz.async_evaluate_one(request, build_resource(project=project.identifier), P_DELETE_PROJECT)):
             return forbidden(request)
 
-        authz_middleware.mark_authz_done(request)
+        authz.mark_authz_done(request)
         return super().destroy(request, *args, **kwargs)
 
 
@@ -140,18 +136,23 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
     queryset = Dataset.objects.all().order_by("title")
 
-    @action(detail=True, methods=['get'])
-    def dats(self, _request, *_args, **_kwargs):
+    @action(detail=True, methods=["get"])
+    def dats(self, request, *_args, **_kwargs):
         """
         Retrieve a specific DATS file for a given dataset.
 
         Return the DATS file as a JSON response or an error if not found.
         """
-        dataset = self.get_object()
+        try:
+            dataset = self.get_object()
+        except Http404:
+            return not_found(request)  # side effect: sets authz done flag
+
+        authz.mark_authz_done(request)
         return Response(json.loads(dataset.dats_file))
 
     @action(detail=True, methods=["get"])
-    def resources(self, _request, *_args, **_kwargs):
+    def resources(self, request, *_args, **_kwargs):
         """
         Retrieve all resources (phenopackets/additional_resources) for a dataset and return a JSON response serialized
         using ResourceSerializer
@@ -159,50 +160,69 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
         # TODO: permissions based on dataset - resources?
 
-        dataset = self.get_object()
+        try:
+            dataset = self.get_object()
+        except Http404:
+            return not_found(request)  # side effect: sets authz done flag
+
+        authz.mark_authz_done(request)
         return Response(ResourceSerializer(dataset.resources.all(), many=True).data)
 
-    async def get_obj_async(self):
-        return await sync_to_async(self.get_object)()
+    @async_to_sync
+    async def list(self, request, *args, **kwargs):
+        # For now, we don't have a view:dataset type permission - we can always view
+        authz.mark_authz_done(request)
+        return super().list(request, *args, **kwargs)
 
     @async_to_sync
     async def create(self, request: Request, *args, **kwargs):
         project_id = request.data.get("project")
 
         if project_id is None:
-            return forbidden(request)
+            return forbidden(request)  # side effect: sets authz done flag  TODO: bad req?
 
-        can_create = await authz_middleware.async_evaluate(
-            request, build_resource(project=project_id), P_CREATE_DATASET)
+        if not (await authz.async_evaluate_one(request, build_resource(project=project_id), P_CREATE_DATASET)):
+            return forbidden(request)  # side effect: sets authz done flag
 
-        if not can_create:
-            return forbidden(request)
+        authz.mark_authz_done(request)
+        return super().create(request, *args, **kwargs)  # TODO: handle invalid
 
-        authz_middleware.mark_authz_done(request)
-        return super().create(request, *args, **kwargs)
+    @async_to_sync
+    async def update(self, request, *args, **kwargs):
+        try:
+            ds = await self.get_obj_async()
+        except Http404:
+            return not_found(request)  # side effect: sets authz done flag
+
+        if not (
+            await authz.async_evaluate_one(
+                request, build_resource(project=ds.project_id, dataset=ds.identifier), P_EDIT_DATASET)
+        ):
+            return forbidden(request)  # side effect: sets authz done flag
+
+        # Do not allow datasets to change project
+        # TODO
+
+        authz.mark_authz_done(request)
+        return super().update(request, *args, **kwargs)  # TODO: handle invalid
 
     @async_to_sync
     async def destroy(self, request: Request, *args, **kwargs):
-        get_obj_async = sync_to_async(self.get_object)
-
         try:
-            dataset = await get_obj_async()
-        except PermissionDenied:
-            return forbidden(request)
+            ds = await self.get_obj_async()
+        except Http404:
+            return not_found(request)  # side effect: sets authz done flag
 
-        can_delete = await authz_middleware.async_evaluate_one(
-            request, build_resource(project=dataset.project_id), P_DELETE_DATASET)
+        if not (await authz.async_evaluate_one(request, build_resource(project=ds.project_id), P_DELETE_DATASET)):
+            return forbidden(request)  # side effect: sets authz done flag
 
-        if not can_delete:
-            return forbidden(request)
+        await ds.adelete()
 
-        await dataset.adelete()
-
-        logger.info(f"Running cleanup after deleting dataset {dataset.identifier} via DRF API")
+        logger.info(f"Running cleanup after deleting dataset {ds.identifier} via DRF API")
         n_removed = await run_all_cleanup()
         logger.info(f"Cleanup: removed {n_removed} objects in total")
 
-        authz_middleware.mark_authz_done(request)
+        authz.mark_authz_done(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
