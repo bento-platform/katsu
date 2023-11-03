@@ -8,8 +8,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from chord_metadata_service.mohpackets.models import PrimaryDiagnosis
+from chord_metadata_service.mohpackets.api import api
+from chord_metadata_service.mohpackets.models import Donor, PrimaryDiagnosis
 from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
+from chord_metadata_service.mohpackets.schema import DonorSchema
 from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
     ChemotherapySerializer,
@@ -452,3 +454,10 @@ def ingest_exposures(request):
         status=status.HTTP_201_CREATED,
         data={f"{len(objs)} exposures were created."},
     )
+
+
+# ===============================================================================
+@api.post("/donor", auth=None)
+def create_donor(request, payload: DonorSchema):
+    donor = Donor.objects.create(**payload.dict())
+    return {"submitter_donor_id": donor.submitter_donor_id}
