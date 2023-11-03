@@ -11,16 +11,17 @@ from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
-from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from typing import Callable, Dict, Optional, Tuple, Union
-from chord_metadata_service.authz.permissions import OverrideOrSuperUserOnly, ReadOnly
+from typing import Callable
+
+from chord_metadata_service.authz.middleware import authz_middleware
 
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.utils import queryset_stats_for_field
@@ -51,6 +52,8 @@ OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
 def experiment_dataset_summary(dataset):
+    # TODO; deduplicate with chord_metadata_service.restapi
+
     experiments = Experiment.objects.filter(dataset=dataset)
 
     return {
@@ -68,23 +71,27 @@ def mcodepacket_dataset_summary(dataset):
     }
 
 
-def phenopacket_dataset_summary(dataset):
+async def phenopacket_dataset_summary(dataset):
+    # TODO; deduplicate with chord_metadata_service.restapi
     phenopacket_qs = Phenopacket.objects.filter(dataset=dataset)  # TODO
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema
-    individuals_sex = queryset_stats_for_field(phenopacket_qs, "subject__sex")
-    individuals_k_sex = queryset_stats_for_field(phenopacket_qs, "subject__karyotypic_sex")
+    individuals_sex = await queryset_stats_for_field(phenopacket_qs, "subject__sex")
+    individuals_k_sex = await queryset_stats_for_field(phenopacket_qs, "subject__karyotypic_sex")
 
     return {
         "count": phenopacket_qs.count(),
         "data_type_specific": {
+            # TODO: deduplicate with biosamples summary from REST API
             "biosamples": {
                 "count": phenopacket_qs.values("biosamples__id").count(),
                 "is_control_sample": queryset_stats_for_field(phenopacket_qs, "biosamples__is_control_sample"),
                 "taxonomy": queryset_stats_for_field(phenopacket_qs, "biosamples__taxonomy__label"),
             },
+            # TODO: deduplicate with diseases summary from REST API
             "diseases": queryset_stats_for_field(phenopacket_qs, "diseases__term__label"),
+            # TODO: deduplicate with individuals summary from REST API
             "individuals": {
                 "count": phenopacket_qs.values("subject__id").count(),
                 "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in Individual.SEX)},
@@ -92,17 +99,13 @@ def phenopacket_dataset_summary(dataset):
                 "taxonomy": queryset_stats_for_field(phenopacket_qs, "subject__taxonomy__label"),
                 "date_of_birth": phenopacket_qs.values("subject__date_of_birth")
             },
+            # TODO: deduplicate with phenotypic features summary from REST API
             "phenotypic_features": queryset_stats_for_field(phenopacket_qs, "phenotypic_features__pftype__label"),
         }
     }
 
 
-# TODO: CHORD-standardized logging
-def debug_log(message):  # pragma: no cover
-    logging.debug(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}")
-
-
-def get_field_lookup(field):
+def get_field_lookup(field: list[str]) -> str:
     """
     Given a field identifier as a schema-like path e.g. ['biosamples', '[item]', 'id'],
     returns a Django ORM field lookup string e.g. 'biosamples__id'
@@ -130,7 +133,7 @@ def get_values_list(queryset, options):
 
 def data_type_results(query, params, key="id"):
     with connection.cursor() as cursor:
-        debug_log(f"Executing SQL:\n    {query.as_string(cursor.connection)}")
+        logger.debug(f"Executing SQL:\n    {query.as_string(cursor.connection)}")
         cursor.execute(query.as_string(cursor.connection), params)
         return set(dict(zip([col[0] for col in cursor.description], row))[key] for row in cursor.fetchall())
 
@@ -138,8 +141,7 @@ def data_type_results(query, params, key="id"):
 def experiment_query_results(query, params, options=None):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: Prefetch related biosample or no?
-    queryset = Experiment.objects\
-        .filter(id__in=data_type_results(query, params, "id"))
+    queryset = Experiment.objects.filter(id__in=data_type_results(query, params, "id"))
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
@@ -152,9 +154,7 @@ def experiment_query_results(query, params, options=None):
 def mcodepacket_query_results(query, params, options=None):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: select_related / prefetch_related for instant performance boost!
-    queryset = MCodePacket.objects.filter(
-        id__in=data_type_results(query, params, "id")
-    )
+    queryset = MCodePacket.objects.filter(id__in=data_type_results(query, params, "id"))
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
@@ -169,7 +169,9 @@ def get_biosamples_with_experiment_details(subject_ids):
     details of any associated experiment. If a biosample does not have an associated experiment, the experiment
     details are returned as None.
     """
-    biosamples_exp_tissue_details = Biosample.objects.filter(phenopacket__subject_id__in=subject_ids)\
+    biosamples_exp_tissue_details = (
+        Biosample.objects
+        .filter(phenopacket__subject_id__in=subject_ids)
         .values(
             subject_id=F("phenopacket__subject_id"),
             biosample_id=F("id"),
@@ -179,12 +181,12 @@ def get_biosamples_with_experiment_details(subject_ids):
             tissue_id=F("sampled_tissue__id"),
             tissue_label=F("sampled_tissue__label")
         )
+    )
     return biosamples_exp_tissue_details
 
 
 def phenopacket_query_results(query, params, options=None):
-    queryset = Phenopacket.objects \
-        .filter(id__in=data_type_results(query, params, "id"))
+    queryset = Phenopacket.objects.filter(id__in=data_type_results(query, params, "id"))
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
@@ -233,7 +235,7 @@ def phenopacket_query_results(query, params, options=None):
             .prefetch_related(*PHENOPACKET_PREFETCH)
 
 
-QUERY_RESULTS_FN: Dict[str, Callable] = {
+QUERY_RESULTS_FN: dict[str, Callable] = {
     DATA_TYPE_EXPERIMENT: experiment_query_results,
     DATA_TYPE_MCODEPACKET: mcodepacket_query_results,
     DATA_TYPE_PHENOPACKET: phenopacket_query_results,
@@ -328,7 +330,6 @@ def search(request, internal_data=False):
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
 @api_view(["GET", "POST"])
-@permission_classes([AllowAny])
 def chord_search(request):
     """
     Free-form search using Bento specific syntax. Returns the list of tables
@@ -343,7 +344,6 @@ def chord_search(request):
 # Cache page for the requested url
 @cache_page(60 * 60 * 2)
 @api_view(["GET", "POST"])
-@permission_classes([AllowAny])
 def chord_private_search(request):
     """
     Free-form search using Bento specific syntax. Results are grouped by table
@@ -459,7 +459,6 @@ def fhir_search(request, internal_data=False):
 
 
 @api_view(["GET", "POST"])
-@permission_classes([AllowAny])
 def fhir_public_search(request):
     return fhir_search(request)
 
@@ -467,7 +466,6 @@ def fhir_public_search(request):
 # Mounted on /private/, so will get protected anyway
 # TODO: Ugly and misleading permissions
 @api_view(["GET", "POST"])
-@permission_classes([AllowAny])
 def fhir_private_search(request):
     return fhir_search(request, internal_data=True)
 
@@ -538,9 +536,11 @@ def get_chord_search_parameters(request, data_type=None):
 
 
 def chord_dataset_search(
-        search_params,
-        dataset_id, start,
-        internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
+    search_params,
+    dataset_id,
+    start,
+    internal=False,
+) -> tuple[None | bool | list, str | None]:
     """
     Performs a search based on a psycopg2 object and paramaters and restricted
     to a given table.
@@ -554,7 +554,7 @@ def chord_dataset_search(
         params=search_params["params"] + (dataset_id,),
         options=search_params
     )
-    if not internal:
+    if not internal:  # TODO: boolean, check if count above configured threshold instead!
         return queryset.exists(), None    # True if at least one match
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
@@ -562,14 +562,14 @@ def chord_dataset_search(
     if search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
         return list(queryset), None
 
-    debug_log(f"Started fetching from queryset and serializing data at {datetime.now() - start}")
+    logger.debug(f"Started fetching from queryset and serializing data at {datetime.now() - start}")
     serialized_data = serializer_class(queryset, many=True).data
-    debug_log(f"Finished running query and serializing in {datetime.now() - start}")
+    logger.debug(f"Finished running query and serializing in {datetime.now() - start}")
 
     return serialized_data, None
 
 
-def chord_dataset_representation(dataset: Dataset):
+def chord_dataset_representation(dataset: Dataset) -> dict:
     return {
         "id": dataset.identifier,
         "title": dataset.title,
@@ -581,11 +581,16 @@ def chord_dataset_representation(dataset: Dataset):
     }
 
 
-def dataset_search(request: HttpRequest, dataset_id: str, internal=False):
+def dataset_search(request: Request, dataset_id: str, internal=False):
+    # TODO: permissions on request
+
     start = datetime.now()
-    search_params, err = get_chord_search_parameters(request=request)
+    search_params, err = get_chord_search_parameters(request)
     if err:
+        authz_middleware.mark_authz_done(request)
         return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
+
+    # TODO: permissions checking + incorporating internal...
 
     data, err = chord_dataset_search(search_params, dataset_id, start, internal)
 
@@ -595,20 +600,18 @@ def dataset_search(request: HttpRequest, dataset_id: str, internal=False):
 
 
 @api_view(["GET", "POST"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def public_dataset_search(request: HttpRequest, dataset_id: str):
-    return dataset_search(request=request, dataset_id=dataset_id)
+def public_dataset_search(request: Request, dataset_id: str):
+    return dataset_search(request, dataset_id)
 
 
 @api_view(["GET", "POST"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def private_dataset_search(request: HttpRequest, dataset_id: str):
-    return dataset_search(request=request, dataset_id=dataset_id, internal=True)
+def private_dataset_search(request: Request, dataset_id: str):
+    return dataset_search(request, dataset_id, internal=True)
 
 
 @api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def dataset_summary(request: HttpRequest, dataset_id: str):
+def dataset_summary(request: Request, dataset_id: str):
+    # TODO: PERMISSIONS
     dataset = Dataset.objects.get(identifier=dataset_id)
     return Response({
         DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary(dataset=dataset),

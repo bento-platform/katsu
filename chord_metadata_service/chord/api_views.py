@@ -13,7 +13,7 @@ from rest_framework.settings import api_settings
 from rest_framework.decorators import action
 
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler, OverrideOrSuperUserOnly
+from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
 from chord_metadata_service.logger import logger
 from chord_metadata_service.resources.serializers import ResourceSerializer
@@ -43,7 +43,6 @@ def forbidden(request: Request):
 class CHORDModelViewSet(viewsets.ModelViewSet):
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES) + (PhenopacketsRenderer,)
     pagination_class = LargeResultsSetPagination
-    permission_classes = [OverrideOrSuperUserOnly]  # Explicit
 
 
 class CHORDPublicModelViewSet(CHORDModelViewSet):
@@ -59,6 +58,8 @@ class ProjectViewSet(CHORDPublicModelViewSet):
     Create a new project
     """
 
+    # TODO: check permissions for project viewing instead
+
     queryset = Project.objects.all().order_by("identifier")
     serializer_class = ProjectSerializer
 
@@ -71,6 +72,8 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     post:
     Create a new dataset
     """
+
+    # TODO: check permissions for dataset viewing instead
 
     filter_backends = [DjangoFilterBackend]
     filterset_class = AuthorizedDatasetFilter
