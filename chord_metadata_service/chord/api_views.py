@@ -1,9 +1,17 @@
 import json
 
 from asgiref.sync import async_to_sync, sync_to_async
-from bento_lib.auth.permissions import P_CREATE_DATASET, P_DELETE_DATASET
-from bento_lib.auth.resources import build_resource
+from bento_lib.auth.permissions import (
+    P_CREATE_PROJECT,
+    P_EDIT_PROJECT,
+    P_DELETE_PROJECT,
+    P_CREATE_DATASET,
+    P_EDIT_DATASET,
+    P_DELETE_DATASET,
+)
+from bento_lib.auth.resources import RESOURCE_EVERYTHING, build_resource
 from bento_lib.responses import errors
+from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.exceptions import PermissionDenied
@@ -32,17 +40,22 @@ from .filters import AuthorizedDatasetFilter
 __all__ = ["ProjectViewSet", "DatasetViewSet"]
 
 
-RES_FORBIDDEN = Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
-
-
 def forbidden(request: Request):
     authz_middleware.mark_authz_done(request)
     return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 
 
+def not_found(request: Request):
+    authz_middleware.mark_authz_done(request)
+    return Response(errors.not_found_error(), status=status.HTTP_404_NOT_FOUND)
+
+
 class CHORDModelViewSet(viewsets.ModelViewSet):
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES) + (PhenopacketsRenderer,)
     pagination_class = LargeResultsSetPagination
+
+    async def get_obj_async(self):
+        return await sync_to_async(self.get_object)()
 
 
 class CHORDPublicModelViewSet(CHORDModelViewSet):
@@ -58,10 +71,54 @@ class ProjectViewSet(CHORDPublicModelViewSet):
     Create a new project
     """
 
-    # TODO: check permissions for project viewing instead
-
     queryset = Project.objects.all().order_by("identifier")
     serializer_class = ProjectSerializer
+
+    @async_to_sync
+    async def list(self, request, *args, **kwargs):
+        # For now, we don't have a view:project type permission - we can always view
+        # TODO: check permissions for project viewing instead
+        authz_middleware.mark_authz_done(request)
+        return super().list(request, *args, **kwargs)
+
+    @async_to_sync
+    async def create(self, request, *args, **kwargs):
+        if not (await authz_middleware.async_evaluate_one(request, RESOURCE_EVERYTHING, P_CREATE_PROJECT)):
+            return forbidden(request)
+
+        authz_middleware.mark_authz_done(request)
+        return super().create(request, *args, **kwargs)
+
+    @async_to_sync
+    async def update(self, request, *args, **kwargs):
+        try:
+            project = await self.get_obj_async()
+        except Http404:
+            return not_found(request)
+
+        if not (
+            await authz_middleware.async_evaluate_one(
+                request, build_resource(project=project.identifier), P_EDIT_PROJECT)
+        ):
+            return forbidden(request)
+
+        authz_middleware.mark_authz_done(request)
+        return super().update(request, *args, **kwargs)
+
+    @async_to_sync
+    async def destroy(self, request, *args, **kwargs):
+        try:
+            project = await self.get_obj_async()
+        except Http404:
+            return not_found(request)
+
+        can_delete = await authz_middleware.async_evaluate_one(
+            request, build_resource(project=project.identifier), P_DELETE_PROJECT)
+        if not can_delete:
+            return forbidden(request)
+
+        authz_middleware.mark_authz_done(request)
+        return super().destroy(request, *args, **kwargs)
 
 
 class DatasetViewSet(CHORDPublicModelViewSet):
