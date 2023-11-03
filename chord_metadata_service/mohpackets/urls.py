@@ -1,6 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
+from chord_metadata_service.mohpackets.api import api
 from chord_metadata_service.mohpackets.api_authorized import (
     AuthorizedBiomarkerViewSet,
     AuthorizedChemotherapyViewSet,
@@ -61,7 +62,6 @@ from chord_metadata_service.mohpackets.api_ingest import (
     ingest_surgeries,
     ingest_treatments,
 )
-from chord_metadata_service.mohpackets.new_api import api
 
 # ================== AUTHORIZED API ================== #
 router = routers.SimpleRouter()
@@ -121,13 +121,13 @@ ingest_patterns = [
 ]
 
 urlpatterns = [
-    path("authorized/", include(router.urls)),
-    path("authorized/api/", api.urls),
-    path("discovery/", include(discovery_router.urls)),
-    path("ingest/", include(ingest_patterns)),
+    path("", api.urls),
+    path("authorized/drf/", include(router.urls)),
+    path("discovery/drf/", include(discovery_router.urls)),
+    path("ingest/drf/", include(ingest_patterns)),
     path("service-info", service_info),
     path(
-        "discovery/overview/",
+        "discovery/drf/overview/",
         include(
             [
                 path("cohort_count", cohort_count),
