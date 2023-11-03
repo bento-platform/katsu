@@ -174,59 +174,63 @@ async def search_overview(request: Request):
     - Parameter
         - id: a list of patient ids
     """
-    individual_id = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
 
-    queryset = patients_models.Individual.objects.all().filter(id__in=individual_id)
+    individual_ids = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
+
+    queryset = patients_models.Individual.objects.all().filter(id__in=individual_ids)
 
     datasets_accessed = frozenset({ds_id async for ds_id in (
         queryset
-        .values("phenopackets__dataset__identifier")
-        .exclude(phenopackets__dataset__identifier__isnull=True)
-        .values_list("phenopackets__dataset__identifier", flat=True)
+        .exclude(phenopackets__dataset_id__isnull=True)
+        .values_list("phenopackets__dataset__project__identifier", "phenopackets__dataset__identifier")
     )})
 
+    # IMPORTANT PERMISSIONS NOTE: ----–----–----–----–----–----–----–----–----–----–------------------------------------
+    # Even though we're basically just accessing counts here, we require the query:data permissions since otherwise
+    # users could discover the ID format/which IDs exist in the instance (BAD!!!)
+    # ------------------------------------------------------------------------------------------------------------------
+
     print(datasets_accessed)
+    authz_resources = tuple(build_resource(project=d[0], dataset=d[1]) for d in datasets_accessed)
+    auth_res = await authz_middleware.async_evaluate(request, authz_resources, (P_QUERY_DATA,))
+    allowed_datasets = tuple(r["dataset"] for r, p in zip(authz_resources, auth_res) if p[0])
 
-    # TODO: filter to only individuals where we have project/dataset-level access? or can we at least pass a dataset
-    #  in too to make this less annoying...
+    authorized_individuals = queryset.filter(phenopackets__dataset_id__in=allowed_datasets)
+    # We need to select these separately, since we could be authorized to access one phenopacket for an individual
+    # but not another - thus we get just phenopackets we're authorized to get for individuals we selected:
+    authorized_phenopackets = pheno_models.Phenopacket.objects.filter(
+        subject__in=authorized_individuals, dataset_id__in=allowed_datasets)
 
-    individuals_count = len(individual_id)
-    biosamples_count = await (
-        queryset
-        .values("phenopackets__biosamples__id")
-        .exclude(phenopackets__biosamples__id__isnull=True)
-        .acount()
-    )
+    individuals_count = await authorized_individuals.acount()
+    biosamples_count = await authorized_phenopackets.values("biosamples__id").acount()
 
     # Sex related fields stats are precomputed here and post processed later
     # to include missing values inferred from the schema
-    individuals_sex = await queryset_stats_for_field(queryset, "sex")
+    individuals_sex = await queryset_stats_for_field(authorized_individuals, "sex")
 
     # several obvious approaches to experiment counts give incorrect answers
     experiment_types = await queryset_stats_for_field(
-        queryset, "phenopackets__biosamples__experiment__experiment_type")
+        authorized_phenopackets, "biosamples__experiment__experiment_type")
     experiments_count = sum(experiment_types.values())
 
     return Response({
         "biosamples": {
             "count": biosamples_count,
             "sampled_tissue": await queryset_stats_for_field(
-                queryset, "phenopackets__biosamples__sampled_tissue__label"),
+                authorized_phenopackets, "biosamples__sampled_tissue__label"),
             "histological_diagnosis": await queryset_stats_for_field(
-                queryset,
-                "phenopackets__biosamples__histological_diagnosis__label"
-            ),
+                authorized_phenopackets, "biosamples__histological_diagnosis__label"),
         },
         "diseases": {
-            "term": await queryset_stats_for_field(queryset, "phenopackets__diseases__term__label"),
+            "term": await queryset_stats_for_field(authorized_phenopackets, "diseases__term__label"),
         },
         "individuals": {
             "count": individuals_count,
             "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.SEX)},
-            "age": await get_age_numeric_binned(queryset, OVERVIEW_AGE_BIN_SIZE),
+            "age": await get_age_numeric_binned(authorized_individuals, OVERVIEW_AGE_BIN_SIZE),
         },
         "phenotypic_features": {
-            "type": await queryset_stats_for_field(queryset, "phenopackets__phenotypic_features__pftype__label"),
+            "type": await queryset_stats_for_field(authorized_phenopackets, "phenotypic_features__pftype__label"),
         },
         "experiments": {
             "count": experiments_count,
