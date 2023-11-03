@@ -4,14 +4,15 @@ from uuid import UUID, uuid4
 
 import orjson
 from django.apps import apps
-from django.db.models import Prefetch
+from django.db.models import Count, Model, Prefetch, Q
+from django.http import HttpResponse
 from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiTypes,
     extend_schema,
     extend_schema_view,
 )
-from ninja import Field, ModelSchema, NinjaAPI, Schema
+from ninja import Field, FilterSchema, ModelSchema, NinjaAPI, Query, Router, Schema
 from ninja.pagination import PageNumberPagination, paginate
 from ninja.parser import Parser
 from ninja.renderers import BaseRenderer
@@ -59,6 +60,11 @@ from chord_metadata_service.mohpackets.models import (
 from chord_metadata_service.mohpackets.pagination import (
     SmallResultsSetPagination,
     StandardResultsSetPagination,
+)
+from chord_metadata_service.mohpackets.schema import (
+    DonorFilterSchema,
+    DonorSchema,
+    DonorWithClinicalDataSchema,
 )
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
@@ -507,3 +513,55 @@ class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
 #         "primarydiagnosis_set__specimen_set__sampleregistration_set",
 #     ).all()
 #     return list(queryset)
+
+
+# =============================================================================
+router = Router()
+
+
+@router.get("/ninja_donors", response=List[DonorWithClinicalDataSchema])
+@paginate(PageNumberPagination, page_size=10)
+def tasks(request):
+    # queryset = Donor.objects.all()
+
+    donor_followups_prefetch = Prefetch(
+        "followup_set",
+        queryset=FollowUp.objects.filter(
+            submitter_primary_diagnosis_id__isnull=True,
+            submitter_treatment_id__isnull=True,
+        ),
+    )
+
+    primary_diagnosis_followups_prefetch = Prefetch(
+        "primarydiagnosis_set__followup_set",
+        queryset=FollowUp.objects.filter(
+            submitter_primary_diagnosis_id__isnull=False,
+            submitter_treatment_id__isnull=True,
+        ),
+    )
+    queryset = Donor.objects.prefetch_related(
+        donor_followups_prefetch,
+        primary_diagnosis_followups_prefetch,
+        "biomarker_set",
+        "comorbidity_set",
+        "exposure_set",
+        "primarydiagnosis_set__treatment_set__chemotherapy_set",
+        "primarydiagnosis_set__treatment_set__hormonetherapy_set",
+        "primarydiagnosis_set__treatment_set__immunotherapy_set",
+        "primarydiagnosis_set__treatment_set__radiation_set",
+        "primarydiagnosis_set__treatment_set__surgery_set",
+        "primarydiagnosis_set__treatment_set__followup_set",
+        "primarydiagnosis_set__specimen_set__sampleregistration_set",
+    ).all()
+    return list(queryset)
+
+
+@router.get(
+    "/donors/",
+    response=List[DonorSchema],
+)
+def list_donors(request, filters: DonorFilterSchema = Query(...)):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return Donor.objects.filter(q)
