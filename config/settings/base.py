@@ -123,8 +123,13 @@ LOGGING = {
     },
     "loggers": {
         "": {
-            "level": "INFO",
+            "level": "DEBUG",
             "handlers": ["console"],
+        },
+        "psycopg.pq": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
         },
     },
 }
