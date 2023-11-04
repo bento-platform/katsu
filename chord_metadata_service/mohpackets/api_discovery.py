@@ -1,12 +1,29 @@
 import os
 from collections import Counter, defaultdict
 from datetime import date, datetime
+from itertools import chain
 from typing import Any, Dict, List, Optional, Type
 
 import orjson
 from authx.auth import get_opa_datasets
 from django.conf import settings
-from django.db.models import Count, Model, Prefetch, Q
+from django.contrib.postgres.fields import ArrayField
+from django.db.models import (
+    CharField,
+    Count,
+    ExpressionWrapper,
+    F,
+    FloatField,
+    Func,
+    Min,
+    Model,
+    OuterRef,
+    Prefetch,
+    Q,
+    Subquery,
+    Value,
+)
+from django.db.models.functions import Concat
 from django.http import HttpResponse, JsonResponse
 from drf_spectacular.utils import (
     OpenApiTypes,
@@ -671,3 +688,179 @@ def discover_comorbidities(request):
 def discover_exposures(request):
     exposures = count_donors(Exposure)
     return DiscoverySchema(discovery_donor=exposures)
+
+
+###############################################
+#                                             #
+#        CUSTOM OVERVIEW API ENDPOINTS        #
+#                                             #
+###############################################
+
+
+@router.get("/sidebar_list/", response=Dict[str, Any])
+def discover_sidebar_list(request):
+    """
+    Retrieve the list of available values for all fields (including for
+    datasets that the user is not authorized to view)
+    """
+    # Drugs queryable for chemotherapy
+    chemotherapy_drug_names = list(
+        Chemotherapy.objects.exclude(drug_name__isnull=True)
+        .values_list("drug_name", flat=True)
+        .order_by("drug_name")
+        .distinct()
+    )
+    # Drugs queryable for immunotherapy
+    immunotherapy_drug_names = list(
+        Immunotherapy.objects.exclude(drug_name__isnull=True)
+        .values_list("drug_name", flat=True)
+        .order_by("drug_name")
+        .distinct()
+    )
+
+    # Drugs queryable for hormone therapy
+    hormone_therapy_drug_names = list(
+        HormoneTherapy.objects.exclude(drug_name__isnull=True)
+        .values_list("drug_name", flat=True)
+        .order_by("drug_name")
+        .distinct()
+    )
+
+    # Create a dictionary of results
+    results = {
+        "treatment_types": TREATMENT_TYPE,
+        "tumour_primary_sites": PRIMARY_SITE,
+        "chemotherapy_drug_names": chemotherapy_drug_names,
+        "immunotherapy_drug_names": immunotherapy_drug_names,
+        "hormone_therapy_drug_names": hormone_therapy_drug_names,
+    }
+
+    return results
+
+
+@router.get("/overview/cohort_count/", response=Dict[str, int])
+def discover_cohort_count(request):
+    """
+    Return the number of cohorts in the database.
+    """
+    return {"cohort_count": Program.objects.count()}
+
+
+@router.get("/overview/patients_per_cohort/", response=Dict[str, int])
+def discover_patients_per_cohort(request):
+    """
+    Return the number of patients per cohort in the database.
+    """
+    cohorts = Donor.objects.values_list("program_id", flat=True)
+    return count_terms(cohorts)
+
+
+@router.get("/overview/individual_count/", response=Dict[str, int])
+def discover_individual_count(request):
+    """
+    Return the number of individuals in the database.
+    """
+
+    return {"individual_count": Donor.objects.count()}
+
+
+@router.get("/overview/gender_count/", response=Dict[str, int])
+def discover_gender_count(request):
+    """
+    Return the count for every gender in the database.
+    """
+    genders = Donor.objects.values_list("gender", flat=True)
+    return count_terms(genders)
+
+
+@router.get("/overview/cancer_type_count/", response=Dict[str, int])
+def discover_cancer_type_count(request):
+    """
+    Return the count for every cancer type in the database.
+    """
+    cancer_types = list(Donor.objects.values_list("primary_site", flat=True))
+
+    # Handle missing values as empty arrays
+    for i in range(len(cancer_types)):
+        if cancer_types[i] is None:
+            cancer_types[i] = [None]
+
+    return count_terms(cancer_types)
+
+
+@router.get("/overview/treatment_type_count/", response=Dict[str, int])
+def discover_treatment_type_count(request):
+    """
+    Return the count for every treatment type in the database.
+    """
+    treatment_types = list(Treatment.objects.values_list("treatment_type", flat=True))
+
+    # Handle missing values as empty arrays
+    for i in range(len(treatment_types)):
+        if treatment_types[i] is None:
+            treatment_types[i] = [None]
+
+    return count_terms(treatment_types)
+
+
+@router.get("/overview/diagnosis_age_count/", response=Dict[str, int])
+def discover_diagnosis_age_count(request):
+    """
+    Return the count for age of diagnosis in the database.
+    If there are multiple date_of_diagnosis, get the earliest
+    """
+    age_count = {
+        "null": 0,
+        "0-19": 0,
+        "20-29": 0,
+        "30-39": 0,
+        "40-49": 0,
+        "50-59": 0,
+        "60-69": 0,
+        "70-79": 0,
+        "80+": 0,
+    }
+
+    earliest_diagnoses = (
+        PrimaryDiagnosis.objects.values("donor_uuid")
+        .annotate(earliest_date=Min("date_of_diagnosis"))
+        .filter(earliest_date__isnull=False)
+    )
+    earliest_diagnoses_dict = {
+        item["donor_uuid"]: item["earliest_date"] for item in earliest_diagnoses
+    }
+
+    # Create a dictionary to store donor UUIDs and their corresponding date_of_birth
+    donor_dob_dict = {donor.uuid: donor.date_of_birth for donor in Donor.objects.all()}
+
+    for donor_uuid, dob in donor_dob_dict.items():
+        diagnosis_date = earliest_diagnoses_dict.get(donor_uuid)
+        if diagnosis_date is not None:
+            # Convert strings to datetime objects
+            dob_date = datetime.strptime(dob, "%Y-%m")
+            diagnosis_date = datetime.strptime(
+                earliest_diagnoses_dict[donor_uuid], "%Y-%m"
+            )
+            # Calculate the age difference in years
+            age = diagnosis_date.year - dob_date.year
+
+            if age < 20:
+                age_count["0-19"] += 1
+            elif age < 30:
+                age_count["20-29"] += 1
+            elif age < 40:
+                age_count["30-39"] += 1
+            elif age < 50:
+                age_count["40-49"] += 1
+            elif age < 60:
+                age_count["50-59"] += 1
+            elif age < 70:
+                age_count["60-69"] += 1
+            elif age < 80:
+                age_count["70-79"] += 1
+            else:
+                age_count["80+"] += 1
+        else:
+            age_count["null"] += 1
+
+    return age_count
