@@ -237,3 +237,53 @@ class ProjectJsonSchemaViewSet(CHORDPublicModelViewSet):
 
     queryset = ProjectJsonSchema.objects.all().order_by("project_id")
     serializer_class = ProjectJsonSchemaSerializer
+
+    @async_to_sync
+    async def list(self, request, *args, **kwargs):
+        # For now, we don't have a view:project type permission - we can always view
+        authz.mark_authz_done(request)
+        super().create(request, *args, **kwargs)
+
+    @async_to_sync
+    async def create(self, request, *args, **kwargs):
+        project_id = request.data.get("project")
+
+        if project_id is None:
+            return forbidden(request)  # side effect: sets authz done flag  TODO: bad req?
+
+        # "Creating" a JSON schema on a project counts as editing the project itself, here
+        if not (await authz.async_evaluate_one(request, build_resource(project=project_id), P_EDIT_PROJECT)):
+            return forbidden(request)  # side effect: sets authz done flag
+
+        authz.mark_authz_done(request)
+        super().create(request, *args, **kwargs)  # TODO: handle invalid
+
+    @async_to_sync
+    async def update(self, request, *args, **kwargs):
+        try:
+            pjs = await self.get_obj_async()
+        except Http404:
+            return not_found(request)  # side effect: sets authz done flag
+
+        # Updating a JSON schema on a project counts as editing the project itself, here
+        if not (await authz.async_evaluate_one(request, build_resource(project=pjs.project_id), P_EDIT_DATASET)):
+            return forbidden(request)  # side effect: sets authz done flag
+
+        # TODO: cannot change project
+
+        authz.mark_authz_done(request)
+        super().create(request, *args, **kwargs)  # TODO: handle invalid
+
+    @async_to_sync
+    async def destroy(self, request: Request, *args, **kwargs):
+        try:
+            pjs = await self.get_obj_async()
+        except Http404:
+            return not_found(request)  # side effect: sets authz done flag
+
+        # "Deleting" a JSON schema on a project counts as editing the project itself, here
+        if not (await authz.async_evaluate_one(request, build_resource(project=pjs.project_id), P_EDIT_PROJECT)):
+            return forbidden(request)  # side effect: sets authz done flag
+
+        authz.mark_authz_done(request)
+        super().destroy(request, *args, **kwargs)
