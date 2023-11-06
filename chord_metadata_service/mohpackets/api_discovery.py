@@ -86,8 +86,9 @@ from chord_metadata_service.mohpackets.schema import (
     SpecimenFilterSchema,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
+from chord_metadata_service.mohpackets.utils import get_schema_url
 
-from .utils import get_schema_url
+# from .utils import get_schema_url
 
 """
     This module inheriting from the base views and adding the discovery mixin,
