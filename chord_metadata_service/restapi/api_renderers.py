@@ -120,7 +120,7 @@ def render_individual_age(individual):
     if "time_at_last_encounter" not in individual:
         return None
     time_at_last_encounter = individual["time_at_last_encounter"]
-    
+
     if "age_range" in time_at_last_encounter:
         age_range = time_at_last_encounter["age_range"]
         start = age_range["start"]["iso8601duration"]
