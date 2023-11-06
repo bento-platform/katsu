@@ -5,7 +5,7 @@ from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.restapi.models import BaseTimeStamp, IndexableMixin, SchemaType, BaseExtraProperties
 from chord_metadata_service.restapi.schemas import TIME_ELEMENT_SCHEMA
-from chord_metadata_service.restapi.validators import JsonSchemaValidator, ontology_validator, age_or_age_range_validator
+from chord_metadata_service.restapi.validators import JsonSchemaValidator, ontology_validator
 from .values import PatientStatus, Sex, KaryotypicSex
 
 
