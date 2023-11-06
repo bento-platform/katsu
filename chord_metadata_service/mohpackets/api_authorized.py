@@ -522,8 +522,6 @@ router = Router()
 @router.get("/ninja_donors", response=List[DonorWithClinicalDataSchema])
 @paginate(PageNumberPagination, page_size=10)
 def tasks(request):
-    # queryset = Donor.objects.all()
-
     donor_followups_prefetch = Prefetch(
         "followup_set",
         queryset=FollowUp.objects.filter(
