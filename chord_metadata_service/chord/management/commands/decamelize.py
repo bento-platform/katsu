@@ -21,6 +21,5 @@ class Command(BaseCommand):
 
         with open(data, "w") as json_file:
             json.dump(json_data, json_file, ensure_ascii=False, indent=4)
-            json_file.close()
 
         print(f"Decamelized file: {data}")
