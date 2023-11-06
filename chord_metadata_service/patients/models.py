@@ -3,11 +3,10 @@ from django.apps import apps
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
-from chord_metadata_service.restapi.models import BaseExtraProperties, IndexableMixin, BaseTimeStamp, SchemaType
-from chord_metadata_service.restapi.validators import ontology_validator, JsonSchemaValidator
-from .values import Sex, KaryotypicSex, PatientStatus
-from .validators import comorbid_condition_validator
-from ..restapi.schemas import TIME_ELEMENT_SCHEMA
+from chord_metadata_service.restapi.models import BaseTimeStamp, IndexableMixin, SchemaType, BaseExtraProperties
+from chord_metadata_service.restapi.schemas import TIME_ELEMENT_SCHEMA
+from chord_metadata_service.restapi.validators import JsonSchemaValidator, ontology_validator, age_or_age_range_validator
+from .values import PatientStatus, Sex, KaryotypicSex
 
 
 class VitalStatus(BaseTimeStamp, IndexableMixin):
@@ -73,21 +72,6 @@ class Individual(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     # FHIR specific
     active = models.BooleanField(default=False, help_text='Whether this patient\'s record is in active use.')
     deceased = models.BooleanField(default=False, help_text='Indicates if the individual is deceased or not.')
-
-    # mCode specific
-    # this field should be complex Ontology - clinical status and code - two Codeable concept - single, cl status has
-    # enum list of values
-    # TODO add these fields to FHIR converter ?
-    comorbid_condition = JSONField(blank=True, null=True, validators=[comorbid_condition_validator],
-                                   help_text='One or more conditions that occur with primary condition.')
-    # TODO decide use ONTOLOGY_CLASS vs. CODEABLE_CONCEPT - currently Ontology class
-    ecog_performance_status = JSONField(blank=True, null=True, validators=[ontology_validator],
-                                        help_text='Value representing the Eastern Cooperative '
-                                                  'Oncology Group performance status.')
-    karnofsky = JSONField(blank=True, null=True, validators=[ontology_validator],
-                          help_text='Value representing the Karnofsky Performance status.')
-    race = models.CharField(max_length=200, blank=True, help_text='A code for the person\'s race.')
-    ethnicity = models.CharField(max_length=200, blank=True, help_text='A code for the person\'s ethnicity.')
 
     # extra
     extra_properties = JSONField(blank=True, null=True,

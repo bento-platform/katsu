@@ -63,7 +63,6 @@ class CandigAuthzMiddleware:
             "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/htsfiles/?.*", "^/api/individuals/?.*",
             "^/api/interpretations/?.*", "^/api/metadata/?.*", "^/api/phenopackets/?.*", "^/api/phenotypicfeatures/?.*",
             "^/api/procedures/?.*", "^/api/variants/?.*", "^/api/biosamples/?.*", "^/api/labsvital/?.*",
-            "^/api/mcodepackets/?.*", "^/api/medicationstatements/?.*", "^/api/geneticspecimens/?.*",
             "^/api/cancergeneticvariants/?.*", "^/api/genomicregionsstudied/?.*", "^/api/genomicsreports/?.*",
             "^/api/cancerconditions/?.*", "^/api/tnmstaging/?.*", "^/api/cancerrelatedprocedures/?.*"
         ]
