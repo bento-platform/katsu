@@ -8,7 +8,6 @@ class Migration(migrations.Migration):
     dependencies = [
         ('phenopackets', '0005_v4_0_0'),
         ('chord', '0005_v3_0_0'),
-        ('mcode', '0006_v4_0_0'),
         ('experiments', '0007_v4_0_0'),
     ]
 

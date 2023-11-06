@@ -3,7 +3,6 @@ from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
 from chord_metadata_service.experiments import api_views as experiment_views
-from chord_metadata_service.mcode import api_views as mcode_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
 from chord_metadata_service.phenopackets.autocomplete_views import (
@@ -14,7 +13,6 @@ from chord_metadata_service.phenopackets.autocomplete_views import (
 from chord_metadata_service.resources import api_views as resources_views
 from .api_views import (
      overview,
-     mcode_overview,
      public_search_fields,
      public_overview,
      public_dataset,
@@ -58,19 +56,6 @@ router.register(r'genomicinterpretations', phenopacket_views.GenomicInterpretati
 router.register(r'diagnoses', phenopacket_views.DiagnosisViewSet, basename="diagnoses")
 router.register(r'interpretations', phenopacket_views.InterpretationViewSet, basename="interpretations")
 
-# mCode app urls
-router.register(r'geneticspecimens', mcode_views.GeneticSpecimenViewSet, basename="geneticspecimens")
-router.register(r'cancergeneticvariants', mcode_views.CancerGeneticVariantViewSet, basename="cancergeneticvariants")
-router.register(r'genomicregionsstudied', mcode_views.GenomicRegionStudiedViewSet, basename="genomicregionsstudied")
-router.register(r'genomicsreports', mcode_views.GenomicsReportViewSet, basename="genomicsreports")
-router.register(r'labsvital', mcode_views.LabsVitalViewSet, basename="labsvital")
-router.register(r'cancerconditions', mcode_views.CancerConditionViewSet, basename="cancerconditions")
-router.register(r'tnmstaging', mcode_views.TNMStagingViewSet, basename="tnmstaging")
-router.register(r'cancerrelatedprocedures', mcode_views.CancerRelatedProcedureViewSet,
-                basename="cancerrelatedprocedures")
-router.register(r'medicationstatements', mcode_views.MedicationStatementViewSet, basename="medicationstatements")
-router.register(r'mcodepackets', mcode_views.MCodePacketViewSet, basename="mcodepackets")
-
 # Resources app urls
 router.register(r'resources', resources_views.ResourceViewSet)
 
@@ -83,15 +68,12 @@ urlpatterns = [
          name="chord-phenopacket-schema"),
     path('experiment_schema', experiment_views.get_experiment_schema,
          name="experiment-schema"),
-    path('mcode_schema', mcode_views.get_mcode_schema,
-         name="mcode-schema"),
 
     # extra properties schema types
     path('extra_properties_schema_types', extra_properties_schema_types, name="extra-properties-schema-types"),
 
     # overviews (statistics)
     path('overview', overview, name="overview"),
-    path('mcode_overview', mcode_overview, name="mcode-overview"),
     path('search_overview', search_overview, name="search-overview"),
 
     # autocomplete URLs

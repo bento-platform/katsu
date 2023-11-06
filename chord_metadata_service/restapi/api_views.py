@@ -1,14 +1,11 @@
 import asyncio
 import json
 
-from collections import Counter
-
 from adrf.decorators import api_view
 from bento_lib.auth.permissions import P_QUERY_DATA
 from bento_lib.auth.resources import build_resource
 from bento_lib.responses import errors
 from django.conf import settings
-from django.views.decorators.cache import cache_page
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
 from rest_framework.decorators import permission_classes
@@ -21,13 +18,11 @@ from chord_metadata_service.authz.discovery import (
     get_data_type_discovery_permissions,
 )
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.permissions import OverrideOrSuperUserOnly, BentoAllowAny
+from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.chord import models as chord_models
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.logger import logger
-from chord_metadata_service.mcode import models as mcode_models
-from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
 from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.phenopackets import models as pheno_models
@@ -266,98 +261,6 @@ async def search_overview(request: Request):
             "count": experiments_count,
             "experiment_type": experiment_types,
         },
-    })
-
-
-@extend_schema(
-    description="Overview of all mCode data in the database",
-    responses={
-        200: inline_serializer(
-            name='mcode_overview_response',
-            fields={
-                'mcodepackets': serializers.IntegerField(),
-                'data_type_specific': serializers.JSONField(),
-            }
-        ),
-    }
-)
-# Cache page for the requested url for 2 hours
-@cache_page(60 * 60 * 2)
-@api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly])
-def mcode_overview(_request: Request):
-    """
-    get:
-    Overview of all mCode data in the database
-    """
-    mcodepackets = mcode_models.MCodePacket.objects.all()\
-        .prefetch_related(*MCODEPACKET_PREFETCH)\
-        .select_related(*MCODEPACKET_SELECT)
-
-    # cancer condition code
-    cancer_condition_counter = Counter()
-    # cancer related procedure type - radiation vs. surgical
-    cancer_related_procedure_type_counter = Counter()
-    # cancer related procedure code
-    cancer_related_procedure_counter = Counter()
-    # cancer disease status
-    cancer_disease_status_counter = Counter()
-
-    individuals_set = set()
-    individuals_sex = Counter()
-    individuals_k_sex = Counter()
-    individuals_taxonomy = Counter()
-    individuals_age = Counter()
-    individuals_ethnicity = Counter()
-
-    for mcodepacket in mcodepackets:
-        # subject/individual
-        individual = mcodepacket.subject
-        individuals_set.add(individual.id)
-        individuals_sex.update((individual.sex,))
-        individuals_k_sex.update((individual.karyotypic_sex,))
-        if individual.ethnicity != "":
-            individuals_ethnicity.update((individual.ethnicity,))
-        if individual.taxonomy is not None:
-            individuals_taxonomy.update((individual.taxonomy["label"],))
-        if mcodepacket.cancer_condition is not None:
-            cancer_condition_counter.update((mcodepacket.cancer_condition.condition_type,))
-        for cancer_related_procedure in mcodepacket.cancer_related_procedures.all():
-            cancer_related_procedure_type_counter.update((cancer_related_procedure.procedure_type,))
-            cancer_related_procedure_counter.update((cancer_related_procedure.code["label"],))
-        if mcodepacket.cancer_disease_status is not None:
-            cancer_disease_status_counter.update((mcodepacket.cancer_disease_status["label"],))
-
-    return Response({
-        "mcodepackets": mcodepackets.count(),
-        "data_type_specific": {
-            "cancer_conditions": {
-                "count": len(cancer_condition_counter.keys()),
-                "term": dict(cancer_condition_counter)
-            },
-            "cancer_related_procedure_types": {
-                "count": len(cancer_related_procedure_type_counter.keys()),
-                "term": dict(cancer_related_procedure_type_counter)
-            },
-            "cancer_related_procedures": {
-                "count": len(cancer_related_procedure_counter.keys()),
-                "term": dict(cancer_related_procedure_counter)
-            },
-            "cancer_disease_status": {
-                "count": len(cancer_disease_status_counter.keys()),
-                "term": dict(cancer_disease_status_counter)
-            },
-            "individuals": {
-                "count": len(individuals_set),
-                "sex": {k: individuals_sex[k] for k in (s[0] for s in pheno_models.Individual.SEX)},
-                "karyotypic_sex": {
-                    k: individuals_k_sex[k] for k in (s[0] for s in pheno_models.Individual.KARYOTYPIC_SEX)
-                },
-                "taxonomy": dict(individuals_taxonomy),
-                "age": dict(individuals_age),
-                "ethnicity": dict(individuals_ethnicity)
-            },
-        }
     })
 
 

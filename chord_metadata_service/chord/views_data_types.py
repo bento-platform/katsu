@@ -19,14 +19,12 @@ from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult
 from chord_metadata_service.logger import logger
-from chord_metadata_service.mcode.models import MCodePacket
 from chord_metadata_service.phenopackets.models import Phenopacket
 
 from . import data_types as dt
 
 QUERYSET_FN: dict[str, Callable] = {
     dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
-    dt.DATA_TYPE_MCODEPACKET: lambda dataset_id: MCodePacket.objects.filter(dataset_id=dataset_id),
     dt.DATA_TYPE_PHENOPACKET: lambda dataset_id: Phenopacket.objects.filter(dataset_id=dataset_id),
     dt.DATA_TYPE_EXPERIMENT_RESULT: lambda dataset_id: ExperimentResult.objects.filter(
         experiment__dataset_id=dataset_id),

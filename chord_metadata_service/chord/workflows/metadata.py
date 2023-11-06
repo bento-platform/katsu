@@ -6,9 +6,8 @@ __all__ = [
     "WORKFLOW_PHENOPACKETS_JSON",
     "WORKFLOW_EXPERIMENTS_JSON",
     "WORKFLOW_FHIR_JSON",
-    "WORKFLOW_MCODE_FHIR_JSON",
-    "WORKFLOW_MCODE_JSON",
     "WORKFLOW_READSET",
+    "WORKFLOW_DOCUMENT",
     "WORKFLOW_MAF_DERIVED_FROM_VCF_JSON",
     "WORKFLOW_VCF2MAF",
     "WORKFLOW_CBIOPORTAL",
@@ -30,9 +29,8 @@ from chord_metadata_service.chord.data_types import (
 WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
-WORKFLOW_MCODE_FHIR_JSON = "mcode_fhir_json"
-WORKFLOW_MCODE_JSON = "mcode_json"
 WORKFLOW_READSET = "readset"
+WORKFLOW_DOCUMENT = "document"
 WORKFLOW_MAF_DERIVED_FROM_VCF_JSON = "maf_derived_from_vcf_json"
 WORKFLOW_VCF2MAF = "vcf2maf"
 WORKFLOW_CBIOPORTAL = "cbioportal"

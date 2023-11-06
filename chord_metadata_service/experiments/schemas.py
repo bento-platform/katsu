@@ -1,13 +1,11 @@
 from pathlib import Path
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
-from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, get_schema_base_path, base_schema_uri, \
-    sub_schema_uri
+from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, get_schema_app_id, sub_schema_uri
 
 __all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
 
-base_path = get_schema_base_path(Path(__file__).parent.name)
-base_uri = base_schema_uri(base_path)
+base_uri = get_schema_app_id(Path(__file__).parent.name)
 
 EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -32,7 +30,8 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
         "file_format": {
             "type": "string",
             "enum": ["SAM", "BAM", "CRAM", "BAI", "CRAI", "VCF", "BCF", "MAF", "GVCF", "BigWig", "BigBed", "FASTA",
-                     "FASTQ", "TAB", "SRA", "SRF", "SFF", "GFF", "TABIX", "UNKNOWN", "OTHER"]
+                     "FASTQ", "TAB", "SRA", "SRF", "SFF", "GFF", "TABIX", "PDF", "CSV", "TSV", "JPEG", "PNG", "GIF",
+                     "MARKDOWN", "MP3", "M4A", "MP4", "DOCX", "XLS", "XLSX", "UNKNOWN", "OTHER"]
         },
         "data_output_type": {
             "type": "string",

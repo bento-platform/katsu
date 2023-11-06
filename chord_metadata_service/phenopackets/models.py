@@ -87,7 +87,7 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
     severity = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "severity"))
     modifiers = JSONField(blank=True, null=True, validators=[ontology_list_validator],
-                         help_text=rec_help(d.PHENOTYPIC_FEATURE, "modifiers"))
+                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "modifiers"))
     onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
     resolution = JSONField(blank=True, null=True, validators=[
         JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])

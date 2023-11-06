@@ -1,7 +1,7 @@
 # Individual schemas for validation of JSONField values
 import json
-import jsonschema
 from pathlib import Path
+from referencing import Registry, Resource
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.schemas import RESOURCE_SCHEMA
 from chord_metadata_service.restapi.schemas import (
@@ -20,10 +20,9 @@ from chord_metadata_service.restapi.schema_utils import (
     base_type,
     enum_of,
     named_one_of,
-    base_schema_uri,
     sub_schema_uri,
     string_with_format,
-    describe_schema, get_schema_base_path
+    describe_schema, get_schema_app_id
 )
 
 from . import descriptions
@@ -52,16 +51,14 @@ __all__ = [
     "PHENOPACKET_RADIATION_THERAPY",
     "PHENOPACKET_THERAPEUTIC_REGIMEN",
     "PHENOPACKET_MEDICAL_ACTION_SCHEMA",
-    "PHENOPACKET_REF_RESOLVER",
     "VRS_VARIATION_SCHEMA"
 ]
 
-base_path = get_schema_base_path(Path(__file__).parent.name)
-base_uri = base_schema_uri(base_path)
-
+base_uri = get_schema_app_id(Path(__file__).parent.name)
 
 with open("chord_metadata_service/vrs/schema/vrs.json", "r") as file:
     vrs_schema_definitions = json.load(file)
+    vrs_schema_definitions["$id"] = sub_schema_uri(base_uri, "vrs")
     file.close()
 
 
@@ -526,6 +523,37 @@ VCF_RECORD_SCHEMA = describe_schema({
 }, descriptions=descriptions.VCF_RECORD)
 
 
+VARIATION_ONE_OF_SCHEMA = describe_schema({
+    "$schema": DRAFT_07,
+    "$id": sub_schema_uri(base_uri, "variation"),
+    "title": "VRS Variation object",
+    "description": "Provides a computable representation of variation",
+    "type": "object",
+    "oneOf": [
+        named_one_of("absolute_copy_numer", {
+            "$ref": sub_schema_uri(base_uri, "vrs#/definitions/AbsoluteCopyNumber")
+        }),
+        named_one_of("allele", {
+            "$ref": sub_schema_uri(base_uri, "vrs#/definitions/Allele")
+        }),
+        named_one_of("genotype", {
+            "$ref": sub_schema_uri(base_uri, "#/definitions/Genotype")
+        }),
+        named_one_of("haplotype", {
+            "$ref": sub_schema_uri(base_uri, "#/definitions/Haplotype")
+        }),
+        named_one_of("relative_copy_number", {
+            "$ref": sub_schema_uri(base_uri, "#/definitions/RelativeCopyNumber")
+        }),
+        named_one_of("text", {
+            "$ref": sub_schema_uri(base_uri, "#/definitions/Text")
+        }),
+        named_one_of("variation_set", {
+            "$ref": sub_schema_uri(base_uri, "#/definitions/VariationSet")
+        }),
+    ]
+}, {})
+
 VARIANT_DESCRIPTOR = describe_schema({
     "$schema": DRAFT_07,
     "$id": sub_schema_uri(base_uri, "variant_descriptor"),
@@ -534,12 +562,10 @@ VARIANT_DESCRIPTOR = describe_schema({
     "type": "object",
     "properties": {
         "id": base_type(SCHEMA_TYPES.STRING),
-        "variation": {
-            "$ref": "#/definitions/Variation"
-        },
+        "variation": VARIATION_ONE_OF_SCHEMA,
         "label": base_type(SCHEMA_TYPES.STRING),
         "description": base_type(SCHEMA_TYPES.STRING),
-        "gene_descriptor": GENE_DESCRIPTOR,
+        "gene_context": GENE_DESCRIPTOR,
         "expressions": array_of(EXPRESSION_SCHEMA),
         "vcf_record": VCF_RECORD_SCHEMA,
         "xrefs": array_of(base_type(SCHEMA_TYPES.STRING)),
@@ -647,10 +673,8 @@ PHENOPACKET_SCHEMA = describe_schema({
     "required": ["id", "meta_data"],
 }, descriptions.PHENOPACKET)
 
-# For efficient validation of VRS
-PHENOPACKET_REF_RESOLVER: jsonschema.RefResolver = jsonschema.RefResolver.from_schema({
-    **PHENOPACKET_SCHEMA,
-    "definitions": vrs_schema_definitions.get("definitions")
-})
+VRS_REF_RESOURCE = Resource.from_contents(contents=vrs_schema_definitions, default_specification=DRAFT_07)
+VRS_REF_REGISTRY = VRS_REF_RESOURCE @ Registry()
 
-_, VRS_VARIATION_SCHEMA = PHENOPACKET_REF_RESOLVER.resolve("#/definitions/Variation")
+resolver = VRS_REF_REGISTRY.resolver()
+VRS_VARIATION_SCHEMA = resolver.lookup(sub_schema_uri(base_uri, "vrs#/definitions/Variation")).contents

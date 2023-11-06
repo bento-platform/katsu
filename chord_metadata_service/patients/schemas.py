@@ -1,5 +1,5 @@
 from chord_metadata_service.restapi.schema_utils import DATE_TIME, DRAFT_07, SCHEMA_TYPES, array_of, base_type, \
-    customize_schema, enum_of, base_schema_uri, tag_ids_and_describe, get_schema_base_path, sub_schema_uri
+    enum_of, tag_ids_and_describe, get_schema_app_id, sub_schema_uri
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA, TIME_ELEMENT_SCHEMA, \
     CURIE_SCHEMA
 from pathlib import Path
@@ -7,19 +7,7 @@ from .descriptions import INDIVIDUAL, VITAL_STATUS
 from .values import Sex, KaryotypicSex
 
 
-base_path = get_schema_base_path(Path(__file__).parent.name)
-base_uri = base_schema_uri(base_path)
-
-
-COMORBID_CONDITION = customize_schema(
-    first_typeof=ONTOLOGY_CLASS,
-    second_typeof=ONTOLOGY_CLASS,
-    first_property="clinical_status",
-    second_property="code",
-    schema_id=sub_schema_uri(base_uri, "comorbid_condition_schema"),
-    title="Comorbid Condition schema",
-    description="Comorbid condition schema."
-)
+base_uri = get_schema_app_id(Path(__file__).parent.name)
 
 VITAL_STATUS_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -33,6 +21,7 @@ VITAL_STATUS_SCHEMA = tag_ids_and_describe({
     },
     "required": ["status"]
 }, VITAL_STATUS)
+
 
 INDIVIDUAL_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
@@ -49,15 +38,13 @@ INDIVIDUAL_SCHEMA = tag_ids_and_describe({
         "karyotypic_sex": enum_of(KaryotypicSex.as_list(), description="An individual's karyotypic sex."),
         "gender": ONTOLOGY_CLASS,
         "taxonomy": ONTOLOGY_CLASS,
-
-        # Extended schema fields
-        "active": base_type(SCHEMA_TYPES.BOOLEAN),
-        "deceased": base_type(SCHEMA_TYPES.BOOLEAN),
-        "race": base_type(SCHEMA_TYPES.STRING),
-        "ethnicity": base_type(SCHEMA_TYPES.STRING),
-        "comorbid_condition": COMORBID_CONDITION,
-        "ecog_performance_status": ONTOLOGY_CLASS,
-        "karnofsky": ONTOLOGY_CLASS,
+        # extended fields
+        "active": {
+            "type": "boolean"
+        },
+        "deceased": {
+            "type": "boolean"
+        },
         "extra_properties": EXTRA_PROPERTIES_SCHEMA,
     },
     "required": ["id"]
