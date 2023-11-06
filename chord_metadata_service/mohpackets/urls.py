@@ -125,7 +125,7 @@ urlpatterns = [
     path("authorized/drf/", include(router.urls)),
     path("discovery/drf/", include(discovery_router.urls)),
     path("ingest/drf/", include(ingest_patterns)),
-    path("service-info", service_info),
+    path("drf/service-info", service_info),
     path(
         "discovery/drf/overview/",
         include(
