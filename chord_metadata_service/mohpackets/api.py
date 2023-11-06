@@ -24,6 +24,7 @@ from rest_framework.exceptions import AuthenticationFailed
 
 from chord_metadata_service.mohpackets.api_authorized import router as authorzied_router
 from chord_metadata_service.mohpackets.api_discovery import router as discovery_router
+from chord_metadata_service.mohpackets.utils import get_schema_url
 
 logger = logging.getLogger(__name__)
 SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
@@ -108,3 +109,15 @@ else:
 api = NinjaAPI(renderer=ORJSONRenderer(), parser=ORJSONParser())
 api.add_router("/discovery/", discovery_router)
 api.add_router("/authorized/", authorzied_router, auth=auth)
+
+
+@api.get("/service-info/", response=Dict[str, str])
+def service_info(request):
+    schema_url = get_schema_url()
+
+    return {
+        "name": "katsu",
+        "description": "A CanDIG clinical data servicezzzzz",
+        "version": settings.KATSU_VERSION,
+        "schema_url": schema_url,
+    }
