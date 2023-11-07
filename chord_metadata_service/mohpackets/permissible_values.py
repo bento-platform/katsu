@@ -4,6 +4,8 @@ MoH model fields and are used for validation during serialization.
 """
 
 # Unknown + Boolean
+from chord_metadata_service.mohpackets.utils import list_to_enum
+
 UBOOLEAN = ["Yes", "No", "Unknown"]
 
 CAUSE_OF_DEATH = ["Died of cancer", "Died of other reasons", "Unknown"]
@@ -1101,3 +1103,82 @@ REGEX_PATTERNS = {
     # Examples: E10, C50.1, I11, M06
     "COMORBIDITY": r"^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$",
 }
+
+
+CauseOfDeathEnum = list_to_enum("CauseOfDeathEnum", CAUSE_OF_DEATH)
+PrimarySiteEnum = list_to_enum("PrimarySiteEnum", PRIMARY_SITE)
+uBooleanEnum = list_to_enum("uBooleanEnum", UBOOLEAN)
+LostToFollowupReasonEnum = list_to_enum(
+    "LostToFollowupReasonEnum", LOST_TO_FOLLOWUP_REASON
+)
+TumourStagingSystemEnum = list_to_enum("TumourStagingSystemEnum", TUMOUR_STAGING_SYSTEM)
+TCategoryEnum = list_to_enum("TCategoryEnum", T_CATEGORY)
+NCategoryEnum = list_to_enum("NCategoryEnum", N_CATEGORY)
+MCategoryEnum = list_to_enum("MCategoryEnum", M_CATEGORY)
+StageGroupEnum = list_to_enum("StageGroupEnum", STAGE_GROUP)
+StorageEnum = list_to_enum("StorageEnum", STORAGE)
+SpecimenProcessingEnum = list_to_enum("SpecimenProcessingEnum", SPECIMEN_PROCESSING)
+SpecimenLateralityEnum = list_to_enum("SpecimenLateralityEnum", SPECIMEN_LATERALITY)
+PrimaryDiagnosisLateralityEnum = list_to_enum(
+    "PrimaryDiagnosisLateralityEnum", PRIMARY_DIAGNOSIS_LATERALITY
+)
+ConfirmedDiagnosisTumourEnum = list_to_enum(
+    "ConfirmedDiagnosisTumourEnum", CONFIRMED_DIAGNOSIS_TUMOUR
+)
+TumourGradingSystemEnum = list_to_enum("TumourGradingSystemEnum", TUMOUR_GRADING_SYSTEM)
+TumourGradeEnum = list_to_enum("TumourGradeEnum", TUMOUR_GRADE)
+PercentCellsRangeEnum = list_to_enum("PercentCellsRangeEnum", PERCENT_CELLS_RANGE)
+CellsMeasureMethodEnum = list_to_enum("CellsMeasureMethodEnum", CELLS_MEASURE_METHOD)
+GenderEnum = list_to_enum("GenderEnum", GENDER)
+SexAtBirthEnum = list_to_enum("SexAtBirthEnum", SEX_AT_BIRTH)
+SpecimenTissueSourceEnum = list_to_enum(
+    "SpecimenTissueSourceEnum", SPECIMEN_TISSUE_SOURCE
+)
+SpecimenTypeEnum = list_to_enum("SpecimenTypeEnum", SPECIMEN_TYPE)
+SampleTypeEnum = list_to_enum("SampleTypeEnum", SAMPLE_TYPE)
+BasisOfDiagnosisEnum = list_to_enum("BasisOfDiagnosisEnum", BASIS_OF_DIAGNOSIS)
+LymphNodeStatusEnum = list_to_enum("LymphNodeStatusEnum", LYMPH_NODE_STATUS)
+LymphNodeMethodEnum = list_to_enum("LymphNodeMethodEnum", LYMPH_NODE_METHOD)
+TreatmentTypeEnum = list_to_enum("TreatmentTypeEnum", TREATMENT_TYPE)
+TreatmentSettingEnum = list_to_enum("TreatmentSettingEnum", TREATMENT_SETTING)
+TreatmentIntentEnum = list_to_enum("TreatmentIntentEnum", TREATMENT_INTENT)
+TreatmentResponseMethodEnum = list_to_enum(
+    "TreatmentResponseMethodEnum", TREATMENT_RESPONSE_METHOD
+)
+TreatmentResponseEnum = list_to_enum("TreatmentResponseEnum", TREATMENT_RESPONSE)
+TreatmentStatusEnum = list_to_enum("TreatmentStatusEnum", TREATMENT_STATUS)
+DrugReferenceDbEnum = list_to_enum("DrugReferenceDbEnum", DRUG_REFERENCE_DB)
+DosageUnitsEnum = list_to_enum("DosageUnitsEnum", DOSAGE_UNITS)
+RadiationTherapyModalityEnum = list_to_enum(
+    "RadiationTherapyModalityEnum", RADIATION_THERAPY_MODALITY
+)
+RadiationAnatomicalSiteEnum = list_to_enum(
+    "RadiationAnatomicalSiteEnum", RADIATION_ANATOMICAL_SITE
+)
+ImmunotherapyTypeEnum = list_to_enum("ImmunotherapyTypeEnum", IMMUNOTHERAPY_TYPE)
+SurgeryTypeEnum = list_to_enum("SurgeryTypeEnum", SURGERY_TYPE)
+SurgeryLocationEnum = list_to_enum("SurgeryLocationEnum", SURGERY_LOCATION)
+TumourFocalityEnum = list_to_enum("TumourFocalityEnum", TUMOUR_FOCALITY)
+TumourClassificationEnum = list_to_enum(
+    "TumourClassificationEnum", TUMOUR_CLASSIFICATION
+)
+MarginTypesEnum = list_to_enum("MarginTypesEnum", MARGIN_TYPES)
+LymphovascularInvasionEnum = list_to_enum(
+    "LymphovascularInvasionEnum", LYMPHOVACULAR_INVASION
+)
+PerineuralInvasionEnum = list_to_enum("PerineuralInvasionEnum", PERINEURAL_INVASION)
+DiseaseStatusFollowupEnum = list_to_enum(
+    "DiseaseStatusFollowupEnum", DISEASE_STATUS_FOLLOWUP
+)
+RelapseTypeEnum = list_to_enum("RelapseTypeEnum", RELAPSE_TYPE)
+ProgressionStatusMethodEnum = list_to_enum(
+    "ProgressionStatusMethodEnum", PROGRESSION_STATUS_METHOD
+)
+MalignancyLateralityEnum = list_to_enum(
+    "MalignancyLateralityEnum", MALIGNANCY_LATERALITY
+)
+ErPrHpvStatusEnum = list_to_enum("ErPrHpvStatusEnum", ER_PR_HPV_STATUS)
+Her2StatusEnum = list_to_enum("Her2StatusEnum", HER2_STATUS)
+HpvStrainEnum = list_to_enum("HpvStrainEnum", HPV_STRAIN)
+SmokingStatusEnum = list_to_enum("SmokingStatusEnum", SMOKING_STATUS)
+TobaccoTypeEnum = list_to_enum("TobaccoTypeEnum", TOBACCO_TYPE)
