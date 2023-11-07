@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+from enum import Enum
 from functools import wraps
 from typing import Dict, List, Optional, Type
 
@@ -33,10 +34,6 @@ from chord_metadata_service.mohpackets.models import (
     Specimen,
     Surgery,
     Treatment,
-)
-from chord_metadata_service.mohpackets.schema import (
-    DonorSchema,
-    DonorWithClinicalDataSchema,
 )
 
 logger = logging.getLogger(__name__)
@@ -71,3 +68,11 @@ def get_schema_url():
             )
             schema_url = None
     return schema_url
+
+
+def list_to_enum(enum_name, value_list):
+    enum_dict = {}
+    for item in value_list:
+        enum_member_name = item.upper().replace(" ", "_")
+        enum_dict[enum_member_name] = item
+    return Enum(enum_name, enum_dict)
