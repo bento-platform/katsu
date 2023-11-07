@@ -4,7 +4,6 @@ from typing import Dict, List, Optional, Type
 from ninja import Field, FilterSchema, ModelSchema, NinjaAPI, Query, Schema
 from pydantic import BaseModel, constr
 
-import chord_metadata_service.mohpackets.permissible_values as val
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
     Chemotherapy,
@@ -22,9 +21,70 @@ from chord_metadata_service.mohpackets.models import (
     Surgery,
     Treatment,
 )
+from chord_metadata_service.mohpackets.permissible_values import (
+    REGEX_PATTERNS,
+    BasisOfDiagnosisEnum,
+    CauseOfDeathEnum,
+    CellsMeasureMethodEnum,
+    ConfirmedDiagnosisTumourEnum,
+    DiseaseStatusFollowupEnum,
+    DosageUnitsEnum,
+    DrugReferenceDbEnum,
+    ErPrHpvStatusEnum,
+    GenderEnum,
+    Her2StatusEnum,
+    HpvStrainEnum,
+    ImmunotherapyTypeEnum,
+    LostToFollowupReasonEnum,
+    LymphNodeMethodEnum,
+    LymphNodeStatusEnum,
+    LymphovascularInvasionEnum,
+    MalignancyLateralityEnum,
+    MarginTypesEnum,
+    MCategoryEnum,
+    NCategoryEnum,
+    PercentCellsRangeEnum,
+    PerineuralInvasionEnum,
+    PrimaryDiagnosisLateralityEnum,
+    PrimarySiteEnum,
+    ProgressionStatusMethodEnum,
+    RadiationAnatomicalSiteEnum,
+    RadiationTherapyModalityEnum,
+    RelapseTypeEnum,
+    SampleTypeEnum,
+    SexAtBirthEnum,
+    SmokingStatusEnum,
+    SpecimenLateralityEnum,
+    SpecimenProcessingEnum,
+    SpecimenTissueSourceEnum,
+    SpecimenTypeEnum,
+    StageGroupEnum,
+    StorageEnum,
+    SurgeryLocationEnum,
+    SurgeryTypeEnum,
+    TCategoryEnum,
+    TobaccoTypeEnum,
+    TreatmentIntentEnum,
+    TreatmentResponseEnum,
+    TreatmentResponseMethodEnum,
+    TreatmentSettingEnum,
+    TreatmentStatusEnum,
+    TreatmentTypeEnum,
+    TumourClassificationEnum,
+    TumourFocalityEnum,
+    TumourGradeEnum,
+    TumourGradingSystemEnum,
+    TumourStagingSystemEnum,
+    uBooleanEnum,
+)
 
 
-class ProgramDiscoverSchema(Schema):
+########################################
+#                                      #
+#           DISCOVERY SCHEMA           #
+#                                      #
+########################################
+class ProgramDiscoverySchema(Schema):
     program_id: str
 
 
@@ -32,6 +92,11 @@ class DiscoverySchema(Schema):
     discovery_donor: Dict[str, int]
 
 
+########################################
+#                                      #
+#           MODEL SCHEMA               #
+#                                      #
+########################################
 class ExposureSchema(ModelSchema):
     class Config:
         model = Exposure
@@ -127,6 +192,29 @@ class BiomarkerSchema(ModelSchema):
         model_fields = "__all__"
 
 
+class DonorSchema(ModelSchema):
+    cause_of_death: Optional[CauseOfDeathEnum] = None
+    submitter_donor_id: str = Field(pattern=REGEX_PATTERNS["ID"], max_length=64)
+    date_of_birth: Optional[str] = Field(
+        None, pattern=REGEX_PATTERNS["DATE"], max_length=32
+    )
+    date_of_death: Optional[str] = Field(
+        None, pattern=REGEX_PATTERNS["DATE"], max_length=32
+    )
+    primary_site: Optional[List[PrimarySiteEnum]] = None
+
+    class Config:
+        model = Donor
+        model_exclude = ["uuid"]
+
+
+#####################################################
+#                                                   #
+#           DONOR WITH CLINICAL SCHEMA              #
+#                                                   #
+#####################################################
+
+
 class DonorWithClinicalDataSchema(ModelSchema):
     comorbidities: List[ComorbiditySchema] = Field(..., alias="comorbidity_set")
     exposures: List[ExposureSchema] = Field(..., alias="exposure_set")
@@ -141,40 +229,24 @@ class DonorWithClinicalDataSchema(ModelSchema):
         model_fields = "__all__"
 
 
-CAUSE_OF_DEATH = ["Died of cancer", "Died of other reasons", "Unknown"]
-
-
-# class CauseOfDeathEnum(str, Enum):
-#     CANCER = "Died of cancer"
-#     OTHER_REASONS = "Died of other reasons"
-#     UNKNOWN = "Unknown"
-#     BLANK = ""
-
-
-# def list_to_enum(enum_name, value_list):
-#     return Enum(enum_name, {value.upper(): value for value in value_list})
-def list_to_enum(enum_name, value_list):
-    enum_dict = {}
-    for item in value_list:
-        enum_member_name = item.upper().replace(" ", "_") if item else "BLANK"
-        enum_dict[enum_member_name] = item
-    return Enum(enum_name, enum_dict)
-
-
-CAUSE_OF_DEATH = ["Died of cancer", "Died of other reasons", "Unknown", ""]
-CauseOfDeathEnum = list_to_enum("CauseOfDeathEnum", CAUSE_OF_DEATH)
-
-
-class DonorSchema(ModelSchema):
-    cause_of_death: Optional[CauseOfDeathEnum] = None
-    # submitter_donor_id: str = Field(pattern=r"^[0-9]+.[0-9]+.[0-9]$", max_length=64)
-    # program_id_id: str = Field(..., alias="program_id")
+########################################
+#                                      #
+#           INGEST SCHEMA              #
+#                                      #
+########################################
+class DonorIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
 
     class Config:
         model = Donor
-        # model_fields = "__all__"
-        # model_exclude = ["uuid", "program_id"]
-        model_exclude = ["uuid"]
+        model_exclude = ["uuid", "program_id"]
+
+
+########################################
+#                                      #
+#           FILTER SCHEMA              #
+#                                      #
+########################################
 
 
 class DonorFilterSchema(FilterSchema):
