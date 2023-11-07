@@ -82,7 +82,7 @@ from chord_metadata_service.mohpackets.schema import (
     DiscoverySchema,
     DonorFilterSchema,
     DonorSchema,
-    ProgramDiscoverSchema,
+    ProgramDiscoverySchema,
     SpecimenFilterSchema,
 )
 from chord_metadata_service.mohpackets.throttling import MoHRateThrottle
@@ -579,7 +579,7 @@ def count_donors(model: Type[Model], filters=None) -> Dict[str, int]:
     return {f"{item['program_id']}": item["donor_count"] for item in item_counts}
 
 
-@router.get("/programs/", response=List[ProgramDiscoverSchema])
+@router.get("/programs/", response=List[ProgramDiscoverySchema])
 def discover_programs(request):
     programs = Program.objects.all()
     return list(programs)
@@ -822,6 +822,7 @@ def discover_diagnosis_age_count(request):
         "80+": 0,
     }
 
+    # For each donor, get diagnosis with earliest date
     earliest_diagnoses = (
         PrimaryDiagnosis.objects.values("donor_uuid")
         .annotate(earliest_date=Min("date_of_diagnosis"))
@@ -834,15 +835,15 @@ def discover_diagnosis_age_count(request):
     # Create a dictionary to store donor UUIDs and their corresponding date_of_birth
     donor_dob_dict = {donor.uuid: donor.date_of_birth for donor in Donor.objects.all()}
 
+    # count donor in each age bucket
     for donor_uuid, dob in donor_dob_dict.items():
         diagnosis_date = earliest_diagnoses_dict.get(donor_uuid)
         if diagnosis_date is not None:
-            # Convert strings to datetime objects
             dob_date = datetime.strptime(dob, "%Y-%m")
             diagnosis_date = datetime.strptime(
                 earliest_diagnoses_dict[donor_uuid], "%Y-%m"
             )
-            # Calculate the age difference in years
+            # Calculate age at time diagnosis
             age = diagnosis_date.year - dob_date.year
 
             if age < 20:
