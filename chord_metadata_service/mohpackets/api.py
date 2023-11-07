@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -10,7 +11,7 @@ from authx.auth import get_opa_datasets, is_site_admin
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Count, Model, Prefetch, Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from drf_spectacular.plumbing import build_bearer_security_scheme_object
 from ninja import Field, FilterSchema, ModelSchema, NinjaAPI, Query, Schema
@@ -111,13 +112,18 @@ api.add_router("/discovery/", discovery_router)
 api.add_router("/authorized/", authorzied_router, auth=auth)
 
 
-@api.get("/service-info/", response=Dict[str, str])
+@api.get("/service-info/")
 def service_info(request):
     schema_url = get_schema_url()
 
-    return {
-        "name": "katsu",
-        "description": "A CanDIG clinical data servicezzzzz",
-        "version": settings.KATSU_VERSION,
-        "schema_url": schema_url,
-    }
+    return JsonResponse(
+        {
+            "name": "katsu",
+            "description": "A CanDIG clinical data service",
+            "version": settings.KATSU_VERSION,
+            "schema_url": schema_url,
+        },
+        status=200,
+        safe=False,
+        json_dumps_params={"indent": 2},
+    )
