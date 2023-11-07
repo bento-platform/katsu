@@ -21,14 +21,13 @@ from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.chord import models as chord_models
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.experiments import models as experiments_models
+from chord_metadata_service.experiments import models as experiments_models, summaries as exp_summaries
 from chord_metadata_service.logger import logger
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
-from chord_metadata_service.patients import models as patients_models
-from chord_metadata_service.phenopackets import models as pheno_models
+from chord_metadata_service.patients import models as patients_models, summaries as patient_summaries
+from chord_metadata_service.phenopackets import models as pheno_models, summaries as pheno_summaries
 from chord_metadata_service.restapi.models import SchemaType
 from chord_metadata_service.restapi.utils import (
-    get_age_numeric_binned,
     get_public_model_name_and_field_path,
     get_field_options,
     stats_for_field,
@@ -76,106 +75,40 @@ async def overview(_request: Request):
 
     # TODO: permissions
 
-    # Parallel-gather all counts and statistics we may need for this response
+    phenopackets = pheno_models.Phenopacket.objects.all()
+    experiments = experiments_models.Experiment.objects.all()
+
+    # Parallel-gather all statistics we may need for this response
     (
         phenopackets_count,
-        biosamples_count,
-        individuals_count,
-        experiments_count,
-        experiment_results_count,
-        instruments_count,
-        phenotypic_features_count,
-        # --------------------------------------------------------------------------------------------------------------
-        individuals_sex,
-        individuals_k_sex,
-        individuals_age,
-        individuals_taxonomy,
-        # --------------------------------------------------------------------------------------------------------------
-        biosamples_taxonomy,
-        biosamples_sampled_tissue,
-        # --------------------------------------------------------------------------------------------------------------
-        diseases_stats,
-        # --------------------------------------------------------------------------------------------------------------
-        phenotypic_features_type,
+        biosample_summary,
+        individual_summary,
+        disease_summary,
+        pf_summary,
+        experiment_summary,
+        exp_res_summary,
+        instrument_summary,
     ) = await asyncio.gather(
-        pheno_models.Phenopacket.objects.all().acount(),
-        pheno_models.Biosample.objects.all().acount(),
-        patients_models.Individual.objects.all().acount(),
-        experiments_models.Experiment.objects.all().acount(),
-        experiments_models.ExperimentResult.objects.all().acount(),
-        experiments_models.Instrument.objects.all().acount(),
-        pheno_models.PhenotypicFeature.objects.all().distinct('pftype').acount(),
-        # --------------------------------------------------------------------------------------------------------------
-        # INDIVIDUALS
-        #  - Sex related fields stats are precomputed here and post processed later
-        #    to include missing values inferred from the schema
-        stats_for_field(patients_models.Individual, "sex"),
-        stats_for_field(patients_models.Individual, "karyotypic_sex"),
-        #  - Age
-        get_age_numeric_binned(patients_models.Individual.objects.all(), OVERVIEW_AGE_BIN_SIZE),
-        #  - Taxonomy
-        stats_for_field(patients_models.Individual, "taxonomy__label"),
-        # --------------------------------------------------------------------------------------------------------------
-        # BIOSAMPLES
-        stats_for_field(pheno_models.Biosample, "taxonomy__label"),
-        stats_for_field(pheno_models.Biosample, "sampled_tissue__label"),
-        # --------------------------------------------------------------------------------------------------------------
-        # DISEASES
-        stats_for_field(pheno_models.Phenopacket, "diseases__term__label"),
-        # --------------------------------------------------------------------------------------------------------------
-        # PHENOTYPIC FEATURES
-        stats_for_field(pheno_models.PhenotypicFeature, "pftype__label"),
+        phenopackets.acount(),
+        pheno_summaries.biosample_summary(phenopackets),
+        patient_summaries.individual_summary(phenopackets),
+        pheno_summaries.disease_summary(phenopackets),
+        pheno_summaries.phenotypic_feature_summary(phenopackets),
+        exp_summaries.experiment_summary(experiments),
+        exp_summaries.experiment_result_summary(experiments),
+        exp_summaries.instrument_summary(experiments),
     )
 
     return Response({
         "phenopackets": phenopackets_count,
         "data_type_specific": {
-            "biosamples": {
-                "count": biosamples_count,
-                "taxonomy": biosamples_taxonomy,
-                "sampled_tissue": biosamples_sampled_tissue,
-            },
-            "diseases": {
-                # count is a number of unique disease terms (not all diseases in the database)
-                "count": len(diseases_stats),
-                "term": diseases_stats,
-            },
-            "individuals": {
-                "count": individuals_count,
-                "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.SEX)},
-                "karyotypic_sex": {
-                    k: individuals_k_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.KARYOTYPIC_SEX)
-                },
-                "taxonomy": individuals_taxonomy,
-                "age": individuals_age,
-            },
-            "phenotypic_features": {
-                # count is a number of unique phenotypic feature types (not all pfs in the database)
-                "count": phenotypic_features_count,
-                "type": phenotypic_features_type,
-            },
-            "experiments": {
-                "count": experiments_count,
-                "study_type": await stats_for_field(experiments_models.Experiment, "study_type"),
-                "experiment_type": await stats_for_field(experiments_models.Experiment, "experiment_type"),
-                "molecule": await stats_for_field(experiments_models.Experiment, "molecule"),
-                "library_strategy": await stats_for_field(experiments_models.Experiment, "library_strategy"),
-                "library_source": await stats_for_field(experiments_models.Experiment, "library_source"),
-                "library_selection": await stats_for_field(experiments_models.Experiment, "library_selection"),
-                "library_layout": await stats_for_field(experiments_models.Experiment, "library_layout"),
-                "extraction_protocol": await stats_for_field(experiments_models.Experiment, "extraction_protocol"),
-            },
-            "experiment_results": {
-                "count": experiment_results_count,
-                "file_format": await stats_for_field(experiments_models.ExperimentResult, "file_format"),
-                "data_output_type": await stats_for_field(experiments_models.ExperimentResult, "data_output_type"),
-                "usage": await stats_for_field(experiments_models.ExperimentResult, "usage")
-            },
-            "instruments": {
-                "count": instruments_count,
-                "platform": await stats_for_field(experiments_models.Experiment, "instrument__platform"),
-                "model": await stats_for_field(experiments_models.Experiment, "instrument__model")
-            },
+            "biosamples": biosample_summary,
+            "diseases": disease_summary,
+            "individuals": individual_summary,
+            "phenotypic_features": pf_summary,
+            "experiments": experiment_summary,
+            "experiment_results": exp_res_summary,
+            "instruments": instrument_summary,
         }
     })
 
@@ -215,7 +148,6 @@ async def search_overview(request: Request):
     # users could discover the ID format/which IDs exist in the instance (BAD!!!)
     # ------------------------------------------------------------------------------------------------------------------
 
-    print(datasets_accessed)
     authz_resources = tuple(build_resource(project=d[0], dataset=d[1]) for d in datasets_accessed)
     auth_res = await authz_middleware.async_evaluate(request, authz_resources, (P_QUERY_DATA,))
     allowed_datasets = tuple(r["dataset"] for r, p in zip(authz_resources, auth_res) if p[0])
@@ -226,41 +158,20 @@ async def search_overview(request: Request):
     authorized_phenopackets = pheno_models.Phenopacket.objects.filter(
         subject__in=authorized_individuals, dataset_id__in=allowed_datasets)
 
-    individuals_count = await authorized_individuals.acount()
-    biosamples_count = await authorized_phenopackets.values("biosamples__id").acount()
-
-    # Sex related fields stats are precomputed here and post processed later
-    # to include missing values inferred from the schema
-    individuals_sex = await queryset_stats_for_field(authorized_individuals, "sex")
-
-    # several obvious approaches to experiment counts give incorrect answers
-    experiment_types = await queryset_stats_for_field(
-        authorized_phenopackets, "biosamples__experiment__experiment_type")
-    experiments_count = sum(experiment_types.values())
+    # TODO: this hardcodes the biosample linked field set relationship
+    #  - in general, this endpoint is less than ideal and should be derived from search results themselves vs. this
+    #    hack-y mess of passing IDs around.
+    authorized_experiments = experiments_models.Experiment.objects.filter(
+        dataset_id__in=allowed_datasets,
+        biosample_id__in=authorized_phenopackets.values_list("biosample_id", flat=True),
+    )
 
     return Response({
-        "biosamples": {
-            "count": biosamples_count,
-            "sampled_tissue": await queryset_stats_for_field(
-                authorized_phenopackets, "biosamples__sampled_tissue__label"),
-            "histological_diagnosis": await queryset_stats_for_field(
-                authorized_phenopackets, "biosamples__histological_diagnosis__label"),
-        },
-        "diseases": {
-            "term": await queryset_stats_for_field(authorized_phenopackets, "diseases__term__label"),
-        },
-        "individuals": {
-            "count": individuals_count,
-            "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in pheno_models.Individual.SEX)},
-            "age": await get_age_numeric_binned(authorized_individuals, OVERVIEW_AGE_BIN_SIZE),
-        },
-        "phenotypic_features": {
-            "type": await queryset_stats_for_field(authorized_phenopackets, "phenotypic_features__pftype__label"),
-        },
-        "experiments": {
-            "count": experiments_count,
-            "experiment_type": experiment_types,
-        },
+        "biosamples": await pheno_summaries.biosample_summary(authorized_phenopackets),
+        "diseases": await pheno_summaries.disease_summary(authorized_phenopackets),
+        "individuals": await patient_summaries.individual_summary(authorized_phenopackets),
+        "phenotypic_features": await pheno_summaries.phenotypic_feature_summary(authorized_phenopackets),
+        "experiments": await exp_summaries.experiment_summary(authorized_experiments),
     })
 
 
