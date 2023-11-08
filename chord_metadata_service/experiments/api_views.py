@@ -1,13 +1,20 @@
-from rest_framework import mixins, serializers, status, viewsets
-from rest_framework.settings import api_settings
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
+from asgiref.sync import async_to_sync, sync_to_async
+from bento_lib.auth import permissions as p
+from bento_lib.auth.resources import build_resource
+from django.core.exceptions import PermissionDenied
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import mixins, serializers, status, viewsets
+from rest_framework.settings import api_settings
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
 
+from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.chord import models as cm
+from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 
 from .serializers import ExperimentSerializer, ExperimentResultSerializer
@@ -60,8 +67,41 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ExperimentFilter
 
-    def dispatch(self, *args, **kwargs):
-        return super(ExperimentViewSet, self).dispatch(*args, **kwargs)
+    @async_to_sync
+    async def get_queryset(self):
+        datasets = cm.Dataset.objects.all()
+
+        resources = [
+            build_resource(project=ds.project_id, dataset=ds.identifier, data_type=DATA_TYPE_EXPERIMENT)
+            async for ds in datasets
+        ]
+
+        method = self.request.method
+
+        if method == "GET":
+            perm = p.P_QUERY_DATA
+        elif method in ("POST", "PUT", "PATCH"):
+            perm = p.P_INGEST_DATA
+        elif method == "DELETE":
+            perm = p.P_DELETE_DATA
+        else:
+            authz_middleware.mark_authz_done(self.request)
+            raise PermissionDenied()
+
+        resources_allowed = tuple(map(all, await authz_middleware.async_evaluate(self.request, resources, (perm,))))
+        datasets_allowed = tuple(r["dataset"] for r, rp in zip(resources, resources_allowed) if rp)
+
+        return (
+            Experiment.objects
+            .filter(dataset__identifier__in=datasets_allowed)
+            .select_related(*EXPERIMENT_SELECT_REL)
+            .prefetch_related(*EXPERIMENT_PREFETCH)
+            .order_by("id")
+        )
+
+    def list(self, request, *args, **kwargs):
+        authz_middleware.mark_authz_done(self.request)  # done in get_queryset()
+        return super().list(request, *args, **kwargs)
 
 
 class BatchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
