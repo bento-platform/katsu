@@ -1,7 +1,5 @@
-from asgiref.sync import async_to_sync, sync_to_async
-from bento_lib.auth import permissions as p
+from asgiref.sync import async_to_sync
 from bento_lib.auth.resources import build_resource
-from django.core.exceptions import PermissionDenied
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
@@ -13,6 +11,7 @@ from rest_framework.response import Response
 
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.authz.utils import data_req_method_to_permission
 from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
@@ -57,10 +56,6 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     Create a new experiment
     """
 
-    queryset = Experiment.objects.all() \
-        .select_related(*EXPERIMENT_SELECT_REL) \
-        .prefetch_related(*EXPERIMENT_PREFETCH) \
-        .order_by("id")
     serializer_class = ExperimentSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
@@ -69,25 +64,11 @@ class ExperimentViewSet(viewsets.ModelViewSet):
 
     @async_to_sync
     async def get_queryset(self):
-        datasets = cm.Dataset.objects.all()
-
+        perm = data_req_method_to_permission(self.request)
         resources = [
             build_resource(project=ds.project_id, dataset=ds.identifier, data_type=DATA_TYPE_EXPERIMENT)
-            async for ds in datasets
+            async for ds in cm.Dataset.objects.all()
         ]
-
-        method = self.request.method
-
-        if method == "GET":
-            perm = p.P_QUERY_DATA
-        elif method in ("POST", "PUT", "PATCH"):
-            perm = p.P_INGEST_DATA
-        elif method == "DELETE":
-            perm = p.P_DELETE_DATA
-        else:
-            authz_middleware.mark_authz_done(self.request)
-            raise PermissionDenied()
-
         resources_allowed = tuple(map(all, await authz_middleware.async_evaluate(self.request, resources, (perm,))))
         datasets_allowed = tuple(r["dataset"] for r, rp in zip(resources, resources_allowed) if rp)
 
