@@ -83,7 +83,7 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
     description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.PHENOTYPIC_FEATURE, "description"))
     pftype = JSONField(verbose_name='type', validators=[ontology_validator],
                        help_text=rec_help(d.PHENOTYPIC_FEATURE, "type"))
-    excluded = models.BooleanField(default=False, help_text=rec_help(d.PHENOTYPIC_FEATURE, "negated"))
+    excluded = models.BooleanField(default=False, help_text=rec_help(d.PHENOTYPIC_FEATURE, "excluded"))
     severity = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "severity"))
     modifiers = JSONField(blank=True, null=True, validators=[ontology_list_validator],

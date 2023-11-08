@@ -30,7 +30,7 @@ INDIVIDUAL_SCHEMA = tag_ids_and_describe({
     "properties": {
         # Phenopacket V2 Individual fields
         "id": base_type(SCHEMA_TYPES.STRING, description="Unique researcher-specified identifier for the individual."),
-        "alternate_ids": array_of(CURIE_SCHEMA, description="A list of alternative identifiers for the individual."),
+        "alternate_ids": array_of(base_type(SCHEMA_TYPES.STRING)),
         "date_of_birth": DATE_TIME,
         "time_at_last_encounter": TIME_ELEMENT_SCHEMA,
         "vital_status": VITAL_STATUS_SCHEMA,
