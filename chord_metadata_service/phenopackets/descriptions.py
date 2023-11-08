@@ -109,7 +109,7 @@ def phenotypic_feature(subject="a subject or biosample"):
         "properties": {
             "description": "Human-readable text describing the phenotypic feature; NOT for structured text.",
             "type": ontology_class("which describes the phenotype"),
-            "excluded": "Whether the feature is present (false) or absent (true, feature is excluded); default is false.",
+            "excluded": "Whether the feature is present (false) or absent (true, feature is excluded); default false.",
             "severity": ontology_class("that describes the severity of the condition"),
             "modifiers": {
                 "description": "A list of ontology terms that provide more expressive / precise descriptions of a "
