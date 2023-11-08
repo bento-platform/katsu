@@ -340,7 +340,7 @@ class PhenopacketTest(ProjectTestCase):
     def test_filtering(self):
         f = PhenopacketFilter()
         number_of_found_pf = len(m.Phenopacket.objects.filter(phenotypic_features__excluded=False))
-        # all phenotypic feature constants have negated=True
+        # all phenotypic feature constants have excluded=True
         result = f.filter_found_phenotypic_feature(m.Phenopacket.objects.all(), "phenotypic_features", "proptosis")
         self.assertEqual(len(result), 0)
         result = f.filter_found_phenotypic_feature(m.Phenopacket.objects.all(), "phenotypic_features", "HP:0000520")
