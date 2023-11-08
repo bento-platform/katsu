@@ -30,8 +30,6 @@ from chord_metadata_service.restapi.models import SchemaType
 from chord_metadata_service.restapi.utils import (
     get_public_model_name_and_field_path,
     get_field_options,
-    stats_for_field,
-    queryset_stats_for_field,
     get_categorical_stats,
     get_date_stats,
     get_range_stats,
