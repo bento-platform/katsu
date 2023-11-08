@@ -17,8 +17,7 @@ SHELL ["/bin/bash", "-c"]
 # Install Poetry for dependency management
 RUN apt-get update -y && \
     apt-get install -y postgresql-client && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip install --no-cache-dir "uvicorn[standard]==0.23.2"
+    rm -rf /var/lib/apt/lists/*
 
 # Backwards-compatible with old BentoV2 container layout
 WORKDIR /app
@@ -38,6 +37,9 @@ RUN mkdir -p /app/tmp
 # Copy in entrypoint and runner so we have some place to start even if the code doesn't get mounted in
 COPY entrypoint.bash .
 COPY run.dev.bash .
+
+# Set an environment variable to tell Katsu we're in local mode (in order to use Daphne)
+ENV KATSU_CONTAINER_LOCAL=True
 
 ENTRYPOINT [ "bash", "./entrypoint.bash" ]
 CMD [ "bash", "./run.dev.bash" ]

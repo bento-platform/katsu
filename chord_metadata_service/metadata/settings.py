@@ -122,7 +122,7 @@ if exists("/run/secrets/opa-root-token"):
 
 # Application definition
 
-INSTALLED_APPS = (['daphne'] if DEBUG else []) + [
+INSTALLED_APPS = (['daphne'] if os.environ.get("KATSU_CONTAINER_LOCAL") else []) + [
     'dal',
     'dal_select2',
 
