@@ -1,3 +1,4 @@
+from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -9,11 +10,13 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer,
                                                           BiosamplesCSVRenderer, ARGORenderer,
                                                           IndividualBentoSearchRenderer)
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
+from chord_metadata_service.restapi.utils import datasets_allowed_for_request_and_data_type
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 
 from . import models as m, serializers as s, filters as f
@@ -133,7 +136,6 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     serializer_class = s.BiosampleSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.BiosampleFilter
-    queryset = m.Biosample.objects.all().prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
 
 
 class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
@@ -197,12 +199,21 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
 
     post:
     Create a new phenopacket
-
     """
+
     serializer_class = s.PhenopacketSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.PhenopacketFilter
-    queryset = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")
+
+    @async_to_sync
+    async def get_queryset(self):
+        return (
+            m.Phenopacket.objects
+            .filter(
+                dataset_id__in=await datasets_allowed_for_request_and_data_type(self.request, DATA_TYPE_PHENOPACKET))
+            .prefetch_related(*PHENOPACKET_PREFETCH)
+            .order_by("id")
+        )
 
 
 class GenomicInterpretationViewSet(PhenopacketsModelViewSet):

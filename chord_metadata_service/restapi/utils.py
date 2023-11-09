@@ -3,15 +3,20 @@ from __future__ import annotations
 import isodate
 import datetime
 
+from bento_lib.auth.resources import build_resource
 from collections import defaultdict, Counter
 from calendar import month_abbr
 from decimal import Decimal, ROUND_HALF_EVEN
-from typing import Any, Type, TypedDict, Mapping, Generator
-
 from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value, QuerySet
 from django.db.models.functions import Cast
 from django.conf import settings
+from django.http.request import HttpRequest
+from rest_framework.request import Request as DrfRequest
+from typing import Any, Type, TypedDict, Mapping, Generator
 
+from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.authz.utils import data_req_method_to_permission
+from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.patients import models as patient_models
 from chord_metadata_service.phenopackets import models as pheno_models
@@ -724,3 +729,13 @@ async def bento_public_format_count_and_stats_list(annotated_queryset: QuerySet)
             stats_list.append({"label": label, "value": value})  # TODO: should this be thresholded?
 
     return total, stats_list
+
+
+async def datasets_allowed_for_request_and_data_type(request: DrfRequest | HttpRequest, data_type) -> tuple[str, ...]:
+    perm = data_req_method_to_permission(request)
+    resources = [
+        build_resource(project=ds.project_id, dataset=ds.identifier, data_type=data_type)
+        async for ds in cm.Dataset.objects.all()
+    ]
+    resources_allowed = tuple(map(all, await authz_middleware.async_evaluate(request, resources, (perm,))))
+    return tuple(r["dataset"] for r, rp in zip(resources, resources_allowed) if rp)

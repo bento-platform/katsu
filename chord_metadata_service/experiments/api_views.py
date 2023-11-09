@@ -1,5 +1,4 @@
 from asgiref.sync import async_to_sync
-from bento_lib.auth.resources import build_resource
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
@@ -11,10 +10,15 @@ from rest_framework.response import Response
 
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
-from chord_metadata_service.authz.utils import data_req_method_to_permission
-from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
+from chord_metadata_service.restapi.api_renderers import (
+    FHIRRenderer,
+    PhenopacketsRenderer,
+    ExperimentCSVRenderer,
+)
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
+from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
+from chord_metadata_service.restapi.utils import datasets_allowed_for_request_and_data_type
 
 from .serializers import ExperimentSerializer, ExperimentResultSerializer
 from .models import Experiment, ExperimentResult
@@ -22,13 +26,6 @@ from .schemas import EXPERIMENT_SCHEMA
 from .filters import ExperimentFilter, ExperimentResultFilter
 
 
-from chord_metadata_service.restapi.api_renderers import (
-    FHIRRenderer,
-    PhenopacketsRenderer,
-    ExperimentCSVRenderer,
-)
-
-from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 
 __all__ = [
     "EXPERIMENT_SELECT_REL",
@@ -64,17 +61,9 @@ class ExperimentViewSet(viewsets.ModelViewSet):
 
     @async_to_sync
     async def get_queryset(self):
-        perm = data_req_method_to_permission(self.request)
-        resources = [
-            build_resource(project=ds.project_id, dataset=ds.identifier, data_type=DATA_TYPE_EXPERIMENT)
-            async for ds in cm.Dataset.objects.all()
-        ]
-        resources_allowed = tuple(map(all, await authz_middleware.async_evaluate(self.request, resources, (perm,))))
-        datasets_allowed = tuple(r["dataset"] for r, rp in zip(resources, resources_allowed) if rp)
-
         return (
             Experiment.objects
-            .filter(dataset__identifier__in=datasets_allowed)
+            .filter(dataset_id__in=await datasets_allowed_for_request_and_data_type(self.request, DATA_TYPE_EXPERIMENT))
             .select_related(*EXPERIMENT_SELECT_REL)
             .prefetch_related(*EXPERIMENT_PREFETCH)
             .order_by("id")
@@ -120,7 +109,7 @@ class ExperimentBatchViewSet(BatchViewSet):
             .order_by("id")
         )
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):  # overrides POST, not actually creating anything
         ids_list = request.data.get('id', [])
         request.data["id"] = ids_list
         queryset = self.get_queryset()
