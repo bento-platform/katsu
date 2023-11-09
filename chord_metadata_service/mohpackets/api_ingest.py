@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from chord_metadata_service.mohpackets.api import api
 from chord_metadata_service.mohpackets.models import Donor, PrimaryDiagnosis
 from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
-from chord_metadata_service.mohpackets.schema import DonorSchema
+from chord_metadata_service.mohpackets.schema import DonorModelSchema
 from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
     ChemotherapySerializer,
@@ -458,6 +458,6 @@ def ingest_exposures(request):
 
 # ===============================================================================
 @api.post("/donor", auth=None)
-def create_donor(request, payload: DonorSchema):
+def create_donor(request, payload: DonorModelSchema):
     donor = Donor.objects.create(**payload.dict())
     return {"submitter_donor_id": donor.submitter_donor_id}
