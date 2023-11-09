@@ -108,8 +108,8 @@ else:
 
 
 api = NinjaAPI(renderer=ORJSONRenderer(), parser=ORJSONParser())
-api.add_router("/discovery/", discovery_router)
-api.add_router("/authorized/", authorzied_router, auth=auth)
+api.add_router("/authorized/", authorzied_router, auth=auth, tags=["authorized"])
+api.add_router("/discovery/", discovery_router, tags=["discovery"])
 
 
 @api.get("/service-info/")
