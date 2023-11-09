@@ -81,7 +81,7 @@ from chord_metadata_service.mohpackets.permissible_values import (
 from chord_metadata_service.mohpackets.schema import (
     DiscoverySchema,
     DonorFilterSchema,
-    DonorSchema,
+    DonorModelSchema,
     ProgramDiscoverySchema,
     SpecimenFilterSchema,
 )
@@ -589,28 +589,6 @@ def discover_programs(request):
 def discover_donors(request, filters: DonorFilterSchema = Query(...)):
     donors = count_donors(Donor, filters)
     return DiscoverySchema(discovery_donor=donors)
-
-
-@router.get("/donors-with-clinical/", response=List[DonorSchema])
-# @router.get("/donors-with-clinical/", response=List[Dict[str, Any]])
-def discover_donors_with_clinical(request):
-    primary_site_input = ["Adrenal gland", "Trachea", "Penis"]
-    treatment_type_input = []
-    chemotherapy_drug_name_input = []
-    hormonetherapy_drug_name_input = []
-    immunotherapy_drug_name_input = []
-    donors = (
-        Donor.objects.filter(
-            primary_site__overlap=primary_site_input,
-            # treatment__treatment_type=treatment_type_input,
-            # chemotherapy__drug_name=chemotherapy_drug_name_input,
-            # hormonetherapy__drug_name=hormonetherapy_drug_name_input,
-            # immunotherapy__drug_name=immunotherapy_drug_name_input,
-        )
-        # .values("program_id")
-        # .annotate(count=Count("program_id"))
-    )
-    return donors
 
 
 @router.get("/specimen/", response=DiscoverySchema)
