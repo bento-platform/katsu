@@ -9,6 +9,7 @@ from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
+from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer,
@@ -214,6 +215,10 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
             .prefetch_related(*PHENOPACKET_PREFETCH)
             .order_by("id")
         )
+
+    def list(self, request, *args, **kwargs):
+        authz_middleware.mark_authz_done(request)  # get_queryset has done the permissions logic already
+        return super().list(request, *args, **kwargs)
 
 
 class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
