@@ -3,13 +3,13 @@ from __future__ import annotations
 import isodate
 import datetime
 
+from bento_lib.auth.permissions import Permission
 from bento_lib.auth.resources import build_resource
 from collections import defaultdict, Counter
 from calendar import month_abbr
 from decimal import Decimal, ROUND_HALF_EVEN
 from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value, QuerySet
 from django.db.models.functions import Cast
-from django.conf import settings
 from django.http.request import HttpRequest
 from rest_framework.request import Request as DrfRequest
 from typing import Any, Type, TypedDict, Mapping, Generator
@@ -22,6 +22,8 @@ from chord_metadata_service.patients import models as patient_models
 from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.logger import logger
+
+from .censorship import get_threshold, thresholded_count
 
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
@@ -42,14 +44,6 @@ PUBLIC_MODEL_NAMES_TO_DATA_TYPE = {
 class BinWithValue(TypedDict):
     label: str
     value: int
-
-
-def get_threshold(low_counts_censored: bool) -> int:
-    """
-    Gets the maximum count threshold for hiding censored data (i.e., rounding to 0).
-    This is a function to prevent settings errors if not running/importing this file in a Django context.
-    """
-    return settings.CONFIG_PUBLIC["rules"]["count_threshold"] if low_counts_censored else 0
 
 
 def camel_case_field_names(string) -> str:
@@ -321,11 +315,9 @@ async def stats_for_field(model: Type[Model], field: str, add_missing: bool = Fa
     return await queryset_stats_for_field(model.objects.all(), field, add_missing)
 
 
-def thresholded_count(c: int, threshold: int) -> int:
-    return 0 if c <= threshold else c
-
-
-async def queryset_stats_for_field(queryset: QuerySet, field: str, add_missing: bool = False) -> Mapping[str, int]:
+async def queryset_stats_for_field(
+    queryset: QuerySet, field: str, low_counts_censored: bool, add_missing: bool = False
+) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a queryset.
     """
@@ -341,17 +333,23 @@ async def queryset_stats_for_field(queryset: QuerySet, field: str, add_missing: 
 
     async for item in annotated_queryset:
         key = item[field]
-        if key is None:
+        if key is None :
             num_missing = item["total"]
             continue
 
         key = str(key) if not isinstance(key, str) else key.strip()
         if key == "":
             continue
+
+        # Censor low cell counts if necessary - we don't want to betray that the value even exists in the database if
+        # we have a low count for it.
+        if item["total"] <= low_counts_censored:
+            continue
+
         stats[key] = item["total"]
 
     if add_missing:
-        stats["missing"] = num_missing
+        stats["missing"] = thresholded_count(num_missing, low_counts_censored)
 
     return stats
 
@@ -393,7 +391,7 @@ async def compute_binned_ages(individual_queryset: QuerySet, bin_size: int) -> l
     return binned_ages
 
 
-async def get_age_numeric_binned(individual_queryset: QuerySet, bin_size: int) -> dict:
+async def get_age_numeric_binned(individual_queryset: QuerySet, bin_size: int, low_counts_censored: bool) -> dict:
     """
     age_numeric is computed at ingestion time of phenopackets. On some instances
     it might be unavailable and as a fallback must be computed from the age JSON field which
@@ -409,7 +407,11 @@ async def get_age_numeric_binned(individual_queryset: QuerySet, bin_size: int) -
         # single update instead of creating iterables in a loop
         await compute_binned_ages(individual_queryset, bin_size)
     )
-    return individuals_age
+
+    return {
+        b: thresholded_count(bv, low_counts_censored)
+        for b, bv in individuals_age.items()
+    }
 
 
 async def get_categorical_stats(field_props: dict, low_counts_censored: bool) -> list[BinWithValue]:
@@ -438,12 +440,11 @@ async def get_categorical_stats(field_props: dict, low_counts_censored: bool) ->
             key=lambda x: x.lower()
         )
 
-    threshold = get_threshold(low_counts_censored)
     bins: list[BinWithValue] = []
 
     for category in labels:
         # Censor small counts by rounding them to 0
-        v: int = thresholded_count(stats.get(category, 0), threshold)
+        v: int = thresholded_count(stats.get(category, 0), low_counts_censored)
 
         if v == 0 and derived_labels:
             # We cannot append 0-counts for derived labels, since that indicates
@@ -468,7 +469,7 @@ async def get_date_stats(field_props: dict, low_counts_censored: bool = True) ->
     and apply privacy policies.
     Note that dates within a JSON are stored as strings, not instances of datetime.
     TODO: for now, only dates in extra_properties are handled. Handle dates as
-    regular fields when needed.
+     regular fields when needed.
     TODO: for now only dates binned by month are handled
     """
 
@@ -508,7 +509,6 @@ async def get_date_stats(field_props: dict, low_counts_censored: bool = True) ->
             start = key
 
     # All the bins between start and end date must be represented
-    threshold = get_threshold(low_counts_censored)
     bins: list[BinWithValue] = []
     if start:   # at least one month
         for year, month in monthly_generator(start, end or start):
@@ -516,12 +516,12 @@ async def get_date_stats(field_props: dict, low_counts_censored: bool = True) ->
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
             bins.append({
                 "label": label,
-                "value": thresholded_count(stats.get(key, 0), threshold),
+                "value": thresholded_count(stats.get(key, 0), low_counts_censored),
             })
 
     # Append missing items at the end if any
     if "missing" in stats:
-        bins.append({"label": "missing", "value": stats["missing"]})
+        bins.append({"label": "missing", "value": thresholded_count(stats["missing"], low_counts_censored)})
 
     return bins
 
@@ -585,15 +585,15 @@ async def get_range_stats(field_props: dict, low_counts_censored: bool = True) -
     )
 
     # Maximum number of entries needed to round a count from its true value down to 0 (censored discovery)
-    threshold = get_threshold(low_counts_censored)
     stats: dict[str, int] = dict()
     async for item in query_set:
-        stats[item["label"]] = thresholded_count(item["total"], threshold)
+        stats[item["label"]] = thresholded_count(item["total"], low_counts_censored)
 
     # All the bins between start and end must be represented and ordered
-    bins: list[BinWithValue] = []
-    for floor, ceil, label in labelled_range_generator(field_props):
-        bins.append({"label": label, "value": stats.get(label, 0)})
+    bins: list[BinWithValue] = [
+        {"label": label, "value": stats.get(label, 0)}
+        for floor, ceil, label in labelled_range_generator(field_props)
+    ]
 
     if "missing" in stats:
         bins.append({"label": "missing", "value": stats["missing"]})
@@ -731,8 +731,10 @@ async def bento_public_format_count_and_stats_list(annotated_queryset: QuerySet)
     return total, stats_list
 
 
-async def datasets_allowed_for_request_and_data_type(request: DrfRequest | HttpRequest, data_type) -> tuple[str, ...]:
-    perm = data_req_method_to_permission(request)
+async def datasets_allowed_for_request_and_data_type(
+    request: DrfRequest | HttpRequest, data_type, permission_override: Permission | None = None
+) -> tuple[str, ...]:
+    perm = permission_override or data_req_method_to_permission(request)
     resources = [
         build_resource(project=ds.project_id, dataset=ds.identifier, data_type=data_type)
         async for ds in cm.Dataset.objects.all()

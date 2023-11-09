@@ -65,16 +65,31 @@ def service_info(_request: Request):
     }
 )
 @api_view(["GET"])
-async def overview(_request: Request):
+async def overview(request: Request):
     """
     get:
-    Overview of all Phenopackets in the database
+    Overview of all Phenopackets and experiments in the database
     """
 
-    # TODO: permissions
+    # TODO: permissions based on project - this endpoint should be scrapped / completely rethought
+
+    # For now, this is on RESOURCE_EVERYTHING
+    dt_permissions = await get_data_type_discovery_permissions(
+        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT])
+
+    # If we don't have AT LEAST one count permission, assume we're not supposed to see this page and return forbidden.
+    if not any(dpd["counts"] or dpd["data"] for dpd in dt_permissions.values()):
+        authz_middleware.mark_authz_done(request)
+        return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 
     phenopackets = pheno_models.Phenopacket.objects.all()
     experiments = experiments_models.Experiment.objects.all()
+
+    phenopacket_query_data = dt_permissions[DATA_TYPE_PHENOPACKET]["data"]
+    experiment_query_data = dt_permissions[DATA_TYPE_EXPERIMENT]["data"]
+
+    any_phenopacket_perms = any(dt_permissions[DATA_TYPE_PHENOPACKET].values())
+    any_experiment_perms = any(dt_permissions[DATA_TYPE_EXPERIMENT].values())
 
     # Parallel-gather all statistics we may need for this response
     (
@@ -88,26 +103,32 @@ async def overview(_request: Request):
         instrument_summary,
     ) = await asyncio.gather(
         phenopackets.acount(),
-        pheno_summaries.biosample_summary(phenopackets),
-        patient_summaries.individual_summary(phenopackets),
-        pheno_summaries.disease_summary(phenopackets),
-        pheno_summaries.phenotypic_feature_summary(phenopackets),
-        exp_summaries.experiment_summary(experiments),
-        exp_summaries.experiment_result_summary(experiments),
-        exp_summaries.instrument_summary(experiments),
+        pheno_summaries.biosample_summary(phenopackets, low_counts_censored=not phenopacket_query_data),
+        patient_summaries.individual_summary(phenopackets, low_counts_censored=not phenopacket_query_data),  # TODO: permission
+        pheno_summaries.disease_summary(phenopackets, low_counts_censored=not phenopacket_query_data),
+        pheno_summaries.phenotypic_feature_summary(phenopackets, low_counts_censored=not phenopacket_query_data),
+        exp_summaries.experiment_summary(experiments, low_counts_censored=not experiment_query_data),
+        exp_summaries.experiment_result_summary(experiments, low_counts_censored=not experiment_query_data),
+        exp_summaries.instrument_summary(experiments, low_counts_censored=not experiment_query_data),
     )
 
     return Response({
-        "phenopackets": phenopackets_count,
+        "phenopackets": phenopackets_count if any_phenopacket_perms else 0,
         "data_type_specific": {
-            "biosamples": biosample_summary,
-            "diseases": disease_summary,
-            "individuals": individual_summary,
-            "phenotypic_features": pf_summary,
-            "experiments": experiment_summary,
-            "experiment_results": exp_res_summary,
-            "instruments": instrument_summary,
-        }
+            # only allow phenopacket-related counts if we have count or query permissions on phenopackets:
+            **({
+                "biosamples": biosample_summary,
+                "diseases": disease_summary,
+                "individuals": individual_summary,
+                "phenotypic_features": pf_summary,
+            } if any_phenopacket_perms else {}),
+            # only allow experiment-related counts if we have count or query permissions on experiments:
+            **({
+                "experiments": experiment_summary,
+                "experiment_results": exp_res_summary,
+                "instruments": instrument_summary,
+            } if any_experiment_perms else {}),
+        },
     })
 
 
@@ -130,6 +151,8 @@ async def search_overview(request: Request):
     - Parameter
         - id: a list of patient ids
     """
+
+    # TODO: this should be project / dataset-scoped and probably shouldn't even exist as-is
 
     individual_ids = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
 
@@ -280,7 +303,7 @@ async def public_overview(request: Request):
     dt_permissions = await get_public_data_type_permissions(request)
 
     # If we don't have AT LEAST one count permission, assume we're not supposed to see this page and return forbidden.
-    if not any(dpd["counts"] for dpd in dt_permissions.values()):
+    if not any(dpd["counts"] or dpd["data"] for dpd in dt_permissions.values()):
         authz_middleware.mark_authz_done(request)
         return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 

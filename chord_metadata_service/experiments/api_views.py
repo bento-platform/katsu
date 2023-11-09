@@ -1,4 +1,5 @@
 from asgiref.sync import async_to_sync
+from bento_lib.auth.permissions import P_QUERY_DATA
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
@@ -24,7 +25,6 @@ from .serializers import ExperimentSerializer, ExperimentResultSerializer
 from .models import Experiment, ExperimentResult
 from .schemas import EXPERIMENT_SCHEMA
 from .filters import ExperimentFilter, ExperimentResultFilter
-
 
 
 __all__ = [
@@ -97,25 +97,37 @@ class ExperimentBatchViewSet(BatchViewSet):
                         PhenopacketsRenderer, ExperimentCSVRenderer)
     content_negotiation_class = FormatInPostContentNegotiation
 
-    def get_queryset(self):
+    @async_to_sync
+    async def get_queryset(self):
+        # It's ok to allow public querying by ID here, since it doesn't give any feedback to the user whether
+        # an experiment they're not allowed to access is present or not based on ID.
         experiment_ids = self.request.data.get("id", None)
-        filter_by_id = {"id__in": experiment_ids} if experiment_ids else {}
-
         return (
             Experiment.objects
-            .filter(**filter_by_id)
+            .filter(
+                dataset_id__in=await datasets_allowed_for_request_and_data_type(
+                    self.request,
+                    DATA_TYPE_EXPERIMENT,
+                    # If we're POSTing, we are actually querying still, not creating - so override this with query:data
+                    permission_override=P_QUERY_DATA if self.request.method == "POST" else None,
+                ),
+                **({"id__in": experiment_ids} if experiment_ids else {}),
+            )
             .select_related(*EXPERIMENT_SELECT_REL)
             .prefetch_related(*EXPERIMENT_PREFETCH)
             .order_by("id")
         )
 
-    def create(self, request, *args, **kwargs):  # overrides POST, not actually creating anything
-        ids_list = request.data.get('id', [])
-        request.data["id"] = ids_list
-        queryset = self.get_queryset()
+    def list(self, request, *args, **kwargs):
+        authz_middleware.mark_authz_done(request)
+        return super().list(request, *args, **kwargs)
 
-        serializer = ExperimentSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def create(self, request, *_args, **_kwargs):  # overrides POST, not actually creating anything
+        # ids_list = request.data.get('id', [])
+        # request.data["id"] = ids_list
+        queryset = self.get_queryset()  # this itself gets the ID list from request data
+        authz_middleware.mark_authz_done(request)
+        return Response(ExperimentSerializer(queryset, many=True).data, status=status.HTTP_200_OK)
 
 
 class ExperimentResultViewSet(viewsets.ModelViewSet):
@@ -133,8 +145,18 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ExperimentResultFilter
 
-    def get_queryset(self):
-        dataset_ids = self.request.get("datasets", None)
+    @async_to_sync
+    async def get_queryset(self):
+        # Limit datasets to the intersection of datasets they request & datasets they're actually allowed to access.
+
+        # It's ok to allow public querying by ID here, since it doesn't give any feedback to the user whether
+        # a dataset they're not allowed to access is present or not based on ID
+        # – they know it either doesn't exist or they don't have permission to access it, but not which case between
+        #   these two.
+
+        dataset_ids = set(self.request.get("datasets", [])) & set(
+            await datasets_allowed_for_request_and_data_type(self.request, DATA_TYPE_EXPERIMENT))
+
         filter_by_dataset = {"experiment_set__dataset_id__in": dataset_ids} if dataset_ids else {}
         return ExperimentResult.objects.filter(**filter_by_dataset).order_by("id")
 
@@ -142,6 +164,10 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     @method_decorator(cache_page(60 * 60 * 2))
     def dispatch(self, *args, **kwargs):
         return super(ExperimentResultViewSet, self).dispatch(*args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        authz_middleware.mark_authz_done(request)  # get_queryset has done the permissions logic already
+        return super().list(request, *args, **kwargs)
 
 
 @extend_schema(
