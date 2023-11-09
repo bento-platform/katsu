@@ -63,7 +63,7 @@ from chord_metadata_service.mohpackets.pagination import (
 )
 from chord_metadata_service.mohpackets.schema import (
     DonorFilterSchema,
-    DonorSchema,
+    DonorModelSchema,
     DonorWithClinicalDataSchema,
 )
 from chord_metadata_service.mohpackets.serializers_nested import (
@@ -556,7 +556,7 @@ def tasks(request):
 
 @router.get(
     "/donors/",
-    response=List[DonorSchema],
+    response=List[DonorModelSchema],
 )
 def list_donors(request, filters: DonorFilterSchema = Query(...)):
     authorized_datasets = request.authorized_datasets
