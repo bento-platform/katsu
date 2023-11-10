@@ -83,7 +83,11 @@ def ingest_data(path):
 
         # Iterate through the data and create model instances
         with transaction.atomic():
-            for item in tqdm(data, desc=f"{filename}", ascii=True, ncols=0):
+            for item in tqdm(
+                data,
+                desc=f"{filename}",
+                bar_format="{desc}: {percentage:3.0f}% {n_fmt}/{total_fmt}",
+            ):
                 item["program_id_id"] = item.pop("program_id", None)
                 model_instance = model(**item)
                 model_instance.save()
