@@ -12,12 +12,12 @@ from rest_framework.response import Response
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
+from chord_metadata_service.discovery.helpers import datasets_allowed_for_request_and_data_type
 from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer,
                                                           BiosamplesCSVRenderer, ARGORenderer,
                                                           IndividualBentoSearchRenderer)
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
-from chord_metadata_service.restapi.utils import datasets_allowed_for_request_and_data_type
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 
 from . import models as m, serializers as s, filters as f

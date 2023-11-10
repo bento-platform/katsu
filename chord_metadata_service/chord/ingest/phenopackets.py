@@ -8,10 +8,10 @@ from decimal import Decimal
 from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Dataset
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
+from chord_metadata_service.phenopackets.utils import time_element_to_years
 from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.schema_utils import patch_project_schemas
 from chord_metadata_service.restapi.types import ExtensionSchemaDict
-from chord_metadata_service.restapi.utils import time_element_to_years
 
 from .exceptions import IngestError
 from .resources import ingest_resource

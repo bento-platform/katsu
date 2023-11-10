@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
+from chord_metadata_service.discovery.helpers import datasets_allowed_for_request_and_data_type
 from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer,
     PhenopacketsRenderer,
@@ -19,7 +20,6 @@ from chord_metadata_service.restapi.api_renderers import (
 )
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
-from chord_metadata_service.restapi.utils import datasets_allowed_for_request_and_data_type
 
 from .serializers import ExperimentSerializer, ExperimentResultSerializer
 from .models import Experiment, ExperimentResult

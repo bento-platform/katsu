@@ -25,12 +25,12 @@ router = routers.DefaultRouter(trailing_slash=False)
 batch_router = BatchListRouter()
 
 # CHORD app urls
-router.register(r'projects', chord_views.ProjectViewSet)
+router.register(r'projects', chord_views.ProjectViewSet, basename="projects")
 router.register(r'datasets', chord_views.DatasetViewSet, basename="datasets")
 router.register(r'project_json_schemas', chord_views.ProjectJsonSchemaViewSet)
 
 # Experiments app urls
-router.register(r'experiments', experiment_views.ExperimentViewSet)
+router.register(r'experiments', experiment_views.ExperimentViewSet, basename="experiments")
 router.register(r'experimentresults', experiment_views.ExperimentResultViewSet, basename="experimentresults")
 router.register(r'batch/experiments', experiment_views.ExperimentBatchViewSet, basename="batch/experiments")
 
@@ -88,7 +88,4 @@ urlpatterns = [
     path('public_overview', discovery_views.public_overview, name='public-overview',),
     path('public_rules', discovery_views.public_rules, name='public-rules',),
     path('public_dataset', discovery_views.public_dataset, name='public-dataset'),
-
-    # uncensored endpoint for beacon search using fields from config.json
-    path('beacon_search', individual_views.BeaconListIndividuals.as_view(), name='beacon-search'),
 ]

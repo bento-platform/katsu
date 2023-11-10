@@ -54,7 +54,9 @@ __all__ = [
     "EXPRESSION_SCHEMA",
     "EXTENSION_SCHEMA",
     "VCF_RECORD_SCHEMA",
-    "VRS_VARIATION_SCHEMA"
+    "VRS_VARIATION_SCHEMA",
+    "VRS_REF_RESOURCE",
+    "VRS_REF_REGISTRY",
 ]
 
 base_uri = get_schema_app_id(Path(__file__).parent.name)

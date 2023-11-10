@@ -12,6 +12,7 @@ from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
 from .fields_utils import monthly_generator
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
+from .stats import stats_for_field
 from .types import BinWithValue
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
