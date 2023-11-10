@@ -74,6 +74,7 @@ async def overview(request: Request):
         dt_experiment_summary(experiments, dt_permissions),
     )
 
+    authz_middleware.mark_authz_done(request)
     return Response({
         DATA_TYPE_PHENOPACKET: phenopackets_summary,
         DATA_TYPE_EXPERIMENT: experiments_summary,
