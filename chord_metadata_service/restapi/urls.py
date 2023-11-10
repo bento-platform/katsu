@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
+from chord_metadata_service.discovery import api_views as discovery_views
 from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
@@ -13,10 +14,6 @@ from chord_metadata_service.phenopackets.autocomplete_views import (
 from chord_metadata_service.resources import api_views as resources_views
 from .api_views import (
     overview,
-    public_search_fields,
-    public_overview,
-    public_rules,
-    public_dataset,
     search_overview,
     extra_properties_schema_types,
 )
@@ -87,10 +84,10 @@ urlpatterns = [
     # public endpoints (no confidential information leak unless we have a token)
     #  TODO: scope these to projects and move these to aggregation or beacon or something
     path('public', individual_views.PublicListIndividuals.as_view(), name='public',),
-    path('public_search_fields', public_search_fields, name='public-search-fields',),
-    path('public_overview', public_overview, name='public-overview',),
-    path('public_rules', public_rules, name='public-rules',),
-    path('public_dataset', public_dataset, name='public-dataset'),
+    path('public_search_fields', discovery_views.public_search_fields, name='public-search-fields',),
+    path('public_overview', discovery_views.public_overview, name='public-overview',),
+    path('public_rules', discovery_views.public_rules, name='public-rules',),
+    path('public_dataset', discovery_views.public_dataset, name='public-dataset'),
 
     # uncensored endpoint for beacon search using fields from config.json
     path('beacon_search', individual_views.BeaconListIndividuals.as_view(), name='beacon-search'),

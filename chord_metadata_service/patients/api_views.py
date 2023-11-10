@@ -22,15 +22,17 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response
 
-from .serializers import IndividualSerializer
-from .models import Individual
-from .filters import IndividualFilter
 from chord_metadata_service.authz.discovery import DataTypeDiscoveryPermissions
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
-from chord_metadata_service.phenopackets.models import Phenopacket
-from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
+from chord_metadata_service.discovery.censorship import thresholded_count
+from chord_metadata_service.discovery.fields import get_field_options, filter_queryset_field_value
+from chord_metadata_service.discovery.stats import biosample_tissue_stats, experiment_type_stats
+from chord_metadata_service.discovery.helpers import (
+    get_public_data_type_permissions,
+    get_public_queryable_fields,
+    get_discovery_rules_and_field_set_permissions,
+)
 from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer,
     PhenopacketsRenderer,
@@ -38,18 +40,15 @@ from chord_metadata_service.restapi.api_renderers import (
     ARGORenderer,
     IndividualBentoSearchRenderer,
 )
+from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
+from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
-from chord_metadata_service.restapi.utils import (
-    get_field_options,
-    filter_queryset_field_value,
-    biosample_tissue_stats,
-    experiment_type_stats,
-    get_public_data_type_permissions,
-    get_public_queryable_fields,
-    get_discovery_rules_and_field_set_permissions,
-)
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
-from ..restapi.censorship import thresholded_count
+
+from .serializers import IndividualSerializer
+from .models import Individual
+from .filters import IndividualFilter
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 

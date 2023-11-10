@@ -1,44 +1,26 @@
 import asyncio
-import json
 
 from adrf.decorators import api_view
 from bento_lib.auth.permissions import P_QUERY_DATA
 from bento_lib.auth.resources import build_resource
 from bento_lib.responses import errors
-from django.conf import settings
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
 from rest_framework.decorators import permission_classes
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from chord_metadata_service.authz.discovery import (
-    DiscoveryPermissionsDict,
-    DataTypeDiscoveryPermissions,
-    get_data_type_discovery_permissions,
-)
+from chord_metadata_service.authz.discovery import get_data_type_discovery_permissions
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
-from chord_metadata_service.chord import models as chord_models
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments import models as experiments_models, summaries as exp_summaries
-from chord_metadata_service.logger import logger
+from chord_metadata_service.experiments.summaries import dt_experiment_summary
 from chord_metadata_service.metadata.service_info import SERVICE_INFO
 from chord_metadata_service.patients import models as patients_models, summaries as patient_summaries
 from chord_metadata_service.phenopackets import models as pheno_models, summaries as pheno_summaries
+from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.restapi.models import SchemaType
-from chord_metadata_service.restapi.utils import (
-    get_public_model_name_and_field_path,
-    get_field_options,
-    get_categorical_stats,
-    get_date_stats,
-    get_range_stats,
-    get_config_public_and_field_set_permissions,
-    get_discovery_rules_and_field_set_permissions,
-    PUBLIC_MODEL_NAMES_TO_MODEL,
-    PUBLIC_MODEL_NAMES_TO_DATA_TYPE,
-    BinWithValue,
-)
 
 OVERVIEW_AGE_BIN_SIZE = 10
 
@@ -87,50 +69,14 @@ async def overview(request: Request):
     phenopackets = pheno_models.Phenopacket.objects.all()
     experiments = experiments_models.Experiment.objects.all()
 
-    phenopacket_query_data = dt_permissions[DATA_TYPE_PHENOPACKET]["data"]
-    experiment_query_data = dt_permissions[DATA_TYPE_EXPERIMENT]["data"]
-
-    any_phenopacket_perms = any(dt_permissions[DATA_TYPE_PHENOPACKET].values())
-    any_experiment_perms = any(dt_permissions[DATA_TYPE_EXPERIMENT].values())
-
-    # Parallel-gather all statistics we may need for this response
-    (
-        phenopackets_count,
-        biosample_summary,
-        individual_summary,
-        disease_summary,
-        pf_summary,
-        experiment_summary,
-        exp_res_summary,
-        instrument_summary,
-    ) = await asyncio.gather(
-        phenopackets.acount(),
-        pheno_summaries.biosample_summary(phenopackets, low_counts_censored=not phenopacket_query_data),
-        patient_summaries.individual_summary(phenopackets, low_counts_censored=not phenopacket_query_data),  # TODO: permission
-        pheno_summaries.disease_summary(phenopackets, low_counts_censored=not phenopacket_query_data),
-        pheno_summaries.phenotypic_feature_summary(phenopackets, low_counts_censored=not phenopacket_query_data),
-        exp_summaries.experiment_summary(experiments, low_counts_censored=not experiment_query_data),
-        exp_summaries.experiment_result_summary(experiments, low_counts_censored=not experiment_query_data),
-        exp_summaries.instrument_summary(experiments, low_counts_censored=not experiment_query_data),
+    phenopackets_summary, experiments_summary = await asyncio.gather(
+        dt_phenopacket_summary(phenopackets, dt_permissions),
+        dt_experiment_summary(experiments, dt_permissions),
     )
 
     return Response({
-        "phenopackets": phenopackets_count if any_phenopacket_perms else 0,
-        "data_type_specific": {
-            # only allow phenopacket-related counts if we have count or query permissions on phenopackets:
-            **({
-                "biosamples": biosample_summary,
-                "diseases": disease_summary,
-                "individuals": individual_summary,
-                "phenotypic_features": pf_summary,
-            } if any_phenopacket_perms else {}),
-            # only allow experiment-related counts if we have count or query permissions on experiments:
-            **({
-                "experiments": experiment_summary,
-                "experiment_results": exp_res_summary,
-                "instruments": instrument_summary,
-            } if any_experiment_perms else {}),
-        },
+        DATA_TYPE_PHENOPACKET: phenopackets_summary,
+        DATA_TYPE_EXPERIMENT: experiments_summary,
     })
 
 
@@ -206,240 +152,4 @@ async def search_overview(request: Request):
         "individuals": individual_summary,
         "phenotypic_features": pf_summary,
         "experiments": experiment_summary,
-    })
-
-
-async def get_public_data_type_permissions(request: Request) -> DataTypeDiscoveryPermissions:
-    return await get_data_type_discovery_permissions(
-        request,
-
-        # Collect all data types that we need permissions for to give various parts of the public overview response.
-        #  - individuals & biosamples are in the 'phenopacket' data type, experiments are in the 'experiment' data type
-        list(set(PUBLIC_MODEL_NAMES_TO_DATA_TYPE.values()))
-    )
-
-
-@extend_schema(
-    description="Public search fields with their configuration",
-    responses={
-        status.HTTP_200_OK: inline_serializer(
-            name='public_search_fields_response',
-            fields={'sections': serializers.JSONField()}
-        ),
-        status.HTTP_404_NOT_FOUND: inline_serializer(
-            name='public_search_fields_not_configured',
-            fields={'message': serializers.CharField()},
-        ),
-    }
-)
-@api_view(["GET"])
-async def public_search_fields(request: Request):
-    """
-    get:
-    Return public search fields with their configuration
-    """
-
-    # TODO: should be project-scoped
-
-    config_public, _, qf_permissions = get_config_public_and_field_set_permissions(
-        # Access (counts/data) permissions by Bento data type:
-        await get_public_data_type_permissions(request)
-    )
-
-    if not config_public:
-        authz_middleware.mark_authz_done(request)
-        return Response(settings.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
-
-    field_conf = config_public["fields"]
-
-    # Note: the array is wrapped in a dictionary structure to help with JSON
-    # processing by some services.
-
-    async def _get_field_response(field) -> dict | None:
-        field_props = field_conf[field]
-        field_perms = qf_permissions[field]
-
-        if not field_perms["counts"]:  # Cannot even see counts, skip this field  TODO: incorporate booleans
-            return None
-
-        return {
-            **field_props,
-            "id": field,
-            "options": await get_field_options(field_props, low_counts_censored=not field_perms["data"]),
-        }
-
-    async def _get_section_response(section) -> dict:
-        return {
-            **section,
-            "fields": await asyncio.gather(*filter(None, map(_get_field_response, section["fields"]))),
-        }
-
-    return Response({
-        "sections": await asyncio.gather(*map(_get_section_response, config_public["search"])),
-    })
-
-
-def get_count_and_query_data_permissions_for_field(
-    dt_permissions: DataTypeDiscoveryPermissions, field_props: dict
-) -> DiscoveryPermissionsDict:
-    public_model_name, _ = get_public_model_name_and_field_path(field_props["mapping"])
-    field_bento_data_type = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[public_model_name]
-    return dt_permissions[field_bento_data_type]
-
-
-@extend_schema(
-    description="Overview of all public data in the database",
-    responses={
-        status.HTTP_200_OK: inline_serializer(
-            name='public_overview_response',
-            fields={'datasets': serializers.CharField()}
-        ),
-        status.HTTP_404_NOT_FOUND: inline_serializer(
-            name='public_overview_not_available',
-            fields={'message': serializers.CharField()},
-        ),
-    }
-)
-@api_view(["GET"])  # Don't use BentoAllowAny, we want to be more careful of cases here.
-async def public_overview(request: Request):
-    """
-    get:
-    Overview of all public data in the database
-    """
-
-    # Access (counts/data) permissions by Bento data type
-    dt_permissions = await get_public_data_type_permissions(request)
-
-    config_public, _, qf_permissions = get_config_public_and_field_set_permissions(dt_permissions)
-
-    if not config_public:
-        authz_middleware.mark_authz_done(request)
-        return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
-
-    # TODO: public overviews SHOULD be project-scoped at least.
-
-    # If we don't have AT LEAST one count permission, assume we're not supposed to see this page and return forbidden.
-    if not any(any(fp.values()) for fp in qf_permissions.values()):
-        authz_middleware.mark_authz_done(request)
-        return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
-
-    # Predefined counts
-    async def _counts_for_model_name(mn: str) -> tuple[str, int]:
-        return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all().acount()
-    counts = dict(await asyncio.gather(*map(_counts_for_model_name, PUBLIC_MODEL_NAMES_TO_MODEL)))
-
-    # Get the rules config - because we used get_config_public_and_field_set_permissions with no arguments, it'll choose
-    #  these values based on if we have access to ALL public fields or not.
-    rules_config = config_public["rules"]
-    count_threshold = rules_config["count_threshold"]
-
-    # Set counts to 0 if they're under the count threshold, and we don't have full data access permissions for the
-    # data type corresponding to the model.
-    for public_model_name in counts:
-        data_type = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[public_model_name]
-        if 0 < counts[public_model_name] <= count_threshold and not dt_permissions[data_type]["data"]:
-            logger.info(f"Public overview: {public_model_name} count is below count threshold")
-            counts[public_model_name] = 0
-
-    response = {
-        "layout": config_public["overview"],
-        "fields": {},
-        "counts": {
-            **({
-                "individuals": counts["individual"],
-                "biosamples": counts["biosample"],
-            } if dt_permissions[DATA_TYPE_PHENOPACKET]["counts"] else {}),
-            **({
-                "experiments": counts["experiment"],
-            } if dt_permissions[DATA_TYPE_EXPERIMENT]["counts"] else {}),
-        },
-        # TODO: remove these in favour of public_rules endpoint
-        "max_query_parameters": rules_config["max_query_parameters"],
-        "count_threshold": count_threshold,
-    }
-
-    # Parse the public config to gather data for each field defined in the overview
-
-    fields = [chart["field"] for section in config_public["overview"] for chart in section["charts"]]
-    field_conf = config_public["fields"]
-
-    async def _get_field_response(field_id: str, field_props: dict) -> dict:
-        field_perms = qf_permissions[field_id]
-
-        # Permissions incorporation: only censor small cell counts when we don't have query:data access
-        stats: list[BinWithValue] | None
-        if not field_perms["counts"]:
-            stats = None
-        elif field_props["datatype"] == "string":
-            stats = await get_categorical_stats(field_props, low_counts_censored=not field_perms["data"])
-        elif field_props["datatype"] == "number":
-            stats = await get_range_stats(field_props, low_counts_censored=not field_perms["data"])
-        elif field_props["datatype"] == "date":
-            stats = await get_date_stats(field_props, low_counts_censored=not field_perms["data"])
-        else:
-            raise NotImplementedError()
-
-        return {
-            **field_props,
-            "id": field_id,
-            **({"data": stats} if stats is not None else {}),
-        }
-
-    # Parallel async collection of field responses for public overview
-    field_responses = await asyncio.gather(*(_get_field_response(field, field_conf[field]) for field in fields))
-
-    for field, field_res in zip(fields, field_responses):
-        response["fields"][field] = field_res
-
-    authz_middleware.mark_authz_done(request)
-    return Response(response)
-
-
-@api_view(["GET"])
-@permission_classes([BentoAllowAny])
-async def public_rules(request: Request):
-    # Access (counts/data) permissions by Bento data type
-    dt_permissions = await get_public_data_type_permissions(request)
-
-    # If a list of fields is passed as a query parameter, we get the rules as they pertain to only those fields:
-    fields = request.query_params.getlist("fields")
-
-    rules, _, _ = get_discovery_rules_and_field_set_permissions(dt_permissions, fields)
-    return Response(rules)
-
-
-@api_view(["GET"])
-@permission_classes([BentoAllowAny])
-async def public_dataset(_request: Request):
-    """
-    get:
-    Properties of the datasets
-    """
-
-    # For now, we don't have any permissions checks for this.
-    # In the future, we could introduce a view:dataset permission or something.
-
-    if not settings.CONFIG_PUBLIC:
-        return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
-
-    return Response({
-        "datasets": [
-            {
-                **d,
-                # convert dats_file json content to dict
-                "dats_file": json.loads(d["dats_file"]) if d["dats_file"] else None,
-            }
-            async for d in (
-                # Datasets provenance metadata:
-                chord_models.Dataset.objects.values(
-                    "title", "description", "contact_info",
-                    "dates", "stored_in", "spatial_coverage",
-                    "types", "privacy", "distributions",
-                    "dimensions", "primary_publications", "citations",
-                    "produced_by", "creators", "licenses",
-                    "acknowledges", "keywords", "version", "dats_file",
-                    "extra_properties", "identifier"
-                )
-            )
-        ]
     })

@@ -2,8 +2,9 @@ import asyncio
 
 from django.db.models import QuerySet
 
-from chord_metadata_service.restapi.censorship import thresholded_count
-from chord_metadata_service.restapi.utils import queryset_stats_for_field, get_age_numeric_binned
+from chord_metadata_service.discovery.censorship import thresholded_count
+from chord_metadata_service.discovery.fields import get_age_numeric_binned
+from chord_metadata_service.discovery.stats import queryset_stats_for_field
 from . import models
 
 __all__ = ["individual_summary"]
@@ -36,4 +37,5 @@ async def individual_summary(phenopackets: QuerySet | None, low_counts_censored:
         "karyotypic_sex": {k: individual_k_sex.get(k, 0) for k in (s[0] for s in models.Individual.KARYOTYPIC_SEX)},
         "age": individual_age,
         "taxonomy": individual_taxonomy,
+        # "date_of_birth": phenopacket_qs.values("subject__date_of_birth")  TODO - this was only in private...
     }

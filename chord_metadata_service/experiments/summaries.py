@@ -2,18 +2,24 @@ import asyncio
 
 from django.db.models import QuerySet
 
-from chord_metadata_service.restapi.censorship import thresholded_count
-from chord_metadata_service.restapi.utils import queryset_stats_for_field
+from chord_metadata_service.discovery.censorship import thresholded_count
+from chord_metadata_service.discovery.stats import queryset_stats_for_field
 from . import models
 
 __all__ = [
     "experiment_summary",
     "experiment_result_summary",
     "instrument_summary",
+    "dt_experiment_summary",
 ]
+
+from ..authz.discovery import DataTypeDiscoveryPermissions
+from ..chord.data_types import DATA_TYPE_EXPERIMENT
 
 
 async def experiment_summary(experiments: QuerySet, low_counts_censored: bool) -> dict:
+    # TODO: limit to authorized field list if we're in censored discovery mode - based on discovery config
+
     (
         count,
         study_type,
@@ -86,4 +92,34 @@ async def instrument_summary(experiments: QuerySet, low_counts_censored: bool) -
         "count": thresholded_count(count, low_counts_censored),
         "platform": platform,
         "model": model,
+    }
+
+
+async def dt_experiment_summary(experiments: QuerySet, dt_permissions: DataTypeDiscoveryPermissions) -> dict:
+    experiment_query_data = dt_permissions[DATA_TYPE_EXPERIMENT]["data"]
+    any_experiment_perms = any(dt_permissions[DATA_TYPE_EXPERIMENT].values())
+
+    # Parallel-gather all statistics we may need for this response
+    (
+        experiments_count,
+        experiment_summary_val,
+        exp_res_summary_val,
+        instrument_summary_val,
+    ) = await asyncio.gather(
+        experiments.acount(),
+        experiment_summary(experiments, low_counts_censored=not experiment_query_data),
+        experiment_result_summary(experiments, low_counts_censored=not experiment_query_data),
+        instrument_summary(experiments, low_counts_censored=not experiment_query_data),
+    )
+
+    return {
+        "count": experiments_count if any_experiment_perms else 0,
+        "data_type_specific": {
+            # only allow experiment-related counts if we have count or query permissions on experiments:
+            **({
+                "experiments": experiment_summary_val,
+                "experiment_results": exp_res_summary_val,
+                "instruments": instrument_summary_val,
+            } if any_experiment_perms else {}),
+        },
     }
