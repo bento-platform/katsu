@@ -65,8 +65,8 @@ def create_bulk_objects(serializer_class, data: dict):
     serializer.is_valid(raise_exception=True)
     # Note: bulk_create() would be faster but it requires to append the _id to the foreign keys
     with transaction.atomic():
-        objs = serializer.save()
-
+        serializer.save()
+    objs = serializer.data
     return objs
 
 
@@ -93,12 +93,12 @@ def ingest_programs(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_programs": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} programs were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -118,12 +118,12 @@ def ingest_donors(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_donors": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} donors were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -143,12 +143,12 @@ def ingest_primary_diagnosises(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_primary_diagnosises": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} primary diagnosises were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -168,12 +168,12 @@ def ingest_specimens(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_specimens": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} specimens were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -193,12 +193,12 @@ def ingest_sample_registrations(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_sample_registrations": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} sample registrations were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -218,12 +218,12 @@ def ingest_treatments(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_treatments": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} treatments were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -243,12 +243,12 @@ def ingest_chemotherapies(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_chemotherapies": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} chemotherapies were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -268,12 +268,12 @@ def ingest_radiations(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_radiations": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} radiations were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -293,12 +293,12 @@ def ingest_surgeries(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_surgeries": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} surgeries were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -318,12 +318,12 @@ def ingest_hormonetherapies(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_hormonetherapies": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} hormonetherapies were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -343,12 +343,12 @@ def ingest_immunotherapies(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_immunotherapies": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} immunotherapies were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -368,12 +368,12 @@ def ingest_followups(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_followups": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} followups were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -393,12 +393,12 @@ def ingest_biomarkers(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_biomarkers": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} biomarkers were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -418,12 +418,12 @@ def ingest_comorbidities(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during ingest_comorbidities": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} comorbidities were created."},
+        data={"result": len(objs)},
     )
 
 
@@ -443,10 +443,10 @@ def ingest_exposures(request):
     except Exception as e:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
-            data={"error during exposures": str(e)},
+            data={"error": str(e)},
         )
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={f"{len(objs)} exposures were created."},
+        data={"result": len(objs)},
     )
