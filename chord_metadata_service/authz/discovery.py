@@ -75,7 +75,10 @@ DataTypeDiscoveryPermissions = dict[str, DiscoveryPermissionsDict]
 
 
 async def get_data_type_discovery_permissions(
-    request: Request | HttpRequest, data_types: list[str]
+    request: Request | HttpRequest,
+    data_types: list[str],
+    resource: dict | None = None,
+    counts_permission: Permission = P_QUERY_PROJECT_LEVEL_COUNTS,
 ) -> DataTypeDiscoveryPermissions:
     # For all of these required data types, figure out if we have:
     #  a) full-response query:data permissions, and
@@ -87,7 +90,7 @@ async def get_data_type_discovery_permissions(
 
     p_query_counts, p_query_data = (
         await authz_middleware.async_evaluate(
-            request, (RESOURCE_EVERYTHING,), (P_QUERY_PROJECT_LEVEL_COUNTS, P_QUERY_DATA)
+            request, (resource or RESOURCE_EVERYTHING,), (counts_permission, P_QUERY_DATA)
         )
     )[0]
 
