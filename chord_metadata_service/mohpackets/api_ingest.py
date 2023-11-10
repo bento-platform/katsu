@@ -98,7 +98,7 @@ def ingest_programs(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -123,7 +123,7 @@ def ingest_donors(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -148,7 +148,7 @@ def ingest_primary_diagnosises(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -173,7 +173,7 @@ def ingest_specimens(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -198,7 +198,7 @@ def ingest_sample_registrations(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -223,7 +223,7 @@ def ingest_treatments(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -248,7 +248,7 @@ def ingest_chemotherapies(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -273,7 +273,7 @@ def ingest_radiations(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -298,7 +298,7 @@ def ingest_surgeries(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -323,7 +323,7 @@ def ingest_hormonetherapies(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -348,7 +348,7 @@ def ingest_immunotherapies(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -373,7 +373,7 @@ def ingest_followups(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -398,7 +398,7 @@ def ingest_biomarkers(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -423,7 +423,7 @@ def ingest_comorbidities(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
 
 
@@ -448,5 +448,5 @@ def ingest_exposures(request):
 
     return Response(
         status=status.HTTP_201_CREATED,
-        data={"result": objs},
+        data={"result": len(objs)},
     )
