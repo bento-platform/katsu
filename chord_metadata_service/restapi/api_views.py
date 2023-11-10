@@ -189,12 +189,23 @@ async def search_overview(request: Request):
         biosample_id__in=authorized_phenopackets.values_list("biosample_id", flat=True),
     )
 
+    # We have the "query:data" permission on all datasets we get back here for all data types.
+    # No low-count thresholding is needed.
+
+    biosample_summary, disease_summary, individual_summary, pf_summary, experiment_summary = await asyncio.gather(
+        pheno_summaries.biosample_summary(authorized_phenopackets, low_counts_censored=False),
+        pheno_summaries.disease_summary(authorized_phenopackets, low_counts_censored=False),
+        patient_summaries.individual_summary(authorized_phenopackets, low_counts_censored=False),
+        pheno_summaries.phenotypic_feature_summary(authorized_phenopackets, low_counts_censored=False),
+        exp_summaries.experiment_summary(authorized_experiments, low_counts_censored=False),
+    )
+
     return Response({
-        "biosamples": await pheno_summaries.biosample_summary(authorized_phenopackets),
-        "diseases": await pheno_summaries.disease_summary(authorized_phenopackets),
-        "individuals": await patient_summaries.individual_summary(authorized_phenopackets),
-        "phenotypic_features": await pheno_summaries.phenotypic_feature_summary(authorized_phenopackets),
-        "experiments": await exp_summaries.experiment_summary(authorized_experiments),
+        "biosamples": biosample_summary,
+        "diseases": disease_summary,
+        "individuals": individual_summary,
+        "phenotypic_features": pf_summary,
+        "experiments": experiment_summary,
     })
 
 
