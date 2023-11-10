@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import sys
+
 import isodate
 import datetime
 
@@ -7,13 +9,18 @@ from bento_lib.auth.permissions import Permission
 from bento_lib.auth.resources import build_resource
 from collections import defaultdict, Counter
 from calendar import month_abbr
+from copy import deepcopy
 from decimal import Decimal, ROUND_HALF_EVEN
+from django.conf import settings
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value, QuerySet
 from django.db.models.functions import Cast
 from django.http.request import HttpRequest
 from rest_framework.request import Request as DrfRequest
-from typing import Any, Type, TypedDict, Mapping, Generator
+from typing import Any, Type, Generator, Iterable, Mapping, TypedDict
 
+from chord_metadata_service.authz.discovery import DataTypeDiscoveryPermissions, get_data_type_discovery_permissions, \
+    DiscoveryPermissionsDict
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.utils import data_req_method_to_permission
 from chord_metadata_service.chord import models as cm
@@ -23,7 +30,7 @@ from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.logger import logger
 
-from .censorship import get_threshold, thresholded_count
+from .censorship import get_threshold, thresholded_count, DiscoveryRules
 
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
@@ -694,7 +701,7 @@ def filter_queryset_field_value(qs: QuerySet, field_props, value: str):
     return qs.filter(**condition)
 
 
-async def experiment_type_stats(queryset: QuerySet) -> tuple[int, list[BinWithValue]]:
+async def experiment_type_stats(queryset: QuerySet, low_counts_censored: bool) -> tuple[int, list[BinWithValue]]:
     """
     returns count and bento_public format list of stats for experiment type
     note that queryset_stats_for_field() does not count "missing" correctly when the field has multiple foreign keys
@@ -702,33 +709,66 @@ async def experiment_type_stats(queryset: QuerySet) -> tuple[int, list[BinWithVa
     return await bento_public_format_count_and_stats_list(
         queryset
         .values(label=F("phenopackets__biosamples__experiment__experiment_type"))
-        .annotate(value=Count("phenopackets__biosamples__experiment", distinct=True))
+        .annotate(value=Count("phenopackets__biosamples__experiment", distinct=True)),
+        low_counts_censored,
     )
 
 
-async def biosample_tissue_stats(queryset) -> tuple[int, list[BinWithValue]]:
+async def biosample_tissue_stats(queryset: QuerySet, low_counts_censored: bool) -> tuple[int, list[BinWithValue]]:
     """
     returns count and bento_public format list of stats for biosample sampled_tissue
     """
     return await bento_public_format_count_and_stats_list(
         queryset
         .values(label=F("phenopackets__biosamples__sampled_tissue__label"))
-        .annotate(value=Count("phenopackets__biosamples", distinct=True))
+        .annotate(value=Count("phenopackets__biosamples", distinct=True)),
+        low_counts_censored,
     )
 
 
-async def bento_public_format_count_and_stats_list(annotated_queryset: QuerySet) -> tuple[int, list[BinWithValue]]:
+async def bento_public_format_count_and_stats_list(
+    annotated_queryset: QuerySet,
+    low_counts_censored: bool,
+) -> tuple[int, list[BinWithValue]]:
     stats_list: list[BinWithValue] = []
     total: int = 0
 
     async for q in annotated_queryset:
         label = q["label"]
-        value = int(q["value"])
-        total += value
-        if label is not None:
-            stats_list.append({"label": label, "value": value})  # TODO: should this be thresholded?
+        value = thresholded_count(int(q["value"]), low_counts_censored)
 
-    return total, stats_list
+        # Be careful not to leak values if they're in the database but below threshold
+        if value == 0:
+            continue
+
+        # Skip 'missing' values
+        if label is None:
+            continue
+
+        total += value
+        stats_list.append({"label": label, "value": value})
+
+    return thresholded_count(total, low_counts_censored), stats_list
+
+
+def get_public_queryable_fields():
+    config_public = settings.CONFIG_PUBLIC
+    search_conf = config_public["search"]
+    field_conf = config_public["fields"]
+    queryable_fields = {
+        f"{f}": field_conf[f] for section in search_conf for f in section["fields"]
+    }
+    return queryable_fields
+
+
+async def get_public_data_type_permissions(request: DrfRequest) -> DataTypeDiscoveryPermissions:
+    return await get_data_type_discovery_permissions(
+        request,
+
+        # Collect all data types that we need permissions for to give various parts of the public overview response.
+        #  - individuals & biosamples are in the 'phenopacket' data type, experiments are in the 'experiment' data type
+        list(set(PUBLIC_MODEL_NAMES_TO_DATA_TYPE.values()))
+    )
 
 
 async def datasets_allowed_for_request_and_data_type(
@@ -741,3 +781,91 @@ async def datasets_allowed_for_request_and_data_type(
     ]
     resources_allowed = tuple(map(all, await authz_middleware.async_evaluate(request, resources, (perm,))))
     return tuple(r["dataset"] for r, rp in zip(resources, resources_allowed) if rp)
+
+
+def permissions_on_public_field_set(
+    fields_accessed: Iterable[str],
+    dt_permissions: DataTypeDiscoveryPermissions,
+) -> tuple[DiscoveryPermissionsDict, dict[str, DiscoveryPermissionsDict]]:
+    dts_accessed: set[str] = set()
+    field_dts: dict[str, str] = {}
+
+    field_set = set(fields_accessed)
+    queryable_fields = get_public_queryable_fields()
+
+    for field in field_set:
+        if field not in queryable_fields:
+            raise ValidationError(f"Unsupported field used in query: {field}")
+
+        mn, _ = get_public_model_name_and_field_path(field)
+        if (f_dt := PUBLIC_MODEL_NAMES_TO_DATA_TYPE.get(mn)) is not None:
+            dts_accessed.add(f_dt)
+            field_dts[field] = f_dt
+
+    if not all(dt_permissions[dt]["counts"] for dt in dts_accessed):
+        raise PermissionDenied()
+
+    field_permissions: dict[str, DiscoveryPermissionsDict] = {f: dt_permissions[field_dts[f]] for f in field_set}
+
+    return {
+        "counts": all(dt_permissions[dt]["counts"] for dt in dts_accessed),
+        "data": all(dt_permissions[dt]["data"] for dt in dts_accessed),
+    }, field_permissions
+
+
+def get_discovery_rules_and_field_set_permissions(
+    dt_permissions: DataTypeDiscoveryPermissions,
+    field_set: Iterable[str] | None = None,
+) -> tuple[DiscoveryRules, DiscoveryPermissionsDict, dict[str, DiscoveryPermissionsDict]]:
+    rules: DiscoveryRules = {
+        "max_query_parameters": settings,  # default to no query parameters allowed
+        "count_threshold": sys.maxsize,  # default to MAXINT count threshold (i.e., no counts can be seen)
+    }
+
+    config_public = settings.CONFIG_PUBLIC
+    if not config_public:
+        return rules, {"counts": False, "data": False}, {}  # no discovery allowed, use default settings
+
+    # -----
+
+    queryable_fields = get_public_queryable_fields()
+    all_qf_permissions, qf_permissions = permissions_on_public_field_set(
+        queryable_fields.keys() if not field_set else field_set, dt_permissions)
+
+    # -----
+
+    def _rule_cases(case_none, case_counts, case_query):
+        if not any(all_qf_permissions.values()):
+            return case_none
+        if all_qf_permissions["data"]:
+            return case_query
+        return case_counts
+
+    rules["max_query_parameters"] = _rule_cases(0, settings.DISCOVERY_MAX_QUERY_PARAMETERS, -1)
+    rules["count_threshold"] = _rule_cases(sys.maxsize, settings.DISCOVERY_COUNT_THRESHOLD, 0)
+    return rules, all_qf_permissions, qf_permissions
+
+
+def get_config_public_and_field_set_permissions(
+    dt_permissions: DataTypeDiscoveryPermissions,
+    field_set: Iterable[str] | None = None,
+) -> tuple[dict, DiscoveryPermissionsDict, dict[str, DiscoveryPermissionsDict]]:
+    """
+    Gets public configuration file. Some values of this response can be updated from the base config based on the
+    environment/permissions.
+    """
+
+    # TODO: the true max_query_parameters depends on what fields are being accessed, which currently isn't reflected
+    #  here all the time (if field_set is None). All of public discovery needs to be somewhat re-thought to be more
+    #  dynamic based on what is being accessed.
+
+    config_public = deepcopy(settings.CONFIG_PUBLIC)
+    if not config_public:  # empty dictionary?
+        return config_public  # return as-is
+
+    rules, all_qf_permissions, qf_permissions = get_discovery_rules_and_field_set_permissions(dt_permissions, field_set)
+
+    if "rules" in config_public:  # overwrite rules with calculated rules based on permissions
+        config_public["rules"] = rules
+
+    return config_public, all_qf_permissions, qf_permissions

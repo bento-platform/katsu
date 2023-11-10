@@ -333,11 +333,33 @@ CACHE_TIME = int(os.getenv('CACHE_TIME', 60 * 60 * 2))
 # Settings related to the Public APIs
 
 # Read project specific config.json that contains custom search fields
+#  - This should not be used directly by endpoints etc. Instead, it should be accessed via the getter in restapi.utils
 if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
     with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
         CONFIG_PUBLIC = json.load(config_file)
 else:
     CONFIG_PUBLIC = {}
+
+# The below DISCOVERY_* settings should be accessed via the get_discovery_rules_and_field_set_permissions getter in
+# API views, to correctly incorporate permissions.
+
+# Maximum query parameters - can be sourced from environment variable; fallback to CONFIG_PUBLIC
+# and if that is not set, then use 0 (no query parameters allowed)
+# NOTE: This value only applies to tokens with the project-level counts permission.
+#  - If this permission is not present, the effective value is 0.
+#  - If the query:data permission is present, the effective value is maxsize.
+DISCOVERY_MAX_QUERY_PARAMETERS = int(os.environ.get(
+    "DISCOVERY_MAX_QUERY_PARAMETERS",
+    CONFIG_PUBLIC.get("rules", {}).get("max_query_parameters", 0)))
+
+# Return count threshold for censored discovery - can be sourced from environment variable; fallback to CONFIG_PUBLIC
+# and if that is not set, then use sys.maxsize (effectively, everything becomes 0)
+# NOTE: This value only applies to tokens with the project-level counts permission.
+#  - If this permission is not present, the effective value is maxsize.
+#  - If the query:data permission is present, the effective value is 0.
+DISCOVERY_COUNT_THRESHOLD = int(os.environ.get(
+    "DISCOVERY_COUNT_THRESHOLD",
+    CONFIG_PUBLIC.get("rules", {}).get("count_threshold", sys.maxsize)))
 
 # Public response when there is no enough data that passes the project-custom threshold
 INSUFFICIENT_DATA_AVAILABLE = {"message": "Insufficient data available."}

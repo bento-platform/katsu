@@ -1,18 +1,21 @@
+import asyncio
 import re
 
 from asgiref.sync import async_to_sync
 from datetime import datetime
 from rest_framework import filters, mixins, serializers, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import APIView
+from bento_lib.responses.errors import forbidden_error
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ValidationError
-from django.db.models import Count, F, Q
+from django.db.models import Count, F, Q, QuerySet
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -22,8 +25,9 @@ from bento_lib.search import build_search_response
 from .serializers import IndividualSerializer
 from .models import Individual
 from .filters import IndividualFilter
+from chord_metadata_service.authz.discovery import DataTypeDiscoveryPermissions
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.logger import logger
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
@@ -36,14 +40,16 @@ from chord_metadata_service.restapi.api_renderers import (
 )
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.utils import (
-    get_threshold,
     get_field_options,
     filter_queryset_field_value,
     biosample_tissue_stats,
     experiment_type_stats,
+    get_public_data_type_permissions,
+    get_public_queryable_fields,
+    get_discovery_rules_and_field_set_permissions,
 )
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
-
+from ..restapi.censorship import thresholded_count
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
@@ -154,6 +160,43 @@ class IndividualBatchViewSet(BatchViewSet):
         return queryset
 
 
+async def public_discovery_filter_queryset(
+    request: DrfRequest,
+    queryset: QuerySet,
+    dt_permissions: DataTypeDiscoveryPermissions,
+) -> QuerySet:
+    # Check query parameters validity
+    qp = request.query_params
+
+    queryable_fields = get_public_queryable_fields()
+    rules, all_qf_permissions, qf_permissions = get_discovery_rules_and_field_set_permissions(dt_permissions, qp.keys())
+
+    # max_query_parameters was adjusted by get_config_public_and_field_set_permissions:
+    if len(qp) > rules["max_query_parameters"]:
+        raise ValidationError(f"Wrong number of fields: {len(qp)}")
+
+    for field, value in qp.items():
+        field_props = queryable_fields[field]
+        options = await get_field_options(field_props, low_counts_censored=not qf_permissions[field]["data"])
+        if (
+            value not in options
+            and not (
+                # case-insensitive search on categories
+                field_props["datatype"] == "string" and value.lower() in [o.lower() for o in options]
+            )
+            and not (
+                # no restriction when enum is not set for categories
+                field_props["datatype"] == "string" and field_props["config"]["enum"] is None
+            )
+        ):
+            raise ValidationError(f"Invalid value used in query: {value}")
+
+        # recursion
+        queryset = filter_queryset_field_value(queryset, field_props, value)
+
+    return queryset
+
+
 @extend_schema(
     description="Individual list available in public endpoint",
     responses={
@@ -170,44 +213,6 @@ class PublicListIndividuals(APIView):
     View to return only count of all individuals after filtering.
     """
 
-    async def filter_queryset(self, queryset, can_query_data: bool):
-        # Check query parameters validity
-        qp = self.request.query_params
-        config_public = settings.CONFIG_PUBLIC
-
-        if not can_query_data and len(qp) > config_public["rules"]["max_query_parameters"]:
-            raise ValidationError(f"Wrong number of fields: {len(qp)}")
-
-        search_conf = config_public["search"]
-        field_conf = config_public["fields"]
-        queryable_fields = {
-            f"{f}": field_conf[f] for section in search_conf for f in section["fields"]
-        }
-
-        for field, value in qp.items():
-            if field not in queryable_fields:
-                raise ValidationError(f"Unsupported field used in query: {field}")
-
-            field_props = queryable_fields[field]
-            options = await get_field_options(field_props, low_counts_censored=not can_query_data)
-            if value not in options \
-                    and not (
-                        # case-insensitive search on categories
-                        field_props["datatype"] == "string"
-                        and value.lower() in [o.lower() for o in options]
-                    ) \
-                    and not (
-                        # no restriction when enum is not set for categories
-                        field_props["datatype"] == "string"
-                        and field_props["config"]["enum"] is None
-                    ):
-                raise ValidationError(f"Invalid value used in query: {value}")
-
-            # recursion
-            queryset = filter_queryset_field_value(queryset, field_props, value)
-
-        return queryset
-
     # TODO: should be project-scoped
 
     @async_to_sync
@@ -216,120 +221,54 @@ class PublicListIndividuals(APIView):
             authz_middleware.mark_authz_done(request)
             return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
-        # TODO: permissions
+        # TODO: permissions - should be project-scoped or something instead of whole-node-scroped
+        # Access (counts/data) permissions by Bento data type
+        dt_permissions = await get_public_data_type_permissions(request)
+        dt_perms_pheno = dt_permissions[DATA_TYPE_PHENOPACKET]
+        dt_perms_exp = dt_permissions[DATA_TYPE_EXPERIMENT]
+
+        # We can't respond if we don't have at least phenopackets counts permission
+        if not any(dt_perms_pheno.values()):
+            authz_middleware.mark_authz_done(request)
+            return Response(forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 
         base_qs = Individual.objects.all()
         try:
-            filtered_qs = await self.filter_queryset(base_qs)
+            filtered_qs = await public_discovery_filter_queryset(self.request, base_qs, dt_permissions)
         except ValidationError as e:
             return Response(
                 errors.bad_request_error(*(e.error_list if hasattr(e, "error_list") else e.error_dict.items())),
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        qct = await filtered_qs.acount()
+        perm_pheno_query_data = dt_perms_pheno["data"]
 
-        if qct <= (threshold := get_threshold()):  # TODO: permissions
+        ind_qct = thresholded_count(await filtered_qs.acount(), low_counts_censored=not perm_pheno_query_data)
+
+        if ind_qct == 0 and not perm_pheno_query_data:
+            # Not enough data to respond with counts
             authz_middleware.mark_authz_done(request)
-            logger.info(
-                f"Public individuals endpoint recieved query params {request.query_params} which resulted in "
-                f"sub-threshold count: {qct} <= {threshold}")
             return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
 
-        tissues_count, sampled_tissues = await biosample_tissue_stats(filtered_qs)
-        experiments_count, experiment_types = await experiment_type_stats(filtered_qs)
+        (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
+            biosample_tissue_stats(filtered_qs, low_counts_censored=not perm_pheno_query_data),
+            experiment_type_stats(filtered_qs, low_counts_censored=not dt_perms_exp["counts"]),
+        )
 
-        # TODO: permissions
+        # TODO: project-scoped permissions
+        # We are already guaranteed to have project-level counts permission here for PHENOPACKETS ONLY
         return Response({
-            "count": qct,
+            "count": ind_qct,
+            # Only if we have "query:data" - this field is for Beacon, which should have an access token:
+            **({"matches": await filtered_qs.values_list("id", flat=True)} if perm_pheno_query_data else {}),
             "biosamples": {
                 "count": tissues_count,
                 "sampled_tissue": sampled_tissues,
             },
-            "experiments": {
-                "count": experiments_count,
-                "experiment_type": experiment_types,
-            }
-        })
-
-
-class BeaconListIndividuals(APIView):
-    """
-    View to return lists of individuals filtered using search terms from katsu's config.json.
-    Uncensored equivalent of PublicListIndividuals.
-    """
-    async def filter_queryset(self, queryset, can_query_data: bool):
-        # Check query parameters validity
-        qp = self.request.query_params
-        config_public = settings.CONFIG_PUBLIC
-
-        if not can_query_data and len(qp) > config_public["rules"]["max_query_parameters"]:
-            raise ValidationError(f"Wrong number of fields: {len(qp)}")
-
-        search_conf = config_public["search"]
-        field_conf = config_public["fields"]
-        queryable_fields = {
-            f: field_conf[f] for section in search_conf for f in section["fields"]
-        }
-
-        for field, value in qp.items():
-            if field not in queryable_fields:
-                raise ValidationError(f"Unsupported field used in query: {field}")
-
-            field_props = queryable_fields[field]
-            options = await get_field_options(field_props, low_counts_censored=not can_query_data)
-            if value not in options \
-                    and not (
-                        # case-insensitive search on categories
-                        field_props["datatype"] == "string"
-                        and value.lower() in [o.lower() for o in options]
-                    ) \
-                    and not (
-                        # no restriction when enum is not set for categories
-                        field_props["datatype"] == "string"
-                        and field_props["config"]["enum"] is None
-                    ):
-                raise ValidationError(f"Invalid value used in query: {value}")
-
-            # recursion
-            queryset = filter_queryset_field_value(queryset, field_props, value)
-
-        return queryset
-
-    @async_to_sync
-    async def get(self, request, *_args, **_kwargs):
-        if not settings.CONFIG_PUBLIC:
-            authz_middleware.mark_authz_done(request)
-            return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
-
-        # Steps for permissions
-        #  - Obtain all datasets
-        #  - Do a bulk request to authz for permissions to see counts for the data types for each...
-
-        base_qs = Individual.objects.all()
-
-        # TODO: permissions
-
-        try:
-            filtered_qs = await self.filter_queryset(base_qs)
-        except ValidationError as e:
-            authz_middleware.mark_authz_done(request)
-            return Response(
-                errors.bad_request_error(*(e.error_list if hasattr(e, "error_list") else e.error_dict.items())),
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        tissues_count, sampled_tissues = await biosample_tissue_stats(filtered_qs)
-        experiments_count, experiment_types = await experiment_type_stats(filtered_qs)
-
-        return Response({
-            "matches": await filtered_qs.values_list("id", flat=True),
-            "biosamples": {
-                "count": tissues_count,
-                "sampled_tissue": sampled_tissues,
-            },
-            "experiments": {
-                "count": experiments_count,
-                "experiment_type": experiment_types,
-            }
+            **({
+                "experiments": {
+                    "count": experiments_count,
+                    "experiment_type": experiment_types,
+                }
+            } if any(dt_perms_exp.values()) else {}),
         })

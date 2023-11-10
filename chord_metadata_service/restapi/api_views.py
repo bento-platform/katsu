@@ -33,6 +33,8 @@ from chord_metadata_service.restapi.utils import (
     get_categorical_stats,
     get_date_stats,
     get_range_stats,
+    get_config_public_and_field_set_permissions,
+    get_discovery_rules_and_field_set_permissions,
     PUBLIC_MODEL_NAMES_TO_MODEL,
     PUBLIC_MODEL_NAMES_TO_DATA_TYPE,
     BinWithValue,
@@ -228,23 +230,26 @@ async def public_search_fields(request: Request):
 
     # TODO: should be project-scoped
 
-    config_public = settings.CONFIG_PUBLIC
+    config_public, _, qf_permissions = get_config_public_and_field_set_permissions(
+        # Access (counts/data) permissions by Bento data type:
+        await get_public_data_type_permissions(request)
+    )
 
     if not config_public:
         authz_middleware.mark_authz_done(request)
         return Response(settings.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
-
-    # Access (counts/data) permissions by Bento data type
-    dt_permissions = await get_public_data_type_permissions(request)
 
     field_conf = config_public["fields"]
 
     # Note: the array is wrapped in a dictionary structure to help with JSON
     # processing by some services.
 
-    async def _get_field_response(field) -> dict:
+    async def _get_field_response(field) -> dict | None:
         field_props = field_conf[field]
-        field_perms = get_count_and_query_data_permissions_for_field(dt_permissions, field_props)
+        field_perms = qf_permissions[field]
+
+        if not field_perms["counts"]:  # Cannot even see counts, skip this field  TODO: incorporate booleans
+            return None
 
         return {
             **field_props,
@@ -255,7 +260,7 @@ async def public_search_fields(request: Request):
     async def _get_section_response(section) -> dict:
         return {
             **section,
-            "fields": await asyncio.gather(*map(_get_field_response, section["fields"])),
+            "fields": await asyncio.gather(*filter(None, map(_get_field_response, section["fields"]))),
         }
 
     return Response({
@@ -291,7 +296,10 @@ async def public_overview(request: Request):
     Overview of all public data in the database
     """
 
-    config_public = settings.CONFIG_PUBLIC
+    # Access (counts/data) permissions by Bento data type
+    dt_permissions = await get_public_data_type_permissions(request)
+
+    config_public, _, qf_permissions = get_config_public_and_field_set_permissions(dt_permissions)
 
     if not config_public:
         authz_middleware.mark_authz_done(request)
@@ -299,11 +307,8 @@ async def public_overview(request: Request):
 
     # TODO: public overviews SHOULD be project-scoped at least.
 
-    # Access (counts/data) permissions by Bento data type
-    dt_permissions = await get_public_data_type_permissions(request)
-
     # If we don't have AT LEAST one count permission, assume we're not supposed to see this page and return forbidden.
-    if not any(dpd["counts"] or dpd["data"] for dpd in dt_permissions.values()):
+    if not any(any(fp.values()) for fp in qf_permissions.values()):
         authz_middleware.mark_authz_done(request)
         return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 
@@ -312,8 +317,9 @@ async def public_overview(request: Request):
         return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all().acount()
     counts = dict(await asyncio.gather(*map(_counts_for_model_name, PUBLIC_MODEL_NAMES_TO_MODEL)))
 
-    # Get the rules config
-    rules_config = settings.CONFIG_PUBLIC["rules"]
+    # Get the rules config - because we used get_config_public_and_field_set_permissions with no arguments, it'll choose
+    #  these values based on if we have access to ALL public fields or not.
+    rules_config = config_public["rules"]
     count_threshold = rules_config["count_threshold"]
 
     # Set counts to 0 if they're under the count threshold, and we don't have full data access permissions for the
@@ -336,6 +342,7 @@ async def public_overview(request: Request):
                 "experiments": counts["experiment"],
             } if dt_permissions[DATA_TYPE_EXPERIMENT]["counts"] else {}),
         },
+        # TODO: remove these in favour of public_rules endpoint
         "max_query_parameters": rules_config["max_query_parameters"],
         "count_threshold": count_threshold,
     }
@@ -346,7 +353,7 @@ async def public_overview(request: Request):
     field_conf = config_public["fields"]
 
     async def _get_field_response(field_id: str, field_props: dict) -> dict:
-        field_perms = get_count_and_query_data_permissions_for_field(dt_permissions, field_props)
+        field_perms = qf_permissions[field_id]
 
         # Permissions incorporation: only censor small cell counts when we don't have query:data access
         stats: list[BinWithValue] | None
@@ -375,6 +382,19 @@ async def public_overview(request: Request):
 
     authz_middleware.mark_authz_done(request)
     return Response(response)
+
+
+@api_view(["GET"])
+@permission_classes([BentoAllowAny])
+async def public_rules(request: Request):
+    # Access (counts/data) permissions by Bento data type
+    dt_permissions = await get_public_data_type_permissions(request)
+
+    # If a list of fields is passed as a query parameter, we get the rules as they pertain to only those fields:
+    fields = request.query_params.getlist("fields")
+
+    rules, _, _ = get_discovery_rules_and_field_set_permissions(dt_permissions, fields)
+    return Response(rules)
 
 
 @api_view(["GET"])
