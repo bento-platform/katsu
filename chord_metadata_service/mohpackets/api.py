@@ -24,7 +24,9 @@ from rest_framework.authentication import BaseAuthentication, get_authorization_
 from rest_framework.exceptions import AuthenticationFailed
 
 from chord_metadata_service.mohpackets.api_authorized import router as authorzied_router
-from chord_metadata_service.mohpackets.api_discovery import router as discovery_router
+from chord_metadata_service.mohpackets.api_discovery import (
+    discovery_router as discovery_router,
+)
 from chord_metadata_service.mohpackets.utils import get_schema_url
 
 logger = logging.getLogger(__name__)
