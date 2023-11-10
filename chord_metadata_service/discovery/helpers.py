@@ -55,7 +55,8 @@ def permissions_on_public_field_set(
         if field not in queryable_fields:
             raise ValidationError(f"Unsupported field used in query: {field}")
 
-        mn, _ = get_public_model_name_and_field_path(field)
+        mn, _ = get_public_model_name_and_field_path(queryable_fields[field]["mapping"])
+
         if (f_dt := PUBLIC_MODEL_NAMES_TO_DATA_TYPE.get(mn)) is not None:
             dts_accessed.add(f_dt)
             field_dts[field] = f_dt

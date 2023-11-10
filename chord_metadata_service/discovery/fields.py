@@ -232,7 +232,7 @@ async def get_categorical_stats(field_props: dict, low_counts_censored: bool) ->
 
     model, field_name = get_model_and_field(field_props["mapping"])
 
-    stats: Mapping[str, int] = await stats_for_field(model, field_name, add_missing=True)
+    stats: Mapping[str, int] = await stats_for_field(model, field_name, low_counts_censored, add_missing=True)
 
     # Enforce values order from config and apply policies
     labels: list[str] | None = field_props["config"].get("enum")
@@ -268,8 +268,7 @@ async def get_categorical_stats(field_props: dict, low_counts_censored: bool) ->
 
         bins.append({"label": category, "value": v})
 
-    if stats["missing"]:
-        bins.append({"label": "missing", "value": stats["missing"]})
+    bins.append({"label": "missing", "value": stats["missing"]})
 
     return bins
 

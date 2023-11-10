@@ -56,12 +56,18 @@ async def bento_public_format_count_and_stats_list(
     return thresholded_count(total, low_counts_censored), stats_list
 
 
-async def stats_for_field(model: Type[Model], field: str, add_missing: bool = False) -> Mapping[str, int]:
+async def stats_for_field(
+    model: Type[Model],
+    field: str,
+    low_counts_censored: bool,
+    add_missing: bool = False,
+) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a given field. Mainly applicable to
     char fields representing categories
     """
-    return await queryset_stats_for_field(model.objects.all(), field, add_missing)
+    return await queryset_stats_for_field(
+        model.objects.all(), field, low_counts_censored=low_counts_censored, add_missing=add_missing)
 
 
 async def queryset_stats_for_field(
