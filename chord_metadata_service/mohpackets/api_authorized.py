@@ -1,4 +1,6 @@
 import os
+from http import HTTPStatus
+from http.client import HTTPException
 from typing import List, Optional
 from uuid import UUID, uuid4
 
@@ -6,6 +8,7 @@ import orjson
 from django.apps import apps
 from django.db.models import Count, Model, Prefetch, Q
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiTypes,
@@ -62,27 +65,41 @@ from chord_metadata_service.mohpackets.pagination import (
     StandardResultsSetPagination,
 )
 from chord_metadata_service.mohpackets.schema import (
+    BiomarkerFilterSchema,
+    BiomarkerModelSchema,
+    ChemotherapyFilterSchema,
+    ChemotherapyModelSchema,
+    ComorbidityFilterSchema,
+    ComorbidityModelSchema,
     DonorFilterSchema,
     DonorModelSchema,
     DonorWithClinicalDataSchema,
+    ExposureFilterSchema,
+    ExposureModelSchema,
+    FollowUpFilterSchema,
+    FollowUpModelSchema,
+    HormoneTherapyFilterSchema,
+    HormoneTherapyModelSchema,
+    ImmunotherapyFilterSchema,
+    ImmunotherapyModelSchema,
+    PrimaryDiagnosisFilterSchema,
+    PrimaryDiagnosisModelSchema,
+    ProgramFilterSchema,
+    ProgramModelSchema,
+    RadiationFilterSchema,
+    RadiationModelSchema,
+    SampleRegistrationFilterSchema,
+    SampleRegistrationModelSchema,
+    SpecimenFilterSchema,
+    SpecimenModelSchema,
+    SurgeryFilterSchema,
+    SurgeryModelSchema,
+    TreatmentFilterSchema,
+    TreatmentModelSchema,
 )
 from chord_metadata_service.mohpackets.serializers_nested import (
     DonorWithClinicalDataSerializer,
 )
-
-# class ORJSONRenderer(BaseRenderer):
-#     media_type = "application/json"
-
-#     def render(self, request, data, *, response_status):
-#         return orjson.dumps(data)
-
-
-# class ORJSONParser(Parser):
-#     def parse_body(self, request):
-#         return orjson.loads(request.body)
-
-
-# api = NinjaAPI(renderer=ORJSONRenderer(), parser=ORJSONParser())
 
 """
     This module inheriting from the base views and adding the authorized mixin,
@@ -363,163 +380,25 @@ class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
         "primarydiagnosis_set__specimen_set__sampleregistration_set",
     ).all()
 
-    # queryset = Donor.objects.all()
-
-
-# from typing import List
-
-
-# class ExposureSchema(ModelSchema):
-#     class Config:
-#         model = Exposure
-#         model_fields = "__all__"
-
-
-# class ComorbiditySchema(ModelSchema):
-#     class Config:
-#         model = Comorbidity
-#         model_fields = "__all__"
-
-
-# class SampleRegistrationSchema(ModelSchema):
-#     class Config:
-#         model = SampleRegistration
-#         model_fields = "__all__"
-
-
-# class SpecimenSchema(ModelSchema):
-#     samplesregistrations: List[SampleRegistrationSchema] = Field(
-#         ..., alias="sampleregistration_set"
-#     )
-
-#     class Config:
-#         model = Specimen
-#         model_fields = "__all__"
-
-
-# class ChemotherapySchema(ModelSchema):
-#     class Config:
-#         model = Chemotherapy
-#         model_fields = "__all__"
-
-
-# class ImmunotherapySchema(ModelSchema):
-#     class Config:
-#         model = Immunotherapy
-#         model_fields = "__all__"
-
-
-# class HormoneTherapySchema(ModelSchema):
-#     class Config:
-#         model = HormoneTherapy
-#         model_fields = "__all__"
-
-
-# class RadiationSchema(ModelSchema):
-#     class Config:
-#         model = Radiation
-#         model_fields = "__all__"
-
-
-# class SurgerySchema(ModelSchema):
-#     class Config:
-#         model = Surgery
-#         model_fields = "__all__"
-
-
-# class FollowUpSchema(Schema):
-#     class Config:
-#         model = FollowUp
-#         model_fields = "__all__"
-
-
-# class TreatmentSchema(ModelSchema):
-#     chemotherapies: List[ChemotherapySchema] = Field(..., alias="chemotherapy_set")
-#     immunotherapies: List[ImmunotherapySchema] = Field(..., alias="immunotherapy_set")
-#     hormonetherapies: List[HormoneTherapySchema] = Field(
-#         ..., alias="hormonetherapy_set"
-#     )
-#     radiations: List[RadiationSchema] = Field(..., alias="radiation_set")
-#     surgeries: List[SurgerySchema] = Field(..., alias="surgery_set")
-#     followups: List[FollowUpSchema] = Field(..., alias="followup_set")
-
-#     class Config:
-#         model = Treatment
-#         model_fields = "__all__"
-
-
-# class PrimaryDiagnosisSchema(ModelSchema):
-#     specimens: List[SpecimenSchema] = Field(..., alias="specimen_set")
-#     treatments: List[TreatmentSchema] = Field(..., alias="treatment_set")
-#     followups: List[FollowUpSchema] = Field(..., alias="followup_set")
-
-#     class Config:
-#         model = PrimaryDiagnosis
-#         model_fields = "__all__"
-
-
-# class BiomarkerSchema(ModelSchema):
-#     class Config:
-#         model = Biomarker
-#         model_fields = "__all__"
-
-
-# class DonorSchema(ModelSchema):
-#     comorbidities: List[ComorbiditySchema] = Field(..., alias="comorbidity_set")
-#     exposures: List[ExposureSchema] = Field(..., alias="exposure_set")
-#     biomarkers: List[BiomarkerSchema] = Field(..., alias="biomarker_set")
-#     primarydiagnosis: List[PrimaryDiagnosisSchema] = Field(
-#         ..., alias="primarydiagnosis_set"
-#     )
-#     followups: List[FollowUpSchema] = Field(..., alias="followup_set")
-
-#     class Config:
-#         model = Donor
-#         model_fields = "__all__"
-
-
-# @api.get("/ninja_donors", response=List[DonorSchema])
-# @paginate(PageNumberPagination, page_size=10)
-# def tasks(request):
-#     # queryset = Donor.objects.all()
-
-#     donor_followups_prefetch = Prefetch(
-#         "followup_set",
-#         queryset=FollowUp.objects.filter(
-#             submitter_primary_diagnosis_id__isnull=True,
-#             submitter_treatment_id__isnull=True,
-#         ),
-#     )
-
-#     primary_diagnosis_followups_prefetch = Prefetch(
-#         "primarydiagnosis_set__followup_set",
-#         queryset=FollowUp.objects.filter(
-#             submitter_primary_diagnosis_id__isnull=False,
-#             submitter_treatment_id__isnull=True,
-#         ),
-#     )
-#     queryset = Donor.objects.prefetch_related(
-#         donor_followups_prefetch,
-#         primary_diagnosis_followups_prefetch,
-#         "biomarker_set",
-#         "comorbidity_set",
-#         "exposure_set",
-#         "primarydiagnosis_set__treatment_set__chemotherapy_set",
-#         "primarydiagnosis_set__treatment_set__hormonetherapy_set",
-#         "primarydiagnosis_set__treatment_set__immunotherapy_set",
-#         "primarydiagnosis_set__treatment_set__radiation_set",
-#         "primarydiagnosis_set__treatment_set__surgery_set",
-#         "primarydiagnosis_set__treatment_set__followup_set",
-#         "primarydiagnosis_set__specimen_set__sampleregistration_set",
-#     ).all()
-#     return list(queryset)
-
 
 # =============================================================================
 router = Router()
 
 
-@router.get("/ninja_donors", response=List[DonorWithClinicalDataSchema])
+@router.delete(
+    "/program/{program_id}",
+    response={204: None, 404: str},
+)
+def delete_program(request, program_id: str):
+    try:
+        dataset = Program.objects.get(pk=program_id)
+        dataset.delete()
+        return HTTPStatus.NO_CONTENT, None
+    except Program.DoesNotExist:
+        return HTTPStatus.NOT_FOUND, "Program matching query does not exist"
+
+
+@router.get("/donors_with_clinical_data/", response=List[DonorWithClinicalDataSchema])
 @paginate(PageNumberPagination, page_size=10)
 def tasks(request):
     donor_followups_prefetch = Prefetch(
@@ -555,11 +434,165 @@ def tasks(request):
 
 
 @router.get(
+    "/programs/",
+    response=List[ProgramModelSchema],
+)
+def list_programs(request, filters: Query[ProgramFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return Program.objects.filter(q)
+
+
+@router.get(
     "/donors/",
     response=List[DonorModelSchema],
 )
-def list_donors(request, filters: DonorFilterSchema = Query(...)):
+def list_donors(request, filters: Query[DonorFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
     q &= filters.get_filter_expression()
     return Donor.objects.filter(q)
+
+
+@router.get(
+    "/primary_diagnoses/",
+    response=List[PrimaryDiagnosisModelSchema],
+)
+def list_primary_diagnoses(request, filters: Query[PrimaryDiagnosisFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return PrimaryDiagnosis.objects.filter(q)
+
+
+@router.get(
+    "/biomarkers/",
+    response=List[BiomarkerModelSchema],
+)
+def list_biomarkers(request, filters: Query[BiomarkerFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return Biomarker.objects.filter(q)
+
+
+@router.get(
+    "/chemotherapies/",
+    response=List[ChemotherapyModelSchema],
+)
+def list_chemotherapies(request, filters: Query[ChemotherapyFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return Chemotherapy.objects.filter(q)
+
+
+@router.get(
+    "/comorbidities/",
+    response=List[ComorbidityModelSchema],
+)
+def list_comorbidities(request, filters: Query[ComorbidityFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return Comorbidity.objects.filter(q)
+
+
+@router.get(
+    "/exposures/",
+    response=List[ExposureModelSchema],
+)
+def list_exposures(request, filters: Query[ExposureFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return Exposure.objects.filter(q)
+
+
+@router.get(
+    "/followups/",
+    response=List[FollowUpModelSchema],
+)
+def list_followups(request, filters: Query[FollowUpFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return FollowUp.objects.filter(q)
+
+
+@router.get(
+    "/hormone_therapies/",
+    response=List[HormoneTherapyModelSchema],
+)
+def list_hormone_therapies(request, filters: Query[HormoneTherapyFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return HormoneTherapy.objects.filter(q)
+
+
+@router.get(
+    "/immunotherapies/",
+    response=List[ImmunotherapyModelSchema],
+)
+def list_immunotherapies(request, filters: Query[ImmunotherapyFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return Immunotherapy.objects.filter(q)
+
+
+@router.get(
+    "/radiations/",
+    response=List[RadiationModelSchema],
+)
+def list_radiations(request, filters: Query[RadiationFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return Radiation.objects.filter(q)
+
+
+@router.get(
+    "/sample_registrations/",
+    response=List[SampleRegistrationModelSchema],
+)
+def list_sample_registrations(request, filters: Query[SampleRegistrationFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return SampleRegistration.objects.filter(q)
+
+
+@router.get(
+    "/specimens/",
+    response=List[SpecimenModelSchema],
+)
+def list_specimens(request, filters: Query[SpecimenFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return Specimen.objects.filter(q)
+
+
+@router.get(
+    "/surgeries/",
+    response=List[SurgeryModelSchema],
+)
+def list_surgeries(request, filters: Query[SurgeryFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return Surgery.objects.filter(q)
+
+
+@router.get(
+    "/treatments/",
+    response=List[TreatmentModelSchema],
+)
+def list_treatments(request, filters: Query[TreatmentFilterSchema]):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q &= filters.get_filter_expression()
+    return Treatment.objects.filter(q)
