@@ -19,7 +19,7 @@ from ..authz.discovery import DataTypeDiscoveryPermissions
 
 
 async def biosample_summary(phenopackets: QuerySet, low_counts_censored: bool):
-    biosamples = models.Biosample.objects.filter(phenopackets__in=phenopackets)
+    biosamples = models.Biosample.objects.filter(phenopacket__in=phenopackets)
 
     (
         biosamples_count,
@@ -32,7 +32,7 @@ async def biosample_summary(phenopackets: QuerySet, low_counts_censored: bool):
         queryset_stats_for_field(biosamples, "taxonomy__label", low_counts_censored),
         queryset_stats_for_field(biosamples, "sampled_tissue__label", low_counts_censored),
         queryset_stats_for_field(biosamples, "histological_diagnosis__label", low_counts_censored),
-        queryset_stats_for_field(biosamples, "biosamples__is_control_sample", low_counts_censored),
+        queryset_stats_for_field(biosamples, "is_control_sample", low_counts_censored),
     )
 
     return {
@@ -56,7 +56,7 @@ async def disease_summary(phenopackets: QuerySet, low_counts_censored: bool):
 async def phenotypic_feature_summary(phenopackets: QuerySet, low_counts_censored: bool):
     phenotypic_features_count, phenotypic_features_type = await asyncio.gather(
         models.PhenotypicFeature.objects.filter(phenopacket__in=phenopackets).distinct('pftype').acount(),
-        stats_for_field(models.PhenotypicFeature, "pftype__label"),
+        stats_for_field(models.PhenotypicFeature, "pftype__label", low_counts_censored),
     )
     return {
         # count is a number of unique phenotypic feature types, not all phenotypic features in the database.
