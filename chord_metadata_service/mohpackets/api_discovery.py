@@ -557,7 +557,10 @@ def service_info(_request):
 
 # ===========================================================
 
-router = Router()
+discovery_router = Router()
+overview_router = Router()
+# api.add_router("/discovery/", discovery_router, tags=["discovery"])
+discovery_router.add_router("/overview/", overview_router, tags=["overview"])
 
 
 def count_donors(model: Type[Model], filters=None) -> Dict[str, int]:
@@ -579,91 +582,91 @@ def count_donors(model: Type[Model], filters=None) -> Dict[str, int]:
     return {f"{item['program_id']}": item["donor_count"] for item in item_counts}
 
 
-@router.get("/programs/", response=List[ProgramDiscoverySchema])
+@discovery_router.get("/programs/", response=List[ProgramDiscoverySchema])
 def discover_programs(request):
     programs = Program.objects.all()
     return list(programs)
 
 
-@router.get("/donors/", response=DiscoverySchema)
+@discovery_router.get("/donors/", response=DiscoverySchema)
 def discover_donors(request, filters: DonorFilterSchema = Query(...)):
     donors = count_donors(Donor, filters)
     return DiscoverySchema(discovery_donor=donors)
 
 
-@router.get("/specimen/", response=DiscoverySchema)
+@discovery_router.get("/specimen/", response=DiscoverySchema)
 def discover_specimens(request, filters: SpecimenFilterSchema = Query(...)):
     specimens = count_donors(Specimen, filters)
     return DiscoverySchema(discovery_donor=specimens)
 
 
-@router.get("/sample_registrations/", response=DiscoverySchema)
+@discovery_router.get("/sample_registrations/", response=DiscoverySchema)
 def discover_sample_registrations(request):
     sample_registrations = count_donors(SampleRegistration)
     return DiscoverySchema(discovery_donor=sample_registrations)
 
 
-@router.get("/primary_diagnoses/", response=DiscoverySchema)
+@discovery_router.get("/primary_diagnoses/", response=DiscoverySchema)
 def discover_primary_diagnoses(request):
     primary_diagnoses = count_donors(PrimaryDiagnosis)
     return DiscoverySchema(discovery_donor=primary_diagnoses)
 
 
-@router.get("/treatments/", response=DiscoverySchema)
+@discovery_router.get("/treatments/", response=DiscoverySchema)
 def discover_treatments(request):
     treatments = count_donors(Treatment)
     return DiscoverySchema(discovery_donor=treatments)
 
 
-@router.get("/chemotherapies/", response=DiscoverySchema)
+@discovery_router.get("/chemotherapies/", response=DiscoverySchema)
 def discover_chemotherapies(request):
     chemotherapies = count_donors(Chemotherapy)
     return DiscoverySchema(discovery_donor=chemotherapies)
 
 
-@router.get("/hormone_therapies/", response=DiscoverySchema)
+@discovery_router.get("/hormone_therapies/", response=DiscoverySchema)
 def discover_hormone_therapies(request):
     hormone_therapies = count_donors(HormoneTherapy)
     return DiscoverySchema(discovery_donor=hormone_therapies)
 
 
-@router.get("/radiations/", response=DiscoverySchema)
+@discovery_router.get("/radiations/", response=DiscoverySchema)
 def discover_radiations(request):
     radiations = count_donors(Radiation)
     return DiscoverySchema(discovery_donor=radiations)
 
 
-@router.get("/immunotherapies/", response=DiscoverySchema)
+@discovery_router.get("/immunotherapies/", response=DiscoverySchema)
 def discover_immunotherapies(request):
     immunotherapies = count_donors(Immunotherapy)
     return DiscoverySchema(discovery_donor=immunotherapies)
 
 
-@router.get("/surgeries/", response=DiscoverySchema)
+@discovery_router.get("/surgeries/", response=DiscoverySchema)
 def discover_surgeries(request):
     surgeries = count_donors(Surgery)
     return DiscoverySchema(discovery_donor=surgeries)
 
 
-@router.get("/follow_ups/", response=DiscoverySchema)
+@discovery_router.get("/follow_ups/", response=DiscoverySchema)
 def discover_follow_ups(request):
     follow_ups = count_donors(FollowUp)
     return DiscoverySchema(discovery_donor=follow_ups)
 
 
-@router.get("/biomarkers/", response=DiscoverySchema)
+@discovery_router.get("/biomarkers/", response=DiscoverySchema)
 def discover_biomarkers(request):
     biomarkers = count_donors(Biomarker)
     return DiscoverySchema(discovery_donor=biomarkers)
 
 
-@router.get("/comorbidities/", response=DiscoverySchema)
+@discovery_router.get("/comorbidities/", response=DiscoverySchema)
 def discover_comorbidities(request):
     comorbidities = count_donors(Comorbidity)
     return DiscoverySchema(discovery_donor=comorbidities)
 
 
-@router.get("/exposures/", response=DiscoverySchema)
+@discovery_router.get("/exposures/", response=DiscoverySchema)
 def discover_exposures(request):
     exposures = count_donors(Exposure)
     return DiscoverySchema(discovery_donor=exposures)
@@ -676,7 +679,7 @@ def discover_exposures(request):
 ###############################################
 
 
-@router.get("/sidebar_list/", response=Dict[str, Any])
+@discovery_router.get("/sidebar_list/", response=Dict[str, Any])
 def discover_sidebar_list(request):
     """
     Retrieve the list of available values for all fields (including for
@@ -717,7 +720,7 @@ def discover_sidebar_list(request):
     return results
 
 
-@router.get("/overview/cohort_count/", response=Dict[str, int])
+@overview_router.get("/cohort_count/", response=Dict[str, int])
 def discover_cohort_count(request):
     """
     Return the number of cohorts in the database.
@@ -725,7 +728,7 @@ def discover_cohort_count(request):
     return {"cohort_count": Program.objects.count()}
 
 
-@router.get("/overview/patients_per_cohort/", response=Dict[str, int])
+@overview_router.get("/patients_per_cohort/", response=Dict[str, int])
 def discover_patients_per_cohort(request):
     """
     Return the number of patients per cohort in the database.
@@ -734,7 +737,7 @@ def discover_patients_per_cohort(request):
     return count_terms(cohorts)
 
 
-@router.get("/overview/individual_count/", response=Dict[str, int])
+@overview_router.get("/individual_count/", response=Dict[str, int])
 def discover_individual_count(request):
     """
     Return the number of individuals in the database.
@@ -743,7 +746,7 @@ def discover_individual_count(request):
     return {"individual_count": Donor.objects.count()}
 
 
-@router.get("/overview/gender_count/", response=Dict[str, int])
+@overview_router.get("/gender_count/", response=Dict[str, int])
 def discover_gender_count(request):
     """
     Return the count for every gender in the database.
@@ -752,7 +755,7 @@ def discover_gender_count(request):
     return count_terms(genders)
 
 
-@router.get("/overview/cancer_type_count/", response=Dict[str, int])
+@overview_router.get("/cancer_type_count/", response=Dict[str, int])
 def discover_cancer_type_count(request):
     """
     Return the count for every cancer type in the database.
@@ -767,7 +770,7 @@ def discover_cancer_type_count(request):
     return count_terms(cancer_types)
 
 
-@router.get("/overview/treatment_type_count/", response=Dict[str, int])
+@overview_router.get("/treatment_type_count/", response=Dict[str, int])
 def discover_treatment_type_count(request):
     """
     Return the count for every treatment type in the database.
@@ -782,7 +785,7 @@ def discover_treatment_type_count(request):
     return count_terms(treatment_types)
 
 
-@router.get("/overview/diagnosis_age_count/", response=Dict[str, int])
+@overview_router.get("/diagnosis_age_count/", response=Dict[str, int])
 def discover_diagnosis_age_count(request):
     """
     Return the count for age of diagnosis in the database.
