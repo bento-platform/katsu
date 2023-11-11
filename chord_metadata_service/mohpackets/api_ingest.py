@@ -3,15 +3,76 @@ import logging
 from django.db import transaction
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
-from ninja import NinjaAPI
+from ninja import Field, FilterSchema, ModelSchema, Query, Router, Schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from chord_metadata_service.mohpackets.api import api
-from chord_metadata_service.mohpackets.models import Donor, PrimaryDiagnosis
+from chord_metadata_service.mohpackets.models import (
+    Biomarker,
+    Chemotherapy,
+    Comorbidity,
+    Donor,
+    Exposure,
+    FollowUp,
+    HormoneTherapy,
+    Immunotherapy,
+    PrimaryDiagnosis,
+    Program,
+    Radiation,
+    SampleRegistration,
+    Specimen,
+    Surgery,
+    Treatment,
+)
 from chord_metadata_service.mohpackets.permissions import CanDIGAdminOrReadOnly
-from chord_metadata_service.mohpackets.schema import DonorModelSchema
+from chord_metadata_service.mohpackets.schema import (
+    BiomarkerFilterSchema,
+    BiomarkerIngestSchema,
+    BiomarkerModelSchema,
+    ChemotherapyFilterSchema,
+    ChemotherapyIngestSchema,
+    ChemotherapyModelSchema,
+    ComorbidityFilterSchema,
+    ComorbidityIngestSchema,
+    ComorbidityModelSchema,
+    DonorFilterSchema,
+    DonorIngestSchema,
+    DonorModelSchema,
+    DonorWithClinicalDataSchema,
+    ExposureFilterSchema,
+    ExposureIngestSchema,
+    ExposureModelSchema,
+    FollowUpFilterSchema,
+    FollowUpIngestSchema,
+    FollowUpModelSchema,
+    HormoneTherapyFilterSchema,
+    HormoneTherapyIngestSchema,
+    HormoneTherapyModelSchema,
+    ImmunotherapyFilterSchema,
+    ImmunotherapyIngestSchema,
+    ImmunotherapyModelSchema,
+    PrimaryDiagnosisFilterSchema,
+    PrimaryDiagnosisIngestSchema,
+    PrimaryDiagnosisModelSchema,
+    ProgramFilterSchema,
+    ProgramModelSchema,
+    RadiationFilterSchema,
+    RadiationIngestSchema,
+    RadiationModelSchema,
+    SampleRegistrationFilterSchema,
+    SampleRegistrationIngestSchema,
+    SampleRegistrationModelSchema,
+    SpecimenFilterSchema,
+    SpecimenIngestSchema,
+    SpecimenModelSchema,
+    SurgeryFilterSchema,
+    SurgeryIngestSchema,
+    SurgeryModelSchema,
+    TreatmentFilterSchema,
+    TreatmentIngestSchema,
+    TreatmentModelSchema,
+)
 from chord_metadata_service.mohpackets.serializers import (
     BiomarkerSerializer,
     ChemotherapySerializer,
@@ -457,7 +518,94 @@ def ingest_exposures(request):
 
 
 # ===============================================================================
-@api.post("/donor", auth=None)
-def create_donor(request, payload: DonorModelSchema):
+router = Router()
+
+
+@router.post("/program/")
+def create_program(request, payload: ProgramModelSchema):
+    program = Program.objects.create(**payload.dict())
+    return {"identifier": str(program)}
+
+
+@router.post("/donor/")
+def create_donor(request, payload: DonorIngestSchema):
     donor = Donor.objects.create(**payload.dict())
-    return {"submitter_donor_id": donor.submitter_donor_id}
+    return {"identifier": str(donor)}
+
+
+@router.post("/biomarker/")
+def create_biomarker(request, payload: BiomarkerIngestSchema):
+    biomarker = Biomarker.objects.create(**payload.dict())
+    return {"identifier": str(biomarker)}
+
+
+@router.post("/chemotherapy/")
+def create_chemotherapy(request, payload: ChemotherapyIngestSchema):
+    chemotherapy = Chemotherapy.objects.create(**payload.dict())
+    return {"identifier": str(chemotherapy)}
+
+
+@router.post("/comorbidity/")
+def create_comorbidity(request, payload: ComorbidityIngestSchema):
+    comorbidity = Comorbidity.objects.create(**payload.dict())
+    return {"identifier": str(comorbidity)}
+
+
+@router.post("/exposure/")
+def create_exposure(request, payload: ExposureIngestSchema):
+    exposure = Exposure.objects.create(**payload.dict())
+    return {"identifier": str(exposure)}
+
+
+@router.post("/followup/")
+def create_followup(request, payload: FollowUpIngestSchema):
+    followup = FollowUp.objects.create(**payload.dict())
+    return {"identifier": str(followup)}
+
+
+@router.post("/hormonetherapy/")
+def create_hormonetherapy(request, payload: HormoneTherapyIngestSchema):
+    hormonetherapy = HormoneTherapy.objects.create(**payload.dict())
+    return {"identifier": str(hormonetherapy)}
+
+
+@router.post("/immunotherapy/")
+def create_immunotherapy(request, payload: ImmunotherapyIngestSchema):
+    immunotherapy = Immunotherapy.objects.create(**payload.dict())
+    return {"identifier": str(immunotherapy)}
+
+
+@router.post("/primarydiagnosis/")
+def create_primarydiagnosis(request, payload: PrimaryDiagnosisIngestSchema):
+    primarydiagnosis = PrimaryDiagnosis.objects.create(**payload.dict())
+    return {"identifier": str(primarydiagnosis)}
+
+
+@router.post("/radiation/")
+def create_radiation(request, payload: RadiationIngestSchema):
+    radiation = Radiation.objects.create(**payload.dict())
+    return {"identifier": str(radiation)}
+
+
+@router.post("/sampleregistration/")
+def create_sampleregistration(request, payload: SampleRegistrationIngestSchema):
+    sampleregistration = SampleRegistration.objects.create(**payload.dict())
+    return {"identifier": str(sampleregistration)}
+
+
+@router.post("/specimen/")
+def create_specimen(request, payload: SpecimenIngestSchema):
+    specimen = Specimen.objects.create(**payload.dict())
+    return {"identifier": str(specimen)}
+
+
+@router.post("/surgery/")
+def create_surgery(request, payload: SurgeryIngestSchema):
+    surgery = Surgery.objects.create(**payload.dict())
+    return {"identifier": str(surgery)}
+
+
+@router.post("/treatment/")
+def create_treatment(request, payload: TreatmentIngestSchema):
+    treatment = Treatment.objects.create(**payload.dict())
+    return {"identifier": str(treatment)}
