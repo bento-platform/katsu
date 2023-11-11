@@ -7,6 +7,10 @@ def preprocessing_filter_path(endpoints):
     filtered = []
     for path, path_regex, method, callback in endpoints:
         # only include endpoints that start with discovery or authorized
-        if path.startswith("/v2/discovery") or path.startswith("/v2/authorized"):
+        if (
+            path.startswith("/v2/discovery")
+            or path.startswith("/v2/authorized")
+            or path.startswith("/v2/ingest")
+        ):
             filtered.append((path, path_regex, method, callback))
     return filtered
