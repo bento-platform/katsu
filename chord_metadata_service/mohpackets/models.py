@@ -69,7 +69,7 @@ class Donor(models.Model):
         ordering = ["submitter_donor_id"]
 
     def __str__(self):
-        return f"{self.submitter_donor_id}"
+        return f"{self.program_id}: {self.submitter_donor_id}"
 
 
 class PrimaryDiagnosis(models.Model):
@@ -108,7 +108,7 @@ class PrimaryDiagnosis(models.Model):
         ordering = ["submitter_primary_diagnosis_id"]
 
     def __str__(self):
-        return f"{self.submitter_primary_diagnosis_id}"
+        return f"{self.program_id}: {self.submitter_primary_diagnosis_id}"
 
 
 class Specimen(models.Model):
@@ -158,7 +158,7 @@ class Specimen(models.Model):
         ordering = ["submitter_specimen_id"]
 
     def __str__(self):
-        return f"{self.submitter_specimen_id}"
+        return f"{self.program_id}: {self.submitter_specimen_id}"
 
 
 class SampleRegistration(models.Model):
@@ -185,7 +185,7 @@ class SampleRegistration(models.Model):
         ordering = ["submitter_sample_id"]
 
     def __str__(self):
-        return f"{self.submitter_sample_id}"
+        return f"{self.program_id}: {self.submitter_sample_id}"
 
 
 class Treatment(models.Model):
@@ -224,7 +224,7 @@ class Treatment(models.Model):
         ordering = ["submitter_treatment_id"]
 
     def __str__(self):
-        return f"{self.submitter_treatment_id}"
+        return f"{self.program_id}: {self.submitter_treatment_id}"
 
 
 class Chemotherapy(models.Model):
@@ -257,7 +257,7 @@ class Chemotherapy(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.submitter_treatment_id}"
+        return f"{self.program_id}: {self.submitter_treatment_id}"
 
 
 class HormoneTherapy(models.Model):
@@ -288,7 +288,7 @@ class HormoneTherapy(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.submitter_treatment_id}"
+        return f"{self.program_id}: {self.submitter_treatment_id}"
 
 
 class Radiation(models.Model):
@@ -320,7 +320,7 @@ class Radiation(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.submitter_treatment_id}"
+        return f"{self.program_id}: {self.submitter_treatment_id}"
 
 
 class Immunotherapy(models.Model):
@@ -354,7 +354,7 @@ class Immunotherapy(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.submitter_treatment_id}"
+        return f"{self.program_id}: {self.submitter_treatment_id}"
 
 
 class Surgery(models.Model):
@@ -397,7 +397,7 @@ class Surgery(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.submitter_treatment_id}"
+        return f"{self.program_id}: {self.submitter_treatment_id}"
 
 
 class FollowUp(models.Model):
@@ -443,7 +443,7 @@ class FollowUp(models.Model):
         ordering = ["submitter_follow_up_id"]
 
     def __str__(self):
-        return f"{self.submitter_follow_up_id}"
+        return f"{self.program_id}: {self.submitter_follow_up_id}"
 
 
 class Biomarker(models.Model):
@@ -481,7 +481,7 @@ class Biomarker(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.submitter_donor_id}"
+        return f"{self.program_id}: {self.submitter_donor_id}"
 
 
 class Comorbidity(models.Model):
@@ -510,7 +510,7 @@ class Comorbidity(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.donor_uuid}"
+        return f"{self.program_id}: {self.donor_uuid}"
 
 
 class Exposure(models.Model):
@@ -532,4 +532,4 @@ class Exposure(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.donor_uuid}"
+        return f"{self.program_id}: {self.donor_uuid}"
