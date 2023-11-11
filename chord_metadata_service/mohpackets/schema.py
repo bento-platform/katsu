@@ -1,6 +1,8 @@
 from enum import Enum, IntEnum
 from typing import Dict, List, Optional, Type
 
+from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Q
 from ninja import Field, FilterSchema, ModelSchema, NinjaAPI, Query, Schema
 from pydantic import BaseModel, constr
 
@@ -522,13 +524,13 @@ class NestedPrimaryDiagnosisSchema(ModelSchema):
 
 
 class DonorWithClinicalDataSchema(ModelSchema):
-    comorbidities: List[NestedComorbiditySchema] = Field(..., alias="comorbidity_set")
-    exposures: List[NestedExposureSchema] = Field(..., alias="exposure_set")
-    biomarkers: List[NestedBiomarkerSchema] = Field(..., alias="biomarker_set")
     primarydiagnosis: List[NestedPrimaryDiagnosisSchema] = Field(
         ..., alias="primarydiagnosis_set"
     )
     followups: List[NestedFollowUpSchema] = Field(..., alias="followup_set")
+    biomarkers: List[NestedBiomarkerSchema] = Field(..., alias="biomarker_set")
+    exposures: List[NestedExposureSchema] = Field(..., alias="exposure_set")
+    comorbidities: List[NestedComorbiditySchema] = Field(..., alias="comorbidity_set")
 
     class Config:
         model = Donor
@@ -546,6 +548,170 @@ class DonorIngestSchema(ModelSchema):
     class Config:
         model = Donor
         model_exclude = ["uuid", "program_id"]
+
+
+class PrimaryDiagnosisIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = PrimaryDiagnosis
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+        ]
+
+
+class BiomarkerIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = Biomarker
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+        ]
+
+
+class ChemotherapyIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = Chemotherapy
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+            "treatment_uuid",
+        ]
+
+
+class ComorbidityIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = Comorbidity
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+        ]
+
+
+class ExposureIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = Exposure
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+        ]
+
+
+class FollowUpIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = FollowUp
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+        ]
+
+
+class HormoneTherapyIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = HormoneTherapy
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+            "treatment_uuid",
+        ]
+
+
+class ImmunotherapyIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = Immunotherapy
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+            "treatment_uuid",
+        ]
+
+
+class RadiationIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = Radiation
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+            "treatment_uuid",
+        ]
+
+
+class SampleRegistrationIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = SampleRegistration
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+            "specimen_uuid",
+        ]
+
+
+class SpecimenIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = Specimen
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+            "primary_diagnosis_uuid",
+        ]
+
+
+class SurgeryIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = Surgery
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+            "treatment_uuid",
+        ]
+
+
+class TreatmentIngestSchema(ModelSchema):
+    program_id_id: str = Field(..., alias="program_id")
+
+    class Config:
+        model = Treatment
+        model_exclude = [
+            "uuid",
+            "program_id",
+            "donor_uuid",
+            "primary_diagnosis_uuid",
+        ]
 
 
 ########################################
@@ -575,7 +741,6 @@ class DonorFilterSchema(FilterSchema):
 class PrimaryDiagnosisFilterSchema(FilterSchema):
     submitter_primary_diagnosis_id: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
-    donor_uuid: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
     date_of_diagnosis: Optional[str] = Field(None)
     cancer_type_code: Optional[str] = Field(None)
@@ -616,8 +781,6 @@ class SpecimenFilterSchema(FilterSchema):
 
 
 class SampleRegistrationFilterSchema(FilterSchema):
-    donor_uuid: Optional[str] = Field(None)
-    specimen_uuid: Optional[str] = Field(None)
     submitter_sample_id: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
@@ -629,8 +792,6 @@ class SampleRegistrationFilterSchema(FilterSchema):
 
 
 class TreatmentFilterSchema(FilterSchema):
-    donor_uuid: Optional[str] = Field(None)
-    primary_diagnosis_uuid: Optional[str] = Field(None)
     submitter_treatment_id: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
@@ -650,8 +811,6 @@ class TreatmentFilterSchema(FilterSchema):
 
 
 class ChemotherapyFilterSchema(FilterSchema):
-    donor_uuid: Optional[str] = Field(None)
-    treatment_uuid: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
     submitter_treatment_id: Optional[str] = Field(None)
@@ -664,8 +823,6 @@ class ChemotherapyFilterSchema(FilterSchema):
 
 
 class HormoneTherapyFilterSchema(FilterSchema):
-    donor_uuid: Optional[str] = Field(None)
-    treatment_uuid: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
     submitter_treatment_id: Optional[str] = Field(None)
@@ -678,8 +835,6 @@ class HormoneTherapyFilterSchema(FilterSchema):
 
 
 class RadiationFilterSchema(FilterSchema):
-    donor_uuid: Optional[str] = Field(None)
-    treatment_uuid: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
     submitter_treatment_id: Optional[str] = Field(None)
@@ -693,8 +848,6 @@ class RadiationFilterSchema(FilterSchema):
 
 
 class ImmunotherapyFilterSchema(FilterSchema):
-    donor_uuid: Optional[str] = Field(None)
-    treatment_uuid: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
     submitter_treatment_id: Optional[str] = Field(None)
@@ -708,8 +861,6 @@ class ImmunotherapyFilterSchema(FilterSchema):
 
 
 class SurgeryFilterSchema(FilterSchema):
-    donor_uuid: Optional[str] = Field(None)
-    treatment_uuid: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
     submitter_treatment_id: Optional[str] = Field(None)
@@ -734,9 +885,6 @@ class SurgeryFilterSchema(FilterSchema):
 
 
 class FollowUpFilterSchema(FilterSchema):
-    donor_uuid: Optional[str] = Field(None)
-    treatment_uuid: Optional[str] = Field(None)
-    primary_diagnosis_uuid: Optional[str] = Field(None)
     submitter_follow_up_id: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
@@ -760,7 +908,6 @@ class FollowUpFilterSchema(FilterSchema):
 
 
 class BiomarkerFilterSchema(FilterSchema):
-    donor_uuid: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
     submitter_specimen_id: Optional[str] = Field(None)
@@ -783,7 +930,6 @@ class BiomarkerFilterSchema(FilterSchema):
 
 
 class ComorbidityFilterSchema(FilterSchema):
-    donor_uuid: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
     prior_malignancy: Optional[str] = Field(None)
@@ -795,9 +941,13 @@ class ComorbidityFilterSchema(FilterSchema):
 
 
 class ExposureFilterSchema(FilterSchema):
-    donor_uuid: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
     tobacco_smoking_status: Optional[str] = Field(None)
     tobacco_type: List[str] = Field(None, q="tobacco_type__overlap")
     pack_years_smoked: Optional[float] = Field(None)
+
+
+class DonorWithClinicalDataFilterSchema(FilterSchema):
+    submitter_donor_id: str
+    program_id: str
