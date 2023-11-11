@@ -1,7 +1,8 @@
 import os
+from functools import wraps
 from http import HTTPStatus
 from http.client import HTTPException
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 from uuid import UUID, uuid4
 
 import orjson
@@ -73,6 +74,7 @@ from chord_metadata_service.mohpackets.schema import (
     ComorbidityModelSchema,
     DonorFilterSchema,
     DonorModelSchema,
+    DonorWithClinicalDataFilterSchema,
     DonorWithClinicalDataSchema,
     ExposureFilterSchema,
     ExposureModelSchema,
@@ -385,6 +387,22 @@ class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
 router = Router()
 
 
+def require_program_donor_together(func):
+    @wraps(func)
+    def wrapper(request, filters):
+        if (filters.program_id and not filters.submitter_donor_id) or (
+            filters.submitter_donor_id and not filters.program_id
+        ):
+            error_message = {
+                "error": "Either both program_id and submitter_donor_id are required, or none"
+            }
+            return HTTPStatus.BAD_REQUEST, error_message
+
+        return func(request, filters)
+
+    return wrapper
+
+
 @router.delete(
     "/program/{program_id}",
     response={204: None, 404: str},
@@ -398,9 +416,10 @@ def delete_program(request, program_id: str):
         return HTTPStatus.NOT_FOUND, "Program matching query does not exist"
 
 
-@router.get("/donors_with_clinical_data/", response=List[DonorWithClinicalDataSchema])
-@paginate(PageNumberPagination, page_size=10)
-def tasks(request):
+@router.get("/donor_with_clinical_data/", response=DonorWithClinicalDataSchema)
+def list_donors_with_clinical_data(
+    request, filters: Query[DonorWithClinicalDataFilterSchema]
+):
     donor_followups_prefetch = Prefetch(
         "followup_set",
         queryset=FollowUp.objects.filter(
@@ -429,14 +448,15 @@ def tasks(request):
         "primarydiagnosis_set__treatment_set__surgery_set",
         "primarydiagnosis_set__treatment_set__followup_set",
         "primarydiagnosis_set__specimen_set__sampleregistration_set",
-    ).all()
-    return list(queryset)
+    ).first()
+    return queryset
 
 
 @router.get(
     "/programs/",
     response=List[ProgramModelSchema],
 )
+@paginate(PageNumberPagination, page_size=10)
 def list_programs(request, filters: Query[ProgramFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -448,6 +468,7 @@ def list_programs(request, filters: Query[ProgramFilterSchema]):
     "/donors/",
     response=List[DonorModelSchema],
 )
+@require_program_donor_together
 def list_donors(request, filters: Query[DonorFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -459,6 +480,7 @@ def list_donors(request, filters: Query[DonorFilterSchema]):
     "/primary_diagnoses/",
     response=List[PrimaryDiagnosisModelSchema],
 )
+@require_program_donor_together
 def list_primary_diagnoses(request, filters: Query[PrimaryDiagnosisFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -470,6 +492,7 @@ def list_primary_diagnoses(request, filters: Query[PrimaryDiagnosisFilterSchema]
     "/biomarkers/",
     response=List[BiomarkerModelSchema],
 )
+@require_program_donor_together
 def list_biomarkers(request, filters: Query[BiomarkerFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -481,6 +504,7 @@ def list_biomarkers(request, filters: Query[BiomarkerFilterSchema]):
     "/chemotherapies/",
     response=List[ChemotherapyModelSchema],
 )
+@require_program_donor_together
 def list_chemotherapies(request, filters: Query[ChemotherapyFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -492,6 +516,7 @@ def list_chemotherapies(request, filters: Query[ChemotherapyFilterSchema]):
     "/comorbidities/",
     response=List[ComorbidityModelSchema],
 )
+@require_program_donor_together
 def list_comorbidities(request, filters: Query[ComorbidityFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -501,8 +526,9 @@ def list_comorbidities(request, filters: Query[ComorbidityFilterSchema]):
 
 @router.get(
     "/exposures/",
-    response=List[ExposureModelSchema],
+    response={200: List[ExposureModelSchema], 400: Dict[str, str]},
 )
+@require_program_donor_together
 def list_exposures(request, filters: Query[ExposureFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -514,6 +540,7 @@ def list_exposures(request, filters: Query[ExposureFilterSchema]):
     "/followups/",
     response=List[FollowUpModelSchema],
 )
+@require_program_donor_together
 def list_followups(request, filters: Query[FollowUpFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -525,6 +552,7 @@ def list_followups(request, filters: Query[FollowUpFilterSchema]):
     "/hormone_therapies/",
     response=List[HormoneTherapyModelSchema],
 )
+@require_program_donor_together
 def list_hormone_therapies(request, filters: Query[HormoneTherapyFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -536,6 +564,7 @@ def list_hormone_therapies(request, filters: Query[HormoneTherapyFilterSchema]):
     "/immunotherapies/",
     response=List[ImmunotherapyModelSchema],
 )
+@require_program_donor_together
 def list_immunotherapies(request, filters: Query[ImmunotherapyFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -547,6 +576,7 @@ def list_immunotherapies(request, filters: Query[ImmunotherapyFilterSchema]):
     "/radiations/",
     response=List[RadiationModelSchema],
 )
+@require_program_donor_together
 def list_radiations(request, filters: Query[RadiationFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -558,6 +588,7 @@ def list_radiations(request, filters: Query[RadiationFilterSchema]):
     "/sample_registrations/",
     response=List[SampleRegistrationModelSchema],
 )
+@require_program_donor_together
 def list_sample_registrations(request, filters: Query[SampleRegistrationFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -569,6 +600,7 @@ def list_sample_registrations(request, filters: Query[SampleRegistrationFilterSc
     "/specimens/",
     response=List[SpecimenModelSchema],
 )
+@require_program_donor_together
 def list_specimens(request, filters: Query[SpecimenFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -580,6 +612,7 @@ def list_specimens(request, filters: Query[SpecimenFilterSchema]):
     "/surgeries/",
     response=List[SurgeryModelSchema],
 )
+@require_program_donor_together
 def list_surgeries(request, filters: Query[SurgeryFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -591,6 +624,7 @@ def list_surgeries(request, filters: Query[SurgeryFilterSchema]):
     "/treatments/",
     response=List[TreatmentModelSchema],
 )
+@require_program_donor_together
 def list_treatments(request, filters: Query[TreatmentFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
