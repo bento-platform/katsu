@@ -27,6 +27,7 @@ from chord_metadata_service.mohpackets.api_authorized import router as authorzie
 from chord_metadata_service.mohpackets.api_discovery import (
     discovery_router as discovery_router,
 )
+from chord_metadata_service.mohpackets.api_ingest import router as ingest_router
 from chord_metadata_service.mohpackets.utils import get_schema_url
 
 logger = logging.getLogger(__name__)
@@ -110,6 +111,7 @@ else:
 
 
 api = NinjaAPI(renderer=ORJSONRenderer(), parser=ORJSONParser())
+api.add_router("/ingest/", ingest_router, auth=None, tags=["ingest"])
 api.add_router("/authorized/", authorzied_router, auth=auth, tags=["authorized"])
 api.add_router("/discovery/", discovery_router, tags=["discovery"])
 
