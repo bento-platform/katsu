@@ -17,8 +17,6 @@ __all__ = [
     "workflow_set",
 ]
 
-from typing import Optional
-
 from chord_metadata_service.chord.data_types import (
     DATA_TYPE_EXPERIMENT,
     DATA_TYPE_EXPERIMENT_RESULT,
@@ -37,19 +35,7 @@ WORKFLOW_CBIOPORTAL = "cbioportal"
 
 
 def json_file_input(id_: str, required: bool = True):
-    return wm.WorkflowFileInput(id=id_, required=required, pattern=r"^*.json$")
-
-
-def json_file_output(id_: str, output_name: Optional[str] = None):
-    return {
-        "id": id_,
-        "type": "file",
-
-        # this triple {} abomination, with e.g. id_=json_document, turns into the string '{json_document}'
-        # the 'output_name or' part is a bit of a hack until we move to a new ingest system which can actually read
-        # Cromwell output JSON to grab the right files or something.
-        "value": output_name or f"{{{id_}}}",
-    }
+    return wm.WorkflowFileInput(id=id_, required=required, pattern=r"^.*\.json$")
 
 
 DRS_URL_INPUT = wm.WorkflowServiceUrlInput(id="drs_url", service_kind="drs")
@@ -111,7 +97,7 @@ workflow_set.add_workflow(WORKFLOW_READSET, wm.WorkflowDefinition(
         wm.WorkflowFileArrayInput(
             id="readset_files",
             required=True,
-            pattern=r"^*.(cram|bam|bigWig|bigBed|bw|bb)$",
+            pattern=r"^.*\.(cram|bam|bigWig|bigBed|bw|bb)$",
         ),
     ],
 ))
@@ -132,7 +118,7 @@ workflow_set.add_workflow(WORKFLOW_DOCUMENT, wm.WorkflowDefinition(
         wm.WorkflowFileArrayInput(
             id="document_files",
             required=True,
-            pattern=r"^*.(pdf|csv|tsv|txt|docx|xlsx|jpeg|jpg|png|gif|md|markdown|mp3|m4a|mp4)$",
+            pattern=r"^.*\.(pdf|csv|tsv|txt|docx|xlsx|jpeg|jpg|png|gif|md|markdown|mp3|m4a|mp4)$",
         ),
     ],
 ))
