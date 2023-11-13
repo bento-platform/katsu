@@ -66,6 +66,7 @@ workflow_set.add_workflow(WORKFLOW_PHENOPACKETS_JSON, wm.WorkflowDefinition(
     type="ingestion",
     name="Bento Phenopackets-Compatible JSON",
     description="This ingestion workflow will validate and import a Phenopackets schema-compatible JSON document.",
+    data_type=DATA_TYPE_PHENOPACKET,  # for permissions
     tags=[DATA_TYPE_PHENOPACKET],
     file="phenopackets_json.wdl",
     inputs=[
@@ -82,6 +83,7 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON, wm.WorkflowDefinition(
     type="ingestion",
     name="Bento Experiments JSON",
     description="This ingestion workflow will validate and import a Bento Experiments schema-compatible JSON document.",
+    data_type=DATA_TYPE_EXPERIMENT,  # for permissions
     tags=[DATA_TYPE_EXPERIMENT],
     file="experiments_json.wdl",
     inputs=[
@@ -97,7 +99,8 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON, wm.WorkflowDefinition(
 workflow_set.add_workflow(WORKFLOW_READSET, wm.WorkflowDefinition(
     type="ingestion",
     name="Readset",
-    description="This workflow will copy readset files over to DRS.", data_type=DATA_TYPE_READSET,
+    description="This workflow will copy readset files over to DRS.",
+    data_type=DATA_TYPE_EXPERIMENT,  # for permissions
     tags=[DATA_TYPE_EXPERIMENT_RESULT, DATA_TYPE_READSET],
     file="readset.wdl",
     inputs=[
@@ -109,6 +112,27 @@ workflow_set.add_workflow(WORKFLOW_READSET, wm.WorkflowDefinition(
             id="readset_files",
             required=True,
             pattern=r"^*.(cram|bam|bigWig|bigBed|bw|bb)$",
+        ),
+    ],
+))
+
+workflow_set.add_workflow(WORKFLOW_DOCUMENT, wm.WorkflowDefinition(
+    type="ingestion",
+    name="Document",
+    description="This workflow ingests into DRS documents which have been already listed as experiment results.",
+    data_type=DATA_TYPE_EXPERIMENT,  # for permissions
+    tags=[DATA_TYPE_EXPERIMENT_RESULT, DATA_TYPE_READSET],
+    file="readset.wdl",
+    inputs=[
+        # injected
+        ACCESS_TOKEN_INPUT,
+        DRS_URL_INPUT,
+        # user
+        PROJECT_DATASET_INPUT,
+        wm.WorkflowFileArrayInput(
+            id="document_files",
+            required=True,
+            pattern=r"^*.(pdf|csv|tsv|txt|docx|xlsx|jpeg|jpg|png|gif|md|markdown|mp3|m4a|mp4)$",
         ),
     ],
 ))
