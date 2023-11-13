@@ -405,7 +405,7 @@ def require_program_donor_together(func):
 
 @router.delete(
     "/program/{program_id}",
-    response={204: None, 404: str},
+    response={204: None, 404: Dict[str, str]},
 )
 def delete_program(request, program_id: str):
     try:
@@ -413,11 +413,14 @@ def delete_program(request, program_id: str):
         dataset.delete()
         return HTTPStatus.NO_CONTENT, None
     except Program.DoesNotExist:
-        return HTTPStatus.NOT_FOUND, "Program matching query does not exist"
+        return HTTPStatus.NOT_FOUND, {"error": "Program matching query does not exist"}
 
 
-@router.get("/donor_with_clinical_data/", response=DonorWithClinicalDataSchema)
-def list_donors_with_clinical_data(
+@router.get(
+    "/donor_with_clinical_data/",
+    response={200: DonorWithClinicalDataSchema, 404: Dict[str, str]},
+)
+def get_donor_with_clinical_data(
     request, filters: Query[DonorWithClinicalDataFilterSchema]
 ):
     donor_followups_prefetch = Prefetch(
@@ -448,8 +451,17 @@ def list_donors_with_clinical_data(
         "primarydiagnosis_set__treatment_set__surgery_set",
         "primarydiagnosis_set__treatment_set__followup_set",
         "primarydiagnosis_set__specimen_set__sampleregistration_set",
-    ).first()
-    return queryset
+    ).all()
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q = filters.get_filter_expression()
+    result = queryset.filter(q).first()
+    if result:
+        return result
+    else:
+        return HTTPStatus.NOT_FOUND, {
+            "error": "Donor matching query does not exist or inaccessible"
+        }
 
 
 @router.get(
@@ -466,8 +478,9 @@ def list_programs(request, filters: Query[ProgramFilterSchema]):
 
 @router.get(
     "/donors/",
-    response=List[DonorModelSchema],
+    response={200: List[DonorModelSchema], 400: Dict[str, str]},
 )
+@paginate(PageNumberPagination, page_size=10)
 @require_program_donor_together
 def list_donors(request, filters: Query[DonorFilterSchema]):
     authorized_datasets = request.authorized_datasets
