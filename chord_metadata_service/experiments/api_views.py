@@ -117,16 +117,12 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     Create a new experiment result
     """
 
+    queryset = ExperimentResult.objects.all().order_by("id")
     serializer_class = ExperimentResultSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
     filter_backends = [DjangoFilterBackend]
     filterset_class = ExperimentResultFilter
-
-    def get_queryset(self):
-        dataset_ids = self.request.get("datasets", None)
-        filter_by_dataset = {"experiment_set__dataset_id__in": dataset_ids} if dataset_ids else {}
-        return ExperimentResult.objects.filter(**filter_by_dataset).order_by("id")
 
     # Cache page for the requested url for 2 hours
     @method_decorator(cache_page(60 * 60 * 2))
