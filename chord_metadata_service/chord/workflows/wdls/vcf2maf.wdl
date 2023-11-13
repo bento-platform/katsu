@@ -4,8 +4,7 @@ workflow vcf2maf {
     input {
         String drs_url
         String katsu_url
-        String one_time_token_metadata_ingest
-        String temp_token_drs
+        String access_token
         String auth_host
         String project_dataset
         String vep_cache_dir
@@ -27,8 +26,7 @@ workflow vcf2maf {
             vep_species = vep_species,
             vep_cache_dir = vep_cache_dir,
             drs_url = drs_url,
-            temp_token_drs = temp_token_drs,
-            auth_host = auth_host,
+            access_token = access_token,
             run_dir = run_dir
     }
 
@@ -37,8 +35,7 @@ workflow vcf2maf {
                 experiment_results_json = katsu_dataset_export_vcf.experiment_results_json,
                 maf_list = vcf_2_maf.maf_list,
                 katsu_url  = katsu_url,
-                one_time_token_metadata_ingest = one_time_token_metadata_ingest,
-                auth_host = auth_host,
+                access_token = access_token,
                 run_dir = run_dir
     }
 
@@ -140,8 +137,7 @@ task vcf_2_maf {
         String vep_species
         String vep_cache_dir
         String drs_url
-        String temp_token_drs
-        String auth_host
+        String access_token
         String run_dir
     }
 
@@ -214,7 +210,7 @@ task vcf_2_maf {
         try:
             response = requests.post(
                 drs_url,
-                headers={"Authorization": "Bearer ~{token}"} if "~{token}" else {},
+                headers={"Authorization": "Bearer ~{access_token}"} if "~{access_token}" else {},
                 json=params,
                 verify=False
             )
@@ -253,7 +249,7 @@ task katsu_update_experiment_results_with_maf {
     input {
         String project_dataset
         String katsu_url
-        String auth_host
+        String access_token
         String run_dir
         File experiment_results_json
         File maf_list
@@ -311,8 +307,8 @@ task katsu_update_experiment_results_with_maf {
         # internally, direct access to the file is guaranteed.
 
         headers = (
-            {"Authorization": "Bearer ~{TODO}"}
-            if "~{TODO}"
+            {"Authorization": "Bearer ~{access_token}"}
+            if "~{access_token}"
             else {}
         )
 
