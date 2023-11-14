@@ -41,7 +41,7 @@ def json_file_input(id_: str, required: bool = True):
 DRS_URL_INPUT = wm.WorkflowServiceUrlInput(id="drs_url", service_kind="drs")
 KATSU_URL_INPUT = wm.WorkflowServiceUrlInput(id="katsu_url", service_kind="metadata")
 PROJECT_DATASET_INPUT = wm.WorkflowProjectDatasetInput(id="project_dataset")
-ACCESS_TOKEN_INPUT = wm.WorkflowConfigInput(id="access_token", key="access_token")
+ACCESS_TOKEN_INPUT = wm.WorkflowSecretInput(id="access_token", key="access_token")
 
 
 workflow_set = WorkflowSet()
