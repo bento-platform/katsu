@@ -87,7 +87,7 @@ workflow_set.add_workflow(WORKFLOW_READSET, wm.WorkflowDefinition(
     name="Readset",
     description="This workflow will copy readset files over to DRS.",
     data_type=DATA_TYPE_EXPERIMENT,  # for permissions
-    tags=[DATA_TYPE_EXPERIMENT_RESULT, DATA_TYPE_READSET],
+    tags=[DATA_TYPE_EXPERIMENT, DATA_TYPE_EXPERIMENT_RESULT, DATA_TYPE_READSET],
     file="readset.wdl",
     inputs=[
         # injected
@@ -107,7 +107,7 @@ workflow_set.add_workflow(WORKFLOW_DOCUMENT, wm.WorkflowDefinition(
     name="Document",
     description="This workflow ingests into DRS documents which have been already listed as experiment results.",
     data_type=DATA_TYPE_EXPERIMENT,  # for permissions
-    tags=[DATA_TYPE_EXPERIMENT_RESULT, DATA_TYPE_READSET],
+    tags=[DATA_TYPE_EXPERIMENT, DATA_TYPE_EXPERIMENT_RESULT],
     file="readset.wdl",
     inputs=[
         # injected
@@ -128,6 +128,7 @@ workflow_set.add_workflow(WORKFLOW_MAF_DERIVED_FROM_VCF_JSON, wm.WorkflowDefinit
     name="MAF files derived from VCF files as a JSON",
     description="This ingestion workflow will add to the current experiment results MAF files that were generated from "
                 "VCF files found in the Dataset.",
+    data_type=DATA_TYPE_EXPERIMENT,  # for permissions
     tags=[DATA_TYPE_EXPERIMENT_RESULT],
     file="maf_derived_from_vcf_json.wdl",
     inputs=[
