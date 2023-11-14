@@ -722,6 +722,7 @@ class ProgramFilterSchema(FilterSchema):
 class DonorFilterSchema(FilterSchema):
     submitter_donor_id: Optional[str] = Field(None)
     program_id: Optional[str] = Field(None)
+    primary_site: List[str] = Field(None, q="primary_site__overlap")
     gender: Optional[str] = Field(None, q="gender__icontains")
     sex_at_birth: Optional[str] = Field(None)
     is_deceased: Optional[bool] = Field(None)
@@ -731,7 +732,6 @@ class DonorFilterSchema(FilterSchema):
     cause_of_death: Optional[str] = Field(None)
     date_of_birth: Optional[str] = Field(None)
     date_of_death: Optional[str] = Field(None)
-    primary_site: List[str] = Field(None, q="primary_site__overlap")
 
 
 class PrimaryDiagnosisFilterSchema(FilterSchema):
