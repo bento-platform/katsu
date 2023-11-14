@@ -32,8 +32,8 @@ task post_to_drs {
         String token
     }
     command {
-        project_id=$(python3 -c 'print("~{project_dataset}".split(":")[0]))'))
-        dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1]))'))
+        project_id=$(python3 -c 'print("~{project_dataset}".split(":")[0])')
+        dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1])')
         curl -k -X POST \
              -F "file=@~{file_path}" \
              -F "project_id=$project_id" \

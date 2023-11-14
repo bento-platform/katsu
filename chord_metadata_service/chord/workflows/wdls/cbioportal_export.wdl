@@ -2,21 +2,25 @@ version 1.0
 
 workflow cbioportal {
     input {
-        String dataset_id
+        String project_dataset
         String run_dir
         String katsu_url
         String drs_url
     }
 
+    call dataset_id_from_project_dataset {
+        input: project_dataset = project_dataset
+    }
+
     call katsu_dataset_export {
-        input: dataset_id = dataset_id,
+        input: dataset_id = dataset_id_from_project_dataset.dataset_id,
                run_dir = run_dir,
                katsu_url = katsu_url
     }
 
     call get_maf {
         input: drs_url = drs_url,
-               dataset_id = dataset_id,
+               dataset_id = dataset_id_from_project_dataset.dataset_id,
                run_dir = run_dir
     }
 
@@ -24,6 +28,18 @@ workflow cbioportal {
         Array[File] cbio = katsu_dataset_export.data_txt
         File stdout = katsu_dataset_export.txt_output
         File stderr = katsu_dataset_export.err_output
+    }
+}
+
+task dataset_id_from_project_dataset {
+    input {
+        String project_dataset
+    }
+    command <<<
+        python3 -c 'print("~{project_dataset}".split(":")[1], end="")'
+    >>>
+    output {
+        String dataset_id = stdout()
     }
 }
 
