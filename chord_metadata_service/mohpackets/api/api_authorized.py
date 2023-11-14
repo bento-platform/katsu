@@ -12,7 +12,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 from ninja import Query, Router
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import PageNumberPagination, RouterPaginated, paginate
 from rest_framework import mixins, status, viewsets
 from rest_framework.response import Response
 
@@ -55,6 +55,8 @@ from chord_metadata_service.mohpackets.models import (
     Treatment,
 )
 from chord_metadata_service.mohpackets.pagination import (
+    CustomPagination,
+    CustomRouterPaginated,
     SmallResultsSetPagination,
     StandardResultsSetPagination,
 )
@@ -377,7 +379,7 @@ class AuthorizedDonorWithClinicalDataViewSet(AuthorizedMixin, BaseDonorViewSet):
 
 
 # =============================================================================
-router = Router()
+router = CustomRouterPaginated()
 
 
 # ==============================================================================
@@ -399,6 +401,9 @@ def require_program_donor_together(func):
     return wrapper
 
 
+# ==============================================================================
+# Delete
+# ==============================================================================
 @router.delete(
     "/program/{program_id}",
     response={204: None, 404: Dict[str, str]},
@@ -412,6 +417,9 @@ def delete_program(request, program_id: str):
         return HTTPStatus.NOT_FOUND, {"error": "Program matching query does not exist"}
 
 
+# ==============================================================================
+# Donor with clinical data
+# ==============================================================================
 @router.get(
     "/donor_with_clinical_data/",
     response={200: DonorWithClinicalDataSchema, 404: Dict[str, str]},
@@ -460,11 +468,13 @@ def get_donor_with_clinical_data(
         }
 
 
+# ==============================================================================
+# Authorized
+# ==============================================================================
 @router.get(
     "/programs/",
     response=List[ProgramModelSchema],
 )
-@paginate(PageNumberPagination, page_size=10)
 def list_programs(request, filters: Query[ProgramFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
@@ -474,9 +484,8 @@ def list_programs(request, filters: Query[ProgramFilterSchema]):
 
 @router.get(
     "/donors/",
-    response={200: List[DonorModelSchema], 400: Dict[str, str]},
+    response=List[DonorModelSchema],
 )
-@paginate(PageNumberPagination, page_size=10)
 @require_program_donor_together
 def list_donors(request, filters: Query[DonorFilterSchema]):
     authorized_datasets = request.authorized_datasets
