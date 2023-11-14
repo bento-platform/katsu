@@ -1,8 +1,8 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from chord_metadata_service.mohpackets.api import api
-from chord_metadata_service.mohpackets.api_authorized import (
+from chord_metadata_service.mohpackets.api.api import api
+from chord_metadata_service.mohpackets.api.api_authorized import (
     AuthorizedBiomarkerViewSet,
     AuthorizedChemotherapyViewSet,
     AuthorizedComorbidityViewSet,
@@ -20,7 +20,7 @@ from chord_metadata_service.mohpackets.api_authorized import (
     AuthorizedSurgeryViewSet,
     AuthorizedTreatmentViewSet,
 )
-from chord_metadata_service.mohpackets.api_discovery import (
+from chord_metadata_service.mohpackets.api.api_discovery import (
     DiscoveryBiomarkerViewSet,
     DiscoveryChemotherapyViewSet,
     DiscoveryComorbidityViewSet,
@@ -45,7 +45,7 @@ from chord_metadata_service.mohpackets.api_discovery import (
     service_info,
     treatment_type_count,
 )
-from chord_metadata_service.mohpackets.api_ingest import (
+from chord_metadata_service.mohpackets.api.api_ingest import (
     ingest_biomarkers,
     ingest_chemotherapies,
     ingest_comorbidities,
