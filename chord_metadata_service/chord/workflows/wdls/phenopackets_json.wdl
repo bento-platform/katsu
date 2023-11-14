@@ -30,7 +30,7 @@ task ingest_task {
         String token
     }
     command <<<
-        dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1]))'))
+        dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1])')
         RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ~{token}" \
