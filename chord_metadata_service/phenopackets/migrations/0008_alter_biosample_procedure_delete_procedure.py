@@ -24,7 +24,7 @@ def migrate_procedure_json(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('phenopackets', '0007_alter_biosample_created_alter_biosample_updated_and_more'),
+        ('phenopackets', '0007_remove_phenopacket_table'),
     ]
 
     operations = [
