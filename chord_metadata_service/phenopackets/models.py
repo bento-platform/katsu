@@ -267,10 +267,11 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
 
     @property
     def get_sample_tissue_data(self):
-        return {'reference': {
-            'reference': self.sampled_tissue.get('id'),
-            'display': self.sampled_tissue.get('label')
-        }
+        return {
+            'reference': {
+                'reference': self.sampled_tissue.get('id'),
+                'display': self.sampled_tissue.get('label'),
+            },
         }
 
     @property

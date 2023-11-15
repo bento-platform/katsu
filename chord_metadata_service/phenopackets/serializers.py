@@ -208,6 +208,8 @@ class InterpretationSerializer(GenericSerializer):
         response = super().to_representation(instance)
         response["diagnosis"] = DiagnosisSerializer(instance.diagnosis, many=False, required=False).data
         return response
+
+
 #############################################################
 #                                                           #
 #              Phenopacket Data  Serializers                 #

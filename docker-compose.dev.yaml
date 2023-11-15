@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   katsu-db:
     image: postgres:13-alpine
