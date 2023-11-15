@@ -155,6 +155,41 @@
       ]
     }
   ],
+  "interpretations": [
+    {
+      "id": "interpretation.id.1",
+      "progress_status": "SOLVED",
+      "diagnosis": {
+        "disease": {
+          "id": "OMIM:158810",
+          "label": "Bethlem myopathy 1"
+        },
+        "genomic_interpretations": [
+          {
+            "subject_or_biosample_id": "proband A",
+            "interpretation_status": "CONTRIBUTORY",
+            "variant_interpretation": {
+              "acmg_pathogenicity_classification": "PATHOGENIC",
+              "therapeutic_actionability": "UNKNOWN_ACTIONABILITY",
+              "variation_descriptor": {
+                "id": "clinvar:13294",
+                "expressions": [
+                  {
+                    "syntax": "hgvs",
+                    "value": "NM_001848.2:c.877G\u003eA"
+                  }
+                ],
+                "allelic_state": {
+                  "id": "GENO:0000135",
+                  "label": "heterozygous"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
   "meta_data": {
     "created": "2019-04-03T15:31:40.765Z",
     "created_by": "Peter R",
