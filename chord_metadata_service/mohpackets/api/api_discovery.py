@@ -124,8 +124,15 @@ def count_terms(terms):
     Return a dictionary of counts for every term in a list, used in overview endpoints
     for fields with lists as entries.
     """
-    if len(terms) > 0 and isinstance(terms[0], list):  # Unnest list if nested
+    # if len(terms) > 0 and isinstance(terms[0], list):  # Unnest list if nested
+    #     terms = sum(terms, [])
+
+    # Unnest list if nested
+    if terms and isinstance(terms[0], list):
         terms = sum(terms, [])
+
+    # Convert None values to "null"
+    terms = ["null" if term is None else term for term in terms]
     return Counter(terms)
 
 
@@ -796,7 +803,7 @@ def discover_diagnosis_age_count(request):
     # count donor in each age bucket
     for donor_uuid, dob in donor_dob_dict.items():
         diagnosis_date = earliest_diagnoses_dict.get(donor_uuid)
-        if diagnosis_date is not None:
+        if diagnosis_date and dob:
             dob_date = datetime.strptime(dob, "%Y-%m")
             diagnosis_date = datetime.strptime(
                 earliest_diagnoses_dict[donor_uuid], "%Y-%m"
