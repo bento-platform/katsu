@@ -196,12 +196,6 @@ VALID_VARIANT_DESCRIPTOR = {
     }
 }
 
-VALID_VARIANT_INTERPRETATION = {
-    "acmg_pathogenicity_classification": "PATHOGENIC",
-    "therapeutic_actionability": "UNKNOWN_ACTIONABILITY",
-    "variant_descriptor": VALID_VARIANT_DESCRIPTOR
-}
-
 VALID_DISEASE_ONTOLOGY = {
     "id": "OMIM:164400",
     "label": "Spinocerebellar ataxia 1"

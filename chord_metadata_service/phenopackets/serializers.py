@@ -27,7 +27,7 @@ __all__ = [
     "BiosampleSerializer",
     "SimplePhenopacketSerializer",
     "PhenopacketSerializer",
-    "VariantDescriptorSerializer",
+    "VariationDescriptorSerializer",
     "VariantInterpretationSerializer",
     "GenomicInterpretationSerializer",
     "GeneDescriptorSerializer",
@@ -136,7 +136,7 @@ class GeneDescriptorSerializer(GenericSerializer):
         fields = '__all__'
 
 
-class VariantDescriptorSerializer(GenericSerializer):
+class VariationDescriptorSerializer(GenericSerializer):
     gene_context = GeneDescriptorSerializer(many=False, required=False)
 
     class Meta:
@@ -152,7 +152,7 @@ class VariantInterpretationSerializer(GenericSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        response["variation_descriptor"] = VariantDescriptorSerializer(
+        response["variation_descriptor"] = VariationDescriptorSerializer(
             instance.variation_descriptor, many=False, required=True).data
         return response
 

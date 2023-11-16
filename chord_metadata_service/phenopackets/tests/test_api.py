@@ -216,15 +216,31 @@ class CreateGenomicInterpretationTest(APITestCase):
 
     def setUp(self):
         gene_description = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
-        self.genomic_interpretation_data = c.valid_genomic_interpretation(gene_descriptor=gene_description.value_id)
+        self.genomic_interpretation_gene = c.valid_genomic_interpretation(gene_descriptor=gene_description.value_id)
 
-    def test_genomic_interpretation(self):
-        response = get_post_response('genomicinterpretations-list', self.genomic_interpretation_data)
+        variant_descriptor = m.VariationDescriptor.objects.create(
+            **c.valid_variant_descriptor(gene_description))
+        variant_interpretation = m.VariantInterpretation.objects.create(
+            **c.valid_variant_interpretation(variant_descriptor=variant_descriptor)
+        )
+        self.genomic_interpretation_variant = c.valid_genomic_interpretation(
+            variant_interpretation=variant_interpretation.id)
+
+    def test_genomic_interpretation_gene(self):
+        response = get_post_response('genomicinterpretations-list', self.genomic_interpretation_gene)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(m.GenomicInterpretation.objects.count(), 1)
+
+    def test_genomic_interpretation_variant(self):
+        response = get_post_response('genomicinterpretations-list', self.genomic_interpretation_variant)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.GenomicInterpretation.objects.count(), 1)
 
     def test_serializer(self):
-        serializer = s.GenomicInterpretationSerializer(data=self.genomic_interpretation_data)
+        serializer = s.GenomicInterpretationSerializer(data=self.genomic_interpretation_gene)
+        self.assertEqual(serializer.is_valid(), True)
+
+        serializer = s.GenomicInterpretationSerializer(data=self.genomic_interpretation_variant)
         self.assertEqual(serializer.is_valid(), True)
 
 
