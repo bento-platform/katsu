@@ -417,9 +417,9 @@ class FollowUp(models.Model):
     )
     submitter_donor_id = models.CharField(max_length=64, null=False, blank=False)
     submitter_primary_diagnosis_id = models.CharField(
-        max_length=64, null=False, blank=False
+        max_length=64, null=True, blank=True
     )
-    submitter_treatment_id = models.CharField(max_length=64, null=False, blank=False)
+    submitter_treatment_id = models.CharField(max_length=64, null=True, blank=True)
     date_of_followup = models.CharField(max_length=32, null=True, blank=True)
     disease_status_at_followup = models.CharField(max_length=255, null=True, blank=True)
     relapse_type = models.CharField(max_length=128, null=True, blank=True)
