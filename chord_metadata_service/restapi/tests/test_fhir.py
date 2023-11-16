@@ -20,7 +20,7 @@ from chord_metadata_service.phenopackets.tests.constants import (
     valid_biosample_2,
     valid_phenotypic_feature,
 )
-from chord_metadata_service.restapi.tests.utils import get_response
+from chord_metadata_service.restapi.tests.utils import get_post_response
 
 
 # Tests for FHIR conversion functions
@@ -140,7 +140,7 @@ class FHIRBiosampleTest(APITestCase):
     def test_get_fhir(self):
         """ POST a new biosample. """
 
-        get_response('biosamples-list', self.valid_payload)
+        get_post_response('biosamples-list', self.valid_payload)
         get_resp = self.client.get('/api/biosamples?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -160,7 +160,7 @@ class FHIRHtsFileTest(APITestCase):
         self.hts_file = VALID_HTS_FILE
 
     def test_get_fhir(self):
-        get_response('htsfiles-list', self.hts_file)
+        get_post_response('htsfiles-list', self.hts_file)
         get_resp = self.client.get('/api/htsfiles?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -180,7 +180,7 @@ class FHIRGeneTest(APITestCase):
         self.gene = VALID_GENE_1
 
     def test_get_fhir(self):
-        get_response('genes-list', self.gene)
+        get_post_response('genes-list', self.gene)
         get_resp = self.client.get('/api/genes?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -200,7 +200,7 @@ class FHIRDiseaseTest(APITestCase):
         self.disease = VALID_DISEASE_1
 
     def test_get_fhir(self):
-        get_response('diseases-list', self.disease)
+        get_post_response('diseases-list', self.disease)
         get_resp = self.client.get('/api/diseases?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()

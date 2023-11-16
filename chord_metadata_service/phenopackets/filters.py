@@ -73,22 +73,6 @@ def filter_datasets(qs, name, value):
         return qs
 
 
-def filter_json_array(qs, name, value):
-    """
-    Filters on the id and label of an ontology contained in a JSONField with a JSON array object.
-    :param qs: QuerySet to filter
-    :param name: lookup pointing to JSONField field
-    :param value: The value to filter on
-    :return: The filtered QuerySet
-    """
-    if value:
-        lookup = "__".join([name, "contains"])
-        qs = qs.filter(
-            **{lookup: value}
-        ).distinct()
-    return qs
-
-
 def filter_time_element(qs, name, value):
     # TODO: better filters
     lookup = "__".join([name, "icontains"])
@@ -378,7 +362,6 @@ class InterpretationFilter(django_filters.rest_framework.FilterSet):
         fields = ["id", "phenopacket"]
 
     def filter_diagnosis(self, qs, name, value):
-        # TODO: implement and test diagnosis filters
-        qs = qs.filter(
-        ).distinct()
+        lookup = "__".join([name, "icontains"])
+        qs = qs.filter(**{lookup: value}).distinct()
         return qs

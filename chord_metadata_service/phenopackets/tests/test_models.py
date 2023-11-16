@@ -5,6 +5,7 @@ from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 
 from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
 from chord_metadata_service.phenopackets.filters import (
+    InterpretationFilter,
     filter_ontology,
     filter_extra_properties_datatype,
     PhenotypicFeatureFilter,
@@ -271,11 +272,20 @@ class InterpretationTest(TestCase):
             progress_status='IN_PROGRESS'
         )
         self.assertEqual(interpretation_qs.count(), 1)
-        # TODO: test diagnosis filters
-        # interpretation_qs = m.Interpretation.objects.filter()
+
+        self._test_interpretation_filter(self.disease_ontology['id'], 1)
+        self._test_interpretation_filter("MONDO:0005015", 0)
 
     def test_interpretation_str(self):
         self.assertEqual(str(self.interpretation), str(self.interpretation.id))
+
+    def _test_interpretation_filter(self, value, count: int):
+        qs = InterpretationFilter().filter_diagnosis(
+            m.Interpretation.objects.all(),
+            "diagnosis__disease_ontology__id",
+            value,
+        )
+        self.assertEqual(qs.count(), count)
 
 
 class MetaDataTest(TestCase):
