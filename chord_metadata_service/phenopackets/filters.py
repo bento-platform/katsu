@@ -146,27 +146,6 @@ class ProcedureFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
 
-class HtsFileFilter(django_filters.rest_framework.FilterSet):
-    description = django_filters.CharFilter(lookup_expr="icontains")
-    hts_format = django_filters.CharFilter(lookup_expr="iexact")
-    genome_assembly = django_filters.CharFilter(lookup_expr="iexact")
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
-
-    class Meta:
-        model = m.HtsFile
-        fields = ["uri"]
-
-
 class GeneFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(

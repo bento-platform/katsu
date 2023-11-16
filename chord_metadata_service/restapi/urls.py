@@ -45,7 +45,6 @@ router.register(r'batch/biosamples', phenopacket_views.BiosampleBatchViewSet, ba
 
 # Phenopackets app urls
 router.register(r'phenotypicfeatures', phenopacket_views.PhenotypicFeatureViewSet, basename="phenotypicfeatures")
-router.register(r'htsfiles', phenopacket_views.HtsFileViewSet, basename="htsfiles")
 router.register(r'genes', phenopacket_views.GeneViewSet, basename="genes")
 router.register(r'diseases', phenopacket_views.DiseaseViewSet, basename="diseases")
 router.register(r'metadata', phenopacket_views.MetaDataViewSet, basename="metadata")

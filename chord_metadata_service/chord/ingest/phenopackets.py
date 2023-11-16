@@ -287,7 +287,6 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     #  biosamples: [...]
     #  genes: [...]
     #  diseases: [...]
-    #  hts_files: [...]
     #  meta_data: {..., resources: [...]}
 
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))

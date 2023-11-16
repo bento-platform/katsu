@@ -13,7 +13,6 @@ from chord_metadata_service.phenopackets.tests.constants import (
     VALID_INDIVIDUAL_1,
     VALID_META_DATA_2,
     VALID_PROCEDURE_1,
-    VALID_HTS_FILE,
     VALID_DISEASE_1,
     VALID_GENE_1,
     valid_biosample_1,
@@ -152,26 +151,6 @@ class FHIRBiosampleTest(APITestCase):
                          'http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-diagnostic-markers')
         self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][4]['valueCodeableConcept']['coding'],
                               list)
-
-
-class FHIRHtsFileTest(APITestCase):
-
-    def setUp(self):
-        self.hts_file = VALID_HTS_FILE
-
-    def test_get_fhir(self):
-        get_post_response('htsfiles-list', self.hts_file)
-        get_resp = self.client.get('/api/htsfiles?format=fhir')
-        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
-        get_resp_obj = get_resp.json()
-        self.assertEqual(get_resp_obj['document_references'][0]['resourceType'], 'DocumentReference')
-        self.assertIsInstance(get_resp_obj['document_references'][0]['content'], list)
-        self.assertIsNotNone(get_resp_obj['document_references'][0]['content'][0]['attachment']['url'])
-        self.assertEqual(get_resp_obj['document_references'][0]['status'], 'current')
-        self.assertEqual(get_resp_obj['document_references'][0]['type']['coding'][0]['code'],
-                         get_resp_obj['document_references'][0]['type']['coding'][0]['display'])
-        self.assertEqual(get_resp_obj['document_references'][0]['extension'][0]['url'],
-                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly')
 
 
 class FHIRGeneTest(APITestCase):

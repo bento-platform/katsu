@@ -114,20 +114,6 @@ class PhenotypicFeatureTest(TestCase):
         self.assertEqual(len(result), 1)
 
 
-class HtsFileTest(TestCase):
-    """ Test module for HtsFile model. """
-
-    def setUp(self):
-        self.hts_file = m.HtsFile.objects.create(**c.VALID_HTS_FILE)
-
-    def test_hts_file(self):
-        hts_file = m.HtsFile.objects.get(genome_assembly='GRCh38')
-        self.assertEqual(hts_file.uri, 'https://data.example/genomes/germline_wgs.vcf.gz')
-
-    def test_hts_file_str(self):
-        self.assertEqual(str(self.hts_file), 'https://data.example/genomes/germline_wgs.vcf.gz')
-
-
 # class GeneTest(TestCase):
 #     """ Test module for Gene model. """
 #

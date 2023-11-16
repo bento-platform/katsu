@@ -70,19 +70,6 @@ VALID_INDIVIDUAL_2 = {
     }
 }
 
-VALID_HTS_FILE = {
-    "uri": "https://data.example/genomes/germline_wgs.vcf.gz",
-    "description": "Matched normal germline sample",
-    "hts_format": "VCF",
-    "genome_assembly": "GRCh38",
-    "individual_to_sample_identifiers": {
-        "patient:1": "NA12345"
-    },
-    "extra_properties": {
-        "comment": "test data"
-    }
-}
-
 VALID_GENE_1 = {
     "id": "HGNC:347",
     "alternate_ids": ["ensembl:ENSRNOG00000019450", "ncbigene:307503"],

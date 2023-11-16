@@ -97,15 +97,6 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
 
                                 # TODO: Interpretation Gene fields
 
-                                # Biosample HTS file fields
-                                "phenopackets__biosamples__hts_files__uri",
-                                "phenopackets__biosamples__hts_files__description",
-                                "phenopackets__biosamples__hts_files__hts_format",
-                                "phenopackets__biosamples__hts_files__genome_assembly",
-                                Cast("phenopackets__biosamples__hts_files__individual_to_sample_identifiers",
-                                     TextField()),
-                                Cast("phenopackets__biosamples__hts_files__extra_properties", TextField()),
-
                                 # Disease field
                                 Cast("phenopackets__diseases__term", TextField()),
                                 Cast("phenopackets__diseases__excluded", BooleanField()),

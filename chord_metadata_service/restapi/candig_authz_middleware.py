@@ -60,7 +60,7 @@ class CandigAuthzMiddleware:
     def is_authorized_get(self, request):
         authorized_paths = [
             "^/api/phenopackets/?.*", "^/api/diagnoses/?.*", "^/api/diseases/?.*", "^/api/datasets/?.*",
-            "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/htsfiles/?.*", "^/api/individuals/?.*",
+            "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/individuals/?.*",
             "^/api/interpretations/?.*", "^/api/metadata/?.*", "^/api/phenopackets/?.*", "^/api/phenotypicfeatures/?.*",
             "^/api/procedures/?.*", "^/api/variants/?.*", "^/api/biosamples/?.*", "^/api/labsvital/?.*",
             "^/api/cancergeneticvariants/?.*", "^/api/genomicregionsstudied/?.*", "^/api/genomicsreports/?.*",

@@ -139,17 +139,6 @@ class CreatePhenotypicFeatureTest(APITestCase):
         self.assertEqual(serializer.is_valid(), False)
 
 
-class CreateHtsFileTest(APITestCase):
-
-    def setUp(self):
-        self.hts_file = c.VALID_HTS_FILE
-
-    def test_hts_file(self):
-        response = get_post_response('htsfiles-list', self.hts_file)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(m.HtsFile.objects.count(), 1)
-
-
 class CreateGeneTest(APITestCase):
 
     def setUp(self):
@@ -159,9 +148,7 @@ class CreateGeneTest(APITestCase):
 
     def test_gene(self):
         response = get_post_response('genes-list', self.gene)
-        response_duplicate = get_post_response('htsfiles-list', self.duplicate_gene)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response_duplicate.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(m.Gene.objects.count(), 1)
 
     def test_alternate_ids(self):

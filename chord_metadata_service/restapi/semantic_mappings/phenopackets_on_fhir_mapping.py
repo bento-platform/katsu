@@ -53,15 +53,6 @@ PHENOPACKETS_ON_FHIR_MAPPING = {
                 "code": "diseases",
                 "display": "Diseases"
             }
-        },
-        "hts_files": {
-            "title": "HTS Files",
-            "code": {
-                "system": "http://ga4gh.org/fhir/phenopackets/CodeSystem/section-type",
-                "version": "0.1.0",
-                "code": "hts-files",
-                "display": "HTS Files"
-            }
         }
     },
     "biosample": {
@@ -94,13 +85,6 @@ PHENOPACKETS_ON_FHIR_MAPPING = {
         # fixed values
         "id_url": "id",
         "description_url": "description"
-    },
-    "hts_file": {
-        "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/HtsFile",
-        "genome_assembly": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly",
-        # fixed value
-        "status": "current",
-        "hts_format": "http://ga4gh.org/fhir/phenopackets/CodeSystem/hts-format"
     },
     "disease": {
         "url": "http://ga4gh.org/fhir/phenopackets/StructureDefinition/Disease",

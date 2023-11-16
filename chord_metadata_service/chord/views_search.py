@@ -345,15 +345,12 @@ def chord_private_search(request):
     return search(request, internal_data=True)
 
 
-def phenopacket_filter_results(subject_ids, htsfile_ids, disease_ids, biosample_ids,
+def phenopacket_filter_results(subject_ids, disease_ids, biosample_ids,
                                phenotypicfeature_ids, phenopacket_ids):
     query = Phenopacket.objects.get_queryset()
 
     if subject_ids:
         query = query.filter(subject__id__in=subject_ids)
-
-    if htsfile_ids:
-        query = query.filter(htsfiles__id__in=htsfile_ids)
 
     if disease_ids:
         query = query.filter(diseases__id__in=disease_ids)
@@ -396,19 +393,17 @@ def fhir_search(request, internal_data=False):
                          if hit['_source']['resourceType'] == resource_type)
 
     subject_ids = hits_for('Patient')
-    htsfile_ids = hits_for('DocumentReference')
     disease_ids = hits_for('Condition')
     biosample_ids = hits_for('Specimen')
     phenotypicfeature_ids = hits_for('Observation')
     phenopacket_ids = hits_for('Composition')
 
-    if all((not subject_ids, not htsfile_ids, not disease_ids, not biosample_ids, not phenotypicfeature_ids,
+    if all((not subject_ids, not disease_ids, not biosample_ids, not phenotypicfeature_ids,
             not phenopacket_ids)):
         return Response(build_search_response([], start))
 
     phenopackets = phenopacket_filter_results(
         subject_ids,
-        htsfile_ids,
         disease_ids,
         biosample_ids,
         phenotypicfeature_ids,

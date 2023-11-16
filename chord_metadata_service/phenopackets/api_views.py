@@ -48,20 +48,6 @@ class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
     queryset = m.PhenotypicFeature.objects.all().order_by("id")
 
 
-class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing HTS files
-
-    post:
-    Create a new HTS file
-
-    """
-    serializer_class = s.HtsFileSerializer
-    filter_backends = [DjangoFilterBackend]
-    queryset = m.HtsFile.objects.all().order_by("uri")
-
-
 class GeneViewSet(ExtendedPhenopacketsModelViewSet):
     """
     get:
@@ -113,7 +99,6 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
 
 
 BIOSAMPLE_PREFETCH = (
-    "hts_files",
     "phenotypic_features",
     "experiment_set",
 )

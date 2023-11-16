@@ -108,67 +108,6 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
         return str(self.id)
 
 
-# class Procedure(BaseTimeStamp, IndexableMixin):
-#     """
-#     Class to represent a clinical procedure performed on an individual
-#     (subject) in order to extract a biosample
-
-#     FHIR: Procedure
-#     """
-
-#     code = JSONField(validators=[ontology_validator], help_text=rec_help(d.PROCEDURE, "code"))
-#     body_site = JSONField(blank=True, null=True, validators=[ontology_validator],
-#                           help_text=rec_help(d.PROCEDURE, "body_site"))
-#     performed = JSONField(blank=True, null=True, validators=[
-#         JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
-#     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "extra_properties"))
-
-#     def __str__(self):
-#         return str(self.id)
-
-
-class File(BaseTimeStamp, IndexableMixin):
-    uri = models.URLField(primary_key=True, max_length=200, help_text=rec_help(d.FILE, "uri"))
-    individual_to_file_identifiers = JSONField(blank=True, null=True,
-                                               help_text=rec_help(d.FILE, "individual_to_file_identifiers"))
-    file_attributes = JSONField(blank=True, null=True, help_text=rec_help(d.FILE, "file_attributes"))
-
-    def __str__(self):
-        return str(self.uri)
-
-
-class HtsFile(BaseTimeStamp, IndexableMixin):
-    """
-    Class to link HTC files with data
-
-    FHIR: DocumentReference
-    """
-
-    HTS_FORMAT = (
-        ('UNKNOWN', 'UNKNOWN'),
-        ('SAM', 'SAM'),
-        ('BAM', 'BAM'),
-        ('CRAM', 'CRAM'),
-        ('VCF', 'VCF'),
-        ('BCF', 'BCF'),
-        ('GVCF', 'GVCF'),
-    )
-    uri = models.URLField(primary_key=True, max_length=200, help_text=rec_help(d.HTS_FILE, "uri"))
-    description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.HTS_FILE, "description"))
-    hts_format = models.CharField(max_length=200, choices=HTS_FORMAT, help_text=rec_help(d.HTS_FILE, "hts_format"))
-    genome_assembly = models.CharField(max_length=200, help_text=rec_help(d.HTS_FILE, "genome_assembly"))
-    # e.g.
-    # "individualToSampleIdentifiers": {
-    #   "patient23456": "NA12345"
-    # TODO how to perform this validation, ensure the patient id is the correct one?
-    individual_to_sample_identifiers = JSONField(
-        blank=True, null=True, help_text=rec_help(d.HTS_FILE, "individual_to_sample_identifiers"))
-    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.HTS_FILE, "extra_properties"))
-
-    def __str__(self):
-        return str(self.uri)
-
-
 class Gene(BaseTimeStamp):
     """
     Class to represent an identifier for a gene
@@ -257,8 +196,6 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
                                    help_text=rec_help(d.BIOSAMPLE, "diagnostic_markers"))
     # CHECK! if Procedure instance is deleted Biosample instance is deleted too
     procedure = models.JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "procedure"))
-    hts_files = models.ManyToManyField(
-        HtsFile, blank=True, related_name='biosample_hts_files', help_text=rec_help(d.BIOSAMPLE, "hts_files"))
     is_control_sample = models.BooleanField(default=False, help_text=rec_help(d.BIOSAMPLE, "is_control_sample"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "extra_properties"))
 
