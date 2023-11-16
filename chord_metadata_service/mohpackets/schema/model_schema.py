@@ -90,6 +90,8 @@ from chord_metadata_service.mohpackets.permissible_values import (
 
 
 class ProgramModelSchema(ModelSchema):
+    program_id: str = Field(pattern=ID_REGEX_PATTERNS, max_length=64)
+
     class Config:
         model = Program
         model_fields = "__all__"
