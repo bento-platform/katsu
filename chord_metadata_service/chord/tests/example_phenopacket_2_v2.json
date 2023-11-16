@@ -154,6 +154,49 @@
       ]
     }
   ],
+  "interpretations": [
+    {
+      "id": "interpretation.id.1",
+      "progress_status": "SOLVED",
+      "diagnosis": {
+        "disease": {
+          "id": "OMIM:158810",
+          "label": "Bethlem myopathy 1"
+        },
+        "genomic_interpretations": [
+          {
+            "subject_or_biosample_id": "patient1",
+            "interpretation_status": "CONTRIBUTORY",
+            "gene_descriptor": {
+              "valueId": "HGNC:3477",
+              "symbol": "ETF1",
+              "alternateIds": [
+                "ensembl:ENSG00000120705",
+                "ncbigene:2107",
+                "ucsc:uc003ldc.6",
+                "OMIM:600285"
+              ],
+              "alternateSymbols": [
+                "SUP45L1",
+                "ERF1",
+                "ERF",
+                "eRF1",
+                "TB3-1",
+                "RF1"
+              ],
+              "xrefs": [
+                "VGNC:97422",
+                "MGI:2385071",
+                "RGD:1305712",
+                "ensembl:ENSRNOG00000019450",
+                "ncbigene:307503"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
   "meta_data": {
     "created": "2019-04-03T15:31:40.765Z",
     "created_by": "Peter R",
