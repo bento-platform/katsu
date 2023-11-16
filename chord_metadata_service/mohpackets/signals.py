@@ -38,7 +38,9 @@ logger = logging.getLogger(__name__)
 
 # helper function
 def set_foreign_key(sender, instance, target_model, submitter_id_field, uuid_id_field):
-    if not getattr(instance, uuid_id_field):
+    if not getattr(instance, uuid_id_field) and getattr(
+        instance, submitter_id_field
+    ):  # and getattr(instance, submitter_id_field)
         try:
             related_object = target_model.objects.get(
                 **{
