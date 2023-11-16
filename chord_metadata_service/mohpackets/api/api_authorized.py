@@ -427,6 +427,11 @@ def delete_program(request, program_id: str):
 def get_donor_with_clinical_data(
     request, filters: Query[DonorWithClinicalDataFilterSchema]
 ):
+    authorized_datasets = request.authorized_datasets
+    q = Q(program_id__in=authorized_datasets)
+    q = filters.get_filter_expression()
+    queryset = Donor.objects.filter(q)
+
     donor_followups_prefetch = Prefetch(
         "followup_set",
         queryset=FollowUp.objects.filter(
@@ -442,27 +447,23 @@ def get_donor_with_clinical_data(
             submitter_treatment_id__isnull=True,
         ),
     )
-    queryset = Donor.objects.prefetch_related(
-        donor_followups_prefetch,
-        primary_diagnosis_followups_prefetch,
-        "biomarker_set",
-        "comorbidity_set",
-        "exposure_set",
-        "primarydiagnosis_set__treatment_set__chemotherapy_set",
-        "primarydiagnosis_set__treatment_set__hormonetherapy_set",
-        "primarydiagnosis_set__treatment_set__immunotherapy_set",
-        "primarydiagnosis_set__treatment_set__radiation_set",
-        "primarydiagnosis_set__treatment_set__surgery_set",
-        "primarydiagnosis_set__treatment_set__followup_set",
-        "primarydiagnosis_set__specimen_set__sampleregistration_set",
-    ).all()
-    authorized_datasets = request.authorized_datasets
-    q = Q(program_id__in=authorized_datasets)
-    q = filters.get_filter_expression()
-    result = queryset.filter(q).first()
-    if result:
-        return result
-    else:
+    try:
+        donor = queryset.prefetch_related(
+            donor_followups_prefetch,
+            primary_diagnosis_followups_prefetch,
+            "biomarker_set",
+            "comorbidity_set",
+            "exposure_set",
+            "primarydiagnosis_set__treatment_set__chemotherapy_set",
+            "primarydiagnosis_set__treatment_set__hormonetherapy_set",
+            "primarydiagnosis_set__treatment_set__immunotherapy_set",
+            "primarydiagnosis_set__treatment_set__radiation_set",
+            "primarydiagnosis_set__treatment_set__surgery_set",
+            "primarydiagnosis_set__treatment_set__followup_set",
+            "primarydiagnosis_set__specimen_set__sampleregistration_set",
+        ).get()
+        return donor
+    except Donor.DoesNotExist:
         return HTTPStatus.NOT_FOUND, {
             "error": "Donor matching query does not exist or inaccessible"
         }
