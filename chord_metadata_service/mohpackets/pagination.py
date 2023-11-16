@@ -47,7 +47,7 @@ class CustomPagination(PaginationBase):
 
     def paginate_queryset(self, queryset, pagination: Input, **params):
         DEFAULT_PAGE = 1
-        DEFAULT_PAGE_SIZE = 10
+        DEFAULT_PAGE_SIZE = 100
         pagination.page = pagination.page or DEFAULT_PAGE
         pagination.page_size = pagination.page_size or DEFAULT_PAGE_SIZE
 
