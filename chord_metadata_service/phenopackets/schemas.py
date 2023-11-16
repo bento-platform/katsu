@@ -100,7 +100,7 @@ PHENOPACKET_META_DATA_SCHEMA = describe_schema({
         "submitted_by": base_type(SCHEMA_TYPES.STRING),
         "resources": array_of(RESOURCE_SCHEMA),
         "updates": array_of(PHENOPACKET_UPDATE_SCHEMA),
-        "phenopacket_schema_version": base_type(SCHEMA_TYPES.STRING),
+        "phenopacket_schema_version": enum_of(["2.0", "2.0.0"]),
         "external_references": array_of(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
