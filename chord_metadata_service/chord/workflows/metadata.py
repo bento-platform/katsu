@@ -28,7 +28,7 @@ WORKFLOW_MAF_DERIVED_FROM_VCF_JSON = "maf_derived_from_vcf_json"
 WORKFLOW_VCF2MAF = "vcf2maf"
 WORKFLOW_CBIOPORTAL = "cbioportal"
 
-WORKFLOW_TAG_CBIOPORTAL = "cBioPortal"
+WORKFLOW_TAG_CBIOPORTAL = "cbioportal"
 
 
 def json_file_input(id_: str, required: bool = True):
