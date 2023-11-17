@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 
 from django.urls import reverse
 from rest_framework import status
@@ -53,6 +54,11 @@ class CreateBiosampleTest(APITestCase):
                 }
             ]
         }
+        self.procedure_age_performed = {
+            "age": {
+                "iso_8601_duration": "P25Y"
+            }
+        }
 
     def test_create_biosample(self):
         """ POST a new biosample. """
@@ -77,6 +83,29 @@ class CreateBiosampleTest(APITestCase):
     def test_seriliazer_validate_valid(self):
         serializer = s.BiosampleSerializer(data=self.valid_payload)
         self.assertEqual(serializer.is_valid(), True)
+
+    def test_update(self):
+        # Create initial biosample
+        response = get_post_response('biosamples-list', self.valid_payload)
+        biosample_id = response.data['id']
+
+        # Should be 1
+        initial_count = m.Biosample.objects.all().count()
+
+        # Update the biosample.procedure.performed field
+        self.valid_payload["procedure"]["performed"] = self.procedure_age_performed
+        # response = get_post_response('biosamples-list', self.valid_payload)
+        response = self.client.put(
+            f"/api/biosamples/{biosample_id}",
+            data=json.dumps(self.valid_payload),
+            content_type='application/json',
+        )
+
+        # Should be 1 as well
+        post_update_count = m.Biosample.objects.all().count()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(initial_count, post_update_count)
+        self.assertEqual(response.data['procedure']['performed'], self.procedure_age_performed)
 
 
 class BatchBiosamplesCSVTest(APITestCase):
