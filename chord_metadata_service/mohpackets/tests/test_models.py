@@ -23,6 +23,7 @@ from chord_metadata_service.mohpackets.models import (
 from chord_metadata_service.mohpackets.schema.model_schema import (
     ChemotherapyModelSchema,
     DonorModelSchema,
+    FollowUpModelSchema,
     HormoneTherapyModelSchema,
     ImmunotherapyModelSchema,
     PrimaryDiagnosisModelSchema,
@@ -1745,12 +1746,12 @@ class FollowUpTest(TestCase):
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
             submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
             "submitter_follow_up_id": "FOLLOW_UP_1",
-            "program_id": self.program,
+            "program_id_id": self.program.program_id,
             "submitter_donor_id": self.donor.submitter_donor_id,
             "submitter_primary_diagnosis_id": self.primary_diagnosis.submitter_primary_diagnosis_id,
             "submitter_treatment_id": self.treatment.submitter_treatment_id,
@@ -1777,11 +1778,16 @@ class FollowUpTest(TestCase):
     def test_followup_fields(self):
         self.assertEqual(self.followup.submitter_follow_up_id, "FOLLOW_UP_1")
         self.assertEqual(self.followup.program_id, self.program)
-        self.assertEqual(self.followup.submitter_donor_id, self.donor)
         self.assertEqual(
-            self.followup.submitter_primary_diagnosis_id, self.primary_diagnosis
+            self.followup.submitter_donor_id, self.donor.submitter_donor_id
         )
-        self.assertEqual(self.followup.submitter_treatment_id, self.treatment)
+        self.assertEqual(
+            self.followup.submitter_primary_diagnosis_id,
+            self.primary_diagnosis.submitter_primary_diagnosis_id,
+        )
+        self.assertEqual(
+            self.followup.submitter_treatment_id, self.treatment.submitter_treatment_id
+        )
         self.assertEqual(self.followup.date_of_followup, "2022-10")
         self.assertEqual(
             self.followup.disease_status_at_followup, "Loco-regional progression"
@@ -1809,9 +1815,10 @@ class FollowUpTest(TestCase):
                 "uuid",
                 "submitter_follow_up_id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
-                # "submitter_treatment_id",
-                # "submitter_primary_diagnosis_id",
+                "treatment_uuid",
+                "primary_diagnosis_uuid",
             ],
             model_fields=self.followup._meta.fields,
         )
@@ -1827,6 +1834,9 @@ class FollowUpTest(TestCase):
                 "submitter_follow_up_id",
                 "submitter_donor_id",
                 "program_id",
+                "donor_uuid",
+                "treatment_uuid",
+                "primary_diagnosis_uuid",
             ],
             model_fields=self.followup._meta.fields,
         )
@@ -1838,123 +1848,109 @@ class FollowUpTest(TestCase):
         with self.assertRaises(IntegrityError):
             self.followup = FollowUp.objects.create(**self.valid_values)
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            FollowUpModelSchema.model_validate(self.valid_values),
+            FollowUpModelSchema,
+        )
+
     def test_invalid_id(self):
         invalid_values = get_invalid_ids()
-        for value in invalid_values:
-            self.valid_values["submitter_follow_up_id"] = value
-            self.serializer = FollowUpSerializer(
-                instance=self.followup, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["submitter_follow_up_id"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_date_of_followup(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["date_of_followup"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["date_of_followup"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_disease_status_at_followup(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["disease_status_at_followup"] = value
-            self.serializer = FollowUpSerializer(
-                instance=self.followup, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["disease_status_at_followup"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_relapse_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["relapse_type"] = value
-            self.serializer = FollowUpSerializer(
-                instance=self.followup, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["relapse_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_date_of_relapse(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["date_of_relapse"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["date_of_relapse"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_method_of_progression_status(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["method_of_progression_status"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["method_of_progression_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
-    # TODO: fix regular expression
-    # def test_anatomic_site_progression_or_recurrence(self):
-    #     invalid_values = ["8260/3", 1]
-    #     for value in invalid_values:
-    #         with self.subTest(value=value):
-    #             self.valid_values["sanatomic_site_progression_or_recurrence"] = value
-    #             self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
-    #             self.assertFalse(self.serializer.is_valid())
+    def test_anatomic_site_progression_or_recurrence(self):
+        invalid_values = ["invalid", 1]
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values[
+                    "anatomic_site_progression_or_recurrence"
+                ] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_recurrence_tumour_staging_system(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["recurrence_tumour_staging_system"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.followup, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["recurrence_tumour_staging_system"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_recurrence_t_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["recurrence_t_category"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.followup, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["recurrence_t_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_recurrence_n_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["recurrence_n_category"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.followup, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["recurrence_n_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_recurrence_m_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["recurrence_m_category"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.followup, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["recurrence_m_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_recurrence_stage_group(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["recurrence_stage_group"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["recurrence_stage_group"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
 
 class BiomarkerTest(TestCase):
@@ -2036,6 +2032,12 @@ class BiomarkerTest(TestCase):
             setattr(self.biomarker, field, "")
             self.biomarker.full_clean()
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            SurgeryModelSchema.model_validate(self.valid_values),
+            SurgeryModelSchema,
+        )
+
 
 class ComorbidityTest(TestCase):
     def setUp(self):
@@ -2099,6 +2101,12 @@ class ComorbidityTest(TestCase):
         for field in optional_fields:
             setattr(self.comorbidity, field, "")
             self.comorbidity.full_clean()
+
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            SurgeryModelSchema.model_validate(self.valid_values),
+            SurgeryModelSchema,
+        )
 
     def test_invalid_prior_malignancy(self):
         invalid_values = get_invalid_choices()
@@ -2202,3 +2210,9 @@ class ExposureTest(TestCase):
         for field in optional_fields:
             setattr(self.exposure, field, "")
             self.exposure.full_clean()
+
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            SurgeryModelSchema.model_validate(self.valid_values),
+            SurgeryModelSchema,
+        )
