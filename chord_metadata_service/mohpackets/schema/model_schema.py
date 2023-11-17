@@ -135,8 +135,12 @@ class BiomarkerModelSchema(ModelSchema):
 
 
 class FollowUpModelSchema(ModelSchema):
+    submitter_follow_up_id: str = Field(pattern=ID_REGEX_PATTERNS, max_length=64)
     disease_status_at_followup: Optional[DiseaseStatusFollowupEnum] = None
     relapse_type: Optional[RelapseTypeEnum] = None
+    date_of_followup: Optional[str] = Field(
+        None, pattern=DATE_REGEX_PATTERNS, max_length=32
+    )
     date_of_relapse: Optional[str] = Field(
         None, pattern=DATE_REGEX_PATTERNS, max_length=32
     )
