@@ -298,7 +298,7 @@ class SpecimenModelSchema(ModelSchema):
 
     class Config:
         model = Specimen
-        model_exclude = ["uuid", "donor_uuid"]
+        model_exclude = ["uuid", "donor_uuid", "primary_diagnosis_uuid"]
 
 
 class DonorModelSchema(ModelSchema):
