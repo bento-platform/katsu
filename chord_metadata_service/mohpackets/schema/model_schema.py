@@ -228,7 +228,7 @@ class TreatmentModelSchema(ModelSchema):
 
     class Config:
         model = Treatment
-        model_exclude = ["uuid", "donor_uuid"]
+        model_exclude = ["uuid", "donor_uuid", "primary_diagnosis_uuid"]
 
 
 class PrimaryDiagnosisModelSchema(ModelSchema):
