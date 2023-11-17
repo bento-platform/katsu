@@ -13,14 +13,13 @@ from chord_metadata_service.phenopackets.tests.constants import (
     VALID_INDIVIDUAL_1,
     VALID_META_DATA_2,
     VALID_PROCEDURE_1,
-    VALID_HTS_FILE,
     VALID_DISEASE_1,
     VALID_GENE_1,
     valid_biosample_1,
     valid_biosample_2,
     valid_phenotypic_feature,
 )
-from chord_metadata_service.restapi.tests.utils import get_response
+from chord_metadata_service.restapi.tests.utils import get_post_response
 
 
 # Tests for FHIR conversion functions
@@ -140,7 +139,7 @@ class FHIRBiosampleTest(APITestCase):
     def test_get_fhir(self):
         """ POST a new biosample. """
 
-        get_response('biosamples-list', self.valid_payload)
+        get_post_response('biosamples-list', self.valid_payload)
         get_resp = self.client.get('/api/biosamples?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -154,33 +153,13 @@ class FHIRBiosampleTest(APITestCase):
                               list)
 
 
-class FHIRHtsFileTest(APITestCase):
-
-    def setUp(self):
-        self.hts_file = VALID_HTS_FILE
-
-    def test_get_fhir(self):
-        get_response('htsfiles-list', self.hts_file)
-        get_resp = self.client.get('/api/htsfiles?format=fhir')
-        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
-        get_resp_obj = get_resp.json()
-        self.assertEqual(get_resp_obj['document_references'][0]['resourceType'], 'DocumentReference')
-        self.assertIsInstance(get_resp_obj['document_references'][0]['content'], list)
-        self.assertIsNotNone(get_resp_obj['document_references'][0]['content'][0]['attachment']['url'])
-        self.assertEqual(get_resp_obj['document_references'][0]['status'], 'current')
-        self.assertEqual(get_resp_obj['document_references'][0]['type']['coding'][0]['code'],
-                         get_resp_obj['document_references'][0]['type']['coding'][0]['display'])
-        self.assertEqual(get_resp_obj['document_references'][0]['extension'][0]['url'],
-                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/htsfile-genome-assembly')
-
-
 class FHIRGeneTest(APITestCase):
 
     def setUp(self):
         self.gene = VALID_GENE_1
 
     def test_get_fhir(self):
-        get_response('genes-list', self.gene)
+        get_post_response('genes-list', self.gene)
         get_resp = self.client.get('/api/genes?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
@@ -200,7 +179,7 @@ class FHIRDiseaseTest(APITestCase):
         self.disease = VALID_DISEASE_1
 
     def test_get_fhir(self):
-        get_response('diseases-list', self.disease)
+        get_post_response('diseases-list', self.disease)
         get_resp = self.client.get('/api/diseases?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()

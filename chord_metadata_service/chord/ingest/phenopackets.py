@@ -287,7 +287,6 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     #  biosamples: [...]
     #  genes: [...]
     #  diseases: [...]
-    #  hts_files: [...]
     #  meta_data: {..., resources: [...]}
 
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
@@ -337,7 +336,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     meta_data_obj = pm.MetaData(
         created_by=meta_data["created_by"],
         submitted_by=meta_data.get("submitted_by"),
-        phenopacket_schema_version="2.0.0",
+        phenopacket_schema_version=meta_data.get("phenopacket_schema_version"),
         external_references=meta_data.get("external_references", []),
         extra_properties=meta_data.get("extra_properties", {}),
     )

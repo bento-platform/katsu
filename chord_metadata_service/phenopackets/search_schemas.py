@@ -217,9 +217,6 @@ GENE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENE_
     }
 })
 
-# TODO: Search? Probably not
-HTS_FILE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_HTS_FILE_SCHEMA, {})
-
 PROCEDURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_PROCEDURE_SCHEMA, {
     "properties": {
         "code": ONTOLOGY_SEARCH_SCHEMA,
@@ -276,9 +273,6 @@ BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
             "search": {"database": {"type": "array"}}
         },
         "procedure": PROCEDURE_SEARCH_SCHEMA,
-        "hts_files": {
-            "items": HTS_FILE_SEARCH_SCHEMA  # TODO
-        },
         "is_control_sample": {
             "search": search_optional_eq(1),  # TODO: Boolean search
         },
@@ -449,9 +443,6 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                 }
             }
         },  # TODO
-        "hts_files": {
-            "items": HTS_FILE_SEARCH_SCHEMA  # TODO
-        },
         "meta_data": META_DATA_SEARCH_SCHEMA
     },
     "search": {

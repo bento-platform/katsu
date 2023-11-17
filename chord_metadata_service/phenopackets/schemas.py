@@ -14,14 +14,12 @@ from chord_metadata_service.restapi.schemas import (
 from chord_metadata_service.restapi.schema_utils import (
     DATE_TIME,
     DRAFT_07,
-    SCHEMA_STRING_FORMATS,
     SCHEMA_TYPES,
     array_of,
     base_type,
     enum_of,
     named_one_of,
     sub_schema_uri,
-    string_with_format,
     describe_schema, get_schema_app_id
 )
 
@@ -35,7 +33,6 @@ __all__ = [
     "PHENOPACKET_EVIDENCE_SCHEMA",
     "PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA",
     "PHENOPACKET_GENE_SCHEMA",
-    "PHENOPACKET_HTS_FILE_SCHEMA",
     "PHENOPACKET_BIOSAMPLE_SCHEMA",
     "PHENOPACKET_DISEASE_ONSET_SCHEMA",
     "PHENOPACKET_DISEASE_SCHEMA",
@@ -103,7 +100,7 @@ PHENOPACKET_META_DATA_SCHEMA = describe_schema({
         "submitted_by": base_type(SCHEMA_TYPES.STRING),
         "resources": array_of(RESOURCE_SCHEMA),
         "updates": array_of(PHENOPACKET_UPDATE_SCHEMA),
-        "phenopacket_schema_version": base_type(SCHEMA_TYPES.STRING),
+        "phenopacket_schema_version": enum_of(["2.0", "2.0.0"]),
         "external_references": array_of(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
@@ -153,21 +150,6 @@ PHENOPACKET_GENE_SCHEMA = describe_schema({
     },
     "required": ["id", "symbol"]
 }, descriptions.GENE)
-
-PHENOPACKET_HTS_FILE_SCHEMA = describe_schema({
-    "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "hts_file"),
-    "type": "object",
-    "properties": {
-        "uri": string_with_format(SCHEMA_STRING_FORMATS.URI),
-        "description": base_type(SCHEMA_TYPES.STRING),
-        "hts_format": enum_of(["SAM", "BAM", "CRAM", "VCF", "BCF", "GVCF", "FASTQ", "UNKNOWN"]),
-        "genome_assembly": base_type(SCHEMA_TYPES.STRING),
-        "individual_to_sample_identifiers": base_type(SCHEMA_TYPES.OBJECT),
-        "extra_properties": EXTRA_PROPERTIES_SCHEMA
-    }
-}, descriptions.HTS_FILE)
-
 
 PHENOPACKET_PROCEDURE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,

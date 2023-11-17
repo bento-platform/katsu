@@ -1,4 +1,3 @@
-from datetime import datetime
 from fhirclient.models import (
     observation as obs,
     patient as p,
@@ -12,8 +11,6 @@ from fhirclient.models import (
     range as range_,
     quantity,
     fhirreference,
-    documentreference,
-    attachment,
     fhirdate,
     condition as cond,
     composition as comp,
@@ -273,31 +270,6 @@ def fhir_specimen(obj):
     return specimen.as_json()
 
 
-def fhir_document_reference(obj):
-    """ Converts HTS file to FHIR DocumentReference. """
-
-    doc_ref = documentreference.DocumentReference()
-    doc_ref.type = fhir_codeable_concept({"label": obj['hts_format'], "id": obj['hts_format']})
-    # GA4GH requires status with the fixed value
-    doc_ref.status = PHENOPACKETS_ON_FHIR_MAPPING['hts_file']['status']
-    doc_ref.content = []
-    doc_content = documentreference.DocumentReferenceContent()
-    doc_content.attachment = attachment.Attachment()
-    doc_content.attachment.url = obj['uri']
-    if 'description' in obj.keys():
-        doc_content.attachment.title = obj.get('description', None)
-    doc_ref.content.append(doc_content)
-    doc_ref.indexed = fhirdate.FHIRDate()
-    # check what date it should be  - when it's retrieved or created
-    doc_ref.indexed.date = datetime.now()
-    doc_ref.extension = []
-    genome_assembly = extension.Extension()
-    genome_assembly.url = PHENOPACKETS_ON_FHIR_MAPPING['hts_file']['genome_assembly']
-    genome_assembly.valueString = obj['genome_assembly']
-    doc_ref.extension.append(genome_assembly)
-    return doc_ref.as_json()
-
-
 def fhir_obs_component_region_studied(obj):
     """ Gene corresponds to Observation.component."""
 
@@ -402,7 +374,7 @@ def fhir_composition(obj):
     })
 
     composition.section = []
-    sections = ['biosamples', 'variants', 'diseases', 'hts_files']
+    sections = ['biosamples', 'variants', 'diseases']
     for section in sections:
         if section in obj:
             section_content = _get_section_object(obj.get(section, None), section)

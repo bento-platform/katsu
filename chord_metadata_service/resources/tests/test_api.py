@@ -1,6 +1,6 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
-from chord_metadata_service.restapi.tests.utils import get_response
+from chord_metadata_service.restapi.tests.utils import get_post_response
 
 from ..models import Resource
 from ..serializers import ResourceSerializer
@@ -14,7 +14,7 @@ class CreateResourceTest(APITestCase):
         self.duplicate_resource = DUPLICATE_RESOURCE_3
 
     def test_resource(self):
-        response = get_response('resource-list', self.resource)
+        response = get_post_response('resource-list', self.resource)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Resource.objects.count(), 1)
 

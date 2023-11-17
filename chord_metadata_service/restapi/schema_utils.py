@@ -2,7 +2,6 @@ from enum import Enum
 from bento_lib.search import queries as q
 from typing import Dict, List, Optional
 from django.db import models
-from jsonschema.validators import RefResolver
 from pathlib import Path
 from chord_metadata_service.logger import logger
 from copy import deepcopy
@@ -206,99 +205,6 @@ def tag_schema_with_nested_ids(schema: dict):
 
 def tag_ids_and_describe(schema: dict, descriptions: dict):
     return tag_schema_with_nested_ids(describe_schema(schema, descriptions))
-
-
-def id_of(schema: dict, default=None):
-    return schema.get("$id", default)
-
-
-class SchemaResolver:
-    """
-    A generic json-schema reference resolver wrapper for jsonschema.RefResolver.
-    Use this wrapper to get non-cyclic schema objects from a RefResolver instance.
-
-    RefResolver is for efficient validation of possibly cyclic objects by crawl, while SchemaResolver can be used to
-    compute a fully resolved schema without refs (if definition is non-cyclical), or a partially resolved schema by
-    ignoring self references (if definition is cyclical)
-    """
-
-    resolving = None
-    CONDITIONS = ["if", "then", "else"]
-
-    def __init__(self, resolver: RefResolver, composition_keywords=None):
-        if composition_keywords is None:
-            composition_keywords = ["oneOf", "allOf", "anyOf"]
-        self.resolver = resolver
-        self.composition_keywords = composition_keywords
-
-    def resolve(self, ref_name: str):
-        self.resolving = ref_name
-        schema = self._resolve(ref_name, first_iter=True)
-        self.resolving = None
-        return schema
-
-    def _resolve_properties(self, schema: dict):
-        if "properties" in schema:
-            schema = {
-                **schema,
-                "properties": {
-                    k: self._resolve(prop_ref)
-                    for k, prop_ref in schema["properties"].items()
-                }
-            }
-        return schema
-
-    def _resolve_compositions(self, schema: dict):
-        for kw in self.composition_keywords:
-            if kw in schema:
-                schema = {
-                    **schema,
-                    kw: [
-                        self._resolve(composed_item)
-                        for composed_item in schema[kw]]
-                }
-        return schema
-
-    def _resolve(self, ref, first_iter=False):
-        schema = None
-        if isinstance(ref, dict):
-            if "$ref" in ref:
-                ref = ref["$ref"]
-            else:
-                schema = ref
-
-        if isinstance(ref, str):
-            if not first_iter and self.resolving and self.resolving == ref:
-                # Skip cyclic definition references
-                return {"$ref": ref}
-            _, schema = self.resolver.resolve(ref)
-
-        if not schema:
-            return ref
-
-        schema = self._resolve_properties(schema)
-        schema = self._resolve_compositions(schema)
-        schema = self._resolve_array(schema)
-        schema = self._resolve_conditions(schema)
-        return schema
-
-    def _resolve_array(self, schema: dict):
-        if "type" in schema and schema["type"] == "array" and "items" in schema:
-            items = schema["items"]
-            schema = {
-                **schema,
-                "items": self._resolve(items)
-            }
-        return schema
-
-    def _resolve_conditions(self, schema: dict):
-        for condition in self.CONDITIONS:
-            if condition in schema:
-                schema = {
-                    **schema,
-                    condition: self._resolve(schema[condition])
-                }
-        return schema
 
 
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,

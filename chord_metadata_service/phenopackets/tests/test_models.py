@@ -5,6 +5,7 @@ from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 
 from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
 from chord_metadata_service.phenopackets.filters import (
+    InterpretationFilter,
     filter_ontology,
     filter_extra_properties_datatype,
     PhenotypicFeatureFilter,
@@ -111,20 +112,6 @@ class PhenotypicFeatureTest(TestCase):
                                     data={"individual": "patient:2,patient:1"})
         result = f.qs
         self.assertEqual(len(result), 1)
-
-
-class HtsFileTest(TestCase):
-    """ Test module for HtsFile model. """
-
-    def setUp(self):
-        self.hts_file = m.HtsFile.objects.create(**c.VALID_HTS_FILE)
-
-    def test_hts_file(self):
-        hts_file = m.HtsFile.objects.get(genome_assembly='GRCh38')
-        self.assertEqual(hts_file.uri, 'https://data.example/genomes/germline_wgs.vcf.gz')
-
-    def test_hts_file_str(self):
-        self.assertEqual(str(self.hts_file), 'https://data.example/genomes/germline_wgs.vcf.gz')
 
 
 # class GeneTest(TestCase):
@@ -271,11 +258,20 @@ class InterpretationTest(TestCase):
             progress_status='IN_PROGRESS'
         )
         self.assertEqual(interpretation_qs.count(), 1)
-        # TODO: test diagnosis filters
-        # interpretation_qs = m.Interpretation.objects.filter()
+
+        self._test_interpretation_filter(self.disease_ontology['id'], 1)
+        self._test_interpretation_filter("MONDO:0005015", 0)
 
     def test_interpretation_str(self):
         self.assertEqual(str(self.interpretation), str(self.interpretation.id))
+
+    def _test_interpretation_filter(self, value, count: int):
+        qs = InterpretationFilter().filter_diagnosis(
+            m.Interpretation.objects.all(),
+            "diagnosis__disease_ontology__id",
+            value,
+        )
+        self.assertEqual(qs.count(), count)
 
 
 class MetaDataTest(TestCase):

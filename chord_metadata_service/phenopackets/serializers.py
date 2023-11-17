@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .models import (
     MetaData,
     PhenotypicFeature,
-    HtsFile,
     Gene,
     Disease,
     Biosample,
@@ -23,13 +22,12 @@ from chord_metadata_service.restapi.serializers import GenericSerializer
 __all__ = [
     "MetaDataSerializer",
     "PhenotypicFeatureSerializer",
-    "HtsFileSerializer",
     "GeneSerializer",
     "DiseaseSerializer",
     "BiosampleSerializer",
     "SimplePhenopacketSerializer",
     "PhenopacketSerializer",
-    "VariantDescriptorSerializer",
+    "VariationDescriptorSerializer",
     "VariantInterpretationSerializer",
     "GenomicInterpretationSerializer",
     "GeneDescriptorSerializer",
@@ -72,16 +70,6 @@ class PhenotypicFeatureSerializer(GenericSerializer):
         # meta info for converting to FHIR
         fhir_datatype_plural = 'observations'
         class_converter = fhir_utils.fhir_observation
-
-
-class HtsFileSerializer(GenericSerializer):
-
-    class Meta:
-        model = HtsFile
-        fields = '__all__'
-        # meta info for converting to FHIR
-        fhir_datatype_plural = 'document_references'
-        class_converter = fhir_utils.fhir_document_reference
 
 
 class GeneSerializer(GenericSerializer):
@@ -148,7 +136,7 @@ class GeneDescriptorSerializer(GenericSerializer):
         fields = '__all__'
 
 
-class VariantDescriptorSerializer(GenericSerializer):
+class VariationDescriptorSerializer(GenericSerializer):
     gene_context = GeneDescriptorSerializer(many=False, required=False)
 
     class Meta:
@@ -164,7 +152,7 @@ class VariantInterpretationSerializer(GenericSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        response["variation_descriptor"] = VariantDescriptorSerializer(
+        response["variation_descriptor"] = VariationDescriptorSerializer(
             instance.variation_descriptor, many=False, required=True).data
         return response
 
@@ -208,6 +196,8 @@ class InterpretationSerializer(GenericSerializer):
         response = super().to_representation(instance)
         response["diagnosis"] = DiagnosisSerializer(instance.diagnosis, many=False, required=False).data
         return response
+
+
 #############################################################
 #                                                           #
 #              Phenopacket Data  Serializers                 #

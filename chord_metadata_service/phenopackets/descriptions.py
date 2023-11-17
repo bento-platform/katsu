@@ -154,19 +154,6 @@ FILE = {
 }
 
 
-HTS_FILE = {
-    "description": "A link to a High-Throughput Sequencing (HTS) data file.",
-    "properties": {
-        "uri": "A valid URI to the file",
-        "description": "Human-readable text describing the file.",
-        "hts_format": "The file's format; one of SAM, BAM, CRAM, VCF, BCF, GVCF, FASTQ, or UNKNOWN.",
-        "genome_assembly": "Genome assembly ID for the file, e.g. GRCh38.",
-        "individual_to_sample_identifiers": ("Mapping between individual or biosample IDs and the sample identifier in "
-                                             "the HTS file."),
-        **EXTRA_PROPERTIES
-    }
-}
-
 GENE = {
     "description": "A representation of an identifier for a gene.",
     "properties": {
@@ -357,10 +344,6 @@ BIOSAMPLE = {
                                     "(HER2/Neu Positive), or NCIT:C131711 Human Papillomavirus-18 Positive)")
         },
         "procedure": PROCEDURE,
-        "hts_files": {
-            "description": "A list of HTS files derived from the biosample.",
-            "items": HTS_FILE
-        },
         "variants": {
             "description": "A list of variants determined to be present in the biosample.",
             "items": VARIANT
@@ -441,10 +424,6 @@ PHENOPACKET = {
         "diseases": {
             "description": "A list of diseases diagnosed in the proband.",
             "items": DISEASE
-        },
-        "hts_files": {
-            "description": "A list of HTS files derived from the individual.",
-            "items": HTS_FILE
         },
         "measurements": {
             "description": "Measurements performed in the proband",
