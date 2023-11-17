@@ -169,7 +169,7 @@ class SurgeryModelSchema(ModelSchema):
 
     class Config:
         model = Surgery
-        model_exclude = ["uuid", "donor_uuid"]
+        model_exclude = ["uuid", "donor_uuid", "treatment_uuid"]
 
 
 class ImmunotherapyModelSchema(ModelSchema):
@@ -179,7 +179,7 @@ class ImmunotherapyModelSchema(ModelSchema):
 
     class Config:
         model = Immunotherapy
-        model_exclude = ["uuid", "donor_uuid"]
+        model_exclude = ["uuid", "donor_uuid", "treatment_uuid"]
 
 
 class RadiationModelSchema(ModelSchema):
@@ -189,7 +189,7 @@ class RadiationModelSchema(ModelSchema):
 
     class Config:
         model = Radiation
-        model_exclude = ["uuid", "donor_uuid"]
+        model_exclude = ["uuid", "donor_uuid", "treatment_uuid"]
 
 
 class HormoneTherapyModelSchema(ModelSchema):
@@ -198,7 +198,7 @@ class HormoneTherapyModelSchema(ModelSchema):
 
     class Config:
         model = HormoneTherapy
-        model_exclude = ["uuid", "donor_uuid"]
+        model_exclude = ["uuid", "donor_uuid", "treatment_uuid"]
 
 
 class ChemotherapyModelSchema(ModelSchema):
