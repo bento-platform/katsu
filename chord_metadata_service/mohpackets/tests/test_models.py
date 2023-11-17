@@ -24,11 +24,13 @@ from chord_metadata_service.mohpackets.schema.model_schema import (
     ChemotherapyModelSchema,
     DonorModelSchema,
     HormoneTherapyModelSchema,
+    ImmunotherapyModelSchema,
     PrimaryDiagnosisModelSchema,
     ProgramModelSchema,
     RadiationModelSchema,
     SampleRegistrationModelSchema,
     SpecimenModelSchema,
+    SurgeryModelSchema,
     TreatmentModelSchema,
 )
 from chord_metadata_service.mohpackets.serializers import (
@@ -1121,7 +1123,6 @@ class ChemotherapyTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
                 "donor_uuid",
                 "program_id",
@@ -1139,7 +1140,6 @@ class ChemotherapyTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
                 "donor_uuid",
                 "program_id",
@@ -1162,6 +1162,12 @@ class ChemotherapyTest(TestCase):
         self.chemotherapy.drug_reference_identifier = "f" * 65
         with self.assertRaises(DataError):
             self.chemotherapy.save()
+
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            ChemotherapyModelSchema.model_validate(self.valid_values),
+            ChemotherapyModelSchema,
+        )
 
     def test_invalid_chemotherapy_drug_dose_units(self):
         invalid_values = get_invalid_choices()
@@ -1199,7 +1205,7 @@ class HormoneTherapyTest(TestCase):
             submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
-            "program_id": self.program,
+            "program_id_id": self.program.program_id,
             "submitter_donor_id": self.donor.submitter_donor_id,
             "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "drug_name": "exemestane",
@@ -1232,7 +1238,6 @@ class HormoneTherapyTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
                 "donor_uuid",
                 "program_id",
@@ -1250,7 +1255,6 @@ class HormoneTherapyTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
                 "donor_uuid",
                 "program_id",
@@ -1273,6 +1277,12 @@ class HormoneTherapyTest(TestCase):
         self.hormone_therapy.drug_reference_identifier = "f" * 65
         with self.assertRaises(DataError):
             self.hormone_therapy.save()
+
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            HormoneTherapyModelSchema.model_validate(self.valid_values),
+            HormoneTherapyModelSchema,
+        )
 
     def test_invalid_hormone_drug_dose_units(self):
         invalid_values = get_invalid_choices()
@@ -1310,14 +1320,14 @@ class RadiationTest(TestCase):
             submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
-            "program_id": self.program,
+            "program_id_id": self.program.program_id,
             "submitter_donor_id": self.donor.submitter_donor_id,
             "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "radiation_therapy_modality": "Brachytherapy (procedure)",
             "radiation_therapy_type": "Internal",
             "radiation_therapy_fractions": "30",
             "radiation_therapy_dosage": "66",
-            "anatomical_site_irradiated": "Chest wall structure",
+            "anatomical_site_irradiated": "Nasopharynx",
             "radiation_boost": True,
             "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_1",
         }
@@ -1340,9 +1350,7 @@ class RadiationTest(TestCase):
         self.assertEqual(self.radiation.radiation_therapy_type, "Internal")
         self.assertEqual(self.radiation.radiation_therapy_fractions, "30")
         self.assertEqual(self.radiation.radiation_therapy_dosage, "66")
-        self.assertEqual(
-            self.radiation.anatomical_site_irradiated, "Chest wall structure"
-        )
+        self.assertEqual(self.radiation.anatomical_site_irradiated, "Nasopharynx")
         self.assertTrue(self.radiation.radiation_boost)
         self.assertEqual(
             self.radiation.reference_radiation_treatment_id,
@@ -1353,7 +1361,6 @@ class RadiationTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
                 "donor_uuid",
                 "program_id",
@@ -1371,7 +1378,6 @@ class RadiationTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
                 "donor_uuid",
                 "program_id",
@@ -1385,6 +1391,12 @@ class RadiationTest(TestCase):
             setattr(self.radiation, field, "")
             self.radiation.full_clean()
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            RadiationModelSchema.model_validate(self.valid_values),
+            RadiationModelSchema,
+        )
+
     def test_invalid_radiation_therapy_modality(self):
         invalid_values = get_invalid_choices()
         for invalid_value in invalid_values:
@@ -1392,13 +1404,6 @@ class RadiationTest(TestCase):
                 self.valid_values["radiation_therapy_modality"] = invalid_value
                 with self.assertRaises(SchemaValidationError):
                     RadiationModelSchema.model_validate(self.valid_values)
-        # for value in invalid_values:
-        #     with self.subTest(value=value):
-        #         self.valid_values["radiation_therapy_modality"] = value
-        #     self.serializer = RadiationSerializer(
-        #         instance=self.radiation, data=self.valid_values
-        #     )
-        #     self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_radiation_therapy_type(self):
         invalid_values = get_invalid_choices()
@@ -1407,13 +1412,6 @@ class RadiationTest(TestCase):
                 self.valid_values["radiation_therapy_type"] = invalid_value
                 with self.assertRaises(SchemaValidationError):
                     RadiationModelSchema.model_validate(self.valid_values)
-        # for value in invalid_values:
-        #     with self.subTest(value=value):
-        #         self.valid_values["radiation_therapy_type"] = value
-        #     self.serializer = RadiationSerializer(
-        #         instance=self.radiation, data=self.valid_values
-        #     )
-        #     self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_anatomical_site_irradiated(self):
         invalid_values = get_invalid_choices()
@@ -1422,13 +1420,6 @@ class RadiationTest(TestCase):
                 self.valid_values["anatomical_site_irradiated"] = invalid_value
                 with self.assertRaises(SchemaValidationError):
                     RadiationModelSchema.model_validate(self.valid_values)
-        # for value in invalid_values:
-        #     with self.subTest(value=value):
-        #         self.valid_values["anatomical_site_irradiated"] = value
-        #     self.serializer = RadiationSerializer(
-        #         instance=self.radiation, data=self.valid_values
-        #     )
-        #     self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_radiation_boost(self):
         self.radiation.radiation_boost = "foo"
@@ -1447,23 +1438,22 @@ class ImmunotherapyTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_donor_id=self.donor.submitter_donor_id,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_treatment_id": self.treatment,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "immunotherapy_type": "Cell-based",
             "drug_name": "Necitumumab",
             "drug_reference_identifier": "8756456",
@@ -1478,8 +1468,13 @@ class ImmunotherapyTest(TestCase):
 
     def test_immunotherapy_fields(self):
         self.assertEqual(self.immunotherapy.program_id, self.program)
-        self.assertEqual(self.immunotherapy.submitter_donor_id, self.donor)
-        self.assertEqual(self.immunotherapy.submitter_treatment_id, self.treatment)
+        self.assertEqual(
+            self.immunotherapy.submitter_donor_id, self.donor.submitter_donor_id
+        )
+        self.assertEqual(
+            self.immunotherapy.submitter_treatment_id,
+            self.treatment.submitter_treatment_id,
+        )
         self.assertEqual(self.immunotherapy.immunotherapy_type, "Cell-based")
         self.assertEqual(self.immunotherapy.drug_name, "Necitumumab")
         self.assertEqual(self.immunotherapy.drug_reference_identifier, "8756456")
@@ -1491,10 +1486,12 @@ class ImmunotherapyTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.immunotherapy._meta.fields,
         )
@@ -1506,10 +1503,12 @@ class ImmunotherapyTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.immunotherapy._meta.fields,
         )
@@ -1517,15 +1516,19 @@ class ImmunotherapyTest(TestCase):
             setattr(self.immunotherapy, field, "")
             self.immunotherapy.full_clean()
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            ImmunotherapyModelSchema.model_validate(self.valid_values),
+            ImmunotherapyModelSchema,
+        )
+
     def test_invalid_immunotherapy_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["immunotherapy_type"] = value
-            self.serializer = ImmunotherapySerializer(
-                instance=self.immunotherapy, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["immunotherapy_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ImmunotherapyModelSchema.model_validate(self.valid_values)
 
     def test_drug_name_max_length(self):
         self.immunotherapy.drug_name = "f" * 256
@@ -1544,23 +1547,22 @@ class SurgeryTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_donor_id=self.donor.submitter_donor_id,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_treatment_id": self.treatment,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "surgery_type": "Drainage of abscess",
             "surgery_site": "C06",
             "surgery_location": "Primary",
@@ -1582,8 +1584,10 @@ class SurgeryTest(TestCase):
 
     def test_surgery_fields(self):
         self.assertEqual(self.surgery.program_id, self.program)
-        self.assertEqual(self.surgery.submitter_donor_id, self.donor)
-        self.assertEqual(self.surgery.submitter_treatment_id, self.treatment)
+        self.assertEqual(self.surgery.submitter_donor_id, self.donor.submitter_donor_id)
+        self.assertEqual(
+            self.surgery.submitter_treatment_id, self.treatment.submitter_treatment_id
+        )
         self.assertEqual(self.surgery.surgery_type, "Drainage of abscess")
         self.assertEqual(self.surgery.surgery_site, "C06")
         self.assertEqual(self.surgery.surgery_location, "Primary")
@@ -1607,14 +1611,13 @@ class SurgeryTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
                 "submitter_specimen_id",
-                "margin_types_involved",
-                "margin_types_not_involved",
-                "margin_types_not_assessed",
             ],
             model_fields=self.surgery._meta.fields,
         )
@@ -1626,14 +1629,13 @@ class SurgeryTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
                 "submitter_specimen_id",
-                "margin_types_involved",
-                "margin_types_not_involved",
-                "margin_types_not_assessed",
             ],
             model_fields=self.surgery._meta.fields,
         )
@@ -1641,104 +1643,91 @@ class SurgeryTest(TestCase):
             setattr(self.surgery, field, "")
             self.surgery.full_clean()
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            SurgeryModelSchema.model_validate(self.valid_values),
+            SurgeryModelSchema,
+        )
+
     def test_invalid_surgery_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["surgery_type"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["surgery_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
-    # TODO: fix regular expression
-    # def test_specimen_surgery_site(self):
-    #     invalid_values = ["8260/3", 1]
-    #     for value in invalid_values:
-    #         with self.subTest(value=value):
-    #             self.valid_values["specimen_anatomic_location"] = value
-    #             self.serializer = SpecimenSerializer(instance=self.donor, data=self.valid_values)
-    #             self.assertFalse(self.serializer.is_valid())
+    def test_invalid_surgery_site(self):
+        invalid_values = ["invalid", 1]
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["surgery_site"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_surgery_location(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["surgery_location"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["surgery_location"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_tumour_focality(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["tumour_focality"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["tumour_focality"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_residual_tumour_classification(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["residual_tumour_classification"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["residual_tumour_classification"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_margin_types_involved(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["margin_types_involved"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["margin_types_involved"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_margin_types_not_involved(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["margin_types_not_involved"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["margin_types_not_involved"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_margin_types_not_assessed(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["margin_types_not_assessed"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["margin_types_not_assessed"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_lymphovascular_invasion(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["lymphovascular_invasion"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["lymphovascular_invasion"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_perineural_invasion(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["perineural_invasion"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["perineural_invasion"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
 
 class FollowUpTest(TestCase):
@@ -1747,25 +1736,24 @@ class FollowUpTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
             submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
             "submitter_follow_up_id": "FOLLOW_UP_1",
             "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_primary_diagnosis_id": self.primary_diagnosis,
-            "submitter_treatment_id": self.treatment,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_primary_diagnosis_id": self.primary_diagnosis.submitter_primary_diagnosis_id,
+            "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "date_of_followup": "2022-10",
             "disease_status_at_followup": "Loco-regional progression",
             "relapse_type": "Progression (liquid tumours)",
@@ -1818,11 +1806,12 @@ class FollowUpTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
+                "uuid",
                 "submitter_follow_up_id",
                 "submitter_donor_id",
                 "program_id",
-                "submitter_treatment_id",
-                "submitter_primary_diagnosis_id",
+                # "submitter_treatment_id",
+                # "submitter_primary_diagnosis_id",
             ],
             model_fields=self.followup._meta.fields,
         )
@@ -1834,11 +1823,10 @@ class FollowUpTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
+                "uuid",
                 "submitter_follow_up_id",
                 "submitter_donor_id",
                 "program_id",
-                "submitter_treatment_id",
-                "submitter_primary_diagnosis_id",
             ],
             model_fields=self.followup._meta.fields,
         )
