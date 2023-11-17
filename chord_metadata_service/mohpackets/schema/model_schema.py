@@ -207,7 +207,7 @@ class ChemotherapyModelSchema(ModelSchema):
 
     class Config:
         model = Chemotherapy
-        model_exclude = ["uuid", "donor_uuid"]
+        model_exclude = ["uuid", "donor_uuid", "treatment_uuid"]
 
 
 class TreatmentModelSchema(ModelSchema):
