@@ -108,7 +108,7 @@ workflow_set.add_workflow(WORKFLOW_DOCUMENT, wm.WorkflowDefinition(
     description="This workflow ingests into DRS documents which have been already listed as experiment results.",
     data_type=DATA_TYPE_EXPERIMENT,  # for permissions
     tags=[DATA_TYPE_EXPERIMENT, DATA_TYPE_EXPERIMENT_RESULT],
-    file="readset.wdl",
+    file="document.wdl",
     inputs=[
         # injected
         ACCESS_TOKEN_INPUT,
