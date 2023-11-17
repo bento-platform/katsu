@@ -21,8 +21,11 @@ from chord_metadata_service.mohpackets.models import (
     Treatment,
 )
 from chord_metadata_service.mohpackets.schema.model_schema import (
+    BiomarkerModelSchema,
     ChemotherapyModelSchema,
+    ComorbidityModelSchema,
     DonorModelSchema,
+    ExposureModelSchema,
     FollowUpModelSchema,
     HormoneTherapyModelSchema,
     ImmunotherapyModelSchema,
@@ -1959,11 +1962,10 @@ class BiomarkerTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
             "test_date": "8",
             "psa_level": 230,
             "ca125": 29,
@@ -1985,7 +1987,9 @@ class BiomarkerTest(TestCase):
 
     def test_biomarker_fields(self):
         self.assertEqual(self.biomarker.program_id, self.program)
-        self.assertEqual(self.biomarker.submitter_donor_id, self.donor)
+        self.assertEqual(
+            self.biomarker.submitter_donor_id, self.donor.submitter_donor_id
+        )
         self.assertEqual(self.biomarker.test_date, "8")
         self.assertEqual(self.biomarker.psa_level, 230)
         self.assertEqual(self.biomarker.ca125, 29)
@@ -2004,8 +2008,9 @@ class BiomarkerTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
             ],
             model_fields=self.biomarker._meta.fields,
@@ -2018,13 +2023,10 @@ class BiomarkerTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
-                "submitter_specimen_id",
-                "submitter_primary_diagnosis_id",
-                "submitter_treatment_id",
-                "submitter_follow_up_id",
             ],
             model_fields=self.biomarker._meta.fields,
         )
@@ -2034,9 +2036,65 @@ class BiomarkerTest(TestCase):
 
     def test_valid_schema(self):
         self.assertIsInstance(
-            SurgeryModelSchema.model_validate(self.valid_values),
-            SurgeryModelSchema,
+            BiomarkerModelSchema.model_validate(self.valid_values),
+            BiomarkerModelSchema,
         )
+
+    def test_invalid_er_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["er_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_pr_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["pr_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_her2_ihc_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["her2_ihc_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_her2_ish_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["her2_ish_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_hpv_ihc_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["hpv_ihc_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_hpv_pcr_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["hpv_pcr_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_hpv_strain(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["hpv_strain"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
 
 
 class ComorbidityTest(TestCase):
@@ -2045,11 +2103,10 @@ class ComorbidityTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
             "prior_malignancy": "Yes",
             "laterality_of_prior_malignancy": "Not applicable",
             "age_at_comorbidity_diagnosis": 35,
@@ -2064,7 +2121,9 @@ class ComorbidityTest(TestCase):
 
     def test_comorbitidy_fields(self):
         self.assertEqual(self.comorbidity.program_id, self.program)
-        self.assertEqual(self.comorbidity.submitter_donor_id, self.donor)
+        self.assertEqual(
+            self.comorbidity.submitter_donor_id, self.donor.submitter_donor_id
+        )
         self.assertEqual(self.comorbidity.prior_malignancy, "Yes")
         self.assertEqual(
             self.comorbidity.laterality_of_prior_malignancy, "Not applicable"
@@ -2078,8 +2137,9 @@ class ComorbidityTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
             ],
             model_fields=self.comorbidity._meta.fields,
@@ -2092,8 +2152,9 @@ class ComorbidityTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
             ],
             model_fields=self.comorbidity._meta.fields,
@@ -2104,48 +2165,41 @@ class ComorbidityTest(TestCase):
 
     def test_valid_schema(self):
         self.assertIsInstance(
-            SurgeryModelSchema.model_validate(self.valid_values),
-            SurgeryModelSchema,
+            ComorbidityModelSchema.model_validate(self.valid_values),
+            ComorbidityModelSchema,
         )
 
     def test_invalid_prior_malignancy(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["prior_malignancy"] = value
-                self.serializer = ComorbiditySerializer(
-                    instance=self.comorbidity, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["prior_malignancy"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ComorbidityModelSchema.model_validate(self.valid_values)
 
     def test_invalid_laterality_of_prior_malignancy(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["laterality_of_prior_malignancy"] = value
-                self.serializer = ComorbiditySerializer(
-                    instance=self.comorbidity, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["laterality_of_prior_malignancy"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ComorbidityModelSchema.model_validate(self.valid_values)
 
-    # TODO: fix regular expression
-    # def test_comorbidity_type_code(self):
-    #     invalid_values = ["8260/3", 1]
-    #     for value in invalid_values:
-    #         with self.subTest(value=value):
-    #             self.valid_values["comorbidity_type_code"] = value
-    #             self.serializer = ComorbiditySerializer(instance=self.followup, data=self.valid_values)
-    #             self.assertFalse(self.serializer.is_valid())
+    def test_comorbidity_type_code(self):
+        invalid_values = ["invalid", 1]
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["comorbidity_type_code"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ComorbidityModelSchema.model_validate(self.valid_values)
 
     def test_invalid_comorbidity_treatment_status(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["comorbidity_treatment_status"] = value
-                self.serializer = ComorbiditySerializer(
-                    instance=self.comorbidity, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["comorbidity_treatment_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ComorbidityModelSchema.model_validate(self.valid_values)
 
     def test_comorbidity_treatment_max_length(self):
         self.comorbidity.comorbidity_treatment = "f" * 256
@@ -2159,11 +2213,10 @@ class ExposureTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
             "tobacco_smoking_status": "Current smoker",
             "tobacco_type": ["Unknown", "Electronic cigarettes", "Not applicable"],
             "pack_years_smoked": 280,
@@ -2175,7 +2228,9 @@ class ExposureTest(TestCase):
 
     def test_exposure_fields(self):
         self.assertEqual(self.exposure.program_id, self.program)
-        self.assertEqual(self.exposure.submitter_donor_id, self.donor)
+        self.assertEqual(
+            self.exposure.submitter_donor_id, self.donor.submitter_donor_id
+        )
         self.assertEqual(self.exposure.tobacco_smoking_status, "Current smoker")
         self.assertEqual(
             self.exposure.tobacco_type,
@@ -2187,8 +2242,9 @@ class ExposureTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
             ],
             model_fields=self.exposure._meta.fields,
@@ -2201,8 +2257,9 @@ class ExposureTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
             ],
             model_fields=self.exposure._meta.fields,
@@ -2213,6 +2270,22 @@ class ExposureTest(TestCase):
 
     def test_valid_schema(self):
         self.assertIsInstance(
-            SurgeryModelSchema.model_validate(self.valid_values),
-            SurgeryModelSchema,
+            ExposureModelSchema.model_validate(self.valid_values),
+            ExposureModelSchema,
         )
+
+    def test_invalid_tobacco_smoking_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["tobacco_smoking_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ExposureModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_tobacco_type(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["tobacco_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ExposureModelSchema.model_validate(self.valid_values)
