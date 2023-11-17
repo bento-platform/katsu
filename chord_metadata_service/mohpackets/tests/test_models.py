@@ -26,6 +26,7 @@ from chord_metadata_service.mohpackets.schema.model_schema import (
     HormoneTherapyModelSchema,
     PrimaryDiagnosisModelSchema,
     ProgramModelSchema,
+    RadiationModelSchema,
     SampleRegistrationModelSchema,
     SpecimenModelSchema,
     TreatmentModelSchema,
@@ -1280,13 +1281,6 @@ class HormoneTherapyTest(TestCase):
                 self.valid_values["hormone_drug_dose_units"] = invalid_value
                 with self.assertRaises(SchemaValidationError):
                     HormoneTherapyModelSchema.model_validate(self.valid_values)
-        # for value in invalid_values:
-        #     with self.subTest(value=value):
-        #         self.valid_values["hormone_drug_dose_units"] = value
-        #     self.serializer = HormoneTherapySerializer(
-        #         instance=self.hormone_therapy, data=self.valid_values
-        #     )
-        #     self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_drug_reference_database(self):
         invalid_values = get_invalid_choices()
@@ -1295,13 +1289,6 @@ class HormoneTherapyTest(TestCase):
                 self.valid_values["drug_reference_database"] = invalid_value
                 with self.assertRaises(SchemaValidationError):
                     HormoneTherapyModelSchema.model_validate(self.valid_values)
-        # for value in invalid_values:
-        #     with self.subTest(value=value):
-        #         self.valid_values["drug_reference_database"] = value
-        #     self.serializer = ChemotherapySerializer(
-        #         instance=self.hormone_therapy, data=self.valid_values
-        #     )
-        #     self.assertFalse(self.serializer.is_valid())
 
 
 class RadiationTest(TestCase):
@@ -1310,23 +1297,22 @@ class RadiationTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_donor_id=self.donor.submitter_donor_id,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
             "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_treatment_id": self.treatment,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "radiation_therapy_modality": "Brachytherapy (procedure)",
             "radiation_therapy_type": "Internal",
             "radiation_therapy_fractions": "30",
@@ -1342,8 +1328,12 @@ class RadiationTest(TestCase):
 
     def test_radiation_fields(self):
         self.assertEqual(self.radiation.program_id, self.program)
-        self.assertEqual(self.radiation.submitter_donor_id, self.donor)
-        self.assertEqual(self.radiation.submitter_treatment_id, self.treatment)
+        self.assertEqual(
+            self.radiation.submitter_donor_id, self.donor.submitter_donor_id
+        )
+        self.assertEqual(
+            self.radiation.submitter_treatment_id, self.treatment.submitter_treatment_id
+        )
         self.assertEqual(
             self.radiation.radiation_therapy_modality, "Brachytherapy (procedure)"
         )
@@ -1365,8 +1355,11 @@ class RadiationTest(TestCase):
             excluded_fields=[
                 "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.radiation._meta.fields,
         )
@@ -1380,8 +1373,11 @@ class RadiationTest(TestCase):
             excluded_fields=[
                 "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.radiation._meta.fields,
         )
@@ -1391,33 +1387,48 @@ class RadiationTest(TestCase):
 
     def test_invalid_radiation_therapy_modality(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["radiation_therapy_modality"] = value
-            self.serializer = RadiationSerializer(
-                instance=self.radiation, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["radiation_therapy_modality"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    RadiationModelSchema.model_validate(self.valid_values)
+        # for value in invalid_values:
+        #     with self.subTest(value=value):
+        #         self.valid_values["radiation_therapy_modality"] = value
+        #     self.serializer = RadiationSerializer(
+        #         instance=self.radiation, data=self.valid_values
+        #     )
+        #     self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_radiation_therapy_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["radiation_therapy_type"] = value
-            self.serializer = RadiationSerializer(
-                instance=self.radiation, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["radiation_therapy_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    RadiationModelSchema.model_validate(self.valid_values)
+        # for value in invalid_values:
+        #     with self.subTest(value=value):
+        #         self.valid_values["radiation_therapy_type"] = value
+        #     self.serializer = RadiationSerializer(
+        #         instance=self.radiation, data=self.valid_values
+        #     )
+        #     self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_anatomical_site_irradiated(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["anatomical_site_irradiated"] = value
-            self.serializer = RadiationSerializer(
-                instance=self.radiation, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["anatomical_site_irradiated"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    RadiationModelSchema.model_validate(self.valid_values)
+        # for value in invalid_values:
+        #     with self.subTest(value=value):
+        #         self.valid_values["anatomical_site_irradiated"] = value
+        #     self.serializer = RadiationSerializer(
+        #         instance=self.radiation, data=self.valid_values
+        #     )
+        #     self.assertFalse(self.serializer.is_valid())
 
     def test_invalid_radiation_boost(self):
         self.radiation.radiation_boost = "foo"
