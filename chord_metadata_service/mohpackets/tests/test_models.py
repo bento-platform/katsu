@@ -24,6 +24,7 @@ from chord_metadata_service.mohpackets.schema.model_schema import (
     DonorModelSchema,
     PrimaryDiagnosisModelSchema,
     ProgramModelSchema,
+    SampleRegistrationModelSchema,
     SpecimenModelSchema,
 )
 from chord_metadata_service.mohpackets.serializers import (
@@ -729,25 +730,24 @@ class SampleRegistrationTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.specimen = Specimen.objects.create(
             submitter_specimen_id="SPECIMEN-1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_donor_id=self.donor.submitter_donor_id,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
             "submitter_sample_id": "SAMPLE_REGISTRATION_1",
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_specimen_id": self.specimen,
-            "specimen_tissue_source": "Blood venous",
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_specimen_id": self.specimen.submitter_specimen_id,
+            "specimen_tissue_source": "Abdominal fluid",
             "tumour_normal_designation": "Normal",
             "specimen_type": "Primary tumour - adjacent to normal",
             "sample_type": "Other DNA enrichments",
@@ -764,10 +764,15 @@ class SampleRegistrationTest(TestCase):
             self.sample_registration.submitter_sample_id, "SAMPLE_REGISTRATION_1"
         )
         self.assertEqual(self.sample_registration.program_id, self.program)
-        self.assertEqual(self.sample_registration.submitter_donor_id, self.donor)
-        self.assertEqual(self.sample_registration.submitter_specimen_id, self.specimen)
         self.assertEqual(
-            self.sample_registration.specimen_tissue_source, "Blood venous"
+            self.sample_registration.submitter_donor_id, self.donor.submitter_donor_id
+        )
+        self.assertEqual(
+            self.sample_registration.submitter_specimen_id,
+            self.specimen.submitter_specimen_id,
+        )
+        self.assertEqual(
+            self.sample_registration.specimen_tissue_source, "Abdominal fluid"
         )
         self.assertEqual(self.sample_registration.tumour_normal_designation, "Normal")
         self.assertEqual(
@@ -781,9 +786,12 @@ class SampleRegistrationTest(TestCase):
         optional_fields = get_optional_fields(
             excluded_fields=[
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_specimen_id",
+                "specimen_uuid",
                 "submitter_sample_id",
+                "uuid",
             ],
             model_fields=self.sample_registration._meta.fields,
         )
@@ -796,9 +804,12 @@ class SampleRegistrationTest(TestCase):
         optional_fields = get_optional_fields(
             excluded_fields=[
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_specimen_id",
+                "specimen_uuid",
                 "submitter_sample_id",
+                "uuid",
             ],
             model_fields=self.sample_registration._meta.fields,
         )
@@ -812,71 +823,51 @@ class SampleRegistrationTest(TestCase):
                 **self.valid_values
             )
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            SampleRegistrationModelSchema.model_validate(self.valid_values),
+            SampleRegistrationModelSchema,
+        )
+
     def test_invalid_id(self):
         invalid_values = get_invalid_ids()
-        for value in invalid_values:
-            self.valid_values["submitter_sample_id"] = value
-            self.serializer = SampleRegistrationSerializer(
-                instance=self.sample_registration, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
-
-    def test_invalid_gender(self):
-        invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["gender"] = value
-                self.sample_registration.full_clean()
-
-    def test_invalid_sex_at_birth(self):
-        invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["sex_at_birth"] = value
-                self.serializer = SampleRegistrationSerializer(
-                    instance=self.sample_registration, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["submitter_sample_id"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SampleRegistrationModelSchema.model_validate(self.valid_values)
 
     def test_invalid_specimen_tissue_source(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["specimen_tissue_source"] = value
-                self.serializer = SampleRegistrationSerializer(
-                    instance=self.sample_registration, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["specimen_tissue_source"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SampleRegistrationModelSchema.model_validate(self.valid_values)
 
     def test_invalid_tumour_normal_designation(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["tumour_normal_designation"] = value
-                self.serializer = SampleRegistrationSerializer(
-                    instance=self.sample_registration, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["tumour_normal_designation"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SampleRegistrationModelSchema.model_validate(self.valid_values)
 
     def test_invalid_specimen_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["specimen_type"] = value
-                self.serializer = SampleRegistrationSerializer(
-                    instance=self.sample_registration, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["specimen_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SampleRegistrationModelSchema.model_validate(self.valid_values)
 
     def test_invalid_sample_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["sample_type"] = value
-                self.serializer = SampleRegistrationSerializer(
-                    instance=self.sample_registration, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["sample_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SampleRegistrationModelSchema.model_validate(self.valid_values)
 
 
 class TreatmentTest(TestCase):
