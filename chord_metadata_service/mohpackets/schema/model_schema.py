@@ -263,7 +263,7 @@ class SampleRegistrationModelSchema(ModelSchema):
 
     class Config:
         model = SampleRegistration
-        model_exclude = ["uuid", "donor_uuid"]
+        model_exclude = ["uuid", "donor_uuid", "specimen_uuid"]
 
 
 class SpecimenModelSchema(ModelSchema):
