@@ -17,12 +17,7 @@ __all__ = [
     "workflow_set",
 ]
 
-from chord_metadata_service.chord.data_types import (
-    DATA_TYPE_EXPERIMENT,
-    DATA_TYPE_EXPERIMENT_RESULT,
-    DATA_TYPE_PHENOPACKET,
-    DATA_TYPE_READSET,
-)
+from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET
 
 WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
@@ -32,6 +27,8 @@ WORKFLOW_DOCUMENT = "document"
 WORKFLOW_MAF_DERIVED_FROM_VCF_JSON = "maf_derived_from_vcf_json"
 WORKFLOW_VCF2MAF = "vcf2maf"
 WORKFLOW_CBIOPORTAL = "cbioportal"
+
+WORKFLOW_TAG_CBIOPORTAL = "cBioPortal"
 
 
 def json_file_input(id_: str, required: bool = True):
@@ -87,7 +84,7 @@ workflow_set.add_workflow(WORKFLOW_READSET, wm.WorkflowDefinition(
     name="Readset",
     description="This workflow will copy readset files over to DRS.",
     data_type=DATA_TYPE_EXPERIMENT,  # for permissions
-    tags=[DATA_TYPE_EXPERIMENT, DATA_TYPE_EXPERIMENT_RESULT, DATA_TYPE_READSET],
+    tags=[DATA_TYPE_EXPERIMENT, "readset"],
     file="readset.wdl",
     inputs=[
         # injected
@@ -107,7 +104,7 @@ workflow_set.add_workflow(WORKFLOW_DOCUMENT, wm.WorkflowDefinition(
     name="Document",
     description="This workflow ingests into DRS documents which have been already listed as experiment results.",
     data_type=DATA_TYPE_EXPERIMENT,  # for permissions
-    tags=[DATA_TYPE_EXPERIMENT, DATA_TYPE_EXPERIMENT_RESULT],
+    tags=[DATA_TYPE_EXPERIMENT, "experiment_result"],
     file="document.wdl",
     inputs=[
         # injected
@@ -129,7 +126,7 @@ workflow_set.add_workflow(WORKFLOW_MAF_DERIVED_FROM_VCF_JSON, wm.WorkflowDefinit
     description="This ingestion workflow will add to the current experiment results MAF files that were generated from "
                 "VCF files found in the Dataset.",
     data_type=DATA_TYPE_EXPERIMENT,  # for permissions
-    tags=[DATA_TYPE_EXPERIMENT_RESULT],
+    tags=[DATA_TYPE_EXPERIMENT, WORKFLOW_TAG_CBIOPORTAL],
     file="maf_derived_from_vcf_json.wdl",
     inputs=[
         # injected
@@ -147,6 +144,7 @@ workflow_set.add_workflow(WORKFLOW_VCF2MAF, wm.WorkflowDefinition(
     name="Convert VCF to MAF files",
     description="This analysis workflow will create MAF files from every VCF file found in a dataset.",
     file="vcf2maf.wdl",
+    tags=[WORKFLOW_TAG_CBIOPORTAL],
     inputs=[
         # injected
         ACCESS_TOKEN_INPUT,
@@ -164,7 +162,7 @@ workflow_set.add_workflow(WORKFLOW_CBIOPORTAL, wm.WorkflowDefinition(
     type="export",
     name="cBioPortal",
     description="This workflow creates a bundle for cBioPortal ingestion.",
-    tags=["cbioportal"],
+    tags=[WORKFLOW_TAG_CBIOPORTAL],
     file="cbioportal_export.wdl",
     inputs=[
         # injected

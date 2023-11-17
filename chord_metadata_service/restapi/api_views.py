@@ -347,7 +347,5 @@ def public_dataset(_request):
 
 DT_QUERYSETS = {
     dt.DATA_TYPE_EXPERIMENT: experiments_models.Experiment.objects.all(),
-    dt.DATA_TYPE_EXPERIMENT_RESULT: experiments_models.ExperimentResult.objects.all(),
     dt.DATA_TYPE_PHENOPACKET: pheno_models.Phenopacket.objects.all(),
-    # dt.DATA_TYPE_READSET: None,
 }
