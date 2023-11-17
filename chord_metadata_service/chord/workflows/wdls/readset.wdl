@@ -3,7 +3,6 @@ version 1.0
 workflow readset {
     input {
         Array[File] readset_files
-        String run_dir
         String drs_url
         String project_dataset
         String access_token
