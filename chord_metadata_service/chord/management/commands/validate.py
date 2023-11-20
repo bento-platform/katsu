@@ -1,9 +1,7 @@
 import json
 
 from django.core.management.base import BaseCommand
-from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET
-from chord_metadata_service.chord.ingest.experiments import validate_experiment
-from chord_metadata_service.chord.ingest.phenopackets import validate_phenopacket
+from chord_metadata_service.chord.ingest.constants import DATA_TYPE_TO_VALIDATOR_FN
 from chord_metadata_service.chord.ingest.utils import workflow_file_output_to_path, get_output_or_raise
 from humps import decamelize
 
@@ -32,12 +30,6 @@ class Command(BaseCommand):
         if isinstance(json_data, list):
             for pheno_item in json_data:
                 print(f"Subject id: {pheno_item['subject']['id']}")
-                {
-                    DATA_TYPE_EXPERIMENT: validate_experiment,
-                    DATA_TYPE_PHENOPACKET: validate_phenopacket
-                }[data_type](pheno_item)
+                DATA_TYPE_TO_VALIDATOR_FN[data_type](pheno_item)
         else:
-            {
-                DATA_TYPE_EXPERIMENT: validate_experiment,
-                DATA_TYPE_PHENOPACKET: validate_phenopacket
-            }[data_type](json_data)
+            DATA_TYPE_TO_VALIDATOR_FN[data_type](json_data)
