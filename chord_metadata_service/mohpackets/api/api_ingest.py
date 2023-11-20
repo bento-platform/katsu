@@ -1,6 +1,9 @@
 import logging
+from http import HTTPStatus
+from typing import Type
 
 from django.db import transaction
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from ninja import Field, FilterSchema, ModelSchema, Query, Router, Schema
@@ -521,91 +524,102 @@ def ingest_exposures(request):
 router = Router()
 
 
+def create_instance(payload, model_cls: Type):
+    try:
+        instance = model_cls.objects.create(**payload.dict())
+    except Exception as e:
+        return JsonResponse(
+            status=HTTPStatus.BAD_REQUEST,
+            data={"detail": str(e)},
+        )
+    return JsonResponse(
+        status=HTTPStatus.CREATED,
+        data={"created": str(instance)},
+    )
+
+
 @router.post("/program/")
-def create_program(request, payload: ProgramModelSchema):
-    program = Program.objects.create(**payload.dict())
-    return {"identifier": str(program)}
+def create_program(request, payload: ProgramModelSchema, response: HttpResponse):
+    return create_instance(payload, Program)
 
 
 @router.post("/donor/")
-def create_donor(request, payload: DonorIngestSchema):
-    donor = Donor.objects.create(**payload.dict())
-    return {"identifier": str(donor)}
+def create_donor(request, payload: DonorIngestSchema, response: HttpResponse):
+    return create_instance(payload, Donor)
 
 
 @router.post("/biomarker/")
-def create_biomarker(request, payload: BiomarkerIngestSchema):
-    biomarker = Biomarker.objects.create(**payload.dict())
-    return {"identifier": str(biomarker)}
+def create_biomarker(request, payload: BiomarkerIngestSchema, response: HttpResponse):
+    return create_instance(payload, Biomarker)
 
 
 @router.post("/chemotherapy/")
-def create_chemotherapy(request, payload: ChemotherapyIngestSchema):
-    chemotherapy = Chemotherapy.objects.create(**payload.dict())
-    return {"identifier": str(chemotherapy)}
+def create_chemotherapy(
+    request, payload: ChemotherapyIngestSchema, response: HttpResponse
+):
+    return create_instance(payload, Chemotherapy)
 
 
 @router.post("/comorbidity/")
-def create_comorbidity(request, payload: ComorbidityIngestSchema):
-    comorbidity = Comorbidity.objects.create(**payload.dict())
-    return {"identifier": str(comorbidity)}
+def create_comorbidity(
+    request, payload: ComorbidityIngestSchema, response: HttpResponse
+):
+    return create_instance(payload, Comorbidity)
 
 
 @router.post("/exposure/")
-def create_exposure(request, payload: ExposureIngestSchema):
-    exposure = Exposure.objects.create(**payload.dict())
-    return {"identifier": str(exposure)}
+def create_exposure(request, payload: ExposureIngestSchema, response: HttpResponse):
+    return create_instance(payload, Exposure)
 
 
 @router.post("/followup/")
-def create_followup(request, payload: FollowUpIngestSchema):
-    followup = FollowUp.objects.create(**payload.dict())
-    return {"identifier": str(followup)}
+def create_followup(request, payload: FollowUpIngestSchema, response: HttpResponse):
+    return create_instance(payload, FollowUp)
 
 
 @router.post("/hormonetherapy/")
-def create_hormonetherapy(request, payload: HormoneTherapyIngestSchema):
-    hormonetherapy = HormoneTherapy.objects.create(**payload.dict())
-    return {"identifier": str(hormonetherapy)}
+def create_hormonetherapy(
+    request, payload: HormoneTherapyIngestSchema, response: HttpResponse
+):
+    return create_instance(payload, HormoneTherapy)
 
 
 @router.post("/immunotherapy/")
-def create_immunotherapy(request, payload: ImmunotherapyIngestSchema):
-    immunotherapy = Immunotherapy.objects.create(**payload.dict())
-    return {"identifier": str(immunotherapy)}
+def create_immunotherapy(
+    request, payload: ImmunotherapyIngestSchema, response: HttpResponse
+):
+    return create_instance(payload, Immunotherapy)
 
 
 @router.post("/primarydiagnosis/")
-def create_primarydiagnosis(request, payload: PrimaryDiagnosisIngestSchema):
-    primarydiagnosis = PrimaryDiagnosis.objects.create(**payload.dict())
-    return {"identifier": str(primarydiagnosis)}
+def create_primarydiagnosis(
+    request, payload: PrimaryDiagnosisIngestSchema, response: HttpResponse
+):
+    return create_instance(payload, PrimaryDiagnosis)
 
 
 @router.post("/radiation/")
-def create_radiation(request, payload: RadiationIngestSchema):
-    radiation = Radiation.objects.create(**payload.dict())
-    return {"identifier": str(radiation)}
+def create_radiation(request, payload: RadiationIngestSchema, response: HttpResponse):
+    return create_instance(payload, Radiation)
 
 
 @router.post("/sampleregistration/")
-def create_sampleregistration(request, payload: SampleRegistrationIngestSchema):
-    sampleregistration = SampleRegistration.objects.create(**payload.dict())
-    return {"identifier": str(sampleregistration)}
+def create_sampleregistration(
+    request, payload: SampleRegistrationIngestSchema, response: HttpResponse
+):
+    return create_instance(payload, SampleRegistration)
 
 
 @router.post("/specimen/")
-def create_specimen(request, payload: SpecimenIngestSchema):
-    specimen = Specimen.objects.create(**payload.dict())
-    return {"identifier": str(specimen)}
+def create_specimen(request, payload: SpecimenIngestSchema, response: HttpResponse):
+    return create_instance(payload, Specimen)
 
 
 @router.post("/surgery/")
-def create_surgery(request, payload: SurgeryIngestSchema):
-    surgery = Surgery.objects.create(**payload.dict())
-    return {"identifier": str(surgery)}
+def create_surgery(request, payload: SurgeryIngestSchema, response: HttpResponse):
+    return create_instance(payload, Surgery)
 
 
 @router.post("/treatment/")
-def create_treatment(request, payload: TreatmentIngestSchema):
-    treatment = Treatment.objects.create(**payload.dict())
-    return {"identifier": str(treatment)}
+def create_treatment(request, payload: TreatmentIngestSchema, response: HttpResponse):
+    return create_instance(payload, Treatment)
