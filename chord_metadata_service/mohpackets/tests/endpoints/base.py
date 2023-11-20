@@ -3,7 +3,7 @@ import os
 
 import factory
 from django.conf import settings
-from django.test import TestCase
+from django.test import Client, TestCase
 from rest_framework.test import APIClient
 
 from chord_metadata_service.mohpackets.api.api_authorized import AuthorizedMixin
@@ -54,19 +54,19 @@ class BaseTestCase(TestCase):
             4, program_id=factory.Iterator(cls.programs)
         )
         cls.primary_diagnoses = PrimaryDiagnosisFactory.create_batch(
-            8, submitter_donor_id=factory.Iterator(cls.donors)
+            8, donor_uuid=factory.Iterator(cls.donors)
         )
         cls.specimens = SpecimenFactory.create_batch(
-            16, submitter_primary_diagnosis_id=factory.Iterator(cls.primary_diagnoses)
+            16, primary_diagnosis_uuid=factory.Iterator(cls.primary_diagnoses)
         )
         cls.sample_registrations = SampleRegistrationFactory.create_batch(
-            32, submitter_specimen_id=factory.Iterator(cls.specimens)
+            32, specimen_uuid=factory.Iterator(cls.specimens)
         )
         cls.treatments = TreatmentFactory.create_batch(
-            16, submitter_primary_diagnosis_id=factory.Iterator(cls.primary_diagnoses)
+            16, primary_diagnosis_uuid=factory.Iterator(cls.primary_diagnoses)
         )
         cls.chemotherapies = ChemotherapyFactory.create_batch(
-            4, submitter_treatment_id=factory.Iterator(cls.treatments)
+            4, treatment_uuid=factory.Iterator(cls.treatments)
         )
 
         # Define test users with permission and datasets access
@@ -108,7 +108,10 @@ class BaseTestCase(TestCase):
         ]
 
     def setUp(self):
-        logging.disable(logging.WARNING)
+        # logging.disable(logging.WARNING)
+        # logging.getLogger("faker.factory").setLevel(logging.WARN)
+
         # Initialize the client before each test method
-        self.client = APIClient()
-        AuthorizedMixin.authentication_classes = [LocalAuthentication]
+        # self.client = APIClient()
+        self.client = Client()
+        # AuthorizedMixin.authentication_classes = [LocalAuthentication]
