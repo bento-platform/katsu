@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Any, Dict, List, Optional
 
 from ninja import Field, Schema
@@ -52,6 +53,7 @@ class CustomPagination(PaginationBase):
         pagination.page_size = pagination.page_size or DEFAULT_PAGE_SIZE
 
         offset = (pagination.page - 1) * pagination.page_size
+
         total_items = queryset.count()
         items = list(queryset[offset : offset + pagination.page_size])
 
