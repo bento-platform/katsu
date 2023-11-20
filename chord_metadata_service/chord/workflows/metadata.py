@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from bento_lib.workflows import models as wm
 from bento_lib.workflows.workflow_set import WorkflowSet
