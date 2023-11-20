@@ -39,5 +39,8 @@ RUN mkdir -p /app/tmp
 COPY entrypoint.bash .
 COPY run.dev.bash .
 
+# Tell the service that we're running a local development container
+ENV BENTO_CONTAINER_LOCAL=True
+
 ENTRYPOINT [ "bash", "./entrypoint.bash" ]
 CMD [ "bash", "./run.dev.bash" ]

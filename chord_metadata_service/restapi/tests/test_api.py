@@ -1,5 +1,6 @@
 import json
 import os
+from asgiref.sync import async_to_sync
 from copy import deepcopy
 
 from django.conf import settings
@@ -8,7 +9,7 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from chord_metadata_service.metadata.service_info import SERVICE_INFO
+from chord_metadata_service.metadata.service_info import get_service_info
 from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
 from chord_metadata_service.phenopackets import models as ph_m
@@ -25,11 +26,15 @@ from .constants import (
 )
 
 
+sync_get_service_info = async_to_sync(get_service_info)
+
+
 class ServiceInfoTest(APITestCase):
     def test_service_info(self):
         r = self.client.get(reverse("service-info"), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(r.json(), SERVICE_INFO)
+        # noinspection PyTypeChecker
+        self.assertDictEqual(r.json(), sync_get_service_info())
 
         # TODO: Test compliance with spec
 

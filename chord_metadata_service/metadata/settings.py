@@ -16,7 +16,7 @@ import logging
 import json
 from os.path import exists
 
-from bento_lib.types import GA4GHServiceType
+from bento_lib.service_info import GA4GHServiceType
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
@@ -46,6 +46,8 @@ LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").uppe
 
 
 # CHORD-specific settings
+
+BENTO_CONTAINER_LOCAL = os.environ.get("BENTO_CONTAINER_LOCAL", "false").lower() == "true"
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
 

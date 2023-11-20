@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from bento_lib.workflows import models as wm
 from bento_lib.workflows.workflow_set import WorkflowSet
 
@@ -11,8 +12,6 @@ __all__ = [
     "WORKFLOW_MAF_DERIVED_FROM_VCF_JSON",
     "WORKFLOW_VCF2MAF",
     "WORKFLOW_CBIOPORTAL",
-
-    "WORKFLOWS_PATH",
 
     "workflow_set",
 ]
@@ -42,7 +41,7 @@ ACCESS_TOKEN_INPUT = wm.WorkflowSecretInput(id="access_token", key="access_token
 VALIDATE_SSL_INPUT = wm.WorkflowConfigInput(id="validate_ssl", key="validate_ssl")
 
 
-workflow_set = WorkflowSet()
+workflow_set = WorkflowSet(Path(__file__).parent / "wdls")
 
 # Ingestion workflows --------------------------------------------------------------------------------------------------
 
@@ -183,5 +182,3 @@ workflow_set.add_workflow(WORKFLOW_CBIOPORTAL, wm.WorkflowDefinition(
 ))
 
 # ----------------------------------------------------------------------------------------------------------------------
-
-WORKFLOWS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "wdls")
