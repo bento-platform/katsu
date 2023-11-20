@@ -170,10 +170,10 @@ CANDIG_OPA_SITE_ADMIN_KEY=
 INSIDE_CANDIG=
 ```
 
-## Standalone PostGres db and AdMiner
+## Standalone Postgres db and Adminer
 
-For local development, you can quickly deploy a local database server (postgres) and management tool (adminer) with 
-`docker compose`. Make sure your postgres env variables are set in `.env` before running:
+For local development, you can quickly deploy a local database server (Postgres) and management tool (Adminer) with 
+`docker compose`. Make sure your Postgres env variables are set in `.env` before running:
 
 ```
 # Start docker compose containers
