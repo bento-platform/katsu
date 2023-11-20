@@ -1,9 +1,9 @@
-import factory
+from http import HTTPStatus
+
 from django.conf import settings
-from rest_framework import status
+from django.forms.models import model_to_dict
 
 from chord_metadata_service.mohpackets.models import Donor
-from chord_metadata_service.mohpackets.serializers import DonorSerializer
 from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 from chord_metadata_service.mohpackets.tests.endpoints.factories import DonorFactory
 
@@ -13,7 +13,7 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import DonorFac
 class IngestTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.donor_url = "/v2/ingest/donors/"
+        self.donor_url = "/v2/ingest/donor/"
 
     def test_donor_create_authorized(self):
         """
@@ -24,43 +24,41 @@ class IngestTestCase(BaseTestCase):
         - An authorized user (user_2) with admin permission.
         - User can perform a POST request for donor creation.
         """
-        donor_data = DonorFactory.build_batch(
-            program_id=factory.Iterator(self.programs), size=2
-        )
-        serialized_data = DonorSerializer(donor_data, many=True).data
+        donor = DonorFactory.build(program_id=self.programs[0])
+        donor_dict = model_to_dict(donor)
         response = self.client.post(
             self.donor_url,
-            data=serialized_data,
+            data=donor_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_201_CREATED,
-            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. "
+            HTTPStatus.CREATED,
+            f"Expected status code {HTTPStatus.CREATED}, but got {response.status_code}. "
             f"Response content: {response.content}",
         )
 
     def test_donor_create_unauthorized(self):
         """
-        Test that a non-admin user attempting to create a donor receives a 403 Forbidden response.
+        Test that a non-admin user attempting to create a donor receives a 401 response.
 
         Testing Strategy:
         - Build Donor data based on the existing program_id
         - An unauthorized user (user_0) with no permission.
         - User cannot perform a POST request for donor creation.
         """
-        donor_data = DonorFactory.build_batch(
-            program_id=factory.Iterator(self.programs), size=2
-        )
-        serialized_data = DonorSerializer(donor_data, many=True).data
+        donor = DonorFactory.build(program_id=self.programs[0])
+        donor_dict = model_to_dict(donor)
         response = self.client.post(
             self.donor_url,
-            data=serialized_data,
+            data=donor_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_0.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
 
 # GET API
@@ -82,7 +80,7 @@ class GETTestCase(BaseTestCase):
             self.donor_url,
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_get_donor_301_redirect(self):
         """
@@ -95,7 +93,7 @@ class GETTestCase(BaseTestCase):
         response = self.client.get(
             "/v2/authorized/donors", HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY)
+        self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
 
 
 # OTHERS
@@ -133,9 +131,8 @@ class OthersTestCase(BaseTestCase):
                 self.donor_url,
                 HTTP_AUTHORIZATION=f"Bearer {user.token}",
             )
-            response_data = [
-                donor["submitter_donor_id"] for donor in response.data["results"]
-            ]
+            response = response.json()
+            response_data = [donor["submitter_donor_id"] for donor in response["items"]]
 
             self.assertEqual(response_data, expected_donors)
 
@@ -147,7 +144,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.post(
             self.donor_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_put_request_405(self):
         """
@@ -157,7 +154,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.put(
             self.donor_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_patch_request_405(self):
         """
@@ -167,7 +164,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.patch(
             self.donor_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_delete_request_404(self):
         """
@@ -182,4 +179,4 @@ class OthersTestCase(BaseTestCase):
             f"{self.donor_url}{donor_to_delete.submitter_donor_id}/",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
