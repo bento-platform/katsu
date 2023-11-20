@@ -17,6 +17,7 @@ from .exceptions import IngestError
 from .resources import ingest_resource
 from .schema import schema_validation
 from .utils import map_if_list, query_and_check_nulls
+from .logger import logger
 from typing import Any, Dict, Iterable, Optional, Union, Callable, TypeVar
 from django.db.models import Model
 
@@ -284,10 +285,15 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     #  id: ...
     #  subject: {...}
     #  phenotypic_features: [...]
+    #  measurements: [...]
     #  biosamples: [...]
-    #  genes: [...]
+    #  interpretations: [...]
     #  diseases: [...]
+    #  medical_actions: [...]
     #  meta_data: {..., resources: [...]}
+
+    if phenopacket_data.get("files", []):
+        logger.warning("Found files in phenopacket.files are not ingested by Katsu.")
 
     new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
 
