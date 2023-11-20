@@ -10,6 +10,7 @@
 # - testing token is user1 and user2                        #
 #############################################################
 
+
 from .base import *
 
 DEBUG = True
@@ -46,7 +47,7 @@ LOCAL_AUTHORIZED_DATASET = [
         "token": "token_2",
         "is_admin": True,
         "datasets": ["SYNTHETIC-1", "SYNTHETIC-2"],
-    }
+    },
 ]
 
 # Debug toolbar settings
@@ -59,3 +60,34 @@ if DEBUG:
         "127.0.0.1",
         "10.0.2.2",
     ]
+
+# Logging
+# -------
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {
+            "format": "[%(asctime)s] [%(name)s] %(levelname)s: %(message)s",
+            "datefmt": "%d/%b/%Y %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "console",
+            "level": "DEBUG",  # Set the log level for the console handler
+        },
+    },
+    "loggers": {
+        "psycopg": {
+            "level": "ERROR",
+        },
+        "factory": {
+            "level": "ERROR",
+        },
+        "faker": {
+            "level": "ERROR",
+        },
+    },
+}
