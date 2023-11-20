@@ -11,7 +11,7 @@ def schema_validation(obj, schema, registry=None):
     Validates an object (obj) against a json-schema (schema).
     May use a referencing.Registry object to resolve schema definitions (e.g. VRS variation schemas)
     """
-    
+
     validator_args = {
         'schema': schema,
         'format_checker': Draft7Validator.FORMAT_CHECKER,
