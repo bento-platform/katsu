@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-import os
-
 from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 
 from bento_lib.responses import errors
-from bento_lib.workflows import get_workflow, get_workflow_resource, workflow_exists
 
-from .metadata import METADATA_WORKFLOWS, WORKFLOWS_PATH
+from .metadata import workflow_set
 
 
 class WDLRenderer(BaseRenderer):
@@ -24,25 +21,22 @@ class WDLRenderer(BaseRenderer):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def workflow_list(_request):
-    return Response(METADATA_WORKFLOWS)
+    return Response(workflow_set.workflow_dicts_by_type_and_id())
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def workflow_item(_request, workflow_id):
-    if not workflow_exists(workflow_id, METADATA_WORKFLOWS):
-        return Response(errors.not_found_error(f"No workflow with ID {workflow_id}"), status=404)
-
-    return Response(get_workflow(workflow_id, METADATA_WORKFLOWS))
+    if (wf := workflow_set.get_workflow(workflow_id)) is not None:
+        return Response(wf.model_dump(mode="json"))
+    return Response(errors.not_found_error(f"No workflow with ID {workflow_id}"), status=404)
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 @renderer_classes([WDLRenderer])
 def workflow_file(_request, workflow_id):
-    if not workflow_exists(workflow_id, METADATA_WORKFLOWS):
-        return Response(status=404, data="Not found")
-
-    wdl_path = os.path.join(WORKFLOWS_PATH, get_workflow_resource(workflow_id, METADATA_WORKFLOWS))
-    with open(wdl_path, "r") as wf:
-        return Response(wf.read())
+    if (wdl := workflow_set.get_workflow_wdl_path(workflow_id)) is not None:
+        with open(wdl, "r") as wf:
+            return Response(wf.read())
+    return Response(status=404, data="Not found")

@@ -1,4 +1,4 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2023.03.22
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2023.10.20
 
 SHELL ["/bin/bash", "-c"]
 
@@ -7,17 +7,17 @@ SHELL ["/bin/bash", "-c"]
 RUN apt-get update -y && \
     apt-get install -y postgresql-client && \
     rm -rf /var/lib/apt/lists/* && \
-    pip install --no-cache-dir "uvicorn[standard]==0.20.0"
+    pip install --no-cache-dir "uvicorn[standard]==0.23.2"
 
 # Backwards-compatible with old BentoV2 container layout
 WORKDIR /app
 
 COPY pyproject.toml .
 COPY poetry.lock .
-COPY poetry.toml .
 
 # Install production dependencies
-RUN poetry install --no-root --without dev
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-root --without dev
 
 # Copy all application code
 COPY . .

@@ -1,6 +1,7 @@
 import json
-import logging
 
+from adrf.decorators import api_view as api_view_async
+from drf_spectacular.utils import extend_schema, inline_serializer
 from django.conf import settings
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -15,33 +16,28 @@ from chord_metadata_service.restapi.utils import (
     get_date_stats,
     get_range_stats
 )
+from chord_metadata_service.chord import data_types as dt, models as chord_models
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
-from chord_metadata_service.metadata.service_info import SERVICE_INFO
-from chord_metadata_service.chord import models as chord_models
+from chord_metadata_service.experiments import models as experiments_models
+from chord_metadata_service.metadata.service_info import get_service_info
 from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.patients import models as patients_models
-from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.restapi.models import SchemaType
-from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 
-from chord_metadata_service.chord import data_types as dt
-
-logger = logging.getLogger("restapi_api_views")
-logger.setLevel(logging.INFO)
 
 OVERVIEW_AGE_BIN_SIZE = 10
 
 
-@api_view()
+@api_view_async()
 @permission_classes([AllowAny])
-def service_info(_request):
+async def service_info(_request):
     """
     get:
     Return service info
     """
 
-    return Response(SERVICE_INFO)
+    return Response(await get_service_info())
 
 
 @extend_schema(
@@ -347,7 +343,5 @@ def public_dataset(_request):
 
 DT_QUERYSETS = {
     dt.DATA_TYPE_EXPERIMENT: experiments_models.Experiment.objects.all(),
-    dt.DATA_TYPE_EXPERIMENT_RESULT: experiments_models.ExperimentResult.objects.all(),
     dt.DATA_TYPE_PHENOPACKET: pheno_models.Phenopacket.objects.all(),
-    # dt.DATA_TYPE_READSET: None,
 }

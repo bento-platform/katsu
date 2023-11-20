@@ -1,24 +1,51 @@
+version 1.0
+
 workflow readset {
-    Array[File] readset_files
+    input {
+        Array[File] readset_files
+        String drs_url
+        String project_dataset
+        String access_token
+        Boolean validate_ssl
+    }
 
     scatter(file in readset_files) {
-        call copy_task {
-            input: readset_file_in = file
+        call post_to_drs {
+            input:
+                file_path = file,
+                drs_url = drs_url,
+                project_dataset = project_dataset,
+                token = access_token,
+                validate_ssl = validate_ssl
         }
     }
 
     output {
-        Array[File] readset_files_out = copy_task.readset_file
+        Array[String] drs_responses = post_to_drs.response_message
     }
 }
 
-task copy_task {
-    File readset_file_in
+task post_to_drs {
+    input {
+        File file_path
+        String drs_url
+        String project_dataset
+        String token
+        Boolean validate_ssl
+    }
     command {
-        cp '${readset_file_in}' $(basename -- ${readset_file_in})
-        echo $(basename -- ${readset_file_in})
+        project_id=$(python3 -c 'print("~{project_dataset}".split(":")[0])')
+        dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1])')
+        curl ~{true="" false="-k" validate_ssl} \
+            -X POST \
+            -F "file=@~{file_path}" \
+            -F "project_id=$project_id" \
+            -F "dataset_id=$dataset_id" \
+            -H "Authorization: Bearer ~{token}" \
+            --fail-with-body \
+            "~{drs_url}/ingest"
     }
     output {
-        File readset_file = read_string(stdout())
+        String response_message = read_string(stdout())
     }
 }

@@ -99,10 +99,9 @@ git submodule update --init
 
 The service uses PostgreSQL database for data storage.
 
-* Create and activate virtual environment
-* Install Poetry (for dependency management) in the virtual environment: `pip install poetry`
-* Install dependencies with `poetry install`
-* To configure the application (such as the DB credentials) we are using python-dotenv:
+* Install Poetry (for dependency management): `pip install poetry`
+* Install dependencies with `poetry install`, which manages its own virtual environment
+* To configure the application (such as the DB credentials) we are using `python-dotenv`:
     - Take a look at the .env-sample file at the root of the project
     - You can export these in your virtualenv or simply `cp .env-sample .env`
     - `python-dotenv` can handle either (a local .env will override environment variables though)
@@ -111,9 +110,9 @@ The service uses PostgreSQL database for data storage.
 * Run:
 
 ```
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver
+poetry run python manage.py makemigrations
+poetry run python manage.py migrate
+poetry run python manage.py runserver
 ```
 
 * Development server runs at `localhost:8000`
