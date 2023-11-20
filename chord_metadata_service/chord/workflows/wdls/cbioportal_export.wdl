@@ -7,6 +7,7 @@ workflow cbioportal {
         String katsu_url
         String drs_url
         String access_token
+        Boolean validate_ssl
     }
 
     call dataset_id_from_project_dataset {
@@ -17,14 +18,16 @@ workflow cbioportal {
         input: dataset_id = dataset_id_from_project_dataset.dataset_id,
                run_dir = run_dir,
                katsu_url = katsu_url,
-               token = access_token
+               token = access_token,
+               validate_ssl = validate_ssl
     }
 
     call get_maf {
         input: drs_url = drs_url,
                dataset_id = dataset_id_from_project_dataset.dataset_id,
                run_dir = run_dir,
-               token = access_token
+               token = access_token,
+               validate_ssl = validate_ssl
     }
 
     output {
@@ -52,6 +55,7 @@ task katsu_dataset_export {
         String katsu_url
         String run_dir
         String token
+        Boolean validate_ssl
     }
 
     # Enclosing command with curly braces {} causes issues with parsing in this
@@ -59,7 +63,7 @@ task katsu_dataset_export {
     # interpolation more straightforward.
     command <<<
         # Export results at export_path and returns http code 200 in case of success
-        RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
+        RESPONSE=$(curl -X POST ~{true="" false="-k" validate_ssl} -s -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ~{token}" \
             -d '{"format": "cbioportal", "object_type": "dataset", "object_id": "~{dataset_id}", "output_path": "~{run_dir}"}' \
@@ -86,6 +90,7 @@ task get_maf {
         String run_dir
         String dataset_id
         String token
+        Boolean validate_ssl
     }
 
     command <<<
@@ -110,7 +115,7 @@ task get_maf {
                 response = requests.get(
                     f"~{drs_url}/objects/{object_id}?internal_path=1",
                     headers={"Authorization": "Bearer ~{token}"},
-                    verify=False,
+                    verify=~{true="True" false="False" validate_ssl},
                 )
                 r = response.json()
 

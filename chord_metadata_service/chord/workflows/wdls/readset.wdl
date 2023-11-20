@@ -6,6 +6,7 @@ workflow readset {
         String drs_url
         String project_dataset
         String access_token
+        Boolean validate_ssl
     }
 
     scatter(file in readset_files) {
@@ -14,7 +15,8 @@ workflow readset {
                 file_path = file,
                 drs_url = drs_url,
                 project_dataset = project_dataset,
-                token = access_token
+                token = access_token,
+                validate_ssl = validate_ssl
         }
     }
 
@@ -29,11 +31,12 @@ task post_to_drs {
         String drs_url
         String project_dataset
         String token
+        Boolean validate_ssl
     }
     command {
         project_id=$(python3 -c 'print("~{project_dataset}".split(":")[0])')
         dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1])')
-        curl -k -X POST \
+        curl ~{} -X POST \
              -F "file=@~{file_path}" \
              -F "project_id=$project_id" \
              -F "dataset_id=$dataset_id" \

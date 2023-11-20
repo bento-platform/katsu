@@ -39,6 +39,7 @@ DRS_URL_INPUT = wm.WorkflowServiceUrlInput(id="drs_url", service_kind="drs")
 KATSU_URL_INPUT = wm.WorkflowServiceUrlInput(id="katsu_url", service_kind="metadata")
 PROJECT_DATASET_INPUT = wm.WorkflowProjectDatasetInput(id="project_dataset")
 ACCESS_TOKEN_INPUT = wm.WorkflowSecretInput(id="access_token", key="access_token")
+VALIDATE_SSL_INPUT = wm.WorkflowConfigInput(id="validate_ssl", key="validate_ssl")
 
 
 workflow_set = WorkflowSet()
@@ -56,6 +57,7 @@ workflow_set.add_workflow(WORKFLOW_PHENOPACKETS_JSON, wm.WorkflowDefinition(
         # injected
         ACCESS_TOKEN_INPUT,
         KATSU_URL_INPUT,
+        VALIDATE_SSL_INPUT,
         # user
         PROJECT_DATASET_INPUT,
         json_file_input("json_document"),
@@ -73,6 +75,7 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON, wm.WorkflowDefinition(
         # injected
         ACCESS_TOKEN_INPUT,
         KATSU_URL_INPUT,
+        VALIDATE_SSL_INPUT,
         # user
         PROJECT_DATASET_INPUT,
         json_file_input("json_document"),
@@ -89,6 +92,8 @@ workflow_set.add_workflow(WORKFLOW_READSET, wm.WorkflowDefinition(
     inputs=[
         # injected
         ACCESS_TOKEN_INPUT,
+        DRS_URL_INPUT,
+        VALIDATE_SSL_INPUT,
         # user
         PROJECT_DATASET_INPUT,
         wm.WorkflowFileArrayInput(
@@ -110,6 +115,7 @@ workflow_set.add_workflow(WORKFLOW_DOCUMENT, wm.WorkflowDefinition(
         # injected
         ACCESS_TOKEN_INPUT,
         DRS_URL_INPUT,
+        VALIDATE_SSL_INPUT,
         # user
         PROJECT_DATASET_INPUT,
         wm.WorkflowFileArrayInput(
@@ -151,6 +157,7 @@ workflow_set.add_workflow(WORKFLOW_VCF2MAF, wm.WorkflowDefinition(
         wm.WorkflowConfigInput(id="vep_cache_dir", key="vep_cache_dir"),
         DRS_URL_INPUT,
         KATSU_URL_INPUT,
+        VALIDATE_SSL_INPUT,
         # user
         PROJECT_DATASET_INPUT,
     ]
@@ -169,6 +176,7 @@ workflow_set.add_workflow(WORKFLOW_CBIOPORTAL, wm.WorkflowDefinition(
         DRS_URL_INPUT,
         KATSU_URL_INPUT,
         ACCESS_TOKEN_INPUT,
+        VALIDATE_SSL_INPUT,
         # user
         PROJECT_DATASET_INPUT,
     ],

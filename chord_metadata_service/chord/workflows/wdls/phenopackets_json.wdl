@@ -6,6 +6,7 @@ workflow phenopackets_json {
         String access_token
         String project_dataset
         String katsu_url
+        Boolean validate_ssl
     }
 
     call ingest_task {
@@ -13,7 +14,8 @@ workflow phenopackets_json {
             json_document = json_document,
             katsu_url = katsu_url,
             project_dataset = project_dataset,
-            token = access_token
+            token = access_token,
+            validate_ssl = validate_ssl
     }
 
     output {
@@ -28,10 +30,11 @@ task ingest_task {
         String katsu_url
         String project_dataset
         String token
+        Boolean validate_ssl
     }
     command <<<
         dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1])')
-        RESPONSE=$(curl -X POST -k -s -w "%{http_code}" \
+        RESPONSE=$(curl -X POST ~{true="" false="-k" validate_ssl} -s -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ~{token}" \
             --data "@~{json_document}" \
