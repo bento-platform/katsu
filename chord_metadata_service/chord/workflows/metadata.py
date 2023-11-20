@@ -168,6 +168,7 @@ workflow_set.add_workflow(WORKFLOW_CBIOPORTAL, wm.WorkflowDefinition(
         # injected
         DRS_URL_INPUT,
         KATSU_URL_INPUT,
+        ACCESS_TOKEN_INPUT,
         # user
         PROJECT_DATASET_INPUT,
     ],
