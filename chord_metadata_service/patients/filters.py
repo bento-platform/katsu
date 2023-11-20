@@ -5,6 +5,11 @@ from django.db.models.functions import Cast
 from django.contrib.postgres.search import SearchVector
 from .models import Individual
 
+GENOMIC_INTERPRETATION_QUERY = "phenopackets__interpretations__diagnosis__genomic_interpretations"
+GENE_DESCRIPTOR_QUERY = f"{GENOMIC_INTERPRETATION_QUERY}__gene_descriptor"
+VARIANT_INTERPRETATION_QUERY = f"{GENOMIC_INTERPRETATION_QUERY}__variant_interpretation"
+VARIATION_DESCRIPTOR_QUERY = f"{VARIANT_INTERPRETATION_QUERY}__variation_descriptor"
+
 
 class IndividualFilter(django_filters.rest_framework.FilterSet):
     id = django_filters.AllValuesMultipleFilter()
@@ -93,9 +98,47 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 Cast("phenopackets__biosamples__procedure__extra_properties", TextField()),
                                 Cast("phenopackets__biosamples__extra_properties", TextField()),
 
-                                # TODO: Interpretation Variant fields
+                                # Interpretation field
+                                "phenopackets__interpretations__progress_status",
+                                "phenopackets__interpretations__summary",
+                                Cast("phenopackets__interpretations__extra_properties", TextField()),
 
-                                # TODO: Interpretation Gene fields
+                                # Interpretation.Diagnosis
+                                Cast("phenopackets__interpretations__diagnosis__disease_ontology", TextField()),
+                                Cast("phenopackets__interpretations__diagnosis__extra_properties", TextField()),
+
+                                # Interpretation.Diagnosis.GenomicInterpretation
+                                f"{GENOMIC_INTERPRETATION_QUERY}__subject_or_biosample_id",
+                                f"{GENOMIC_INTERPRETATION_QUERY}__interpretation_status",
+                                Cast(f"{GENOMIC_INTERPRETATION_QUERY}__extra_properties", TextField()),
+
+                                # Interpretation.Diagnosis.GenomicInterpretation.VariantInterpretation fields
+                                f"{VARIANT_INTERPRETATION_QUERY}__acmg_pathogenicity_classification",
+                                f"{VARIANT_INTERPRETATION_QUERY}__therapeutic_actionability",
+
+                                # VariantInterpretation.VariationDescriptor
+                                f"{VARIATION_DESCRIPTOR_QUERY}__id",
+                                f"{VARIATION_DESCRIPTOR_QUERY}__label",
+                                f"{VARIATION_DESCRIPTOR_QUERY}__description",
+                                f"{VARIATION_DESCRIPTOR_QUERY}__molecule_context",
+                                f"{VARIATION_DESCRIPTOR_QUERY}__vrs_ref_allele_seq",
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__variation", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__expressions", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__vcf_record", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__xrefs", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__alternate_labels", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__extensions", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__structural_type", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__allelic_state", TextField()),
+
+                                # Interpretation.Diagnosis.GenomicInterpretation.GeneDescriptor fields
+                                f"{GENE_DESCRIPTOR_QUERY}__value_id",
+                                f"{GENE_DESCRIPTOR_QUERY}__symbol",
+                                f"{GENE_DESCRIPTOR_QUERY}__description",
+                                Cast(f"{GENE_DESCRIPTOR_QUERY}__alternate_ids", TextField()),
+                                Cast(f"{GENE_DESCRIPTOR_QUERY}__xrefs", TextField()),
+                                Cast(f"{GENE_DESCRIPTOR_QUERY}__alternate_symbols", TextField()),
+                                Cast(f"{GENE_DESCRIPTOR_QUERY}__extra_properties", TextField()),
 
                                 # Disease field
                                 Cast("phenopackets__diseases__term", TextField()),
