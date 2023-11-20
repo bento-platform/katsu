@@ -108,7 +108,7 @@ else:
 # ********** MAIN API CLASS **********
 # ************************************************
 api = NinjaAPI(renderer=ORJSONRenderer(), parser=ORJSONParser())
-api.add_router("/ingest/", ingest_router, auth=None, tags=["ingest"])
+api.add_router("/ingest/", ingest_router, auth=auth, tags=["ingest"])
 api.add_router("/authorized/", authorzied_router, auth=auth, tags=["authorized"])
 api.add_router("/discovery/", discovery_router, tags=["discovery"])
 
