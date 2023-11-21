@@ -1,9 +1,11 @@
+from http import HTTPStatus
+
 import factory
 from django.conf import settings
-from rest_framework import status
+from django.forms.models import model_to_dict
 
+# from rest_framework import status
 from chord_metadata_service.mohpackets.models import PrimaryDiagnosis
-from chord_metadata_service.mohpackets.serializers import PrimaryDiagnosisSerializer
 from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 from chord_metadata_service.mohpackets.tests.endpoints.factories import (
     PrimaryDiagnosisFactory,
@@ -15,7 +17,7 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import (
 class IngestTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.primary_diagnosis_url = "/v2/ingest/primary_diagnoses/"
+        self.primary_diagnosis_url = "/v2/ingest/primary_diagnosis/"
 
     def test_primary_diagnosis_create_authorized(self):
         """
@@ -26,47 +28,41 @@ class IngestTestCase(BaseTestCase):
         - An authorized user (user_2) with admin permission.
         - User can perform a POST request for primary diagnosis creation.
         """
-        primary_diagnosis_data = PrimaryDiagnosisFactory.build_batch(
-            submitter_donor_id=factory.Iterator(self.donors), size=2
-        )
-        serialized_data = PrimaryDiagnosisSerializer(
-            primary_diagnosis_data, many=True
-        ).data
+        primary_diagnosis = PrimaryDiagnosisFactory.build(donor_uuid=self.donors[0])
+        data_dict = model_to_dict(primary_diagnosis)
         response = self.client.post(
             self.primary_diagnosis_url,
-            data=serialized_data,
+            data=data_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_201_CREATED,
-            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. "
+            HTTPStatus.CREATED,
+            f"Expected status code {HTTPStatus.CREATED}, but got {response.status_code}. "
             f"Response content: {response.content}",
         )
 
     def test_primary_diagnosis_create_unauthorized(self):
         """
-        Test that a non-admin user attempting to create a primary diagnosis receives a 403 Forbidden response.
+        Test that a non-admin user attempting to create a primary diagnosis receives a 401 response.
 
         Testing Strategy:
         - Build PrimaryDiagnosis data based on the existing program_id
         - An unauthorized user (user_0) with no permission.
         - User cannot perform a POST request for primary diagnosis creation.
         """
-        primary_diagnosis_data = PrimaryDiagnosisFactory.build_batch(
-            submitter_donor_id=factory.Iterator(self.donors), size=2
-        )
-        serialized_data = PrimaryDiagnosisSerializer(
-            primary_diagnosis_data, many=True
-        ).data
+        primary_diagnosis = PrimaryDiagnosisFactory.build(donor_uuid=self.donors[0])
+        data_dict = model_to_dict(primary_diagnosis)
         response = self.client.post(
             self.primary_diagnosis_url,
-            data=serialized_data,
+            data=data_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_0.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
 
 # GET API
@@ -88,7 +84,7 @@ class GETTestCase(BaseTestCase):
             self.primary_diagnosis_url,
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_get_primary_diagnosis_301_redirect(self):
         """
@@ -102,7 +98,7 @@ class GETTestCase(BaseTestCase):
             "/v2/authorized/primary_diagnoses",
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY)
+        self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
 
 
 # OTHERS
@@ -140,9 +136,10 @@ class OthersTestCase(BaseTestCase):
                 self.primary_diagnosis_url,
                 HTTP_AUTHORIZATION=f"Bearer {user.token}",
             )
+            response = response.json()
             response_data = [
                 primary_diagnosis["submitter_primary_diagnosis_id"]
-                for primary_diagnosis in response.data["results"]
+                for primary_diagnosis in response["items"]
             ]
 
             self.assertEqual(response_data, expected_primary_diagnoses)
@@ -155,7 +152,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.post(
             self.primary_diagnosis_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_put_request_405(self):
         """
@@ -165,7 +162,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.put(
             self.primary_diagnosis_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_patch_request_405(self):
         """
@@ -175,7 +172,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.patch(
             self.primary_diagnosis_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_delete_request_404(self):
         """
@@ -190,4 +187,4 @@ class OthersTestCase(BaseTestCase):
             f"{self.primary_diagnosis_url}{diagnoses_to_delete.submitter_primary_diagnosis_id}/",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
