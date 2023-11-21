@@ -775,59 +775,56 @@ def discover_diagnosis_age_count(request):
     Return the count for age of diagnosis in the database.
     If there are multiple date_of_diagnosis, get the earliest
     """
-    age_count = {
-        "null": 0,
-        "0-19": 0,
-        "20-29": 0,
-        "30-39": 0,
-        "40-49": 0,
-        "50-59": 0,
-        "60-69": 0,
-        "70-79": 0,
-        "80+": 0,
-    }
-
-    # For each donor, get diagnosis with earliest date
-    earliest_diagnoses = (
-        PrimaryDiagnosis.objects.values("donor_uuid")
-        .annotate(earliest_date=Min("date_of_diagnosis"))
-        .filter(earliest_date__isnull=False)
+    # Find the earliest diagnosis date per donor
+    diagnosis_dates = PrimaryDiagnosis.objects.values(
+        "submitter_donor_id", "date_of_diagnosis"
     )
-    earliest_diagnoses_dict = {
-        item["donor_uuid"]: item["earliest_date"] for item in earliest_diagnoses
-    }
-
-    # Create a dictionary to store donor UUIDs and their corresponding date_of_birth
-    donor_dob_dict = {donor.uuid: donor.date_of_birth for donor in Donor.objects.all()}
-
-    # count donor in each age bucket
-    for donor_uuid, dob in donor_dob_dict.items():
-        diagnosis_date = earliest_diagnoses_dict.get(donor_uuid)
-        if diagnosis_date and dob:
-            dob_date = datetime.strptime(dob, "%Y-%m")
-            diagnosis_date = datetime.strptime(
-                earliest_diagnoses_dict[donor_uuid], "%Y-%m"
-            )
-            # Calculate age at time diagnosis
-            age = diagnosis_date.year - dob_date.year
-
-            if age < 20:
-                age_count["0-19"] += 1
-            elif age < 30:
-                age_count["20-29"] += 1
-            elif age < 40:
-                age_count["30-39"] += 1
-            elif age < 50:
-                age_count["40-49"] += 1
-            elif age < 60:
-                age_count["50-59"] += 1
-            elif age < 70:
-                age_count["60-69"] += 1
-            elif age < 80:
-                age_count["70-79"] += 1
-            else:
-                age_count["80+"] += 1
+    min_dates = {}
+    for d_date in diagnosis_dates:
+        donor = d_date["submitter_donor_id"]
+        cur_date = (
+            datetime.strptime(d_date["date_of_diagnosis"], "%Y-%m").date()
+            if d_date["date_of_diagnosis"] is not None
+            else date.max
+        )
+        if donor not in min_dates.keys():
+            min_dates[donor] = cur_date
         else:
-            age_count["null"] += 1
+            if cur_date < min_dates[donor]:
+                min_dates[donor] = cur_date
 
-    return age_count
+    # Calculate donor's age of diagnosis
+    birth_dates = Donor.objects.values("submitter_donor_id", "date_of_birth")
+    birth_dates = {
+        date["submitter_donor_id"]: date["date_of_birth"] for date in birth_dates
+    }
+    ages = {}
+    for donor, diagnosis_date in min_dates.items():
+        if birth_dates[donor] is not None and diagnosis_date is not date.max:
+            birth_date = datetime.strptime(birth_dates[donor], "%Y-%m").date()
+            ages[donor] = (diagnosis_date - birth_date).days // 365.25
+        else:
+            ages[donor] = None
+
+    age_counts = defaultdict(int)
+    for age in ages.values():
+        if age is None:
+            age_counts["null"] += 1
+        elif age <= 19:
+            age_counts["0-19"] += 1
+        elif age <= 29:
+            age_counts["20-29"] += 1
+        elif age <= 39:
+            age_counts["30-39"] += 1
+        elif age <= 49:
+            age_counts["40-49"] += 1
+        elif age <= 59:
+            age_counts["50-59"] += 1
+        elif age <= 69:
+            age_counts["60-69"] += 1
+        elif age <= 79:
+            age_counts["70-79"] += 1
+        else:
+            age_counts["80+"] += 1
+
+    return age_counts
