@@ -201,6 +201,10 @@ class SpecimenFactory(factory.django.DjangoModelFactory):
     submitter_donor_id = factory.SelfAttribute(
         "primary_diagnosis_uuid.submitter_donor_id"
     )
+    donor_uuid = factory.SelfAttribute("primary_diagnosis_uuid.donor_uuid")
+    submitter_primary_diagnosis_id = factory.SelfAttribute(
+        "primary_diagnosis_uuid.submitter_primary_diagnosis_id"
+    )
     primary_diagnosis_uuid = factory.SubFactory(PrimaryDiagnosisFactory)
 
 
@@ -228,6 +232,8 @@ class SampleRegistrationFactory(factory.django.DjangoModelFactory):
     # submitter_specimen_id = factory.SubFactory(SpecimenFactory)
     program_id = factory.SelfAttribute("specimen_uuid.program_id")
     submitter_donor_id = factory.SelfAttribute("specimen_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("specimen_uuid.donor_uuid")
+    submitter_specimen_id = factory.SelfAttribute("specimen_uuid.submitter_specimen_id")
     specimen_uuid = factory.SubFactory(SpecimenFactory)
 
 
@@ -276,6 +282,10 @@ class TreatmentFactory(factory.django.DjangoModelFactory):
     submitter_donor_id = factory.SelfAttribute(
         "primary_diagnosis_uuid.submitter_donor_id"
     )
+    donor_uuid = factory.SelfAttribute("primary_diagnosis_uuid.donor_uuid")
+    submitter_primary_diagnosis_id = factory.SelfAttribute(
+        "primary_diagnosis_uuid.submitter_primary_diagnosis_id"
+    )
     primary_diagnosis_uuid = factory.SubFactory(PrimaryDiagnosisFactory)
 
 
@@ -304,6 +314,10 @@ class ChemotherapyFactory(factory.django.DjangoModelFactory):
     # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
     program_id = factory.SelfAttribute("treatment_uuid.program_id")
     submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
+    )
     treatment_uuid = factory.SubFactory(TreatmentFactory)
 
 
@@ -332,6 +346,10 @@ class HormoneTherapyFactory(factory.django.DjangoModelFactory):
     # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
     program_id = factory.SelfAttribute("treatment_uuid.program_id")
     submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
+    )
     treatment_uuid = factory.SubFactory(TreatmentFactory)
 
 
@@ -363,6 +381,10 @@ class RadiationFactory(factory.django.DjangoModelFactory):
     # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
     program_id = factory.SelfAttribute("treatment_uuid.program_id")
     submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
+    )
     treatment_uuid = factory.SubFactory(TreatmentFactory)
 
 
@@ -394,6 +416,10 @@ class ImmunotherapyFactory(factory.django.DjangoModelFactory):
     # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
     program_id = factory.SelfAttribute("treatment_uuid.program_id")
     submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
+    )
     treatment_uuid = factory.SubFactory(TreatmentFactory)
 
 
@@ -449,6 +475,10 @@ class SurgeryFactory(factory.django.DjangoModelFactory):
     # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
     program_id = factory.SelfAttribute("treatment_uuid.program_id")
     submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
+    )
     treatment_uuid = factory.SubFactory(TreatmentFactory)
 
 
@@ -498,8 +528,15 @@ class FollowUpFactory(factory.django.DjangoModelFactory):
     # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
     program_id = factory.SelfAttribute("treatment_uuid.program_id")
     submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
     submitter_primary_diagnosis_id = factory.SelfAttribute(
         "treatment_uuid.submitter_primary_diagnosis_id"
+    )
+    primary_diagnosis_uuid = factory.SelfAttribute(
+        "treatment_uuid.primary_diagnosis_uuid"
+    )
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
     )
     treatment_uuid = factory.SubFactory(TreatmentFactory)
 
