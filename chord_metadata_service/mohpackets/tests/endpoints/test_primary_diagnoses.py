@@ -1,10 +1,8 @@
 from http import HTTPStatus
 
-import factory
 from django.conf import settings
 from django.forms.models import model_to_dict
 
-# from rest_framework import status
 from chord_metadata_service.mohpackets.models import PrimaryDiagnosis
 from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 from chord_metadata_service.mohpackets.tests.endpoints.factories import (
