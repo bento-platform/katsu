@@ -572,13 +572,13 @@ def create_exposure(request, payload: ExposureIngestSchema, response: HttpRespon
     return create_instance(payload, Exposure)
 
 
-@router.post("/followup/")
-def create_followup(request, payload: FollowUpIngestSchema, response: HttpResponse):
+@router.post("/follow_up/")
+def create_follow_up(request, payload: FollowUpIngestSchema, response: HttpResponse):
     return create_instance(payload, FollowUp)
 
 
-@router.post("/hormonetherapy/")
-def create_hormonetherapy(
+@router.post("/hormone_therapy/")
+def create_hormone_therapy(
     request, payload: HormoneTherapyIngestSchema, response: HttpResponse
 ):
     return create_instance(payload, HormoneTherapy)
@@ -591,8 +591,8 @@ def create_immunotherapy(
     return create_instance(payload, Immunotherapy)
 
 
-@router.post("/primarydiagnosis/")
-def create_primarydiagnosis(
+@router.post("/primary_diagnosis/")
+def create_primary_diagnosis(
     request, payload: PrimaryDiagnosisIngestSchema, response: HttpResponse
 ):
     return create_instance(payload, PrimaryDiagnosis)
@@ -603,8 +603,8 @@ def create_radiation(request, payload: RadiationIngestSchema, response: HttpResp
     return create_instance(payload, Radiation)
 
 
-@router.post("/sampleregistration/")
-def create_sampleregistration(
+@router.post("/sample_registration/")
+def create_sample_registration(
     request, payload: SampleRegistrationIngestSchema, response: HttpResponse
 ):
     return create_instance(payload, SampleRegistration)
