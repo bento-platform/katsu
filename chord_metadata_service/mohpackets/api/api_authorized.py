@@ -550,10 +550,10 @@ def list_exposures(request, filters: Query[ExposureFilterSchema]):
 
 
 @router.get(
-    "/followups/",
+    "/follow_ups/",
     response=List[FollowUpModelSchema],
 )
-def list_followups(request, filters: Query[FollowUpFilterSchema]):
+def list_follow_ups(request, filters: Query[FollowUpFilterSchema]):
     authorized_datasets = request.authorized_datasets
     q = Q(program_id__in=authorized_datasets)
     q &= filters.get_filter_expression()
