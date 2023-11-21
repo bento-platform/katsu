@@ -248,9 +248,6 @@ class BeaconListIndividuals(APIView):
     def filter_queryset(self, queryset):
         # Check query parameters validity
         qp = self.request.query_params
-        if len(qp) > settings.CONFIG_PUBLIC["rules"]["max_query_parameters"]:
-            raise ValidationError(f"Wrong number of fields: {len(qp)}")
-
         search_conf = settings.CONFIG_PUBLIC["search"]
         field_conf = settings.CONFIG_PUBLIC["fields"]
         queryable_fields = {

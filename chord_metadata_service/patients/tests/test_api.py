@@ -733,6 +733,6 @@ class BeaconSearchTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
-    def test_beacon_search_too_many_params(self):
+    def test_beacon_search_more_params_than_censorship_limit(self):
         response = self.client.get('/api/beacon_search?sex=MALE&smoking=Non-smoker&death_dc=Deceased')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

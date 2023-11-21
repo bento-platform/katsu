@@ -26,10 +26,9 @@ QUERYSET_FN: dict[str, Callable] = {
 }
 
 
-async def get_count_for_data_type(data_type: str, project: str | None = None, dataset: str | None = None) -> int | None:
+async def _filtered_query(data_type: str, project: str | None = None, dataset: str | None = None) -> QuerySet:
     """
-    Returns the count for a particular data type. If dataset is provided, project will be ignored. If neither are
-    provided, the count will be for the whole node.
+    Returns a filtered query based on the data type, project, and dataset.
     """
 
     q: QuerySet | None = None
@@ -48,9 +47,32 @@ async def get_count_for_data_type(data_type: str, project: str | None = None, da
                 raise ValueError("Project ID must be a UUID")
 
     if q is None:
-        raise ValueError(f"Unsupported data type for count function: {data_type}")
+        raise ValueError(f"Unsupported data type: {data_type}")
 
-    return await q.acount()
+    return q
+
+
+async def get_count_for_data_type(data_type: str, project: str | None = None, dataset: str | None = None) -> int | None:
+    """
+    Returns the count for a particular data type. If dataset is provided, project will be ignored. If neither are
+    provided, the count will be for the whole node.
+    """
+    q = await _filtered_query(data_type, project, dataset)
+    return None if q is None else await q.acount()
+
+
+async def get_last_ingested_for_data_type(data_type: str, project: str | None = None,
+                                          dataset: str | None = None) -> dict | None:
+
+    q = await _filtered_query(data_type, project, dataset)
+    if q is None:
+        return None
+    latest_obj = await q.order_by('-created').afirst()
+
+    if not latest_obj:
+        return None
+
+    return latest_obj.created
 
 
 async def make_data_type_response_object(
@@ -63,6 +85,7 @@ async def make_data_type_response_object(
         **data_type_details,
         "id": data_type_id,
         "count": await get_count_for_data_type(data_type_id, project, dataset),
+        "last_ingested": await get_last_ingested_for_data_type(data_type_id, project, dataset)
     }
 
 

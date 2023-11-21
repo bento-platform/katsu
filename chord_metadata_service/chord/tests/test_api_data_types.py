@@ -41,6 +41,7 @@ class DataTypeTest(APITestCase):
             **DATA_TYPES[DATA_TYPE_PHENOPACKET],
             "queryable": True,
             "count": 0,
+            "last_ingested": None,
         })
 
     def test_data_type_detail_non_uuid_project(self):
