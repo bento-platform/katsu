@@ -1,9 +1,9 @@
-import factory
+from http import HTTPStatus
+
 from django.conf import settings
-from rest_framework import status
+from django.forms.models import model_to_dict
 
 from chord_metadata_service.mohpackets.models import Specimen
-from chord_metadata_service.mohpackets.serializers import SpecimenSerializer
 from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 from chord_metadata_service.mohpackets.tests.endpoints.factories import SpecimenFactory
 
@@ -13,7 +13,7 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import Specimen
 class IngestTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.specimen_url = "/v2/ingest/specimens/"
+        self.specimen_url = "/v2/ingest/specimen/"
 
     def test_specimen_create_authorized(self):
         """
@@ -24,21 +24,21 @@ class IngestTestCase(BaseTestCase):
         - An authorized user (user_2) with admin permission.
         - User can perform a POST request for specimen creation.
         """
-        specimen_data = SpecimenFactory.build_batch(
-            submitter_primary_diagnosis_id=factory.Iterator(self.primary_diagnoses),
-            size=2,
+        specimen = SpecimenFactory.build(
+            primary_diagnosis_uuid=self.primary_diagnoses[0]
         )
-        serialized_data = SpecimenSerializer(specimen_data, many=True).data
+        data_dict = model_to_dict(specimen)
         response = self.client.post(
             self.specimen_url,
-            data=serialized_data,
+            data=data_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_201_CREATED,
-            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. "
+            HTTPStatus.CREATED,
+            f"Expected status code {HTTPStatus.CREATED}, but got {response.status_code}. "
             f"Response content: {response.content}",
         )
 
@@ -51,18 +51,18 @@ class IngestTestCase(BaseTestCase):
         - An unauthorized user (user_0) with no permission.
         - User cannot perform a POST request for specimen creation.
         """
-        specimen_data = SpecimenFactory.build_batch(
-            submitter_primary_diagnosis_id=factory.Iterator(self.primary_diagnoses),
-            size=2,
+        specimen = SpecimenFactory.build(
+            primary_diagnosis_uuid=self.primary_diagnoses[0]
         )
-        serialized_data = SpecimenSerializer(specimen_data, many=True).data
+        data_dict = model_to_dict(specimen)
         response = self.client.post(
             self.specimen_url,
-            data=serialized_data,
+            data=data_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_0.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
 
 # GET API
@@ -84,7 +84,7 @@ class GETTestCase(BaseTestCase):
             self.specimen_url,
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_get_specimen_301_redirect(self):
         """
@@ -98,7 +98,7 @@ class GETTestCase(BaseTestCase):
             "/v2/authorized/specimens",
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY)
+        self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
 
 
 # OTHERS
@@ -137,9 +137,9 @@ class OthersTestCase(BaseTestCase):
                 self.specimen_url,
                 HTTP_AUTHORIZATION=f"Bearer {user.token}",
             )
+            response = response.json()
             response_data = [
-                specimen["submitter_specimen_id"]
-                for specimen in response.data["results"]
+                specimen["submitter_specimen_id"] for specimen in response["items"]
             ]
 
             self.assertEqual(response_data, expected_specimens)
@@ -152,7 +152,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.post(
             self.specimen_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_put_request_405(self):
         """
@@ -162,7 +162,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.put(
             self.specimen_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_patch_request_405(self):
         """
@@ -172,7 +172,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.patch(
             self.specimen_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_delete_request_404(self):
         """
@@ -187,4 +187,4 @@ class OthersTestCase(BaseTestCase):
             f"{self.specimen_url}{specimen_to_delete.submitter_specimen_id}/",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
