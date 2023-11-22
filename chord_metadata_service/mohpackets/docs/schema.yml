@@ -529,13 +529,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedDonorList'
           description: ''
-  /v2/authorized/query/:
+  /v2/discovery/query/:
     get:
       operationId: authorized_donors_list
       description: Dicovery query for the list of applicable donors' ids/program_ids/submitter_specimen_IDs.
       parameters:
       - in: query
         name: treatment_type
+        schema:
+          type: array
+          items:
+            type: string
+      - in: query
+        name: primary_site
         schema:
           type: array
           items:
@@ -551,15 +557,9 @@ paths:
         schema:
           type: array
           items:
-            type: string
+            type: string  
       - in: query
         name: hormone_therapy_drug_name
-        schema:
-          type: array
-          items:
-            type: string
-      - in: query
-        name: primary_site
         schema:
           type: array
           items:
@@ -571,18 +571,6 @@ paths:
           type: array
           items:
             type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page. If not provided, all results will be returned
-        schema:
-          type: integer
       tags:
       - authorized
       security:
@@ -592,7 +580,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DonorWithSpecimensList'
+                $ref: '#/components/schemas/DonorWithSamplesList'
           description: ''
   /v2/authorized/exposures/:
     get:
@@ -3534,7 +3522,7 @@ components:
       required:
       - program_id
       - submitter_donor_id
-    DonorWithSpecimens:
+    DonorWithSamples:
       type: object
       properties:
         submitter_donor_id:
@@ -3543,7 +3531,7 @@ components:
           pattern: ^[A-Za-z0-9\-\._]{1,64}
         program_id:
           type: string
-        submitter_specimen_ids:
+        submitter_sample_ids:
           type: array
           items:
             type: string
@@ -5009,13 +4997,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DonorWithClinicalData'
-    DonorWithSpecimensList:
+    DonorWithSamplesList:
       type: object
       properties:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/DonorWithSpecimens'
+            $ref: '#/components/schemas/DonorWithSamples'
     PaginatedExposureList:
       type: object
       properties:
