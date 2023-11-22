@@ -6,4 +6,4 @@ class MohpacketsConfig(AppConfig):
     name = "chord_metadata_service.mohpackets"
 
     def ready(self):
-        from . import signals
+        from . import signals  # noqa: F401
