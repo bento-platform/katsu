@@ -1,14 +1,10 @@
-from http import HTTPStatus
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from ninja import Field, Schema
 from ninja.pagination import (
-    PageNumberPagination,
     PaginationBase,
     RouterPaginated,
-    paginate,
 )
-from rest_framework.pagination import PageNumberPagination
 
 """
     This module contains the PAGINATION classes. It is used to
@@ -22,17 +18,8 @@ from rest_framework.pagination import PageNumberPagination
 
 """
 
-
-class StandardResultsSetPagination(PageNumberPagination):
-    page_size = 100
-    page_size_query_param = "page_size"
-    max_page_size = 1000
-
-
-class SmallResultsSetPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = "page_size"
-    max_page_size = 1000
+DEFAULT_PAGE = 1
+DEFAULT_PAGE_SIZE = 100
 
 
 class CustomPagination(PaginationBase):
@@ -47,15 +34,13 @@ class CustomPagination(PaginationBase):
         previous_page: Optional[int]
 
     def paginate_queryset(self, queryset, pagination: Input, **params):
-        DEFAULT_PAGE = 1
-        DEFAULT_PAGE_SIZE = 100
         pagination.page = pagination.page or DEFAULT_PAGE
         pagination.page_size = pagination.page_size or DEFAULT_PAGE_SIZE
 
         offset = (pagination.page - 1) * pagination.page_size
 
         total_items = queryset.count()
-        items = list(queryset[offset : offset + pagination.page_size])
+        items = list(queryset[offset : offset + pagination.page_size])  # noqa: E203
 
         next_page = (
             pagination.page + 1 if offset + pagination.page_size < total_items else None
