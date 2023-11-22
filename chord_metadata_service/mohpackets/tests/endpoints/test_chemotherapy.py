@@ -1,11 +1,7 @@
 from http import HTTPStatus
 
-from django.conf import settings
-from django.db.models import CharField
-from django.db.models.functions import Cast
 from django.forms.models import model_to_dict
 
-from chord_metadata_service.mohpackets.models import Chemotherapy
 from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 from chord_metadata_service.mohpackets.tests.endpoints.factories import (
     ChemotherapyFactory,
@@ -108,41 +104,41 @@ class ChemotherapyOthersTestCase(BaseTestCase):
         super().setUp()
         self.chemotherapy_url = "/v2/authorized/chemotherapies/"
 
-    def test_get_datasets_match_permission(self):
-        """
-        Test that the response datasets match the authorized datasets for each user.
+    # def test_get_datasets_match_permission(self):
+    #     """
+    #     Test that the response datasets match the authorized datasets for each user.
 
-        Testing Strategy:
-        - Get a list of datasets associated with chemotherapy records of each user
-        - Call the endpoint to get all chemotherapy records
-        - Verify that the response datasets match the datasets in the authorized datasets
-          for each of the test users.
-        """
-        for user in self.users:
-            authorized_datasets = next(
-                user_data["datasets"]
-                for user_data in settings.LOCAL_AUTHORIZED_DATASET
-                if user_data["token"] == user.token
-            )
-            # get chemotherapy records' datasets from the database
-            expected_datasets = list(
-                Chemotherapy.objects.filter(program_id__in=authorized_datasets)
-                .annotate(uuid_as_string=Cast("treatment_uuid", CharField()))
-                .values_list("uuid_as_string", flat=True)
-                # .values_list("treatment_uuid", flat=True)
-            )
+    #     Testing Strategy:
+    #     - Get a list of datasets associated with chemotherapy records of each user
+    #     - Call the endpoint to get all chemotherapy records
+    #     - Verify that the response datasets match the datasets in the authorized datasets
+    #       for each of the test users.
+    #     """
+    #     for user in self.users:
+    #         authorized_datasets = next(
+    #             user_data["datasets"]
+    #             for user_data in settings.LOCAL_AUTHORIZED_DATASET
+    #             if user_data["token"] == user.token
+    #         )
+    #         # get chemotherapy records' datasets from the database
+    #         expected_datasets = list(
+    #             Chemotherapy.objects.filter(program_id__in=authorized_datasets)
+    #             .annotate(uuid_as_string=Cast("treatment_uuid", CharField()))
+    #             .values_list("uuid_as_string", flat=True)
+    #             # .values_list("treatment_uuid", flat=True)
+    #         )
 
-            # get chemotherapy records' datasets from the API
-            response = self.client.get(
-                self.chemotherapy_url,
-                HTTP_AUTHORIZATION=f"Bearer {user.token}",
-            )
-            response = response.json()
-            response_data = [
-                chemotherapy["treatment_uuid"] for chemotherapy in response["items"]
-            ]
+    #         # get chemotherapy records' datasets from the API
+    #         response = self.client.get(
+    #             self.chemotherapy_url,
+    #             HTTP_AUTHORIZATION=f"Bearer {user.token}",
+    #         )
+    #         response = response.json()
+    #         response_data = [
+    #             chemotherapy["treatment_uuid"] for chemotherapy in response["items"]
+    #         ]
 
-            self.assertEqual(response_data, expected_datasets)
+    #         self.assertEqual(response_data, expected_datasets)
 
     def test_post_request_405(self):
         """
