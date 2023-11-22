@@ -24,15 +24,14 @@ from chord_metadata_service.mohpackets.models import (
 logger = logging.getLogger(__name__)
 """
     This module contains the SIGNALS for the MoH Models.
-    Due to the change to include UUID in each models, the UUID and FK have to be either provided 
+    Due to the change to include UUID in each models, the UUID and FK have to be either provided
     upon ingest or in katsu before saving the object
     The pre_save signal should check this saving process before saving to the database
     to ensure the the FK is properly link:
     - If there is no donor_uuid, need to find the Donor and link it
     - If donor_uuid exists, continue
-    
+
     Author: Son Chau
-    
 """
 
 
