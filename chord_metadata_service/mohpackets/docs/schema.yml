@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: MoH Service API
   version: 2.3.0
-  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/f6454c48b1141c11424e06596ad59080ff6f8b76/chord_metadata_service/mohpackets/docs/schema.yml
+  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/e9992d7585a9a0052570d86a217a02e37fd2594e/chord_metadata_service/mohpackets/docs/schema.yml
 paths:
   /v2/authorized/biomarkers/:
     get:
@@ -528,59 +528,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedDonorList'
-          description: ''
-  /v2/discovery/query/:
-    get:
-      operationId: authorized_donors_list
-      description: Dicovery query for the list of applicable donors' ids/program_ids/submitter_specimen_IDs.
-      parameters:
-      - in: query
-        name: treatment_type
-        schema:
-          type: array
-          items:
-            type: string
-      - in: query
-        name: primary_site
-        schema:
-          type: array
-          items:
-            type: string
-      - in: query
-        name: chemotherapy_drug_name
-        schema:
-          type: array
-          items:
-            type: string
-      - in: query
-        name: immunotherapy_drug_name
-        schema:
-          type: array
-          items:
-            type: string  
-      - in: query
-        name: hormone_therapy_drug_name
-        schema:
-          type: array
-          items:
-            type: string
-      - in: query
-        name: exclude_cohorts
-        description: Cohorts to be exclude results frmo
-        schema:
-          type: array
-          items:
-            type: string
-      tags:
-      - authorized
-      security:
-      - localAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DonorWithSamplesList'
           description: ''
   /v2/authorized/exposures/:
     get:
@@ -3522,33 +3469,6 @@ components:
       required:
       - program_id
       - submitter_donor_id
-    DonorWithSamples:
-      type: object
-      properties:
-        submitter_donor_id:
-          type: string
-          maxLength: 64
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
-        program_id:
-          type: string
-        age_at_diagnosis:
-          type: string
-          description: One of 0-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80+, or null
-        submitter_sample_ids:
-          type: array
-          items:
-            type: string
-        treatment_type:
-          type: array
-          items:
-            type: string
-        primary_sites:
-          type: array
-          items:
-            type: string
-      required:
-      - program_id
-      - submitter_donor_id
     DosageUnitsEnum:
       enum:
       - mg/m2
@@ -5008,13 +4928,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DonorWithClinicalData'
-    DonorWithSamplesList:
-      type: object
-      properties:
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/DonorWithSamples'
     PaginatedExposureList:
       type: object
       properties:
