@@ -1114,7 +1114,7 @@ ID_REGEX_PATTERNS = r"^[A-Za-z0-9\-\._]{1,64}"
 # A date, or partial date (e.g. just year or year + month) as used in
 # human communication. The format is YYYY, YYYY-MM, or YYYY-MM-DD,
 # e.g. 2018, 1973-06, or 1905-08-23. There SHALL be no time zone.
-DATE_REGEX_PATTERNS = r"^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?"
+DATE_REGEX_PATTERNS = r"^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?"  # noqa: E501
 
 # ICD-O-3 morphology codes
 # Examples: 8260/3, 9691/36
