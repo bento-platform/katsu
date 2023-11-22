@@ -16,13 +16,8 @@ Including another URLconf
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import include, path
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
 
-from chord_metadata_service.mohpackets import urls as moh_urls
+from chord_metadata_service.mohpackets.apis.core import api
 
 
 def redirect_to_default(request):
@@ -30,12 +25,8 @@ def redirect_to_default(request):
 
 
 urlpatterns = [
-    path("v2/", include(moh_urls)),
-    path("", redirect_to_default),  # how do i set default to url v2/api/docs
-    # OpenAPI 3 documentation with Swagger UI
-    path("v1", SpectacularSwaggerView.as_view(), name="swagger-ui"),
-    path("schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path("", redirect_to_default),
+    path("v2/", api.urls),
 ]
 
 if settings.DEBUG:
