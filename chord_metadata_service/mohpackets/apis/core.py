@@ -20,7 +20,7 @@ from chord_metadata_service.mohpackets.apis.ingestion import router as ingest_ro
 from chord_metadata_service.mohpackets.utils import get_schema_url
 
 """
-Module with configurations for APIs 
+Module with configurations for APIs
 
 Author: Son Chau
 """
