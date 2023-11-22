@@ -529,6 +529,77 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedDonorList'
           description: ''
+  /v2/authorized/query/:
+    get:
+      operationId: authorized_donors_list
+      description: Queries for a list of donors that the user is authorized to view.
+      parameters:
+      - in: query
+        name: submitter_donor_id
+        schema:
+          type: string
+      - in: query
+        name: program_id
+        schema:
+          type: string
+      - in: query
+        name: treatment_type
+        schema:
+          type: string
+      - in: query
+        name: chemotherapy_drug_name
+        schema:
+          type: array
+          items:
+            type: string
+      - in: query
+        name: immunotherapy_drug_name
+        schema:
+          type: array
+          items:
+            type: string
+      - in: query
+        name: hormone_therapy_drug_name
+        schema:
+          type: array
+          items:
+            type: string
+      - in: query
+        name: primary_site
+        schema:
+          type: array
+          items:
+            type: string
+      - in: query
+        name: exclude_cohorts
+        description: Cohorts to be exclude results frmo
+        schema:
+          type: array
+          items:
+            type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page. If not provided, all results will be returned
+        schema:
+          type: integer
+      tags:
+      - authorized
+      security:
+      - localAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonorWithSpecimensList'
+          description: ''
   /v2/authorized/exposures/:
     get:
       operationId: authorized_exposures_list
@@ -3469,6 +3540,22 @@ components:
       required:
       - program_id
       - submitter_donor_id
+    DonorWithSpecimens:
+      type: object
+      properties:
+        submitter_donor_id:
+          type: string
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+        program_id:
+          type: string
+        submitter_specimen_ids:
+          type: array
+          items:
+            type: string
+      required:
+      - program_id
+      - submitter_donor_id
     DosageUnitsEnum:
       enum:
       - mg/m2
@@ -4928,6 +5015,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DonorWithClinicalData'
+    DonorWithSpecimensList:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DonorWithSpecimens'
     PaginatedExposureList:
       type: object
       properties:
