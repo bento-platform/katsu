@@ -4,16 +4,16 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils import timezone
 
-""" 
+"""
     Marathon of Hope MODELS module containing MOHCCN Clinical Data Model V2.
-    
+
     Model Schema: https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/moh-clinical-data-model-v2---feb-202381759e70b6034dcfa0b7bde4174e9822.xlsx?Status=Master&sfvrsn=2932cab_7 # noqa: E501
     ER Diagram: https://www.marathonofhopecancercentres.ca/docs/default-source/policies-and-guidelines/mohccn_data_standard_er_diagram_endorsed6oct22.pdf?Status=Master&sfvrsn=dd57a75e_5 # noqa: E501
 
-    Note: UUID and FK fields are added to the original Model Schema. 
-    For the list of changes, see "Notes on the changes from the Entity Model (ER)" 
+    Note: UUID and FK fields are added to the original Model Schema.
+    For the list of changes, see "Notes on the changes from the Entity Model (ER)"
     on Confluence page.
-    
+
     Author: Son Chau
 """
 
