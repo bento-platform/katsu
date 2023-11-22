@@ -20,7 +20,7 @@ from chord_metadata_service.mohpackets.models import (
     Surgery,
     Treatment,
 )
-from chord_metadata_service.mohpackets.schema.model_schema import (
+from chord_metadata_service.mohpackets.schemas.model import (
     BiomarkerModelSchema,
     ChemotherapyModelSchema,
     ComorbidityModelSchema,
@@ -36,21 +36,6 @@ from chord_metadata_service.mohpackets.schema.model_schema import (
     SpecimenModelSchema,
     SurgeryModelSchema,
     TreatmentModelSchema,
-)
-from chord_metadata_service.mohpackets.serializers import (
-    ChemotherapySerializer,
-    ComorbiditySerializer,
-    DonorSerializer,
-    FollowUpSerializer,
-    HormoneTherapySerializer,
-    ImmunotherapySerializer,
-    PrimaryDiagnosisSerializer,
-    ProgramSerializer,
-    RadiationSerializer,
-    SampleRegistrationSerializer,
-    SpecimenSerializer,
-    SurgerySerializer,
-    TreatmentSerializer,
 )
 
 
