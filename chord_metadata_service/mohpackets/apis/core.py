@@ -19,6 +19,12 @@ from chord_metadata_service.mohpackets.apis.discovery import (
 from chord_metadata_service.mohpackets.apis.ingestion import router as ingest_router
 from chord_metadata_service.mohpackets.utils import get_schema_url
 
+"""
+Module with configurations for APIs 
+
+Author: Son Chau
+"""
+
 logger = logging.getLogger(__name__)
 SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
 
@@ -61,7 +67,6 @@ class OPAAuth(HttpBearer):
             logger.exception(f"An error occurred in OPA: {e}")
             raise Exception("Error with OPA authentication.")
 
-        # debug message
         logger.debug(
             "Authentication completed for request '%s' with token: %s. Authorized datasets: %s. Permission: %s",
             request.get_full_path(),
@@ -89,7 +94,7 @@ class LocalAuth(HttpBearer):
             for dataset in d["datasets"]
         ]
         request.authorized_datasets = authorized_datasets
-        # debug message
+
         logger.debug(
             "Authentication completed for request '%s' with token: %s. Authorized datasets: %s. Permission: %s",
             request.get_full_path(),
