@@ -37,6 +37,6 @@ python make_er_diagram.py
 ```
 
 ```
-python manage.py export_openapi_schema --api chord_metadata_service.mohpackets.urls.api | python -m json.tool > chord_metadata_service/mohpackets/docs/schema.json
+python manage.py export_openapi_schema --api chord_metadata_service.mohpackets.apis.core.api | python -m json.tool > chord_metadata_service/mohpackets/docs/schema.json
 
 ```
