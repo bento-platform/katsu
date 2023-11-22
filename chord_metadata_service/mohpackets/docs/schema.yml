@@ -532,20 +532,14 @@ paths:
   /v2/authorized/query/:
     get:
       operationId: authorized_donors_list
-      description: Queries for a list of donors that the user is authorized to view.
+      description: Dicovery query for the list of applicable donors' ids/program_ids/submitter_specimen_IDs.
       parameters:
-      - in: query
-        name: submitter_donor_id
-        schema:
-          type: string
-      - in: query
-        name: program_id
-        schema:
-          type: string
       - in: query
         name: treatment_type
         schema:
-          type: string
+          type: array
+          items:
+            type: string
       - in: query
         name: chemotherapy_drug_name
         schema:
