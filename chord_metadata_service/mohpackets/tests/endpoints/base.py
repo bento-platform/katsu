@@ -1,13 +1,9 @@
-import logging
 import os
 
 import factory
 from django.conf import settings
 from django.test import Client, TestCase
-from rest_framework.test import APIClient
 
-from chord_metadata_service.mohpackets.api.api_authorized import AuthorizedMixin
-from chord_metadata_service.mohpackets.authentication import LocalAuthentication
 from chord_metadata_service.mohpackets.tests.endpoints.factories import (
     ChemotherapyFactory,
     DonorFactory,
