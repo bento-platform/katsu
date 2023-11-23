@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from ninja import Field, ModelSchema
 
 from chord_metadata_service.mohpackets.models import (
@@ -25,6 +27,7 @@ from chord_metadata_service.mohpackets.models import (
 ########################################
 class DonorIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = Donor
@@ -33,6 +36,7 @@ class DonorIngestSchema(ModelSchema):
 
 class PrimaryDiagnosisIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = PrimaryDiagnosis
@@ -45,6 +49,7 @@ class PrimaryDiagnosisIngestSchema(ModelSchema):
 
 class BiomarkerIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = Biomarker
@@ -57,6 +62,7 @@ class BiomarkerIngestSchema(ModelSchema):
 
 class ChemotherapyIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = Chemotherapy
@@ -70,6 +76,7 @@ class ChemotherapyIngestSchema(ModelSchema):
 
 class ComorbidityIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = Comorbidity
@@ -82,6 +89,7 @@ class ComorbidityIngestSchema(ModelSchema):
 
 class ExposureIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = Exposure
@@ -94,6 +102,7 @@ class ExposureIngestSchema(ModelSchema):
 
 class FollowUpIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = FollowUp
@@ -106,6 +115,7 @@ class FollowUpIngestSchema(ModelSchema):
 
 class HormoneTherapyIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = HormoneTherapy
@@ -119,6 +129,7 @@ class HormoneTherapyIngestSchema(ModelSchema):
 
 class ImmunotherapyIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = Immunotherapy
@@ -132,6 +143,7 @@ class ImmunotherapyIngestSchema(ModelSchema):
 
 class RadiationIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = Radiation
@@ -145,6 +157,7 @@ class RadiationIngestSchema(ModelSchema):
 
 class SampleRegistrationIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = SampleRegistration
@@ -158,6 +171,7 @@ class SampleRegistrationIngestSchema(ModelSchema):
 
 class SpecimenIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = Specimen
@@ -171,6 +185,7 @@ class SpecimenIngestSchema(ModelSchema):
 
 class SurgeryIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = Surgery
@@ -184,6 +199,7 @@ class SurgeryIngestSchema(ModelSchema):
 
 class TreatmentIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
+    uuid: Optional[str] = None
 
     class Config:
         model = Treatment
