@@ -126,8 +126,9 @@ api = NinjaAPI(
             "termsOfService": "https://example.com/terms/",
         }
     },
-    title="Demo API",
-    description="This is a demo API with dynamic OpenAPI info section",
+    title="MoH Service API",
+    version=settings.KATSU_VERSION,
+    description="This is the RESTful API for the MoH Service.",
 )
 api.add_router("/ingest/", ingest_router, auth=auth, tags=["ingest"])
 api.add_router("/authorized/", authorzied_router, auth=auth, tags=["authorized"])
