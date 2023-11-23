@@ -55,7 +55,7 @@ def create_instance(payload, model_cls: Type):
     except Exception as e:
         return JsonResponse(
             status=HTTPStatus.BAD_REQUEST,
-            data={"detail": str(e)},
+            data={"error": str(e)},
         )
     return JsonResponse(
         status=HTTPStatus.CREATED,
