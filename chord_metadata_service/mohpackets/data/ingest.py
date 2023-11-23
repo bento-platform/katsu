@@ -6,6 +6,15 @@ from collections import OrderedDict
 import django
 from django.db import transaction
 
+# Add your Django project's root directory to the Python path
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+)  # This assumes your script is in the data directory
+
+# Set the DJANGO_SETTINGS_MODULE to your project's settings module
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
+# Initialize Django
+django.setup()
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
     Chemotherapy,
@@ -23,16 +32,6 @@ from chord_metadata_service.mohpackets.models import (
     Surgery,
     Treatment,
 )
-
-# Add your Django project's root directory to the Python path
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
-)  # This assumes your script is in the data directory
-
-# Set the DJANGO_SETTINGS_MODULE to your project's settings module
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
-# Initialize Django
-django.setup()
 
 
 def ingest_data(path):
