@@ -198,4 +198,4 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # CURRENT KATSU VERSION ACCORDING TO MODEL CHANGES
 # ------------------------------------------------
 
-KATSU_VERSION = "2.3.0"
+KATSU_VERSION = "3.0.0"
