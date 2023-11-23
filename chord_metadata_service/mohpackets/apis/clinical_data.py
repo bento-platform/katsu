@@ -76,9 +76,11 @@ Author: Son Chau
 router = CustomRouterPaginated()
 
 
-# ==============================================================================
-# Helper tools
-# ==============================================================================
+##########################################
+#                                        #
+#           HELPER FUNCTIONS             #
+#                                        #
+##########################################
 def require_donor_by_program(func):
     @wraps(func)
     def wrapper(request, filters):
@@ -91,9 +93,11 @@ def require_donor_by_program(func):
     return wrapper
 
 
-# ==============================================================================
-# Delete
-# ==============================================================================
+##########################################
+#                                        #
+#           DELETE FUNCTIONS             #
+#                                        #
+##########################################
 @router.delete(
     "/program/{program_id}/",
     response={204: None, 404: Dict[str, str]},
@@ -107,9 +111,11 @@ def delete_program(request, program_id: str):
         return HTTPStatus.NOT_FOUND, {"error": "Program matching query does not exist"}
 
 
-# ==============================================================================
-# Donor with clinical data
-# ==============================================================================
+##########################################
+#                                        #
+#        DONOR WITH CLINICAL DATA        #
+#                                        #
+##########################################
 @router.get(
     "/donor_with_clinical_data/",
     response={200: DonorWithClinicalDataSchema, 404: Dict[str, str]},
@@ -159,9 +165,11 @@ def get_donor_with_clinical_data(
         }
 
 
-# ==============================================================================
-# Authorized
-# ==============================================================================
+##########################################
+#                                        #
+#             CLINICAL DATA              #
+#                                        #
+##########################################
 @router.get(
     "/programs/",
     response=List[ProgramModelSchema],
