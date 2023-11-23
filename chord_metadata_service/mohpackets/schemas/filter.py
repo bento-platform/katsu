@@ -2,6 +2,12 @@ from typing import List, Optional
 
 from ninja import Field, FilterSchema
 
+"""
+Module with schema used for filtering
+
+Author: Son Chau
+"""
+
 
 ########################################
 #                                      #
