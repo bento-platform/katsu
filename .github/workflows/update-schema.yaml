@@ -1,21 +1,12 @@
 name: Docs
 
-# on:
-#   pull_request:
-#     types: [review_requested, ready_for_review]
-# Controls when the workflow will run
 on:
-  # Allows you to call this workflow within another workflow
-  workflow_call:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   # Triggered based on the git event type
-  push:
-    branches:
-      - '*'
   pull_request:
-    branches:
-      - '*'
+    types: [review_requested, ready_for_review]
+
     
 jobs:
   generate-moh-schema:
