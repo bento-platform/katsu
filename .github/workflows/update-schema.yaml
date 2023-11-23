@@ -91,9 +91,12 @@ jobs:
 
             // Update description to include sha of
             let schemaLines = schemaJson.split('\n');
-            for (let i = 0; i < schemaLines.length; ++i) {
-              if ("description: This is the RESTful API for the MoH Service." === schemaLines[i].trim()) {
-                schemaLines[i] += ' Based on https://raw.githubusercontent.com/' + context.repo.owner + '/' + context.repo.repo + '/' + repoSha + '/' + repoPath + 'schema.json';
+            for (let i = 0; i < 10; ++i) {
+              let descStr = '"description": "This is the RESTful API for the MoH Service."';
+              let textLink = 'Based on https://raw.githubusercontent.com/' + context.repo.owner + '/' + context.repo.repo + '/' + repoSha + '/' + repoPath + 'schema.json';
+              if (descStr === schemaLines[i].trim()) {
+              schemaLines[i] = `"description": "This is the RESTful API for the MoH Service. ${textLink}"`;
+
               }
             }
             schemaJson = schemaLines.join('\n');
