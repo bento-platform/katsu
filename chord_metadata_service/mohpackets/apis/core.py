@@ -118,7 +118,17 @@ if "dev" in settings_module or "prod" in settings_module:
 else:
     auth = LocalAuth()
 
-api = NinjaAPI(renderer=ORJSONRenderer(), parser=ORJSONParser())
+api = NinjaAPI(
+    renderer=ORJSONRenderer(),
+    parser=ORJSONParser(),
+    openapi_extra={
+        "info": {
+            "termsOfService": "https://example.com/terms/",
+        }
+    },
+    title="Demo API",
+    description="This is a demo API with dynamic OpenAPI info section",
+)
 api.add_router("/ingest/", ingest_router, auth=auth, tags=["ingest"])
 api.add_router("/authorized/", authorzied_router, auth=auth, tags=["authorized"])
 api.add_router("/discovery/", discovery_router, tags=["discovery"])
