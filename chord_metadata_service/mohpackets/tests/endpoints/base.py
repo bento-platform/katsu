@@ -30,6 +30,8 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import (
         class MyAPITestCase(BaseTestCase):
             def test_my_endpoint(self):
                 # Write your test logic here using the initialized data and test users.
+
+    Author: Son Chau
 """
 
 
@@ -104,10 +106,4 @@ class BaseTestCase(TestCase):
         ]
 
     def setUp(self):
-        # logging.disable(logging.WARNING)
-        # logging.getLogger("faker.factory").setLevel(logging.WARN)
-
-        # Initialize the client before each test method
-        # self.client = APIClient()
         self.client = Client()
-        # AuthorizedMixin.authentication_classes = [LocalAuthentication]
