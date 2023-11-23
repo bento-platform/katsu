@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: MoH Service API
   version: 2.3.0
-  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/f6454c48b1141c11424e06596ad59080ff6f8b76/chord_metadata_service/mohpackets/docs/schema.yml
+  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/e9992d7585a9a0052570d86a217a02e37fd2594e/chord_metadata_service/mohpackets/docs/schema.yml
 paths:
   /v2/authorized/biomarkers/:
     get:
