@@ -19,6 +19,14 @@ from chord_metadata_service.mohpackets.models import (
     Treatment,
 )
 
+"""
+Module with schema used for ingesting
+
+All fields are derived from the model, with the fix for FK and uuid
+
+Author: Son Chau
+"""
+
 
 ########################################
 #                                      #
