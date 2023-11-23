@@ -82,6 +82,15 @@ from chord_metadata_service.mohpackets.permissible_values import (
     uBooleanEnum,
 )
 
+"""
+Module containing schemas for clinical data models.
+
+All fields are derived from the model, excluding 'uuid'.
+Custom validations, such as regex and permissible choices, have been included.
+
+Author: Son Chau
+"""
+
 ########################################
 #                                      #
 #           MODEL SCHEMA               #
