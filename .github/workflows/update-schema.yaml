@@ -51,7 +51,7 @@ jobs:
       - name: Install octokit/rest
         run: npm install @octokit/rest
 
-      - name: Update schema.yml and openapi.md
+      - name: Update schema.json and openapi.md
         uses: actions/github-script@v6
         with:
           script: |
@@ -93,7 +93,7 @@ jobs:
             let schemaLines = schemaJson.split('\n');
             for (let i = 0; i < schemaLines.length; ++i) {
               if ("description: This is the RESTful API for the MoH Service." === schemaLines[i].trim()) {
-                schemaLines[i] += ' Based on https://raw.githubusercontent.com/' + context.repo.owner + '/' + context.repo.repo + '/' + repoSha + '/' + repoPath + 'schema.yml';
+                schemaLines[i] += ' Based on https://raw.githubusercontent.com/' + context.repo.owner + '/' + context.repo.repo + '/' + repoSha + '/' + repoPath + 'schema.json';
               }
             }
             schemaJson = schemaLines.join('\n');

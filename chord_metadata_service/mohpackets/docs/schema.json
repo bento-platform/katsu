@@ -1,12 +1,12 @@
 {
-    "openapi": "3.0.2",
+    "openapi": "3.1.0",
     "info": {
-        "title": "DemoAPI",
-        "version": "1.0.0",
-        "description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/e9992d7585a9a0052570d86a217a02e37fd2594e/chord_metadata_service/mohpackets/docs/schema.yml"
+        "title": "MoH Service API",
+        "version": "3.0.0",
+        "description": "This is the RESTful API for the MoH Service."
     },
     "paths": {
-        "/v2/service-info/": {
+        "/v2/service-info": {
             "get": {
                 "operationId": "chord_metadata_service_mohpackets_apis_core_service_info",
                 "summary": "Service Info",
@@ -4861,6 +4861,17 @@
                         "title": "Program Id",
                         "type": "string"
                     },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
+                    },
                     "submitter_donor_id": {
                         "maxLength": 64,
                         "title": "Submitter Donor Id",
@@ -4998,6 +5009,17 @@
                     "program_id": {
                         "title": "Program Id",
                         "type": "string"
+                    },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
                     },
                     "submitter_donor_id": {
                         "maxLength": 64,
@@ -5217,6 +5239,17 @@
                         "title": "Program Id",
                         "type": "string"
                     },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
+                    },
                     "submitter_donor_id": {
                         "maxLength": 64,
                         "title": "Submitter Donor Id",
@@ -5312,6 +5345,17 @@
                         "title": "Program Id",
                         "type": "string"
                     },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
+                    },
                     "submitter_donor_id": {
                         "maxLength": 64,
                         "title": "Submitter Donor Id",
@@ -5402,6 +5446,17 @@
                         "title": "Program Id",
                         "type": "string"
                     },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
+                    },
                     "submitter_donor_id": {
                         "maxLength": 64,
                         "title": "Submitter Donor Id",
@@ -5455,6 +5510,17 @@
                     "program_id": {
                         "title": "Program Id",
                         "type": "string"
+                    },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
                     },
                     "treatment_uuid_id": {
                         "anyOf": [
@@ -5661,6 +5727,17 @@
                         "title": "Program Id",
                         "type": "string"
                     },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
+                    },
                     "submitter_donor_id": {
                         "maxLength": 64,
                         "title": "Submitter Donor Id",
@@ -5755,6 +5832,17 @@
                     "program_id": {
                         "title": "Program Id",
                         "type": "string"
+                    },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
                     },
                     "submitter_donor_id": {
                         "maxLength": 64,
@@ -5862,6 +5950,17 @@
                     "program_id": {
                         "title": "Program Id",
                         "type": "string"
+                    },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
                     },
                     "submitter_primary_diagnosis_id": {
                         "anyOf": [
@@ -6043,6 +6142,17 @@
                         "title": "Program Id",
                         "type": "string"
                     },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
+                    },
                     "submitter_donor_id": {
                         "maxLength": 64,
                         "title": "Submitter Donor Id",
@@ -6149,6 +6259,17 @@
                         "title": "Program Id",
                         "type": "string"
                     },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
+                    },
                     "submitter_sample_id": {
                         "maxLength": 64,
                         "title": "Submitter Sample Id",
@@ -6227,6 +6348,17 @@
                     "program_id": {
                         "title": "Program Id",
                         "type": "string"
+                    },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
                     },
                     "submitter_specimen_id": {
                         "maxLength": 64,
@@ -6463,6 +6595,17 @@
                         "title": "Program Id",
                         "type": "string"
                     },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
+                    },
                     "submitter_donor_id": {
                         "maxLength": 64,
                         "title": "Submitter Donor Id",
@@ -6653,6 +6796,17 @@
                         "title": "Program Id",
                         "type": "string"
                     },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
+                    },
                     "submitter_treatment_id": {
                         "maxLength": 64,
                         "title": "Submitter Treatment Id",
@@ -6817,6 +6971,24 @@
                     "submitter_primary_diagnosis_id"
                 ],
                 "title": "TreatmentIngestSchema",
+                "type": "object"
+            },
+            "DonorWithClinicalDataFilterSchema": {
+                "properties": {
+                    "submitter_donor_id": {
+                        "title": "Submitter Donor Id",
+                        "type": "string"
+                    },
+                    "program_id": {
+                        "title": "Program Id",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "submitter_donor_id",
+                    "program_id"
+                ],
+                "title": "DonorWithClinicalDataFilterSchema",
                 "type": "object"
             },
             "DonorWithClinicalDataSchema": {
@@ -8501,6 +8673,39 @@
                 "title": "NestedTreatmentSchema",
                 "type": "object"
             },
+            "Input": {
+                "properties": {
+                    "page": {
+                        "minimum": 1,
+                        "title": "Page",
+                        "type": "integer"
+                    },
+                    "page_size": {
+                        "minimum": 1,
+                        "title": "Page Size",
+                        "type": "integer"
+                    }
+                },
+                "title": "Input",
+                "type": "object"
+            },
+            "ProgramFilterSchema": {
+                "properties": {
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    }
+                },
+                "title": "ProgramFilterSchema",
+                "type": "object"
+            },
             "PagedProgramModelSchema": {
                 "properties": {
                     "items": {
@@ -8551,6 +8756,142 @@
                     "previous_page"
                 ],
                 "title": "PagedProgramModelSchema",
+                "type": "object"
+            },
+            "DonorFilterSchema": {
+                "properties": {
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "gender": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "q": "gender__icontains",
+                        "title": "Gender"
+                    },
+                    "sex_at_birth": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Sex At Birth"
+                    },
+                    "is_deceased": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Is Deceased"
+                    },
+                    "lost_to_followup_after_clinical_event_identifier": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Lost To Followup After Clinical Event Identifier"
+                    },
+                    "lost_to_followup_reason": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Lost To Followup Reason"
+                    },
+                    "date_alive_after_lost_to_followup": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Alive After Lost To Followup"
+                    },
+                    "cause_of_death": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Cause Of Death"
+                    },
+                    "date_of_birth": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Of Birth"
+                    },
+                    "date_of_death": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Of Death"
+                    },
+                    "primary_site": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "q": "primary_site__overlap",
+                        "title": "Primary Site",
+                        "type": "array"
+                    }
+                },
+                "title": "DonorFilterSchema",
                 "type": "object"
             },
             "CauseOfDeathEnum": {
@@ -8856,6 +9197,177 @@
                 ],
                 "title": "SexAtBirthEnum",
                 "type": "string"
+            },
+            "PrimaryDiagnosisFilterSchema": {
+                "properties": {
+                    "submitter_primary_diagnosis_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Primary Diagnosis Id"
+                    },
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "date_of_diagnosis": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Of Diagnosis"
+                    },
+                    "cancer_type_code": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Cancer Type Code"
+                    },
+                    "basis_of_diagnosis": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Basis Of Diagnosis"
+                    },
+                    "laterality": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Laterality"
+                    },
+                    "lymph_nodes_examined_status": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Lymph Nodes Examined Status"
+                    },
+                    "lymph_nodes_examined_method": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Lymph Nodes Examined Method"
+                    },
+                    "number_lymph_nodes_positive": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Number Lymph Nodes Positive"
+                    },
+                    "clinical_tumour_staging_system": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Clinical Tumour Staging System"
+                    },
+                    "clinical_t_category": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Clinical T Category"
+                    },
+                    "clinical_n_category": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Clinical N Category"
+                    },
+                    "clinical_m_category": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Clinical M Category"
+                    },
+                    "clinical_stage_group": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Clinical Stage Group"
+                    }
+                },
+                "title": "PrimaryDiagnosisFilterSchema",
+                "type": "object"
             },
             "BasisOfDiagnosisEnum": {
                 "enum": [
@@ -9348,6 +9860,218 @@
                 "title": "TumourStagingSystemEnum",
                 "type": "string"
             },
+            "BiomarkerFilterSchema": {
+                "properties": {
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "submitter_specimen_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Specimen Id"
+                    },
+                    "submitter_primary_diagnosis_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Primary Diagnosis Id"
+                    },
+                    "submitter_treatment_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Treatment Id"
+                    },
+                    "submitter_follow_up_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Follow Up Id"
+                    },
+                    "test_date": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Test Date"
+                    },
+                    "psa_level": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Psa Level"
+                    },
+                    "ca125": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Ca125"
+                    },
+                    "cea": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Cea"
+                    },
+                    "er_status": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Er Status"
+                    },
+                    "er_percent_positive": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Er Percent Positive"
+                    },
+                    "pr_status": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pr Status"
+                    },
+                    "pr_percent_positive": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pr Percent Positive"
+                    },
+                    "her2_ihc_status": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Her2 Ihc Status"
+                    },
+                    "her2_ish_status": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Her2 Ish Status"
+                    },
+                    "hpv_ihc_status": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Hpv Ihc Status"
+                    },
+                    "hpv_pcr_status": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Hpv Pcr Status"
+                    },
+                    "hpv_strain": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "q": "hpv_strain__overlap",
+                        "title": "Hpv Strain",
+                        "type": "array"
+                    }
+                },
+                "title": "BiomarkerFilterSchema",
+                "type": "object"
+            },
             "BiomarkerModelSchema": {
                 "properties": {
                     "er_status": {
@@ -9652,6 +10376,111 @@
                 "title": "PagedBiomarkerModelSchema",
                 "type": "object"
             },
+            "ChemotherapyFilterSchema": {
+                "properties": {
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "submitter_treatment_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Treatment Id"
+                    },
+                    "drug_reference_database": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Drug Reference Database"
+                    },
+                    "drug_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Drug Name"
+                    },
+                    "drug_reference_identifier": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Drug Reference Identifier"
+                    },
+                    "chemotherapy_drug_dose_units": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Chemotherapy Drug Dose Units"
+                    },
+                    "prescribed_cumulative_drug_dose": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Prescribed Cumulative Drug Dose"
+                    },
+                    "actual_cumulative_drug_dose": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Actual Cumulative Drug Dose"
+                    }
+                },
+                "title": "ChemotherapyFilterSchema",
+                "type": "object"
+            },
             "ChemotherapyModelSchema": {
                 "properties": {
                     "chemotherapy_drug_dose_units": {
@@ -9817,6 +10646,100 @@
                 "title": "PagedChemotherapyModelSchema",
                 "type": "object"
             },
+            "ComorbidityFilterSchema": {
+                "properties": {
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "prior_malignancy": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Prior Malignancy"
+                    },
+                    "laterality_of_prior_malignancy": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Laterality Of Prior Malignancy"
+                    },
+                    "age_at_comorbidity_diagnosis": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Age At Comorbidity Diagnosis"
+                    },
+                    "comorbidity_type_code": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Comorbidity Type Code"
+                    },
+                    "comorbidity_treatment_status": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Comorbidity Treatment Status"
+                    },
+                    "comorbidity_treatment": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Comorbidity Treatment"
+                    }
+                },
+                "title": "ComorbidityFilterSchema",
+                "type": "object"
+            },
             "ComorbidityModelSchema": {
                 "properties": {
                     "prior_malignancy": {
@@ -9976,6 +10899,64 @@
                 "title": "uBooleanEnum",
                 "type": "string"
             },
+            "ExposureFilterSchema": {
+                "properties": {
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "tobacco_smoking_status": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tobacco Smoking Status"
+                    },
+                    "tobacco_type": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "q": "tobacco_type__overlap",
+                        "title": "Tobacco Type",
+                        "type": "array"
+                    },
+                    "pack_years_smoked": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pack Years Smoked"
+                    }
+                },
+                "title": "ExposureFilterSchema",
+                "type": "object"
+            },
             "ExposureModelSchema": {
                 "properties": {
                     "tobacco_smoking_status": {
@@ -10110,6 +11091,182 @@
                 ],
                 "title": "TobaccoTypeEnum",
                 "type": "string"
+            },
+            "FollowUpFilterSchema": {
+                "properties": {
+                    "submitter_follow_up_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Follow Up Id"
+                    },
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "submitter_primary_diagnosis_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Primary Diagnosis Id"
+                    },
+                    "submitter_treatment_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Treatment Id"
+                    },
+                    "date_of_followup": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Of Followup"
+                    },
+                    "disease_status_at_followup": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Disease Status At Followup"
+                    },
+                    "relapse_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Relapse Type"
+                    },
+                    "date_of_relapse": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Of Relapse"
+                    },
+                    "method_of_progression_status": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "q": "method_of_progression_status__overlap",
+                        "title": "Method Of Progression Status",
+                        "type": "array"
+                    },
+                    "anatomic_site_progression_or_recurrence": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "q": "anatomic_site_progression_or_recurrence__overlap",
+                        "title": "Anatomic Site Progression Or Recurrence",
+                        "type": "array"
+                    },
+                    "recurrence_tumour_staging_system": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Recurrence Tumour Staging System"
+                    },
+                    "recurrence_t_category": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Recurrence T Category"
+                    },
+                    "recurrence_n_category": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Recurrence N Category"
+                    },
+                    "recurrence_m_category": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Recurrence M Category"
+                    },
+                    "recurrence_stage_group": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Recurrence Stage Group"
+                    }
+                },
+                "title": "FollowUpFilterSchema",
+                "type": "object"
             },
             "DiseaseStatusFollowupEnum": {
                 "enum": [
@@ -10398,6 +11555,111 @@
                 "title": "RelapseTypeEnum",
                 "type": "string"
             },
+            "HormoneTherapyFilterSchema": {
+                "properties": {
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "submitter_treatment_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Treatment Id"
+                    },
+                    "drug_reference_database": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Drug Reference Database"
+                    },
+                    "drug_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Drug Name"
+                    },
+                    "drug_reference_identifier": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Drug Reference Identifier"
+                    },
+                    "hormone_drug_dose_units": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Hormone Drug Dose Units"
+                    },
+                    "prescribed_cumulative_drug_dose": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Prescribed Cumulative Drug Dose"
+                    },
+                    "actual_cumulative_drug_dose": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Actual Cumulative Drug Dose"
+                    }
+                },
+                "title": "HormoneTherapyFilterSchema",
+                "type": "object"
+            },
             "HormoneTherapyModelSchema": {
                 "properties": {
                     "hormone_drug_dose_units": {
@@ -10539,6 +11801,122 @@
                     "previous_page"
                 ],
                 "title": "PagedHormoneTherapyModelSchema",
+                "type": "object"
+            },
+            "ImmunotherapyFilterSchema": {
+                "properties": {
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "submitter_treatment_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Treatment Id"
+                    },
+                    "drug_reference_database": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Drug Reference Database"
+                    },
+                    "immunotherapy_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Immunotherapy Type"
+                    },
+                    "drug_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Drug Name"
+                    },
+                    "drug_reference_identifier": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Drug Reference Identifier"
+                    },
+                    "immunotherapy_drug_dose_units": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Immunotherapy Drug Dose Units"
+                    },
+                    "prescribed_cumulative_drug_dose": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Prescribed Cumulative Drug Dose"
+                    },
+                    "actual_cumulative_drug_dose": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Actual Cumulative Drug Dose"
+                    }
+                },
+                "title": "ImmunotherapyFilterSchema",
                 "type": "object"
             },
             "ImmunotherapyModelSchema": {
@@ -10702,6 +12080,122 @@
                     "previous_page"
                 ],
                 "title": "PagedImmunotherapyModelSchema",
+                "type": "object"
+            },
+            "RadiationFilterSchema": {
+                "properties": {
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "submitter_treatment_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Treatment Id"
+                    },
+                    "radiation_therapy_modality": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Radiation Therapy Modality"
+                    },
+                    "radiation_therapy_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Radiation Therapy Type"
+                    },
+                    "radiation_therapy_fractions": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Radiation Therapy Fractions"
+                    },
+                    "radiation_therapy_dosage": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Radiation Therapy Dosage"
+                    },
+                    "anatomical_site_irradiated": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Anatomical Site Irradiated"
+                    },
+                    "radiation_boost": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Radiation Boost"
+                    },
+                    "reference_radiation_treatment_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Reference Radiation Treatment Id"
+                    }
+                },
+                "title": "RadiationFilterSchema",
                 "type": "object"
             },
             "PagedRadiationModelSchema": {
@@ -11143,6 +12637,100 @@
                 "title": "TherapyTypeEnum",
                 "type": "string"
             },
+            "SampleRegistrationFilterSchema": {
+                "properties": {
+                    "submitter_sample_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Sample Id"
+                    },
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "submitter_specimen_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Specimen Id"
+                    },
+                    "specimen_tissue_source": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Specimen Tissue Source"
+                    },
+                    "tumour_normal_designation": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tumour Normal Designation"
+                    },
+                    "specimen_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Specimen Type"
+                    },
+                    "sample_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Sample Type"
+                    }
+                },
+                "title": "SampleRegistrationFilterSchema",
+                "type": "object"
+            },
             "PagedSampleRegistrationModelSchema": {
                 "properties": {
                     "items": {
@@ -11353,6 +12941,243 @@
                 ],
                 "title": "TumourDesginationEnum",
                 "type": "string"
+            },
+            "SpecimenFilterSchema": {
+                "properties": {
+                    "submitter_specimen_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Specimen Id"
+                    },
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "submitter_primary_diagnosis_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Primary Diagnosis Id"
+                    },
+                    "pathological_tumour_staging_system": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pathological Tumour Staging System"
+                    },
+                    "pathological_t_category": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pathological T Category"
+                    },
+                    "pathological_n_category": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pathological N Category"
+                    },
+                    "pathological_m_category": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pathological M Category"
+                    },
+                    "pathological_stage_group": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pathological Stage Group"
+                    },
+                    "specimen_collection_date": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Specimen Collection Date"
+                    },
+                    "specimen_storage": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Specimen Storage"
+                    },
+                    "specimen_processing": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Specimen Processing"
+                    },
+                    "tumour_histological_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tumour Histological Type"
+                    },
+                    "specimen_anatomic_location": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Specimen Anatomic Location"
+                    },
+                    "specimen_laterality": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Specimen Laterality"
+                    },
+                    "reference_pathology_confirmed_diagnosis": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Reference Pathology Confirmed Diagnosis"
+                    },
+                    "reference_pathology_confirmed_tumour_presence": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Reference Pathology Confirmed Tumour Presence"
+                    },
+                    "tumour_grading_system": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tumour Grading System"
+                    },
+                    "tumour_grade": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tumour Grade"
+                    },
+                    "percent_tumour_cells_range": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Percent Tumour Cells Range"
+                    },
+                    "percent_tumour_cells_measurement_method": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Percent Tumour Cells Measurement Method"
+                    }
+                },
+                "title": "SpecimenFilterSchema",
+                "type": "object"
             },
             "CellsMeasureMethodEnum": {
                 "enum": [
@@ -11734,6 +13559,190 @@
                 "title": "TumourGradingSystemEnum",
                 "type": "string"
             },
+            "SurgeryFilterSchema": {
+                "properties": {
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "submitter_treatment_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Treatment Id"
+                    },
+                    "submitter_specimen_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Specimen Id"
+                    },
+                    "surgery_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Surgery Type"
+                    },
+                    "surgery_site": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Surgery Site"
+                    },
+                    "surgery_location": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Surgery Location"
+                    },
+                    "tumour_length": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tumour Length"
+                    },
+                    "tumour_width": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tumour Width"
+                    },
+                    "greatest_dimension_tumour": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Greatest Dimension Tumour"
+                    },
+                    "tumour_focality": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tumour Focality"
+                    },
+                    "residual_tumour_classification": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Residual Tumour Classification"
+                    },
+                    "margin_types_involved": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "q": "margin_types_involved__overlap",
+                        "title": "Margin Types Involved",
+                        "type": "array"
+                    },
+                    "margin_types_not_involved": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "q": "margin_types_not_involved__overlap",
+                        "title": "Margin Types Not Involved",
+                        "type": "array"
+                    },
+                    "margin_types_not_assessed": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "q": "margin_types_not_assessed__overlap",
+                        "title": "Margin Types Not Assessed",
+                        "type": "array"
+                    },
+                    "lymphovascular_invasion": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Lymphovascular Invasion"
+                    },
+                    "perineural_invasion": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Perineural Invasion"
+                    }
+                },
+                "title": "SurgeryFilterSchema",
+                "type": "object"
+            },
             "LymphovascularInvasionEnum": {
                 "enum": [
                     "Absent",
@@ -12101,6 +14110,185 @@
                 ],
                 "title": "TumourFocalityEnum",
                 "type": "string"
+            },
+            "TreatmentFilterSchema": {
+                "properties": {
+                    "submitter_treatment_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Treatment Id"
+                    },
+                    "program_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
+                    },
+                    "submitter_donor_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Donor Id"
+                    },
+                    "submitter_primary_diagnosis_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Primary Diagnosis Id"
+                    },
+                    "treatment_type": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "q": "treatment_type__overlap",
+                        "title": "Treatment Type",
+                        "type": "array"
+                    },
+                    "is_primary_treatment": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Is Primary Treatment"
+                    },
+                    "line_of_treatment": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Line Of Treatment"
+                    },
+                    "treatment_start_date": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Treatment Start Date"
+                    },
+                    "treatment_end_date": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Treatment End Date"
+                    },
+                    "treatment_setting": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Treatment Setting"
+                    },
+                    "treatment_intent": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Treatment Intent"
+                    },
+                    "days_per_cycle": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Days Per Cycle"
+                    },
+                    "number_of_cycles": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Number Of Cycles"
+                    },
+                    "response_to_treatment_criteria_method": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Response To Treatment Criteria Method"
+                    },
+                    "response_to_treatment": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Response To Treatment"
+                    },
+                    "status_of_treatment": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Status Of Treatment"
+                    }
+                },
+                "title": "TreatmentFilterSchema",
+                "type": "object"
             },
             "PagedTreatmentModelSchema": {
                 "properties": {
