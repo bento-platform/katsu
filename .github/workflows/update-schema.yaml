@@ -1,8 +1,12 @@
 name: Docs
 
+# on:
+#   pull_request:
+#     types: [review_requested, ready_for_review]
 on:
-  pull_request:
-    types: [review_requested, ready_for_review]
+  push:
+    branches:
+      - '*'
     
 jobs:
   generate-moh-schema:
@@ -77,31 +81,31 @@ jobs:
               return data.sha;
             }
 
-            const schemaSha = await getFileSha('schema.yml');
+            const schemaSha = await getFileSha('schema.json');
             const openApiSha = await getFileSha('openapi.md');
             const repoSha = await getRepoSha();
 
             // Read the content of updated files
-            let schemaYml = fs.readFileSync(`./${repoPath}schema.yml`, 'utf8');
+            let schemaJson = fs.readFileSync(`./${repoPath}schema.json`, 'utf8');
             const openApiMd = fs.readFileSync(`./${repoPath}openapi.md`, 'utf8');
 
             // Update description to include sha of
-            let schemaLines = schemaYml.split('\n');
+            let schemaLines = schemaJson.split('\n');
             for (let i = 0; i < schemaLines.length; ++i) {
               if ("description: This is the RESTful API for the MoH Service." === schemaLines[i].trim()) {
                 schemaLines[i] += ' Based on https://raw.githubusercontent.com/' + context.repo.owner + '/' + context.repo.repo + '/' + repoSha + '/' + repoPath + 'schema.yml';
               }
             }
-            schemaYml = schemaLines.join('\n');
-            fs.writeFileSync(`./${repoPath}schema.yml`, schemaYml, 'utf8');
+            schemaJson = schemaLines.join('\n');
+            fs.writeFileSync(`./${repoPath}schema.json`, schemaJson, 'utf8');
 
             // Commit and push changes
             await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              path: 'schema.yml',
-              message: 'Update schema.yml',
-              content: Buffer.from(schemaYml).toString('base64'),
+              path: 'schema.json',
+              message: 'Update schema.json',
+              content: Buffer.from(schemaJson).toString('base64'),
               sha: schemaSha,
               branch: `${{ github.head_ref }}`
             });
