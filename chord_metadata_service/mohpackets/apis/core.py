@@ -121,11 +121,6 @@ else:
 api = NinjaAPI(
     renderer=ORJSONRenderer(),
     parser=ORJSONParser(),
-    openapi_extra={
-        "info": {
-            "termsOfService": "https://example.com/terms/",
-        }
-    },
     title="MoH Service API",
     version=settings.KATSU_VERSION,
     description="This is the RESTful API for the MoH Service.",
