@@ -135,7 +135,7 @@ api.add_router("/authorized/", authorzied_router, auth=auth, tags=["authorized"]
 api.add_router("/discovery/", discovery_router, tags=["discovery"])
 
 
-@api.get("/service-info/")
+@api.get("/service-info")
 def service_info(request):
     schema_url = get_schema_url()
 
