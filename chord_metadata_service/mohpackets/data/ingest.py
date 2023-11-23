@@ -15,7 +15,7 @@ sys.path.append(
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
 # Initialize Django
 django.setup()
-from chord_metadata_service.mohpackets.models import (
+from chord_metadata_service.mohpackets.models import (  # noqa: E402
     Biomarker,
     Chemotherapy,
     Comorbidity,

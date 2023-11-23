@@ -69,7 +69,7 @@ Module with authorized APIs for patient clinical data.
 These APIs require authorization and only returns the objects related
 to the datasets that user authorized to see.
 
-Author: Son Chau 
+Author: Son Chau
 """
 
 
