@@ -3,8 +3,9 @@ from typing import Dict, List
 from ninja import Schema
 
 """
-Contains schemas for discovery APIs,
-used to convert Python objects or Django model instances into JSON strings.
+Module with schema used for discovery response
+
+Author: Son Chau
 """
 
 
