@@ -40,6 +40,7 @@ from chord_metadata_service.mohpackets.models import (
         These factories use the Factory Boy library (https://factoryboy.readthedocs.io/)
         to generate test data.
 
+    Author: Son Chau
 """
 
 
