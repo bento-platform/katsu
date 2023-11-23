@@ -16,6 +16,7 @@ from ninja.pagination import (
 
     The default page size is 100, and the maximum page size is 1000.
 
+    Author: Son Chau
 """
 
 DEFAULT_PAGE = 1
