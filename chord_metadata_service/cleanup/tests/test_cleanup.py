@@ -6,12 +6,30 @@ from chord_metadata_service.experiments.models import Experiment, ExperimentResu
 from chord_metadata_service.patients.cleanup import clean_individuals
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import cleanup as pc
-from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, PhenotypicFeature
+from chord_metadata_service.phenopackets.models import (
+    Biosample,
+    Diagnosis,
+    GeneDescriptor,
+    GenomicInterpretation,
+    Interpretation,
+    MetaData,
+    Phenopacket,
+    PhenotypicFeature,
+    VariantInterpretation,
+    VariationDescriptor,
+)
 from chord_metadata_service.phenopackets.tests.constants import (
+    VALID_DISEASE_ONTOLOGY,
+    VALID_GENE_DESCRIPTOR_1,
     VALID_PROCEDURE_1,
+    VALID_VARIANT_DESCRIPTOR,
+    VALID_META_DATA_1,
     valid_biosample_1,
     valid_biosample_2,
-    VALID_META_DATA_1,
+    valid_diagnosis,
+    valid_genomic_interpretation,
+    valid_interpretation,
+    valid_variant_interpretation,
 )
 from chord_metadata_service.resources.cleanup import clean_resources
 from chord_metadata_service.resources.models import Resource
@@ -64,6 +82,25 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
 
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
+        # GenomicInterpretation (Gene & Variant)
+        self.gene_descriptor = GeneDescriptor.objects.create(**VALID_GENE_DESCRIPTOR_1)
+        self.variant_descriptor = VariationDescriptor.objects.create(**VALID_VARIANT_DESCRIPTOR)
+        self.variant_interpretation = VariantInterpretation.objects.create(
+            **valid_variant_interpretation(self.variant_descriptor)
+        )
+        self.genomic_interpretation = GenomicInterpretation.objects.create(
+            **valid_genomic_interpretation(self.gene_descriptor, self.variant_interpretation)
+        )
+
+        # Phenopacket.interpretations
+        self.disease_ontology = VALID_DISEASE_ONTOLOGY
+        self.diagnosis = Diagnosis.objects.create(**valid_diagnosis(self.disease_ontology))
+        self.diagnosis.genomic_interpretations.set([self.genomic_interpretation])
+
+        self.interpretation = Interpretation.objects.create(**valid_interpretation(self.diagnosis))
+        self.phenopacket.interpretations.set([self.interpretation])
+
+        # Phenopacket.phenotypic_features
         self.phenotypic_feature = PhenotypicFeature.objects.create(
             **valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
@@ -124,9 +161,12 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         # 1 individual +
         # 0 experiment results +
         # 0 instruments +
-        # 1 resource
-        # = 6 objects total
-        self.assertEqual(await run_all_cleanup(), 6)
+        # 1 resource +
+        # 1 interpretation +
+        # 1 diagnosis
+        # 1 genomic interpretation
+        # = 9 objects total
+        self.assertEqual(await run_all_cleanup(), 9)
 
         # Should have been removed via cascade with v2.17.0 database changes
         with self.assertRaises(PhenotypicFeature.DoesNotExist):

@@ -19,6 +19,9 @@ async def run_all_cleanup() -> int:
     n_removed += await pc.clean_meta_data()
     n_removed += await pc.clean_biosamples()
     n_removed += await pc.clean_phenotypic_features()
+    n_removed += await pc.clean_interpretations()
+    n_removed += await pc.clean_diagnoses()
+    n_removed += await pc.clean_genomic_interpretations()
 
     # Experiment artifacts
     n_removed += await ec.clean_experiment_results()

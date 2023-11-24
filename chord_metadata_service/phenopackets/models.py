@@ -347,8 +347,6 @@ class Diagnosis(BaseTimeStamp):
     FHIR: Condition
     """
     disease_ontology = models.JSONField(null=True, blank=True, validators=[ontology_validator])
-
-    # required?
     genomic_interpretations = models.ManyToManyField(
         GenomicInterpretation, blank=True,
         help_text='The genomic elements assessed as being responsible for the disease.')
