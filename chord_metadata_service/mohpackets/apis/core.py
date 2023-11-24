@@ -68,7 +68,7 @@ class OPAAuth(HttpBearer):
             raise Exception("Error with OPA authentication.")
 
         logger.debug(
-            "Authentication completed for request '%s' with token: %s. Authorized datasets: %s. Permission: %s",
+            "OPA Authentication completed for request '%s' with token: %s. Authorized datasets: %s. Permission: %s",
             request.get_full_path(),
             token,
             authorized_datasets,
@@ -96,7 +96,7 @@ class LocalAuth(HttpBearer):
         request.authorized_datasets = authorized_datasets
 
         logger.debug(
-            "Authentication completed for request '%s' with token: %s. Authorized datasets: %s. Permission: %s",
+            "Local Authentication completed for request '%s' with token: %s. Authorized datasets: %s. Permission: %s",
             request.get_full_path(),
             token,
             authorized_datasets,
