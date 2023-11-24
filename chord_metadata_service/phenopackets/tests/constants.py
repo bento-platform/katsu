@@ -70,29 +70,6 @@ VALID_INDIVIDUAL_2 = {
     }
 }
 
-VALID_GENE_1 = {
-    "id": "HGNC:347",
-    "alternate_ids": ["ensembl:ENSRNOG00000019450", "ncbigene:307503"],
-    "symbol": "ETF1",
-    "extra_properties": {
-        "comment": "test data"
-    }
-}
-
-INVALID_GENE_2 = {
-    "id": "HGNC:347",
-    "alternate_ids": "ensembl:ENSRNOG00000019450",
-    "symbol": "ETF1",
-    "extra_properties": {
-        "comment": "test data"
-    }
-}
-
-DUPLICATE_GENE_2 = {
-    "id": "HGNC:347",
-    "symbol": "DYI"
-}
-
 VALID_GENE_DESCRIPTOR_1 = {
     "value_id": "HGNC:347",
     "symbol": "ETF1",

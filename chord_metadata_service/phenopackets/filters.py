@@ -146,24 +146,6 @@ class ProcedureFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
 
 
-class GeneFilter(django_filters.rest_framework.FilterSet):
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
-
-    class Meta:
-        model = m.Gene
-        fields = ["id", "symbol"]
-
-
 class DiseaseFilter(django_filters.rest_framework.FilterSet):
     term = django_filters.CharFilter(method=filter_ontology, field_name="term", label="Term")
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")

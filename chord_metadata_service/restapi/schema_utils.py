@@ -122,11 +122,13 @@ def search_db_pk(model: models.Model):
 
 def search_db_fk(type: str, foreign_model: models.Model, field_name: str):
     return {
-        "search": {"database": {"relationship": {
-            "type": type,
-            "foreign_key": foreign_model._meta.get_field(field_name).column
-        }
-        }
+        "search": {
+            "database": {
+                "relationship": {
+                    "type": type,
+                    "foreign_key": foreign_model._meta.get_field(field_name).column
+                }
+            }
         }
     }
 

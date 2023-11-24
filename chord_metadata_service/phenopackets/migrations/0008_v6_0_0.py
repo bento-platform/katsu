@@ -482,4 +482,7 @@ class Migration(migrations.Migration):
             name='diagnosis',
             field=models.ForeignKey(blank=True, help_text='One or more diagnoses, if made.', null=True, on_delete=django.db.models.deletion.CASCADE, to='phenopackets.diagnosis'),
         ),
+        migrations.DeleteModel(
+            name='Gene',
+        ),
     ]

@@ -14,7 +14,6 @@ from chord_metadata_service.phenopackets.tests.constants import (
     VALID_META_DATA_2,
     VALID_PROCEDURE_1,
     VALID_DISEASE_1,
-    VALID_GENE_1,
     valid_biosample_1,
     valid_biosample_2,
     valid_phenotypic_feature,
@@ -151,26 +150,6 @@ class FHIRBiosampleTest(APITestCase):
                          'http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-diagnostic-markers')
         self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][4]['valueCodeableConcept']['coding'],
                               list)
-
-
-class FHIRGeneTest(APITestCase):
-
-    def setUp(self):
-        self.gene = VALID_GENE_1
-
-    def test_get_fhir(self):
-        get_post_response('genes-list', self.gene)
-        get_resp = self.client.get('/api/genes?format=fhir')
-        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
-        get_resp_obj = get_resp.json()
-        self.assertIsInstance(get_resp_obj['observations'], list)
-        self.assertIsInstance(get_resp_obj['observations'][0]['code']['coding'], list)
-        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['code'], '48018-6')
-        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['display'], 'Gene studied [ID]')
-        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['system'], 'https://loinc.org')
-        self.assertIsInstance(get_resp_obj['observations'][0]['valueCodeableConcept']['coding'], list)
-        self.assertEqual(get_resp_obj['observations'][0]['valueCodeableConcept']['coding'][0]['system'],
-                         'https://www.genenames.org/')
 
 
 class FHIRDiseaseTest(APITestCase):

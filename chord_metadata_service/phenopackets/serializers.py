@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .models import (
     MetaData,
     PhenotypicFeature,
-    Gene,
     Disease,
     Biosample,
     Phenopacket,
@@ -22,7 +21,6 @@ from chord_metadata_service.restapi.serializers import GenericSerializer
 __all__ = [
     "MetaDataSerializer",
     "PhenotypicFeatureSerializer",
-    "GeneSerializer",
     "DiseaseSerializer",
     "BiosampleSerializer",
     "SimplePhenopacketSerializer",
@@ -70,19 +68,6 @@ class PhenotypicFeatureSerializer(GenericSerializer):
         # meta info for converting to FHIR
         fhir_datatype_plural = 'observations'
         class_converter = fhir_utils.fhir_observation
-
-
-class GeneSerializer(GenericSerializer):
-    alternate_ids = serializers.ListField(
-        child=serializers.CharField(allow_blank=True),
-        allow_empty=True, required=False)
-
-    class Meta:
-        model = Gene
-        fields = '__all__'
-        # meta info for converting to FHIR
-        fhir_datatype_plural = 'observations'
-        class_converter = fhir_utils.fhir_obs_component_region_studied
 
 
 class DiseaseSerializer(GenericSerializer):

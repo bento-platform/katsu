@@ -168,23 +168,6 @@ class CreatePhenotypicFeatureTest(APITestCase):
         self.assertEqual(serializer.is_valid(), False)
 
 
-class CreateGeneTest(APITestCase):
-
-    def setUp(self):
-        self.gene = c.VALID_GENE_1
-        self.duplicate_gene = c.DUPLICATE_GENE_2
-        self.invalid_gene = c.INVALID_GENE_2
-
-    def test_gene(self):
-        response = get_post_response('genes-list', self.gene)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(m.Gene.objects.count(), 1)
-
-    def test_alternate_ids(self):
-        serializer = s.GeneSerializer(data=self.invalid_gene)
-        self.assertEqual(serializer.is_valid(), False)
-
-
 class CreateDiseaseTest(APITestCase):
 
     def setUp(self):

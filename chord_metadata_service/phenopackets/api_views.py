@@ -48,21 +48,6 @@ class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
     queryset = m.PhenotypicFeature.objects.all().order_by("id")
 
 
-class GeneViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing genes
-
-    post:
-    Create a new gene
-
-    """
-    serializer_class = s.GeneSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.GeneFilter
-    queryset = m.Gene.objects.all().order_by("id")
-
-
 class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
     """
     get:

@@ -194,28 +194,6 @@ PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
     }
 })
 
-# TODO: Fix
-GENE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENE_SCHEMA, {
-    "properties": {
-        "id": {
-            "search": search_optional_str(0),
-        },
-        "alternate_ids": {
-            "items": {
-                "search": search_optional_str(1),
-            }
-        },
-        "symbol": {
-            "search": search_optional_str(2),
-        }
-    },
-    "search": {
-        "database": {
-            "relation": models.Gene._meta.db_table,
-            "primary_key": models.Gene._meta.pk.column
-        }
-    }
-})
 
 PROCEDURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_PROCEDURE_SCHEMA, {
     "properties": {

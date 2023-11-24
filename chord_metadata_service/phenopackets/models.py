@@ -108,27 +108,6 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
         return str(self.id)
 
 
-class Gene(BaseTimeStamp):
-    """
-    Class to represent an identifier for a gene
-
-    FHIR: ?
-    Draft extension for Gene is in development
-    where Gene defined via class CodeableConcept
-    """
-
-    # Gene id is unique
-    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENE, "id"))
-    # CURIE style? Yes!
-    alternate_ids = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
-                               help_text=rec_help(d.GENE, "alternate_ids"))
-    symbol = models.CharField(max_length=200, help_text=rec_help(d.GENE, "symbol"))
-    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.GENE, "extra_properties"))
-
-    def __str__(self):
-        return str(self.id)
-
-
 class Disease(BaseTimeStamp, IndexableMixin):
     """
     Class to represent a diagnosis and inference or hypothesis about the cause
