@@ -12,7 +12,7 @@ def get_schema_url():
     """
     Retrieve the schema URL either from cached or by parsing the first 10 lines of a JSON file.
     It first checks if the URL is cached in "schema_url".
-    If not cached, it reads the first 10 lines of the JSON file and extracts the URL from the "description".
+    If not cached, it reads the first 6 lines of the JSON file and extracts the URL from the "description".
     """
 
     schema_url = cache.get("schema_url")

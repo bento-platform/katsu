@@ -30,7 +30,6 @@ from chord_metadata_service.mohpackets.schemas.filter import (
     ChemotherapyFilterSchema,
     ComorbidityFilterSchema,
     DonorFilterSchema,
-    DonorWithClinicalDataFilterSchema,
     ExposureFilterSchema,
     FollowUpFilterSchema,
     HormoneTherapyFilterSchema,
@@ -117,15 +116,16 @@ def delete_program(request, program_id: str):
 #                                        #
 ##########################################
 @router.get(
-    "/donor_with_clinical_data/",
+    "/donor_with_clinical_data/program/{program_id}/donor/{donor_id}",
     response={200: DonorWithClinicalDataSchema, 404: Dict[str, str]},
 )
-def get_donor_with_clinical_data(
-    request, filters: Query[DonorWithClinicalDataFilterSchema]
-):
+def get_donor_with_clinical_data(request, program_id: str, donor_id: str):
     authorized_datasets = request.authorized_datasets
-    q = Q(program_id__in=authorized_datasets)
-    q = filters.get_filter_expression()
+    q = (
+        Q(program_id__in=authorized_datasets)
+        & Q(program_id=program_id)
+        & Q(submitter_donor_id=donor_id)
+    )
     queryset = Donor.objects.filter(q)
 
     donor_followups_prefetch = Prefetch(

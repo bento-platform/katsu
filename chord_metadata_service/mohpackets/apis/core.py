@@ -5,7 +5,7 @@ import orjson
 from authx.auth import get_opa_datasets, is_site_admin
 from django.conf import settings
 from django.http import JsonResponse
-from ninja import NinjaAPI
+from ninja import NinjaAPI, Swagger
 from ninja.parser import Parser
 from ninja.renderers import BaseRenderer
 from ninja.security import HttpBearer
@@ -121,6 +121,9 @@ else:
 api = NinjaAPI(
     renderer=ORJSONRenderer(),
     parser=ORJSONParser(),
+    docs=Swagger(
+        settings={"docExpansion": "none"}
+    ),  # collapse all endpoints by default
     title="MoH Service API",
     version=settings.KATSU_VERSION,
     description="This is the RESTful API for the MoH Service.",
