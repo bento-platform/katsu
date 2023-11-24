@@ -94,9 +94,9 @@ def ingest_data(path):
 
 def main():
     print("Select an option:")
-    print("1. Ingest small dataset")
-    print("2. Ingest medium dataset")
-    print("3. Ingest large dataset")
+    print("1. Load small dataset")
+    print("2. Load medium dataset")
+    print("3. Load large dataset")
     print("4. Exit")
 
     choice = int(input("Enter your choice [1-4]: "))

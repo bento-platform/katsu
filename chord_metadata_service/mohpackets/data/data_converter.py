@@ -20,45 +20,6 @@ MODEL_NAME_MAPPING = {
 }
 
 
-def convert_to_fixtures(path):
-    """
-    Convert synthetic data to Django fixtures.
-    The data should been assigned foreign keys already.
-    """
-    print("Step 2: Convert to Fixtures:\n")
-    # Get the absolute path to the synthetic data folder
-    script_dir = os.path.dirname(__file__)
-    synthetic_data_folder = os.path.join(script_dir, f"{path}/synthetic_data")
-    fixtures_folder = os.path.join(script_dir, f"{path}/fixtures")
-
-    # Create the fixtures folder if it doesn't already exist
-    os.makedirs(fixtures_folder, exist_ok=True)
-
-    # Get all the JSON file names in ingest order
-    json_file_names = list(MODEL_NAME_MAPPING.values())
-
-    fixtures = []
-
-    # Convert each JSON file to a Django fixture
-    for json_file_name in json_file_names:
-        print(f"Processing {json_file_name}...")
-        model_name = json_file_name.split(".")[0].lower()
-
-        with open(os.path.join(synthetic_data_folder, json_file_name)) as json_file:
-            raw_data = json.load(json_file)
-
-            for data_item in raw_data:
-                fixture = {"model": "mohpackets." + model_name, "fields": data_item}
-                fixtures.append(fixture)
-
-    with open(os.path.join(fixtures_folder, "fixtures.json"), "w") as fixtures_file:
-        json.dump(fixtures, fixtures_file, indent=4)
-
-    print(
-        "\nSuccess! Converted files to fixtures completed and saved to folder fixtures.\n"
-    )
-
-
 def set_foreign_keys(path):
     """
     Set foreign keys for synthetic data.
@@ -203,7 +164,6 @@ def main():
         return
 
     set_foreign_keys(path)
-    convert_to_fixtures(path)
 
 
 if __name__ == "__main__":
