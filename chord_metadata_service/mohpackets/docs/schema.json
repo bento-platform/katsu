@@ -3,7 +3,7 @@
     "info": {
         "title": "MoH Service API",
         "version": "3.0.0",
-"description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/9e9dc957a79ba856e9713bc4205a1945515fed19/chord_metadata_service/mohpackets/docs/schema.json"
+"description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/60f7da48ed5de3eda8e99b2a9b9a29aec1333420/chord_metadata_service/mohpackets/docs/schema.json"
     },
     "paths": {
         "/v2/service-info": {
@@ -512,25 +512,25 @@
                 ]
             }
         },
-        "/v2/authorized/donor_with_clinical_data/": {
+        "/v2/authorized/donor_with_clinical_data/program/{program_id}/donor/{donor_id}": {
             "get": {
                 "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_get_donor_with_clinical_data",
                 "summary": "Get Donor With Clinical Data",
                 "parameters": [
                     {
-                        "in": "query",
-                        "name": "submitter_donor_id",
+                        "in": "path",
+                        "name": "program_id",
                         "schema": {
-                            "title": "Submitter Donor Id",
+                            "title": "Program Id",
                             "type": "string"
                         },
                         "required": true
                     },
                     {
-                        "in": "query",
-                        "name": "program_id",
+                        "in": "path",
+                        "name": "donor_id",
                         "schema": {
-                            "title": "Program Id",
+                            "title": "Donor Id",
                             "type": "string"
                         },
                         "required": true
@@ -6971,24 +6971,6 @@
                     "submitter_primary_diagnosis_id"
                 ],
                 "title": "TreatmentIngestSchema",
-                "type": "object"
-            },
-            "DonorWithClinicalDataFilterSchema": {
-                "properties": {
-                    "submitter_donor_id": {
-                        "title": "Submitter Donor Id",
-                        "type": "string"
-                    },
-                    "program_id": {
-                        "title": "Program Id",
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "submitter_donor_id",
-                    "program_id"
-                ],
-                "title": "DonorWithClinicalDataFilterSchema",
                 "type": "object"
             },
             "DonorWithClinicalDataSchema": {
