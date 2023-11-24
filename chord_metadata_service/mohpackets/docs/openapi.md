@@ -262,7 +262,7 @@ Base URLs:
 
 <a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_get_donor_with_clinical_data"></a>
 
-`GET /v2/authorized/donor_with_clinical_data/`
+`GET /v2/authorized/donor_with_clinical_data/program/{program_id}/donor/{donor_id}`
 
 *Get Donor With Clinical Data*
 
@@ -270,8 +270,8 @@ Base URLs:
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|submitter_donor_id|query|string|true|none|
-|program_id|query|string|true|none|
+|program_id|path|string|true|none|
+|donor_id|path|string|true|none|
 
 > Example responses
 
@@ -5062,30 +5062,6 @@ or
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|null|false|none|none|
-
-<h2 id="tocS_DonorWithClinicalDataFilterSchema">DonorWithClinicalDataFilterSchema</h2>
-
-<a id="schemadonorwithclinicaldatafilterschema"></a>
-<a id="schema_DonorWithClinicalDataFilterSchema"></a>
-<a id="tocSdonorwithclinicaldatafilterschema"></a>
-<a id="tocsdonorwithclinicaldatafilterschema"></a>
-
-```json
-{
-  "submitter_donor_id": "string",
-  "program_id": "string"
-}
-
-```
-
-DonorWithClinicalDataFilterSchema
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|submitter_donor_id|string|true|none|none|
-|program_id|string|true|none|none|
 
 <h2 id="tocS_DonorWithClinicalDataSchema">DonorWithClinicalDataSchema</h2>
 
