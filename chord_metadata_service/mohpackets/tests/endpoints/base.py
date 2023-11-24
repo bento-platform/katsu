@@ -1,3 +1,4 @@
+import logging
 import os
 
 import factory
@@ -106,4 +107,5 @@ class BaseTestCase(TestCase):
         ]
 
     def setUp(self):
+        logging.disable(logging.WARNING)
         self.client = Client()

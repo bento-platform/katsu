@@ -18,6 +18,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -99,38 +100,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
-
-# Logging
-# https://docs.djangoproject.com/en/4.1/topics/logging/
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "console": {
-            "format": "[%(asctime)s] [%(name)s] %(levelname)s: %(message)s",
-            "datefmt": "%d/%b/%Y %H:%M:%S",
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "console",
-        },
-    },
-    "loggers": {
-        "": {
-            "level": "DEBUG",
-            "handlers": ["console"],
-        },
-        "psycopg.pq": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-    },
-}
-
 
 # Cache
 # https://docs.djangoproject.com/en/4.1/topics/cache/

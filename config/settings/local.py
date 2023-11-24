@@ -50,19 +50,6 @@ LOCAL_AUTHORIZED_DATASET = [
     },
 ]
 
-# Debug toolbar settings
-# ----------------------
-if DEBUG:
-    import socket
-
-    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + [
-        "127.0.0.1",
-        "10.0.2.2",
-    ]
-
-# Logging
-# -------
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -76,18 +63,23 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "console",
-            "level": "DEBUG",  # Set the log level for the console handler
         },
     },
     "loggers": {
-        "psycopg": {
-            "level": "ERROR",
-        },
-        "factory": {
-            "level": "ERROR",
-        },
-        "faker": {
-            "level": "ERROR",
+        "": {
+            "level": "INFO",
+            "handlers": ["console"],
         },
     },
 }
+
+# Debug toolbar settings
+# ----------------------
+if DEBUG:
+    import socket
+
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + [
+        "127.0.0.1",
+        "10.0.2.2",
+    ]
