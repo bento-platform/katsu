@@ -234,11 +234,6 @@ class Migration(migrations.Migration):
             field=models.CharField(choices=[('UNKNOWN_STATUS', 'Unknown status'), ('REJECTED', 'Rejected'), ('CANDIDATE', 'Candidate'), ('CONTRIBUTORY', 'Contributory'), ('CAUSATIVE', 'Causative')], default='UNKNOWN_STATUS', help_text='How the call of this GenomicInterpretation was interpreted.', max_length=200),
         ),
         migrations.AddField(
-            model_name='genomicinterpretation',
-            name='subject_or_biosample_id',
-            field=models.CharField(blank=True, help_text='Id of the patient or biosample of the subject being interpreted', max_length=200),
-        ),
-        migrations.AddField(
             model_name='interpretation',
             name='progress_status',
             field=models.CharField(blank=True, choices=[('UNKNOWN_PROGRESS', 'Unknown Progress'), ('IN_PROGRESS', 'In Progress'), ('COMPLETED', 'Completed'), ('SOLVED', 'Solved'), ('UNSOLVED', 'Unsolved')], help_text='The current status of work on the case.', max_length=200),

@@ -108,7 +108,8 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 Cast("phenopackets__interpretations__diagnosis__extra_properties", TextField()),
 
                                 # Interpretation.Diagnosis.GenomicInterpretation
-                                f"{GENOMIC_INTERPRETATION_QUERY}__subject_or_biosample_id",
+                                f"{GENOMIC_INTERPRETATION_QUERY}__subject__id",
+                                f"{GENOMIC_INTERPRETATION_QUERY}__biosample__id",
                                 f"{GENOMIC_INTERPRETATION_QUERY}__interpretation_status",
                                 Cast(f"{GENOMIC_INTERPRETATION_QUERY}__extra_properties", TextField()),
 

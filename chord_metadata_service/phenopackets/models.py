@@ -316,8 +316,7 @@ class GenomicInterpretation(BaseTimeStamp):
         (CONTRIBUTORY, 'Contributory'),
         (CAUSATIVE, 'Causative')
     )
-    subject_or_biosample_id = models.CharField(
-        max_length=200, blank=True, help_text="Id of the patient or biosample of the subject being interpreted")
+    # 'subject_or_biosample_id' is returned by the serializer
 
     # Corresponds to 'subject_or_biosample_id' if it matches an Individual
     subject = models.ForeignKey(

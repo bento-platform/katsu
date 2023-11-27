@@ -290,7 +290,14 @@ DISEASE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DI
 GENOMIC_INTERPRETATION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENOMIC_INTERPRETATION, {
     "properties": {
         "id": search_table_ref(models.GenomicInterpretation),
-        "subject_or_biosample_id": search_optional_str(0),
+        "subject": merge_schema_dictionaries(
+            INDIVIDUAL_SEARCH_SCHEMA,
+            search_db_fk("MANY_TO_ONE", models.GenomicInterpretation, "subject")
+        ),
+        "biosample": merge_schema_dictionaries(
+            BIOSAMPLE_SEARCH_SCHEMA,
+            search_db_fk("MANY_TO_ONE", models.GenomicInterpretation, "biosample")
+        ),
         "interpretation_status": search_optional_str(0),
         "call": {}
     },

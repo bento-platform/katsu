@@ -109,8 +109,8 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
             **valid_phenotypic_feature(phenopacket=None)
         )
 
-    async def _check_dataset_delete(self, delete_url: str):
-        # Check individual exists pre-table-delete
+    async def test_dataset_delete_api(self):
+        # Check individual exists pre-dataset-delete
         await Individual.objects.aget(id="patient:1")
 
         # Check we can run clean_biosamples and clean_individuals with nothing lost (in order),
@@ -118,10 +118,13 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         # since the individual is referenced by the phenopacket and the biosample is in use.
         self.assertEqual(await pc.clean_biosamples(), 0)
         self.assertEqual(await pc.clean_phenotypic_features(), 1)
+        self.assertEqual(await pc.clean_interpretations(), 0)
+        self.assertEqual(await pc.clean_diagnoses(), 0)
+        self.assertEqual(await pc.clean_genomic_interpretations(), 0)
         self.assertEqual(await clean_individuals(), 0)
         self.assertEqual(await clean_resources(), 0)
 
-        r = await self.async_client.delete(delete_url)
+        r = await self.async_client.delete(f"/api/datasets/{self.dataset.identifier}")
         assert r.status_code == 204
 
         with self.assertRaises(PhenotypicFeature.DoesNotExist):  # PhenotypicFeature successfully deleted
@@ -132,11 +135,23 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
 
         self.assertEqual(await pc.clean_biosamples(), 0)
         self.assertEqual(await pc.clean_phenotypic_features(), 0)
+        self.assertEqual(await pc.clean_interpretations(), 0)
+        self.assertEqual(await pc.clean_diagnoses(), 0)
+        self.assertEqual(await pc.clean_genomic_interpretations(), 0)
         self.assertEqual(await clean_individuals(), 0)
         self.assertEqual(await clean_resources(), 0)
 
         with self.assertRaises(Individual.DoesNotExist):
             await Individual.objects.aget(id="patient:1")
+
+        with self.assertRaises(Interpretation.DoesNotExist):
+            await self.interpretation.arefresh_from_db()
+
+        with self.assertRaises(Diagnosis.DoesNotExist):
+            await self.diagnosis.arefresh_from_db()
+
+        with self.assertRaises(GenomicInterpretation.DoesNotExist):
+            await self.genomic_interpretation.arefresh_from_db()
 
         # Check we can run all cleaning again with no change...
         self.assertEqual(await run_all_cleanup(), 0)
@@ -154,17 +169,24 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         # Delete dataset to remove the parent phenopacket
         await self.dataset.adelete()
 
+        # Phenopacket artifacts
         # 1 metadata object +
         # 2 biosamples +
         # 0 linked phenotypic feature (removed via cascade with v2.17.0 database changes) +
         # 1 unlinked phenotypic feature (pretend left-over from pre v2.17.0 or created manually) +
-        # 1 individual +
-        # 0 experiment results +
-        # 0 instruments +
-        # 1 resource +
         # 1 interpretation +
         # 1 diagnosis
         # 1 genomic interpretation
+
+        # Experiment artifacts
+        # 0 experiment results +
+        # 0 instruments +
+
+        # Patients
+        # 1 individual +
+
+        # Resources
+        # 1 resource +
         # = 9 objects total
         self.assertEqual(await run_all_cleanup(), 9)
 

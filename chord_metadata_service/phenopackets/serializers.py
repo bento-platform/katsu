@@ -146,7 +146,7 @@ class GenomicInterpretationSerializer(GenericSerializer):
 
     class Meta:
         model = GenomicInterpretation
-        fields = '__all__'
+        exclude = ["subject", "biosample"]
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
@@ -158,6 +158,12 @@ class GenomicInterpretationSerializer(GenericSerializer):
         elif instance.variant_interpretation:
             response["variant_interpretation"] = VariantInterpretationSerializer(
                 instance.variant_interpretation, many=False, required=False).data
+
+        # subject_or_biosample_id is obtained from the referenced subject/biosample
+        if instance.subject:
+            response["subject_or_biosample_id"] = instance.subject.id
+        elif instance.biosample:
+            response["subject_or_biosample_id"] = instance.biosample.id
 
         return response
 

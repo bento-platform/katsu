@@ -238,7 +238,6 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
     variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
 
     gen_obj, _ = pm.GenomicInterpretation.objects.get_or_create(
-        subject_or_biosample_id=subject_or_biosample_id,
         interpretation_status=gen_interp["interpretation_status"],
         gene_descriptor=gene_descriptor,
         variant_interpretation=variant_interpretation,
