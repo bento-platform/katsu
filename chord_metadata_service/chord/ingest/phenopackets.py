@@ -141,7 +141,6 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
         id=bs["id"],
         description=bs.get("description", ""),
         procedure=bs.get("procedure", {}),
-        derived_from_id=bs.get("derived_from_id", ""),
         sample_type=bs.get("sample_type", {}),
         measurements=bs.get("measurements", []),
         pathological_stage=bs.get("pathological_stage", {}),
@@ -150,6 +149,15 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
         extra_properties=bs.get("extra_properties", {}),
         **bs_query
     )
+
+    if derived_from_id := bs.get("derived_from_id"):
+        try:
+            parent_biosample = pm.Biosample.objects.get(id=derived_from_id)
+            parent_biosample.derived_biosamples.add(bs_obj)
+            parent_biosample.save()
+        except pm.Biosample.DoesNotExist:
+            logger.warning(
+                f"Biosample {bs['id']} refers to a non-existing 'derived_from_id' Biosample {derived_from_id}.")
 
     if bs_created:
         bs_pfs = [get_or_create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
@@ -204,26 +212,44 @@ def get_or_create_variant_interp(variant_interp_data: dict) -> pm.VariantInterpr
 
 
 def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpretation:
-    gene_descriptor = _get_or_create_opt("gene_descriptor", gen_interp, get_or_create_gene_descriptor)
-    variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
-
     # Check if a Biosample or Individual with subject_or_biosample_id exists
     subject_or_biosample_id = gen_interp["subject_or_biosample_id"]
     is_biosample = pm.Biosample.objects.filter(id=subject_or_biosample_id).exists()
     is_subject = pm.Individual.objects.filter(id=subject_or_biosample_id).exists()
 
-    # Store the type the ID refers to in extra_properties
-    element_type = "biosample" if is_biosample and not is_subject else "subject"
-    extra_properties = gen_interp.get("extra_properties", {})
-    extra_properties["related_type"] = element_type
+    if is_biosample and is_subject:
+        # Cannot be both
+        raise IngestError(
+            f"Ambiguous GenomicInterpretation.subject_or_biosample_id {subject_or_biosample_id} "
+            "points to a Biosample AND a Subject. Must point to a Biosample or a Subject, not both.")
+    elif is_biosample:
+        # Get related Biosample
+        related_obj = pm.Biosample.objects.get(id=subject_or_biosample_id)
+    elif is_subject:
+        # Get related Individual
+        related_obj = pm.Individual.objects.get(id=subject_or_biosample_id)
+    else:
+        # Cannot be neither
+        raise IngestError(
+            f"GenomicInterpretation.subject_or_biosample_id {subject_or_biosample_id} "
+            "has no matching Biosample or Individual.")
+
+    gene_descriptor = _get_or_create_opt("gene_descriptor", gen_interp, get_or_create_gene_descriptor)
+    variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
 
     gen_obj, _ = pm.GenomicInterpretation.objects.get_or_create(
         subject_or_biosample_id=subject_or_biosample_id,
         interpretation_status=gen_interp["interpretation_status"],
         gene_descriptor=gene_descriptor,
         variant_interpretation=variant_interpretation,
-        extra_properties=extra_properties,
+        extra_properties=gen_interp.get("extra_properties", {}),
     )
+
+    if related_obj:
+        # Set the link with Biosample/Individual
+        related_obj.genomic_interpretations.add(gen_obj)
+        related_obj.save()
+
     return gen_obj
 
 

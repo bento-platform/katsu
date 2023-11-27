@@ -175,7 +175,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='biosample',
             name='derived_from_id',
-            field=models.CharField(blank=True, help_text='id of the biosample from which the current biosample was derived (if applicable)', max_length=200),
+            field=models.ForeignKey(blank=True, help_text='id of the biosample from which the current biosample was derived (if applicable)', 
+            null=True, on_delete=django.db.models.deletion.CASCADE, related_name='derived_biosamples', to='phenopackets.biosample'),
         ),
         migrations.AddField(
             model_name='biosample',
@@ -484,5 +485,15 @@ class Migration(migrations.Migration):
         ),
         migrations.DeleteModel(
             name='Gene',
+        ),
+        migrations.AddField(
+            model_name='genomicinterpretation',
+            name='biosample',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='genomic_interpretations', to='phenopackets.biosample'),
+        ),
+        migrations.AddField(
+            model_name='genomicinterpretation',
+            name='subject',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='genomic_interpretations', to='patients.individual'),
         ),
     ]

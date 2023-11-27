@@ -144,7 +144,9 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     individual = models.ForeignKey(
         Individual, on_delete=models.CASCADE, blank=True, null=True, related_name="biosamples",
         help_text=rec_help(d.BIOSAMPLE, "individual_id"))
-    derived_from_id = models.CharField(max_length=200, blank=True, help_text=rec_help(d.BIOSAMPLE, "derived_from_id"))
+    derived_from_id = models.ForeignKey(
+        "self", on_delete=models.CASCADE, blank=True, null=True, related_name="derived_biosamples",
+        help_text=rec_help(d.BIOSAMPLE, "derived_from_id"))
     description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.BIOSAMPLE, "description"))
     sampled_tissue = JSONField(validators=[ontology_validator], help_text=rec_help(d.BIOSAMPLE, "sampled_tissue"))
     sample_type = JSONField(blank=True, null=True, validators=[ontology_validator],
@@ -173,7 +175,6 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
                                    help_text=rec_help(d.BIOSAMPLE, "pathological_stage"))
     diagnostic_markers = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                                    help_text=rec_help(d.BIOSAMPLE, "diagnostic_markers"))
-    # CHECK! if Procedure instance is deleted Biosample instance is deleted too
     procedure = models.JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "procedure"))
     is_control_sample = models.BooleanField(default=False, help_text=rec_help(d.BIOSAMPLE, "is_control_sample"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "extra_properties"))
@@ -317,6 +318,14 @@ class GenomicInterpretation(BaseTimeStamp):
     )
     subject_or_biosample_id = models.CharField(
         max_length=200, blank=True, help_text="Id of the patient or biosample of the subject being interpreted")
+
+    # Corresponds to 'subject_or_biosample_id' if it matches an Individual
+    subject = models.ForeignKey(
+        Individual, on_delete=models.CASCADE, null=True, blank=True, related_name="genomic_interpretations")
+    # Corresponds to 'subject_or_biosample_id' if it matches a Biosample
+    biosample = models.ForeignKey(
+        Biosample, on_delete=models.CASCADE, null=True, blank=True, related_name="genomic_interpretations")
+
     interpretation_status = models.CharField(max_length=200, choices=GENOMIC_INTERPRETATION_STATUS,
                                              default="UNKNOWN_STATUS",
                                              help_text='How the call of this GenomicInterpretation was interpreted.')
@@ -335,6 +344,8 @@ class GenomicInterpretation(BaseTimeStamp):
     def clean(self):
         if not (self.gene_descriptor or self.variant_interpretation):
             raise ValidationError('Either Gene or Variant must be specified')
+        if not (self.subject or self.biosample):
+            raise ValidationError('The subject_or_biosample_id must point to a Biosample or a Subject.')
 
     def __str__(self):
         return str(self.id)
