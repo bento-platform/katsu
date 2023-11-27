@@ -1,0 +1,7288 @@
+components:
+  schemas:
+    BasisOfDiagnosisEnum:
+      enum:
+      - Clinical investigation
+      - Clinical
+      - Cytology
+      - Death certificate only
+      - Histology of a metastasis
+      - Histology of a primary tumour
+      - Specific tumour markers
+      - Unknown
+      title: BasisOfDiagnosisEnum
+      type: string
+    BiomarkerIngestSchema:
+      properties:
+        ca125:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ca125
+        cea:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cea
+        er_percent_positive:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Er Percent Positive
+        er_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Er Status
+        her2_ihc_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Her2 Ihc Status
+        her2_ish_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Her2 Ish Status
+        hpv_ihc_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Hpv Ihc Status
+        hpv_pcr_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Hpv Pcr Status
+        hpv_strain:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Hpv Strain
+        pr_percent_positive:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Pr Percent Positive
+        pr_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Pr Status
+        program_id:
+          title: Program Id
+          type: string
+        psa_level:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Psa Level
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_follow_up_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Follow Up Id
+        submitter_primary_diagnosis_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+        submitter_specimen_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Specimen Id
+        submitter_treatment_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+        test_date:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Test Date
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_donor_id
+      title: BiomarkerIngestSchema
+      type: object
+    BiomarkerModelSchema:
+      properties:
+        ca125:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ca125
+        cea:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cea
+        er_percent_positive:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Er Percent Positive
+        er_status:
+          anyOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - type: 'null'
+        her2_ihc_status:
+          anyOf:
+          - $ref: '#/components/schemas/Her2StatusEnum'
+          - type: 'null'
+        her2_ish_status:
+          anyOf:
+          - $ref: '#/components/schemas/Her2StatusEnum'
+          - type: 'null'
+        hpv_ihc_status:
+          anyOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - type: 'null'
+        hpv_pcr_status:
+          anyOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - type: 'null'
+        hpv_strain:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/HpvStrainEnum'
+            type: array
+          - type: 'null'
+          title: Hpv Strain
+        pr_percent_positive:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Pr Percent Positive
+        pr_status:
+          anyOf:
+          - $ref: '#/components/schemas/ErPrHpvStatusEnum'
+          - type: 'null'
+        program_id:
+          title: Program Id
+          type: string
+        psa_level:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Psa Level
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_follow_up_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Follow Up Id
+        submitter_primary_diagnosis_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+        submitter_specimen_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Specimen Id
+        submitter_treatment_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+        test_date:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Test Date
+      required:
+      - program_id
+      - submitter_donor_id
+      title: BiomarkerModelSchema
+      type: object
+    CauseOfDeathEnum:
+      enum:
+      - Died of cancer
+      - Died of other reasons
+      - Unknown
+      title: CauseOfDeathEnum
+      type: string
+    CellsMeasureMethodEnum:
+      enum:
+      - Genomics
+      - Image analysis
+      - Pathology estimate by percent nuclei
+      - Unknown
+      title: CellsMeasureMethodEnum
+      type: string
+    ChemotherapyIngestSchema:
+      properties:
+        actual_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+        chemotherapy_drug_dose_units:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Chemotherapy Drug Dose Units
+        drug_name:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Drug Name
+        drug_reference_database:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Database
+        drug_reference_identifier:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+        prescribed_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+      title: ChemotherapyIngestSchema
+      type: object
+    ChemotherapyModelSchema:
+      properties:
+        actual_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+        chemotherapy_drug_dose_units:
+          anyOf:
+          - $ref: '#/components/schemas/DosageUnitsEnum'
+          - type: 'null'
+        drug_name:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Drug Name
+        drug_reference_database:
+          anyOf:
+          - $ref: '#/components/schemas/DrugReferenceDbEnum'
+          - type: 'null'
+        drug_reference_identifier:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+        prescribed_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+      required:
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+      title: ChemotherapyModelSchema
+      type: object
+    ComorbidityIngestSchema:
+      properties:
+        age_at_comorbidity_diagnosis:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Age At Comorbidity Diagnosis
+        comorbidity_treatment:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Comorbidity Treatment
+        comorbidity_treatment_status:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Comorbidity Treatment Status
+        comorbidity_type_code:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Comorbidity Type Code
+        laterality_of_prior_malignancy:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Laterality Of Prior Malignancy
+        prior_malignancy:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Prior Malignancy
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_donor_id
+      title: ComorbidityIngestSchema
+      type: object
+    ComorbidityModelSchema:
+      properties:
+        age_at_comorbidity_diagnosis:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Age At Comorbidity Diagnosis
+        comorbidity_treatment:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Comorbidity Treatment
+        comorbidity_treatment_status:
+          anyOf:
+          - $ref: '#/components/schemas/uBooleanEnum'
+          - type: 'null'
+        comorbidity_type_code:
+          anyOf:
+          - maxLength: 64
+            pattern: ^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$
+            type: string
+          - type: 'null'
+          title: Comorbidity Type Code
+        laterality_of_prior_malignancy:
+          anyOf:
+          - $ref: '#/components/schemas/MalignancyLateralityEnum'
+          - type: 'null'
+        prior_malignancy:
+          anyOf:
+          - $ref: '#/components/schemas/uBooleanEnum'
+          - type: 'null'
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+      required:
+      - program_id
+      - submitter_donor_id
+      title: ComorbidityModelSchema
+      type: object
+    ConfirmedDiagnosisTumourEnum:
+      enum:
+      - 'Yes'
+      - 'No'
+      - Not done
+      - Unknown
+      title: ConfirmedDiagnosisTumourEnum
+      type: string
+    DiscoverySchema:
+      properties:
+        donors_by_cohort:
+          additionalProperties:
+            type: integer
+          title: Donors By Cohort
+          type: object
+      required:
+      - donors_by_cohort
+      title: DiscoverySchema
+      type: object
+    DiseaseStatusFollowupEnum:
+      enum:
+      - Complete remission
+      - Distant progression
+      - Loco-regional progression
+      - No evidence of disease
+      - Partial remission
+      - Progression not otherwise specified
+      - Relapse or recurrence
+      - Stable
+      title: DiseaseStatusFollowupEnum
+      type: string
+    DonorIngestSchema:
+      properties:
+        cause_of_death:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Cause Of Death
+        date_alive_after_lost_to_followup:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Date Alive After Lost To Followup
+        date_of_birth:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Date Of Birth
+        date_of_death:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Date Of Death
+        gender:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Gender
+        is_deceased:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Deceased
+        lost_to_followup_after_clinical_event_identifier:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Lost To Followup After Clinical Event Identifier
+        lost_to_followup_reason:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Lost To Followup Reason
+        primary_site:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Primary Site
+        program_id:
+          title: Program Id
+          type: string
+        sex_at_birth:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Sex At Birth
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_donor_id
+      title: DonorIngestSchema
+      type: object
+    DonorModelSchema:
+      properties:
+        cause_of_death:
+          anyOf:
+          - $ref: '#/components/schemas/CauseOfDeathEnum'
+          - type: 'null'
+        date_alive_after_lost_to_followup:
+          anyOf:
+          - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+            type: string
+          - type: 'null'
+          title: Date Alive After Lost To Followup
+        date_of_birth:
+          anyOf:
+          - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+            type: string
+          - type: 'null'
+          title: Date Of Birth
+        date_of_death:
+          anyOf:
+          - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+            type: string
+          - type: 'null'
+          title: Date Of Death
+        gender:
+          anyOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - type: 'null'
+        is_deceased:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Deceased
+        lost_to_followup_after_clinical_event_identifier:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Lost To Followup After Clinical Event Identifier
+        lost_to_followup_reason:
+          anyOf:
+          - $ref: '#/components/schemas/LostToFollowupReasonEnum'
+          - type: 'null'
+        primary_site:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/PrimarySiteEnum'
+            type: array
+          - type: 'null'
+          title: Primary Site
+        program_id:
+          title: Program Id
+          type: string
+        sex_at_birth:
+          anyOf:
+          - $ref: '#/components/schemas/SexAtBirthEnum'
+          - type: 'null'
+        submitter_donor_id:
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+          title: Submitter Donor Id
+          type: string
+      required:
+      - submitter_donor_id
+      - program_id
+      title: DonorModelSchema
+      type: object
+    DonorWithClinicalDataSchema:
+      properties:
+        biomarkers:
+          items:
+            $ref: '#/components/schemas/NestedBiomarkerSchema'
+          title: Biomarkers
+          type: array
+        cause_of_death:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Cause Of Death
+        comorbidities:
+          items:
+            $ref: '#/components/schemas/NestedComorbiditySchema'
+          title: Comorbidities
+          type: array
+        date_alive_after_lost_to_followup:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Date Alive After Lost To Followup
+        date_of_birth:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Date Of Birth
+        date_of_death:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Date Of Death
+        exposures:
+          items:
+            $ref: '#/components/schemas/NestedExposureSchema'
+          title: Exposures
+          type: array
+        followups:
+          items:
+            $ref: '#/components/schemas/NestedFollowUpSchema'
+          title: Followups
+          type: array
+        gender:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Gender
+        is_deceased:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Deceased
+        lost_to_followup_after_clinical_event_identifier:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Lost To Followup After Clinical Event Identifier
+        lost_to_followup_reason:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Lost To Followup Reason
+        primary_site:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Primary Site
+        primarydiagnosis:
+          items:
+            $ref: '#/components/schemas/NestedPrimaryDiagnosisSchema'
+          title: Primarydiagnosis
+          type: array
+        program_id:
+          title: Program Id
+          type: string
+        sex_at_birth:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Sex At Birth
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+      required:
+      - primarydiagnosis
+      - followups
+      - biomarkers
+      - exposures
+      - comorbidities
+      - submitter_donor_id
+      - program_id
+      title: DonorWithClinicalDataSchema
+      type: object
+    DosageUnitsEnum:
+      enum:
+      - mg/m2
+      - IU/m2
+      - IU/kg
+      - ug/m2
+      - g/m2
+      - mg/kg
+      - cells/kg
+      title: DosageUnitsEnum
+      type: string
+    DrugReferenceDbEnum:
+      enum:
+      - RxNorm
+      - PubChem
+      - NCI Thesaurus
+      title: DrugReferenceDbEnum
+      type: string
+    ErPrHpvStatusEnum:
+      enum:
+      - Cannot be determined
+      - Negative
+      - Not applicable
+      - Positive
+      - Unknown
+      title: ErPrHpvStatusEnum
+      type: string
+    ExposureIngestSchema:
+      properties:
+        pack_years_smoked:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Pack Years Smoked
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        tobacco_smoking_status:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Tobacco Smoking Status
+        tobacco_type:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Tobacco Type
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_donor_id
+      title: ExposureIngestSchema
+      type: object
+    ExposureModelSchema:
+      properties:
+        pack_years_smoked:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Pack Years Smoked
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        tobacco_smoking_status:
+          anyOf:
+          - $ref: '#/components/schemas/SmokingStatusEnum'
+          - type: 'null'
+        tobacco_type:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/TobaccoTypeEnum'
+            type: array
+          - type: 'null'
+          title: Tobacco Type
+      required:
+      - program_id
+      - submitter_donor_id
+      title: ExposureModelSchema
+      type: object
+    FollowUpIngestSchema:
+      properties:
+        anatomic_site_progression_or_recurrence:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Anatomic Site Progression Or Recurrence
+        date_of_followup:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Date Of Followup
+        date_of_relapse:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Date Of Relapse
+        disease_status_at_followup:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Disease Status At Followup
+        method_of_progression_status:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Method Of Progression Status
+        primary_diagnosis_uuid_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Primary Diagnosis Uuid
+        program_id:
+          title: Program Id
+          type: string
+        recurrence_m_category:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Recurrence M Category
+        recurrence_n_category:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Recurrence N Category
+        recurrence_stage_group:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Recurrence Stage Group
+        recurrence_t_category:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Recurrence T Category
+        recurrence_tumour_staging_system:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Recurrence Tumour Staging System
+        relapse_type:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Relapse Type
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_follow_up_id:
+          maxLength: 64
+          title: Submitter Follow Up Id
+          type: string
+        submitter_primary_diagnosis_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+        submitter_treatment_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+        treatment_uuid_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Treatment Uuid
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_follow_up_id
+      - submitter_donor_id
+      title: FollowUpIngestSchema
+      type: object
+    FollowUpModelSchema:
+      properties:
+        anatomic_site_progression_or_recurrence:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Anatomic Site Progression Or Recurrence
+        date_of_followup:
+          anyOf:
+          - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+            type: string
+          - type: 'null'
+          title: Date Of Followup
+        date_of_relapse:
+          anyOf:
+          - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+            type: string
+          - type: 'null'
+          title: Date Of Relapse
+        disease_status_at_followup:
+          anyOf:
+          - $ref: '#/components/schemas/DiseaseStatusFollowupEnum'
+          - type: 'null'
+        method_of_progression_status:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/ProgressionStatusMethodEnum'
+            type: array
+          - type: 'null'
+          title: Method Of Progression Status
+        primary_diagnosis_uuid:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Primary Diagnosis Uuid
+        program_id:
+          title: Program Id
+          type: string
+        recurrence_m_category:
+          anyOf:
+          - $ref: '#/components/schemas/MCategoryEnum'
+          - type: 'null'
+        recurrence_n_category:
+          anyOf:
+          - $ref: '#/components/schemas/NCategoryEnum'
+          - type: 'null'
+        recurrence_stage_group:
+          anyOf:
+          - $ref: '#/components/schemas/StageGroupEnum'
+          - type: 'null'
+        recurrence_t_category:
+          anyOf:
+          - $ref: '#/components/schemas/TCategoryEnum'
+          - type: 'null'
+        recurrence_tumour_staging_system:
+          anyOf:
+          - $ref: '#/components/schemas/TumourStagingSystemEnum'
+          - type: 'null'
+        relapse_type:
+          anyOf:
+          - $ref: '#/components/schemas/RelapseTypeEnum'
+          - type: 'null'
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_follow_up_id:
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+          title: Submitter Follow Up Id
+          type: string
+        submitter_primary_diagnosis_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+        submitter_treatment_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+        treatment_uuid:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Treatment Uuid
+      required:
+      - submitter_follow_up_id
+      - program_id
+      - submitter_donor_id
+      title: FollowUpModelSchema
+      type: object
+    GenderEnum:
+      enum:
+      - Man
+      - Woman
+      - Non-binary
+      title: GenderEnum
+      type: string
+    Her2StatusEnum:
+      enum:
+      - Cannot be determined
+      - Equivocal
+      - Positive
+      - Negative
+      - Not applicable
+      - Unknown
+      title: Her2StatusEnum
+      type: string
+    HormoneTherapyIngestSchema:
+      properties:
+        actual_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+        drug_name:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Drug Name
+        drug_reference_database:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Database
+        drug_reference_identifier:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+        hormone_drug_dose_units:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Hormone Drug Dose Units
+        prescribed_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+      title: HormoneTherapyIngestSchema
+      type: object
+    HormoneTherapyModelSchema:
+      properties:
+        actual_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+        drug_name:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Drug Name
+        drug_reference_database:
+          anyOf:
+          - $ref: '#/components/schemas/DrugReferenceDbEnum'
+          - type: 'null'
+        drug_reference_identifier:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+        hormone_drug_dose_units:
+          anyOf:
+          - $ref: '#/components/schemas/DosageUnitsEnum'
+          - type: 'null'
+        prescribed_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+      required:
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+      title: HormoneTherapyModelSchema
+      type: object
+    HpvStrainEnum:
+      enum:
+      - HPV16
+      - HPV18
+      - HPV31
+      - HPV33
+      - HPV35
+      - HPV39
+      - HPV45
+      - HPV51
+      - HPV52
+      - HPV56
+      - HPV58
+      - HPV59
+      - HPV66
+      - HPV68
+      - HPV73
+      title: HpvStrainEnum
+      type: string
+    ImmunotherapyIngestSchema:
+      properties:
+        actual_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+        drug_name:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Drug Name
+        drug_reference_database:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Database
+        drug_reference_identifier:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+        immunotherapy_drug_dose_units:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Immunotherapy Drug Dose Units
+        immunotherapy_type:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Immunotherapy Type
+        prescribed_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+      title: ImmunotherapyIngestSchema
+      type: object
+    ImmunotherapyModelSchema:
+      properties:
+        actual_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+        drug_name:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Drug Name
+        drug_reference_database:
+          anyOf:
+          - $ref: '#/components/schemas/DrugReferenceDbEnum'
+          - type: 'null'
+        drug_reference_identifier:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+        immunotherapy_drug_dose_units:
+          anyOf:
+          - $ref: '#/components/schemas/DosageUnitsEnum'
+          - type: 'null'
+        immunotherapy_type:
+          anyOf:
+          - $ref: '#/components/schemas/ImmunotherapyTypeEnum'
+          - type: 'null'
+        prescribed_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+      required:
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+      title: ImmunotherapyModelSchema
+      type: object
+    ImmunotherapyTypeEnum:
+      enum:
+      - Cell-based
+      - Immune checkpoint inhibitors
+      - Monoclonal antibodies other than immune checkpoint inhibitors
+      - Other immunomodulatory substances
+      title: ImmunotherapyTypeEnum
+      type: string
+    LostToFollowupReasonEnum:
+      enum:
+      - Completed study
+      - Discharged to palliative care
+      - Lost contact
+      - Not applicable
+      - Unknown
+      - Withdrew from study
+      title: LostToFollowupReasonEnum
+      type: string
+    LymphNodeMethodEnum:
+      enum:
+      - Imaging
+      - Lymph node dissection/pathological exam
+      - Physical palpation of patient
+      title: LymphNodeMethodEnum
+      type: string
+    LymphNodeStatusEnum:
+      enum:
+      - Cannot be determined
+      - 'No'
+      - No lymph nodes found in resected specimen
+      - Not applicable
+      - 'Yes'
+      title: LymphNodeStatusEnum
+      type: string
+    LymphovascularInvasionEnum:
+      enum:
+      - Absent
+      - Both lymphatic and small vessel and venous (large vessel) invasion
+      - Lymphatic and small vessel invasion only
+      - Not applicable
+      - Present
+      - Venous (large vessel) invasion only
+      - Unknown
+      title: LymphovascularInvasionEnum
+      type: string
+    MCategoryEnum:
+      enum:
+      - M0
+      - M0(i+)
+      - M1
+      - M1a
+      - M1a(0)
+      - M1a(1)
+      - M1b
+      - M1b(0)
+      - M1b(1)
+      - M1c
+      - M1c(0)
+      - M1c(1)
+      - M1d
+      - M1d(0)
+      - M1d(1)
+      - M1e
+      - MX
+      title: MCategoryEnum
+      type: string
+    MalignancyLateralityEnum:
+      enum:
+      - Bilateral
+      - Left
+      - Midline
+      - Not applicable
+      - Right
+      - Unilateral, Side not specified
+      - Unknown
+      title: MalignancyLateralityEnum
+      type: string
+    MarginTypesEnum:
+      enum:
+      - Circumferential resection margin
+      - Common bile duct margin
+      - Distal margin
+      - Not applicable
+      - Proximal margin
+      - Unknown
+      title: MarginTypesEnum
+      type: string
+    NCategoryEnum:
+      enum:
+      - N0
+      - N0a
+      - N0a (biopsy)
+      - N0b
+      - N0b (no biopsy)
+      - N0(i+)
+      - N0(i-)
+      - N0(mol+)
+      - N0(mol-)
+      - N1
+      - N1a
+      - N1a(sn)
+      - N1b
+      - N1c
+      - N1mi
+      - N2
+      - N2a
+      - N2b
+      - N2c
+      - N2mi
+      - N3
+      - N3a
+      - N3b
+      - N3c
+      - N4
+      - NX
+      title: NCategoryEnum
+      type: string
+    NestedBiomarkerSchema:
+      properties:
+        ca125:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ca125
+        cea:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cea
+        er_percent_positive:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Er Percent Positive
+        er_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Er Status
+        her2_ihc_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Her2 Ihc Status
+        her2_ish_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Her2 Ish Status
+        hpv_ihc_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Hpv Ihc Status
+        hpv_pcr_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Hpv Pcr Status
+        hpv_strain:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Hpv Strain
+        pr_percent_positive:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Pr Percent Positive
+        pr_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Pr Status
+        psa_level:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Psa Level
+        submitter_follow_up_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Follow Up Id
+        submitter_primary_diagnosis_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+        submitter_specimen_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Specimen Id
+        submitter_treatment_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+        test_date:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Test Date
+      title: NestedBiomarkerSchema
+      type: object
+    NestedChemotherapySchema:
+      properties:
+        actual_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+        chemotherapy_drug_dose_units:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Chemotherapy Drug Dose Units
+        drug_name:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Drug Name
+        drug_reference_database:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Database
+        drug_reference_identifier:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+        prescribed_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+      title: NestedChemotherapySchema
+      type: object
+    NestedComorbiditySchema:
+      properties:
+        age_at_comorbidity_diagnosis:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Age At Comorbidity Diagnosis
+        comorbidity_treatment:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Comorbidity Treatment
+        comorbidity_treatment_status:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Comorbidity Treatment Status
+        comorbidity_type_code:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Comorbidity Type Code
+        laterality_of_prior_malignancy:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Laterality Of Prior Malignancy
+        prior_malignancy:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Prior Malignancy
+      title: NestedComorbiditySchema
+      type: object
+    NestedExposureSchema:
+      properties:
+        pack_years_smoked:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Pack Years Smoked
+        tobacco_smoking_status:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Tobacco Smoking Status
+        tobacco_type:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Tobacco Type
+      title: NestedExposureSchema
+      type: object
+    NestedFollowUpSchema:
+      properties: {}
+      title: NestedFollowUpSchema
+      type: object
+    NestedHormoneTherapySchema:
+      properties:
+        actual_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+        drug_name:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Drug Name
+        drug_reference_database:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Database
+        drug_reference_identifier:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+        hormone_drug_dose_units:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Hormone Drug Dose Units
+        prescribed_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+      title: NestedHormoneTherapySchema
+      type: object
+    NestedImmunotherapySchema:
+      properties:
+        actual_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+        drug_name:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Drug Name
+        drug_reference_database:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Database
+        drug_reference_identifier:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+        immunotherapy_drug_dose_units:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Immunotherapy Drug Dose Units
+        immunotherapy_type:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Immunotherapy Type
+        prescribed_cumulative_drug_dose:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+      title: NestedImmunotherapySchema
+      type: object
+    NestedPrimaryDiagnosisSchema:
+      properties:
+        basis_of_diagnosis:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Basis Of Diagnosis
+        cancer_type_code:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Cancer Type Code
+        clinical_m_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Clinical M Category
+        clinical_n_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Clinical N Category
+        clinical_stage_group:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Clinical Stage Group
+        clinical_t_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Clinical T Category
+        clinical_tumour_staging_system:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Clinical Tumour Staging System
+        date_of_diagnosis:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Date Of Diagnosis
+        followups:
+          items:
+            $ref: '#/components/schemas/NestedFollowUpSchema'
+          title: Followups
+          type: array
+        laterality:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Laterality
+        lymph_nodes_examined_method:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Lymph Nodes Examined Method
+        lymph_nodes_examined_status:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Lymph Nodes Examined Status
+        number_lymph_nodes_positive:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Number Lymph Nodes Positive
+        specimens:
+          items:
+            $ref: '#/components/schemas/NestedSpecimenSchema'
+          title: Specimens
+          type: array
+        submitter_primary_diagnosis_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+        treatments:
+          items:
+            $ref: '#/components/schemas/NestedTreatmentSchema'
+          title: Treatments
+          type: array
+      required:
+      - specimens
+      - treatments
+      - followups
+      title: NestedPrimaryDiagnosisSchema
+      type: object
+    NestedRadiationSchema:
+      properties:
+        anatomical_site_irradiated:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Anatomical Site Irradiated
+        radiation_boost:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Radiation Boost
+        radiation_therapy_dosage:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Radiation Therapy Dosage
+        radiation_therapy_fractions:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Radiation Therapy Fractions
+        radiation_therapy_modality:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Radiation Therapy Modality
+        radiation_therapy_type:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Radiation Therapy Type
+        reference_radiation_treatment_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Reference Radiation Treatment Id
+      title: NestedRadiationSchema
+      type: object
+    NestedSampleRegistrationSchema:
+      properties:
+        sample_type:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Sample Type
+        specimen_tissue_source:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Specimen Tissue Source
+        specimen_type:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Specimen Type
+        submitter_sample_id:
+          maxLength: 64
+          title: Submitter Sample Id
+          type: string
+        tumour_normal_designation:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Tumour Normal Designation
+      required:
+      - submitter_sample_id
+      title: NestedSampleRegistrationSchema
+      type: object
+    NestedSpecimenSchema:
+      properties:
+        pathological_m_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Pathological M Category
+        pathological_n_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Pathological N Category
+        pathological_stage_group:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Pathological Stage Group
+        pathological_t_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Pathological T Category
+        pathological_tumour_staging_system:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Pathological Tumour Staging System
+        percent_tumour_cells_measurement_method:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Percent Tumour Cells Measurement Method
+        percent_tumour_cells_range:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Percent Tumour Cells Range
+        reference_pathology_confirmed_diagnosis:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Reference Pathology Confirmed Diagnosis
+        reference_pathology_confirmed_tumour_presence:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Reference Pathology Confirmed Tumour Presence
+        samplesregistrations:
+          items:
+            $ref: '#/components/schemas/NestedSampleRegistrationSchema'
+          title: Samplesregistrations
+          type: array
+        specimen_anatomic_location:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Specimen Anatomic Location
+        specimen_collection_date:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Specimen Collection Date
+        specimen_laterality:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Specimen Laterality
+        specimen_processing:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Specimen Processing
+        specimen_storage:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Specimen Storage
+        submitter_specimen_id:
+          maxLength: 64
+          title: Submitter Specimen Id
+          type: string
+        tumour_grade:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Tumour Grade
+        tumour_grading_system:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Tumour Grading System
+        tumour_histological_type:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Tumour Histological Type
+      required:
+      - samplesregistrations
+      - submitter_specimen_id
+      title: NestedSpecimenSchema
+      type: object
+    NestedSurgerySchema:
+      properties:
+        greatest_dimension_tumour:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Greatest Dimension Tumour
+        lymphovascular_invasion:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Lymphovascular Invasion
+        margin_types_involved:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Margin Types Involved
+        margin_types_not_assessed:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Margin Types Not Assessed
+        margin_types_not_involved:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Margin Types Not Involved
+        perineural_invasion:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Perineural Invasion
+        residual_tumour_classification:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Residual Tumour Classification
+        submitter_specimen_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Specimen Id
+        surgery_location:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Surgery Location
+        surgery_site:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Surgery Site
+        surgery_type:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Surgery Type
+        tumour_focality:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Tumour Focality
+        tumour_length:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tumour Length
+        tumour_width:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tumour Width
+      title: NestedSurgerySchema
+      type: object
+    NestedTreatmentSchema:
+      properties:
+        chemotherapies:
+          items:
+            $ref: '#/components/schemas/NestedChemotherapySchema'
+          title: Chemotherapies
+          type: array
+        days_per_cycle:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Days Per Cycle
+        followups:
+          items:
+            $ref: '#/components/schemas/NestedFollowUpSchema'
+          title: Followups
+          type: array
+        hormonetherapies:
+          items:
+            $ref: '#/components/schemas/NestedHormoneTherapySchema'
+          title: Hormonetherapies
+          type: array
+        immunotherapies:
+          items:
+            $ref: '#/components/schemas/NestedImmunotherapySchema'
+          title: Immunotherapies
+          type: array
+        is_primary_treatment:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Is Primary Treatment
+        line_of_treatment:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Line Of Treatment
+        number_of_cycles:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Number Of Cycles
+        radiations:
+          items:
+            $ref: '#/components/schemas/NestedRadiationSchema'
+          title: Radiations
+          type: array
+        response_to_treatment:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Response To Treatment
+        response_to_treatment_criteria_method:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Response To Treatment Criteria Method
+        status_of_treatment:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Status Of Treatment
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+        surgeries:
+          items:
+            $ref: '#/components/schemas/NestedSurgerySchema'
+          title: Surgeries
+          type: array
+        treatment_end_date:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Treatment End Date
+        treatment_intent:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Treatment Intent
+        treatment_setting:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Treatment Setting
+        treatment_start_date:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Treatment Start Date
+        treatment_type:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Treatment Type
+      required:
+      - chemotherapies
+      - immunotherapies
+      - hormonetherapies
+      - radiations
+      - surgeries
+      - followups
+      - submitter_treatment_id
+      title: NestedTreatmentSchema
+      type: object
+    PagedBiomarkerModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/BiomarkerModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedBiomarkerModelSchema
+      type: object
+    PagedChemotherapyModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/ChemotherapyModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedChemotherapyModelSchema
+      type: object
+    PagedComorbidityModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/ComorbidityModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedComorbidityModelSchema
+      type: object
+    PagedDonorModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/DonorModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedDonorModelSchema
+      type: object
+    PagedExposureModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/ExposureModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedExposureModelSchema
+      type: object
+    PagedFollowUpModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/FollowUpModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedFollowUpModelSchema
+      type: object
+    PagedHormoneTherapyModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/HormoneTherapyModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedHormoneTherapyModelSchema
+      type: object
+    PagedImmunotherapyModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/ImmunotherapyModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedImmunotherapyModelSchema
+      type: object
+    PagedPrimaryDiagnosisModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/PrimaryDiagnosisModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedPrimaryDiagnosisModelSchema
+      type: object
+    PagedProgramModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/ProgramModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedProgramModelSchema
+      type: object
+    PagedRadiationModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/RadiationModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedRadiationModelSchema
+      type: object
+    PagedSampleRegistrationModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/SampleRegistrationModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedSampleRegistrationModelSchema
+      type: object
+    PagedSpecimenModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/SpecimenModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedSpecimenModelSchema
+      type: object
+    PagedSurgeryModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/SurgeryModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedSurgeryModelSchema
+      type: object
+    PagedTreatmentModelSchema:
+      properties:
+        count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Count
+        items:
+          items:
+            $ref: '#/components/schemas/TreatmentModelSchema'
+          title: Items
+          type: array
+        next_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Page
+        previous_page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Previous Page
+      required:
+      - items
+      - count
+      - next_page
+      - previous_page
+      title: PagedTreatmentModelSchema
+      type: object
+    PercentCellsRangeEnum:
+      enum:
+      - 0-19%
+      - 20-50%
+      - 51-100%
+      title: PercentCellsRangeEnum
+      type: string
+    PerineuralInvasionEnum:
+      enum:
+      - Absent
+      - Cannot be assessed
+      - Not applicable
+      - Present
+      - Unknown
+      title: PerineuralInvasionEnum
+      type: string
+    PrimaryDiagnosisIngestSchema:
+      properties:
+        basis_of_diagnosis:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Basis Of Diagnosis
+        cancer_type_code:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Cancer Type Code
+        clinical_m_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Clinical M Category
+        clinical_n_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Clinical N Category
+        clinical_stage_group:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Clinical Stage Group
+        clinical_t_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Clinical T Category
+        clinical_tumour_staging_system:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Clinical Tumour Staging System
+        date_of_diagnosis:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Date Of Diagnosis
+        laterality:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Laterality
+        lymph_nodes_examined_method:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Lymph Nodes Examined Method
+        lymph_nodes_examined_status:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Lymph Nodes Examined Status
+        number_lymph_nodes_positive:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Number Lymph Nodes Positive
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Donor Id
+        submitter_primary_diagnosis_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      title: PrimaryDiagnosisIngestSchema
+      type: object
+    PrimaryDiagnosisLateralityEnum:
+      enum:
+      - Bilateral
+      - Left
+      - Midline
+      - Not a paired site
+      - Right
+      - Unilateral, side not specified
+      - Unknown
+      title: PrimaryDiagnosisLateralityEnum
+      type: string
+    PrimaryDiagnosisModelSchema:
+      properties:
+        basis_of_diagnosis:
+          anyOf:
+          - $ref: '#/components/schemas/BasisOfDiagnosisEnum'
+          - type: 'null'
+        cancer_type_code:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Cancer Type Code
+        clinical_m_category:
+          anyOf:
+          - $ref: '#/components/schemas/MCategoryEnum'
+          - type: 'null'
+        clinical_n_category:
+          anyOf:
+          - $ref: '#/components/schemas/NCategoryEnum'
+          - type: 'null'
+        clinical_stage_group:
+          anyOf:
+          - $ref: '#/components/schemas/StageGroupEnum'
+          - type: 'null'
+        clinical_t_category:
+          anyOf:
+          - $ref: '#/components/schemas/TCategoryEnum'
+          - type: 'null'
+        clinical_tumour_staging_system:
+          anyOf:
+          - $ref: '#/components/schemas/TumourStagingSystemEnum'
+          - type: 'null'
+        date_of_diagnosis:
+          anyOf:
+          - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+            type: string
+          - type: 'null'
+          title: Date Of Diagnosis
+        laterality:
+          anyOf:
+          - $ref: '#/components/schemas/PrimaryDiagnosisLateralityEnum'
+          - type: 'null'
+        lymph_nodes_examined_method:
+          anyOf:
+          - $ref: '#/components/schemas/LymphNodeMethodEnum'
+          - type: 'null'
+        lymph_nodes_examined_status:
+          anyOf:
+          - $ref: '#/components/schemas/LymphNodeStatusEnum'
+          - type: 'null'
+        number_lymph_nodes_positive:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Number Lymph Nodes Positive
+        program_id:
+          title: Program Id
+          type: string
+        submitter_donor_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Donor Id
+        submitter_primary_diagnosis_id:
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+          title: Submitter Primary Diagnosis Id
+          type: string
+      required:
+      - submitter_primary_diagnosis_id
+      - program_id
+      title: PrimaryDiagnosisModelSchema
+      type: object
+    PrimarySiteEnum:
+      enum:
+      - Accessory sinuses
+      - Adrenal gland
+      - Anus and anal canal
+      - Base of tongue
+      - Bladder
+      - Bones, joints and articular cartilage of limbs
+      - Bones, joints and articular cartilage of other and unspecified sites
+      - Brain
+      - Breast
+      - Bronchus and lung
+      - Cervix uteri
+      - Colon
+      - Connective, subcutaneous and other soft tissues
+      - Corpus uteri
+      - Esophagus
+      - Eye and adnexa
+      - Floor of mouth
+      - Gallbladder
+      - Gum
+      - Heart, mediastinum, and pleura
+      - Hematopoietic and reticuloendothelial systems
+      - Hypopharynx
+      - Kidney
+      - Larynx
+      - Lip
+      - Liver and intrahepatic bile ducts
+      - Lymph nodes
+      - Meninges
+      - Nasal cavity and middle ear
+      - Nasopharynx
+      - Oropharynx
+      - Other and ill-defined digestive organs
+      - Other and ill-defined sites
+      - Other and ill-defined sites in lip, oral cavity and pharynx
+      - Other and ill-defined sites within respiratory system and intrathoracic organs
+      - Other and unspecified female genital organs
+      - Other and unspecified major salivary glands
+      - Other and unspecified male genital organs
+      - Other and unspecified parts of biliary tract
+      - Other and unspecified parts of mouth
+      - Other and unspecified parts of tongue
+      - Other and unspecified urinary organs
+      - Other endocrine glands and related structures
+      - Ovary
+      - Palate
+      - Pancreas
+      - Parotid gland
+      - Penis
+      - Peripheral nerves and autonomic nervous system
+      - Placenta
+      - Prostate gland
+      - Pyriform sinus
+      - Rectosigmoid junction
+      - Rectum
+      - Renal pelvis
+      - Retroperitoneum and peritoneum
+      - Skin
+      - Small intestine
+      - Spinal cord, cranial nerves, and other parts of central nervous system
+      - Stomach
+      - Testis
+      - Thymus
+      - Thyroid gland
+      - Tonsil
+      - Trachea
+      - Ureter
+      - Uterus, NOS
+      - Vagina
+      - Vulva
+      - Unknown primary site
+      title: PrimarySiteEnum
+      type: string
+    ProgramDiscoverySchema:
+      properties:
+        cohort_list:
+          items:
+            type: string
+          title: Cohort List
+          type: array
+      required:
+      - cohort_list
+      title: ProgramDiscoverySchema
+      type: object
+    ProgramModelSchema:
+      properties:
+        created:
+          format: date-time
+          title: Created
+          type: string
+        metadata:
+          anyOf:
+          - type: object
+          - type: 'null'
+          title: Metadata
+        program_id:
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+          title: Program Id
+          type: string
+        updated:
+          format: date-time
+          title: Updated
+          type: string
+      required:
+      - program_id
+      title: ProgramModelSchema
+      type: object
+    ProgressionStatusMethodEnum:
+      enum:
+      - Imaging (procedure)
+      - Histopathology test (procedure)
+      - Assessment of symptom control (procedure)
+      - Physical examination procedure (procedure)
+      - Tumor marker measurement (procedure)
+      - Laboratory data interpretation (procedure)
+      title: ProgressionStatusMethodEnum
+      type: string
+    RadiationAnatomicalSiteEnum:
+      enum:
+      - Left Abdomen
+      - Whole Abdomen
+      - Right Abdomen
+      - Lower Abdomen
+      - Left Lower Abdomen
+      - Right Lower Abdomen
+      - Upper Abdomen
+      - Left Upper Abdomen
+      - Right Upper Abdomen
+      - Left Adrenal
+      - Right Adrenal
+      - Bilateral Ankle
+      - Left Ankle
+      - Right Ankle
+      - Bilateral Antrum (Bull's Eye)
+      - Left Antrum
+      - Right Antrum
+      - Anus
+      - Lower Left Arm
+      - Lower Right Arm
+      - Bilateral Arms
+      - Left Arm
+      - Right Arm
+      - Upper Left Arm
+      - Upper Right Arm
+      - Left Axilla
+      - Right Axilla
+      - Skin or Soft Tissue of Back
+      - Bile Duct
+      - Bladder
+      - Lower Body
+      - Middle Body
+      - Upper Body
+      - Whole Body
+      - Boost - Area Previously Treated
+      - Brain
+      - Left Breast Boost
+      - Right Breast Boost
+      - Bilateral Breast
+      - Left Breast
+      - Right Breast
+      - Bilateral Breasts with Nodes
+      - Left Breast with Nodes
+      - Right Breast with Nodes
+      - Bilateral Buttocks
+      - Left Buttock
+      - Right Buttock
+      - Inner Canthus
+      - Outer Canthus
+      - Cervix
+      - Bilateral Chest Lung & Area Involve
+      - Left Chest
+      - Right Chest
+      - Chin
+      - Left Cheek
+      - Right Cheek
+      - Bilateral Chest Wall (W/o Breast)
+      - Left Chest Wall
+      - Right Chest Wall
+      - Bilateral Clavicle
+      - Left Clavicle
+      - Right Clavicle
+      - Coccyx
+      - Colon
+      - Whole C.N.S. (Medulla Techinque)
+      - Csf Spine (Medull Tech 2 Diff Machi
+      - Left Chestwall Boost
+      - Right Chestwall Boost
+      - Bilateral Chestwall with Nodes
+      - Left Chestwall with Nodes
+      - Right Chestwall with Nodes
+      - Left Ear
+      - Right Ear
+      - Epigastrium
+      - Lower Esophagus
+      - Middle Esophagus
+      - Upper Esophagus
+      - Entire Esophagus
+      - Ethmoid Sinus
+      - Bilateral Eyes
+      - Left Eye
+      - Right Eye
+      - Bilateral Face
+      - Left Face
+      - Right Face
+      - Left Fallopian Tubes
+      - Right Fallopian Tubes
+      - Bilateral Femur
+      - Left Femur
+      - Right Femur
+      - Left Fibula
+      - Right Fibula
+      - Finger (Including Thumbs)
+      - Floor of Mouth (Boosts)
+      - Bilateral Feet
+      - Left Foot
+      - Right Foot
+      - Forehead
+      - Posterior Fossa
+      - Gall Bladder
+      - Gingiva
+      - Bilateral Hand
+      - Left Hand
+      - Right Hand
+      - Head
+      - Bilateral Heel
+      - Left Heel
+      - Right Heel
+      - Left Hemimantle
+      - Right Hemimantle
+      - Heart
+      - Bilateral Hip
+      - Left Hip
+      - Right Hip
+      - Left Humerus
+      - Right Humerus
+      - Hypopharynx
+      - Bilateral Internal Mammary Chain
+      - Bilateral Inguinal Nodes
+      - Left Inguinal Nodes
+      - Right Inguinal Nodes
+      - Inverted 'Y' (Dog-Leg,Hockey-Stick)
+      - Left Kidney
+      - Right Kidney
+      - Bilateral Knee
+      - Left Knee
+      - Right Knee
+      - Bilateral Lacrimal Gland
+      - Left Lacrimal Gland
+      - Right Lacrimal Gland
+      - Larygopharynx
+      - Larynx
+      - Bilateral Leg
+      - Left Leg
+      - Right Leg
+      - Lower Bilateral Leg
+      - Lower Left Leg
+      - Lower Right Leg
+      - Upper Bilateral Leg
+      - Upper Left Leg
+      - Upper Right Leg
+      - Both Eyelid(s)
+      - Left Eyelid
+      - Right Eyelid
+      - Both Lip(s)
+      - Lower Lip
+      - Upper Lip
+      - Liver
+      - Bilateral Lung
+      - Left Lung
+      - Right Lung
+      - Bilateral Mandible
+      - Left Mandible
+      - Right Mandible
+      - Mantle
+      - Bilateral Maxilla
+      - Left Maxilla
+      - Right Maxilla
+      - Mediastinum
+      - Multiple Skin
+      - Nasal Fossa
+      - Nasopharynx
+      - Bilateral Neck Includes Nodes
+      - Left Neck Includes Nodes
+      - Right Neck Includes Nodes
+      - Neck - Skin
+      - Nose
+      - Oral Cavity / Buccal Mucosa
+      - Bilateral Orbit
+      - Left Orbit
+      - Right Orbit
+      - Oropharynx
+      - Bilateral Ovary
+      - Left Ovary
+      - Right Ovary
+      - Hard Palate
+      - Soft Palate
+      - Palate Unspecified
+      - Pancreas
+      - Para-Aortic Nodes
+      - Left Parotid
+      - Right Parotid
+      - Bilateral Pelvis
+      - Left Pelvis
+      - Right Pelvis
+      - Penis
+      - Perineum
+      - Pituitary
+      - Left Pleura (As in Mesothelioma)
+      - Right Pleura
+      - Prostate
+      - Pubis
+      - Pyriform Fossa (Sinuses)
+      - Left Radius
+      - Right Radius
+      - Rectum (Includes Sigmoid)
+      - Left Ribs
+      - Right Ribs
+      - Sacrum
+      - Left Salivary Gland
+      - Right Salivary Gland
+      - Bilateral Scapula
+      - Left Scapula
+      - Right Scapula
+      - Bilateral Supraclavicular Nodes
+      - Left Supraclavicular Nodes
+      - Right Supraclavicular Nodes
+      - Bilateral Scalp
+      - Left Scalp
+      - Right Scalp
+      - Scrotum
+      - Bilateral Shoulder
+      - Left Shoulder
+      - Right Shoulder
+      - Whole Body - Skin
+      - Skull
+      - Cervical & Thoracic Spine
+      - Sphenoid Sinus
+      - Cervical Spine
+      - Lumbar Spine
+      - Thoracic Spine
+      - Whole Spine
+      - Spleen
+      - Lumbo-Sacral Spine
+      - Thoracic & Lumbar Spine
+      - Sternum
+      - Stomach
+      - Submandibular Glands
+      - Left Temple
+      - Right Temple
+      - Bilateral Testis
+      - Left Testis
+      - Right Testis
+      - Thyroid
+      - Left Tibia
+      - Right Tibia
+      - Left Toes
+      - Right Toes
+      - Tongue
+      - Tonsil
+      - Trachea
+      - Left Ulna
+      - Right Ulna
+      - Left Ureter
+      - Right Ureter
+      - Urethra
+      - Uterus
+      - Uvula
+      - Vagina
+      - Vulva
+      - Abdomen
+      - Body
+      - Chest
+      - Lower Limb
+      - Neck
+      - Other
+      - Pelvis
+      - Skin
+      - Spine
+      - Upper Limb
+      title: RadiationAnatomicalSiteEnum
+      type: string
+    RadiationIngestSchema:
+      properties:
+        anatomical_site_irradiated:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Anatomical Site Irradiated
+        program_id:
+          title: Program Id
+          type: string
+        radiation_boost:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Radiation Boost
+        radiation_therapy_dosage:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Radiation Therapy Dosage
+        radiation_therapy_fractions:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Radiation Therapy Fractions
+        radiation_therapy_modality:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Radiation Therapy Modality
+        radiation_therapy_type:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Radiation Therapy Type
+        reference_radiation_treatment_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Reference Radiation Treatment Id
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+      title: RadiationIngestSchema
+      type: object
+    RadiationModelSchema:
+      properties:
+        anatomical_site_irradiated:
+          anyOf:
+          - $ref: '#/components/schemas/RadiationAnatomicalSiteEnum'
+          - type: 'null'
+        program_id:
+          title: Program Id
+          type: string
+        radiation_boost:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Radiation Boost
+        radiation_therapy_dosage:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Radiation Therapy Dosage
+        radiation_therapy_fractions:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Radiation Therapy Fractions
+        radiation_therapy_modality:
+          anyOf:
+          - $ref: '#/components/schemas/RadiationTherapyModalityEnum'
+          - type: 'null'
+        radiation_therapy_type:
+          anyOf:
+          - $ref: '#/components/schemas/TherapyTypeEnum'
+          - type: 'null'
+        reference_radiation_treatment_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Reference Radiation Treatment Id
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+      required:
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+      title: RadiationModelSchema
+      type: object
+    RadiationTherapyModalityEnum:
+      enum:
+      - Megavoltage radiation therapy using photons (procedure)
+      - Radiopharmaceutical
+      - Teleradiotherapy using electrons (procedure)
+      - Teleradiotherapy protons (procedure)
+      - Teleradiotherapy neutrons (procedure)
+      - Brachytherapy (procedure)
+      - Other
+      title: RadiationTherapyModalityEnum
+      type: string
+    RelapseTypeEnum:
+      enum:
+      - Distant recurrence/metastasis
+      - Local recurrence
+      - Local recurrence and distant metastasis
+      - Progression (liquid tumours)
+      - Biochemical progression
+      title: RelapseTypeEnum
+      type: string
+    SampleRegistrationIngestSchema:
+      properties:
+        program_id:
+          title: Program Id
+          type: string
+        sample_type:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Sample Type
+        specimen_tissue_source:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Specimen Tissue Source
+        specimen_type:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Specimen Type
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_sample_id:
+          maxLength: 64
+          title: Submitter Sample Id
+          type: string
+        submitter_specimen_id:
+          maxLength: 64
+          title: Submitter Specimen Id
+          type: string
+        tumour_normal_designation:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Tumour Normal Designation
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_sample_id
+      - submitter_donor_id
+      - submitter_specimen_id
+      title: SampleRegistrationIngestSchema
+      type: object
+    SampleRegistrationModelSchema:
+      properties:
+        program_id:
+          title: Program Id
+          type: string
+        sample_type:
+          anyOf:
+          - $ref: '#/components/schemas/SampleTypeEnum'
+          - type: 'null'
+        specimen_tissue_source:
+          anyOf:
+          - $ref: '#/components/schemas/SpecimenTissueSourceEnum'
+          - type: 'null'
+        specimen_type:
+          anyOf:
+          - $ref: '#/components/schemas/SpecimenTypeEnum'
+          - type: 'null'
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_sample_id:
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+          title: Submitter Sample Id
+          type: string
+        submitter_specimen_id:
+          maxLength: 64
+          title: Submitter Specimen Id
+          type: string
+        tumour_normal_designation:
+          anyOf:
+          - $ref: '#/components/schemas/TumourDesginationEnum'
+          - type: 'null'
+      required:
+      - submitter_sample_id
+      - program_id
+      - submitter_donor_id
+      - submitter_specimen_id
+      title: SampleRegistrationModelSchema
+      type: object
+    SampleTypeEnum:
+      enum:
+      - Amplified DNA
+      - ctDNA
+      - Other DNA enrichments
+      - Other RNA fractions
+      - polyA+ RNA
+      - Protein
+      - rRNA-depleted RNA
+      - Total DNA
+      - Total RNA
+      title: SampleTypeEnum
+      type: string
+    SexAtBirthEnum:
+      enum:
+      - Male
+      - Female
+      - Other
+      - Unknown
+      title: SexAtBirthEnum
+      type: string
+    SmokingStatusEnum:
+      enum:
+      - Current reformed smoker for <= 15 years
+      - Current reformed smoker for > 15 years
+      - Current reformed smoker, duration not specified
+      - Current smoker
+      - Lifelong non-smoker (<100 cigarettes smoked in lifetime)
+      - Not applicable
+      - Smoking history not documented
+      title: SmokingStatusEnum
+      type: string
+    SpecimenIngestSchema:
+      properties:
+        pathological_m_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Pathological M Category
+        pathological_n_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Pathological N Category
+        pathological_stage_group:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Pathological Stage Group
+        pathological_t_category:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Pathological T Category
+        pathological_tumour_staging_system:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Pathological Tumour Staging System
+        percent_tumour_cells_measurement_method:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Percent Tumour Cells Measurement Method
+        percent_tumour_cells_range:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Percent Tumour Cells Range
+        program_id:
+          title: Program Id
+          type: string
+        reference_pathology_confirmed_diagnosis:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Reference Pathology Confirmed Diagnosis
+        reference_pathology_confirmed_tumour_presence:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Reference Pathology Confirmed Tumour Presence
+        specimen_anatomic_location:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Specimen Anatomic Location
+        specimen_collection_date:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Specimen Collection Date
+        specimen_laterality:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Specimen Laterality
+        specimen_processing:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Specimen Processing
+        specimen_storage:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Specimen Storage
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_primary_diagnosis_id:
+          maxLength: 64
+          title: Submitter Primary Diagnosis Id
+          type: string
+        submitter_specimen_id:
+          maxLength: 64
+          title: Submitter Specimen Id
+          type: string
+        tumour_grade:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Tumour Grade
+        tumour_grading_system:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Tumour Grading System
+        tumour_histological_type:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Tumour Histological Type
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_specimen_id
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+      title: SpecimenIngestSchema
+      type: object
+    SpecimenLateralityEnum:
+      enum:
+      - Left
+      - Not applicable
+      - Right
+      - Unknown
+      title: SpecimenLateralityEnum
+      type: string
+    SpecimenModelSchema:
+      properties:
+        pathological_m_category:
+          anyOf:
+          - $ref: '#/components/schemas/MCategoryEnum'
+          - type: 'null'
+        pathological_n_category:
+          anyOf:
+          - $ref: '#/components/schemas/NCategoryEnum'
+          - type: 'null'
+        pathological_stage_group:
+          anyOf:
+          - $ref: '#/components/schemas/StageGroupEnum'
+          - type: 'null'
+        pathological_t_category:
+          anyOf:
+          - $ref: '#/components/schemas/TCategoryEnum'
+          - type: 'null'
+        pathological_tumour_staging_system:
+          anyOf:
+          - $ref: '#/components/schemas/TumourStagingSystemEnum'
+          - type: 'null'
+        percent_tumour_cells_measurement_method:
+          anyOf:
+          - $ref: '#/components/schemas/CellsMeasureMethodEnum'
+          - type: 'null'
+        percent_tumour_cells_range:
+          anyOf:
+          - $ref: '#/components/schemas/PercentCellsRangeEnum'
+          - type: 'null'
+        program_id:
+          title: Program Id
+          type: string
+        reference_pathology_confirmed_diagnosis:
+          anyOf:
+          - $ref: '#/components/schemas/ConfirmedDiagnosisTumourEnum'
+          - type: 'null'
+        reference_pathology_confirmed_tumour_presence:
+          anyOf:
+          - $ref: '#/components/schemas/ConfirmedDiagnosisTumourEnum'
+          - type: 'null'
+        specimen_anatomic_location:
+          anyOf:
+          - maxLength: 32
+            pattern: ^[C][0-9]{2}(.[0-9]{1})?$
+            type: string
+          - type: 'null'
+          title: Specimen Anatomic Location
+        specimen_collection_date:
+          anyOf:
+          - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+            type: string
+          - type: 'null'
+          title: Specimen Collection Date
+        specimen_laterality:
+          anyOf:
+          - $ref: '#/components/schemas/SpecimenLateralityEnum'
+          - type: 'null'
+        specimen_processing:
+          anyOf:
+          - $ref: '#/components/schemas/SpecimenProcessingEnum'
+          - type: 'null'
+        specimen_storage:
+          anyOf:
+          - $ref: '#/components/schemas/StorageEnum'
+          - type: 'null'
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_primary_diagnosis_id:
+          maxLength: 64
+          title: Submitter Primary Diagnosis Id
+          type: string
+        submitter_specimen_id:
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+          title: Submitter Specimen Id
+          type: string
+        tumour_grade:
+          anyOf:
+          - $ref: '#/components/schemas/TumourGradeEnum'
+          - type: 'null'
+        tumour_grading_system:
+          anyOf:
+          - $ref: '#/components/schemas/TumourGradingSystemEnum'
+          - type: 'null'
+        tumour_histological_type:
+          anyOf:
+          - maxLength: 128
+            pattern: ^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$
+            type: string
+          - type: 'null'
+          title: Tumour Histological Type
+      required:
+      - submitter_specimen_id
+      - program_id
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+      title: SpecimenModelSchema
+      type: object
+    SpecimenProcessingEnum:
+      enum:
+      - Cryopreservation in liquid nitrogen (dead tissue)
+      - Cryopreservation in dry ice (dead tissue)
+      - Cryopreservation of live cells in liquid nitrogen
+      - Cryopreservation - other
+      - Formalin fixed & paraffin embedded
+      - Formalin fixed - buffered
+      - Formalin fixed - unbuffered
+      - Fresh
+      - Other
+      - Unknown
+      title: SpecimenProcessingEnum
+      type: string
+    SpecimenTissueSourceEnum:
+      enum:
+      - Abdominal fluid
+      - Amniotic fluid
+      - Arterial blood
+      - Bile
+      - Blood derived - bone marrow
+      - Blood derived - peripheral blood
+      - Bone marrow fluid
+      - Bone marrow derived mononuclear cells
+      - Buccal cell
+      - Buffy coat
+      - Cerebrospinal fluid
+      - Cervical mucus
+      - Convalescent plasma
+      - Cord blood
+      - Duodenal fluid
+      - Female genital fluid
+      - Fetal blood
+      - Hydrocele fluid
+      - Male genital fluid
+      - Pancreatic fluid
+      - Pericardial effusion
+      - Pleural fluid
+      - Renal cyst fluid
+      - Saliva
+      - Seminal fluid
+      - Serum
+      - Solid tissue
+      - Sputum
+      - Synovial fluid
+      - Urine
+      - Venous blood
+      - Vitreous fluid
+      - Whole blood
+      - Wound
+      title: SpecimenTissueSourceEnum
+      type: string
+    SpecimenTypeEnum:
+      enum:
+      - Cell line - derived from normal
+      - Cell line - derived from primary tumour
+      - Cell line - derived from metastatic tumour
+      - Cell line - derived from xenograft tumour
+      - Metastatic tumour - additional metastatic
+      - Metastatic tumour - metastasis local to lymph node
+      - Metastatic tumour - metastasis to distant location
+      - Metastatic tumour
+      - Normal - tissue adjacent to primary tumour
+      - Normal
+      - Primary tumour - additional new primary
+      - Primary tumour - adjacent to normal
+      - Primary tumour
+      - Recurrent tumour
+      - Tumour - unknown if derived from primary or metastatic tumour
+      - Xenograft - derived from primary tumour
+      - Xenograft - derived from metastatic tumour
+      - Xenograft - derived from tumour cell line
+      title: SpecimenTypeEnum
+      type: string
+    StageGroupEnum:
+      enum:
+      - Stage 0
+      - Stage 0a
+      - Stage 0is
+      - Stage 1
+      - Stage 1A
+      - Stage 1B
+      - Stage A
+      - Stage B
+      - Stage C
+      - Stage I
+      - Stage IA
+      - Stage IA1
+      - Stage IA2
+      - Stage IA3
+      - Stage IAB
+      - Stage IAE
+      - Stage IAES
+      - Stage IAS
+      - Stage IB
+      - Stage IB1
+      - Stage IB2
+      - Stage IBE
+      - Stage IBES
+      - Stage IBS
+      - Stage IC
+      - Stage IE
+      - Stage IEA
+      - Stage IEB
+      - Stage IES
+      - Stage II
+      - Stage II bulky
+      - Stage IIA
+      - Stage IIA1
+      - Stage IIA2
+      - Stage IIAE
+      - Stage IIAES
+      - Stage IIAS
+      - Stage IIB
+      - Stage IIBE
+      - Stage IIBES
+      - Stage IIBS
+      - Stage IIC
+      - Stage IIE
+      - Stage IIEA
+      - Stage IIEB
+      - Stage IIES
+      - Stage III
+      - Stage IIIA
+      - Stage IIIA1
+      - Stage IIIA2
+      - Stage IIIAE
+      - Stage IIIAES
+      - Stage IIIAS
+      - Stage IIIB
+      - Stage IIIBE
+      - Stage IIIBES
+      - Stage IIIBS
+      - Stage IIIC
+      - Stage IIIC1
+      - Stage IIIC2
+      - Stage IIID
+      - Stage IIIE
+      - Stage IIIES
+      - Stage IIIS
+      - Stage IIS
+      - Stage IS
+      - Stage IV
+      - Stage IVA
+      - Stage IVA1
+      - Stage IVA2
+      - Stage IVAE
+      - Stage IVAES
+      - Stage IVAS
+      - Stage IVB
+      - Stage IVBE
+      - Stage IVBES
+      - Stage IVBS
+      - Stage IVC
+      - Stage IVE
+      - Stage IVES
+      - Stage IVS
+      - In situ
+      - Localized
+      - Regionalized
+      - Distant
+      - Stage L1
+      - Stage L2
+      - Stage M
+      - Stage Ms
+      - Stage 2A
+      - Stage 2B
+      - Stage 3
+      - Stage 4
+      - Stage 4S
+      - Occult Carcinoma
+      title: StageGroupEnum
+      type: string
+    StorageEnum:
+      enum:
+      - Cut slide
+      - Frozen in -70 freezer
+      - Frozen in liquid nitrogen
+      - Frozen in vapour phase
+      - Not Applicable
+      - Other
+      - Paraffin block
+      - RNA later frozen
+      - Unknown
+      title: StorageEnum
+      type: string
+    SurgeryIngestSchema:
+      properties:
+        greatest_dimension_tumour:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Greatest Dimension Tumour
+        lymphovascular_invasion:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Lymphovascular Invasion
+        margin_types_involved:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Margin Types Involved
+        margin_types_not_assessed:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Margin Types Not Assessed
+        margin_types_not_involved:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Margin Types Not Involved
+        perineural_invasion:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Perineural Invasion
+        program_id:
+          title: Program Id
+          type: string
+        residual_tumour_classification:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Residual Tumour Classification
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_specimen_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Specimen Id
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+        surgery_location:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Surgery Location
+        surgery_site:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Surgery Site
+        surgery_type:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Surgery Type
+        tumour_focality:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Tumour Focality
+        tumour_length:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tumour Length
+        tumour_width:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tumour Width
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+      title: SurgeryIngestSchema
+      type: object
+    SurgeryLocationEnum:
+      enum:
+      - Local recurrence
+      - Metastatic
+      - Primary
+      title: SurgeryLocationEnum
+      type: string
+    SurgeryModelSchema:
+      properties:
+        greatest_dimension_tumour:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Greatest Dimension Tumour
+        lymphovascular_invasion:
+          anyOf:
+          - $ref: '#/components/schemas/LymphovascularInvasionEnum'
+          - type: 'null'
+        margin_types_involved:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/MarginTypesEnum'
+            type: array
+          - type: 'null'
+          title: Margin Types Involved
+        margin_types_not_assessed:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/MarginTypesEnum'
+            type: array
+          - type: 'null'
+          title: Margin Types Not Assessed
+        margin_types_not_involved:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/MarginTypesEnum'
+            type: array
+          - type: 'null'
+          title: Margin Types Not Involved
+        perineural_invasion:
+          anyOf:
+          - $ref: '#/components/schemas/PerineuralInvasionEnum'
+          - type: 'null'
+        program_id:
+          title: Program Id
+          type: string
+        residual_tumour_classification:
+          anyOf:
+          - $ref: '#/components/schemas/TumourClassificationEnum'
+          - type: 'null'
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_specimen_id:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Submitter Specimen Id
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+        surgery_location:
+          anyOf:
+          - $ref: '#/components/schemas/SurgeryLocationEnum'
+          - type: 'null'
+        surgery_site:
+          anyOf:
+          - maxLength: 255
+            pattern: ^[C][0-9]{2}(.[0-9]{1})?$
+            type: string
+          - type: 'null'
+          title: Surgery Site
+        surgery_type:
+          anyOf:
+          - $ref: '#/components/schemas/SurgeryTypeEnum'
+          - type: 'null'
+        tumour_focality:
+          anyOf:
+          - $ref: '#/components/schemas/TumourFocalityEnum'
+          - type: 'null'
+        tumour_length:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tumour Length
+        tumour_width:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tumour Width
+      required:
+      - program_id
+      - submitter_donor_id
+      - submitter_treatment_id
+      title: SurgeryModelSchema
+      type: object
+    SurgeryTypeEnum:
+      enum:
+      - Ablation
+      - Axillary Clearance
+      - Axillary lymph nodes sampling
+      - Bilateral complete salpingo-oophorectomy
+      - Biopsy
+      - Bypass Gastrojejunostomy
+      - Cholecystectomy
+      - Cholecystojejunostomy
+      - Completion Gastrectomy
+      - Debridement of pancreatic and peripancreatic necrosis
+      - Distal subtotal pancreatectomy
+      - Drainage of abscess
+      - Duodenal preserving pancreatic head resection
+      - Endoscopic biopsy
+      - Endoscopic brushings of gastrointestinal tract
+      - Enucleation
+      - Esophageal bypass surgery/jejunostomy only
+      - Exploratory laparotomy
+      - Fine needle aspiration biopsy
+      - Gastric Antrectomy
+      - Glossectomy
+      - Hepatojejunostomy
+      - Hysterectomy
+      - Incision of thorax
+      - Ivor Lewis subtotal esophagectomy
+      - Laparotomy
+      - Left thoracoabdominal incision
+      - Lobectomy
+      - Mammoplasty
+      - Mastectomy
+      - McKeown esophagectomy
+      - Merendino procedure
+      - Minimally invasive esophagectomy
+      - Omentectomy
+      - Ovariectomy
+      - Pancreaticoduodenectomy (Whipple procedure)
+      - Pancreaticojejunostomy, side-to-side anastomosis
+      - Partial pancreatectomy
+      - Pneumonectomy
+      - Prostatectomy
+      - Proximal subtotal gastrectomy
+      - Pylorus-sparing Whipple operation
+      - Radical pancreaticoduodenectomy
+      - Radical prostatectomy
+      - Reexcision
+      - Segmentectomy
+      - Sentinal Lymph Node Biopsy
+      - Spleen preserving distal pancreatectomy
+      - Splenectomy
+      - Total gastrectomy
+      - Total gastrectomy with extended lymphadenectomy
+      - Total pancreatectomy
+      - Transhiatal esophagectomy
+      - Triple bypass of pancreas
+      - Tumor Debulking
+      - Wedge/localised gastric resection
+      - Wide Local Excision
+      title: SurgeryTypeEnum
+      type: string
+    TCategoryEnum:
+      enum:
+      - T0
+      - T1
+      - T1a
+      - T1a1
+      - T1a2
+      - T1a(s)
+      - T1a(m)
+      - T1b
+      - T1b1
+      - T1b2
+      - T1b(s)
+      - T1b(m)
+      - T1c
+      - T1d
+      - T1mi
+      - T2
+      - T2(s)
+      - T2(m)
+      - T2a
+      - T2a1
+      - T2a2
+      - T2b
+      - T2c
+      - T2d
+      - T3
+      - T3(s)
+      - T3(m)
+      - T3a
+      - T3b
+      - T3c
+      - T3d
+      - T3e
+      - T4
+      - T4a
+      - T4a(s)
+      - T4a(m)
+      - T4b
+      - T4b(s)
+      - T4b(m)
+      - T4c
+      - T4d
+      - T4e
+      - Ta
+      - Tis
+      - Tis(DCIS)
+      - Tis(LAMN)
+      - Tis(LCIS)
+      - Tis(Paget)
+      - Tis(Paget's)
+      - Tis pu
+      - Tis pd
+      - TX
+      title: TCategoryEnum
+      type: string
+    TherapyTypeEnum:
+      enum:
+      - External
+      - Internal
+      title: TherapyTypeEnum
+      type: string
+    TobaccoTypeEnum:
+      enum:
+      - Chewing Tobacco
+      - Cigar
+      - Cigarettes
+      - Electronic cigarettes
+      - Not applicable
+      - Pipe
+      - Roll-ups
+      - Snuff
+      - Unknown
+      - Waterpipe
+      title: TobaccoTypeEnum
+      type: string
+    TreatmentIngestSchema:
+      properties:
+        days_per_cycle:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Days Per Cycle
+        is_primary_treatment:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Is Primary Treatment
+        line_of_treatment:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Line Of Treatment
+        number_of_cycles:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Number Of Cycles
+        program_id:
+          title: Program Id
+          type: string
+        response_to_treatment:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Response To Treatment
+        response_to_treatment_criteria_method:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Response To Treatment Criteria Method
+        status_of_treatment:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          title: Status Of Treatment
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_primary_diagnosis_id:
+          maxLength: 64
+          title: Submitter Primary Diagnosis Id
+          type: string
+        submitter_treatment_id:
+          maxLength: 64
+          title: Submitter Treatment Id
+          type: string
+        treatment_end_date:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Treatment End Date
+        treatment_intent:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Treatment Intent
+        treatment_setting:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          title: Treatment Setting
+        treatment_start_date:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Treatment Start Date
+        treatment_type:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Treatment Type
+        uuid:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uuid
+      required:
+      - program_id
+      - submitter_treatment_id
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+      title: TreatmentIngestSchema
+      type: object
+    TreatmentIntentEnum:
+      enum:
+      - Curative
+      - Palliative
+      - Supportive
+      - Diagnostic
+      - Preventive
+      - Guidance
+      - Screening
+      - Forensic
+      title: TreatmentIntentEnum
+      type: string
+    TreatmentModelSchema:
+      properties:
+        days_per_cycle:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Days Per Cycle
+        is_primary_treatment:
+          anyOf:
+          - $ref: '#/components/schemas/uBooleanEnum'
+          - type: 'null'
+        line_of_treatment:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Line Of Treatment
+        number_of_cycles:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Number Of Cycles
+        program_id:
+          title: Program Id
+          type: string
+        response_to_treatment:
+          anyOf:
+          - $ref: '#/components/schemas/TreatmentResponseEnum'
+          - type: 'null'
+        response_to_treatment_criteria_method:
+          anyOf:
+          - $ref: '#/components/schemas/TreatmentResponseMethodEnum'
+          - type: 'null'
+        status_of_treatment:
+          anyOf:
+          - $ref: '#/components/schemas/TreatmentStatusEnum'
+          - type: 'null'
+        submitter_donor_id:
+          maxLength: 64
+          title: Submitter Donor Id
+          type: string
+        submitter_primary_diagnosis_id:
+          maxLength: 64
+          title: Submitter Primary Diagnosis Id
+          type: string
+        submitter_treatment_id:
+          maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
+          title: Submitter Treatment Id
+          type: string
+        treatment_end_date:
+          anyOf:
+          - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+            type: string
+          - type: 'null'
+          title: Treatment End Date
+        treatment_intent:
+          anyOf:
+          - $ref: '#/components/schemas/TreatmentIntentEnum'
+          - type: 'null'
+        treatment_setting:
+          anyOf:
+          - $ref: '#/components/schemas/TreatmentSettingEnum'
+          - type: 'null'
+        treatment_start_date:
+          anyOf:
+          - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
+            type: string
+          - type: 'null'
+          title: Treatment Start Date
+        treatment_type:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/TreatmentTypeEnum'
+            type: array
+          - type: 'null'
+          title: Treatment Type
+      required:
+      - submitter_treatment_id
+      - program_id
+      - submitter_donor_id
+      - submitter_primary_diagnosis_id
+      title: TreatmentModelSchema
+      type: object
+    TreatmentResponseEnum:
+      enum:
+      - Complete response
+      - Partial response
+      - Progressive disease
+      - Stable disease
+      - Immune complete response (iCR)
+      - Immune partial response (iPR)
+      - Immune uncomfirmed progressive disease (iUPD)
+      - Immune confirmed progressive disease (iCPD)
+      - Immune stable disease (iSD)
+      - Complete remission
+      - Partial remission
+      - Minor response
+      - Complete remission without measurable residual disease (CR MRD-)
+      - Complete remission with incomplete hematologic recovery (CRi)
+      - Morphologic leukemia-free state
+      - Primary refractory disease
+      - Hematologic relapse (after CR MRD-, CR, CRi)
+      - Molecular relapse (after CR MRD-)
+      - Physician assessed complete response
+      - Physician assessed partial response
+      - Physician assessed stable disease
+      - No evidence of disease (NED)
+      - Major response
+      title: TreatmentResponseEnum
+      type: string
+    TreatmentResponseMethodEnum:
+      enum:
+      - RECIST 1.1
+      - iRECIST
+      - Cheson CLL 2012 Oncology Response Criteria
+      - Response Assessment in Neuro-Oncology (RANO)
+      - AML Response Criteria
+      - Physician Assessed Response Criteria
+      - Blazer score
+      title: TreatmentResponseMethodEnum
+      type: string
+    TreatmentSettingEnum:
+      enum:
+      - Adjuvant
+      - Advanced/Metastatic
+      - Neoadjuvant
+      - Conditioning
+      - Induction
+      - Locally advanced
+      - Maintenance
+      - Mobilization
+      - Preventative
+      - Radiosensitization
+      - Salvage
+      title: TreatmentSettingEnum
+      type: string
+    TreatmentStatusEnum:
+      enum:
+      - Treatment completed as prescribed
+      - Treatment incomplete due to technical or organizational problems
+      - Treatment incomplete because patient died
+      - Patient choice (stopped or interrupted treatment)
+      - Physician decision (stopped or interrupted treatment)
+      - Treatment stopped due to lack of efficacy (disease progression)
+      - Treatment stopped due to acute toxicity
+      - Other
+      - Not applicable
+      - Unknown
+      title: TreatmentStatusEnum
+      type: string
+    TreatmentTypeEnum:
+      enum:
+      - Bone marrow transplant
+      - Chemotherapy
+      - Hormonal therapy
+      - Immunotherapy
+      - No treatment
+      - Other targeting molecular therapy
+      - Photodynamic therapy
+      - Radiation therapy
+      - Stem cell transplant
+      - Surgery
+      title: TreatmentTypeEnum
+      type: string
+    TumourClassificationEnum:
+      enum:
+      - Not applicable
+      - RX
+      - R0
+      - R1
+      - R2
+      - Unknown
+      title: TumourClassificationEnum
+      type: string
+    TumourDesginationEnum:
+      enum:
+      - Normal
+      - Tumour
+      title: TumourDesginationEnum
+      type: string
+    TumourFocalityEnum:
+      enum:
+      - Cannot be assessed
+      - Multifocal
+      - Not applicable
+      - Unifocal
+      - Unknown
+      title: TumourFocalityEnum
+      type: string
+    TumourGradeEnum:
+      enum:
+      - Low grade
+      - High grade
+      - GX
+      - G1
+      - G2
+      - G3
+      - G4
+      - Low
+      - High
+      - Grade 1
+      - Grade 2
+      - Grade 3
+      - Grade 4
+      - Grade I
+      - Grade II
+      - Grade III
+      - Grade IV
+      - Grade Group 1
+      - Grade Group 2
+      - Grade Group 3
+      - Grade Group 4
+      - Grade Group 5
+      title: TumourGradeEnum
+      type: string
+    TumourGradingSystemEnum:
+      enum:
+      - FNCLCC grading system
+      - Four-tier grading system
+      - Gleason grade group system
+      - Grading system for GISTs
+      - Grading system for GNETs
+      - IASLC grading system
+      - ISUP grading system
+      - Nottingham grading system
+      - Nuclear grading system for DCIS
+      - Scarff-Bloom-Richardson grading system
+      - Three-tier grading system
+      - Two-tier grading system
+      - WHO grading system for CNS tumours
+      title: TumourGradingSystemEnum
+      type: string
+    TumourStagingSystemEnum:
+      enum:
+      - AJCC 8th edition
+      - AJCC 7th edition
+      - AJCC 6th edition
+      - Ann Arbor staging system
+      - Binet staging system
+      - Durie-Salmon staging system
+      - FIGO staging system
+      - International Neuroblastoma Risk Group Staging System
+      - International Neuroblastoma Staging System
+      - Lugano staging system
+      - Rai staging system
+      - Revised International staging system (RISS)
+      - SEER staging system
+      - St Jude staging system
+      title: TumourStagingSystemEnum
+      type: string
+    uBooleanEnum:
+      enum:
+      - 'Yes'
+      - 'No'
+      - Unknown
+      title: uBooleanEnum
+      type: string
+  securitySchemes:
+    LocalAuth:
+      scheme: bearer
+      type: http
+info:
+  description: This is the RESTful API for the MoH Service.
+  title: MoH Service API
+  version: 3.0.0
+openapi: 3.0.2
+paths:
+  /v2/authorized/biomarkers/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_biomarkers
+      parameters:
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: submitter_specimen_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Specimen Id
+      - in: query
+        name: submitter_primary_diagnosis_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+      - in: query
+        name: submitter_treatment_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+      - in: query
+        name: submitter_follow_up_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Follow Up Id
+      - in: query
+        name: test_date
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Test Date
+      - in: query
+        name: psa_level
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Psa Level
+      - in: query
+        name: ca125
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ca125
+      - in: query
+        name: cea
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cea
+      - in: query
+        name: er_status
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Er Status
+      - in: query
+        name: er_percent_positive
+        required: false
+        schema:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Er Percent Positive
+      - in: query
+        name: pr_status
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pr Status
+      - in: query
+        name: pr_percent_positive
+        required: false
+        schema:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Pr Percent Positive
+      - in: query
+        name: her2_ihc_status
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Her2 Ihc Status
+      - in: query
+        name: her2_ish_status
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Her2 Ish Status
+      - in: query
+        name: hpv_ihc_status
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Hpv Ihc Status
+      - in: query
+        name: hpv_pcr_status
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Hpv Pcr Status
+      - in: query
+        name: hpv_strain
+        required: false
+        schema:
+          items:
+            type: string
+          q: hpv_strain__overlap
+          title: Hpv Strain
+          type: array
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedBiomarkerModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Biomarkers
+      tags:
+      - authorized
+  /v2/authorized/chemotherapies/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_chemotherapies
+      parameters:
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: submitter_treatment_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+      - in: query
+        name: drug_reference_database
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Drug Reference Database
+      - in: query
+        name: drug_name
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Drug Name
+      - in: query
+        name: drug_reference_identifier
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+      - in: query
+        name: chemotherapy_drug_dose_units
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Chemotherapy Drug Dose Units
+      - in: query
+        name: prescribed_cumulative_drug_dose
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+      - in: query
+        name: actual_cumulative_drug_dose
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedChemotherapyModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Chemotherapies
+      tags:
+      - authorized
+  /v2/authorized/comorbidities/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_comorbidities
+      parameters:
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: prior_malignancy
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Prior Malignancy
+      - in: query
+        name: laterality_of_prior_malignancy
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Laterality Of Prior Malignancy
+      - in: query
+        name: age_at_comorbidity_diagnosis
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Age At Comorbidity Diagnosis
+      - in: query
+        name: comorbidity_type_code
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Comorbidity Type Code
+      - in: query
+        name: comorbidity_treatment_status
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Comorbidity Treatment Status
+      - in: query
+        name: comorbidity_treatment
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Comorbidity Treatment
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedComorbidityModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Comorbidities
+      tags:
+      - authorized
+  /v2/authorized/donor_with_clinical_data/program/{program_id}/donor/{donor_id}:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_get_donor_with_clinical_data
+      parameters:
+      - in: path
+        name: program_id
+        required: true
+        schema:
+          title: Program Id
+          type: string
+      - in: path
+        name: donor_id
+        required: true
+        schema:
+          title: Donor Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonorWithClinicalDataSchema'
+          description: OK
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                title: Response
+                type: object
+          description: Not Found
+      security:
+      - LocalAuth: []
+      summary: Get Donor With Clinical Data
+      tags:
+      - authorized
+  /v2/authorized/donors/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_donors
+      parameters:
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: gender
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          q: gender__icontains
+          title: Gender
+      - in: query
+        name: sex_at_birth
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sex At Birth
+      - in: query
+        name: is_deceased
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Deceased
+      - in: query
+        name: lost_to_followup_after_clinical_event_identifier
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Lost To Followup After Clinical Event Identifier
+      - in: query
+        name: lost_to_followup_reason
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Lost To Followup Reason
+      - in: query
+        name: date_alive_after_lost_to_followup
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date Alive After Lost To Followup
+      - in: query
+        name: cause_of_death
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cause Of Death
+      - in: query
+        name: date_of_birth
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date Of Birth
+      - in: query
+        name: date_of_death
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date Of Death
+      - in: query
+        name: primary_site
+        required: false
+        schema:
+          items:
+            type: string
+          q: primary_site__overlap
+          title: Primary Site
+          type: array
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedDonorModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Donors
+      tags:
+      - authorized
+  /v2/authorized/exposures/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_exposures
+      parameters:
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: tobacco_smoking_status
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tobacco Smoking Status
+      - in: query
+        name: tobacco_type
+        required: false
+        schema:
+          items:
+            type: string
+          q: tobacco_type__overlap
+          title: Tobacco Type
+          type: array
+      - in: query
+        name: pack_years_smoked
+        required: false
+        schema:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Pack Years Smoked
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedExposureModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Exposures
+      tags:
+      - authorized
+  /v2/authorized/follow_ups/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_follow_ups
+      parameters:
+      - in: query
+        name: submitter_follow_up_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Follow Up Id
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: submitter_primary_diagnosis_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+      - in: query
+        name: submitter_treatment_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+      - in: query
+        name: date_of_followup
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date Of Followup
+      - in: query
+        name: disease_status_at_followup
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Disease Status At Followup
+      - in: query
+        name: relapse_type
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Relapse Type
+      - in: query
+        name: date_of_relapse
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date Of Relapse
+      - in: query
+        name: method_of_progression_status
+        required: false
+        schema:
+          items:
+            type: string
+          q: method_of_progression_status__overlap
+          title: Method Of Progression Status
+          type: array
+      - in: query
+        name: anatomic_site_progression_or_recurrence
+        required: false
+        schema:
+          items:
+            type: string
+          q: anatomic_site_progression_or_recurrence__overlap
+          title: Anatomic Site Progression Or Recurrence
+          type: array
+      - in: query
+        name: recurrence_tumour_staging_system
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Recurrence Tumour Staging System
+      - in: query
+        name: recurrence_t_category
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Recurrence T Category
+      - in: query
+        name: recurrence_n_category
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Recurrence N Category
+      - in: query
+        name: recurrence_m_category
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Recurrence M Category
+      - in: query
+        name: recurrence_stage_group
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Recurrence Stage Group
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedFollowUpModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Follow Ups
+      tags:
+      - authorized
+  /v2/authorized/hormone_therapies/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_hormone_therapies
+      parameters:
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: submitter_treatment_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+      - in: query
+        name: drug_reference_database
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Drug Reference Database
+      - in: query
+        name: drug_name
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Drug Name
+      - in: query
+        name: drug_reference_identifier
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+      - in: query
+        name: hormone_drug_dose_units
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Hormone Drug Dose Units
+      - in: query
+        name: prescribed_cumulative_drug_dose
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+      - in: query
+        name: actual_cumulative_drug_dose
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedHormoneTherapyModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Hormone Therapies
+      tags:
+      - authorized
+  /v2/authorized/immunotherapies/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_immunotherapies
+      parameters:
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: submitter_treatment_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+      - in: query
+        name: drug_reference_database
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Drug Reference Database
+      - in: query
+        name: immunotherapy_type
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Immunotherapy Type
+      - in: query
+        name: drug_name
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Drug Name
+      - in: query
+        name: drug_reference_identifier
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Drug Reference Identifier
+      - in: query
+        name: immunotherapy_drug_dose_units
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Immunotherapy Drug Dose Units
+      - in: query
+        name: prescribed_cumulative_drug_dose
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Prescribed Cumulative Drug Dose
+      - in: query
+        name: actual_cumulative_drug_dose
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Actual Cumulative Drug Dose
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedImmunotherapyModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Immunotherapies
+      tags:
+      - authorized
+  /v2/authorized/primary_diagnoses/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_primary_diagnoses
+      parameters:
+      - in: query
+        name: submitter_primary_diagnosis_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: date_of_diagnosis
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date Of Diagnosis
+      - in: query
+        name: cancer_type_code
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cancer Type Code
+      - in: query
+        name: basis_of_diagnosis
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Basis Of Diagnosis
+      - in: query
+        name: laterality
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Laterality
+      - in: query
+        name: lymph_nodes_examined_status
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Lymph Nodes Examined Status
+      - in: query
+        name: lymph_nodes_examined_method
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Lymph Nodes Examined Method
+      - in: query
+        name: number_lymph_nodes_positive
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Number Lymph Nodes Positive
+      - in: query
+        name: clinical_tumour_staging_system
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clinical Tumour Staging System
+      - in: query
+        name: clinical_t_category
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clinical T Category
+      - in: query
+        name: clinical_n_category
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clinical N Category
+      - in: query
+        name: clinical_m_category
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clinical M Category
+      - in: query
+        name: clinical_stage_group
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clinical Stage Group
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedPrimaryDiagnosisModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Primary Diagnoses
+      tags:
+      - authorized
+  /v2/authorized/program/{program_id}/:
+    delete:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_delete_program
+      parameters:
+      - in: path
+        name: program_id
+        required: true
+        schema:
+          title: Program Id
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                title: Response
+                type: object
+          description: Not Found
+      security:
+      - LocalAuth: []
+      summary: Delete Program
+      tags:
+      - authorized
+  /v2/authorized/programs/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_programs
+      parameters:
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedProgramModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Programs
+      tags:
+      - authorized
+  /v2/authorized/radiations/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_radiations
+      parameters:
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: submitter_treatment_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+      - in: query
+        name: radiation_therapy_modality
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Radiation Therapy Modality
+      - in: query
+        name: radiation_therapy_type
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Radiation Therapy Type
+      - in: query
+        name: radiation_therapy_fractions
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Radiation Therapy Fractions
+      - in: query
+        name: radiation_therapy_dosage
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Radiation Therapy Dosage
+      - in: query
+        name: anatomical_site_irradiated
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Anatomical Site Irradiated
+      - in: query
+        name: radiation_boost
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Radiation Boost
+      - in: query
+        name: reference_radiation_treatment_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reference Radiation Treatment Id
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedRadiationModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Radiations
+      tags:
+      - authorized
+  /v2/authorized/sample_registrations/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_sample_registrations
+      parameters:
+      - in: query
+        name: submitter_sample_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Sample Id
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: submitter_specimen_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Specimen Id
+      - in: query
+        name: specimen_tissue_source
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Specimen Tissue Source
+      - in: query
+        name: tumour_normal_designation
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tumour Normal Designation
+      - in: query
+        name: specimen_type
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Specimen Type
+      - in: query
+        name: sample_type
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sample Type
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedSampleRegistrationModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Sample Registrations
+      tags:
+      - authorized
+  /v2/authorized/specimens/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_specimens
+      parameters:
+      - in: query
+        name: submitter_specimen_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Specimen Id
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: submitter_primary_diagnosis_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+      - in: query
+        name: pathological_tumour_staging_system
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pathological Tumour Staging System
+      - in: query
+        name: pathological_t_category
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pathological T Category
+      - in: query
+        name: pathological_n_category
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pathological N Category
+      - in: query
+        name: pathological_m_category
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pathological M Category
+      - in: query
+        name: pathological_stage_group
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pathological Stage Group
+      - in: query
+        name: specimen_collection_date
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Specimen Collection Date
+      - in: query
+        name: specimen_storage
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Specimen Storage
+      - in: query
+        name: specimen_processing
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Specimen Processing
+      - in: query
+        name: tumour_histological_type
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tumour Histological Type
+      - in: query
+        name: specimen_anatomic_location
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Specimen Anatomic Location
+      - in: query
+        name: specimen_laterality
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Specimen Laterality
+      - in: query
+        name: reference_pathology_confirmed_diagnosis
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reference Pathology Confirmed Diagnosis
+      - in: query
+        name: reference_pathology_confirmed_tumour_presence
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reference Pathology Confirmed Tumour Presence
+      - in: query
+        name: tumour_grading_system
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tumour Grading System
+      - in: query
+        name: tumour_grade
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tumour Grade
+      - in: query
+        name: percent_tumour_cells_range
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Percent Tumour Cells Range
+      - in: query
+        name: percent_tumour_cells_measurement_method
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Percent Tumour Cells Measurement Method
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedSpecimenModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Specimens
+      tags:
+      - authorized
+  /v2/authorized/surgeries/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_surgeries
+      parameters:
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: submitter_treatment_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+      - in: query
+        name: submitter_specimen_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Specimen Id
+      - in: query
+        name: surgery_type
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Surgery Type
+      - in: query
+        name: surgery_site
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Surgery Site
+      - in: query
+        name: surgery_location
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Surgery Location
+      - in: query
+        name: tumour_length
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tumour Length
+      - in: query
+        name: tumour_width
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tumour Width
+      - in: query
+        name: greatest_dimension_tumour
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Greatest Dimension Tumour
+      - in: query
+        name: tumour_focality
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tumour Focality
+      - in: query
+        name: residual_tumour_classification
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Residual Tumour Classification
+      - in: query
+        name: margin_types_involved
+        required: false
+        schema:
+          items:
+            type: string
+          q: margin_types_involved__overlap
+          title: Margin Types Involved
+          type: array
+      - in: query
+        name: margin_types_not_involved
+        required: false
+        schema:
+          items:
+            type: string
+          q: margin_types_not_involved__overlap
+          title: Margin Types Not Involved
+          type: array
+      - in: query
+        name: margin_types_not_assessed
+        required: false
+        schema:
+          items:
+            type: string
+          q: margin_types_not_assessed__overlap
+          title: Margin Types Not Assessed
+          type: array
+      - in: query
+        name: lymphovascular_invasion
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Lymphovascular Invasion
+      - in: query
+        name: perineural_invasion
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Perineural Invasion
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedSurgeryModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Surgeries
+      tags:
+      - authorized
+  /v2/authorized/treatments/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_treatments
+      parameters:
+      - in: query
+        name: submitter_treatment_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Treatment Id
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: submitter_primary_diagnosis_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Primary Diagnosis Id
+      - in: query
+        name: treatment_type
+        required: false
+        schema:
+          items:
+            type: string
+          q: treatment_type__overlap
+          title: Treatment Type
+          type: array
+      - in: query
+        name: is_primary_treatment
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Is Primary Treatment
+      - in: query
+        name: line_of_treatment
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Line Of Treatment
+      - in: query
+        name: treatment_start_date
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Treatment Start Date
+      - in: query
+        name: treatment_end_date
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Treatment End Date
+      - in: query
+        name: treatment_setting
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Treatment Setting
+      - in: query
+        name: treatment_intent
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Treatment Intent
+      - in: query
+        name: days_per_cycle
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Days Per Cycle
+      - in: query
+        name: number_of_cycles
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Number Of Cycles
+      - in: query
+        name: response_to_treatment_criteria_method
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Response To Treatment Criteria Method
+      - in: query
+        name: response_to_treatment
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Response To Treatment
+      - in: query
+        name: status_of_treatment
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Status Of Treatment
+      - in: query
+        name: page
+        required: false
+        schema:
+          minimum: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          minimum: 1
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedTreatmentModelSchema'
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: List Treatments
+      tags:
+      - authorized
+  /v2/discovery/biomarkers/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_biomarkers
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Biomarkers
+      tags:
+      - discovery
+  /v2/discovery/chemotherapies/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_chemotherapies
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Chemotherapies
+      tags:
+      - discovery
+  /v2/discovery/comorbidities/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_comorbidities
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Comorbidities
+      tags:
+      - discovery
+  /v2/discovery/donors/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_donors
+      parameters:
+      - in: query
+        name: submitter_donor_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Submitter Donor Id
+      - in: query
+        name: program_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Program Id
+      - in: query
+        name: gender
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          q: gender__icontains
+          title: Gender
+      - in: query
+        name: sex_at_birth
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sex At Birth
+      - in: query
+        name: is_deceased
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Deceased
+      - in: query
+        name: lost_to_followup_after_clinical_event_identifier
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Lost To Followup After Clinical Event Identifier
+      - in: query
+        name: lost_to_followup_reason
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Lost To Followup Reason
+      - in: query
+        name: date_alive_after_lost_to_followup
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date Alive After Lost To Followup
+      - in: query
+        name: cause_of_death
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cause Of Death
+      - in: query
+        name: date_of_birth
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date Of Birth
+      - in: query
+        name: date_of_death
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Date Of Death
+      - in: query
+        name: primary_site
+        required: false
+        schema:
+          items:
+            type: string
+          q: primary_site__overlap
+          title: Primary Site
+          type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Donors
+      tags:
+      - discovery
+  /v2/discovery/exposures/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_exposures
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Exposures
+      tags:
+      - discovery
+  /v2/discovery/follow_ups/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_follow_ups
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Follow Ups
+      tags:
+      - discovery
+  /v2/discovery/hormone_therapies/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_hormone_therapies
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Hormone Therapies
+      tags:
+      - discovery
+  /v2/discovery/immunotherapies/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_immunotherapies
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Immunotherapies
+      tags:
+      - discovery
+  /v2/discovery/overview/cancer_type_count/:
+    get:
+      description: Return the count for every cancer type in the database.
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_cancer_type_count
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: integer
+                title: Response
+                type: object
+          description: OK
+      summary: Discover Cancer Type Count
+      tags:
+      - overview
+  /v2/discovery/overview/cohort_count/:
+    get:
+      description: Return the number of cohorts in the database.
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_cohort_count
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: integer
+                title: Response
+                type: object
+          description: OK
+      summary: Discover Cohort Count
+      tags:
+      - overview
+  /v2/discovery/overview/diagnosis_age_count/:
+    get:
+      description: 'Return the count for age of diagnosis in the database.
+
+        If there are multiple date_of_diagnosis, get the earliest'
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_diagnosis_age_count
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: integer
+                title: Response
+                type: object
+          description: OK
+      summary: Discover Diagnosis Age Count
+      tags:
+      - overview
+  /v2/discovery/overview/gender_count/:
+    get:
+      description: Return the count for every gender in the database.
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_gender_count
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: integer
+                title: Response
+                type: object
+          description: OK
+      summary: Discover Gender Count
+      tags:
+      - overview
+  /v2/discovery/overview/individual_count/:
+    get:
+      description: Return the number of individuals in the database.
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_individual_count
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: integer
+                title: Response
+                type: object
+          description: OK
+      summary: Discover Individual Count
+      tags:
+      - overview
+  /v2/discovery/overview/patients_per_cohort/:
+    get:
+      description: Return the number of patients per cohort in the database.
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_patients_per_cohort
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: integer
+                title: Response
+                type: object
+          description: OK
+      summary: Discover Patients Per Cohort
+      tags:
+      - overview
+  /v2/discovery/overview/treatment_type_count/:
+    get:
+      description: Return the count for every treatment type in the database.
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_treatment_type_count
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: integer
+                title: Response
+                type: object
+          description: OK
+      summary: Discover Treatment Type Count
+      tags:
+      - overview
+  /v2/discovery/primary_diagnoses/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_primary_diagnoses
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Primary Diagnoses
+      tags:
+      - discovery
+  /v2/discovery/programs/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_programs
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramDiscoverySchema'
+          description: OK
+      summary: Discover Programs
+      tags:
+      - discovery
+  /v2/discovery/radiations/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_radiations
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Radiations
+      tags:
+      - discovery
+  /v2/discovery/sample_registrations/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_sample_registrations
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Sample Registrations
+      tags:
+      - discovery
+  /v2/discovery/sidebar_list/:
+    get:
+      description: 'Retrieve the list of available values for all fields (including
+        for
+
+        datasets that the user is not authorized to view)'
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_sidebar_list
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                title: Response
+                type: object
+          description: OK
+      summary: Discover Sidebar List
+      tags:
+      - discovery
+  /v2/discovery/specimen/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_specimens
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Specimens
+      tags:
+      - discovery
+  /v2/discovery/surgeries/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_surgeries
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Surgeries
+      tags:
+      - discovery
+  /v2/discovery/treatments/:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_treatments
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverySchema'
+          description: OK
+      summary: Discover Treatments
+      tags:
+      - discovery
+  /v2/ingest/biomarker/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_biomarker
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BiomarkerIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Biomarker
+      tags:
+      - ingest
+  /v2/ingest/chemotherapy/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_chemotherapy
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChemotherapyIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Chemotherapy
+      tags:
+      - ingest
+  /v2/ingest/comorbidity/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_comorbidity
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComorbidityIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Comorbidity
+      tags:
+      - ingest
+  /v2/ingest/donor/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_donor
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DonorIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Donor
+      tags:
+      - ingest
+  /v2/ingest/exposure/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_exposure
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExposureIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Exposure
+      tags:
+      - ingest
+  /v2/ingest/follow_up/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_follow_up
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FollowUpIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Follow Up
+      tags:
+      - ingest
+  /v2/ingest/hormone_therapy/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_hormone_therapy
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HormoneTherapyIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Hormone Therapy
+      tags:
+      - ingest
+  /v2/ingest/immunotherapy/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_immunotherapy
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImmunotherapyIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Immunotherapy
+      tags:
+      - ingest
+  /v2/ingest/primary_diagnosis/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_primary_diagnosis
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrimaryDiagnosisIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Primary Diagnosis
+      tags:
+      - ingest
+  /v2/ingest/program/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_program
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProgramModelSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Program
+      tags:
+      - ingest
+  /v2/ingest/radiation/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_radiation
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RadiationIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Radiation
+      tags:
+      - ingest
+  /v2/ingest/sample_registration/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_sample_registration
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SampleRegistrationIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Sample Registration
+      tags:
+      - ingest
+  /v2/ingest/specimen/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_specimen
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecimenIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Specimen
+      tags:
+      - ingest
+  /v2/ingest/surgery/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_surgery
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurgeryIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Surgery
+      tags:
+      - ingest
+  /v2/ingest/treatment/:
+    post:
+      operationId: chord_metadata_service_mohpackets_apis_ingestion_create_treatment
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TreatmentIngestSchema'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+      - LocalAuth: []
+      summary: Create Treatment
+      tags:
+      - ingest
+  /v2/service-info:
+    get:
+      operationId: chord_metadata_service_mohpackets_apis_core_service_info
+      parameters: []
+      responses:
+        '200':
+          description: OK
+      summary: Service Info
+servers: []
+

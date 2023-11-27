@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 import orjson
 from authx.auth import get_opa_datasets, is_site_admin
@@ -116,6 +117,9 @@ settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
 if "dev" in settings_module or "prod" in settings_module:
     auth = OPAAuth()
 else:
+    auth = LocalAuth()
+
+if "test" in sys.argv:
     auth = LocalAuth()
 
 api = NinjaAPI(

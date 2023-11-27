@@ -12,7 +12,9 @@
 import os
 from os.path import exists
 
-from .local import *
+from .base import *
+
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "localhost",
